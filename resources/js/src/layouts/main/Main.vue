@@ -140,6 +140,8 @@ import TheNavbarVertical   from '@/layouts/components/navbar/TheNavbarVertical.v
 import TheFooter           from '@/layouts/components/TheFooter.vue'
 import themeConfig         from '@/../themeConfig.js'
 import VNavMenu            from '@/layouts/components/vertical-nav-menu/VerticalNavMenu.vue'
+import axios from './../../http/axios.js'
+import helper from './../../until/helper.js'
 
 const VxTour = () => import('@/components/VxTour.vue')
 
@@ -164,7 +166,7 @@ export default {
       isNavbarDark      : false,
       navbarColor       : themeConfig.navbarColor || '#fff',
       navbarType        : themeConfig.navbarType  || 'floating',
-      navMenuItems,
+      navMenuItems ,
       routerTransition  : themeConfig.routerTransition || 'none',
       routeTitle        : this.$route.meta.pageTitle,
       steps: [
@@ -276,11 +278,21 @@ export default {
     },
     toggleHideScrollToTop (val) {
       this.hideScrollToTop = val
+    },
+    updateMenu(){
+      const new_list = []
+      this.navMenuItems.map(item => {
+          if ( typeof item.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item.permission)) {
+              new_list.push(item)
+          }
+      })
+      this.navMenuItems = new_list
     }
   },
   created () {
     const color = this.navbarColor === '#fff' && this.isThemeDark ? '#10163a' : this.navbarColor
     this.updateNavbarColor(color)
+    this.updateMenu()
     this.setNavMenuVisibility(this.$store.state.mainLayoutType)
 
     // Dynamic Watchers for tour

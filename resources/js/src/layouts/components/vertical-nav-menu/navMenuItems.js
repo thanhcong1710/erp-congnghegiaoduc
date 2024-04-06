@@ -25,7 +25,8 @@ export default [
     name: 'Dashboard',
     tagColor: 'warning',
     icon: 'HomeIcon',
-    i18n: 'Dashboard'
+    i18n: 'Dashboard',
+    permission:'dashboard'
   },
   {
     header: 'Ứng dụng',
