@@ -41,6 +41,10 @@ const router = new Router({
         // Theme Routes
         // =============================================================================
         {
+          path: '/',
+          redirect: '/admin/dashboard'
+        },
+        {
           path: '/admin/index',
           redirect: '/admin/dashboard'
         },
