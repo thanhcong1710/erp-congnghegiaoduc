@@ -20,6 +20,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import auth from '@/auth/authService'
+import User from './routers/user'
+import Setting from './routers/setting'
 Vue.use(Router)
 
 const router = new Router({
@@ -29,7 +31,8 @@ const router = new Router({
     return { x: 0, y: 0 }
   },
   routes: [
-
+    User.router,
+    Setting.router,
     {
     // =============================================================================
     // MAIN LAYOUT ROUTES
@@ -42,7 +45,7 @@ const router = new Router({
         // =============================================================================
         {
           path: '/',
-          redirect: '/admin/index'
+          redirect: '/admin/dashboard'
         },
         {
           path: '/admin/index',
@@ -56,19 +59,7 @@ const router = new Router({
             rule: 'editor'
           }
         },
-        {
-          path: '/admin/user/profile',
-          name: 'user-profile',
-          component: () => import('@/views/users/UserSettings.vue'),
-          meta: {
-            breadcrumb: [
-              { title: 'Home', url: '/' },
-              { title: 'Tài khoản', active: true }
-            ],
-            pageTitle: 'Tài khoản',
-            rule: 'editor'
-          }
-        },
+       
         
         // =============================================================================
         // LAW MAIN PAGE LAYOUTS
