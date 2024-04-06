@@ -42,7 +42,7 @@ const router = new Router({
         // =============================================================================
         {
           path: '/',
-          redirect: '/admin/dashboard'
+          redirect: '/admin/index'
         },
         {
           path: '/admin/index',
