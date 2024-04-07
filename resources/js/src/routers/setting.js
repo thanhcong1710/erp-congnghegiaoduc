@@ -1,19 +1,32 @@
 
 export default {
   router: {
-    path: '/user/profile',
+    path: '/settings',
     component: () => import('@/layouts/main/Main.vue'),
     children: [
       {
-        path: '/user/profile',
-        name: 'user-profile',
-        component: () => import('@/views/users/UserSettings.vue'),
+        path: '/settings/roles',
+        name: 'roles',
+        component: () => import('@/views/settings/roles/index.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Tài khoản', active: true }
+            { title: 'Chức vụ', active: true }
           ],
-          pageTitle: 'Tài khoản',
+          pageTitle: 'Chức vụ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/permissions/:role_id',
+        name: 'permissions',
+        component: () => import('@/views/settings/roles/permissions.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Phân quyền', active: true }
+          ],
+          pageTitle: 'Phân quyền',
           rule: 'editor'
         }
       },

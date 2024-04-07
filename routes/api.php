@@ -28,5 +28,12 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('update-info', 'UserController@updateInfo');
             Route::post('change-password', 'UserController@changePassword');
         });
+        Route::prefix('roles')->group(function () {
+            Route::get('{id}', 'RolesController@info');
+            Route::post('create', 'RolesController@create');
+            Route::post('delete', 'RolesController@delete');
+            Route::post('list', 'RolesController@list');
+            Route::post('permissions', 'RolesController@permissions');
+        });
     });
 });

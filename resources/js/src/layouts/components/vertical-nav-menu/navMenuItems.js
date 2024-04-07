@@ -50,39 +50,20 @@ export default [
     ]
   },
   {
-    header: 'Tài khoản',
+    header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
-    i18n: 'Tài khoản',
     items: [
       {
-        url: '/apps/email',
-        name: 'Cài đặt tài khoản',
-        slug: 'user',
-        icon: 'SettingsIcon',
-        i18n: 'Cài đặt tài khoản'
+        url: '/settings/roles',
+        name: 'Chức vụ',
+        icon: 'UserCheckIcon',
       },
       {
-        url: '/apps/chat',
-        name: 'Gói dịch vụ',
-        slug: 'records',
-        icon: 'StarIcon',
-        i18n: 'Gói dịch vụ',
-        submenu: [
-          {
-            url: '/apps/user/user-list',
-            name: 'Nâng cấp',
-            slug: 'app-user-list',
-            i18n: 'Nâng cấp dịch vụ'
-          },
-          {
-            url: '/apps/user/user-view/268',
-            name: 'Lịch sử thanh toán',
-            slug: 'app-user-view',
-            i18n: 'Lịch sử thanh toán'
-          }
-        ]
+        url: '/settings/permissions',
+        name: 'Phân quyền',
+        icon: 'PocketIcon',
       },
     ]
-  }
+  },
 ]
 
