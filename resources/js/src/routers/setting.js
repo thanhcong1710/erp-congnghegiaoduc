@@ -30,6 +30,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/users',
+        name: 'setting-users',
+        component: () => import('@/views/settings/users/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Người dùng', active: true }
+          ],
+          pageTitle: 'Người dùng',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/users/add',
+        name: 'setting-user-add',
+        component: () => import('@/views/settings/users/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Người dùng', url: '/settings/users' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới người dùng',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/users/edit/:user_id',
+        name: 'setting-user-edit',
+        component: () => import('@/views/settings/users/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Người dùng', url: '/settings/users' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật người dùng',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

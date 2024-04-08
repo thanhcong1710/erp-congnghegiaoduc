@@ -29,23 +29,18 @@ export default [
     permission:'dashboard'
   },
   {
-    header: 'Ứng dụng',
+    header: 'CRM',
     icon: 'PackageIcon',
-    i18n: 'Ứng dụng',
     items: [
       {
         url: '/apps/email',
-        name: 'Cuộc họp',
-        slug: 'rooms',
-        icon: 'VideoIcon',
-        i18n: 'Cuộc họp'
+        name: 'Khách hàng',
+        icon: 'UserIcon',
       },
       {
         url: '/apps/chat',
-        name: 'Lưu trữ',
-        slug: 'records',
-        icon: 'ArchiveIcon',
-        i18n: 'Lưu trữ'
+        name: 'Import',
+        icon: 'ArrowUpCircleIcon',
       },
     ]
   },
@@ -54,15 +49,15 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
-        url: '/settings/roles',
-        name: 'Chức vụ',
-        icon: 'UserCheckIcon',
+        url: '/settings/users',
+        name: 'Người dùng',
+        icon: 'UserIcon',
       },
       {
-        url: '/settings/permissions',
-        name: 'Phân quyền',
+        url: '/settings/roles',
+        name: 'Chức vụ, phân quyền',
         icon: 'PocketIcon',
-      },
+      }
     ]
   },
 ]

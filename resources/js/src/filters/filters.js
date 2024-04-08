@@ -95,3 +95,13 @@ Vue.filter('formatCurrency', (v, c = 'đ') => {
   }
   return resp
 })
+
+Vue.filter('getStatusColor', function (status) {
+  if (status == 1) return 'success'
+  return ''
+})
+
+Vue.filter('getStatusText', function (status) {
+  if (status == 1) return 'Kích hoạt'
+  return 'Không kích hoạt'
+})
