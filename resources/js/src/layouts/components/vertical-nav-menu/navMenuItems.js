@@ -33,12 +33,12 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
-        url: '/apps/email',
+        url: '/crm/parents',
         name: 'Khách hàng',
         icon: 'UserIcon',
       },
       {
-        url: '/apps/chat',
+        url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',
       },

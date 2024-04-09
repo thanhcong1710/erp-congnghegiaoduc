@@ -45,5 +45,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('{user_id}', 'UserController@info');
             Route::post('update/{user_id}', 'UserController@update');
         });
+        Route::prefix('crm')->group(function () {
+            Route::post('/imports/list', 'ImportsController@list');
+            Route::post('/imports/upload', 'ImportsController@upload');
+            Route::post('/imports/assign', 'ImportsController@assign');
+        });
     });
 });

@@ -22,6 +22,7 @@ import Router from 'vue-router'
 import auth from '@/auth/authService'
 import User from './routers/user'
 import Setting from './routers/setting'
+import CRM from './routers/crm'
 Vue.use(Router)
 
 const router = new Router({
@@ -33,6 +34,7 @@ const router = new Router({
   routes: [
     User.router,
     Setting.router,
+    CRM.router,
     {
     // =============================================================================
     // MAIN LAYOUT ROUTES
