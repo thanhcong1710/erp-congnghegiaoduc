@@ -190,4 +190,19 @@ class UtilityServiceProvider extends ServiceProvider
 			'gender' => data_get($data, 'gender'),
 		);
 	}
+	public static function phoneNew($number = '') {
+        $resp = false;
+        if ($number) {
+            $resp = trim(str_replace(array('-', '.', ' '), '', (string)$number)); 
+            if(substr($resp,0,2)=="84"){
+                $resp = "0".substr($resp,2);
+            }elseif(substr($resp,0,1)!="0"){
+                $resp = "0".$resp;
+            }
+            // $resp = !preg_match('/(84|0[3|5|7|8|9])+([0-9]{8})\b/', $number) ? false : $resp;
+            $resp = !preg_match('/(84|0[0-9])+([0-9]{8})\b/', $resp) ? false : $resp;
+            $resp = strlen($resp) != 10 ? false : $resp; 
+        }
+        return $resp;
+    }
 }

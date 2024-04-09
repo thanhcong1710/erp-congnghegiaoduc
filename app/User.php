@@ -76,25 +76,12 @@ class User extends Authenticatable implements JWTSubject
         'menuroles' => 'user',
     ];
 
-    public static function getInstance()
+    public function checkPermission($permission)
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
-    }
-
-    public function checkPermission(Permission $permission)
-    {
-        return $this->_checkPermission($permission);
-    }
-
-    public function _checkPermission($permission)
-    {
-        $user_permission = u::first("SELECT p.permission_id FROM permission_has_role AS p 
-            LEFT JOIN role_has_user AS r ON p.role_id=r.role_id 
-            WHERE r.user_id = ".Auth::user()->id." AND p.permission_id = ".$permission->id);
+        $user_permission = u::first("SELECT pr.permission_id FROM permission_has_role AS pr 
+            LEFT JOIN role_has_user AS r ON r.role_id=pr.role_id 
+            LEFT JOIN permissions AS p ON p.id = pr.permission_id
+            WHERE r.user_id = ".Auth::user()->id." AND p.name = '$permission'");
         
         return empty($user_permission) ? false : true;
     }
@@ -117,5 +104,15 @@ class User extends Authenticatable implements JWTSubject
             }
         }
         return $result;
+    }
+
+    public function getBranchesHasUser()
+    {
+        $list_branches = u::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = ".Auth::user()->id);
+        $tmp = "";
+        foreach($list_branches AS $branch){
+            $tmp.= $tmp ? ",".$branch->branch_id : $branch->branch_id;
+        }
+        return $tmp ? $tmp : 0;
     }
 }

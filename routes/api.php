@@ -21,12 +21,17 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('forgot-password', 'AuthController@forgotPassword');
         Route::post('reset-password', 'AuthController@resetPassword');
     });
+    Route::prefix('export')->group(function () {
+        Route::get('import/{import_id}', 'ExportController@import');
+    });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
             Route::get('branches', 'SystemController@getBranches');
             Route::get('roles', 'SystemController@getRoles');
+            Route::get('sources', 'SystemController@getSources');
+            Route::get('source_detail', 'SystemController@getSourceDetail');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -44,11 +49,12 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('add', 'UserController@add');
             Route::get('{user_id}', 'UserController@info');
             Route::post('update/{user_id}', 'UserController@update');
+            Route::get('get-data/users-manager', 'UserController@getUsersManager');
         });
         Route::prefix('crm')->group(function () {
-            Route::post('/imports/list', 'ImportsController@list');
-            Route::post('/imports/upload', 'ImportsController@upload');
-            Route::post('/imports/assign', 'ImportsController@assign');
+            Route::post('imports/list', 'ImportsController@list');
+            Route::post('imports/upload', 'ImportsController@upload');
+            Route::post('imports/assign', 'ImportsController@assign');
         });
     });
 });

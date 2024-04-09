@@ -21,4 +21,18 @@ class SystemController extends Controller
         $data = u::query("SELECT *, 0 AS selected FROM roles ");
         return response()->json($data);
     }
+
+    public function getSources(){
+        $data = u::query("SELECT * FROM sources WHERE status=1");
+        return response()->json($data);
+    }
+
+    public function getSourceDetail(Request $request){
+        $cond = "";
+        if(!Auth::user()->checkPermission('canViewAllSourceDetail')){
+            $cond = " AND (branch_id IN (".Auth::user()->getBranchesHasUser().") OR branch_id IS NULL OR branch_id=0)";
+        }
+        $data = u::query("SELECT * FROM source_detail WHERE status=1 $cond");
+        return response()->json($data);
+    }
 }

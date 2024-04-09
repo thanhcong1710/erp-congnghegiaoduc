@@ -25,10 +25,10 @@ class ImportsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
         $cond = " 1 ";
-        if($status!==''){
+        if($status != '-1'){
             $cond .= " AND status=$status";
         }
-        if(!Auth::user()->can('canViewAllImport')){
+        if(!Auth::user()->checkPermission('canViewAllImport')){
             $cond .= " AND i.creator_id IN (".Auth::user()->getStaffHasUser().")";
         }
 
@@ -283,7 +283,7 @@ class ImportsController extends Controller
         u::query("UPDATE crm_import_parents SET status=6 WHERE import_id=$import_id AND status=4 AND is_lock=0");
         u::query("UPDATE crm_imports SET status=1 WHERE id=$import_id ");
         u::query("UPDATE crm_students AS s LEFT JOIN crm_parents AS p ON s.gud_mobile_1 =p.mobile_1 SET s.parent_id=p.id WHERE s.parent_id IS NULL ");
-        u::query("UPDATE crm_students AS s LEFT JOIN crm_branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
+        u::query("UPDATE crm_students AS s LEFT JOIN branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
         $data = u::first("SELECT (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status=6) AS total_success,
             (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status!=6) AS total_error");
         return response()->json($data);

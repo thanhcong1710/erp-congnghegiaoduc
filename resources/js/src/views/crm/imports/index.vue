@@ -82,22 +82,35 @@
                 <td class="td vs-table--td"><a :href="item.file_link" target="blank">{{ item.file_name }}</a></td>
                 <td class="td vs-table--td">{{ item.created_at }}</td>
                 <td class="td vs-table--td">{{ item.creator_name }}</td>
-                <td class="td vs-table--td">{{ item.count_success }}</td>
-                <td class="td vs-table--td">{{ item.count_error }}</td>
-                <td class="td vs-table--td">{{ item.status | getStatusName}}</td>
-                <td><button class="btn btn-sm btn-info" @click="exportExcel(item)"> <i class="fas fa-download"></i></button></td>
+                <td class="td vs-table--td text-center">{{ item.count_success }}</td>
+                <td class="td vs-table--td text-center">{{ item.count_error }}</td>
+                <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
+                <td class="text-center"> <i style="cursor:pointer; color:rgb(113 11 239)" class="fas fa-download" @click="exportExcel(item)"></i></td>
               </tr>
             </table>
             
           </div>
         </div>
       </div>
-      <vs-pagination
-            class="mt-3"
-            v-if="Math.ceil(pagination.total / pagination.limit) >1"
-            :total="Math.ceil(pagination.total / pagination.limit)"
-            :max="7"
-            v-model="pagination.cpage" @change="changePage()"/>
+      <div class="flex flex-wrap items-center mt-5">
+        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
+          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
+            <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </div>
+          <vs-dropdown-menu>
+            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="pagination.limit=item" >
+              <span>{{item}}</span>
+            </vs-dropdown-item>
+          </vs-dropdown-menu>
+        </vs-dropdown>
+        <vs-pagination
+              style="width: calc(100% - 160px);"
+              v-if="Math.ceil(pagination.total / pagination.limit) >1"
+              :total="Math.ceil(pagination.total / pagination.limit)"
+              :max="7"
+              v-model="pagination.cpage" @change="changePage()"/>
+      </div>
     </vx-card>
   </div>
 
@@ -153,7 +166,7 @@
             pagination: this.pagination
           })
           .then((response) => {
-            this.roles = response.data.list
+            this.imports = response.data.list
             this.$vs.loading.close()
             this.pagination = response.data.paging;
             this.pagination.init = 1;

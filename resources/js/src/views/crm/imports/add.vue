@@ -10,7 +10,7 @@
 <template>
 
   <div id="page-roles-list">
-    <vx-card no-shadow class="mt-5">
+    <vx-card no-shadow class="mt-6">
       <div class="row bs-wizard" style="border-bottom:0;">
                 
         <div :class="curr_step == 1 ?'col-sm-3 bs-wizard-step active': 'col-sm-3 bs-wizard-step complete'">
@@ -50,6 +50,207 @@
           <vs-button class="mr-3 mb-2" color="success" @click="btnUpload" style=" float:left; margin-left: 10px;" ><i class="fas fa-upload"></i> Import</vs-button>
         </div>
       </div>
+
+      <div class="card-body" v-if="curr_step==2">
+          <div class="mb-4">
+            <p><strong>DỮ LIỆU ĐÃ KIỂM TRA</strong></p>
+            <input class="mt-3" type="checkbox" id="checkbox" v-model="error_checked" v-if="total_error > 0">
+            <label class="mt-3" for="checkbox" v-if="total_error > 0">Bỏ qua không nhập dữ liệu lỗi</label>
+            <vs-button style="float:right" class="mb-2" color="success" :disabled="!(total_error==0 || error_checked)" @click="showStep3()">Tiếp theo</vs-button>
+            <vs-button color="dark" type="border" class="mb-2 mr-3" @click=" reloadPage()" style="float:right"> Hủy</vs-button>
+          </div>  
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <!---->
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">STT
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Tên khách hàng
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Số điện thoại
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Trạng thái
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Thông tin lỗi
+                          <!---->
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_data_check" :key="index">
+                    <!---->
+                    <td class="td vs-table--td">{{ index + 1 }}</td>
+                    <td class="td vs-table--td">{{item.name}}</td>
+                    <td class="td vs-table--td">{{item.gud_mobile1}}</td>
+                    <td class="td vs-table--td"> <i v-if="item.status ==1 || (item.status==4 && item.is_lock==0)" class="fas fa-check" style="color:rgb(18 152 23);font-size: 20px;"></i>
+                            <i v-else class="fas fa-times" style="color:rgb(177 8 8); font-size: 20px"></i></td>
+                    <td class="td vs-table--td">{{ item.error_message }}</td>
+                  </tr>
+                </table>
+                
+              </div>
+            </div>
+          </div>
+          
+      </div>
+      <div class="card-body" v-if="curr_step==3">
+        <div>
+          <p><strong>THÔNG TIN DỮ LIỆU</strong></p>
+          <div class="vs-component vs-con-table stripe vs-table-primary mt-3">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <!---->
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Thông số
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Số lượng
+                          <!---->
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tr class="tr-values vs-table--tr tr-table-state-null">
+                    <!---->
+                    <td class="td vs-table--td">Số khách hàng hợp lệ</td>
+                    <td class="td vs-table--td">{{ total_validate }}</td>
+                  </tr>
+                   <tr class="tr-values vs-table--tr tr-table-state-null">
+                    <!---->
+                    <td class="td vs-table--td">Số khách hàng không hợp lệ</td>
+                    <td class="td vs-table--td">{{ total_error }}</td>
+                  </tr>
+                   <tr class="tr-values vs-table--tr tr-table-state-null">
+                    <!---->
+                    <td class="td vs-table--td">Số khách hàng có thể ghi đè</td>
+                    <td class="td vs-table--td">{{ total_open_lock }}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <p><strong>PHÂN CHIA DỮ LIỆU</strong></p>
+          <div class="vx-row mt-3">
+            <div class="vx-col md:w-1/2 w-full">
+              <div class="mb-6">
+                <label for="nf-email">Chọn người phụ trách</label>
+                <multiselect
+                  placeholder="Chọn người phụ trách"
+                  select-label="Chọn một người phụ trách"
+                  v-model="data_assign.owners"
+                  :options="list_owner"
+                  label="label_name"
+                  :close-on-select="false"
+                  :hide-selected="true"
+                  :multiple="true"
+                  :searchable="true"
+                  track-by="id"
+                >
+                  <span slot="noResult">Không tìm thấy dữ liệu</span>
+                </multiselect>
+              </div>
+            </div>
+              <div class="vx-col md:w-1/2 w-full">
+                <div class="mb-6">
+                  <label for="nf-email">Chọn nguồn</label>
+                  <v-select
+                      label="name"
+                      placeholder="Chọn nguồn"
+                      :options="list_source"
+                      v-model="data_assign.source"
+                      :searchable="true"
+                      language="tv-VN"
+                      @input="selectSource"
+                  ></v-select>
+                </div>
+              </div>
+              <div class="vx-col md:w-1/2 w-full">
+              <div class="mb-6">
+                <label for="nf-email">Chọn nguồn chi tiết</label>
+                <v-select
+                    label="name"
+                    placeholder="Chọn nguồn chi tiết"
+                    :options="list_source_detail"
+                    v-model="data_assign.source_detail"
+                    :searchable="true"
+                    language="tv-VN"
+                    @input="selectSourceDetail"
+                ></v-select>
+              </div>
+            </div>
+           </div>
+          <div class="mt-3 mb-3" style="overflow: hidden;">
+              <p style="color:red" v-html="data_assign.error_message"></p>
+              <vs-button style="float:right" class="mb-2" color="success" @click="assginContact">Tiếp theo</vs-button>
+              <vs-button color="dark" type="border" class="mb-2 mr-3" @click=" reloadPage()" style="float:right"> Hủy</vs-button>
+            </div>
+        </div>
+      </div>
+
+      <div class="card-body" v-if="curr_step==4">
+        <div>
+          <p><strong>KẾT QUẢ TẢI LÊN</strong></p>
+          <div class="vs-component vs-con-table stripe vs-table-primary mt-3">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <!---->
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Thông số
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Số lượng
+                          <!---->
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tr class="tr-values vs-table--tr tr-table-state-null">
+                    <!---->
+                    <td class="td vs-table--td">Số khách hàng mới được tải lên</td>
+                    <td class="td vs-table--td">{{ result_total_success }}</td>
+                  </tr>
+                   <tr class="tr-values vs-table--tr tr-table-state-null">
+                    <!---->
+                    <td class="td vs-table--td">Số khách hàng bị bỏ qua</td>
+                    <td class="td vs-table--td">{{ result_total_error }}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 mb-3" style="overflow: hidden;">
+          <vs-button class="fl-right" @click="reloadPage()"> Quay lại trang import</vs-button>
+        </div>
+      </div>
     </vx-card>
   </div>
 
@@ -58,11 +259,14 @@
 <script>
 
   import vSelect from 'vue-select'
-  import axios from '../../../http/axios.js'
+  import Multiselect from "vue-multiselect";
+  import axios from '../../../http/axios.js';
+  import helper from '../../../until/helper.js'
 
   export default {
     components: {
-      vSelect
+      vSelect,
+      Multiselect
     },
     data() {
       return {
@@ -101,33 +305,108 @@
           this.attached_file = e.target.result;
         };
       },
-    btnUpload() {
-      if (this.attached_file) {
-        this.$vs.loading()
-        let dataUpload = {
-          files: this.attached_file,
-          file_name: this.file_name,
+      btnUpload() {
+        if (this.attached_file) {
+          this.$vs.loading()
+          let dataUpload = {
+            files: this.attached_file,
+            file_name: this.file_name,
+          }
+          axios.p(`/api/crm/imports/upload`, dataUpload)
+            .then(response => {
+              this.$vs.loading.close()
+              if(response.data.error){
+                alert(response.data.message);
+                this.reloadPage();
+              }else{
+                this.list_data_check = response.data.data
+                this.curr_step=2
+                this.total_error = response.data.total_error
+                this.total_validate = response.data.total_validate
+                this.total_open_lock = response.data.total_open_lock
+                this.data_assign.import_id = response.data.import_id
+              }
+            })
+            .catch(e => console.log(e))
         }
-        axios.p(`/api/crm/imports/upload`, dataUpload)
-          .then(response => {
-            this.$vs.loading.close()
-            if(response.data.error){
-              alert(response.data.message);
-              this.reloadPage();
-            }else{
-              this.list_data_check = response.data.data
-              this.curr_step=2
-              this.total_error = response.data.total_error
-              this.total_validate = response.data.total_validate
-              this.total_open_lock = response.data.total_open_lock
-              this.data_assign.import_id = response.data.import_id
-            }
+      },
+      reloadPage(){
+        location.reload();
+      },
+      showStep3(){
+        this.curr_step=3;
+      },
+      selectSource(data = null){
+        console.log(data);
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.data_assign.source = data
+          this.data_assign.source_id = source_id
+        }else{
+          this.data_assign.source = ""
+          this.data_assign.source_id = ""
+        }
+      },
+      selectSourceDetail(data = null){
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.data_assign.source_detail = data
+          this.data_assign.source_detail_id = source_id
+        }else{
+          this.data_assign.source_detail = ""
+          this.data_assign.source_detail_id = ""
+        }
+      },
+      assginContact(){
+        const ids = []
+        this.data_assign.owners = helper.is.obj(this.data_assign.owners) ? [this.data_assign.owners] : this.data_assign.owners
+        if (this.data_assign.owners.length) {
+          this.data_assign.owners.map(item => {
+            ids.push(item.id)
           })
-          .catch(e => console.log(e))
+        }
+        this.data_assign.owners_id = ids
+        let mess = "";
+        let resp = true;
+        if (this.data_assign.source == "") {
+          mess += " - Nguồn dữ liệu không được để trống<br/>";
+          resp = false;
+        }
+        if (!this.data_assign.owners_id.length) {
+          mess += " - Người phụ trách không được để trống<br/>";
+          resp = false;
+        } 
+        if(resp){
+          this.data_assign.error_message = "";
+          this.$vs.loading()
+          axios.p(`/api/crm/imports/assign`,this.data_assign)
+          .then((response) => {
+            this.$vs.loading.close()
+            console.log(response.data);
+            this.result_total_success = response.data.total_success
+            this.result_total_error = response.data.total_error
+            this.curr_step = 4
+          })
+          .catch((e) => {
+          });
+        }else{
+          this.data_assign.error_message = mess;
+        }
       }
     },
-    },
     created() {
+      axios.g(`/api/users/get-data/users-manager`)
+        .then(response => {
+        this.list_owner = response.data
+      })
+      axios.g(`/api/system/sources`)
+        .then(response => {
+        this.list_source = response.data
+      })
+      axios.g(`/api/system/source_detail`)
+        .then(response => {
+        this.list_source_detail = response.data
+      })
     },
   }
 </script>
@@ -184,5 +463,8 @@
     font-size: 0.65625rem;
     border-radius: 0.25rem;
     background-color: #ebedef;
+}
+.multiselect--above .multiselect__content-wrapper{
+  z-index: 20;
 }
 </style>

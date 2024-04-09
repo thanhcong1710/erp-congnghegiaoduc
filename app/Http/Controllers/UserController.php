@@ -219,4 +219,14 @@ class UserController extends Controller
             'message' => 'Cập nhật thành công',
         ]);
     }
+
+    public function getUsersManager(Request $request){
+        $cond = "";
+        if(!Auth::user()->checkPermission('canViewAllUser')){
+            $cond = " AND id IN (".Auth::user()->getStaffHasUser().")";
+        }
+        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name 
+            FROM users WHERE status=1 $cond");
+        return response()->json($data);
+    }
 }
