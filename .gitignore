@@ -24,3 +24,4 @@ Homestead.json
 public/js/*.js
 public/js/app.js
 public/js
+public/static/upload
