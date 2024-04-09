@@ -13,6 +13,7 @@
     <span class="text-danger text-sm">{{ errors.first('email') }}</span>
 
     <vs-input
+        @keyup.enter="loginJWT"
         data-vv-validate-on="blur"
         v-validate="'required|min:6|max:10'"
         type="password"
