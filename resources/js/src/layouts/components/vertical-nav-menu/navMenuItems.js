@@ -33,7 +33,7 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
-        url: '/crm/parents',
+        url: '/crm/parent',
         name: 'Khách hàng',
         icon: 'UserIcon',
       },
@@ -41,7 +41,7 @@ export default [
         url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',
-      },
+      }
     ]
   },
   {

@@ -31,6 +31,19 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/crm/parent',
+        name: 'crm-parent',
+        component: () => import('@/views/crm/imports/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách Import', active: true }
+          ],
+          pageTitle: 'Danh sách Import',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
