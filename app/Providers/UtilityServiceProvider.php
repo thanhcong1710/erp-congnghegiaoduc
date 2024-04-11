@@ -205,4 +205,54 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $resp;
     }
+	public static function getStatusParent($status){
+        $tmp ="";
+        switch ($status) {
+            case 0:
+                $tmp = 'KH mới';
+                break;
+            case 10:
+                $tmp = 'KH không liên lạc được';
+                break;
+            case 20:
+                $tmp = 'KH ở vùng CMS không có cơ sở';
+                break;
+            case 30:
+                $tmp = 'KH không nghe máy';
+                break;
+            case 40:
+                $tmp = 'KH hẹn gọi lại sau';
+                break;
+            case 50:
+                $tmp = 'KH không quan tâm';
+                break;
+            case 60:
+                $tmp = 'KH không tiềm năng';
+                break;
+            case 71:
+                $tmp = 'KH quan tâm, cần follow up date';
+                break;
+            case 72:
+                $tmp = 'KH tiềm năng nhưng không muốn làm phiền';
+                break;
+            case 73:
+                $tmp = 'KH đồng ý đặt lịch Checkin';
+                break;
+            case 81:
+                $tmp = 'KH đến hạn tái tục';
+                break;
+            case 82:
+                $tmp = 'KH đã mua gói phí';
+                break;
+            case 83:
+                $tmp = 'KH đến hạn tái tục';
+                break;
+            case 90:
+                $tmp = 'Danh sách đen';
+                break;
+            default:
+                $tmp = 'KH mới';
+          }
+        return $tmp;
+    }
 }

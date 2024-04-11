@@ -61,3 +61,29 @@ body {
     font-family: OpenSans, sans-serif !important;
     color: #252525 !important;
 }
+.list-action .vs-button.small:not(.includeIconOnly){
+    padding: 8px;
+    margin: 4px;
+    width: 28px;
+}
+@media only screen and (min-width: 600px) {
+    .content-area__heading {
+      display: none;
+    }
+}
+.modal_warning .vs-popup--header {
+    background: #ffa044;
+    color: #fff;
+}
+.modal_success .vs-popup--header{
+    background: #28c76f;
+    color: #fff;
+}
+
+.modal_info .vs-popup--header{
+    background-color: #938af4;
+    color: #fff;
+}
+.modal_info .vs-popup--title h3, .modal_success .vs-popup--title h3, .modal_warning .vs-popup--title h3{
+    color: #fff;
+}

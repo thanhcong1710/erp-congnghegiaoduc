@@ -60,6 +60,8 @@
         "vuecode.js": "0.0.27",
         "vuedraggable": "^2.21.0",
         "vuejs-datepicker": "^1.5.4",
+        "vue2-datepicker": "^2.11.2",
+        "vue-multiselect": "^2.1.6",
         "vuepress": "0.14.11",
         "vuesax": "jd-0001/vuesax",
         "vuex": "^3.1.1",

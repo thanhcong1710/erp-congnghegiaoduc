@@ -9183,6 +9183,49 @@ body {
   color: #252525 !important;
 }
 
+.list-action .vs-button.small:not(.includeIconOnly){
+  width: 28px;
+}
+
+[dir] .list-action .vs-button.small:not(.includeIconOnly){
+  padding: 8px;
+  margin: 4px;
+}
+
+@media only screen and (min-width: 600px) {
+  .content-area__heading {
+    display: none;
+  }
+}
+
+.modal_warning .vs-popup--header {
+  color: #fff;
+}
+
+[dir] .modal_warning .vs-popup--header {
+  background: #ffa044;
+}
+
+.modal_success .vs-popup--header{
+  color: #fff;
+}
+
+[dir] .modal_success .vs-popup--header{
+  background: #28c76f;
+}
+
+.modal_info .vs-popup--header{
+  color: #fff;
+}
+
+[dir] .modal_info .vs-popup--header{
+  background-color: #938af4;
+}
+
+.modal_info .vs-popup--title h3, .modal_success .vs-popup--title h3, .modal_warning .vs-popup--title h3{
+  color: #fff;
+}
+
 @media (min-width: 576px) {
   .sm\:container {
     width: 100%;

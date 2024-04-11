@@ -32,6 +32,9 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('roles', 'SystemController@getRoles');
             Route::get('sources', 'SystemController@getSources');
             Route::get('source_detail', 'SystemController@getSourceDetail');
+            Route::get('provinces', 'SystemController@getProvinces');
+            Route::get('jobs', 'SystemController@getJobs');
+            Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -55,6 +58,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('imports/list', 'ImportsController@list');
             Route::post('imports/upload', 'ImportsController@upload');
             Route::post('imports/assign', 'ImportsController@assign');
+            Route::post('parents/list', 'ParentsController@list');
+            Route::post('parents/validate_phone', 'ParentsController@validatePhone');
+            Route::post('parents/overwrite', 'ParentsController@overwrite');
+            Route::post('parents/validate_c2c_phone', 'ParentsController@validateC2CPhone');
         });
     });
 });

@@ -225,7 +225,7 @@ class UserController extends Controller
         if(!Auth::user()->checkPermission('canViewAllUser')){
             $cond = " AND id IN (".Auth::user()->getStaffHasUser().")";
         }
-        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name 
+        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name, id AS `value` 
             FROM users WHERE status=1 $cond");
         return response()->json($data);
     }
