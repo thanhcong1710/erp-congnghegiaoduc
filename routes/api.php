@@ -34,6 +34,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('source_detail', 'SystemController@getSourceDetail');
             Route::get('provinces', 'SystemController@getProvinces');
             Route::get('jobs', 'SystemController@getJobs');
+            Route::get('methods', 'SystemController@getMethods');
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
         });
         Route::prefix('user')->group(function () {
@@ -63,6 +64,14 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('parents/overwrite', 'ParentsController@overwrite');
             Route::post('parents/validate_c2c_phone', 'ParentsController@validateC2CPhone');
             Route::post('parents/add', 'ParentsController@add');
+            Route::get('parents/show/{parent_id}', 'ParentsController@show');
+            Route::post('parents/update', 'ParentsController@update');
+            Route::post('parents/change_status', 'ParentsController@changeStatus');
+            Route::post('parents/assign', 'ParentsController@assign');
+            Route::post('parents/update_next_care_date', 'ParentsController@updateNextCareDate');
+            Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
+            Route::get('care/get_all_data/{parent_id}', 'ParentCareController@getAllDataByParent');
+            Route::post('care/add', 'ParentCareController@add');
         });
     });
 });

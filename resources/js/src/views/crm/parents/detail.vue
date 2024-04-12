@@ -2,462 +2,975 @@
 
 <template>
 
-  <div id="page-roles-list">
-    <vx-card no-shadow class="mt-6">
-      <div class="row bs-wizard" style="border-bottom:0;">
-                
-        <div :class="curr_step == 1 ?'col-sm-3 bs-wizard-step active': 'col-sm-3 bs-wizard-step complete'">
-          <div class="text-center bs-wizard-stepnum">Chọn tập tin</div>
-          <div class="progress"><div class="progress-bar"></div></div>
-          <a class="bs-wizard-dot"></a>
-          <div class="bs-wizard-info text-center"></div>
-        </div>
-        
-        <div :class="curr_step == 2 ?'col-sm-3 bs-wizard-step active': (curr_step < 2 ? 'col-sm-3 bs-wizard-step disabled':'col-sm-3 bs-wizard-step complete')" ><!-- complete -->
-          <div class="text-center bs-wizard-stepnum">Kiểm tra dữ liệu</div>
-          <div class="progress"><div class="progress-bar"></div></div>
-          <a class="bs-wizard-dot"></a>
-          <div class="bs-wizard-info text-center"></div>
-        </div>
-        
-        <div :class="curr_step == 3 ?'col-sm-3 bs-wizard-step active': (curr_step < 3 ? 'col-sm-3 bs-wizard-step disabled':'col-sm-3 bs-wizard-step complete')"><!-- complete -->
-          <div class="text-center bs-wizard-stepnum">Phân chia dữ liệu</div>
-          <div class="progress"><div class="progress-bar"></div></div>
-          <a class="bs-wizard-dot"></a>
-          <div class="bs-wizard-info text-center"></div>
-        </div>
-        
-        <div :class="curr_step == 4 ?'col-sm-3 bs-wizard-step active': (curr_step < 4 ? 'col-sm-3 bs-wizard-step disabled':'col-sm-3 bs-wizard-step complete')"><!-- active -->
-          <div class="text-center bs-wizard-stepnum">Hoàn thành</div>
-          <div class="progress"><div class="progress-bar"></div></div>
-          <a class="bs-wizard-dot"></a>
-          <div class="bs-wizard-info text-center"></div>
-        </div>
-      </div>
-      <div class="card-body" v-if="curr_step==1">
-        <div class="mb-4">
-          <p><a href="/static/template/import_khach_hang.xlsx" target="blank"><i class="fas fa-download"></i> Tải danh sách khách hàng mẫu</a></p>
-        </div>
-        <div style="overflow: hidden;">
-           <input type="file" class="vs-inputx vs-input--input normal" id="fileUploadExcel" @change="fileChanged" style="width: calc(100% - 175px); float:left;">
-          <vs-button class="mr-3 mb-2" color="success" @click="btnUpload" style=" float:left; margin-left: 10px;" ><i class="fas fa-upload"></i> Import</vs-button>
-        </div>
-      </div>
-
-      <div class="card-body" v-if="curr_step==2">
-          <div class="mb-4">
-            <p><strong>DỮ LIỆU ĐÃ KIỂM TRA</strong></p>
-            <input class="mt-3" type="checkbox" id="checkbox" v-model="error_checked" v-if="total_error > 0">
-            <label class="mt-3" for="checkbox" v-if="total_error > 0">Bỏ qua không nhập dữ liệu lỗi</label>
-            <vs-button style="float:right" class="mb-2" color="success" :disabled="!(total_error==0 || error_checked)" @click="showStep3()">Tiếp theo</vs-button>
-            <vs-button color="dark" type="border" class="mb-2 mr-3" @click=" reloadPage()" style="float:right"> Hủy</vs-button>
-          </div>  
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <!---->
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">STT
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Tên khách hàng
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Số điện thoại
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Trạng thái
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Thông tin lỗi
-                          <!---->
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_data_check" :key="index">
-                    <!---->
-                    <td class="td vs-table--td">{{ index + 1 }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.gud_mobile1}}</td>
-                    <td class="td vs-table--td"> <i v-if="item.status ==1 || (item.status==4 && item.is_lock==0)" class="fas fa-check" style="color:rgb(18 152 23);font-size: 20px;"></i>
-                            <i v-else class="fas fa-times" style="color:rgb(177 8 8); font-size: 20px"></i></td>
-                    <td class="td vs-table--td">{{ item.error_message }}</td>
-                  </tr>
-                </table>
-                
-              </div>
+  <div id="page-parent-detail">
+    <vx-card no-shadow class="mb-base">
+        <div class="vx-row">
+          <div class="vx-col md:w-1/3 w-full item-first">
+            <div style="float: left; width: 110px;">
+              <img class="rounded" src="@assets/images/common/avatar-default.jpg" width="100%">
+            </div>
+            <div style="float: left; padding: 10px; width: calc(100% - 110px);">
+               <h5>{{parent.name}}</h5>
+              <p style="margin-top: 5px;" class="list-action"><span> {{parent.mobile_1}}</span> 
+                <vs-button size="small" @click="callPhone(parent.mobile_1)"><i class="fa fa-phone"></i></vs-button>
+                <vs-button size="small" @click="showSendSms(parent.mobile_1)"><i class="fa fa-sms"></i></vs-button>
+              </p>
+              <p style="margin-top: 5px;" class="list-action" v-if="parent.mobile_2"> 
+                <span> {{parent.mobile_2}}</span> 
+                <vs-button size="small" @click="callPhone(parent.mobile_2)"><i class="fa fa-phone"></i></vs-button>
+                <vs-button size="small" @click="showSendSms(parent.mobile_2)"><i class="fa fa-sms"></i></vs-button>
+              </p>
             </div>
           </div>
-          
-      </div>
-      <div class="card-body" v-if="curr_step==3">
-        <div>
-          <p><strong>THÔNG TIN DỮ LIỆU</strong></p>
-          <div class="vs-component vs-con-table stripe vs-table-primary mt-3">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <!---->
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Thông số
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Số lượng
-                          <!---->
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null">
-                    <!---->
-                    <td class="td vs-table--td">Số khách hàng hợp lệ</td>
-                    <td class="td vs-table--td">{{ total_validate }}</td>
-                  </tr>
-                   <tr class="tr-values vs-table--tr tr-table-state-null">
-                    <!---->
-                    <td class="td vs-table--td">Số khách hàng không hợp lệ</td>
-                    <td class="td vs-table--td">{{ total_error }}</td>
-                  </tr>
-                   <tr class="tr-values vs-table--tr tr-table-state-null">
-                    <!---->
-                    <td class="td vs-table--td">Số khách hàng có thể ghi đè</td>
-                    <td class="td vs-table--td">{{ total_open_lock }}</td>
-                  </tr>
-                </table>
-              </div>
-            </div>
+          <div class="vx-col md:w-1/3 w-full">
+            <p class="mb-1">Liên hệ lần cuối: {{parent.last_care}}</p>
+            <p class="mb-1">Tương tác: <strong>{{parent.num_care}}</strong></p>
+            <p><i class="fa fa-calendar"></i> Lịch chăm sóc tiếp theo</p>
+            <p class="mb-1"><input class="form-control" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
+          </div>
+          <div class="vx-col md:w-1/3 w-full">
+            <p>Trạng thái</p>
+            <p class="mb-1">
+              <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
+                <option value="0" v-if="tmp_status<70">0. KH mới</option>
+                <option value="10" v-if="tmp_status<70">1. KH không liên lạc được</option>
+                <option value="20" v-if="tmp_status<70">2. KH ở vùng CMS không có cơ sở</option>
+                <option value="30" v-if="tmp_status<70">3. KH không nghe máy</option>
+                <option value="40" v-if="tmp_status<70">4. KH hẹn gọi lại sau</option>
+                <option value="50" v-if="tmp_status<70">5. KH không quan tâm</option>
+                <option value="60" v-if="tmp_status<70">6. KH không tiềm năng</option>
+                <option value="71">7.1. KH quan tâm, cần follow up date</option>
+                <option value="72">7.2. KH tiềm năng nhưng không muốn làm phiền</option>
+                <option value="73">7.3. KH đồng ý đặt lịch Checkin</option>
+                <option value="81">8.1. KH đã đến checkin</option>
+                <option value="82">8.2. KH đã mua gói phí</option>
+                <option value="83">8.3. KH đến hạn tái tục</option>
+                <option value="90">9. Danh sách đen</option>
+              </select>
+            </p> 
+            <p>Người phụ trách</p>
+            <p class="mb-1">
+              <select class="vs-inputx vs-input--input normal" @change="openConfirmAssgin" v-model="tmp_owner_id" > 
+                <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{item.label_name}}</option>
+              </select>
+            </p>
           </div>
         </div>
-        <div class="mt-4">
-          <p><strong>PHÂN CHIA DỮ LIỆU</strong></p>
-          <div class="vx-row mt-3">
-            <div class="vx-col md:w-1/2 w-full">
-              <div class="mb-6">
-                <label for="nf-email">Chọn người phụ trách</label>
-                <multiselect
-                  placeholder="Chọn người phụ trách"
-                  select-label="Chọn một người phụ trách"
-                  v-model="data_assign.owners"
-                  :options="list_owner"
-                  label="label_name"
-                  :close-on-select="false"
-                  :hide-selected="true"
-                  :multiple="true"
-                  :searchable="true"
-                  track-by="id"
-                >
-                  <span slot="noResult">Không tìm thấy dữ liệu</span>
-                </multiselect>
-              </div>
-            </div>
-              <div class="vx-col md:w-1/2 w-full">
-                <div class="mb-6">
-                  <label for="nf-email">Chọn nguồn</label>
-                  <v-select
-                      label="name"
-                      placeholder="Chọn nguồn"
-                      :options="list_source"
-                      v-model="data_assign.source"
-                      :searchable="true"
-                      language="tv-VN"
-                      @input="selectSource"
-                  ></v-select>
+      </vx-card>
+      <vx-card no-shadow class="mt-5">
+        <vs-tabs v-model="active_tab">
+          <vs-tab label="Thông tin" @click="changeTab()">
+            <div class="tab-text">
+              <div class="vx-row">
+                <div class="vx-col md:w-1/2 w-full item-first">
+                  <div class="vx-row">
+                    <div class="vx-col md:w-1/3 w-full mb-4">
+                      <label>Danh xưng <span class="text-danger"> (*)</span></label>
+                      <select class="vs-inputx vs-input--input normal" v-model="parent.gender" :disabled="disabled_edit">
+                        <option value="M">Ông</option>
+                        <option value="F">Bà</option>
+                      </select>
+                    </div>
+                    <div class="vx-col md:w-2/3 w-full mb-4">
+                      <label>Họ tên <span class="text-danger"> (*)</span></label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.name"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label  >Điện thoại <span class="text-danger"> (*)</span></label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.mobile_1"
+                        @change="validatePhone"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label  >Điện thoại 2</label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.mobile_2"
+                        @change="validatePhone2"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Email</label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.email"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Ngày sinh </label>
+                      <datepicker class="w-full"
+                        v-model="parent.birthday"
+                        placeholder="Chọn ngày sinh nhật"
+                        lang="lang"
+                        @change="selectDate"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Nghề nghiệp</label>
+                      <vue-select
+                            label="title"
+                            placeholder="Chọn nghề nghiệp"
+                            :options="html.jobs.list"
+                            v-model="parent.job"
+                            :searchable="true"
+                            language="tv-VN"
+                            @input="saveJob"
+                            :disabled="disabled_edit"
+                        ></vue-select>
+                    </div>
+                    <div class="vx-col w-full mb-4">
+                      <label >Ghi chú</label>
+                      <textarea class="vs-inputx vs-input--input normal" v-model="parent.note" :disabled="disabled_edit"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="vx-col md:w-1/2 w-full item-last">
+                  <div class="vx-row">
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Tỉnh Thành Phố</label>
+                      <vue-select
+                        naem="input_province"
+                        label="name"
+                        placeholder="Chọn Tỉnh/Thành Phố"
+                        :options="html.province.list"
+                        v-model="parent.province"
+                        :searchable="true"
+                        language="tv-VN"
+                        @input="getDistrict"
+                        :disabled="disabled_edit"
+                      ></vue-select>
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Quận huyện</label>
+                      <vue-select
+                            naem="input_district"
+                            label="name"
+                            placeholder="Chọn Quận/Huyện/Thị Xã"
+                            :options="html.district.list"
+                            v-model="parent.district"
+                            :searchable="true"
+                            language="tv-VN"
+                            @input="saveDistrict"
+                            :disabled="disabled_edit"
+                        ></vue-select>
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Nguồn  <span class="text-danger"> (*)</span></label>
+                      <vue-select
+                            label="name"
+                            placeholder="Chọn nguồn"
+                            :options="html.source.list"
+                            v-model="parent.source"
+                            :searchable="true"
+                            language="tv-VN"
+                            @input="saveSource"
+                            :disabled="disabled_edit"
+                        ></vue-select>
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Nguồn chi tiết</label>
+                      <vue-select
+                            label="name"
+                            placeholder="Chọn nguồn chi tiết"
+                            :options="html.source_detail.list"
+                            v-model="parent.source_detail"
+                            :searchable="true"
+                            language="tv-VN"
+                            @input="saveSourceDetail"
+                            :disabled="disabled_edit"
+                        ></vue-select>
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label  >Người giới thiệu (ĐT)</label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.c2c_mobile"
+                        @change="validatePhoneC2C"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col w-full mb-4">
+                      <p><i>{{c2c_info}}</i></p>
+                    </div>
+                  </div>
+                </div>
+                <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+                  <div v-html="alert.body"></div>
+                </vs-alert>
+                <div class="vx-col w-full">
+                  <vs-button class="mb-2" @click="disabled_edit=false" v-if="disabled_edit== true">Cập nhật thông tin</vs-button>
+                  <vs-button color="dark" class="mb-2 mr-3" @click="reloadPage" v-if="disabled_edit== false">Hủy</vs-button>
+                  <vs-button class="mb-2" color="success" @click="saveInfo" v-if="disabled_edit== false">Lưu</vs-button>
                 </div>
               </div>
-              <div class="vx-col md:w-1/2 w-full">
-              <div class="mb-6">
-                <label for="nf-email">Chọn nguồn chi tiết</label>
-                <v-select
-                    label="name"
-                    placeholder="Chọn nguồn chi tiết"
-                    :options="list_source_detail"
-                    v-model="data_assign.source_detail"
-                    :searchable="true"
-                    language="tv-VN"
-                    @input="selectSourceDetail"
-                ></v-select>
+            </div>
+          </vs-tab>
+          <vs-tab label="Chăm sóc"  @click="changeTab()">
+            <div class="tab-text">
+              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalCare"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+              <div class="vs-component vs-con-table stripe vs-table-primary">
+                <div class="con-tablex vs-table--content">
+                  <div class="vs-con-tbody vs-table--tbody ">
+                    <table class="vs-table vs-table--tbody-table">
+                      <thead class="vs-table--thead">
+                        <tr>
+                          <!---->
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text text-center">Thời gian
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Phụ trách
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Trung tâm
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Phương thức
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Trạng thái cuộc gọi
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Chi tiết
+                              <!---->
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in cares" :key="index">
+                        <td class="td vs-table--td">{{ item.care_date }}</td>
+                        <td class="td vs-table--td">{{ item.creator_name }}</td>
+                        <td class="td vs-table--td">{{ item.branch_name }}</td>
+                        <td class="td vs-table--td">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
+                        <td class="td vs-table--td">{{ item.call_status_label }}</td>
+                        <td class="td vs-table--td">
+                          <p v-if="item.link_record">
+                            <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
+                              <source :src="item.link_record" type="audio/x-wav">
+                            </audio>
+                          </p>
+                          <p v-html="item.note"></p>
+                          <p v-if="item.attached_file">
+                            <a :href="item.attached_file" target="blank">File đính kèm</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
-           </div>
-          <div class="mt-3 mb-3" style="overflow: hidden;">
-              <p style="color:red" v-html="data_assign.error_message"></p>
-              <vs-button style="float:right" class="mb-2" color="success" @click="assginContact">Tiếp theo</vs-button>
-              <vs-button color="dark" type="border" class="mb-2 mr-3" @click=" reloadPage()" style="float:right"> Hủy</vs-button>
+          </vs-tab>
+          <vs-tab label="Học sinh"  @click="changeTab()">
+            <div class="tab-text">
+              <span>Chocolate ....</span>
             </div>
-        </div>
-      </div>
-
-      <div class="card-body" v-if="curr_step==4">
-        <div>
-          <p><strong>KẾT QUẢ TẢI LÊN</strong></p>
-          <div class="vs-component vs-con-table stripe vs-table-primary mt-3">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <!---->
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Thông số
+          </vs-tab>
+          <vs-tab label="Lịch sử cập nhật"  @click="changeTab()">
+            <div class="tab-text">
+              <div class="vs-component vs-con-table stripe vs-table-primary">
+                <div class="con-tablex vs-table--content">
+                  <div class="vs-con-tbody vs-table--tbody ">
+                    <table class="vs-table vs-table--tbody-table">
+                      <thead class="vs-table--thead">
+                        <tr>
                           <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Số lượng
-                          <!---->
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null">
-                    <!---->
-                    <td class="td vs-table--td">Số khách hàng mới được tải lên</td>
-                    <td class="td vs-table--td">{{ result_total_success }}</td>
-                  </tr>
-                   <tr class="tr-values vs-table--tr tr-table-state-null">
-                    <!---->
-                    <td class="td vs-table--td">Số khách hàng bị bỏ qua</td>
-                    <td class="td vs-table--td">{{ result_total_error }}</td>
-                  </tr>
-                </table>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text text-center">Thời gian
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Nội dung
+                              <!---->
+                            </div>
+                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">
+                            <div class="vs-table-text">Người thực hiện
+                              <!---->
+                            </div>
+                          </th>
+                          
+                        </tr>
+                      </thead>
+                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
+                        <td class="td vs-table--td">{{ item.created_at }}</td>
+                        <td class="td vs-table--td">{{ item.content }}</td>
+                        <td class="td vs-table--td">{{ item.creator_name }}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
+          </vs-tab>
+        </vs-tabs>
+      </vx-card>
+      <vs-popup :class="'modal_'+ modal_care.color" :title="modal_care.title" :active.sync="modal_care.show">
+        <div class="vx-row"> 
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Phương thức</label>
+            <select class="vs-inputx vs-input--input normal" v-model="care.method_id">
+              <option value="">Chọn phương thức</option>
+              <option
+                :value="method.id"
+                v-for="(method, index) in methods"
+                :key="index"
+              >{{method.name}}</option>
+            </select>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>File đính kèm</label>
+             <input
+                type="file"
+                class="vs-inputx vs-input--input normal"
+                id="fileUploadExcel"
+                @change="fileChanged"
+              >
+          </div>
+          <div class="vx-col w-full mb-4">
+            <label>Ghi chú</label>
+            <textarea class="vs-inputx vs-input--input normal" v-model="care.note"></textarea>
+          </div>
+          <vs-alert :active.sync="modal_care.alert.active" class="mb-5" :color="modal_care.alert.color" closable icon-pack="feather" close-icon="icon-x">
+            <div v-html="modal_care.alert.body"></div>
+          </vs-alert>
+          <div class="vx-col w-full">
+            <vs-button color="dark" type="border" class="mr-3" @click="modal_care.show = false">Hủy</vs-button>
+            <vs-button color="success" @click="addCare">Lưu</vs-button>
           </div>
         </div>
-        <div class="mt-3 mb-3" style="overflow: hidden;">
-          <vs-button class="fl-right" @click="reloadPage()"> Quay lại trang import</vs-button>
-        </div>
-      </div>
-    </vx-card>
+      </vs-popup>
   </div>
 
 </template>
 
 <script>
 
-  import vSelect from 'vue-select'
   import Multiselect from "vue-multiselect";
   import axios from '../../../http/axios.js';
-  import helper from '../../../until/helper.js'
+  import u from '../../../until/helper.js'
+  import moment from 'moment';
+  import datepicker from "vue2-datepicker";
+  import select from 'vue-select'
 
   export default {
     components: {
-      vSelect,
-      Multiselect
+      "vue-select": select,
+      Multiselect,
+      moment,
+      datepicker
     },
     data() {
       return {
-        attached_file:"",
-        file_name:"",
-        curr_step:1,
-        list_data_check:[],
-        error_checked:false,
-        total_error:0,
-        total_validate:0,
-        total_open_lock:0,
-        list_owner:[],
-        list_source:[],
-        list_source_detail:[],
-        data_assign:{
-          owners:"",
-          import_id:"",
-          source:"",
-          source_id:"",
-          source_detail:"",
-          source_detail_id:"",
-          owners_id:"",
-          error_message:"",
+        active_tab: 1,
+        alert:{
+          active: false,
+          body: '',
+          color:'',
         },
-        result_total_success:0,
-        result_total_error:0,
-      }
+        html:{
+          province: {
+            item: '',
+            list: []
+          },
+          district: {
+            item: '',
+            list: []
+          },
+          jobs: {
+            item: '',
+            list: []
+          },
+          source: {
+            item: '',
+            list: []
+          },
+          source_detail: {
+            item: '',
+            list: []
+          },
+        },
+        branches:[],
+        modal_care: {
+          title: "THÊM MỚI CHĂM SÓC",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
+        },
+        modal_student: {
+          title: "THÊM MỚI HỌC SINH",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:""
+        },
+        modal_checkin: {
+          title: "TẠO CHECKIN HỌC SINH",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          branch_id:"",
+          checkin_at:"",
+          student_id:"",
+          error_message:"",
+          disabled:false,
+          type_product:"",
+        },
+        parent: {
+          id:"",
+          gender: "",
+          name: "",
+          birthday: "",
+          mobile_1: "",
+          mobile_2:"",
+          note: "",
+          email: "",
+          status: 0,
+          province_id:"",
+          district_id:"",
+          job_id:"",
+          source_id:"",
+          source:"",
+          source_detail_id:"",
+          source_detail:"",
+          job:"",
+          province:"",
+          district:"",
+          address:"",
+          owner_id:"",
+          c2c_mobile:"",
+        },
+        activeItem: 'customer_care',
+        methods:[],
+        cares:[],
+        care:{
+          method_id:"",
+          care_date:"",
+          note:"",
+          parent_id:"",
+          attached_file:"",
+          file_name:"",
+        },
+        students:[],
+        student:{
+          id:0,
+          parent_id:"",
+          name:"",
+          gender:"",
+          school_level:"",
+          birthday:"",
+          select_school:"",
+          note:"",
+        },
+        logs:[],
+        users_manager:[],
+        tmp_owner_id:"",
+        tmp_status:"",
+        phone:{
+          css_class: 'alert alert-success',
+          show: false,
+          title:'Đang thực hiện cuộc gọi đi',
+          status:0,
+          description:'',
+          show_input_note:false,
+          care_id:'',
+          note:'',
+          select_note:'',
+          select_note_status:'',
+          select_note_status_sub:'',
+          next_care_date:'',
+          error_message:''
+        },
+        sms:{
+          content:'',
+          show:false,
+          title:'Gửi tin nhắn SMS',
+          phone:''
+        },
+        template_note:[],
+        disabled_action:false,
+        disabled_edit:true,
+        c2c_info:"",
+      };
+    },
+    async created() {
+      axios.g(`/api/system/methods`)
+        .then(response => {
+        this.methods = response.data
+      })
+      axios.g(`/api/users/get-data/users-manager`)
+      .then(response => {
+        this.users_manager = response.data
+      })
+      axios.g(`/api/system/provinces`)
+        .then(response => {
+        this.html.province.list = response.data
+      })
+      axios.g(`/api/system/jobs`)
+        .then(response => {
+        this.html.jobs.list = response.data
+      })
+      axios.g(`/api/system/sources`)
+        .then(response => {
+        this.html.source.list = response.data
+      })
+      await axios.g(`/api/system/source_detail`)
+        .then(response => {
+        this.html.source_detail.list = response.data
+      })
+      this.loadDetail();
+      this.loadCares();
     },
     methods: {
-      fileChanged(e) {
-        const fileReader = new FileReader();
-        const fileName = e.target.value.split("\\").pop();
-        this.file_name = fileName
-        fileReader.readAsDataURL(e.target.files[0]);
-        fileReader.onload = e => {
-          this.attached_file = e.target.result;
-        };
-      },
-      btnUpload() {
-        if (this.attached_file) {
-          this.$vs.loading()
-          let dataUpload = {
-            files: this.attached_file,
-            file_name: this.file_name,
+      loadDetail(){
+        this.$vs.loading();
+        axios.g(`/api/crm/parents/show/${this.$route.params.id}`)
+          .then(response => {
+          this.$vs.loading.close();
+          if(response.data.length !== 0){
+            this.parent = response.data
+            this.parent.job = this.html.jobs.list.filter(item => item.id == this.parent.job_id)[0]
+            this.parent.source = this.html.source.list.filter(item => item.id == this.parent.source_id)[0]
+            this.parent.source_detail = this.html.source_detail.list.filter(item => item.id == this.parent.source_detail_id)[0]
+            this.parent.province = this.html.province.list.filter(item => item.id == this.parent.province_id)[0]
+            this.tmp_district_id = this.parent.district_id
+            this.tmp_owner_id = response.data.owner_id
+            this.tmp_status = response.data.status
+            this.getDistrict(this.parent.province);
+          }else{
+            this.$router.push({ path: `/parents` });
           }
-          axios.p(`/api/crm/imports/upload`, dataUpload)
-            .then(response => {
-              this.$vs.loading.close()
-              if(response.data.error){
-                alert(response.data.message);
-                this.reloadPage();
-              }else{
-                this.list_data_check = response.data.data
-                this.curr_step=2
-                this.total_error = response.data.total_error
-                this.total_validate = response.data.total_validate
-                this.total_open_lock = response.data.total_open_lock
-                this.data_assign.import_id = response.data.import_id
-              }
-            })
-            .catch(e => console.log(e))
+        })
+      },
+      updateNextCareDate(){
+          const data = {
+            parent_id: this.$route.params.id,
+            next_care_date: document.getElementById('next_care_date').value
+          };
+          this.$vs.loading();;
+          u.p(`/api/parents/update_next_care_date`,data)
+          .then((response) => {
+            this.loadDetail();
+          })
+          .catch((e) => {
+          });
+      },
+      showModalAssgin(){
+        this.modal_assign.show =true
+      },
+      showModalChangeStatus(){
+        this.modal_status.show =true
+      },
+      validatePhone(){
+        if(this.parent.mobile_1){
+          const data = {
+            phone: this.parent.mobile_1,
+            parent_id: this.parent.id,
+          };
+          this.$vs.loading();
+          u.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.parent.mobile_1 ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+            }
+          })
+        }
+      },
+      validatePhone2(){
+        if(this.parent.mobile_2){
+          const data = {
+            phone: this.parent.mobile_2,
+            parent_id: this.parent.id,
+          };
+          this.$vs.loading();
+          u.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.parent.mobile_2 ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+            }else if(response.data.status==2){
+              this.modal_overwrite.show = true;
+              this.modal_overwrite.message = response.data.message;
+            }
+          })
+        }
+      },
+      validatePhoneC2C(){
+        this.c2c_info=""
+        if(this.parent.c2c_mobile){
+          const data = {
+            phone: this.parent.c2c_mobile,
+          };
+          this.$vs.loading();
+          u.p(`/api/crm/parents/validate_c2c_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.parent.c2c_mobile ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+            }else{
+              this.c2c_info = response.data.message
+            }
+          })
+        }
+      },
+      selectDate(date) {
+        if (date) {
+          this.parent.birthday = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      getDistrict(data = null){
+        if (data && typeof data === 'object') {
+          const province_id = data.id
+          this.parent.province = data
+          this.parent.province_id = province_id
+          this.$vs.loading()
+          axios.g(`/api/system/provinces/${province_id}/districts`).then(response => {
+            this.$vs.loading.close();
+            this.html.district.list = response.data
+            if(this.tmp_district_id){
+              this.parent.district = this.html.district.list.filter(item => item.id == this.tmp_district_id)[0]
+            }else{
+              this.parent.district_id = ""
+              this.parent.district = ""
+            } 
+          })
+        }else{
+          this.parent.province = ""
+          this.parent.province_id = ""
+          this.html.district.list = []
+          this.parent.district = ""
+          this.parent.district_id = ""
+        }
+      },
+      saveDistrict(data = null){
+        if (data && typeof data === 'object') {
+          const district_id = data.id
+          this.parent.district = data
+          this.parent.district_id = district_id
+        }else{
+          this.parent.district = ""
+          this.parent.district_id = ""
+        }
+      },
+      saveJob(data = null){
+        if (data && typeof data === 'object') {
+          const job_id = data.id
+          this.parent.job = data
+          this.parent.job_id = job_id
+        }else{
+          this.parent.job = ""
+          this.parent.job_id = ""
+        }
+      },
+      saveSource(data = null){
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.parent.source = data
+          this.parent.source_id = source_id
+        }else{
+          this.parent.source = ""
+          this.parent.source_id = ""
+        }
+      },
+      saveSourceDetail(data = null){
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.parent.source_detail = data
+          this.parent.source_detail_id = source_id
+        }else{
+          this.parent.source_detail = ""
+          this.parent.source_detail_id = ""
         }
       },
       reloadPage(){
         location.reload();
       },
-      showStep3(){
-        this.curr_step=3;
-      },
-      selectSource(data = null){
-        console.log(data);
-        if (data && typeof data === 'object') {
-          const source_id = data.id
-          this.data_assign.source = data
-          this.data_assign.source_id = source_id
-        }else{
-          this.data_assign.source = ""
-          this.data_assign.source_id = ""
-        }
-      },
-      selectSourceDetail(data = null){
-        if (data && typeof data === 'object') {
-          const source_id = data.id
-          this.data_assign.source_detail = data
-          this.data_assign.source_detail_id = source_id
-        }else{
-          this.data_assign.source_detail = ""
-          this.data_assign.source_detail_id = ""
-        }
-      },
-      assginContact(){
-        const ids = []
-        this.data_assign.owners = helper.is.obj(this.data_assign.owners) ? [this.data_assign.owners] : this.data_assign.owners
-        if (this.data_assign.owners.length) {
-          this.data_assign.owners.map(item => {
-            ids.push(item.id)
-          })
-        }
-        this.data_assign.owners_id = ids
+      saveInfo(){
         let mess = "";
         let resp = true;
-        if (this.data_assign.source == "") {
-          mess += " - Nguồn dữ liệu không được để trống<br/>";
+        if (this.parent.gender == "") {
+          mess += " - Danh xưng không được để trống<br/>";
           resp = false;
         }
-        if (!this.data_assign.owners_id.length) {
-          mess += " - Người phụ trách không được để trống<br/>";
+        if (this.parent.name == "") {
+          mess += " - Họ tên không được để trống<br/>";
           resp = false;
-        } 
-        if(resp){
-          this.data_assign.error_message = "";
-          this.$vs.loading()
-          axios.p(`/api/crm/imports/assign`,this.data_assign)
+        }
+        if (this.parent.mobile_1 == "") {
+          mess += " - Số điện thoại không được để trống<br/>";
+          resp = false;
+        }
+        if (this.parent.mobile_1 != "" && !u.vld.phone(this.parent.mobile_1)) {
+          mess += " - Số điện thoại không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (this.parent.mobile_2 != null && this.parent.mobile_2 != "" && !u.vld.phone(this.parent.mobile_2)) {
+          mess += " - Số điện thoại 2 không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (this.parent.source_id == "") {
+          mess += " - Nguồn không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.alert.color = 'danger'
+          this.alert.body = mess;
+          this.alert.active = true;
+          return false;
+        }
+        this.$vs.loading()
+        axios.p("/api/crm/parents/update",this.parent)
+        .then((response) => {
+          this.$vs.loading.close();;
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.disabled_edit = true
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+      },
+      openConfirmChangeStatus () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn cập nhật trạng thái của khách hàng?`,
+          accept: this.changeStatus,
+          cancel: this.cancelChangeStaus,
+          acceptText: 'Cập nhật',
+          cancelText: 'Hủy'
+        })
+      },
+      cancelChangeStaus(){
+        this.tmp_status = this.parent.status
+      },
+      changeStatus(){
+        const data = {
+          parent_id: this.parent.id,
+          status: this.tmp_status,
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/parents/change_status`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.loadDetail();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+        .catch((e) => {
+        });
+      },
+      openConfirmAssgin () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn thay đổi người phụ trách của khách hàng?`,
+          accept: this.changeAssgin,
+          cancel: this.cancelChangeAssgin,
+          acceptText: 'Cập nhật',
+          cancelText: 'Hủy'
+        })
+      },
+      cancelChangeAssgin(){
+        this.tmp_owner_id = this.parent.owner_id
+      },
+      changeAssgin(){
+        const data = {
+          parent_id: this.parent.id,
+          owner_id: this.tmp_owner_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/parents/assign`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.loadDetail();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      },
+      updateNextCareDate(){
+        const data = {
+          parent_id: this.$route.params.id,
+          next_care_date: document.getElementById('next_care_date').value
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/parents/update_next_care_date`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+        .catch((e) => {
+        });
+      },
+      changeTab(){
+        if(this.active_tab ==1){
+          this.loadCares();
+        }else if(this.active_tab ==2){
+
+        }else if(this.active_tab ==3){
+          this.loadLogs();
+        }else{
+          this.loadDetail();
+        }
+      },
+      loadLogs(){
+        this.$vs.loading();
+        axios.g(`/api/crm/parents/get_logs/${this.parent.id}`)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.logs=response.data;
+        })
+        .catch((e) => {
+        });
+      },
+      showModalCare(){
+        // document.getElementById('published_date').value=""
+        this.modal_care.show = true
+        this.modal_care.error_message=""
+        this.care.method_id=""
+        this.care.note=""
+        this.care.attached_file=""
+        this.care.file_name=""
+      },
+      loadCares(){
+        this.$vs.loading();
+          axios.g(`/api/crm/care/get_all_data/${this.$route.params.id}`)
           .then((response) => {
-            this.$vs.loading.close()
-            console.log(response.data);
-            this.result_total_success = response.data.total_success
-            this.result_total_error = response.data.total_error
-            this.curr_step = 4
+            this.$vs.loading.close();
+            this.cares=response.data;
           })
           .catch((e) => {
           });
-        }else{
-          this.data_assign.error_message = mess;
+      },
+      addCare(){
+        this.care.parent_id = this.parent.id
+        let mess = "";
+        let resp = true;
+        if (this.care.method_id == "") {
+          mess += " - Phương thức chăm sóc không được để trống<br/>";
+          resp = false;
         }
-      }
-    },
-    created() {
-      axios.g(`/api/users/get-data/users-manager`)
-        .then(response => {
-        this.list_owner = response.data
-      })
-      axios.g(`/api/system/sources`)
-        .then(response => {
-        this.list_source = response.data
-      })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.list_source_detail = response.data
-      })
+        if (this.care.note == "") {
+          mess += " - Nội dung chăm sóc không được để trống<br/>";
+          resp = false;
+        }
+        if (this.care.file_name == "") {
+          mess += " - File đính kèm không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.modal_care.alert.color = 'danger'
+          this.modal_care.alert.body = mess;
+          this.modal_care.alert.active = true;
+          return false;
+        }
+        this.$vs.loading();
+        this.modal_care.show = false
+        axios.p(`/api/crm/care/add`,this.care)
+        .then((response) => {
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$vs.loading.close();
+          this.loadCares();
+        })
+        .catch((e) => {
+        });
+      },
+      fileChanged(e) {
+        const fileReader = new FileReader();
+        const fileName = e.target.value.split("\\").pop();
+        this.care.file_name = fileName
+        fileReader.readAsDataURL(e.target.files[0]);
+        fileReader.onload = e => {
+          this.care.attached_file = e.target.result;
+        };
+      },
     },
   }
 </script>
 <style>
-@media only screen and (min-width: 600px) {
-  #page-roles-list .vs-table--search {
-    max-width: 360px;
-  }
-  #page-roles-list .vs-table--search-input{
-    width: 360px;
-  }
+.vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
+    opacity: 1;
+    background: #edf3f0;
 }
-/*Form Wizard*/
-.bs-wizard {border-bottom: solid 1px #e0e0e0; padding: 0 0 10px 0;}
-.bs-wizard > .bs-wizard-step {padding: 0; position: relative;}
-.bs-wizard > .bs-wizard-step .bs-wizard-stepnum {color: #595959; font-size: 16px; margin-bottom: 5px;}
-.bs-wizard > .bs-wizard-step .bs-wizard-info {color: #999; font-size: 14px;}
-.bs-wizard > .bs-wizard-step > .bs-wizard-dot {position: absolute; width: 30px; height: 30px; display: block; background: #fbe8aa; top: 45px; left: 50%; margin-top: -15px; margin-left: -15px; border-radius: 50%;} 
-.bs-wizard > .bs-wizard-step > .bs-wizard-dot:after {content: ' '; width: 14px; height: 14px; background: #fbbd19; border-radius: 50px; position: absolute; top: 8px; left: 8px; } 
-.bs-wizard > .bs-wizard-step > .progress {position: relative; border-radius: 0px; height: 8px; box-shadow: none; margin: 20px 0;}
-.bs-wizard > .bs-wizard-step > .progress > .progress-bar {width:0px; box-shadow: none; background: #fbe8aa;}
-.bs-wizard > .bs-wizard-step.complete > .progress > .progress-bar {width:100%;}
-.bs-wizard > .bs-wizard-step.active > .progress > .progress-bar {width:50%;}
-.bs-wizard > .bs-wizard-step:first-child.active > .progress > .progress-bar {width:0%;}
-.bs-wizard > .bs-wizard-step:last-child.active > .progress > .progress-bar {width: 100%;}
-.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot {background-color: #f5f5f5;}
-.bs-wizard > .bs-wizard-step.disabled > .bs-wizard-dot:after {opacity: 0;}
-.bs-wizard > .bs-wizard-step:first-child  > .progress {left: 50%; width: 50%;}
-.bs-wizard > .bs-wizard-step:last-child  > .progress {width: 50%;}
-.bs-wizard > .bs-wizard-step.disabled a.bs-wizard-dot{ pointer-events: none; }
-.fl-right{
-  float: right;
-  margin-left:10px;
-}
-.col-sm-3 {
-    -webkit-box-flex: 0;
-    -ms-flex: 0 0 25%;
-    flex: 0 0 25%;
-    max-width: 25%;
-}
-.row {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -ms-flex-wrap: wrap;
-    flex-wrap: wrap;
-    margin-right: -15px;
-    margin-left: -15px;
-}
-.progress {
-    display: flex;
-    height: 1rem;
-    overflow: hidden;
-    font-size: 0.65625rem;
-    border-radius: 0.25rem;
-    background-color: #ebedef;
-}
-.multiselect--above .multiselect__content-wrapper{
-  z-index: 20;
+.vs-tabs--li button.vs-tabs--btn{
+  font-size: 16px;
 }
 </style>

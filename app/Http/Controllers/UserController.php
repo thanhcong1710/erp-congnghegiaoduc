@@ -92,9 +92,11 @@ class UserController extends Controller
             }
         }
         $branch_name = '';
+        $branch_id = '';
         foreach($request->branches AS $branch){
             if(data_get($branch,'selected')){
                 $branch_name.= $branch_name ? ', '.data_get($branch,'name') : data_get($branch,'name'); 
+                $branch_id = data_get($branch,'id');
             }
         }
         $user_id = u::insertSimpleRow(array(
@@ -108,6 +110,7 @@ class UserController extends Controller
             'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
             'sip_id' => $request->sip_id,
             'role_name' => $role_name,
+            'branch_id' => $branch_id,
             'branch_name' => $branch_name,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id
@@ -169,9 +172,11 @@ class UserController extends Controller
             }
         }
         $branch_name = '';
+        $branch_id = '';
         foreach($request->branches AS $branch){
             if(data_get($branch,'selected')){
                 $branch_name.= $branch_name ? ', '.data_get($branch,'name') : data_get($branch,'name'); 
+                $branch_id = data_get($branch,'id');
             }
         }
         if($request->change_pass){
@@ -189,6 +194,7 @@ class UserController extends Controller
             'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
             'sip_id' => $request->sip_id,
             'role_name' => $role_name,
+            'branch_id' => $branch_id,
             'branch_name' => $branch_name,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id

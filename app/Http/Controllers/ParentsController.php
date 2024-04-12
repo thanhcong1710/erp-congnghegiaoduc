@@ -217,6 +217,112 @@ class ParentsController extends Controller
             'c2c_mobile'=>$request->c2c_mobile,
         ), 'crm_parents');
         LogParents::logAdd($id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
-        return response()->json($id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Thêm mới khách hàng thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function show(Request $request,$parent_id)
+    {
+        $cond="";
+        if(!Auth::user()->checkPermission('canViewAllParents')){
+            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+        }
+        $data = u::first("SELECT p.*,(SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
+                (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
+                (SELECT name FROM provinces WHERE id=p.province_id) AS province_name,
+                (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
+                (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
+                (SELECT title FROM jobs WHERE id=p.job_id) AS job_name,
+                (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1) AS num_care,
+                (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care
+            FROM crm_parents AS p WHERE id=$parent_id  $cond");
+        return response()->json($data);
+    }
+
+    public function update(Request $request)
+    {
+        $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $request->id");
+        $data_update = array(
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'mobile_1' => $request->mobile_1,
+            'mobile_2' => $request->mobile_2,
+            'address' => $request->address,
+            'province_id' => $request->province_id,
+            'district_id' => $request->district_id,
+            'gender' => $request->gender,
+            'birthday' => $request->birthday,
+            'job_id' => $request->job_id,
+            'source_id' => $request->source_id,
+            'source_detail_id' => $request->source_detail_id,
+            'note' => $request->note,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'c2c_mobile'=>$request->c2c_mobile,
+        );
+        $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_parents');
+        LogParents::logUpdateInfo($pre_parent_info,$data_update,Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật khách hàng thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function changeStatus(Request $request)
+    {
+        $pre_parent_info = u::first("SELECT status FROM crm_parents WHERE id=$request->parent_id");
+        $data = u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'status'=>$request->status,
+        ), array('id' => $request->parent_id), 'crm_parents');
+        LogParents::logStatus($request->parent_id,$pre_parent_info->status,$request->status,Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật trạng thái khách hàng thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function assign(Request $request)
+    {
+        $pre_parent_info = u::first("SELECT owner_id,last_assign_date FROM crm_parents WHERE id=$request->parent_id");
+        $data = u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'owner_id'=>$request->owner_id,
+            'last_assign_date'=>$request->owner_id != $pre_parent_info->owner_id ? date('Y-m-d H:i:s') : $pre_parent_info->last_assign_date,
+        ), array('id' => $request->parent_id), 'crm_parents');
+        LogParents::logAssign($request->parent_id,$pre_parent_info->owner_id,$request->owner_id,Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật người phụ trách thành công'
+        );
+        return response()->json($data);
+    }
+
+    public function updateNextCareDate(Request $request){
+        $data=u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => $request->user()->id,
+            'next_care_date'=>date('Y-m-d H:i:s',strtotime($request->next_care_date)),
+        ), array('id' => $request->parent_id), 'crm_parents');
+        LogParents::logAdd($request->parent_id,'Cập nhật lịch chăm sóc tiếp theo: '.date('Y-m-d H:i:s',strtotime($request->next_care_date)),$request->user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật lịch chăm sóc thành công'
+        );
+        return response()->json($data);
+    }
+
+    public function getLogs(Request $request, $parent_id){
+        $data = u::query("SELECT l.*,(SELECT name FROM users WHERE id=l.creator_id) AS creator_name
+            FROM crm_parent_logs AS l WHERE l.parent_id=$parent_id AND l.status=1 
+            ORDER BY l.id DESC");
+        return response()->json($data);
     }
 }

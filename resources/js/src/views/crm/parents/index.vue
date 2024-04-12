@@ -15,7 +15,7 @@
             <multiselect
                 name="search_status"
                 placeholder="Chọn trạng thái"
-                v-model="searchData.status"
+                v-model="searchData.arr_status"
                 :options="statusOptions"
                 label="label"
                 :close-on-select="false"
@@ -180,8 +180,8 @@
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in imports" :key="index">
                 <!---->
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td"><router-link :to="`/parents/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
-                <td class="td vs-table--td"><router-link :to="`/parents/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
+                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
+                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
                 <td class="td vs-table--td">{{ item.hs1_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
                 <td class="td vs-table--td">{{ item.source_detail_name }}</td>
@@ -191,10 +191,7 @@
                 <td class="td vs-table--td text-center">{{ item.last_time_care }}</td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
-                  <router-link :to="`/parents/${item.id}/edit`"> 
-                    <vs-button size="small"><i class="fa fa-edit"></i></vs-button> 
-                  </router-link>
-                  <router-link :to="`/parents/${item.id}/detail`" >
+                  <router-link :to="`/crm/parent/${item.id}/detail`" >
                     <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                   </router-link>    
                 </td>
@@ -235,9 +232,11 @@
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
+  import select from 'vue-select'
 
   export default {
-    components: {
+    components: { 
+      "vue-select": select,
       vSelect,
       Multiselect,
       DatePicker
