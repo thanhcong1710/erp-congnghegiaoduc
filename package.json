@@ -62,6 +62,7 @@
         "vuejs-datepicker": "^1.5.4",
         "vue2-datepicker": "^2.11.2",
         "vue-multiselect": "^2.1.6",
+        "moment": "^2.22.2",
         "vuepress": "0.14.11",
         "vuesax": "jd-0001/vuesax",
         "vuex": "^3.1.1",

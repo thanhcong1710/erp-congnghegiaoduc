@@ -62,6 +62,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('parents/validate_phone', 'ParentsController@validatePhone');
             Route::post('parents/overwrite', 'ParentsController@overwrite');
             Route::post('parents/validate_c2c_phone', 'ParentsController@validateC2CPhone');
+            Route::post('parents/add', 'ParentsController@add');
         });
     });
 });

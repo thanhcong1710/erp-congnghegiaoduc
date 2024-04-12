@@ -150,7 +150,7 @@ class ParentsController extends Controller
 
     public function overwrite(Request $request){
         $phone = isset($request->phone) ? $request->phone : '';
-        $parent_info = u::first("SELECT * FROM cms_parents WHERE mobile_1='$phone'");
+        $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1='$phone'");
         if($parent_info){
             u::updateSimpleRow(array(
                 'updated_at' => date('Y-m-d H:i:s'),
@@ -168,13 +168,17 @@ class ParentsController extends Controller
             ), 'crm_parent_overwrite');
             LogParents::logAssign($parent_info->id,$parent_info->owner_id,Auth::user()->id,Auth::user()->id,true);
         }
-        return "ok";
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Ghi đè quyền chăm sóc thành công'
+        );
+        return response()->json($result);
     }
 
     public function validateC2CPhone(Request $request){
         $phone = isset($request->phone) ? $request->phone : '';
         
-        $parent_info=u::first("SELECT name,mobile_1,mobile_2 FROM cms_parents WHERE mobile_1 = '$phone' OR mobile_2 ='$phone'");
+        $parent_info=u::first("SELECT name,mobile_1,mobile_2 FROM crm_parents WHERE mobile_1 = '$phone' OR mobile_2 ='$phone'");
         if($parent_info){
             $result =(object)array(
                 'status'=>1,
@@ -187,5 +191,32 @@ class ParentsController extends Controller
             );
         }
         return response()->json($result);
+    }
+
+    public function add(Request $request)
+    {
+        $id = u::insertSimpleRow(array(
+            'name'=>$request->name,
+            'email'=>$request->email,
+            'mobile_1' => $request->mobile_1,
+            'mobile_2' => $request->mobile_2,
+            'address' => $request->address,
+            'province_id' => $request->province_id,
+            'district_id' => $request->district_id,
+            'gender' => $request->gender,
+            'birthday' => $request->birthday,
+            'job_id' => $request->job_id,
+            'source_id' => $request->source_id,
+            'source_detail_id' => $request->source_detail_id,
+            'note' => $request->note,
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'last_assign_date' => date('Y-m-d H:i:s'),
+            'owner_id'=>$request->owner_id,
+            'status'=>$request->status,
+            'c2c_mobile'=>$request->c2c_mobile,
+        ), 'crm_parents');
+        LogParents::logAdd($id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
+        return response()->json($id);
     }
 }

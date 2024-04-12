@@ -68,19 +68,7 @@
                     v-model="parent.job"
                     :searchable="true"
                     language="tv-VN"
-                    :onChange="saveJob"
-                ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Nghề nghiệp</label>
-              <vue-select
-                    label="title"
-                    placeholder="Chọn nghề nghiệp"
-                    :options="html.jobs.list"
-                    v-model="parent.job"
-                    :searchable="true"
-                    language="tv-VN"
-                    :onChange="saveJob"
+                     @input="saveJob"
                 ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
@@ -100,7 +88,7 @@
                 v-model="parent.province"
                 :searchable="true"
                 language="tv-VN"
-                :onChange="getDistrict"
+                @input="getDistrict"
               ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -112,7 +100,7 @@
                     v-model="parent.district"
                     :searchable="true"
                     language="tv-VN"
-                    :onChange="saveDistrict"
+                    @input="saveDistrict"
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -130,7 +118,7 @@
                     v-model="parent.source"
                     :searchable="true"
                     language="tv-VN"
-                    :onChange="saveSource"
+                     @input="saveSource"
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -142,7 +130,7 @@
                     v-model="parent.source_detail"
                     :searchable="true"
                     language="tv-VN"
-                    :onChange="saveSourceDetail"
+                     @input="saveSourceDetail"
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -214,6 +202,7 @@
   import axios from '../../../http/axios.js'
   import u from '../../../until/helper.js'
   import datepicker from "vue2-datepicker";
+  import moment from 'moment';
 
   export default {
     components: {
@@ -306,14 +295,13 @@
           this.$vs.loading()
           axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
             this.$vs.loading.close();
-            if(response.data.status==0 && 1==2){
+            if(response.data.status==0){
               this.change_source_parent_id = response.data.dup_parent_id
               this.parent.mobile_1 ="";
               this.modal.color = "warning";
               this.modal.body = response.data.message;
               this.modal.show = true;
-              this.modal.action_exit = "close";
-            }else if(response.data.status==2 || 1==1){
+            }else if(response.data.status==2){
               this.modal_overwrite.show = true;
               this.modal.color = "info";
               this.modal_overwrite.message = response.data.message;
@@ -330,15 +318,10 @@
           this.$vs.loading.close();
           if(response.data.status==0){
             this.change_source_parent_id = response.data.dup_parent_id
-            const arr_role = JSON.parse(localStorage.getItem("roles")).split(",");
-            if(arr_role.indexOf("Marketing")> -1){
-              this.change_source = true
-            }
             this.parent.mobile_2 ="";
             this.modal.color = "warning";
             this.modal.body = response.data.message;
             this.modal.show = true;
-            this.modal.action_exit = "close";
           }else if(response.data.status==2){
             this.modal_overwrite.show = true;
             this.modal.color = "info";
@@ -352,7 +335,7 @@
           this.parent.province = data
           this.parent.province_id = province_id
           this.$vs.loading()
-          axios.g(`/api/provinces/${province_id}/districts`).then(response => {
+          axios.g(`/api/system/provinces/${province_id}/districts`).then(response => {
             this.$vs.loading.close();
             this.html.district.list = response.data
             this.parent.district_id = ""
@@ -420,7 +403,6 @@
               this.modal.color = "warning";
               this.modal.body = response.data.message;
               this.modal.show = true;
-              this.modal.action_exit = "close";
             }else{
               this.c2c_info = response.data.message
             }
@@ -439,40 +421,48 @@
         this.loading.processing = true
         this.modal_overwrite.show = false;
         u.p(`/api/crm/parents/overwrite`,data).then(response => {
-          this.loading.processing = false
-          if(response.status==200){
-            this.parent.mobile_1 ="";
-            this.modal.color = "success";
-            this.modal.body = "Ghi đè quyền chăm sóc thành công!";
-            this.modal.show = true;
-            this.modal.action_exit = "exit";
-          }
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$router.push('/crm/parent')
         })
       },
       save() {
         let mess = "";
         let resp = true;
-        if (this.user_info.name == "") {
+        if (this.parent.gender == "") {
+          mess += " - Danh xưng không được để trống<br/>";
+          resp = false;
+        }
+        if (this.parent.name == "") {
           mess += " - Họ tên không được để trống<br/>";
           resp = false;
         }
-        if (this.user_info.email == "") {
-          mess += " - Email không được để trống<br/>";
-          resp = false;
-        }
-        if (this.user_info.phone == "") {
+        if (this.parent.mobile_1 == "") {
           mess += " - Số điện thoại không được để trống<br/>";
           resp = false;
         }
-        if (this.user_info.phone != "" && !helper.vld.phone(this.user_info.phone)) {
+        if (this.parent.mobile_1 != "" && !u.vld.phone(this.parent.mobile_1)) {
           mess += " - Số điện thoại không đúng định dạng<br/>";
           resp = false;
         }
-        if (this.user_info.hrm_id == "") {
-          mess += " - Mã nhân viên không được để trống<br/>";
+        if (this.parent.mobile_2 != "" && !u.vld.phone(this.parent.mobile_2)) {
+          mess += " - Số điện thoại 2 không đúng định dạng<br/>";
           resp = false;
         }
-        
+        if (this.parent.owner_id == "") {
+          mess += " - Người phụ trách không được để trống<br/>";
+          resp = false;
+        }
+        if (this.parent.source_id == "") {
+          mess += " - Nguồn không được để trống<br/>";
+          resp = false;
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
@@ -480,44 +470,23 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/users/add",{
-          name: this.user_info.name,
-          email: this.user_info.email,
-          phone:this.user_info.phone,
-          password: this.user_info.password,
-          status: this.user_info.status,
-          hrm_id: this.user_info.hrm_id,
-          manager_hrm_id : this.user_info.manager_hrm_id,
-          roles:this.roles,
-          branches:this.branches,
-          sip_id: this.user_info.sip_id
-        })
-          .then((response) => {
-            this.$vs.loading.close();
-            if (response.data.status) {
-              this.$vs.notify({
-                title: 'Thành Công',
-                text: response.data.message,
-                color: 'success',
-                iconPack: 'feather',
-                icon: 'icon-check'
-              })
-              this.$router.push('/settings/users')
-            }else{
-              this.$vs.notify({
-                title: 'Lỗi',
-                text: response.data.message,
-                iconPack: 'feather',
-                icon: 'icon-alert-circle',
-                color: 'danger'
-              })
-            }
+        axios.p("/api/crm/parents/add",this.parent)
+        .then((response) => {
+          this.$vs.loading.close();;
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
           })
-          .catch((e) => {
-            console.log(error);
-            this.$vs.loading.close();
-          });
-      },
+          this.$router.push('/crm/parent')
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+      }
     },
     created() {
       axios.g(`/api/users/get-data/users-manager`)
