@@ -72,6 +72,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
             Route::get('care/get_all_data/{parent_id}', 'ParentCareController@getAllDataByParent');
             Route::post('care/add', 'ParentCareController@add');
+            Route::post('parents/send_sms', 'ParentsController@sendSms');
         });
     });
 });

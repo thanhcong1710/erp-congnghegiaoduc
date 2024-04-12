@@ -302,7 +302,7 @@ class ParentsController extends Controller
             'status'=>1,
             'message'=>'Cập nhật người phụ trách thành công'
         );
-        return response()->json($data);
+        return response()->json($result);
     }
 
     public function updateNextCareDate(Request $request){
@@ -316,7 +316,7 @@ class ParentsController extends Controller
             'status'=>1,
             'message'=>'Cập nhật lịch chăm sóc thành công'
         );
-        return response()->json($data);
+        return response()->json($result);
     }
 
     public function getLogs(Request $request, $parent_id){
@@ -324,5 +324,27 @@ class ParentsController extends Controller
             FROM crm_parent_logs AS l WHERE l.parent_id=$parent_id AND l.status=1 
             ORDER BY l.id DESC");
         return response()->json($data);
+    }
+
+    public function sendSms(Request $request){
+        $parent_info = u::first("SELECT id,mobile_1,mobile_2 FROM crm_parents WHERE id='$request->parent_id'");
+        $phone = $request->phone ? $request->phone :$parent_info->mobile_1;
+        if($parent_info){
+            u::insertSimpleRow( array(
+                'parent_id'=>$parent_info->id,
+                'note'=>$request->content,
+                'created_at'=>date('Y-m-d H:i:s'),
+                'creator_id'=>$request->user()->id,
+                'method_id'=>4,
+                'care_date'=>date('Y-m-d H:i:s'),
+                'phone'=>$phone, 
+                'branch_id' => Auth::user()->branch_id,
+            ),'crm_customer_care');
+        }
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Gửi tin nhắn sms thành công'
+        );
+        return response()->json($result);
     }
 }

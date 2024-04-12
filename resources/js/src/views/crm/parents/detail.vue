@@ -57,6 +57,18 @@
           </div>
         </div>
       </vx-card>
+      <vx-card no-shadow class="mb-base" v-if="sms.show">
+        <div class="alert alert-secondary" role="alert" >
+          <h5 class="alert-heading"> <i class="fa fa-sms" style="margin-right:10px"></i> {{sms.title}}</h5>
+          <vs-divider/>
+            <textarea class="vs-inputx vs-input--input normal" v-model="sms.content" placeholder="Nhập nội dung tin nhắn"></textarea>
+            <div style="margin-top:5px;text-align:right">
+              <vs-button color="success" @click="sendSms"> <i class="fa fa-paper-plane"></i> Gửi</vs-button>
+              <vs-button color="dark" @click="sms.show=false"> <i class="fa fa-times"></i> Hủy</vs-button>
+            </div>
+        </div>
+      </vx-card>
+
       <vx-card no-shadow class="mt-5">
         <vs-tabs v-model="active_tab">
           <vs-tab label="Thông tin" @click="changeTab()">
@@ -961,6 +973,37 @@
         fileReader.onload = e => {
           this.care.attached_file = e.target.result;
         };
+      },
+      showSendSms(phone){
+        this.sms.show =true
+        this.sms.phone =phone
+        this.sms.content = ''
+        this.sms.title = 'Gửi tin nhắn SMS tới SĐT - '+phone
+      },
+      sendSms(){
+        if(this.sms.content){
+          const data = {
+            parent_id: this.$route.params.id,
+            content: this.sms.content,
+            phone: this.sms.phone,
+          };
+          this.$vs.loading();
+          axios.p(`/api/crm/parents/send_sms`,data)
+          .then((response) => {
+            this.$vs.loading.close();
+            this.sms.show = false;
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+            this.loadCares();
+          })
+          .catch((e) => {
+          });
+        }
       },
     },
   }
