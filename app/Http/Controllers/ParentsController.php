@@ -305,6 +305,24 @@ class ParentsController extends Controller
         return response()->json($result);
     }
 
+    public function assignList(Request $request)
+    {
+        $cond = implode(",",$request->parents);
+        $arr_owner = $request->owners;
+        $list_parent_info = u::query("SELECT p.id AS parent_id,p.owner_id,(SELECT CONCAT(name,' (',hrm_id,')') FROM users WHERE id= p.owner_id) AS pre_owner,p.last_assign_date FROM crm_parents AS p WHERE p.id IN ($cond)");
+        foreach($list_parent_info AS $k=>$row){
+            $owner_id =  $arr_owner[$k%count($arr_owner)];
+            $last_assign_date = $owner_id != $row->owner_id ? date('Y-m-d H:i:s') : $row->last_assign_date;
+            u::query("UPDATE crm_parents SET owner_id= $owner_id,last_assign_date='$last_assign_date' WHERE id =$row->parent_id");
+            LogParents::logAssign($row->parent_id,$row->owner_id,$owner_id,Auth::user()->id);
+        }
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Bàn giao thành công'
+        );
+        return response()->json($result);
+    }
+
     public function updateNextCareDate(Request $request){
         $data=u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),

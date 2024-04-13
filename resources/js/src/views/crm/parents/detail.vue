@@ -57,6 +57,56 @@
           </div>
         </div>
       </vx-card>
+
+      <vx-card no-shadow class="mb-base" v-if="phone.show">
+        <div class="alert alert-secondary" role="alert" >
+          <h5 class="alert-heading"> <i class="fa fa-phone" style="margin-right:10px"></i> {{phone.title}}</h5>
+          <vs-divider/>
+            <div v-html="phone.description"></div>
+            <div class="mt-3">
+              <label for="nf-email">Trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
+              <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status">
+                <option value="">Chọn trạng thái</option>
+                <!-- <option value="0">Blank</option> -->
+                <option value="1">Thuê bao - Tắt máy - Sai số</option>
+                <option value="2">Location</option>
+                <option value="3">Máy bận - Không nghe máy</option>
+                <option value="4">KH hẹn gọi lại sau</option>
+                <option value="5">KH Từ chối nói chuyện</option>
+                <option value="6">KH không phù hợp</option>
+                <option value="7">KH tiềm năng</option>
+                <option value="9">Blacklist</option>
+              </select>
+            </div>
+            <div v-if="['5','6','7'].indexOf(phone.select_note_status) > -1" class="mt-3">
+              <label >Chi tiết trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
+              <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status_sub">
+                <option value="">Chọn chi tiết trạng thái</option>
+                <option value="51" v-if="phone.select_note_status==5">KH đã từng sử dụng dịch vụ</option>
+                <option value="52" v-if="phone.select_note_status==5">KH không quan tâm</option>
+                <option value="53" v-if="phone.select_note_status==5">KH thực sự không muốn nói chuyện</option>
+                <option value="61" v-if="phone.select_note_status==6">Không có con</option>
+                <option value="62" v-if="phone.select_note_status==6">Lý do khác</option>
+                <option value="71" v-if="phone.select_note_status==7">KH đang cân nhắc</option>
+                <option value="72" v-if="phone.select_note_status==7">KH hẹn thời gian khác</option>
+                <option value="73" v-if="phone.select_note_status==7">KH ko muốn làm phiền</option>
+                <option value="74" v-if="phone.select_note_status==7">Confirm 1</option>
+              </select>
+            </div>
+            <div class="mt-3">
+              <label >Ghi chú cuộc gọi<span class="text-danger"> (*)</span></label>
+              <textarea class="vs-inputx vs-input--input normal mt-2" v-model="phone.note" placeholder="Thêm ghi chú cuộc gọi"></textarea>
+            </div>
+            <vs-alert :active.sync="phone.alert.active" class="mb-5 mr-4 ml-4" :color="phone.alert.color" closable icon-pack="feather" close-icon="icon-x">
+              <div v-html="phone.alert.body"></div>
+            </vs-alert>
+            <div class="mt-3" style="text-align:right">
+              <vs-button color="success" @click="updateNotePhone"> <i class="fa fa-paper-plane"></i> Lưu</vs-button>
+              <vs-button color="dark" @click="phone.show=false"> <i class="fa fa-times"></i> Hủy</vs-button>
+            </div>
+        </div>
+      </vx-card>
+      
       <vx-card no-shadow class="mb-base" v-if="sms.show">
         <div class="alert alert-secondary" role="alert" >
           <h5 class="alert-heading"> <i class="fa fa-sms" style="margin-right:10px"></i> {{sms.title}}</h5>
@@ -131,7 +181,7 @@
                         v-model="parent.birthday"
                         placeholder="Chọn ngày sinh nhật"
                         lang="lang"
-                        @change="selectDate"
+                        @change="selectDateParent"
                         :disabled="disabled_edit"
                       />
                     </div>
@@ -226,7 +276,7 @@
                     </div>
                   </div>
                 </div>
-                <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+                <vs-alert :active.sync="alert.active" class="mb-5 mr-4 ml-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
                   <div v-html="alert.body"></div>
                 </vs-alert>
                 <div class="vx-col w-full">
@@ -239,7 +289,7 @@
           </vs-tab>
           <vs-tab label="Chăm sóc"  @click="changeTab()">
             <div class="tab-text">
-              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalCare"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalCare"><i class="fa fa-plus"></i> Thêm mới chăm sóc</vs-button>
               <div class="vs-component vs-con-table stripe vs-table-primary">
                 <div class="con-tablex vs-table--content">
                   <div class="vs-con-tbody vs-table--tbody ">
@@ -305,7 +355,32 @@
           </vs-tab>
           <vs-tab label="Học sinh"  @click="changeTab()">
             <div class="tab-text">
-              <span>Chocolate ....</span>
+              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
+               
+              <div class="vx-row">
+                <div class="vx-col md:w-1/3 w-full item-first" v-for="(item, index) in students" :key="index">
+                  <vx-card class="mb-base">
+                    <div class="card-header list-action">
+                      <strong>{{ item.name }}</strong>
+                      <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)"> <i class="fa fa-edit"></i> </vs-button>
+                      <vs-button :disabled="disabled_action" color="danger" v-if="item.status==0" class="small" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
+                    </div>
+                    <div class="card-body">
+                      <p>Ngày sinh: {{ item.birthday }}</p>
+                      <p>Giới tính: {{ item.gender | genTextGender}}</p>
+                      <p>Ghi chú: {{ item.note}}</p>
+                      <p>Ngày tạo: {{ item.created_at}}</p>
+                      <p>Người tạo: {{ item.creator_name}}</p>
+                      <p>Trạng thái: <b>{{ item.status | genStudentStatus}}</b></p>
+                      <p v-if="item.status>0">Trung tâm checkin: {{ item.checkin_branch_name}}</p>
+                      <p v-if="item.status>0">Thời gian checkin: {{ item.checkin_at}}</p>
+                      <p v-if="item.status>0 && item.status!=2" class="list-action">Cập nhật checkin: 
+                        <vs-button :disabled="disabled_action" v-if="item.status>0" @click="showModalUpdateCheckin(item)" class="small"><i class="fa fa-edit"></i></vs-button>
+                      </p>
+                    </div>
+                  </vx-card>
+                </div>
+              </div>
             </div>
           </vs-tab>
           <vs-tab label="Lịch sử cập nhật"  @click="changeTab()">
@@ -374,12 +449,91 @@
             <label>Ghi chú</label>
             <textarea class="vs-inputx vs-input--input normal" v-model="care.note"></textarea>
           </div>
-          <vs-alert :active.sync="modal_care.alert.active" class="mb-5" :color="modal_care.alert.color" closable icon-pack="feather" close-icon="icon-x">
+          <vs-alert :active.sync="modal_care.alert.active" class="mb-5  mr-4 ml-4" :color="modal_care.alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="modal_care.alert.body"></div>
           </vs-alert>
           <div class="vx-col w-full">
             <vs-button color="dark" type="border" class="mr-3" @click="modal_care.show = false">Hủy</vs-button>
             <vs-button color="success" @click="addCare">Lưu</vs-button>
+          </div>
+        </div>
+      </vs-popup>
+      <vs-popup :class="'modal_'+ modal_student.color" :title="modal_student.title" :active.sync="modal_student.show">
+        <div class="vx-row"> 
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Họ tên học sinh</label>
+            <input class="vs-inputx vs-input--input normal" type="text" v-model="student.name">
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Ngày sinh</label>
+            <datepicker
+              class=" w-full calendar"
+              v-model="student.birthday"
+              placeholder="Chọn ngày sinh nhật"
+              lang="lang"
+              @change="selectDate"
+            />
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Giới tính</label>
+            <select class="vs-inputx vs-input--input normal" v-model="student.gender">
+              <option value="M">Nam</option>
+              <option value="F">Nữ</option>
+            </select>
+          </div>
+          
+          <div class="vx-col w-full mb-4">
+            <label>Ghi chú</label>
+            <textarea class="vs-inputx vs-input--input normal" v-model="student.note"></textarea>
+          </div>
+          <vs-alert :active.sync="modal_student.alert.active" class="mb-5" :color="modal_student.alert.color" closable icon-pack="feather" close-icon="icon-x">
+            <div v-html="modal_student.alert.body"></div>
+          </vs-alert>
+          <div class="vx-col w-full">
+            <vs-button color="dark" type="border" class="mr-3" @click="modal_student.show = false">Hủy</vs-button>
+            <vs-button color="success" @click="addStudent">Lưu</vs-button>
+          </div>
+        </div>
+      </vs-popup>
+
+      <vs-popup :class="'modal_'+ modal_checkin.color" :title="modal_checkin.title" :active.sync="modal_checkin.show">
+        <div class="vx-row"> 
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Trung tâm checkin</label>
+            <select class="vs-inputx vs-input--input normal" v-model="modal_checkin.branch_id" :disabled="modal_checkin.disabled">
+              <option value="">Chọn trung tâm</option>
+              <option :value="item.id" v-for="(item, index) in branches" :key="index">{{item.name}}</option>
+            </select>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Ngày/Giờ Checkin</label>
+            <datepicker
+                      id="checkin-at"
+                      class="form-control calendar"
+                      :value="modal_checkin.checkin_at"
+                      v-model="modal_checkin.checkin_at"
+                      placeholder="Chọn ngày giờ"
+                      lang="lang"
+                      type="datetime"
+                      format="YYYY-MM-DD HH:mm"
+              >
+              </datepicker>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Sản phẩm</label>
+            <select class="vs-inputx vs-input--input normal" v-model="modal_checkin.type_product">
+              <option value="">Chọn sản phẩm</option>
+              <option value="1">CMS</option>
+              <option value="2">Accelium</option>
+            </select>
+          </div>
+          
+          <vs-alert :active.sync="modal_checkin.alert.active" class="mb-5 mr-4 ml-4" :color="modal_checkin.alert.color" closable icon-pack="feather" close-icon="icon-x">
+            <div v-html="modal_checkin.alert.body"></div>
+          </vs-alert>
+          <div class="vx-col w-full">
+            <vs-button color="dark" type="border" class="mr-3" @click="modal_checkin.show = false">Hủy</vs-button>
+            <vs-button color="success" @click="checkin">Lưu</vs-button>
           </div>
         </div>
       </vs-popup>
@@ -405,6 +559,7 @@
     },
     data() {
       return {
+        check_list: [],
         active_tab: 1,
         alert:{
           active: false,
@@ -453,7 +608,12 @@
           color: "info",
           closeOnBackdrop: false,
           size:"lg",
-          error_message:""
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
         },
         modal_checkin: {
           title: "TẠO CHECKIN HỌC SINH",
@@ -468,6 +628,11 @@
           error_message:"",
           disabled:false,
           type_product:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
         },
         parent: {
           id:"",
@@ -532,7 +697,11 @@
           select_note_status:'',
           select_note_status_sub:'',
           next_care_date:'',
-          error_message:''
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
         },
         sms:{
           content:'',
@@ -550,6 +719,10 @@
       axios.g(`/api/system/methods`)
         .then(response => {
         this.methods = response.data
+      })
+      axios.g(`/api/system/branches`)
+        .then(response => {
+        this.branches = response.data
       })
       axios.g(`/api/users/get-data/users-manager`)
       .then(response => {
@@ -673,9 +846,14 @@
           })
         }
       },
-      selectDate(date) {
+      selectDateParent(){
         if (date) {
           this.parent.birthday = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      selectDate(date) {
+        if (date) {
+          this.student.birthday = moment(date).format("YYYY-MM-DD");
         }
       },
       getDistrict(data = null){
@@ -890,7 +1068,7 @@
         if(this.active_tab ==1){
           this.loadCares();
         }else if(this.active_tab ==2){
-
+          this.loadStudents();
         }else if(this.active_tab ==3){
           this.loadLogs();
         }else{
@@ -1004,6 +1182,235 @@
           .catch((e) => {
           });
         }
+      },
+      callPhone(phone){
+        this.phone.show = true
+        this.phone.status = 0
+        this.phone.select_note = ""
+        this.phone.show_input_note = false
+        this.phone.css_class= 'alert alert-success'
+        this.phone.title = "Đang thực hiện cuộc gọi đi đến SĐT - "+phone+" ..."
+        this.phone.care_id = ''
+        this.phone.note=''
+        this.phone.select_note_status='',
+        this.phone.select_note_status_sub='',
+        this.phone.next_care_date='',
+        this.phone.alert.body=''
+        this.phone.alert.color=''
+      },
+      updateNotePhone(){
+        let mess = "";
+        let resp = true;
+        
+        this.phone.alert.body=''
+        this.phone.alert.color=''
+        if (this.phone.select_note_status == "") {
+          mess += " - Trạng thái cuộc gọi không được để trống<br/>";
+          resp = false;
+        }
+        if (['5','6','7'].indexOf(this.phone.select_note_status) > -1 && this.phone.select_note_status_sub =='') {
+          mess += " - Chi tiết trạng thái cuộc gọi không được để trống<br/>";
+          resp = false;
+        }
+        
+        if (this.phone.note == "") {
+          mess += " - Ghi chú cuộc gọi không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.phone.alert.color = 'danger'
+          this.phone.alert.body = mess;
+          this.phone.alert.active = true;
+          return false;
+        }
+
+        const data = {
+          method_id:1,
+          note:this.phone.note,
+          parent_id:this.parent.id,
+          attached_file:"",
+          file_name:"",
+          care_date:"",
+          call_status_sub:this.phone.select_note_status_sub,
+          call_status:this.phone.select_note_status
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/care/add`,data)
+          .then((response) => {
+            this.$vs.loading.close();
+            this.phone.show = false;
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+            this.loadCares();
+          })
+          .catch((e) => {
+          });
+      },
+      showModalStudent(data){
+        if(data==0){
+          this.modal_student.show = true
+          this.modal_student.error_message=""
+          this.modal_student.title ="THÊM MỚI HỌC SINH"
+          this.student.id =0
+          this.student.parent_id =""
+          this.student.name =""
+          this.student.gender =""
+          this.student.school_level =""
+          this.student.birthday =""
+          this.student.select_school =""
+          this.student.note =""
+        }else{
+          console.log(data)
+          this.modal_student.show = true
+          this.modal_student.error_message=""
+          this.modal_student.title ="CẬP NHẬT THÔNG TIN HỌC SINH"
+          this.student.id =data.id
+          this.student.parent_id =data.parent_id
+          this.student.name =data.name
+          this.student.gender =data.gender
+          this.student.school_level =data.school_level
+          this.student.birthday =data.birthday
+          this.student.select_school =data.school
+          this.student.school = data.school
+          this.student.note =data.note
+          this.getSchools()
+        }
+      },
+      showModalCheckin(item){
+        this.modal_checkin.show =true
+        this.modal_checkin.student_id = item.id
+        this.modal_checkin.branch_id = this.parent.branch_id
+        this.modal_checkin.checkin_at = ""
+        this.modal_checkin.error_message=""
+        this.modal_checkin.type_product=""
+      },
+      checkin(){
+        let mess = "";
+        let resp = true;
+        if (this.modal_checkin.branch_id == "") {
+          mess += " - Trung tâm checkin không được để trống<br/>";
+          resp = false;
+        }
+        if (this.modal_checkin.checkin_at == "") {
+          mess += " - Thời gian checkin không được để trống<br/>";
+          resp = false;
+        }
+        if (this.modal_checkin.type_product == "") {
+          mess += " - Sản phẩm không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.modal_checkin.alert.color = 'danger'
+          this.modal_checkin.alert.body = mess;
+          this.modal_checkin.alert.active = true;
+          return false;
+        }
+        const data = {
+          student_id: this.modal_checkin.student_id,
+          branch_id: this.modal_checkin.branch_id,
+          checkin_at: moment(this.modal_checkin.checkin_at).format('YYYY-MM-DD HH:mm'),
+          type_product: this.modal_checkin.type_product
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/students/checkin`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.modal_checkin.show =false
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.loadStudents();
+        })
+        .catch((e) => {
+        });
+      },
+      showModalUpdateCheckin(item){
+        this.modal_checkin.show =true
+        this.modal_checkin.student_id = item.id
+        this.modal_checkin.branch_id = item.checkin_branch_id
+        this.modal_checkin.checkin_at = item.checkin_at
+        this.modal_checkin.type_product = item.type_product
+        this.modal_checkin.error_message=""
+      },
+      addStudent(){
+        this.student.parent_id = this.parent.id
+        let mess = "";
+        let resp = true;
+        if (this.student.name == "") {
+          mess += " - Tên học sinh không được để trống<br/>";
+          resp = false;
+        }
+        if (this.student.birthday == "") {
+          mess += " - Ngày sinh không được để trống<br/>";
+          resp = false;
+        }
+        if (this.student.gender == "") {
+          mess += " - Giới tính không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.modal_student.alert.color = 'danger'
+          this.modal_student.alert.body = mess;
+          this.modal_student.alert.active = true;
+          return false;
+        }
+        this.$vs.loading();
+        axios.p(`/api/crm/students/add`,this.student)
+        .then((response) => {
+          this.modal_student.show = false
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.loadStudents();
+        })
+        .catch((e) => {
+        });
+      },
+      loadStudents(){
+        this.$vs.loading();
+        axios.g(`/api/crm/students/get_all_data/${this.$route.params.id}`)
+        .then((response) => {
+          this.students = response.data;
+          this.$vs.loading.close();
+        })
+        .catch((e) => {
+        });
+      },
+    },
+    filters: {
+      genTextGender(item){
+        let resp = ''
+        if(item== 'M'){
+          resp = 'Nam'
+        }else{
+          resp = 'Nữ'
+        }
+        return resp
+      },
+      genStudentStatus(item){
+        let resp = ''
+        if(item== 0){
+          resp = 'Mới tạo'
+        }else if(item==1){
+          resp = 'Thêm mới checkin'
+        }else if(item==2){
+          resp = 'Đã đến checkin'
+        }
+        return resp
       },
     },
   }

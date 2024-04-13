@@ -101,6 +101,10 @@
           </div>
         </div>
       </div>
+      <div class="form-group col-sm-12" v-if="checked_list.length>0">
+        <p style="text-align: end">Bạn đã lựa chọn <b>{{checked_list.length}}</b> khách hàng   
+        <vs-button  style="margin-left:30px;" @click="showModalAssgin" color="danger"><i class="fa-solid fa-paper-plane mr-2"></i>Bàn giao</vs-button></p>
+      </div>
 
       <vs-tabs v-model="activeItem">
         <vs-tab :label="'Tất cả ('+ total.total_0 +')'" @click.prevent="setActive(0)" ></vs-tab>
@@ -115,6 +119,18 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text text-center">
+                      <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
+                        <input type="checkbox" v-model="selectAll" class="vs-checkbox--input" >
+                        <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
+                          <span class="vs-checkbox--check">
+                            <i class="vs-icon notranslate icon-scale vs-checkbox--icon  material-icons null">check</i>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text text-center">STT
                       <!---->
@@ -177,8 +193,18 @@
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in imports" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in parents" :key="index">
                 <!---->
+                <td class="td vs-table--td">
+                  <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
+                    <input type="checkbox" v-model="checked_list" :value="item.id" class="vs-checkbox--input" >
+                    <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
+                      <span class="vs-checkbox--check">
+                        <i class="vs-icon notranslate icon-scale vs-checkbox--icon  material-icons null">check</i>
+                      </span>
+                    </span>
+                  </div>
+                </td>
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
@@ -221,6 +247,32 @@
               v-model="pagination.cpage" @change="changePage()"/>
       </div>
     </vx-card>
+    <vs-popup :class="'modal_'+ modal_assign.color" :title="modal_assign.title" :active.sync="modal_assign.show" >
+        <div class="vx-row" > 
+          <div class="vx-col w-full mb-4">
+            <label>Chọn người phụ trách</label>
+            <multiselect
+              placeholder="Chọn người phụ trách"
+              v-model="owners"
+              :options="users_manager_list"
+              label="label_name"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              track-by="id"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
+          
+          <div class="vx-col w-full">
+            <vs-button color="dark" type="border" class="mr-3" @click="modal_assign.show = false">Hủy</vs-button>
+            <vs-button color="success" @click="assignCustomer">Lưu</vs-button>
+          </div>
+        </div>
+      </vs-popup>
   </div>
 
 </template>
@@ -243,7 +295,8 @@
     },
     data() {
       return {
-        activeItem: 0,
+        checked_list: [],
+        activeItem: 0,    
         total:{
           total_0:0,
           total_1:0,
@@ -309,8 +362,8 @@
           }
         },
 
-        imports: [],
-        limitSource: [10, 20, 30, 40, 50],
+        parents: [],
+        limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
           id: "",
@@ -326,9 +379,40 @@
           pages: [],
           init: 0
         },
+        modal_assign: {
+          title: "BÀN GIAO KHÁCH HÀNG",
+          show: false,
+          color: "info",
+          closeOnBackdrop: true,
+          error_message:""
+        },
+        owner_id:"",
+        owners:[],
+      }
+    },
+    computed: {
+      selectAll: {
+        get: function() {
+          return (
+            parseInt(this.checked_list.length) === parseInt(this.parents.length)
+          );
+        },
+        set: function(value) {
+          const selected_list = [];
+          if (value) {
+            this.parents.forEach(parent => {
+              selected_list.push(parent.id);
+            });
+          }
+          this.checked_list = selected_list;
+        }
       }
     },
     methods: {
+      showModalAssgin(){
+        this.owner_id =""
+        this.modal_assign.show =true
+      },
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
@@ -399,7 +483,7 @@
         axios.p('/api/crm/parents/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.imports = response.data.list
+            this.parents = response.data.list
             this.total = response.data.detail_total
             this.pagination = response.data.paging;
             this.pagination.init = 1;
@@ -424,7 +508,38 @@
         this.activeItem = menuItem
         this.getData();
       },
-
+      assignCustomer(){
+        if(this.owners.length){
+          const ids = []
+          this.owners = u.is.obj(this.owners) ? [this.owners] : this.owners
+          if (this.owners.length) {
+            this.owners.map(item => {
+              ids.push(item.id)
+            })
+          }
+          const data = {
+            parents: this.checked_list,
+            owners: ids,
+          };
+          this.modal_assign.show =false
+          this.$vs.loading()
+            axios.p(`/api/crm/parents/assign_list`,data)
+            .then((response) => {
+              this.$vs.loading.close()
+              this.$vs.notify({
+                title: 'Thành Công',
+                text: response.data.message,
+                color: 'success',
+                iconPack: 'feather',
+                icon: 'icon-check'
+              })
+              this.getData();
+              this.checked_list=[]
+            })
+            .catch((e) => {
+            });
+        }
+      },
     },
     created() {
       axios.g(`/api/users/get-data/users-manager`)

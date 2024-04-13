@@ -295,4 +295,32 @@ class UtilityServiceProvider extends ServiceProvider
             return 'Blacklist';
         }  
     }
+
+	public static function genStatusByCallStatus($call_status, $call_status_sub){
+        if($call_status == 0){
+            return 0;
+        } elseif($call_status == 1){
+            return 10;
+        } elseif($call_status == 2){
+            return 20;
+        } elseif($call_status == 3){
+            return 30;
+        } elseif($call_status == 4){
+            return 40;
+        } elseif($call_status == 5){
+            return 50;
+        }elseif($call_status == 6){
+            return 60;
+        }  elseif($call_status == 7){
+            if($call_status_sub == 71 || $call_status_sub == 72){
+                return 71;
+            }elseif($call_status_sub == 73){
+                return 72;
+            }elseif($call_status_sub == 74){
+                return 73;
+            }
+        } elseif($call_status == 9){
+            return 90;
+        } 
+    }
 }
