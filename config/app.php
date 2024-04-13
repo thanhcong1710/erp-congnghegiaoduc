@@ -228,12 +228,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+        'JWTAuth'   => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class
 
     ],
-
-    'bigblubutton' => [
-        'url' => 'https://bbb.dapanh.com/bigbluebutton/',
-        'secret' => 'vWmKBZtDtq3pbKEDyxBJ7YcXKqPEjvqR2wm6qyvdU0'
-    ],
-
 ];
