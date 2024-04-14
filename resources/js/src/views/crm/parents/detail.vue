@@ -191,7 +191,7 @@
                             label="title"
                             placeholder="Chọn nghề nghiệp"
                             :options="html.jobs.list"
-                            v-model="parent.job"
+                            v-model="parent_input.job"
                             :searchable="true"
                             language="tv-VN"
                             @input="saveJob"
@@ -213,7 +213,7 @@
                         label="name"
                         placeholder="Chọn Tỉnh/Thành Phố"
                         :options="html.province.list"
-                        v-model="parent.province"
+                        v-model="parent_input.province"
                         :searchable="true"
                         language="tv-VN"
                         @input="getDistrict"
@@ -227,7 +227,7 @@
                             label="name"
                             placeholder="Chọn Quận/Huyện/Thị Xã"
                             :options="html.district.list"
-                            v-model="parent.district"
+                            v-model="parent_input.district"
                             :searchable="true"
                             language="tv-VN"
                             @input="saveDistrict"
@@ -240,7 +240,7 @@
                             label="name"
                             placeholder="Chọn nguồn"
                             :options="html.source.list"
-                            v-model="parent.source"
+                            v-model="parent_input.source"
                             :searchable="true"
                             language="tv-VN"
                             @input="saveSource"
@@ -253,7 +253,7 @@
                             label="name"
                             placeholder="Chọn nguồn chi tiết"
                             :options="html.source_detail.list"
-                            v-model="parent.source_detail"
+                            v-model="parent_input.source_detail"
                             :searchable="true"
                             language="tv-VN"
                             @input="saveSourceDetail"
@@ -634,6 +634,13 @@
             color:'',
           },
         },
+        parent_input:{
+          job:"",
+          source:"",
+          source_detail:"",
+          province:"",
+          district:"",
+        },
         parent: {
           id:"",
           gender: "",
@@ -648,12 +655,7 @@
           district_id:"",
           job_id:"",
           source_id:"",
-          source:"",
           source_detail_id:"",
-          source_detail:"",
-          job:"",
-          province:"",
-          district:"",
           address:"",
           owner_id:"",
           c2c_mobile:"",
@@ -755,14 +757,14 @@
           this.$vs.loading.close();
           if(response.data.length !== 0){
             this.parent = response.data
-            this.parent.job = this.html.jobs.list.filter(item => item.id == this.parent.job_id)[0]
-            this.parent.source = this.html.source.list.filter(item => item.id == this.parent.source_id)[0]
-            this.parent.source_detail = this.html.source_detail.list.filter(item => item.id == this.parent.source_detail_id)[0]
-            this.parent.province = this.html.province.list.filter(item => item.id == this.parent.province_id)[0]
-            this.tmp_district_id = this.parent.district_id
+            this.parent_input.job = this.html.jobs.list.filter(item => item.id == response.data.job_id)[0]
+            this.parent_input.source = this.html.source.list.filter(item => item.id == response.data.source_id)[0]
+            this.parent_input.source_detail = this.html.source_detail.list.filter(item => item.id == response.data.source_detail_id)[0]
+            this.parent_input.province = this.html.province.list.filter(item => item.id == response.data.province_id)[0]
+            this.tmp_district_id = response.data.district_id
             this.tmp_owner_id = response.data.owner_id
             this.tmp_status = response.data.status
-            this.getDistrict(this.parent.province);
+            this.getDistrict(this.parent_input.province);
           }else{
             this.$router.push({ path: `/parents` });
           }
@@ -866,10 +868,10 @@
             this.$vs.loading.close();
             this.html.district.list = response.data
             if(this.tmp_district_id){
-              this.parent.district = this.html.district.list.filter(item => item.id == this.tmp_district_id)[0]
+              this.parent_input.district = this.html.district.list.filter(item => item.id == this.tmp_district_id)[0]
             }else{
               this.parent.district_id = ""
-              this.parent.district = ""
+              this.parent_input.district = ""
             } 
           })
         }else{
@@ -883,40 +885,40 @@
       saveDistrict(data = null){
         if (data && typeof data === 'object') {
           const district_id = data.id
-          this.parent.district = data
+          this.parent_input.district = data
           this.parent.district_id = district_id
         }else{
-          this.parent.district = ""
+          this.parent_input.district = ""
           this.parent.district_id = ""
         }
       },
       saveJob(data = null){
         if (data && typeof data === 'object') {
           const job_id = data.id
-          this.parent.job = data
+          this.parent_input.job = data
           this.parent.job_id = job_id
         }else{
-          this.parent.job = ""
+          this.parent_input.job = ""
           this.parent.job_id = ""
         }
       },
       saveSource(data = null){
         if (data && typeof data === 'object') {
           const source_id = data.id
-          this.parent.source = data
+          this.parent_input.source = data
           this.parent.source_id = source_id
         }else{
-          this.parent.source = ""
+          this.parent_input.source = ""
           this.parent.source_id = ""
         }
       },
       saveSourceDetail(data = null){
         if (data && typeof data === 'object') {
           const source_id = data.id
-          this.parent.source_detail = data
+          this.parent_input.source_detail = data
           this.parent.source_detail_id = source_id
         }else{
-          this.parent.source_detail = ""
+          this.parent_input.source_detail = ""
           this.parent.source_detail_id = ""
         }
       },
