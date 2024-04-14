@@ -1311,6 +1311,7 @@
           return false;
         }
         const data = {
+          owner_id : this.parent.owner_id,
           student_id: this.modal_checkin.student_id,
           branch_id: this.modal_checkin.branch_id,
           checkin_at: moment(this.modal_checkin.checkin_at).format('YYYY-MM-DD HH:mm'),

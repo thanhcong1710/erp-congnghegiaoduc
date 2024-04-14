@@ -31,7 +31,7 @@
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
-                name="search_checkin_status"
+                name="search_status"
                 placeholder="Chọn trạng thái"
                 v-model="searchData.arr_status"
                 :options="statusOptions"
@@ -46,9 +46,47 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Người phụ trách</label>
+            <multiselect
+                name="search_owner"
+                placeholder="Chọn người phụ trách"
+                v-model="searchData.arr_creator"
+                :options="users_list"
+                label="label_name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
           
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
+            <label for="" class="vs-input--label">Nguồn</label>
+            <multiselect
+                name="search_source"
+                placeholder="Chọn nguồn"
+                select-label="Chọn nguồn"
+                v-model="searchData.arr_source"
+                :options="source_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Thời gian đặt lịch checkin</label>
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
@@ -77,17 +115,17 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Tên khách hàng
+                    <div class="vs-table-text">Tên học sinh
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số điện thoại
+                    <div class="vs-table-text">Giới tính
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Học sinh
+                    <div class="vs-table-text">Ngày sinh
                       <!---->
                     </div>
                   </th>
@@ -97,27 +135,32 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn chi tiết
+                    <div class="vs-table-text">Phụ huynh
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Số điện thoại
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Địa chỉ
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Trung tâm checkin
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Lịch hẹn checkin
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Người phụ trách
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch chăm sóc tiếp theo
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch sử chăm sóc
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thời gian chăm sóc gần nhất
                       <!---->
                     </div>
                   </th>
@@ -133,24 +176,24 @@
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in parents" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in checkin_students" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
-                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
-                <td class="td vs-table--td">{{ item.hs1_name }}</td>
+                <td class="td vs-table--td">{{ item.name }}</td>
+                <td class="td vs-table--td text-center">{{ item.gender == 'F' ? 'Nữ' : 'Nam' }}</td>
+                <td class="td vs-table--td text-center">{{ item.birthday }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
-                <td class="td vs-table--td">{{ item.source_detail_name }}</td>
-                <td class="td vs-table--td">{{ item.owner_name }}</td>
-                <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
-                <td class="td vs-table--td">{{ item.last_care }}</td>
-                <td class="td vs-table--td text-center">{{ item.last_time_care }}</td>
+                <td class="td vs-table--td">{{ item.parent_name }}</td>
+                <td class="td vs-table--td text-center">{{ item.mobile_1 }}</td>
+                <td class="td vs-table--td">{{ item.address }}</td>
+                <td class="td vs-table--td">{{ item.checkin_branch_name }}</td>
+                <td class="td vs-table--td text-center">{{ item.checkin_at }}</td>
+                <td class="td vs-table--td">{{ item.checkin_owner_name }}</td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
-                  <router-link :to="`/crm/parent/${item.id}/detail`" >
-                    <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                  </router-link>    
+                    <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item.id)"><i class="fa-solid fa-clipboard-check"></i></vs-button>
+                    <vs-button size="small" color="danger" v-if="item.status==2" @click="openConfirmUpStudent(item.id,item.name)"><i class="fa-solid fa-paper-plane"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -178,32 +221,35 @@
               v-model="pagination.cpage" @change="changePage()"/>
       </div>
     </vx-card>
-    <vs-popup :class="'modal_'+ modal_assign.color" :title="modal_assign.title" :active.sync="modal_assign.show" >
-        <div class="vx-row" > 
-          <div class="vx-col w-full mb-4">
-            <label>Chọn người phụ trách</label>
-            <multiselect
-              placeholder="Chọn người phụ trách"
-              v-model="owners"
-              :options="users_list"
-              label="label_name"
-              :close-on-select="false"
-              :hide-selected="true"
-              :multiple="true"
-              :searchable="true"
-              track-by="id"
-              selectedLabel="" selectLabel="" deselectLabel=""
+    <vs-popup :class="'modal_'+ modal_checkin.color" :title="modal_checkin.title" :active.sync="modal_checkin.show">
+      <div class="vx-row"> 
+        <div class="vx-col w-full mb-4">
+          <label>Thời gian đến checkin <span class="text-danger"> (*)</span></label>
+          <date-picker
+                    id="checkin-at"
+                    :value="modal_checkin.checkined_at"
+                    v-model="modal_checkin.checkined_at"
+                    placeholder="Chọn ngày giờ"
+                    lang="lang"
+                    type="datetime"
+                    format="YYYY-MM-DD HH:mm"
+                    style="width: 100%"
             >
-              <span slot="noResult">Không tìm thấy dữ liệu</span>
-            </multiselect>
-          </div>
-          
-          <div class="vx-col w-full">
-            <vs-button color="dark" type="border" class="mr-3" @click="modal_assign.show = false">Hủy</vs-button>
-            <vs-button color="success" @click="assignCustomer">Lưu</vs-button>
-          </div>
+          </date-picker>
         </div>
-      </vs-popup>
+        <div class="vx-col w-full mb-4">
+          <label>Ghi chú <span class="text-danger"> (*)</span></label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="modal_checkin.note"></textarea>
+        </div>
+        <vs-alert :active.sync="modal_checkin.alert.active" class="mb-5  mr-4 ml-4" :color="modal_checkin.alert.color" closable icon-pack="feather" close-icon="icon-x">
+          <div v-html="modal_checkin.alert.body"></div>
+        </vs-alert>
+        <div class="vx-col w-full">
+          <vs-button color="dark" type="border" class="mr-3" @click="modal_checkin.show = false">Hủy</vs-button>
+          <vs-button color="success" @click="updateCheckin">Lưu</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 
 </template>
@@ -215,25 +261,32 @@
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
-  import select from 'vue-select'
 
   export default {
     components: { 
-      "vue-select": select,
       vSelect,
       Multiselect,
       DatePicker
     },
     data() {
       return {
-        branch_list: [],
-        activeItem: 0,    
-        total:{
-          total_0:0,
-          total_1:0,
-          total_2:0,
-          total_3:0,
+        modal_checkin: {
+          title: "XÁC NHẬN CHECKIN",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
+          student_id:'',
+          checkined_at:'',
+          note:''
         },
+        branch_list: [],
         searchData: {
           arr_branch: "",
           branch_id:"",
@@ -242,19 +295,18 @@
           arr_creator: "",
           arr_source: "",
           status: "",
-          creator_id: "",
+          checkin_owner_id: "",
           source_id: "",
           pagination: this.pagination,
           dateRange: "",
         },
         statusOptions:[
-          {id:0,label:'Chưa đến checkin'},
-          {id:1,label:'Đã checkin'},
-          {id:2,label:'Đã lên chính thức'},
+          {id:1,label:'Chưa đến checkin'},
+          {id:2,label:'Đã checkin'},
+          {id:3,label:'Đã lên chính thức'},
         ],
         users_list:[],
         source_list:[],
-        source_detail_list:[],
         searchData: {
           status: '',
         },
@@ -281,7 +333,7 @@
           }
         },
 
-        parents: [],
+        checkin_students: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -298,15 +350,8 @@
           pages: [],
           init: 0
         },
-        modal_assign: {
-          title: "BÀN GIAO KHÁCH HÀNG",
-          show: false,
-          color: "info",
-          closeOnBackdrop: true,
-          error_message:""
-        },
-        owner_id:"",
-        owners:[],
+        checkin_owner_id:"",
+        up_student_id:"",
       }
     },
     created() {
@@ -322,54 +367,51 @@
         .then(response => {
         this.source_list = response.data
       })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.source_detail_list = response.data
-      })
       this.getData();
     },
     methods: {
-      showModalAssgin(){
-        this.owner_id =""
-        this.modal_assign.show =true
-      },
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
-        this.searchData.arr_owner= ""
+        this.searchData.arr_creator= ""
         this.searchData.arr_source= ""
-        this.searchData.arr_source_detail= ""
+        this.searchData.arr_branch= ""
+        this.searchData.branch_id= ""
         this.searchData.status= ""
-        this.searchData.owner_id= ""
+        this.searchData.checkin_owner_id= ""
         this.searchData.source_id= ""
-        this.searchData.source_detail_id= ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
-        this.searchData.type_seach= 1
         this.getData();
       },
       getData() {
         const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
         const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
         const ids = []
-        this.searchData.arr_status = u.is.obj(this.searchData.arr_status) ? [this.searchData.arr_status] : this.searchData.arr_status
         if (this.searchData.arr_status && this.searchData.arr_status.length) {
           this.searchData.arr_status.map(item => {
             ids.push(item.id)
           })
         }
         this.searchData.status = ids
-        const ids_owner = []
-        this.searchData.arr_owner = u.is.obj(this.searchData.arr_owner) ? [this.searchData.arr_owner] : this.searchData.arr_owner
-        if (this.searchData.arr_owner && this.searchData.arr_owner.length) {
-          this.searchData.arr_owner.map(item => {
-            ids_owner.push(item.id)
+        
+        const ids_branch = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            ids_branch.push(item.id)
           })
         }
-        this.searchData.owner_id = ids_owner
+        this.searchData.branch_id = ids_branch
+
+        const ids_creator = []
+        if (this.searchData.arr_creator && this.searchData.arr_creator.length) {
+          this.searchData.arr_creator.map(item => {
+            ids_creator.push(item.id)
+          })
+        }
+        this.searchData.checkin_owner_id = ids_creator
 
         const ids_source = []
-        this.searchData.arr_source = u.is.obj(this.searchData.arr_source) ? [this.searchData.arr_source] : this.searchData.arr_source
         if (this.searchData.arr_source && this.searchData.arr_source.length) {
           this.searchData.arr_source.map(item => {
             ids_source.push(item.id)
@@ -377,20 +419,11 @@
         }
         this.searchData.source_id = ids_source
 
-        const ids_source_detail = []
-        this.searchData.arr_source_detail = u.is.obj(this.searchData.arr_source_detail) ? [this.searchData.arr_source_detail] : this.searchData.arr_source_detail
-        if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) {
-          this.searchData.arr_source_detail.map(item => {
-            ids_source_detail.push(item.id)
-          })
-        }
-        this.searchData.source_detail_id = ids_source_detail
-
         const data = {
-            status: this.searchData.status.value,
-            owner_id: this.searchData.owner_id,
+            checkin_branch_id: this.searchData.branch_id,
+            status: this.searchData.status,
+            checkin_owner_id: this.searchData.checkin_owner_id,
             source_id: this.searchData.source_id,
-            source_detail_id: this.searchData.source_detail_id,
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
@@ -399,10 +432,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/crm/parents/list', data)
+        axios.p('/api/lms/checkin/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.parents = response.data.list
+            this.checkin_students = response.data.list
             this.total = response.data.detail_total
             this.pagination = response.data.paging;
             this.pagination.init = 1;
@@ -422,42 +455,84 @@
         this.pagination.limit = limit
         this.getData();
       },
-      setActive (menuItem) {
-        this.searchData.type_seach = menuItem
-        this.activeItem = menuItem
-        this.getData();
+
+      openConfirmUpStudent (id, name) {
+        this.up_student_id = id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn chuyển học sinh "${name}" lên danh sách chính thức?`,
+          accept: this.upStudent,
+          acceptText: 'Lưu',
+          cancelText: 'Hủy'
+        })
       },
-      assignCustomer(){
-        if(this.owners.length){
-          const ids = []
-          this.owners = u.is.obj(this.owners) ? [this.owners] : this.owners
-          if (this.owners.length) {
-            this.owners.map(item => {
-              ids.push(item.id)
-            })
-          }
-          const data = {
-            parents: this.checked_list,
-            owners: ids,
-          };
-          this.modal_assign.show =false
-          this.$vs.loading()
-            axios.p(`/api/crm/parents/assign_list`,data)
-            .then((response) => {
-              this.$vs.loading.close()
-              this.$vs.notify({
-                title: 'Thành Công',
-                text: response.data.message,
-                color: 'success',
-                iconPack: 'feather',
-                icon: 'icon-check'
-              })
-              this.getData();
-              this.checked_list=[]
-            })
-            .catch((e) => {
-            });
+      upStudent(){
+        console.log('1233');
+        // const data = {
+        //   parent_id: this.parent.id,
+        //   owner_id: this.tmp_owner_id,
+        // };
+        // this.$vs.loading();
+        // axios.p(`/api/crm/parents/assign`,data)
+        // .then((response) => {
+        //   this.$vs.loading.close();
+        //   this.loadDetail();
+        //   this.$vs.notify({
+        //     title: 'Thành Công',
+        //     text: response.data.message,
+        //     color: 'success',
+        //     iconPack: 'feather',
+        //     icon: 'icon-check'
+        //   })
+        // })
+      },
+
+      showModalCheckin(id){
+        this.modal_checkin.show = true
+        this.modal_checkin.error_message=""
+        this.modal_checkin.student_id=id
+        this.modal_checkin.note=""
+        this.modal_checkin.checkined_at=""
+      },
+      updateCheckin(){
+        let mess = "";
+        let resp = true;
+        if (this.modal_checkin.checkined_at == "") {
+          mess += " - Thời gian đến checkin không được để trống<br/>";
+          resp = false;
         }
+        if (this.modal_checkin.note == "") {
+          mess += " - Ghi chú không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.modal_checkin.alert.color = 'danger'
+          this.modal_checkin.alert.body = mess;
+          this.modal_checkin.alert.active = true;
+          return false;
+        }
+        this.$vs.loading();
+        this.modal_checkin.show = false
+        axios.p(`/api/lms/checkin/student/checked`,{
+          student_id: this.modal_checkin.student_id,
+          note: this.modal_checkin.note,
+          checkined_at: this.modal_checkin.checkined_at
+        })
+        .then((response) => {
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$vs.loading.close();
+          this.getData();
+        })
+        .catch((e) => {
+        });
       },
     },
     
@@ -465,50 +540,14 @@
       getStatusName(value) {
         let resp = ''
         switch (Number(value)) {
-            case 0:
-                resp = 'KH mới';
+            case 2:
+                resp = 'Đã checkin';
                 break;
-            case 10:
-                resp = 'KH không liên lạc được';
-                break;
-            case 20:
-                resp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                resp = 'KH không nghe máy';
-                break;
-            case 40:
-                resp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                resp = 'KH không quan tâm';
-                break;
-            case 60:
-                resp = 'KH không tiềm năng';
-                break;
-            case 71:
-                resp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                resp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                resp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 82:
-                resp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                resp = 'Danh sách đen';
+            case 3:
+                resp = 'Đã lên chính thức';
                 break;
             default:
-                resp = 'KH mới'
+                resp = 'Chưa đến checkin'
                 break
         }
         return resp

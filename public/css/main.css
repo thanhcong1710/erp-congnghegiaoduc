@@ -9185,10 +9185,11 @@ body {
 
 .list-action .vs-button.small:not(.includeIconOnly){
   width: 28px;
+  font-size: 13px;
 }
 
 [dir] .list-action .vs-button.small:not(.includeIconOnly){
-  padding: 8px;
+  padding: 6px;
   margin: 4px;
 }
 

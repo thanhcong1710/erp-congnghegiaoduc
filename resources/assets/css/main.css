@@ -62,9 +62,10 @@ body {
     color: #252525 !important;
 }
 .list-action .vs-button.small:not(.includeIconOnly){
-    padding: 8px;
+    padding: 6px;
     margin: 4px;
     width: 28px;
+    font-size: 13px;
 }
 @media only screen and (min-width: 600px) {
     .content-area__heading {

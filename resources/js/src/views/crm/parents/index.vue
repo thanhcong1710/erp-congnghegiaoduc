@@ -280,10 +280,10 @@
 <script>
 
   import axios from '../../../http/axios.js'
+  import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
   import select from 'vue-select'
-  import Multiselect from "vue-multiselect";
 
   export default {
     components: { 
@@ -430,7 +430,6 @@
         const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
         const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
         const ids = []
-        this.searchData.arr_status = u.is.obj(this.searchData.arr_status) ? [this.searchData.arr_status] : this.searchData.arr_status
         if (this.searchData.arr_status && this.searchData.arr_status.length) {
           this.searchData.arr_status.map(item => {
             ids.push(item.id)
@@ -438,7 +437,6 @@
         }
         this.searchData.status = ids
         const ids_owner = []
-        this.searchData.arr_owner = u.is.obj(this.searchData.arr_owner) ? [this.searchData.arr_owner] : this.searchData.arr_owner
         if (this.searchData.arr_owner && this.searchData.arr_owner.length) {
           this.searchData.arr_owner.map(item => {
             ids_owner.push(item.id)
@@ -447,7 +445,6 @@
         this.searchData.owner_id = ids_owner
 
         const ids_source = []
-        this.searchData.arr_source = u.is.obj(this.searchData.arr_source) ? [this.searchData.arr_source] : this.searchData.arr_source
         if (this.searchData.arr_source && this.searchData.arr_source.length) {
           this.searchData.arr_source.map(item => {
             ids_source.push(item.id)
@@ -456,7 +453,6 @@
         this.searchData.source_id = ids_source
 
         const ids_source_detail = []
-        this.searchData.arr_source_detail = u.is.obj(this.searchData.arr_source_detail) ? [this.searchData.arr_source_detail] : this.searchData.arr_source_detail
         if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) {
           this.searchData.arr_source_detail.map(item => {
             ids_source_detail.push(item.id)
@@ -465,7 +461,7 @@
         this.searchData.source_detail_id = ids_source_detail
 
         const data = {
-            status: this.searchData.status.value,
+            status: this.searchData.status,
             owner_id: this.searchData.owner_id,
             source_id: this.searchData.source_id,
             source_detail_id: this.searchData.source_detail_id,

@@ -80,5 +80,11 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('students/checkin', 'StudentsController@checkin');
             Route::post('parents/assign_list', 'ParentsController@assignList');
         });
+
+        Route::prefix('lms')->group(function () {
+            Route::post('checkin/list', 'CheckinController@list');
+            Route::post('checkin/student/checked', 'CheckinController@stuentChecked');
+            
+        });
     });
 });

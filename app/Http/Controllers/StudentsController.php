@@ -62,11 +62,12 @@ class StudentsController extends Controller
     public function checkin(Request $request){
         $data_update = array(
             'checkin_at'=>$request->checkin_at,
+            'checkin_owner_id' => $request->owner_id,
             'checkin_branch_id'=>$request->branch_id,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
             'type_product'=>$request->type_product,
-            'status' => 1,
+            'status' => 1, // 
         );
         u::updateSimpleRow($data_update,array('id'=>$request->student_id), 'crm_students');
         $result =(object)array(
