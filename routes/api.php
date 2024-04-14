@@ -28,7 +28,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
-            Route::get('branches', 'SystemController@getBranches');
+            Route::get('branches', 'SystemController@getAllBranches');
             Route::get('roles', 'SystemController@getRoles');
             Route::get('sources', 'SystemController@getSources');
             Route::get('source_detail', 'SystemController@getSourceDetail');
@@ -36,6 +36,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('jobs', 'SystemController@getJobs');
             Route::get('methods', 'SystemController@getMethods');
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
+            Route::get('branches-has-user', 'SystemController@getBranchesHasUser');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -54,6 +55,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('{user_id}', 'UserController@info');
             Route::post('update/{user_id}', 'UserController@update');
             Route::get('get-data/users-manager', 'UserController@getUsersManager');
+            Route::get('get-data/all', 'UserController@getAllUsers');
         });
         Route::prefix('crm')->group(function () {
             Route::post('imports/list', 'ImportsController@list');

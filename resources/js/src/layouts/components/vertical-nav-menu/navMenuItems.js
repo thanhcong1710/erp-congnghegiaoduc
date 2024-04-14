@@ -35,12 +35,33 @@ export default [
       {
         url: '/crm/parent',
         name: 'Khách hàng',
-        icon: 'UserIcon',
+        icon: 'UsersIcon',
       },
       {
         url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',
+      }
+    ]
+  },
+  {
+    header: 'LMS',
+    icon: 'PackageIcon',
+    items: [
+      {
+        url: '/lms/students/list',
+        name: 'Học sinh',
+        icon: 'UserIcon',
+        submenu: [
+          {
+            url: '/lms/students/list',
+            name: 'Danh sách',
+          },
+          {
+            url: '/lms/checkin',
+            name: 'Checkin',
+          }
+        ]
       }
     ]
   },

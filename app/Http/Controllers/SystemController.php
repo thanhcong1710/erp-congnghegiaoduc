@@ -10,9 +10,16 @@ use Illuminate\Support\Facades\Hash;
 
 class SystemController extends Controller
 {
-    public function getBranches(Request $request)
+    public function getAllBranches(Request $request)
     {
         $data = u::query("SELECT *, 0 AS selected, id AS `value`  FROM branches WHERE status = 1");
+        return response()->json($data);
+    }
+    
+    public function getBranchesHasUser(Request $request)
+    {
+        $cond = " AND id IN (" . Auth::user()->getBranchesHasUser().")";
+        $data = u::query("SELECT *, 0 AS selected, id AS `value`  FROM branches WHERE status = 1 $cond");
         return response()->json($data);
     }
 

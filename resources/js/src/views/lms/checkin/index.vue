@@ -7,13 +7,31 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+            <multiselect
+                name="search_branch"
+                placeholder="Chọn trung tâm checkin"
+                v-model="searchData.arr_branch"
+                :options="branch_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên khách hàng, số điện thoại" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên phụ huynh, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
-                name="search_status"
+                name="search_checkin_status"
                 placeholder="Chọn trạng thái"
                 v-model="searchData.arr_status"
                 :options="statusOptions"
@@ -28,63 +46,7 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Người phụ trách</label>
-            <multiselect
-                name="search_owner"
-                placeholder="Chọn người phụ trách"
-                v-model="searchData.arr_owner"
-                :options="users_manager_list"
-                label="label_name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
           
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Nguồn</label>
-            <label for="ccmonth">Nguồn</label>
-            <multiselect
-                name="search_source"
-                placeholder="Chọn nguồn"
-                select-label="Chọn nguồn"
-                v-model="searchData.arr_source"
-                :options="source_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Nguồn chi tiết</label>
-            <multiselect
-                name="search_source_detail"
-                placeholder="Chọn nguồn chi tiết"
-                v-model="searchData.arr_source_detail"
-                :options="source_detail_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
@@ -101,17 +63,7 @@
           </div>
         </div>
       </div>
-      <div class="form-group col-sm-12" v-if="checked_list.length>0">
-        <p style="text-align: end">Bạn đã lựa chọn <b>{{checked_list.length}}</b> khách hàng   
-        <vs-button  style="margin-left:30px;" @click="showModalAssgin" color="danger"><i class="fa-solid fa-paper-plane mr-2"></i>Bàn giao</vs-button></p>
-      </div>
 
-      <vs-tabs v-model="activeItem">
-        <vs-tab :label="'Tất cả ('+ total.total_0 +')'" @click.prevent="setActive(0)" ></vs-tab>
-        <vs-tab :label="'Chưa chăm sóc ('+ total.total_1 +')'" @click.prevent="setActive(1)"></vs-tab>
-        <vs-tab :label="'Lịch chăm sóc trong ngày ('+ total.total_2 +')'" @click.prevent="setActive(2)"></vs-tab>
-        <vs-tab :label="'KH quá hạn xử lý ('+ total.total_3+')'" @click.prevent="setActive(3)"></vs-tab>
-      </vs-tabs>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -119,18 +71,6 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">
-                      <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
-                        <input type="checkbox" v-model="selectAll" class="vs-checkbox--input" >
-                        <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
-                          <span class="vs-checkbox--check">
-                            <i class="vs-icon notranslate icon-scale vs-checkbox--icon  material-icons null">check</i>
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-                  </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text text-center">STT
                       <!---->
@@ -195,16 +135,7 @@
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in parents" :key="index">
                 <!---->
-                <td class="td vs-table--td">
-                  <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
-                    <input type="checkbox" v-model="checked_list" :value="item.id" class="vs-checkbox--input" >
-                    <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
-                      <span class="vs-checkbox--check">
-                        <i class="vs-icon notranslate icon-scale vs-checkbox--icon  material-icons null">check</i>
-                      </span>
-                    </span>
-                  </div>
-                </td>
+                
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
@@ -254,7 +185,7 @@
             <multiselect
               placeholder="Chọn người phụ trách"
               v-model="owners"
-              :options="users_manager_list"
+              :options="users_list"
               label="label_name"
               :close-on-select="false"
               :hide-selected="true"
@@ -279,21 +210,23 @@
 
 <script>
 
+  import vSelect from 'vue-select'
   import axios from '../../../http/axios.js'
+  import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
   import select from 'vue-select'
-  import Multiselect from "vue-multiselect";
 
   export default {
     components: { 
       "vue-select": select,
-      DatePicker,
+      vSelect,
       Multiselect,
+      DatePicker
     },
     data() {
       return {
-        checked_list: [],
+        branch_list: [],
         activeItem: 0,    
         total:{
           total_0:0,
@@ -302,36 +235,24 @@
           total_3:0,
         },
         searchData: {
+          arr_branch: "",
+          branch_id:"",
           keyword: "",
           arr_status: "",
-          arr_owner: "",
+          arr_creator: "",
           arr_source: "",
-          arr_source_detail: "",
           status: "",
-          owner_id: "",
+          creator_id: "",
           source_id: "",
-          source_detail_id: "",
           pagination: this.pagination,
           dateRange: "",
-          type_seach: 1,
         },
         statusOptions:[
-          {id:0,label:'KH mới'},
-          {id:10,label:'KH không liên lạc được'},
-          {id:20,label:'KH ở vùng CMS không có cơ sở'},
-          {id:30,label:'KH không nghe máy'},
-          {id:40,label:'KH hẹn gọi lại sau'},
-          {id:50,label:'KH không quan tâm'},
-          {id:60,label:'KH không tiềm năng'},
-          {id:71,label:'KH quan tâm, cần follow up date'},
-          {id:72,label:'KH tiềm năng nhưng không muốn làm phiền'},
-          {id:73,label:'KH đồng ý đặt lịch Checkin'},
-          {id:81,label:'KH đã đến checkin'},
-          {id:82,label:'KH đã mua gói phí'},
-          {id:83,label:'KH đến hạn tái tục'},
-          {id:90,label:'Danh sách đen'}
+          {id:0,label:'Chưa đến checkin'},
+          {id:1,label:'Đã checkin'},
+          {id:2,label:'Đã lên chính thức'},
         ],
-        users_manager_list:[],
+        users_list:[],
         source_list:[],
         source_detail_list:[],
         searchData: {
@@ -388,23 +309,24 @@
         owners:[],
       }
     },
-    computed: {
-      selectAll: {
-        get: function() {
-          return (
-            parseInt(this.checked_list.length) === parseInt(this.parents.length)
-          );
-        },
-        set: function(value) {
-          const selected_list = [];
-          if (value) {
-            this.parents.forEach(parent => {
-              selected_list.push(parent.id);
-            });
-          }
-          this.checked_list = selected_list;
-        }
-      }
+    created() {
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
+      })
+      axios.g(`/api/users/get-data/all`)
+        .then(response => {
+        this.users_list = response.data
+      })
+      axios.g(`/api/system/sources`)
+        .then(response => {
+        this.source_list = response.data
+      })
+      axios.g(`/api/system/source_detail`)
+        .then(response => {
+        this.source_detail_list = response.data
+      })
+      this.getData();
     },
     methods: {
       showModalAssgin(){
@@ -475,7 +397,6 @@
             type_seach:this.searchData.type_seach,
             pagination: this.pagination,
           }
-        localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 
         this.$vs.loading()
         axios.p('/api/crm/parents/list', data)
@@ -539,26 +460,7 @@
         }
       },
     },
-    created() {
-      axios.g(`/api/users/get-data/users-manager`)
-        .then(response => {
-        this.users_manager_list = response.data
-      })
-      axios.g(`/api/system/sources`)
-        .then(response => {
-        this.source_list = response.data
-      })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.source_detail_list = response.data
-      })
-      if(localStorage.getItem("parents_searchData")){
-        this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
-        this.activeItem = this.searchData.type_seach
-      }
-
-      this.getData();
-    },
+    
     filters: {
       getStatusName(value) {
         let resp = ''

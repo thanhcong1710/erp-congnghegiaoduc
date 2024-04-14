@@ -235,4 +235,15 @@ class UserController extends Controller
             FROM users WHERE status=1 $cond");
         return response()->json($data);
     }
+
+    public function getAllUsers(Request $request){
+        $cond = "";
+        if($request->status !== null){
+            $cond = " AND status = ".(int)$request->status;
+        }
+        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name, id AS `value` 
+            FROM users WHERE 1 $cond");
+        return response()->json($data);
+    }
+    
 }
