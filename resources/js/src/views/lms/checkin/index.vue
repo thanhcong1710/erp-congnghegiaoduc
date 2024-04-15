@@ -307,9 +307,6 @@
         ],
         users_list:[],
         source_list:[],
-        searchData: {
-          status: '',
-        },
         datepickerOptions: {
           closed: true,
           value: "",
@@ -420,6 +417,7 @@
         this.searchData.source_id = ids_source
 
         const data = {
+            keyword: this.searchData.keyword,
             checkin_branch_id: this.searchData.branch_id,
             status: this.searchData.status,
             checkin_owner_id: this.searchData.checkin_owner_id,
@@ -428,7 +426,6 @@
             end_date:endDate,
             pagination:this.pagination,
             type_seach:this.searchData.type_seach,
-            pagination: this.pagination,
           }
 
         this.$vs.loading()
