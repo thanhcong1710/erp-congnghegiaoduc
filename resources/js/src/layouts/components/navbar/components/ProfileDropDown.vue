@@ -21,13 +21,6 @@
             <feather-icon icon="UserIcon" svgClasses="w-4 h-4" />
             <span class="ml-2">Tài khoản</span>
           </li>
-          <li
-            class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white"
-            @click="$router.push('/').catch(() => {})">
-            <feather-icon icon="StarIcon" svgClasses="w-4 h-4" />
-            <span class="ml-2">Gói dịch vụ</span>
-          </li>
-          <vs-divider class="m-1" />
 
           <li
             class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white"

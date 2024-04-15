@@ -23,9 +23,9 @@
 
         <vs-spacer />
 
-        <i18n />
+        <!-- <i18n /> -->
 
-        <search-bar />
+        <!-- <search-bar /> -->
 
         <notification-drop-down />
 

@@ -232,4 +232,6 @@ return [
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class
 
     ],
+
+    'prefix_student_code' => env('APP_PREFIX_STUDENT_CODE', 'LMS'),
 ];

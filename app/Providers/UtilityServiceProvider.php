@@ -323,4 +323,32 @@ class UtilityServiceProvider extends ServiceProvider
             return 90;
         } 
     }
+
+	public static function explodeName($text){
+        $data = (object)[
+            'firstname'=>"",
+            'midname'=>"",
+            'lastname'=>"",
+        ];
+        $arr_text = explode(" ",$text);
+        if(count($arr_text)==1){
+            $data->lastname = $arr_text[0];
+        }elseif(count($arr_text)==2){
+            $data->firstname = $arr_text[0];
+            $data->lastname = $arr_text[1];
+        }elseif(count($arr_text)==3){
+            $data->firstname = $arr_text[0];
+            $data->lastname = $arr_text[2];
+            $data->midname = $arr_text[1];
+        }else{
+            $data->firstname = $arr_text[0];
+            $data->lastname = $arr_text[count($arr_text)-1];
+            foreach($arr_text AS $k=> $row){
+                if($k!=0 && $k!=count($arr_text)-1){
+                    $data->midname.= $data->midname?" ".$row:$row;
+                }
+            }
+        }
+        return $data;
+    }
 }

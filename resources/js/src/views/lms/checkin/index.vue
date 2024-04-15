@@ -469,24 +469,22 @@
         })
       },
       upStudent(){
-        console.log('1233');
-        // const data = {
-        //   parent_id: this.parent.id,
-        //   owner_id: this.tmp_owner_id,
-        // };
-        // this.$vs.loading();
-        // axios.p(`/api/crm/parents/assign`,data)
-        // .then((response) => {
-        //   this.$vs.loading.close();
-        //   this.loadDetail();
-        //   this.$vs.notify({
-        //     title: 'Thành Công',
-        //     text: response.data.message,
-        //     color: 'success',
-        //     iconPack: 'feather',
-        //     icon: 'icon-check'
-        //   })
-        // })
+        const data = {
+          crm_student_id: this.up_student_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/lms/checkin/upgrade`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$router.push(`/lms/students/${response.data.lms_student_id}/detail`)
+        })
       },
 
       showModalCheckin(id){

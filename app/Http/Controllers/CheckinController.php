@@ -6,7 +6,7 @@ use App\Providers\UtilityServiceProvider as u;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Models\LogStudents;
 class CheckinController extends Controller
 {
     public function list(Request $request)
@@ -66,7 +66,7 @@ class CheckinController extends Controller
         return response()->json($data);
     }
 
-    public function stuentChecked(Request $request)
+    public function studentChecked(Request $request)
     {
         u::updateSimpleRow(array(
             'checkined_at' => date('Y-m-d H:i:s', strtotime($request->checkined_at)),
@@ -78,6 +78,62 @@ class CheckinController extends Controller
         $result =(object)array(
             'status'=>1,
             'message'=>'Xác nhận checkin thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function studentUpgrade(Request $request){
+        $crm_student_info = u::first("SELECT * FROM crm_students WHERE id = $request->crm_student_id");
+        $crm_parent_info = u::first("SELECT * FROM crm_parents WHERE id = ".(int)data_get($crm_student_info, 'parent_id'));
+        if($crm_student_info && $crm_parent_info){
+            $arr_name = u::explodeName(data_get($crm_student_info, 'name'));
+            $lms_student_id = u::insertSimpleRow(array(
+                'lms_code' => '',
+                'name' => data_get($crm_student_info, 'name'),
+                'firstname' => data_get($arr_name, 'firstname'),
+                'midname' => data_get($arr_name, 'midname'),
+                'lastname' => data_get($arr_name, 'lastname'),
+                'gender' => data_get($crm_student_info, 'gender'),
+                'date_of_birth' => data_get($crm_student_info, 'birthday'),
+                'gud_mobile1' => data_get($crm_parent_info, 'mobile_1'),
+                'gud_name1' => data_get($crm_parent_info, 'name'),
+                'gud_email1' => data_get($crm_parent_info, 'email'),
+                'address' =>  data_get($crm_parent_info, 'address'),
+                'province_id' => data_get($crm_parent_info, 'province_id'),
+                'district_id' => data_get($crm_parent_info, 'district_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
+                'gud_birth_day1' => data_get($crm_parent_info, 'birthday'),
+                'gud_gender1' => data_get($crm_parent_info, 'gender'),
+                'gud_job1' => data_get($crm_parent_info, 'job_id'),
+                'status' => 1,
+                'source_detail_id' => data_get($crm_parent_info, 'source_detail_id'),
+                'source_id' => data_get($crm_parent_info, 'source_id', ),
+            ), 'students');
+
+            u::insertSimpleRow(array(
+                'student_id' => $lms_student_id,
+                'ec_id' => data_get($crm_student_info, 'checkin_owner_id'),
+                'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'status' => 1
+            ), 'term_student_user');
+
+            u::updateSimpleRow(array('status'=>3), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
+
+            $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
+            $lms_code = config('app.prefix_student_code').$last_lms_code;
+            u::updateSimpleRow(array('lms_code'=>$lms_code), array('id'=>$lms_student_id), 'students');
+            LogStudents::logAdd($lms_student_id, 'Chuyển lên danh sách học sinh chính thức', Auth::user()->id);
+        }
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Chuyển học sinh từ checkin lên danh sách chính thức thành công',
+            'data' => [
+                'lms_student_id' => $lms_student_id ?? 0
+            ]
         );
         return response()->json($result);
     }

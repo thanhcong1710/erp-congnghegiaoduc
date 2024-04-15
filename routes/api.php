@@ -83,8 +83,8 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         Route::prefix('lms')->group(function () {
             Route::post('checkin/list', 'CheckinController@list');
-            Route::post('checkin/student/checked', 'CheckinController@stuentChecked');
-            
+            Route::post('checkin/student/checked', 'CheckinController@studentChecked');
+            Route::post('checkin/upgrade', 'CheckinController@studentUpgrade');
         });
     });
 });
