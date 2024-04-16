@@ -767,7 +767,7 @@
             this.tmp_status = response.data.status
             this.getDistrict(this.parent_input.province);
           }else{
-            this.$router.push({ path: `/parents` });
+            this.$router.push({ path: `/crm/parent` });
           }
         })
       },
@@ -797,7 +797,7 @@
             parent_id: this.parent.id,
           };
           this.$vs.loading();
-          u.p(`/api/crm/parents/validate_phone`,data).then(response => {
+          axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
               this.parent.mobile_1 ="";
@@ -815,7 +815,7 @@
             parent_id: this.parent.id,
           };
           this.$vs.loading();
-          u.p(`/api/crm/parents/validate_phone`,data).then(response => {
+          axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
               this.parent.mobile_2 ="";
@@ -1419,12 +1419,3 @@
     },
   }
 </script>
-<style>
-.vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
-    opacity: 1;
-    background: #edf3f063;
-}
-.vs-tabs--li button.vs-tabs--btn{
-  font-size: 16px;
-}
-</style>

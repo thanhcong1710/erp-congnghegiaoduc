@@ -9227,6 +9227,31 @@ body {
   color: #fff;
 }
 
+.vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
+  opacity: 0.9 !important;
+}
+
+[dir] .vs-input--input:disabled, [dir] .vs-input--input:disabled+.vs-input--placeholder {
+  background: #edf3f063 !important;
+}
+
+.vs-tabs--li button.vs-tabs--btn{
+  font-size: 16px;
+}
+
+[dir] .vs--disabled .vs__search{
+  opacity: 0.9 !important;
+  background: #edf3f063 !important;
+}
+
+.mx-input:disabled, .mx-input.disabled{
+  opacity: 0.9 !important;
+}
+
+[dir] .mx-input:disabled, [dir] .mx-input.disabled{
+  background: #edf3f063 !important;
+}
+
 @media (min-width: 576px) {
   .sm\:container {
     width: 100%;

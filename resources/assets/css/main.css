@@ -88,3 +88,18 @@ body {
 .modal_info .vs-popup--title h3, .modal_success .vs-popup--title h3, .modal_warning .vs-popup--title h3{
     color: #fff;
 }
+.vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
+    opacity: 0.9 !important;
+    background: #edf3f063 !important;
+}
+.vs-tabs--li button.vs-tabs--btn{
+  font-size: 16px;
+}
+[dir] .vs--disabled .vs__search{
+    opacity: 0.9 !important;
+    background: #edf3f063 !important;
+}
+.mx-input:disabled, .mx-input.disabled{
+    opacity: 0.9 !important;
+    background: #edf3f063 !important;
+}

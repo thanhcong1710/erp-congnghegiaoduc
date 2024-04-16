@@ -1,7 +1,7 @@
 
 export default {
   router: {
-    path: '/crm/parents',
+    path: '/crm/parent',
     component: () => import('@/layouts/main/Main.vue'),
     children: [
       {

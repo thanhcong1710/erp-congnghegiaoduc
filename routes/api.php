@@ -86,6 +86,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('checkin/student/checked', 'CheckinController@studentChecked');
             Route::post('checkin/upgrade', 'CheckinController@studentUpgrade');
             Route::post('students/list', 'StudentsController@list');
+            Route::get('students/show/{student_id}', 'StudentsController@show');
+            Route::post('students/update', 'StudentsController@update');
         });
     });
 });

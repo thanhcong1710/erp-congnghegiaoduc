@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LogParents;
+use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use App\Providers\CurlServiceProvider as curl;
 use Illuminate\Http\Request;
@@ -114,4 +115,46 @@ class StudentsController extends Controller
         return response()->json($data);
     }
 
+    public function show(Request $request,$student_id)
+    {
+        $data = u::first("SELECT s.*
+            FROM students AS s WHERE s.id=$student_id");
+        return response()->json($data);
+    }
+
+    public function update(Request $request)
+    {
+        $pre_student_info = u::first("SELECT * FROM students WHERE id = $request->id");
+        $arr_name = u::explodeName(data_get($request, 'name'));
+        $data_update = array(
+            'name'=>$request->name,
+            'firstname' => data_get($arr_name, 'firstname'),
+            'midname' => data_get($arr_name, 'midname'),
+            'lastname' => data_get($arr_name, 'lastname'),
+            'date_of_birth'=>$request->date_of_birth,
+            'gender' => $request->gender,
+            'province_id' => $request->province_id,
+            'district_id' => $request->district_id,
+            'address' => $request->address,
+            'school' => $request->school,
+            'gud_name1' => $request->gud_name1,
+            'gud_email1' => $request->gud_email1,
+            'gud_birth_day1' => $request->gud_birth_day1,
+            'gud_job1' => $request->gud_job1,
+            'gud_name2' => $request->gud_name2,
+            'gud_email2' => $request->gud_email2,
+            'gud_mobile2' => $request->gud_mobile2,
+            'gud_birth_day2' => $request->gud_birth_day2,
+            'gud_job2' => $request->gud_job2,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        );
+        $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
+        LogStudents::logUpdateInfo($pre_student_info,$data_update,Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật học sinh thành công'
+        );
+        return response()->json($result);
+    }
 }
