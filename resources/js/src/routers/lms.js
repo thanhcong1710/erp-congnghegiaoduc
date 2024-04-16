@@ -20,26 +20,27 @@ export default {
       {
         path: '/lms/students',
         name: 'lms-students',
-        component: () => import('@/views/lms/checkin/index.vue'),
+        component: () => import('@/views/lms/students/index.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách checkin', active: true }
+            { title: 'Danh sách học sinh', active: true }
           ],
-          pageTitle: 'Danh sách checkin',
+          pageTitle: 'Danh sách học sinh',
           rule: 'editor'
         }
       },
       {
         path: '/lms/students/:id/detail',
         name: 'lms-students-detail',
-        component: () => import('@/views/lms/checkin/index.vue'),
+        component: () => import('@/views/lms/students/detail.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách checkin', active: true }
+            { title: 'Danh sách học sinh', url: '/lms/students'},
+            { title: 'Thông tin học sinh', active: true}
           ],
-          pageTitle: 'Danh sách checkin',
+          pageTitle: 'Thông tin học sinh',
           rule: 'editor'
         }
       },

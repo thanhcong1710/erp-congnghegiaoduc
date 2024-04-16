@@ -49,12 +49,12 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
-        url: '/lms/students/list',
+        url: '/lms/students',
         name: 'Học sinh',
         icon: 'UserIcon',
         submenu: [
           {
-            url: '/lms/students/list',
+            url: '/lms/students',
             name: 'Danh sách',
           },
           {

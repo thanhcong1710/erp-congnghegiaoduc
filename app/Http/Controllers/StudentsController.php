@@ -76,4 +76,42 @@ class StudentsController extends Controller
         );
         return response()->json($result);
     }
+
+    //LMS
+    public function list(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $status = isset($request->status) ? $request->status : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " s.status > 0 ";
+        $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        
+        if (!empty($status)) {
+            $cond .= " AND s.status IN (".implode(",",$status).")";
+        }
+        if (!empty($branch_id)) {
+            $cond .= " AND s.branch_id IN (".implode(",",$branch_id).")";
+        }
+        
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+        }
+        
+        $order_by = " ORDER BY s.id DESC ";
+
+        $total = u::first("SELECT count(s.id) AS total FROM students AS s WHERE $cond");
+        
+        $list = u::query("SELECT s.*
+            FROM students AS s
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
 }

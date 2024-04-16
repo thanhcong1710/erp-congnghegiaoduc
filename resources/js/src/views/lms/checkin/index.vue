@@ -93,9 +93,6 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/crm/parent/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
-            </router-link>  
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
           </div>
@@ -105,7 +102,7 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 2000px">
+            <table class="vs-table vs-table--tbody-table">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
@@ -114,53 +111,18 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Tên học sinh
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Học sinh
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Giới tính
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Ngày sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Phụ huynh
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số điện thoại
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Địa chỉ
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trung tâm checkin
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch hẹn checkin
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Người phụ trách
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Thông tin checkin
                       <!---->
                     </div>
                   </th>
@@ -180,16 +142,21 @@
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{ item.name }}</td>
-                <td class="td vs-table--td text-center">{{ item.gender == 'F' ? 'Nữ' : 'Nam' }}</td>
-                <td class="td vs-table--td text-center">{{ item.birthday }}</td>
-                <td class="td vs-table--td">{{ item.source_name }}</td>
-                <td class="td vs-table--td">{{ item.parent_name }}</td>
-                <td class="td vs-table--td text-center">{{ item.mobile_1 }}</td>
-                <td class="td vs-table--td">{{ item.address }}</td>
-                <td class="td vs-table--td">{{ item.checkin_branch_name }}</td>
-                <td class="td vs-table--td text-center">{{ item.checkin_at }}</td>
-                <td class="td vs-table--td">{{ item.checkin_owner_name }}</td>
+                <td class="td vs-table--td">
+                  <p><strong>{{ item.name }}</strong></p>
+                  <p>Giới tính: {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}</p>
+                  <p>Ngày sinh: {{ item.birthday }}</p>
+                </td>
+                <td class="td vs-table--td">
+                  <p><strong>{{ item.parent_name }}</strong></p>
+                  <p>SĐT: {{ item.mobile_1 }}</p>
+                  <p>Nguồn: {{ item.source_name }}</p>
+                  <p>Phụ trách: {{ item.checkin_owner_name }}</p>
+                </td>
+                <td class="td vs-table--td">
+                  <p>{{ item.checkin_branch_name }}</p>
+                  <p>Thời gian: {{ item.checkin_at }}</p>
+                </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
                     <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item.id)"><i class="fa-solid fa-clipboard-check"></i></vs-button>

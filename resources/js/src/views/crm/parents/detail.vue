@@ -10,7 +10,7 @@
               <img class="rounded" src="@assets/images/common/avatar-default.jpg" width="100%">
             </div>
             <div style="float: left; padding: 10px; width: calc(100% - 110px);">
-               <h5>{{parent.name}}</h5>
+               <h5><strong>{{parent.name}}</strong></h5>
               <p style="margin-top: 5px;" class="list-action"><span> {{parent.mobile_1}}</span> 
                 <vs-button size="small" @click="callPhone(parent.mobile_1)"><i class="fa fa-phone"></i></vs-button>
                 <vs-button size="small" @click="showSendSms(parent.mobile_1)"><i class="fa fa-sms"></i></vs-button>
@@ -25,8 +25,9 @@
           <div class="vx-col md:w-1/3 w-full">
             <p class="mb-1">Liên hệ lần cuối: {{parent.last_care}}</p>
             <p class="mb-1">Tương tác: <strong>{{parent.num_care}}</strong></p>
+            <vs-divider/>
             <p><i class="fa fa-calendar"></i> Lịch chăm sóc tiếp theo</p>
-            <p class="mb-1"><input class="form-control" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
+            <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
             <p>Trạng thái</p>
@@ -1421,7 +1422,7 @@
 <style>
 .vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
     opacity: 1;
-    background: #edf3f0;
+    background: #edf3f063;
 }
 .vs-tabs--li button.vs-tabs--btn{
   font-size: 16px;
