@@ -67,4 +67,10 @@ class SystemController extends Controller
         $data = u::query("SELECT * FROM crm_contact_methods WHERE status=1");
         return response()->json($data);
     }
+
+    public function getProducts(){
+        $data = u::query("SELECT * FROM products WHERE status=1");
+        return response()->json($data);
+    }
+    
 }

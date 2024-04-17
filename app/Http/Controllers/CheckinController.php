@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SystemCode;
 use App\Providers\UtilityServiceProvider as u;
 
 use Illuminate\Http\Request;
@@ -112,10 +113,17 @@ class CheckinController extends Controller
                 'source_id' => data_get($crm_parent_info, 'source_id', ),
             ), 'students');
 
+            $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
+                LEFT JOIN roles AS r ON r.id = ru.role_id
+                LEFT JOIN users AS u ON u.id = ru.user_id
+                WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."'");
+            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($crm_student_info, 'checkin_owner_id'));
             u::insertSimpleRow(array(
                 'student_id' => $lms_student_id,
-                'ec_id' => data_get($crm_student_info, 'checkin_owner_id'),
+                'ec_id' => data_get($ec_info, 'id'),
                 'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
+                'ceo_branch_id' => data_get($ceo_info, 'id'),
+                'ec_leader_id' => data_get($ec_info, 'manager_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
                 'status' => 1

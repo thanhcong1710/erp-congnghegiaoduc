@@ -37,6 +37,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('methods', 'SystemController@getMethods');
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
             Route::get('branches-has-user', 'SystemController@getBranchesHasUser');
+            Route::get('products', 'SystemController@getProducts');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -88,6 +89,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('students/list', 'StudentsController@list');
             Route::get('students/show/{student_id}', 'StudentsController@show');
             Route::post('students/update', 'StudentsController@update');
+            Route::post('students/search-contract', 'StudentsController@searchContract');
         });
     });
 });

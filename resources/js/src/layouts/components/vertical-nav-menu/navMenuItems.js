@@ -61,8 +61,58 @@ export default [
             url: '/lms/checkin',
             name: 'Checkin',
           }
+        ],
+      },
+      {
+        url: '/lms/contracts',
+        name: 'Vận hành',
+        icon: 'AirplayIcon',
+        submenu: [
+          {
+            url: '/lms/contracts',
+            name: 'Nhập học',
+          },
+          {
+            url: '/lms/enrolments',
+            name: 'Xếp lớp',
+          },
+          {
+            url: '/lms/reserves',
+            name: 'Bảo lưu',
+          },
+          {
+            url: '/lms/class_transfers',
+            name: 'Chuyển lớp',
+          },
+          {
+            url: '/lms/branch_transfers',
+            name: 'Chuyển trung tâm',
+          },
+          {
+            url: '/lms/tution_transfers',
+            name: 'Chuyển phí',
+          },
+          {
+            url: '/lms/exchange',
+            name: 'Quy đổi',
+          },
+          {
+            url: '/lms/attendances',
+            name: 'Điểm danh',
+          }
+
         ]
-      }
+      },
+      {
+        url: '/lms/accounting',
+        name: 'Kế toán',
+        icon: 'DollarSignIcon'
+      },
+      {
+        url: '/lms/reports',
+        name: 'Báo cáo',
+        icon: 'TrendingUpIcon'
+      },
     ]
   },
   {

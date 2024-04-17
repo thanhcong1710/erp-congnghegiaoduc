@@ -351,4 +351,12 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $data;
     }
+
+	public static function addLogContracts($contract_id){
+		$contract_info = (array)self::getObject(['id'=>$contract_id], 'contracts');
+		$contract_info['contract_id'] = data_get($contract_info, 'id');
+		unset($contract_info['id']);
+		$log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
+		return $log_contract_id;
+	}
 }
