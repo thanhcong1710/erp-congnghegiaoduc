@@ -90,6 +90,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('students/show/{student_id}', 'StudentsController@show');
             Route::post('students/update', 'StudentsController@update');
             Route::post('students/search-contract', 'StudentsController@searchContract');
+            Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
+            Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
+            Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
+            
         });
     });
 });
