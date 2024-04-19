@@ -93,7 +93,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
-            
+            Route::post('contracts/add', 'ContractsController@add');
         });
     });
 });

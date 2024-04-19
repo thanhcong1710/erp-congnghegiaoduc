@@ -234,4 +234,5 @@ return [
     ],
 
     'prefix_student_code' => env('APP_PREFIX_STUDENT_CODE', 'LMS'),
+    'prefix_contract_code' => env('APP_PREFIX_CONTRACT_CODE', 'C'),
 ];

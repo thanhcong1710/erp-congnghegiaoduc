@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Http\Controllers\Controller;
+use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +15,10 @@ class ContractsController extends Controller
     {
         $product_id = $request->product_id;
         $branch_id = $request->branch_id;
+        $type_contract = $request->type_contract;
         $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session
             FROM tuition_fee AS t 
-            WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE 
+            WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE AND type_contract = $type_contract
             AND t.product_id = $product_id AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' ) 
             ORDER BY t.name DESC");
         return response()->json($data);
@@ -65,6 +67,75 @@ class ContractsController extends Controller
                 'message' => 'Mã voucher không hợp lệ'
             );
         }
+        return response()->json($result);
+    }
+
+    public function add(Request $request)
+    {
+        $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
+        $contract_id = u::insertSimpleRow(array(
+            'type' => data_get($request, 'type'),
+           'student_id' => data_get($request, 'student_id'), 
+           'branch_id' => data_get($student_info, 'branch_id'),
+           'ceo_branch_id' => data_get($student_info, 'ceo_branch_id'),
+           'ec_id' => data_get($student_info, 'ec_id'),
+           'ec_leader_id' => data_get($student_info, 'ec_leader_id'),
+           'cm_id' => data_get($student_info, 'cm_id'),
+           'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
+           'product_id' => data_get($request, 'product_id'),
+           'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
+           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'must_charge' => data_get($request, 'total_amount'),
+           'total_charged'=>0,
+           'debt_amount' => data_get($request, 'total_amount'),
+           'discount_code_id' => data_get($request, 'discount_code_id'),
+           'discount_code' => data_get($request, 'discount_code'),
+           'discount_code_amount' => data_get($request, 'discount_code_amount'),
+           'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
+           'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
+           'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
+           'total_sessions' => data_get($request, 'total_session'),
+           'real_sessions' => data_get($request, 'tuition_fee_session'),
+           'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
+           'summary_sessions' => 0, // chưa đóng phí
+           'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
+           'start_date'=> data_get($request, 'start_date'),
+           'note'=> data_get($request, 'note'),
+           'created_at'=>date('Y-m-d H:i:s'),
+           'creator_id'=>Auth::user()->id,
+           'status' => 1
+        ), 'contracts');
+
+        if(data_get($request,'coupon_code_check') == 1){
+            $coupon_info = u::getObject(['code'=>data_get($request, 'coupon_code')], 'coupons');
+            if($coupon_info->quota == 1){
+                u::updateSimpleRow(array(
+                    'status'=> 2,
+                    'checked_date'=>date('Y-m-d'),
+                    'updated_at'=>date('Y-m-d H:i:s'),
+                    'updator_id'=>Auth::user()->id,
+                ), array('id'=>$coupon_info->id), 'coupons');
+            }
+            u::insertSimpleRow(array(
+                'contract_id' => $contract_id,
+                'coupon_id' => $coupon_info->id,
+                'created_at'=>date('Y-m-d H:i:s'),
+                'creator_id'=>Auth::user()->id,
+            ), 'coupon_logs');
+        }
+        $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
+        $contract_code = config('app.prefix_contract_code').$contract_code;
+        u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
+        u::addLogContracts($contract_id);
+        LogStudents::logAdd(data_get($student_info, 'id'), 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
+
+        $result = array(
+            'status' => 1,
+            'message' => 'Thêm mới nhập học thành công'
+        );
         return response()->json($result);
     }
 }
