@@ -9190,7 +9190,7 @@ body {
 
 [dir] .list-action .vs-button.small:not(.includeIconOnly){
   padding: 6px;
-  margin: 4px;
+  margin: 1px;
 }
 
 @media only screen and (min-width: 600px) {
@@ -9232,7 +9232,7 @@ body {
 }
 
 [dir] .vs-input--input:disabled, [dir] .vs-input--input:disabled+.vs-input--placeholder {
-  background: #edf3f063 !important;
+  background: #c9d2d263 !important;
 }
 
 .vs-tabs--li button.vs-tabs--btn{
@@ -9241,7 +9241,7 @@ body {
 
 [dir] .vs--disabled .vs__search{
   opacity: 0.9 !important;
-  background: #edf3f063 !important;
+  /* background: #c9d2d263 !important; */
 }
 
 .mx-input:disabled, .mx-input.disabled{
@@ -9249,7 +9249,7 @@ body {
 }
 
 [dir] .mx-input:disabled, [dir] .mx-input.disabled{
-  background: #edf3f063 !important;
+  background: #c9d2d263 !important;
 }
 
 @media (min-width: 576px) {

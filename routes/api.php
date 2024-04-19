@@ -94,6 +94,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
             Route::post('contracts/add', 'ContractsController@add');
+            Route::post('contracts/list', 'ContractsController@list');
+            Route::post('contracts/delete', 'ContractsController@delete');
+            Route::get('contracts/show/{contract_id}', 'ContractsController@show');
+            Route::post('contracts/update', 'ContractsController@update');
         });
     });
 });

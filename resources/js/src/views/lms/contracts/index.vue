@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã, tên học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã tên học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian tạo</label>
@@ -95,28 +95,31 @@
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
                   <p><strong>{{ item.name }}</strong></p>
-                  <p>Mã: </p>
+                  <p>Mã: {{item.lms_code}}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p><strong>{{ item.parent_name }}</strong></p>
-                  <p>EC: {{ item.mobile_1 }}</p>
-                  <p>CM: {{ item.source_name }}</p>
+                  <p><strong>{{ item.branch_name }}</strong></p>
+                  <p>EC: {{ item.ec_name }}</p>
+                  <p>CM: {{ item.cm_name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Mã: <strong>{{ item.checkin_branch_name }}</strong></p>
-                  <p>Chương trình: {{ item.checkin_at }}</p>
-                  <p>Gói phí: {{ item.checkin_at }}</p>
-                  <p>Số buổi: {{ item.checkin_at }}</p>
+                  <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
+                  <p>Chương trình: {{ item.product_name }}</p>
+                  <p>Gói phí: {{ item.tuition_fee_name }}</p>
+                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} học bổng)</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.checkin_branch_name }}</strong></p>
-                  <p>Phải đóng: {{ item.checkin_at }}</p>
-                  <p>Công nợ: {{ item.checkin_at }}</p>
+                  <p>Giá gốc: <strong>{{ item.tuition_fee_amount | formatMoney }}</strong></p>
+                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
+                  <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
-                <td class="text-center list-action"> 
-                    <vs-button size="small" color="success"><i class="fa-solid fa-pen-to-square"></i></vs-button>
-                    <vs-button size="small" ><i class="fa-solid fa-print"></i></vs-button>
+                <td class="td vs-table--td text-center list-action"> 
+                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
+                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+                    </router-link> 
+                    <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                    <vs-button size="small" color="danger" v-if="item.total_charged == 0" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -210,6 +213,7 @@
           pages: [],
           init: 0
         },
+        delete_id:'',
       }
     },
     created() {
@@ -248,7 +252,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/checkin/list', data)
+        axios.p('/api/lms/contracts/list', data)
           .then((response) => {
             this.$vs.loading.close()
             this.contracts = response.data.list
@@ -270,7 +274,36 @@
         this.pagination.limit = limit
         this.getData();
       },
-
+      confirmDelete (item) {
+        this.delete_id = item.contract_id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn hủy hợp đồng nhập học - ${item.code}?`,
+          accept: this.deleteContract,
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      deleteContract(){
+        const data = {
+          contract_id: this.delete_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/lms/contracts/delete`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.getData();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      },
     },
     filters: {
     },
@@ -290,5 +323,8 @@ th .sort-th, th .vs-table-text{
 }
 .multiselect{
   z-index: 999;
+}
+.td.vs-table--td{
+  vertical-align: top;
 }
 </style>

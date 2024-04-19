@@ -63,7 +63,7 @@ body {
 }
 .list-action .vs-button.small:not(.includeIconOnly){
     padding: 6px;
-    margin: 4px;
+    margin: 1px;
     width: 28px;
     font-size: 13px;
 }
@@ -90,16 +90,16 @@ body {
 }
 .vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
     opacity: 0.9 !important;
-    background: #edf3f063 !important;
+    background: #c9d2d263 !important;
 }
 .vs-tabs--li button.vs-tabs--btn{
   font-size: 16px;
 }
 [dir] .vs--disabled .vs__search{
     opacity: 0.9 !important;
-    background: #edf3f063 !important;
+    /* background: #c9d2d263 !important; */
 }
 .mx-input:disabled, .mx-input.disabled{
     opacity: 0.9 !important;
-    background: #edf3f063 !important;
+    background: #c9d2d263 !important;
 }

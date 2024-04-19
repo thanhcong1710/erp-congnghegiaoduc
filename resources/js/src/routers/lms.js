@@ -72,6 +72,34 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/contracts/:id/detail',
+        name: 'lms-contracts-detail',
+        component: () => import('@/views/lms/contracts/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhập học', url: '/lms/contracts'},
+            { title: 'Thông tin nhập học', active: true}
+          ],
+          pageTitle: 'Thông tin nhập học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/contracts/:id/edit',
+        name: 'lms-contracts-edit',
+        component: () => import('@/views/lms/contracts/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhập học', url: '/lms/contracts'},
+            { title: 'Cập nhật nhập học', active: true}
+          ],
+          pageTitle: 'Cập nhật nhập học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
