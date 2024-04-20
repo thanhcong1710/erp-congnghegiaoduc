@@ -119,7 +119,7 @@
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
-          <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin đăng ký chương trình học</h5>
+          <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin đăng ký học</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Loại hợp đồng <span class="text-danger"> (*)</span></label>
@@ -130,10 +130,10 @@
               </select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Chương trình học</label>
+              <label >Khóa học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn chương trình học"
+                    placeholder="Chọn khóa học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
@@ -526,7 +526,7 @@
           resp = false;
         }
         if (this.contract.product_id == "") {
-          mess += " - Chương trình học không được để trống<br/>";
+          mess += " - Khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.contract.tuition_fee_id == "") {

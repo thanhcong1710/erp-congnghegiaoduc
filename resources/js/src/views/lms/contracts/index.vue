@@ -104,7 +104,7 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-                  <p>Chương trình: {{ item.product_name }}</p>
+                  <p>Khóa học: {{ item.product_name }}</p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
                   <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} học bổng)</p>
                 </td>

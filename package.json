@@ -63,6 +63,7 @@
         "vue2-datepicker": "^2.11.2",
         "vue-multiselect": "^2.1.6",
         "vue2-autocomplete-js": "^0.2.2",
+        "vue-jstree": "^2.1.6",
         "moment": "^2.22.2",
         "vuepress": "0.14.11",
         "vuesax": "jd-0001/vuesax",

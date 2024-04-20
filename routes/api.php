@@ -98,10 +98,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/delete', 'ContractsController@delete');
             Route::get('contracts/show/{contract_id}', 'ContractsController@show');
             Route::post('contracts/update', 'ContractsController@update');
-
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
+            Route::post('enrolments/load-classes', 'EnrolmentsController@loadClasses');
         });
     });
 });

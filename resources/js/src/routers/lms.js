@@ -140,6 +140,19 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/enrolments',
+        name: 'lms-enrolments',
+        component: () => import('@/views/lms/enrolments/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Xếp lớp', active: true}
+          ],
+          pageTitle: 'Xếp lớp',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
