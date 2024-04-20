@@ -60,7 +60,12 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Hợp đồng
+                    <div class="vs-table-text">Mã Hợp đồng
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Sản phẩm
                       <!---->
                     </div>
                   </th>
@@ -99,6 +104,9 @@
                 <td class="td vs-table--td">
                   <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
+                <td class="td vs-table--td">
+                  <p>{{ item.product_name }}</p>
+                </td> 
                 <td class="td vs-table--td">
                   <p>{{ item.tuition_fee_name }}</p>
                 </td>                
@@ -214,7 +222,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/accounting/charges/list', data)
+        axios.p('/api/lms/accounting/waitcharges/list', data)
           .then((response) => {
             this.$vs.loading.close()
             this.contracts = response.data.list

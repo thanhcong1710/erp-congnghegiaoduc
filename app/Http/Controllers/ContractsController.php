@@ -135,7 +135,7 @@ class ContractsController extends Controller
         $contract_code = config('app.prefix_contract_code').$contract_code;
         u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
         u::addLogContracts($contract_id);
-        LogStudents::logAdd(data_get($student_info, 'id'), 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
+        LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
 
         $result = array(
             'status' => 1,
@@ -198,7 +198,7 @@ class ContractsController extends Controller
         u::updateSimpleRow(array('status' => 0), array('id'=>$request->contract_id), 'contracts');
         u::addLogContracts($request->contract_id);
 
-        LogStudents::logAdd(data_get($contract_info, 'id'), 'Hủy hợp đồng nhập học - '.data_get($contract_info, 'code'), Auth::user()->id);
+        LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Hủy hợp đồng nhập học - '.data_get($contract_info, 'code'), Auth::user()->id);
         $result = array(
             'status' => 1,
             'message' => 'Hủy hợp đồng nhập học '.data_get($contract_info, 'code').' thành công.'

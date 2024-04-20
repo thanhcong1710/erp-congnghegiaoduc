@@ -55,69 +55,51 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text text-center" >Mã học sinh
+                    <div class="vs-table-text text-center" >Học sinh
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Tên Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Hợp đồng
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Gói phí
+                  <th colspan="1" rowspan="1" >
+                    <div class="vs-table-text">Thu phí
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">EC
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số tiền còn phải đóng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Ngày thu phí
                       <!---->
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in payments" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
-                  <p>{{ item.lms_code }}</p>
+                   <p><strong>{{ item.name }}</strong></p>
+                  <p>Mã: {{ item.lms_code }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>{{ item.name }}</p>
+                  <p><strong>{{ item.code }}</strong></p>
+                  <p>Sản phẩm: {{item.product_name}}</p>
+                  <p>Gói phí: {{item.tuition_fee_name}}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
+                  <p><strong> {{ item.amount | formatMoney }}</strong></p>
+                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
+                  <p>Tổng tiền đã thu: {{ item.total | formatMoney }}</p>
+                  <p>Công nợ: {{ item.debt | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>{{ item.tuition_fee_name }}</p>
-                </td>                
-                <td class="td vs-table--td">
-                  <p>{{ item.ec_name }}</p>
-                </td>
-                <td class="td vs-table--td text-right ">
-                  <p>{{ item.debt_amount | formatMoney }}</p>
-                </td>
-                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >
-                      <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
-                    </router-link> 
-                </td>
+                  <p><strong>{{ item.charge_date }}</strong></p>
+                  <p>Người tạo: {{ item.creator_name }}</p>
+                  <p>Ngày tạo: {{ item.created_at }}</p>
+                </td> 
               </tr>
             </table>
             
@@ -193,7 +175,7 @@
             ]
           }
         },
-        contracts: [],
+        payments: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -251,7 +233,7 @@
         axios.p('/api/lms/accounting/charges/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contracts = response.data.list
+            this.payments = response.data.list
             this.pagination = response.data.paging;
             this.pagination.init = 1;
           })

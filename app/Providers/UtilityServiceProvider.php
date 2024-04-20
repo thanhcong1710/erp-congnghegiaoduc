@@ -359,4 +359,8 @@ class UtilityServiceProvider extends ServiceProvider
 		$log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
 		return $log_contract_id;
 	}
+
+	public static function formatCurrency($currency){
+        return number_format($currency)."đ";
+    }
 }

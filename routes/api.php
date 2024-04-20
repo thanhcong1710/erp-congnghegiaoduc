@@ -100,6 +100,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/update', 'ContractsController@update');
 
             Route::post('accounting/charges/list', 'ChargesController@list');
+            Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
         });
     });
