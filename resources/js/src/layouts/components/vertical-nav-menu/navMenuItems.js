@@ -104,9 +104,19 @@ export default [
         ]
       },
       {
-        url: '/lms/accounting',
+        url: '/lms/charges',
         name: 'Kế toán',
-        icon: 'DollarSignIcon'
+        icon: 'DollarSignIcon',
+        submenu: [
+          {
+            url: '/lms/charges',
+            name: 'Đã thu phí',
+          },
+          {
+            url: '/lms/waitcharges',
+            name: 'Chờ thu phí',
+          }
+        ],
       },
       {
         url: '/lms/reports',

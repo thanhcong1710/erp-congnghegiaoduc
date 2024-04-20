@@ -73,6 +73,9 @@ class ContractsController extends Controller
     public function add(Request $request)
     {
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
+        $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
+        $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         $contract_id = u::insertSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -91,6 +94,7 @@ class ContractsController extends Controller
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),
+           'total_discount' => $total_discount,
            'discount_code_id' => data_get($request, 'discount_code_id'),
            'discount_code' => data_get($request, 'discount_code'),
            'discount_code_percent' => data_get($request, 'discount_code_percent'),
@@ -212,7 +216,8 @@ class ContractsController extends Controller
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ceo_branch_id) AS ceo_branch_name,
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-            (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name
+            (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
         return response()->json($data);
@@ -223,6 +228,9 @@ class ContractsController extends Controller
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
+        $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
+        $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -241,6 +249,7 @@ class ContractsController extends Controller
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),
+           'total_discount'=> $total_discount, 
            'discount_code_id' => data_get($request, 'discount_code_id'),
            'discount_code' => data_get($request, 'discount_code'),
            'discount_code_percent' => data_get($request, 'discount_code_percent'),

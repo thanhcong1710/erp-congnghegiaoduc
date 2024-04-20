@@ -112,10 +112,29 @@ function dateToString (data) {
   const yyyy = date.getFullYear()
   return [yyyy, (mm > 9 ? '' : '0') + mm, (dd > 9 ? '' : '0') + dd].join('-')
 }
+function fmc (input) {
+  let code = ''
+  let drap = null
+  let resp = {
+    s: '',
+    n: 0
+  }
+  if (!input || input.toString() === '' || input.toString() === '0') {
+    resp.n = 0
+    resp.s = '0'
+  } else {
+    drap = input.toString().replace(/[\D\s\._\-]+/g, "")
+    drap = drap ? parseInt(drap, 10) : 0
+    resp.n = drap
+    resp.s = drap === 0 ? "0" : `${drap.toLocaleString( "en-US" )}`
+  }
+  return resp
+}
 
 export default {
   dateToString,
   checkPermission,
   vld,
   is,
+  fmc,
 }

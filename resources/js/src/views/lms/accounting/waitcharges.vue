@@ -26,19 +26,11 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã tên học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian tạo</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
+            <vs-input class="w-full" placeholder="Mã HS, tên HS, mã hợp đồng" v-model="searchData.keyword"></vs-input>
           </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/contracts/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
-            </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
           </div>
@@ -58,27 +50,32 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Học sinh
+                    <div class="vs-table-text text-center" >Mã học sinh
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm
+                    <div class="vs-table-text">Tên Học sinh
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1">
+                  <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Hợp đồng
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Đóng phí
+                    <div class="vs-table-text">Gói phí
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
+                    <div class="vs-table-text">EC
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Số tiền còn phải đóng
                       <!---->
                     </div>
                   </th>
@@ -94,32 +91,27 @@
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
-                  <p><strong>{{ item.name }}</strong></p>
-                  <p>Mã: {{item.lms_code}}</p>
+                  <p>{{ item.lms_code }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p><strong>{{ item.branch_name }}</strong></p>
-                  <p>EC: {{ item.ec_name }}</p>
-                  <p>CM: {{ item.cm_name }}</p>
+                  <p>{{ item.name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-                  <p>Chương trình: {{ item.product_name }}</p>
-                  <p>Gói phí: {{ item.tuition_fee_name }}</p>
-                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} học bổng)</p>
+                  <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.tuition_fee_amount | formatMoney }}</strong></p>
-                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
-                  <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
+                  <p>{{ item.tuition_fee_name }}</p>
+                </td>                
+                <td class="td vs-table--td">
+                  <p>{{ item.ec_name }}</p>
                 </td>
-                <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
+                <td class="td vs-table--td text-right ">
+                  <p>{{ item.debt_amount | formatMoney }}</p>
+                </td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
-                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+                    <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >
+                      <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
                     </router-link> 
-                    <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
-                    <vs-button size="small" color="danger" v-if="item.total_charged == 0" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -156,14 +148,12 @@
   import vSelect from 'vue-select'
   import axios from '../../../http/axios.js'
   import Multiselect from "vue-multiselect";
-  import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
 
   export default {
     components: { 
       vSelect,
-      Multiselect,
-      DatePicker
+      Multiselect
     },
     data() {
       return {
@@ -173,28 +163,6 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
-        },
-        datepickerOptions: {
-          closed: true,
-          value: "",
-          minDate: "",
-          lang: {
-            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
-            months: [
-              "Tháng 1",
-              "Tháng 2",
-              "Tháng 3",
-              "Tháng 4",
-              "Tháng 5",
-              "Tháng 6",
-              "Tháng 7",
-              "Tháng 8",
-              "Tháng 9",
-              "Tháng 10",
-              "Tháng 11",
-              "Tháng 12"
-            ]
-          }
         },
         contracts: [],
         limitSource: [20, 50, 100, 500],
@@ -229,13 +197,9 @@
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
-        this.searchData.dateRange= ""
         this.getData();
       },
       getData() {
-        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-        
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -246,13 +210,11 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
-            start_date:startDate,
-            end_date:endDate,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/contracts/list', data)
+        axios.p('/api/lms/accounting/charges/list', data)
           .then((response) => {
             this.$vs.loading.close()
             this.contracts = response.data.list
@@ -273,36 +235,6 @@
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getData();
-      },
-      confirmDelete (item) {
-        this.delete_id = item.contract_id
-        this.$vs.dialog({
-          type: 'confirm',
-          color: 'danger',
-          title: 'Thông báo',
-          text: `Bạn chắc chắn hủy hợp đồng nhập học - ${item.code}?`,
-          accept: this.deleteContract,
-          acceptText: 'Xóa',
-          cancelText: 'Hủy'
-        })
-      },
-      deleteContract(){
-        const data = {
-          contract_id: this.delete_id,
-        };
-        this.$vs.loading();
-        axios.p(`/api/lms/contracts/delete`,data)
-        .then((response) => {
-          this.$vs.loading.close();
-          this.getData();
-          this.$vs.notify({
-            title: 'Thành Công',
-            text: response.data.message,
-            color: 'success',
-            iconPack: 'feather',
-            icon: 'icon-check'
-          })
-        })
       },
     },
     filters: {
