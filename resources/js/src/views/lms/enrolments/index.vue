@@ -44,149 +44,7 @@
         <div class="vx-col md:w-3/4 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin lớp học</h5>
           <div class="vx-row">
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại hợp đồng <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="contract_info.type" disabled>
-                <option value="" disabled>Chọn loại hợp đồng</option>
-                <option value="0">Học thử</option>
-                <option value="1">Chính thức</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Chương trình học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.product_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Gói học phí</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.tuition_fee_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Giá gốc</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                :value="contract_info.tuition_fee_amount | formatNumber"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi chính thức</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.tuition_fee_session"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Mã chiết khấu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.discount_code_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Phần trăm chiết khấu(%)</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.discount_code_percent"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền giảm trừ theo mã chiết khấu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                :value="contract_info.discount_code_amount | formatNumber"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label>Mã voucher</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.coupon_code"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền voucher</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                :value="contract_info.coupon_amount | formatNumber"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi học bổng</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.coupon_session"
-                disabled="true"
-              />
-            </div>
-            <vs-divider/>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền phải đóng</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                :value="contract_info.must_charge | formatNumber"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Tổng số buổi học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.total_sessions"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày dự kiến học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="contract_info.start_date"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label>Ghi chú</label>
-              <textarea class="vs-inputx vs-input--input normal" v-model="contract_info.note" disabled="true"></textarea>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -196,7 +54,7 @@
           <router-link class="btn btn-danger" :to="`/lms/contracts`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`">
+          <router-link class="btn btn-danger" :to="`/lms/contracts`">
             <vs-button class="mb-2" color="success" >Cập nhật hợp đồng</vs-button>
           </router-link>
         </div>
@@ -257,7 +115,6 @@
         .then(response => {
         this.html.products.list = response.data
       })
-      // this.loadDetail();
     },
     methods: {
       saveBranch(data = null){
@@ -267,35 +124,31 @@
         }else{
           this.enrol.branch_id = ""
         }
+        this.loadClasses();
       },
       saveProduct(data = null){
         if (data && typeof data === 'object') {
           const product_id = data.id
           this.enrol.product_id = product_id
-          this.loadClasses();
         }else{
           this.enrol.product_id = ""
-          this.classes =[]
         }
-      },
-      loadDetail(){
-        this.$vs.loading();
-        axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
-          .then(response => {
-          this.$vs.loading.close();
-          this.contract_info = response.data
-        })
+        this.loadClasses();
       },
       loadClasses(){
-        this.$vs.loading();
-        axios.p(`/api/lms/enrolments/load-classes`, {
-          branch_id: this.enrol.branch_id,
-          product_id: this.enrol.product_id
-        })
-          .then(response => {
-          this.$vs.loading.close();
-          this.classes = response.data
-        })
+        if(this.enrol.branch_id && this.enrol.product_id){
+          this.$vs.loading();
+          axios.p(`/api/lms/enrolments/load-classes`, {
+            branch_id: this.enrol.branch_id,
+            product_id: this.enrol.product_id
+          })
+            .then(response => {
+            this.$vs.loading.close();
+            this.classes = response.data
+          })
+        }else{
+          this.classes =[]
+        }
       },
       selectClass(selected_class) {
       if (selected_class.model.item_type === 'class') {

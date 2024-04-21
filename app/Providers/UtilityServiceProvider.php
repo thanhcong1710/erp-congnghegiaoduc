@@ -363,4 +363,25 @@ class UtilityServiceProvider extends ServiceProvider
 	public static function formatCurrency($currency){
         return number_format($currency)."đ";
     }
+
+	public static function get_tree_data($array = [], $parent = 'parent_id', $note = 'id')
+    {
+        $resp = array();
+        foreach ($array as $sub) {
+            $resp[$sub->$parent][] = $sub;
+        }
+        $fnBuilder = function ($siblings) use (&$fnBuilder, $resp, $note) {
+            foreach ($siblings as $k => $sibling) {
+                $id = $sibling->$note;
+                if (isset($resp[$id])) {
+                    $sibling->icon = 'fa fa-folder-open';
+                    $sibling->children = $fnBuilder($resp[$id]);
+                }
+                $siblings[$k] = $sibling;
+            }
+            return $siblings;
+        };
+        $tree = count($resp) > 0 && isset($resp[0]) ? $fnBuilder($resp[0]) : null;
+        return $tree;
+    }
 }

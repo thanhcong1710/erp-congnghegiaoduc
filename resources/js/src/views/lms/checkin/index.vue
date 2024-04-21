@@ -197,7 +197,7 @@
                     :value="modal_checkin.checkined_at"
                     v-model="modal_checkin.checkined_at"
                     placeholder="Chọn ngày giờ"
-                    lang="lang"
+                    :lang="datepickerOptions.lang"
                     type="datetime"
                     format="YYYY-MM-DD HH:mm"
                     style="width: 100%"

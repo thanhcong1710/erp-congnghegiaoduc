@@ -181,7 +181,7 @@
                       <datepicker class="w-full"
                         v-model="parent.birthday"
                         placeholder="Chọn ngày sinh nhật"
-                        lang="lang"
+                        :lang="datepickerOptions.lang"
                         @change="selectDateParent"
                         :disabled="disabled_edit"
                       />
@@ -471,7 +471,7 @@
               class=" w-full calendar"
               v-model="student.birthday"
               placeholder="Chọn ngày sinh nhật"
-              lang="lang"
+              :lang="datepickerOptions.lang"
               @change="selectDate"
             />
           </div>
@@ -514,7 +514,7 @@
                       :value="modal_checkin.checkin_at"
                       v-model="modal_checkin.checkin_at"
                       placeholder="Chọn ngày giờ"
-                      lang="lang"
+                      :lang="datepickerOptions.lang"
                       type="datetime"
                       format="YYYY-MM-DD HH:mm"
               >
@@ -560,6 +560,28 @@
     },
     data() {
       return {
+        datepickerOptions: {
+          closed: true,
+          value: "",
+          minDate: "",
+          lang: {
+            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+            months: [
+              "Tháng 1",
+              "Tháng 2",
+              "Tháng 3",
+              "Tháng 4",
+              "Tháng 5",
+              "Tháng 6",
+              "Tháng 7",
+              "Tháng 8",
+              "Tháng 9",
+              "Tháng 10",
+              "Tháng 11",
+              "Tháng 12"
+            ]
+          }
+        },
         check_list: [],
         active_tab: 1,
         alert:{

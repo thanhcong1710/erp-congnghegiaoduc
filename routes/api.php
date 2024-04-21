@@ -38,6 +38,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
             Route::get('branches-has-user', 'SystemController@getBranchesHasUser');
             Route::get('products', 'SystemController@getProducts');
+            Route::get('shifts', 'SystemController@getShifts');
+            Route::get('rooms/{branch_id}', 'SystemController@getRooms');
+            Route::get('cms/{branch_id}', 'SystemController@getCMs');
+            Route::get('teachers/{branch_id}', 'SystemController@getTeachers');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -102,6 +106,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
             Route::post('enrolments/load-classes', 'EnrolmentsController@loadClasses');
+        });
+
+        Route::prefix('settings')->group(function () {
+            Route::post('classes/load-classes', 'ClassesController@loadClasses');
         });
     });
 });

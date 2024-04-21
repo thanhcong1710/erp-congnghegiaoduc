@@ -9,7 +9,7 @@ use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class EnrolmentsController extends Controller
+class ClassesController extends Controller
 {
     public function loadClasses(Request $request)
     {
@@ -37,7 +37,7 @@ class EnrolmentsController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE c.status = 1 AND p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE()";
+        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE()";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {
@@ -51,7 +51,7 @@ class EnrolmentsController extends Controller
             $classes = u::get_tree_data($class);
             if ($classes) {
                 foreach ($classes as $cls) {
-                    if ($cls && !empty(data_get($cls, 'children')) ) {
+                    if ($cls) {
                         $data[] = $cls;
                     }
                 }

@@ -138,6 +138,11 @@ export default [
         url: '/settings/roles',
         name: 'Chức vụ, phân quyền',
         icon: 'PocketIcon',
+      },
+      {
+        url: '/settings/classes',
+        name: 'Lớp học',
+        icon: 'FileIcon',
       }
     ]
   },

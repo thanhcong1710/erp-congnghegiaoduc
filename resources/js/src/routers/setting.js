@@ -71,6 +71,19 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/classes',
+        name: 'setting-classes',
+        component: () => import('@/views/settings/classes/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách lớp học', active: true }
+          ],
+          pageTitle: 'Danh sách lớp học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
