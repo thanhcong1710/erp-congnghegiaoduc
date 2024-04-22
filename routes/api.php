@@ -110,6 +110,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         Route::prefix('settings')->group(function () {
             Route::post('classes/load-classes', 'ClassesController@loadClasses');
+            Route::post('classes/save', 'ClassesController@save');
         });
     });
 });

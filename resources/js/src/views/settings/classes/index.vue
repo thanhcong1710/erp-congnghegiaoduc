@@ -172,7 +172,7 @@
       <div class="vx-row mt-5">
         <div class="vx-col w-full text-right">
           <vs-button color="dark" type="border" class="mb-2 mr-3" @click="reload()" >Hủy</vs-button>
-          <vs-button class="mb-2" color="success" @click="save()">{{is_edit ? 'Cập nhật' : 'Thêm mới'}}</vs-button>
+          <vs-button class="mb-2" color="success" @click="save()">{{config.is_edit ? 'Cập nhật' : 'Thêm mới'}}</vs-button>
         </div>
       </div>
     </vx-card>
@@ -197,6 +197,28 @@
     },
     data() {
       return {
+        datepickerOptions: {
+          closed: true,
+          value: "",
+          minDate: "",
+          lang: {
+            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+            months: [
+              "Tháng 1",
+              "Tháng 2",
+              "Tháng 3",
+              "Tháng 4",
+              "Tháng 5",
+              "Tháng 6",
+              "Tháng 7",
+              "Tháng 8",
+              "Tháng 9",
+              "Tháng 10",
+              "Tháng 11",
+              "Tháng 12"
+            ]
+          }
+        },
         disabled_input: true,
         classes: [],
         html:{
@@ -225,8 +247,8 @@
             list: []
           }
         },
-        is_edit:0,
         config:{
+          is_edit:0,
           branch_id:'',
           product_id:'',
           session: 0,
@@ -248,6 +270,7 @@
             day_8: false,
           },
           title:'',
+          program_id:'',
         },
         alert:{
           active: false,
@@ -386,9 +409,10 @@
       selectClass(selected_class) {
         this.disabled_input = false
         if (selected_class.model.item_type === 'class') {
-          this.is_edit=1
+          this.config.is_edit=1
         } else {
-          this.is_edit=0
+          this.config.program_id = selected_class.model.id
+          this.config.is_edit=0
           this.resetInput();
         }
       },
@@ -419,6 +443,10 @@
         }
         if (this.config.product_id == "") {
           mess += " - Khóa học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.config.program_id == "") {
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.config.title == "") {
@@ -456,7 +484,7 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/lms/contracts/add",this.contract)
+        axios.p("/api/settings/classes/save",this.config)
         .then((response) => {
           this.$vs.loading.close();
           this.$vs.notify({
@@ -466,7 +494,9 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/contracts')
+          this.config.is_edit=0
+          this.resetInput();
+          thiss.loadClasses()
         })
         .catch((e) => {
           console.log(e);
