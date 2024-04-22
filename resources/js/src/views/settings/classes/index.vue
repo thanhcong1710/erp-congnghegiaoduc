@@ -249,6 +249,7 @@
         },
         config:{
           is_edit:0,
+          class_id:'',
           branch_id:'',
           product_id:'',
           session: 0,
@@ -333,7 +334,7 @@
       },
       saveShift(data = null){
         if (data && typeof data === 'object') {
-          const shift_id = data.shift_id
+          const shift_id = data.id
           this.config.shift_id = shift_id
         }else{
           this.config.shift_id = ""
@@ -410,8 +411,18 @@
         this.disabled_input = false
         if (selected_class.model.item_type === 'class') {
           this.config.is_edit=1
+          this.$vs.loading();
+          axios.g(`/api/settings/classes/info-config/${selected_class.model.item_id}`)
+            .then(response => {
+            this.$vs.loading.close();
+            this.config = response.data
+            this.html.teachers.item = this.html.teachers.list.filter(item => item.id == response.data.teacher_id)[0]
+            this.html.cms.item = this.html.cms.list.filter(item => item.id == response.data.cm_id)[0]
+            this.html.rooms.item = this.html.rooms.list.filter(item => item.id == response.data.room_id)[0]
+            this.html.shifts.item = this.html.shifts.list.filter(item => item.id == response.data.shift_id)[0]
+          })
         } else {
-          this.config.program_id = selected_class.model.id
+          this.config.program_id = selected_class.model.item_id
           this.config.is_edit=0
           this.resetInput();
         }
@@ -433,6 +444,10 @@
         this.config.shift_id=''
         this.config.room_id=''
         this.config.title=''
+        this.html.rooms.item = ''
+        this.html.teachers.item = ''
+        this.html.cms.item = ''
+        this.html.shifts.item = ''
       },
       save() {
         let mess = "";
@@ -496,7 +511,7 @@
           })
           this.config.is_edit=0
           this.resetInput();
-          thiss.loadClasses()
+          this.loadClasses()
         })
         .catch((e) => {
           console.log(e);
