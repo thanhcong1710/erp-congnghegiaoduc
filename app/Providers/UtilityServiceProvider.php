@@ -608,4 +608,18 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $resp;
     }
+
+    public static function getClassDayText($class_day){
+        $arr_day =explode(',', $class_day);
+        $text = "";
+        foreach($arr_day AS $day){
+            $text_day = $day == 8 ? 'Chủ nhật' : 'Thứ '.$day;
+            $text.= $text ? ', '.$text_day : $text_day;
+        }
+        return $text;
+    }
+
+    public static function updateEnrolmentLastDate($contract_id){
+         return true;
+    }
 }

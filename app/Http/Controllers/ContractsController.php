@@ -76,6 +76,7 @@ class ContractsController extends Controller
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
+        $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." ORDER BY count_recharge DESC LIMIT 1");
         $contract_id = u::insertSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -111,7 +112,8 @@ class ContractsController extends Controller
            'note'=> data_get($request, 'note'),
            'created_at'=>date('Y-m-d H:i:s'),
            'creator_id'=>Auth::user()->id,
-           'status' => 1
+           'status' => 1,
+           'count_recharge' => $last_contract ? $last_contract->count_recharge + 1 : 0,
         ), 'contracts');
 
         if(data_get($request,'coupon_code_check') == 1){

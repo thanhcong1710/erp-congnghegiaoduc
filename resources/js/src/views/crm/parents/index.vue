@@ -468,8 +468,7 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_seach:this.searchData.type_seach,
-            pagination: this.pagination,
+            type_seach:this.searchData.type_seach
           }
         localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 

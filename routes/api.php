@@ -106,6 +106,9 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
             Route::post('enrolments/load-classes', 'EnrolmentsController@loadClasses');
+            Route::get('enrolments/info-class/{class_id}', 'EnrolmentsController@getClassInfo');
+            Route::post('enrolments/get-students-add', 'EnrolmentsController@getStudentsAdd');
+            Route::post('enrolments/add-student', 'EnrolmentsController@addStudent');
         });
 
         Route::prefix('settings')->group(function () {
