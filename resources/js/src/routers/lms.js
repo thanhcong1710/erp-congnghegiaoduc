@@ -194,6 +194,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/class_transfers',
+        name: 'lms-class_transfers',
+        component: () => import('@/views/lms/class_transfers/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển lớp', active: true}
+          ],
+          pageTitle: 'Danh sách chuyển lớp',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/class_transfers/add',
+        name: 'lms-class_transfers-add',
+        component: () => import('@/views/lms/class_transfers/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers' },
+            { title: 'Thêm mới chuyển lớp', active: true }
+          ],
+          pageTitle: 'Thêm mới chuyển lớp',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/class_transfers/:id/detail',
+        name: 'lms-class_transfers-detail',
+        component: () => import('@/views/lms/class_transfers/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers'},
+            { title: 'Thông tin chuyển lớp', active: true}
+          ],
+          pageTitle: 'Thông tin chuyển lớp',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

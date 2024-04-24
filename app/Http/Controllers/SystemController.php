@@ -116,4 +116,11 @@ class SystemController extends Controller
 
         return data_get($data_sessions, 'end_date');
     }
+
+    public function getClassesActiveByBranchProduct(Request $request){
+        $branch_id = data_get($request,'branch_id');
+        $product_id = data_get($request,'product_id');
+        $data= u::query("SELECT cls_name AS label, id FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id");
+        return response()->json($data);
+    }
 }
