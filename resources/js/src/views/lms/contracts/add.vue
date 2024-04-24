@@ -10,7 +10,7 @@
               <label>Chọn trung tâm <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="name"
-                    placeholder="Nhập tên trung tâm để giới hạn phạm vi tìm kiếm"
+                    placeholder="Chọn trung tâm để giới hạn phạm vi tìm kiếm"
                     :options="html.branches.list"
                     v-model="html.branches.item"
                     :searchable="true"

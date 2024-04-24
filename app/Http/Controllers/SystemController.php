@@ -103,4 +103,17 @@ class SystemController extends Controller
             WHERE u.status=1 AND b.branch_id=$branch_id AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
         return response()->json($data);
     }
+
+    public function getEndDateInClass(Request $request){
+        $start_date = data_get($request,'start_date');
+        $session = data_get($request,'session');
+        $class_id = data_get($request,'class_id');
+        $class_info = u::first("SELECT class_day, branch_id, product_id FROM classes WHERE id= $class_id");
+
+        $holidays = u::getPublicHolidays(data_get($class_info,'branch_id'), data_get($class_info,'product_id'));
+        $arr_day = explode(",",data_get($class_info, 'class_day'));
+        $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
+
+        return data_get($data_sessions, 'end_date');
+    }
 }

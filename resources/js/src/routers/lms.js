@@ -153,6 +153,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/reserves',
+        name: 'lms-reserves',
+        component: () => import('@/views/lms/reserves/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu', active: true}
+          ],
+          pageTitle: 'Danh sách bảo lưu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reserves/add',
+        name: 'lms-reserves-add',
+        component: () => import('@/views/lms/reserves/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
+            { title: 'Thêm mới bảo lưu', active: true }
+          ],
+          pageTitle: 'Thêm mới bảo lưu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reserves/:id/detail',
+        name: 'lms-reserves-detail',
+        component: () => import('@/views/lms/reserves/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu', url: '/lms/reserves'},
+            { title: 'Thông tin bảo lưu', active: true}
+          ],
+          pageTitle: 'Thông tin bảo lưu',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

@@ -26,11 +26,32 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã HS, tên HS, mã hợp đồng" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã tên học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <multiselect
+                name="search_status"
+                placeholder="Chọn trạng thái"
+                v-model="searchData.arr_status"
+                :options="statusOptions"
+                label="label"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
           </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
+            <router-link class="btn btn-success" :to="'/lms/reserves/add'">
+              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+            </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
           </div>
@@ -44,43 +65,33 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">STT
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text text-center" >Mã học sinh
+                    <div class="vs-table-text">Học sinh
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Tên Học sinh
+                    <div class="vs-table-text">Lớp học
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Thông tin bảo lưu
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Thời gian bảo lưu
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Mã Hợp đồng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Khóa học
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Gói phí
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">EC
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số tiền còn phải đóng
+                    <div class="vs-table-text">Trạng thái
                       <!---->
                     </div>
                   </th>
@@ -91,35 +102,33 @@
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in reserves" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
-                  <p>{{ item.lms_code }}</p>
+                  <p><strong>{{ item.name }}</strong></p>
+                  <p>Mã: {{item.lms_code}}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>{{ item.name }}</p>
+                  <p>Lớp: {{item.class_name}}</p>
+                  <p>Trung tâm: {{item.branch_name}}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
+                  <p>Số buổi: <strong>{{item.session}}</strong></p>
+                  <p>Loại:{{item.is_reserved ? ' Bảo lưu giữ chỗ' : 'Bảo lưu không giữ chỗ'}}</p>
                 </td>
-                <td class="td vs-table--td">
-                  <p>{{ item.product_name }}</p>
-                </td> 
-                <td class="td vs-table--td">
-                  <p>{{ item.tuition_fee_name }}</p>
-                </td>                
-                <td class="td vs-table--td">
-                  <p>{{ item.ec_name }}</p>
+                 <td class="td vs-table--td">
+                  <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>
                 </td>
-                <td class="td vs-table--td text-right ">
-                  <p>{{ item.debt_amount | formatMoney }}</p>
+                <td class="td vs-table--td text-center">
+                  <p>{{item.status | getStatusName}}</p>
                 </td>
-                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >
-                      <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
+               <td class="td vs-table--td text-center list-action"> 
+                    <router-link :to="`/lms/reserves/${item.id}/detail`" >
+                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
+                    <vs-button size="small" color="danger" v-if="item.status == 1" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -171,8 +180,15 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          arr_status: "",
+          status: "",
         },
-        contracts: [],
+        statusOptions:[
+          {id:1,label:'Chờ duyệt'},
+          {id:2,label:'Đã duyệt'},
+          {id:3,label:'Từ chối'},
+        ],
+        reserves: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -205,9 +221,13 @@
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
+        this.searchData.dateRange= ""
         this.getData();
       },
       getData() {
+        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
+        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
+        
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -215,17 +235,28 @@
           })
         }
         this.searchData.branch_id = ids_branch
+
+        const ids_status = []
+        if (this.searchData.arr_status && this.searchData.arr_status.length) {
+          this.searchData.arr_status.map(item => {
+            ids_status.push(item.id)
+          })
+        }
+        this.searchData.status = ids_status
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            status: this.searchData.status,
+            start_date:startDate,
+            end_date:endDate,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/accounting/waitcharges/list', data)
+        axios.p('/api/lms/reserves/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contracts = response.data.list
+            this.reserves = response.data.list
             this.pagination = response.data.paging;
             this.pagination.init = 1;
           })
@@ -244,8 +275,56 @@
         this.pagination.limit = limit
         this.getData();
       },
+      confirmDelete (item) {
+        this.delete_id = item.id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn hủy bảo lưu của học sinh "${item.name} - ${item.lms_code}"`,
+          accept: this.deleteContract,
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      deleteContract(){
+        const data = {
+          id: this.delete_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/lms/reserves/delete`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.getData();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      },
     },
     filters: {
+      getStatusName(value) {
+        let resp = ''
+        switch (Number(value)) {
+            case 1:
+                resp = 'Chờ phê duyệt';
+                break;
+            case 2:
+                resp = 'Đã phê duyệt';
+                break;
+            case 3:
+                resp = 'Từ chối phê duyệt';
+                break;
+            default:
+                resp = 'Chờ phê duyệt'
+                break
+        }
+        return resp
+      },
     },
   }
 </script>

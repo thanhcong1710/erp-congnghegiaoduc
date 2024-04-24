@@ -125,7 +125,7 @@
             />
           </div>
           <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Sản phẩm</label>
+            <label>Khóa học</label>
             <input
               class="vs-inputx vs-input--input normal"
               type="text"

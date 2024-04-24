@@ -145,22 +145,26 @@ class EnrolmentsController extends Controller
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
             WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
         $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
+        $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
+        $arr_day = explode(",",data_get($class_info, 'class_day'));
         
         foreach($contracts AS $contract){
             $contract_id = data_get($contract,'contract_id');
             $student_id = data_get($contract,'student_id');
+            $start_date = data_get($contract,'class_date', null);
+            $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
             u::updateSimpleRow(array(
                 'cm_id' => $cm_id,
                 'cm_leader_id' => $cm_leader_id,
                 'program_id' => data_get($class_info,'program_id', null),
                 'class_id' => data_get($class_info,'id', null),
                 'class_id' => data_get($class_info,'id', null),
-                'enrolment_start_date' => data_get($contract,'class_date', null),
+                'enrolment_start_date' => $start_date,
+                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
                 'status' => 6,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
             ),array('id'=>$contract_id),'contracts');
-            u::updateEnrolmentLastDate($contract_id);
             u::addLogContracts($contract_id);
             u::updateSimpleRow(array(
                 'cm_id'=> $cm_id,

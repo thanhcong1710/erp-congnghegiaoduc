@@ -42,6 +42,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('rooms/{branch_id}', 'SystemController@getRooms');
             Route::get('cms/{branch_id}', 'SystemController@getCMs');
             Route::get('teachers/{branch_id}', 'SystemController@getTeachers');
+            Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -109,6 +110,13 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('enrolments/info-class/{class_id}', 'EnrolmentsController@getClassInfo');
             Route::post('enrolments/get-students-add', 'EnrolmentsController@getStudentsAdd');
             Route::post('enrolments/add-student', 'EnrolmentsController@addStudent');
+            Route::post('reserves/list', 'ReservesController@list');
+            Route::post('reserves/search-student', 'ReservesController@searchStudent');
+            Route::post('reserves/add', 'ReservesController@add');
+            Route::post('reserves/delete', 'ReservesController@delete');
+            Route::get('reserves/show/{reserve_id}', 'ReservesController@show');
+            Route::post('reserves/approve', 'ReservesController@approve');
+            Route::get('reserves/logs/{student_id}', 'ReservesController@getLogsByStudent');
         });
 
         Route::prefix('settings')->group(function () {

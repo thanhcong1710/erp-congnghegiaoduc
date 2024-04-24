@@ -130,6 +130,12 @@ function fmc (input) {
   }
   return resp
 }
+const convertDateToString = date => date.getFullYear() + "-" + ((date.getMonth() > 8)?(date.getMonth() + 1):('0'+ '' + (date.getMonth() + 1))) + "-" + ((date.getDate() > 9)?date.getDate():('0'+ '' + (date.getDate())));
+function isGreaterThan (_from, _to) {
+  let _from_time = new Date(_from) // Y-m-d
+  let _to_time = new Date(_to) // Y-m-d
+  return (_from_time.getTime() > _to_time.getTime())?true:false
+}
 
 export default {
   dateToString,
@@ -137,4 +143,6 @@ export default {
   vld,
   is,
   fmc,
+  convertDateToString,
+  isGreaterThan
 }
