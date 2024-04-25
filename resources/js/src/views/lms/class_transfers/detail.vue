@@ -12,7 +12,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.branch_name"
+                v-model="class_transfer_info.branch_name"
                 disabled="true"
               />
             </div>
@@ -22,7 +22,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.name"
+                v-model="class_transfer_info.meta_data.student_info.name"
                 disabled="true"
               />
             </div>
@@ -32,7 +32,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.lms_code"
+                v-model="class_transfer_info.meta_data.student_info.lms_code"
                 disabled="true"
               />
             </div>
@@ -42,7 +42,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.product_name"
+                v-model="class_transfer_info.meta_data.student_info.product_name"
                 disabled="true"
               />
             </div>
@@ -52,7 +52,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.program_name"
+                v-model="class_transfer_info.meta_data.student_info.program_name"
                 disabled="true"
               />
             </div>
@@ -62,7 +62,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.class_name"
+                v-model="class_transfer_info.meta_data.student_info.class_name"
                 disabled="true"
               />
             </div>
@@ -72,7 +72,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.tuition_fee_name"
+                v-model="class_transfer_info.meta_data.student_info.tuition_fee_name"
                 disabled="true"
               />
             </div>
@@ -82,7 +82,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                :value="reserve_info.meta_data.student_info.total_charged | formatNumber"
+                :value="class_transfer_info.meta_data.student_info.total_charged | formatNumber"
                 disabled="true"
               />
             </div>
@@ -92,27 +92,37 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.student_info.summary_sessions"
+                 v-model="class_transfer_info.meta_data.student_info.summary_sessions"
                 disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi được phép bảo lưu</label>
+              <label>Số buổi học bổng</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.student_info.reservable_sessions"
+                 v-model="class_transfer_info.meta_data.student_info.bonus_sessions"
                 disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi đã bảo lưu</label>
+              <label>Số buổi đã học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.student_info.reserved_sessions"
+                 v-model="class_transfer_info.meta_data.student_info.done_sessions"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi còn lại</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                 v-model="class_transfer_info.meta_data.student_info.left_sessions"
                 disabled="true"
               />
             </div>
@@ -122,64 +132,55 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin chuyển lớp</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại bảo lưu</label>
-              <select class="vs-inputx vs-input--input normal" v-model="reserve_info.meta_data.reserve.is_reserved" disabled="true">
-                <option value="0">Bảo lưu không giữ chỗ</option>
-                <option value="1">Bảo lưu giữ chỗ</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi bảo lưu</label>
+              <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.reserve.session"
+                 v-model="class_transfer_info.to_product_name"
                 disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày bắt đầu bảo lưu</label>
+              <label>Lớp chuyển đến</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.reserve.start_date"
+                 v-model="class_transfer_info.to_class_name"
                 disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày kết thúc bảo lưu</label>
+              <label>Ngày bắt đầu chuyển lớp</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.reserve.end_date"
+                v-model="class_transfer_info.transfer_date"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi còn lại lúc chuyển</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="class_transfer_info.meta_data.class_transfer.left_session"
                 disabled="true"
               />
             </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
-              <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="reserve_info.meta_data.reserve.note"></textarea>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label>Ghi chú phê duyệt</label>
-              <textarea class="vs-inputx vs-input--input normal" v-model="comment" :disabled="status!=1"></textarea>
-            </div>
-            <vs-alert :active.sync="alert.active" class="mb-5 mr-4 ml-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
-              <div v-html="alert.body"></div>
-            </vs-alert>
-            <div class="vx-col w-full mb-4" v-if="status!=1">
-              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt'}}</strong></label>
+              <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="class_transfer_info.note"></textarea>
             </div>
           </div>
 
           <div class="vx-col w-full text-right">
-            <router-link class="btn btn-danger" :to="`/lms/reserves`">
+            <router-link class="btn btn-danger" :to="`/lms/class_transfers`">
               <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
             </router-link>
-            <vs-button class="mb-2  mr-3" color="success" @click="save(2)" v-if="status==1">Phê duyệt</vs-button>
-            <vs-button class="mb-2" color="danger" @click="save(3)" v-if="status==1">Từ chối phê duyệt</vs-button>
           </div>
         </div>
       </div>
@@ -196,23 +197,33 @@
                   <thead class="vs-table--thead">
                     <tr>
                       <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Người tạo
+                        <div class="vs-table-text">Ngày tạo
                           <!---->
                         </div>
                       </th>
                       <th colspan="1" rowspan="1">
-                        <div class="vs-table-text">Lớp học
+                        <div class="vs-table-text">Người tạo
                           <!---->
                         </div>
                       </th>
 
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Thông tin bảo lưu
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text">Lớp đi
                           <!---->
                         </div>
                       </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text"> Phê duyệt
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text"> Lớp đến
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text"> Ngày chuyển
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1">
+                        <div class="vs-table-text"> Ghi chú
                           <!---->
                         </div>
                       </th>
@@ -225,27 +236,14 @@
                   </thead>
                   <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
                     <!---->
-                    
-                    <td class="td vs-table--td">
-                      <p>{{item.creator_name}}</p>
-                      <p>Thời gian tạo: {{item.created_at}}</p>
-                    </td>
-                    <td class="td vs-table--td">
-                      <p>{{item.class_name}}</p>
-                      <p>{{item.branch_name}}</p>
-                    </td>
-                    <td class="td vs-table--td">
-                      <p>Số buổi: <strong>{{item.session}}</strong></p>
-                      <p>Ngày bắt đầu: {{item.start_date}}</p>
-                      <p>Loại: {{item.is_reserved ? 'Giữ chỗ' : 'Không giữ chỗ'}}</p>
-                    </td>
-                    <td class="td vs-table--td">
-                      <p><strong>{{ item.status | getStatusName}}</strong></p>
-                      <p>Ngày duyệt: {{item.approved_at}}</p>
-                      <p>Người duyệt: {{item.approver_name}}</p>
-                    </td>
+                    <td class="td vs-table--td">{{item.created_at}}</td>
+                    <td class="td vs-table--td">{{item.creator_name}}</td>
+                    <td class="td vs-table--td">{{item.from_class_name}}</td>
+                    <td class="td vs-table--td">{{item.to_class_name}}</td>
+                    <td class="td vs-table--td">{{item.transfer_date}}</td>
+                     <td class="td vs-table--td">{{item.note}}</td>
                     <td class="td vs-table--td text-center list-action">
-                      <router-link :to="`/lms/reserves/${item.id}/detail`" >
+                      <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
                         <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                       </router-link> 
                     </td>
@@ -283,7 +281,7 @@
           body: '',
           color:'',
         },
-        reserve_info:{},
+        class_transfer_info:{},
         comment:'',
         status:'',
         logs:[],
@@ -295,7 +293,7 @@
     methods: {
       getLogs(student_id){
         this.$vs.loading();
-        axios.g(`/api/lms/reserves/logs/${student_id}`)
+        axios.g(`/api/lms/class_transfers/logs/${student_id}`)
           .then(response => {
           this.$vs.loading.close();
           this.logs = response.data
@@ -303,10 +301,10 @@
       },
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/lms/reserves/show/${this.$route.params.id}`)
+        axios.g(`/api/lms/class_transfers/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.reserve_info = response.data
+          this.class_transfer_info = response.data
           this.status = response.data.status
           this.comment = response.data.comment
           this.getLogs(response.data.student_id)
@@ -326,8 +324,8 @@
       },
       approveContract(){
         this.$vs.loading()
-        axios.p("/api/lms/reserves/approve",{
-          reserve_id: this.reserve_info.id,
+        axios.p("/api/lms/class_transfers/approve",{
+          class_transfer_id: this.class_transfer_info.id,
           status: this.status,
           comment: this.comment
         })
@@ -340,7 +338,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/reserves')
+          this.$router.push('/lms/class_transfers')
         })
         .catch((e) => {
           console.log(e);

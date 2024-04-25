@@ -167,4 +167,24 @@ class ClassTransfersController extends Controller
         LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
         return true;
     }
+
+    public function show(Request $request,$class_transfer_id)
+    {
+        $data = u::first("SELECT t.* , (SELECT name FROM branches WHERE id=t.from_branch_id) AS branch_name,
+                (SELECT cls_name FROM classes WHERE id=t.to_class_id) AS to_class_name,
+                (SELECT name FROM products WHERE id=t.to_product_id) AS to_product_name 
+            FROM class_transfer AS t WHERE t.id=$class_transfer_id");
+        $data->meta_data = $data->meta_data ? json_decode($data->meta_data) : '';
+        return response()->json($data);
+    }
+
+    public function getLogsByStudent(Request $request, $student_id){
+        $data = u::query("SELECT t.id,t.transfer_date, t.note, t.created_at,
+                (SELECT cls_name FROM classes WHERE id=t.from_class_id) AS from_class_name,
+                (SELECT cls_name FROM classes WHERE id=t.to_class_id) AS to_class_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.creator_id) AS creator_name
+            FROM class_transfer AS t 
+            WHERE t.student_id = $student_id AND t.status ORDER BY t.id DESC");
+        return response()->json($data);
+    }
 }

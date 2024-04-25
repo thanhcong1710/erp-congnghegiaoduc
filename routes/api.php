@@ -123,7 +123,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('class_transfers/search-student', 'ClassTransfersController@searchStudent');
             Route::post('class_transfers/get-left-sessions', 'ClassTransfersController@getLeftSessions');
             Route::post('class_transfers/add', 'ClassTransfersController@add');
-            
+            Route::get('class_transfers/show/{class_transfer_id}', 'ClassTransfersController@show');
+            Route::get('class_transfers/logs/{student_id}', 'ClassTransfersController@getLogsByStudent');
         });
 
         Route::prefix('settings')->group(function () {
