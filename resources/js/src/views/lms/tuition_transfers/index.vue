@@ -28,10 +28,28 @@
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Nhập tên hoặc mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <multiselect
+                name="search_status"
+                placeholder="Chọn trạng thái"
+                v-model="searchData.arr_status"
+                :options="statusOptions"
+                label="label"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/class_transfers/add'">
+            <router-link class="btn btn-success" :to="'/lms/tuition_transfers/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -53,11 +71,6 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Mã học sinh
                       <!---->
                     </div>
@@ -68,17 +81,27 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Lớp đi
+                    <div class="vs-table-text">Trung tâm chuyển
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Lớp đến
+                    <div class="vs-table-text">Trung tâm nhận
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Ngày chuyển lớp
+                    <div class="vs-table-text">Ngày chuyển
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Ghi chú
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Trạng thái
                       <!---->
                     </div>
                   </th>
@@ -89,18 +112,21 @@
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in class_transfers" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_transfers" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.from_branch_name}}</td>
                 <td class="td vs-table--td">{{item.lms_code}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.from_class_name}}</td>
-                <td class="td vs-table--td">{{item.to_class_name}}</td>
+                <td class="td vs-table--td">{{item.from_branch_name}}</td>
+                <td class="td vs-table--td">{{item.to_branch_name}}</td>
                 <td class="td vs-table--td">{{item.transfer_date}}</td>
+                <td class="td vs-table--td">{{item.note}}</td>
+                <td class="td vs-table--td">
+                  <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusName}}</vs-chip>
+                </td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
+                    <router-link :to="`/lms/tuition_transfers/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
                 </td>
@@ -153,8 +179,18 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
+          arr_status: "",
+          status: "",
         },
-        class_transfers: [],
+        statusOptions:[
+          {id:1,label:'Chờ duyệt đi'},
+          {id:2,label:'Đã từ chối duyệt đi'},
+          {id:3,label:'Chờ duyệt đến'},
+          {id:4,label:'Đã từ chối duyệt đến'},
+          {id:5,label:'Đã phê duyệt'},
+          {id:6,label:'Đã xử lý'},
+        ],
+        tuition_transfers: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -185,6 +221,8 @@
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
+        this.searchData.arr_status= ""
+        this.searchData.status= ""
         this.searchData.pagination= this.pagination
         this.getData();
       },
@@ -196,18 +234,27 @@
           })
         }
         this.searchData.branch_id = ids_branch
+
+        const ids_status = []
+        if (this.searchData.arr_status && this.searchData.arr_status.length) {
+          this.searchData.arr_status.map(item => {
+            ids_status.push(item.id)
+          })
+        }
+        this.searchData.status = ids_status
        
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            status: this.searchData.status,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/class_transfers/list', data)
+        axios.p('/api/lms/tuition_transfers/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.class_transfers = response.data.list
+            this.tuition_transfers = response.data.list
             this.pagination = response.data.paging;
             this.pagination.init = 1;
           })
@@ -226,8 +273,62 @@
         this.pagination.limit = limit
         this.getData();
       },
+      getStatusColor(value) {
+        let resp = ''
+        switch (Number(value)) {
+            case 1:
+                resp = 'primary';
+                break;
+            case 2:
+                resp = 'danger';
+                break;
+            case 3:
+                resp = 'success';
+                break;
+            case 4:
+                resp = 'danger';
+                break;
+            case 5:
+                resp = 'success';
+                break;
+            case 6:
+                resp = '#24c1a0';
+                break;
+            default:
+                resp = 'primary'
+                break
+        }
+        return resp
+      },
     },
     filters: {
+      getStatusName(value) {
+        let resp = ''
+        switch (Number(value)) {
+            case 1:
+                resp = 'Chờ duyệt đi';
+                break;
+            case 2:
+                resp = 'Từ chối duyệt đi';
+                break;
+            case 3:
+                resp = 'Chờ duyệt đến';
+                break;
+            case 4:
+                resp = 'Từ chối duyệt đến';
+                break;
+            case 5:
+                resp = 'Đã được duyệt đến';
+                break;
+            case 6:
+                resp = 'Đã xử lý';
+                break;
+            default:
+                resp = 'Chờ phê duyệt'
+                break
+        }
+        return resp
+      },
     },
   }
 </script>

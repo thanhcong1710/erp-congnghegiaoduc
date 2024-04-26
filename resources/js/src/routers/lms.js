@@ -276,6 +276,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/tuition_transfers',
+        name: 'lms-tuition_transfers',
+        component: () => import('@/views/lms/tuition_transfers/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển phí', active: true}
+          ],
+          pageTitle: 'Danh sách chuyển phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/tuition_transfers/add',
+        name: 'lms-tuition_transfers-add',
+        component: () => import('@/views/lms/tuition_transfers/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers' },
+            { title: 'Thêm mới chuyển phí', active: true }
+          ],
+          pageTitle: 'Thêm mới chuyển phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/tuition_transfers/:id/detail',
+        name: 'lms-tuition_transfers-detail',
+        component: () => import('@/views/lms/tuition_transfers/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers'},
+            { title: 'Thông tin chuyển phí', active: true}
+          ],
+          pageTitle: 'Thông tin chuyển phí',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

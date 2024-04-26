@@ -89,13 +89,13 @@ export default [
             name: 'Chuyển trung tâm',
           },
           {
-            url: '/lms/tution_transfers',
+            url: '/lms/tuition_transfers',
             name: 'Chuyển phí',
           },
-          {
-            url: '/lms/exchange',
-            name: 'Quy đổi',
-          },
+          // {
+          //   url: '/lms/exchange',
+          //   name: 'Quy đổi',
+          // },
           {
             url: '/lms/attendances',
             name: 'Điểm danh',
