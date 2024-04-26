@@ -243,9 +243,7 @@
                     <td class="td vs-table--td">{{item.transfer_date}}</td>
                      <td class="td vs-table--td">{{item.note}}</td>
                     <td class="td vs-table--td text-center list-action">
-                      <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
-                        <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                      </router-link> 
+                        <vs-button size="small" @click="loadDetail(item.id)"><i class="fa fa-eye"></i></vs-button>
                     </td>
                   </tr>
                 </table>
@@ -288,7 +286,7 @@
       }
     },
     created() {
-      this.loadDetail();
+      this.loadDetail(this.$route.params.id);
     },
     methods: {
       getLogs(student_id){
@@ -299,9 +297,9 @@
           this.logs = response.data
         })
       },
-      loadDetail(){
+      loadDetail(id){
         this.$vs.loading();
-        axios.g(`/api/lms/class_transfers/show/${this.$route.params.id}`)
+        axios.g(`/api/lms/class_transfers/show/${id}`)
           .then(response => {
           this.$vs.loading.close();
           this.class_transfer_info = response.data
@@ -349,7 +347,7 @@
         let mess = "";
         let resp = true;
         if (status == 3 && this.comment == "") {
-          mess += " - Ghi chú phê duyệt được để trống khi từ chối phê duyệt<br/>";
+          mess += " - Ghi chú phê duyệt không được để trống khi từ chối phê duyệt<br/>";
           resp = false;
         }
         if (!resp) {

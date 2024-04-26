@@ -125,6 +125,15 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('class_transfers/add', 'ClassTransfersController@add');
             Route::get('class_transfers/show/{class_transfer_id}', 'ClassTransfersController@show');
             Route::get('class_transfers/logs/{student_id}', 'ClassTransfersController@getLogsByStudent');
+
+            Route::post('branch_transfers/list', 'BranchTransfersController@list');
+            Route::post('branch_transfers/search-student', 'BranchTransfersController@searchStudent');
+            Route::post('branch_transfers/get-data-from-contract', 'BranchTransfersController@getDataFromContractActive');
+            Route::post('branch_transfers/get-data-to-contract', 'BranchTransfersController@getDataContractActiveByTransferDate');
+            Route::post('branch_transfers/add', 'BranchTransfersController@add');
+            Route::get('branch_transfers/show/{reserve_id}', 'BranchTransfersController@show');
+            Route::post('branch_transfers/approve', 'BranchTransfersController@approve');
+            Route::get('branch_transfers/logs/{student_id}', 'BranchTransfersController@getLogsByStudent');
         });
 
         Route::prefix('settings')->group(function () {

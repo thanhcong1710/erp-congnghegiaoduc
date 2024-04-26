@@ -243,7 +243,7 @@ class ReservesController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=r.creator_id) AS creator_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=r.approver_id) AS approver_name
             FROM reserves AS r 
-            WHERE r.student_id = $student_id AND r.status ORDER BY r.id DESC");
+            WHERE r.student_id = $student_id AND r.status > 0 ORDER BY r.id DESC");
         return response()->json($data);
     }
 }

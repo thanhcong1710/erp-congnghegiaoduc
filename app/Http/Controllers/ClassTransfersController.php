@@ -184,7 +184,7 @@ class ClassTransfersController extends Controller
                 (SELECT cls_name FROM classes WHERE id=t.to_class_id) AS to_class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.creator_id) AS creator_name
             FROM class_transfer AS t 
-            WHERE t.student_id = $student_id AND t.status ORDER BY t.id DESC");
+            WHERE t.student_id = $student_id AND t.status>0 ORDER BY t.id DESC");
         return response()->json($data);
     }
 }

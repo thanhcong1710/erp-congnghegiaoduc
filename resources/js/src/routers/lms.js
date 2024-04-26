@@ -235,6 +235,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/branch_transfers',
+        name: 'lms-branch_transfers',
+        component: () => import('@/views/lms/branch_transfers/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển trung tâm', active: true}
+          ],
+          pageTitle: 'Danh sách chuyển trung tâm',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/branch_transfers/add',
+        name: 'lms-branch_transfers-add',
+        component: () => import('@/views/lms/branch_transfers/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers' },
+            { title: 'Thêm mới chuyển trung tâm', active: true }
+          ],
+          pageTitle: 'Thêm mới chuyển trung tâm',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/branch_transfers/:id/detail',
+        name: 'lms-branch_transfers-detail',
+        component: () => import('@/views/lms/branch_transfers/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers'},
+            { title: 'Thông tin chuyển trung tâm', active: true}
+          ],
+          pageTitle: 'Thông tin chuyển trung tâm',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
