@@ -91,7 +91,6 @@ class ContractsController extends Controller
            'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
            'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
            'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),

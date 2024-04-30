@@ -4,15 +4,15 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="vx-col md:w-1/2 w-full item-first">
-          <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Thông tin học sinh</h5>
+          <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Học sinh chuyển phí</h5>
           <div class="vx-row">
             <div class="vx-col w-full mb-4">
-              <label>Trung tâm </label>
+              <label>Trung tâm học sinh chuyển </label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="branch_transfer_info.from_branch_name"
+                v-model="tuition_transfer_info.from_branch_name"
                 disabled="true"
               />
             </div>
@@ -24,50 +24,50 @@
                     <table class="vs-table vs-table--tbody-table">
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td" width="124px"><span>Họ tên:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.name}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Mã LMS:</span></td> 
-                        <td class="td vs-table--td"><strong>{{branch_transfer_info.meta_data.student_info.lms_code}}</strong></td> 
+                        <td class="td vs-table--td"><strong>{{tuition_transfer_info.meta_data.from_student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Phụ huynh:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.gud_name1}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.gud_name1}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Điện thoại:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.gud_mobile1}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.gud_mobile1}}</span></td> 
                       </tr>
                        <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Email:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.gud_email1}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.gud_email1}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Điạ chỉ:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.address}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.address}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>EC:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.ec_name}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.ec_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>CM:</span></td> 
-                        <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.cm_name}}</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.cm_name}}</span></td> 
                       </tr>
                     </table>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="vx-col w-full mb-4" v-if="branch_transfer_info.meta_data.from_contracts.length > 0">
-              <label>Danh sách gói phí</label>
-              <div class="vs-component vs-con-table stripe vs-table-primary mb-5" v-for="(item, index) in branch_transfer_info.meta_data.from_contracts" :key="index">
+            <div class="vx-col w-full mb-4">
+              <label>Danh sách gói phí chuyển (tính đến thời điểm chuyển)</label>
+              <div class="vs-component vs-con-table stripe vs-table-primary mb-5" v-for="(item, index) in tuition_transfer_info.meta_data.transferred_contracts" :key="index">
                 <div class="vs-con-tbody vs-table--tbody ">
                   <table class="vs-table vs-table--tbody-table" >
                     <thead class="vs-table--thead">
                       <tr>
                         <!---->
-                        <th colspan="2" rowspan="1" class="bg-primary" style="color:#fff">
+                        <th colspan="2" rowspan="1"  class="bg-success" style="color:#fff">
                           <div class="vs-table-text">{{index+1}}. Hợp đồng số {{item.code}} (gói phí {{item.tuition_fee_name}})</div>
                         </th>
                       </tr>
@@ -90,8 +90,12 @@
                         <td class="td vs-table--td"><strong>{{item.done_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Số buổi còn:</span></td> 
-                        <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
+                        <td class="td vs-table--td"><span>Số buổi còn lại:</span></td> 
+                        <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong> (<span>{{item.left_real_sessions}}</span> buổi chính thức)</td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td" width="160px"><span>Số phí còn lại:</span></td> 
+                        <td class="td vs-table--td"><span>{{item.left_amount | formatMoney}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Khóa học:</span></td> 
@@ -110,41 +114,78 @@
                 </div>
               </div>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Tổng số tiền còn lại</label>
+              <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.transferred_amount | formatMoney"  disabled="true" />
+            </div>
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
-          <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin chuyển trung tâm</h5>
+          <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Học sinh nhận phí</h5>
           <div class="vx-row">
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Trung tâm nhận</label>
+            <div class="vx-col w-full mb-4">
+              <label>Trung tâm nhận học sinh nhận</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="branch_transfer_info.to_branch_name"
+                 v-model="tuition_transfer_info.to_branch_name"
                 disabled="true"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày bắt đầu chuyển</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="branch_transfer_info.transfer_date"
-                disabled="true"
-              />
+            <div class="vx-col w-full mb-4" v-if="tuition_transfer_info.to_student_id">
+              <div class="vx-col w-full mb-4">
+                <label>Hồ sơ học sinh</label>
+                <div class="vs-component vs-con-table stripe vs-table-primary">
+                  <div class="vs-con-tbody vs-table--tbody ">
+                    <table class="vs-table vs-table--tbody-table">
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td" width="124px"><span>Họ tên:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.name}}</span></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><strong>{{tuition_transfer_info.meta_data.to_student_info.lms_code}}</strong></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>Phụ huynh:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.gud_name1}}</span></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>Điện thoại:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.gud_mobile1}}</span></td> 
+                      </tr>
+                       <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>Email:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.gud_email1}}</span></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>Điạ chỉ:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.address}}</span></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>EC:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.ec_name}}</span></td> 
+                      </tr>
+                      <tr class="tr-values vs-table--tr tr-table-state-null">
+                        <td class="td vs-table--td"><span>CM:</span></td> 
+                        <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.cm_name}}</span></td> 
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="vx-col w-full mb-4" v-if="branch_transfer_info.meta_data.to_contracts.length > 0">
-              <label>Danh sách gói phí tại thời điểm chuyển</label>
-              <div class="vs-component vs-con-table stripe vs-table-primary mb-5" v-for="(item, index) in branch_transfer_info.meta_data.to_contracts" :key="index">
+            <div class="vx-col w-full mb-4" v-if="tuition_transfer_info.to_student_id && tuition_transfer_info.meta_data.received_contracts.length > 0">
+              <label>Danh sách gói phí nhận</label>
+              <div class="vs-component vs-con-table stripe vs-table-primary mb-5" v-for="(item, index) in tuition_transfer_info.meta_data.received_contracts" :key="index">
                 <div class="vs-con-tbody vs-table--tbody ">
                   <table class="vs-table vs-table--tbody-table" >
                     <thead class="vs-table--thead">
                       <tr>
                         <!---->
-                        <th colspan="2" rowspan="1" class="bg-success" style="color:#fff">
-                          <div class="vs-table-text">{{index+1}}. Hợp đồng số {{item.code}} (gói phí {{item.tuition_fee_name}})</div>
+                        <th colspan="2" rowspan="1"  class="bg-success" style="color:#fff">
+                          <div class="vs-table-text">{{index+1}}.Gói phí {{item.tuition_fee_name}}</div>
                         </th>
                       </tr>
                     </thead>
@@ -162,14 +203,6 @@
                         <td class="td vs-table--td"><span>{{item.bonus_sessions}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Số buổi đã học:</span></td> 
-                        <td class="td vs-table--td"><strong>{{item.done_sessions}}</strong></td> 
-                      </tr>
-                      <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Số buổi còn:</span></td> 
-                        <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
-                      </tr>
-                      <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Khóa học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
@@ -177,30 +210,41 @@
                   </table>
                 </div>
               </div>
-              
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label>Tổng số tiền nhận</label>
+              <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.received_amount | formatMoney"  disabled="true" />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Khóa học quy đổi</label>
+              <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.to_product_name"  disabled="true" />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Ngày bắt đầu chuyển</label>
+              <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.transfer_date"  disabled="true" />
             </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
-              <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="branch_transfer_info.note"></textarea>
+              <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="tuition_transfer_info.note"></textarea>
             </div>
             <div class="vx-col w-full mb-4">
-              <p>Người tạo: {{branch_transfer_info.creator_name}}</p>
-              <p class="mb-3">Thời gian tạo: {{branch_transfer_info.created_at}}</p>
+              <p>Người tạo: {{tuition_transfer_info.creator_name}}</p>
+              <p class="mb-3">Thời gian tạo: {{tuition_transfer_info.created_at}}</p>
 
-              <p v-if="branch_transfer_info.from_approver_id">Người duyệt đi: {{branch_transfer_info.from_approver_name}}</p>
-              <p v-if="branch_transfer_info.from_approver_id">Thời gian duyệt đi: {{branch_transfer_info.from_approved_at}}</p>
-              <p class="mb-3" v-if="branch_transfer_info.from_approver_id">Ghi chú duyệt đi: {{branch_transfer_info.from_approve_comment}}</p>
+              <p v-if="tuition_transfer_info.ceo_approver_id">GĐTT duyệt: {{tuition_transfer_info.ceo_approver_name}}</p>
+              <p v-if="tuition_transfer_info.ceo_approver_id">Thời gian duyệt: {{tuition_transfer_info.ceo_approved_at}}</p>
+              <p class="mb-3" v-if="tuition_transfer_info.ceo_approver_id">Ghi chú duyệt: {{tuition_transfer_info.ceo_comment}}</p>
 
-              <p v-if="branch_transfer_info.to_approver_id">Người duyệt đến: {{branch_transfer_info.to_approver_name}}</p>
-              <p v-if="branch_transfer_info.to_approver_id">Thời gian duyệt đến: {{branch_transfer_info.to_approved_at}}</p>
-              <p class="mb-3" v-if="branch_transfer_info.to_approver_id">Ghi chú duyệt đến: {{branch_transfer_info.to_approve_comment}}</p>
+              <p v-if="tuition_transfer_info.accounting_approver_id">Kế toán duyệt: {{tuition_transfer_info.accounting_approver_name}}</p>
+              <p v-if="tuition_transfer_info.accounting_approver_id">Thời gian duyệt: {{tuition_transfer_info.accounting_approved_at}}</p>
+              <p class="mb-3" v-if="tuition_transfer_info.accounting_approver_id">Ghi chú duyệt: {{tuition_transfer_info.accounting_comment}}</p>
 
               <label>Trạng thái: </label>
-              <strong :class="getStatusTextColor(branch_transfer_info.status)">{{branch_transfer_info.status | getStatusName}}</strong>
+              <strong :class="getStatusTextColor(tuition_transfer_info.status)">{{tuition_transfer_info.status | getStatusName}}</strong>
             </div>
-            <div class="vx-col w-full mb-4" v-if="showAction(branch_transfer_info.status)">
+            <div class="vx-col w-full mb-4" v-if="showAction(tuition_transfer_info.status)">
               <label>Ghi chú phê duyệt</label>
-              <textarea class="vs-inputx vs-input--input normal" v-model="comment" :disabled="!showAction(branch_transfer_info.status)"></textarea>
+              <textarea class="vs-inputx vs-input--input normal" v-model="comment" :disabled="!showAction(tuition_transfer_info.status)"></textarea>
             </div>
             <vs-alert :active.sync="alert.active" class="mb-5 mr-4 ml-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
               <div v-html="alert.body"></div>
@@ -208,51 +252,12 @@
           </div>
 
           <div class="vx-col w-full text-right">
-            <router-link class="btn btn-danger" :to="`/lms/branch_transfers`">
+            <router-link class="btn btn-danger" :to="`/lms/tuition_transfers`">
               <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
             </router-link>
-            <vs-button class="mb-2  mr-3" color="success" @click="save(true)" v-if="showAction(branch_transfer_info.status)">Phê duyệt</vs-button>
-            <vs-button class="mb-2" color="danger" @click="save(false)" v-if="showAction(branch_transfer_info.status)">Từ chối phê duyệt</vs-button>
+            <vs-button class="mb-2  mr-3" color="success" @click="save(true)" v-if="showAction(tuition_transfer_info.status)">Phê duyệt</vs-button>
+            <vs-button class="mb-2" color="danger" @click="save(false)" v-if="showAction(tuition_transfer_info.status)">Từ chối phê duyệt</vs-button>
           </div>
-        </div>
-      </div>
-    </vx-card>
-    
-    <vx-card no-shadow class="mt-5">
-      <div class="vx-row">
-        <div class="vx-col w-full item-first">
-          <h5 class="w-full mb-3"><i class="fa-solid fa-file-lines mr-1"></i> Lịch sử chuyển trung tâm</h5>
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th colspan="1" rowspan="1" class="text-center">Ngày chuyển</th>
-                      <th colspan="1" rowspan="1">Trung tâm chuyển</th>
-                      <th colspan="1" rowspan="1">Trung tâm nhận</th>
-                      <th colspan="1" rowspan="1">Trạng thái</th>
-                      <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
-                    <!---->
-                    
-                    <td class="td vs-table--td text-center">{{item.transfer_date}}</td>
-                    <td class="td vs-table--td">{{item.from_branch_name}}</td>
-                    <td class="td vs-table--td">{{item.to_branch_name}}</td>
-                    <td class="td vs-table--td">
-                      <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusName}}</vs-chip>
-                    </td>
-                    <td class="td vs-table--td text-center list-action">
-                      <vs-button size="small" @click="loadDetail(item.id)"><i class="fa fa-eye"></i></vs-button>
-                    </td>
-                  </tr>
-                </table>
-                
-              </div>
-            </div>
-          </div>  
         </div>
       </div>
     </vx-card>
@@ -281,32 +286,22 @@
           body: '',
           color:'',
         },
-        branch_transfer_info:{},
+        tuition_transfer_info:{},
         comment:'',
         approve:'',
-        logs:[],
       }
     },
     created() {
       this.loadDetail(this.$route.params.id);
     },
     methods: {
-      getLogs(student_id){
-        this.$vs.loading();
-        axios.g(`/api/lms/branch_transfers/logs/${student_id}`)
-          .then(response => {
-          this.$vs.loading.close();
-          this.logs = response.data
-        })
-      },
       loadDetail(id){
         this.$vs.loading();
-        axios.g(`/api/lms/branch_transfers/show/${id}`)
+        axios.g(`/api/lms/tuition_transfers/show/${id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.branch_transfer_info = response.data
+          this.tuition_transfer_info = response.data
           this.status = response.data.status
-          this.getLogs(response.data.student_id)
         })
       },
       confirmApprove (approve) {
@@ -315,7 +310,7 @@
           type: 'confirm',
           color: !approve ?'danger' : 'success',
           title: 'Thông báo',
-          text: !approve ? `Bạn chắc chắn muốn từ chối phê duyệt bản ghi chuyển trung tâm trên?` : `Bạn chắc chắn muốn phê duyệt bản ghi chuyển trung tâm trên?`,
+          text: !approve ? `Bạn chắc chắn muốn từ chối phê duyệt bản ghi chuyển phí trên?` : `Bạn chắc chắn muốn phê duyệt bản ghi chuyển phí trên?`,
           accept: this.approveContract,
           acceptText: !approve ? 'Từ chối phê duyệt' : 'Phê duyệt',
           cancelText: 'Hủy'
@@ -323,8 +318,8 @@
       },
       approveContract(){
         this.$vs.loading()
-        axios.p("/api/lms/branch_transfers/approve",{
-          branch_transfer_id: this.branch_transfer_info.id,
+        axios.p("/api/lms/tuition_transfers/approve",{
+          tuition_transfer_id: this.tuition_transfer_info.id,
           approve: this.approve,
           comment: this.comment
         })
@@ -337,7 +332,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/branch_transfers')
+          this.$router.push('/lms/tuition_transfers')
         })
         .catch((e) => {
           console.log(e);
