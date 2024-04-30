@@ -137,8 +137,9 @@ Route::group(['middleware' => 'api'], function ($router) {
 
             Route::post('tuition_transfers/list', 'TuitionTransfersController@list');
             Route::post('tuition_transfers/search-student', 'TuitionTransfersController@searchStudent');
-            Route::post('tuition_transfers/get-data-from-contract', 'TuitionTransfersController@getDataFromContractActive');
-            Route::post('tuition_transfers/get-data-to-contract', 'TuitionTransfersController@getDataContractActiveByTransferDate');
+            Route::post('tuition_transfers/get-data-contract', 'TuitionTransfersController@getDataContractActive');
+            Route::post('tuition_transfers/prepare-transfer-data', 'TuitionTransfersController@prepareTransferData');
+
             Route::post('tuition_transfers/add', 'TuitionTransfersController@add');
             Route::get('tuition_transfers/show/{reserve_id}', 'TuitionTransfersController@show');
             Route::post('tuition_transfers/approve', 'TuitionTransfersController@approve');

@@ -49,48 +49,56 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
-        url: '/lms/students',
+        url: null,
         name: 'Học sinh',
         icon: 'UserIcon',
         submenu: [
           {
             url: '/lms/students',
             name: 'Danh sách',
+            slug: 'lms-students',
           },
           {
             url: '/lms/checkin',
             name: 'Checkin',
+            slug: 'lms-checkin',
           }
         ],
       },
       {
-        url: '/lms/contracts',
+        url: null,
         name: 'Vận hành',
         icon: 'AirplayIcon',
         submenu: [
           {
             url: '/lms/contracts',
             name: 'Nhập học',
+            slug: 'lms-contracts',
           },
           {
             url: '/lms/enrolments',
             name: 'Xếp lớp',
+            slug: 'lms-enrolments',
           },
           {
             url: '/lms/reserves',
             name: 'Bảo lưu',
+            slug: 'lms-reserves',
           },
           {
             url: '/lms/class_transfers',
             name: 'Chuyển lớp',
+            slug: 'lms-class_transfers',
           },
           {
             url: '/lms/branch_transfers',
             name: 'Chuyển trung tâm',
+            slug: 'lms-branch_transfers',
           },
           {
             url: '/lms/tuition_transfers',
             name: 'Chuyển phí',
+            slug: 'lms-tuition_transfers',
           },
           // {
           //   url: '/lms/exchange',
@@ -99,6 +107,7 @@ export default [
           {
             url: '/lms/attendances',
             name: 'Điểm danh',
+            slug: 'lms-attendances',
           }
 
         ]
@@ -111,17 +120,20 @@ export default [
           {
             url: '/lms/charges',
             name: 'Đã thu phí',
+            slug: 'lms-charges',
           },
           {
             url: '/lms/waitcharges',
             name: 'Chờ thu phí',
+            slug: 'lms-waitcharges',
           }
         ],
       },
       {
         url: '/lms/reports',
         name: 'Báo cáo',
-        icon: 'TrendingUpIcon'
+        icon: 'TrendingUpIcon',
+        slug: 'lms-reports',
       },
     ]
   },
@@ -133,16 +145,19 @@ export default [
         url: '/settings/users',
         name: 'Người dùng',
         icon: 'UserIcon',
+        slug: 'settings-users',
       },
       {
         url: '/settings/roles',
         name: 'Chức vụ, phân quyền',
         icon: 'PocketIcon',
+        slug: 'settings-roles',
       },
       {
         url: '/settings/classes',
         name: 'Lớp học',
         icon: 'FileIcon',
+        slug: 'settings-classes',
       }
     ]
   },

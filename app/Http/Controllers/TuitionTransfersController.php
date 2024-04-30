@@ -16,6 +16,7 @@ class TuitionTransfersController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $status = isset($request->status) ? $request->status : [];
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -31,22 +32,25 @@ class TuitionTransfersController extends Controller
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s1.lms_code LIKE '%$keyword%' OR s1.name LIKE '%$keyword%') ";
         }
+        if (!empty($status)) {
+            $cond .= " AND t.status IN (".implode(",",$status).")";
+        }
         
         $order_by = " ORDER BY t.id DESC ";
 
         $total = u::first("SELECT count(t.id) AS total 
             FROM tuition_transfer AS t 
                 LEFT JOIN students AS s ON s.id=t.from_student_id 
-                LEFT JOIN students AS s1 ON s.id=t.to_student_id 
+                LEFT JOIN students AS s1 ON s1.id=t.to_student_id 
             WHERE $cond");
         
-        $list = u::query("SELECT t.id, s.name, s.lms_code, t.status, t.note,
-                (SELECT name FROM branches WHERE id= t.from_branch_id) AS from_branch_name,
-                (SELECT name FROM branches WHERE id= t.to_branch_id) AS to_branch_name,
+        $list = u::query("SELECT t.id, s.name AS from_student_name, s.lms_code AS from_student_lms_code, 
+                s1.name AS to_student_name, s1.lms_code AS to_student_lms_code, t.status, t.note, t.transferred_amount,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id= t.creator_id) AS creator_name,
                 t.transfer_date
             FROM tuition_transfer AS t 
                 LEFT JOIN students AS s ON s.id=t.from_student_id 
-                LEFT JOIN students AS s1 ON s.id=t.to_student_id 
+                LEFT JOIN students AS s1 ON s1.id=t.to_student_id 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -65,10 +69,10 @@ class TuitionTransfersController extends Controller
         return response()->json($data);
     }  
 
-    public function getDataFromContractActive (Request $request){
+    public function getDataContractActive (Request $request){
         $student_id = data_get($request,'student_id');
         $contracts = u::query("SELECT c.id AS contract_id, c.total_charged, c.summary_sessions,c.real_sessions, c.branch_id, c.product_id,
-                c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date,
+                c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date, c.tuition_fee_id,
                 (SELECT class_day FROM classes WHERE id=c.class_id) AS class_day,
                 (SELECT cls_name FROM classes WHERE id=c.class_id) AS class_name,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
@@ -77,10 +81,14 @@ class TuitionTransfersController extends Controller
         return response()->json($contracts);
     }  
 
-    public function getDataContractActiveByTransferDate(Request $request){
+    public function prepareTransferData(Request $request){
+        $to_product_id = data_get($request, 'to_product_id');
+        $to_branch_id = data_get($request, 'to_branch_id');
         $transfer_date = data_get($request, 'transfer_date');
         $from_contracts = data_get($request, 'from_contracts');
-        $to_contracts = [];
+        $transferred_contracts = [];
+        $received_contracts = [];
+        $total_amount_transfer = 0;
         foreach($from_contracts AS $k=> $contract){
             $contract = (object)$contract;
             if(data_get($contract, 'class_id')){
@@ -90,37 +98,90 @@ class TuitionTransfersController extends Controller
                 $contract->done_sessions = $contract->done_sessions + (int)data_get($data_sessions, 'total', 0);
                 $contract->left_sessions = $contract->left_sessions - (int)data_get($data_sessions, 'total', 0);
                 $contract->left_sessions = $contract->left_sessions > 0 ? $contract->left_sessions : 0;
+                $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
+                $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0;
+            }else{
+                $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
+                $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
             }
-            $to_contracts[$k] = $contract;
+            $contract->left_real_sessions = $left_real_sessions;
+            $contract->left_amount = $left_real_amount;
+            $transferred_contracts[$k] = $contract;
+            $data_calc_transfer = self::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id);
+            if(!data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                $result = array(
+                    'status' => 0,
+                    'message' => 'Chưa có gói phí quy đổi tương ứng'
+                );
+                return response()->json($result);
+            }
+            $received_contracts[$k] = array(
+                'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
+                'tuition_fee_name' => data_get($data_calc_transfer, 'receive_tuition_fee.name'),
+                'total_charged' => data_get($data_calc_transfer, 'transfer_amount'),
+                'real_sessions' => data_get($data_calc_transfer, 'sessions'),
+                'bonus_sessions' => 0,
+                'product_name' => data_get($data_calc_transfer, 'receive_tuition_fee.product_name'),
+            );
+            $total_amount_transfer = $total_amount_transfer + $left_real_amount;
         }
-        return response()->json($to_contracts);
+        $data = [
+            'status' => 1,
+            'message' => 'ok',
+            'transferred_contracts' => $transferred_contracts,
+            'received_contracts' => $received_contracts,
+            'total_amount_transfer' => $total_amount_transfer
+        ];
+        return response()->json($data);
+    }
+
+    public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
+    {
+        $resp = (object)[];
+        if ($from_tuition_fee_id && (int)$transfer_amount >= 0) {
+            $available_tuiotion_fee_ids = u::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
+            if (count($available_tuiotion_fee_ids)) {
+                $available_ids = [];
+                foreach ($available_tuiotion_fee_ids as $id) {
+                    $available_ids[] = (int)$id->exchange_tuition_fee_id;
+                }
+                $available_ids = implode(',', $available_ids);
+                $to_tuition_fee = u::first("SELECT t.*, p.name AS product_name 
+                    FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
+                    WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
+                        AND t.id IN ($available_ids)");
+                if($to_tuition_fee){
+                    $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
+                    $resp->receive_tuition_fee = $to_tuition_fee;
+                    $resp->transfer_amount = $transfer_amount;
+                }
+            }
+        }
+        return $resp;
     }
 
     public function add(Request $request){
         $tuition_transfer = data_get($request,'tuition_transfer'); 
-        $transfer_date =  data_get($tuition_transfer,'transfer_date'); 
-        $from_contracts = data_get($request,'from_contracts');
-        $list_contract_id = "";
-        foreach($from_contracts AS $contract){
-            $list_contract_id.= $list_contract_id ? ",".data_get($contract, 'contract_id') : data_get($contract, 'contract_id');
-        }
-        
+
         $tuition_transfer_id = u::insertSimpleRow(array(
-            'student_id' => data_get($tuition_transfer,'student_id'),
-            'list_contract_id' =>  $list_contract_id,
-            'from_branch_id'=>data_get($tuition_transfer,'branch_id'),
-            'to_branch_id' => data_get($tuition_transfer,'to_branch_id'),
+            'from_student_id' => data_get($tuition_transfer,'from_student_id'),
+            'to_student_id' =>  data_get($tuition_transfer,'to_student_id'),
+            'note'=>data_get($tuition_transfer,'note'),
+            'transfer_date' => data_get($tuition_transfer,'transfer_date'),
             'creator_id' => Auth::user()->id,
             'created_at' => date('Y-m-d H:i:s'),
             'status' => 1,  
-            'note' => data_get($tuition_transfer,'note'),
-            'transfer_date' => $transfer_date,
-            'meta_data' => json_encode($request->input())
+            'transferred_amount' => data_get($tuition_transfer,'transferred_amount'),
+            'received_amount' => data_get($tuition_transfer,'received_amount'),
+            'meta_data' => json_encode($request->input()),
+            'from_branch_id' => data_get($tuition_transfer,'from_branch_id'),
+            'to_branch_id' => data_get($tuition_transfer,'to_branch_id'),
+            'to_product_id' => data_get($tuition_transfer,'to_product_id'),
         ), 'tuition_transfer');
         
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới chuyển trung tâm thành công'
+            'message' => 'Thêm mới chuyển phí thành công'
         );
 
         return response()->json($result);

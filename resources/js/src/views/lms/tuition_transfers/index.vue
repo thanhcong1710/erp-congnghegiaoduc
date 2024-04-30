@@ -71,27 +71,22 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Mã học sinh
+                    <div class="vs-table-text">Học sinh chuyển
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Tên Học sinh
+                    <div class="vs-table-text">Học sinh nhận
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm chuyển
+                    <div class="vs-table-text">Số tiền chuyển
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm nhận
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Ngày chuyển
+                    <div class="vs-table-text">Ngày chuyển phí
                       <!---->
                     </div>
                   </th>
@@ -116,10 +111,15 @@
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.from_branch_name}}</td>
-                <td class="td vs-table--td">{{item.to_branch_name}}</td>
+                <td class="td vs-table--td">
+                  <p>{{item.from_student_name}}</p>
+                  <p>Mã: {{item.from_student_lms_code}}</p>
+                </td>
+                <td class="td vs-table--td">
+                  <p>{{item.to_student_name}}</p>
+                  <p>Mã: {{item.to_student_lms_code}}</p>
+                </td>
+                <td class="td vs-table--td">{{item.transferred_amount | formatMoney}}</td>
                 <td class="td vs-table--td">{{item.transfer_date}}</td>
                 <td class="td vs-table--td">{{item.note}}</td>
                 <td class="td vs-table--td">
@@ -183,10 +183,10 @@
           status: "",
         },
         statusOptions:[
-          {id:1,label:'Chờ duyệt đi'},
-          {id:2,label:'Đã từ chối duyệt đi'},
-          {id:3,label:'Chờ duyệt đến'},
-          {id:4,label:'Đã từ chối duyệt đến'},
+          {id:1,label:'Chờ GĐTT duyệt'},
+          {id:2,label:'GĐTT đã từ chối duyệt'},
+          {id:3,label:'Chờ kế toán duyệt'},
+          {id:4,label:'Kế toán đã từ chối duyệt'},
           {id:5,label:'Đã phê duyệt'},
           {id:6,label:'Đã xử lý'},
         ],
@@ -306,25 +306,25 @@
         let resp = ''
         switch (Number(value)) {
             case 1:
-                resp = 'Chờ duyệt đi';
+                resp = 'Chờ GĐTT duyệt';
                 break;
             case 2:
-                resp = 'Từ chối duyệt đi';
+                resp = 'GĐTT từ chối duyệt';
                 break;
             case 3:
-                resp = 'Chờ duyệt đến';
+                resp = 'Chờ kế toán duyệt';
                 break;
             case 4:
-                resp = 'Từ chối duyệt đến';
+                resp = 'Kế toán từ chối duyệt';
                 break;
             case 5:
-                resp = 'Đã được duyệt đến';
+                resp = 'Đã được duyệt';
                 break;
             case 6:
                 resp = 'Đã xử lý';
                 break;
             default:
-                resp = 'Chờ phê duyệt'
+                resp = 'Chờ GĐTT duyệt'
                 break
         }
         return resp

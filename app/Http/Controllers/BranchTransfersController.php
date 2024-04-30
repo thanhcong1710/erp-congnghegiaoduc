@@ -16,6 +16,7 @@ class BranchTransfersController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $status = isset($request->status) ? $request->status : [];
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -30,6 +31,9 @@ class BranchTransfersController extends Controller
         }
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+        if (!empty($status)) {
+            $cond .= " AND t.status IN (".implode(",",$status).")";
         }
         
         $order_by = " ORDER BY t.id DESC ";
