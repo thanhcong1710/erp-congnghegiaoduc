@@ -23,10 +23,9 @@ export default [
   {
     url: '/',
     name: 'Dashboard',
-    tagColor: 'warning',
     icon: 'HomeIcon',
-    i18n: 'Dashboard',
-    permission:'dashboard'
+    slug: 'dashboard',
+    permission:'dashboard',
   },
   {
     header: 'CRM',
@@ -36,11 +35,13 @@ export default [
         url: '/crm/parent',
         name: 'Khách hàng',
         icon: 'UsersIcon',
+        slug: 'crm-parent',
       },
       {
         url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',
+        slug: 'crm-imports',
       }
     ]
   },
