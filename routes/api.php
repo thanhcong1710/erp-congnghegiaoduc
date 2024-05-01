@@ -146,6 +146,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
             Route::post('attendances/load-classes', 'AttendancesController@loadClasses');
             Route::post('attendances/load-students', 'AttendancesController@loadStudents');
+            Route::post('attendances/save', 'AttendancesController@save');
         });
 
         Route::prefix('settings')->group(function () {

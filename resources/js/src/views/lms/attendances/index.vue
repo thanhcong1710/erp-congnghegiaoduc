@@ -63,7 +63,7 @@
               />
         </div>
         <div class="vx-col w-full item-last" v-if="class_info.class_id">
-          <div style="background: #72ae7517; padding: 10px; font-size: 16px;">
+          <div style="background: #72ae7517; padding: 10px; font-size: 14px;">
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
                   <span>Tên lớp học:</span>
@@ -77,7 +77,7 @@
                   <span>Thời gian:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.cls_startdate}} - {{class_info.cls_enddate}}</span>
+                  <span>{{class_info.cls_startdate | formatDateView}} - {{class_info.cls_enddate | formatDateView}}</span>
                 </div>
             </div>
             <div class="vx-row">
@@ -98,18 +98,10 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>Ca học:</span>
+                  <span>Ca học, phòng học:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.shift_text}}</span>
-                </div>
-            </div>
-            <div class="vx-row">
-                <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>Phòng học:</span>
-                </div>
-                <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.room_text}}</span>
+                  <span>{{class_info.shift_text}} {{class_info.room_text}}</span>
                 </div>
             </div>
             <div class="vx-row">
@@ -122,42 +114,37 @@
             </div>
           </div>
 
-          <div class="vs-component vs-con-table stripe vs-table-primary">
+          <div class="vs-component vs-con-table stripe vs-table-primary mt-5">
             <div class="con-tablex vs-table--content">
               <div class="vs-con-tbody vs-table--tbody ">
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th colspan="1" rowspan="1" class="text-center">STT</th>
-                      <th colspan="1" rowspan="1">Tên học sinh</th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        Mã học sinh
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Buổi học
-                          <!---->
-                        </div>
-                      </th>
+                      <th colspan="1" rowspan="2" class="text-center">STT</th>
+                      <th colspan="1" rowspan="2" style="min-width:126px">Tên học sinh</th>
+                      <th colspan="1" rowspan="2" class="text-center">Mã học sinh</th>
+                      <th :colspan="shedules.length" rowspan="1" class="text-center">{{att.date_select}}</th>
+                    </tr>
+                    <tr>
+                      <th colspan="1" rowspan="1" class="text-center" v-for="(item, index) in shedules" :key="index">{{item.date_label}}</th>
                     </tr>
                   </thead>
                   <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
-                    <td class="td vs-table--td">{{index+1}}</td> 
-                    <td class="td vs-table--td">
-                      <p><strong>{{item.contract_code}}</strong></p>
-                      <p>Tên HS: {{item.name}}</p>
-                      <p>Mã HS:{{item.lms_code}}</p>
-                      <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
-                      <p>Ngày kết thúc: {{item.enrolment_last_date}}</p>
-                    </td>
-                    <td class="td vs-table--td">
-                      <p><strong>{{item.tuition_fee_name}}</strong></p>
-                      <p>Phải đóng: {{item.must_charge}}</p>
-                      <p>Đã đóng: {{item.total_charged}}</p>
-                    </td>
-                    <td class="td vs-table--td">
-                      <p>Số buổi đã học: <strong>{{item.done_session}}</strong></p>
-                      <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                      <p>Trạng thái: <strong></strong></p>
+                    <td class="td vs-table--td text-center">{{index+1}}</td> 
+                    <td class="td vs-table--td">{{item.name}}</td>
+                    <td class="td vs-table--td text-center">{{item.lms_code}}</td>
+                    <td class="td vs-table--td text-center" v-for="(att, index_att) in item.attendances" :key="index_att">
+                      <div v-if="att.status==1">
+                        <select class="input-attendance vs-inputx vs-input--input normal" v-model="att.attendance_status" @change="save(att)">
+                          <option value="0">Chưa điểm danh</option>
+                          <option value="1">Đi học</option>
+                          <option value="2">Nghỉ học</option>
+                        </select>
+                        <textarea class="input-attendance vs-inputx vs-input--input normal mt-1" placeholder="Ghi chú..." v-model="att.note" @change="save(att)"></textarea>
+                      </div>
+                      <div v-if="att.status==2">
+                        <span>Bảo lưu</span>
+                      </div>
                     </td>
                   </tr>
                 </table>
@@ -243,7 +230,8 @@
           date_select:moment(new Date()).format('YYYY-MM')
         },
         students:[],
-        class_info:{}
+        class_info:{},
+        shedules:[],
       }
     },
     created() {
@@ -335,11 +323,26 @@
             this.$vs.loading.close();
             this.class_info = response.data.class_info
             this.students = response.data.students
+            this.shedules = response.data.shedules
           })
         }else{
           this.class_info ={}
           this.students=[]
         }
+      },
+      save(data){
+        this.$vs.loading();
+        axios.p(`/api/lms/attendances/save`, data)
+          .then(response => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
       }
     },
   }
@@ -351,5 +354,18 @@
 
 .td.vs-table--td{
   vertical-align: top;
+}
+
+[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th{
+  border: 1px solid #ccc;
+  padding: 5px 8px;
+}
+[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .tr-values .vs-table--td{
+  border: 1px solid #ccc;
+  padding: 5px 8px;
+}
+[dir] .input-attendance.vs-input--input.normal{
+  padding: 2px !important;
+  font-size: 12px !important;
 }
 </style>

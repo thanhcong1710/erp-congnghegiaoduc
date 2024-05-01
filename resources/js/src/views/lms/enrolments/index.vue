@@ -57,7 +57,7 @@
                   <span>Thời gian:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.cls_startdate}} - {{class_info.cls_enddate}}</span>
+                  <span>{{class_info.cls_startdate | formatDateView}} - {{class_info.cls_enddate | formatDateView}}</span>
                 </div>
             </div>
             <div class="vx-row">
@@ -78,18 +78,10 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>Ca học:</span>
+                  <span>Ca học, phòng học:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.shift_text}}</span>
-                </div>
-            </div>
-            <div class="vx-row">
-                <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>Phòng học:</span>
-                </div>
-                <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.room_text}}</span>
+                  <span>{{class_info.shift_text}} {{class_info.room_text}}</span>
                 </div>
             </div>
             <div class="vx-row">
