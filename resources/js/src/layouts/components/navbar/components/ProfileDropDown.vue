@@ -3,7 +3,7 @@
 
     <div class="text-right leading-tight hidden sm:block">
       <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
-      <small>Available</small>
+      <small>Mã: {{activeUserInfo.hrm_id}}</small>
     </div>
 
     <vs-dropdown vs-custom-content vs-trigger-click class="cursor-pointer">
@@ -17,7 +17,7 @@
 
           <li
             class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white"
-            @click="$router.push('/admin/user/profile').catch(() => {})">
+            @click="$router.push('/user/profile').catch(() => {})">
             <feather-icon icon="UserIcon" svgClasses="w-4 h-4" />
             <span class="ml-2">Tài khoản</span>
           </li>

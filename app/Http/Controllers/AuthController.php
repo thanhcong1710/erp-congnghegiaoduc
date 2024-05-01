@@ -118,6 +118,7 @@ class AuthController extends Controller
             'accessToken' => $token,
             'userData' => [
                 'displayName' => auth()->user()->name,
+                'hrm_id' => auth()->user()->hrm_id,
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
                 'phone' => auth()->user()->phone,
