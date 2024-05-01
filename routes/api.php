@@ -44,6 +44,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('teachers/{branch_id}', 'SystemController@getTeachers');
             Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
+            Route::get('programs/{product_id}', 'SystemController@getProgramsByProduct');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -142,6 +143,9 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('tuition_transfers/add', 'TuitionTransfersController@add');
             Route::get('tuition_transfers/show/{reserve_id}', 'TuitionTransfersController@show');
             Route::post('tuition_transfers/approve', 'TuitionTransfersController@approve');
+
+            Route::post('attendances/load-classes', 'AttendancesController@loadClasses');
+            Route::post('attendances/load-students', 'AttendancesController@loadStudents');
         });
 
         Route::prefix('settings')->group(function () {

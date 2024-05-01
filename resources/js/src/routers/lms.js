@@ -317,6 +317,19 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/attendances',
+        name: 'lms-attendances',
+        component: () => import('@/views/lms/attendances/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Điểm danh', active: true }
+          ],
+          pageTitle: 'Điểm danh',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

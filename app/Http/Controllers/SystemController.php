@@ -123,4 +123,9 @@ class SystemController extends Controller
         $data= u::query("SELECT cls_name AS label, id FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id");
         return response()->json($data);
     }
+
+    public function getProgramsByProduct(Request $request, $product_id){
+        $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+        return response()->json($data);
+    }
 }
