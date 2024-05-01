@@ -354,7 +354,49 @@ class UtilityServiceProvider extends ServiceProvider
 
 	public static function addLogContracts($contract_id){
 		$contract_info = (array)self::getObject(['id'=>$contract_id], 'contracts');
+        $class_date = date('Y-m-d');
+        if(data_get($contract_info, 'status') == 6){
+            $schedule = self::first("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id
+                FROM contracts AS c 
+                    LEFT JOIN classes AS cl ON cl.id = c.class_id
+                    LEFT JOIN schedules AS s ON s.class_id=cl.id
+                WHERE c.id=$contract_id AND s.status=1 AND s.class_date = '$class_date'");
+            $schedule_has_student_info = self::first("SELECT id FROM schedule_has_student WHERE contract_id= $contract_id AND class_date='$class_date'") ;
+            if($schedule){
+                $reserve_info = self::first("SELECT id FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 
+                    AND student_id=".data_get($schedule, 'student_id')." AND contract_id=".data_get($schedule, 'contract_id')." AND is_reserved=1");
+                if($schedule_has_student_info){
+                    self::updateSimpleRow(array(
+                        'student_id'=> data_get($schedule, 'student_id'),
+                        'branch_id'=> data_get($schedule, 'branch_id'),
+                        'class_id'=> data_get($schedule, 'class_id'),
+                        'product_id'=> data_get($schedule, 'product_id'),
+                        'program_id'=> data_get($schedule, 'program_id'),
+                        'status'=> $reserve_info ? 2 : 1,
+                    ), array('id'=>data_get($schedule_has_student_info, 'id')), 'schedule_has_student');
+                }else{
+                    self::insertSimpleRow(array(
+                        'student_id'=> data_get($schedule, 'student_id'),
+                        'branch_id'=> data_get($schedule, 'branch_id'),
+                        'class_id'=> data_get($schedule, 'class_id'),
+                        'contract_id'=> data_get($schedule, 'contract_id'),
+                        'product_id'=> data_get($schedule, 'product_id'),
+                        'program_id'=> data_get($schedule, 'program_id'),
+                        'class_date'=> $class_date,
+                        'created_at'=> date('Y-m-d H:i:s'),
+                        'status'=> $reserve_info ? 2 : 1,
+                    ), 'schedule_has_student');
+                }
+            }else{
+                if($schedule_has_student_info){
+                    self::query("UPDATE schedule_has_student SET status=0 WHERE id=".(int)data_get($schedule_has_student_info,'id'));
+                } 
+            }
+        }else{
+            self::query("UPDATE schedule_has_student SET status=0 WHERE contract_id=$contract_id AND class_date='$class_date'");
+        }
 		$contract_info['contract_id'] = data_get($contract_info, 'id');
+        $contract_info['log_time'] = date('Y-m-d H:i:s');
 		unset($contract_info['id']);
 		$log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
 		return $log_contract_id;
@@ -617,9 +659,5 @@ class UtilityServiceProvider extends ServiceProvider
             $text.= $text ? ', '.$text_day : $text_day;
         }
         return $text;
-    }
-
-    public static function updateEnrolmentLastDate($contract_id){
-         return true;
     }
 }

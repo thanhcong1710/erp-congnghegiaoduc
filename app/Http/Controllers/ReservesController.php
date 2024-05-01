@@ -145,7 +145,6 @@ class ReservesController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
             ),array('id'=>$contract_id),'contracts');
-            u::updateEnrolmentLastDate(data_get($contract_info,'id'));
             u::addLogContracts(data_get($contract_info,'id'));
             LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
 
@@ -224,7 +223,6 @@ class ReservesController extends Controller
                         'updator_id' => Auth::user()->id,
                     ),array('id'=>$contract_info->id),'contracts');
                 }
-                u::updateEnrolmentLastDate(data_get($contract_info,'id'));
                 u::addLogContracts(data_get($contract_info,'id'));
                 LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
                 $result = array(

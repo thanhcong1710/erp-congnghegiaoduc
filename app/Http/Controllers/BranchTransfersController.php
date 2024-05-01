@@ -226,7 +226,6 @@ class BranchTransfersController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id'=>$contract->id),'contracts');
-                u::updateEnrolmentLastDate($contract->id);
             }else{
                 u::updateSimpleRow(array(
                     'branch_id'=> data_get($branch_transfer_info, 'to_branch_id'),

@@ -162,7 +162,6 @@ class ClassTransfersController extends Controller
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ),array('id'=>$contract_id),'contracts');
-        u::updateEnrolmentLastDate($contract_id);
         u::addLogContracts($contract_id);
         LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
         return true;
