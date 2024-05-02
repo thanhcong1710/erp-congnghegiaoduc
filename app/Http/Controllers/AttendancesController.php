@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\SystemCode;
-use App\User;
 use App\Http\Controllers\Controller;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
