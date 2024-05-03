@@ -660,4 +660,17 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $text;
     }
+
+    public static function sendSingleMail($to=[],$subject, $body,$arr_cc = [], $arr_att = [],$from =[]){
+        DB::table('email_queues')->insert([
+            'email_from' => json_encode($from),
+            'email_to' => json_encode($to),
+            'email_subject' => $subject,
+            'email_body' => $body,
+            'email_cc' => json_encode($arr_cc),
+            'email_attack' => json_encode($arr_att),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        return true;
+    }
 }
