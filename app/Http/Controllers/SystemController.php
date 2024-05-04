@@ -70,7 +70,7 @@ class SystemController extends Controller
     }
 
     public function getProducts(){
-        $data = u::query("SELECT * FROM products WHERE status=1");
+        $data = u::query("SELECT *, 0 AS selected FROM products WHERE status=1");
         return response()->json($data);
     }
 

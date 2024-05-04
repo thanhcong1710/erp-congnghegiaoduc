@@ -330,6 +330,61 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/holidays',
+        name: 'setting-holidays',
+        component: () => import('@/views/settings/holidays/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ngày nghỉ lễ', active: true }
+          ],
+          pageTitle: 'Danh sách ngày nghỉ lễ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/holidays/add',
+        name: 'setting-holidays-add',
+        component: () => import('@/views/settings/holidays/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ngày nghỉ lễ', url: '/settings/holidays' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới ngày nghỉ lễ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/holidays/edit/:id',
+        name: 'setting-holidays-edit',
+        component: () => import('@/views/settings/holidays/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ngày nghỉ lễ', url: '/settings/holidays' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật ngày nghỉ lễ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/holidays/detail/:id',
+        name: 'setting-holidays-detail',
+        component: () => import('@/views/settings/holidays/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ngày nghỉ lễ', url: '/settings/holidays' },
+            { title: 'Thông tin chi tiết', active: true }
+          ],
+          pageTitle: 'Chi tiết ngày nghỉ lễ',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
