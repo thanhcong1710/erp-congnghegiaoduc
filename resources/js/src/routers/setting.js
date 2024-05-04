@@ -248,6 +248,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/rooms',
+        name: 'setting-rooms',
+        component: () => import('@/views/settings/rooms/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách phòng học', active: true }
+          ],
+          pageTitle: 'Danh sách phòng học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/rooms/add',
+        name: 'setting-rooms-add',
+        component: () => import('@/views/settings/rooms/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách phòng học', url: '/rooms/programs' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới phòng học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/rooms/edit/:id',
+        name: 'setting-rooms-edit',
+        component: () => import('@/views/settings/rooms/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách phòng học', url: '/settings/rooms' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật phòng học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

@@ -80,7 +80,7 @@ class SystemController extends Controller
     }
     
     public function getRooms($branch_id){
-        $data = u::query("SELECT *, room_name AS label FROM rooms WHERE status=1 AND branch_id=$branch_id");
+        $data = u::query("SELECT *, name AS label FROM rooms WHERE status=1 AND branch_id=$branch_id");
         return response()->json($data);
     }
 

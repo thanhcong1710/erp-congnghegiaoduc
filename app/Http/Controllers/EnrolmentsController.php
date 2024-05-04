@@ -67,12 +67,12 @@ class EnrolmentsController extends Controller
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
                 cl.max_students, cl.class_day,'' AS room_text, '' AS shift_text, '' AS class_day_text
             FROM classes AS cl WHERE id = $class_id");
-        $rooms = u::query("SELECT DISTINCT r.room_name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
+        $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
         $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND s.class_id =".$class_id);
 
         $room_text = "";
         foreach($rooms AS $room){
-            $room_text.= $room_text ? ", ".$room->room_name : $room->room_name;
+            $room_text.= $room_text ? ", ".$room->name : $room->name;
         }
         $class_info->room_text = $room_text;
         $shift_text = "";

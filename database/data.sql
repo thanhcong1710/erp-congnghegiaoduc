@@ -3396,7 +3396,7 @@ DROP TABLE IF EXISTS `rooms`;
 CREATE TABLE `rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `room_id` int(11) DEFAULT NULL COMMENT 'room id lms',
-  `room_name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'room name lms',
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'room name lms',
   `branch_id` int(11) DEFAULT NULL,
   `brch_id` int(11) DEFAULT NULL COMMENT 'branch id lms',
   `created_at` datetime DEFAULT NULL,
