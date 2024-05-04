@@ -45,9 +45,9 @@ class ShiftsController extends Controller
     public function add(Request $request)
     {
         $shift_id = u::insertSimpleRow(array(
-            'branch_id' => data_get($request, 'branch_id'),
             'name' => data_get($request, 'name'),
-            'code' => data_get($request, 'code'), 
+            'start_time' => data_get($request, 'start_time'),
+            'end_time' => data_get($request, 'end_time'), 
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($request, 'status'),
@@ -81,9 +81,9 @@ class ShiftsController extends Controller
     public function update(Request $request)
     {
         u::updateSimpleRow(array(
-            'branch_id' => data_get($request, 'branch_id'),
             'name' => data_get($request, 'name'),
-            'code' => data_get($request, 'code'), 
+            'start_time' => data_get($request, 'start_time'),
+            'end_time' => data_get($request, 'end_time'), 
             'status' =>  data_get($request, 'status'),
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,

@@ -6,35 +6,27 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Trung tâm <span class="text-danger"> (*)</span></label>
+          <label>Tên ca học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <vue-select
-                  label="name"
-                  placeholder="Chọn trung tâm"
-                  :options="html.branches.list"
-                  v-model="html.branches.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveBranch"
-              ></vue-select>
+            <input type="text" v-model="shift.name" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã phòng học <span class="text-danger"> (*)</span></label>
+          <label>Thời gian bắt đầu <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="text" v-model="room.code" class="vs-inputx vs-input--input normal">
+            <input type="time" v-model="shift.start_time" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên phòng học <span class="text-danger"> (*)</span></label>
+          <label>Thời gian kết thúc <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="text" v-model="room.name" class="vs-inputx vs-input--input normal">
+            <input type="time" v-model="shift.end_time" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Trạng thái</label>
           <div class=w-full>
-            <vs-switch v-model="room.status" color="success"/>
+            <vs-switch v-model="shift.status" color="success"/>
           </div>
         </div>
         
@@ -45,7 +37,7 @@
       </vs-alert>
       <div class="vx-row">
         <div class="vx-col w-full">
-          <router-link class="btn btn-danger" :to="`/settings/rooms`">
+          <router-link class="btn btn-danger" :to="`/settings/shifts`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
           <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
@@ -93,72 +85,48 @@
             ]
           }
         },
-        html:{
-          branches: {
-            item: '',
-            list: []
-          },
-        },
         alert:{
           active: false,
           body: '',
           color:'',
         },
-        room:{
-          branch_id:'',
-          code:'',
+        shift:{
+          start_time:'',
+          end_time:'',
           name: '',
           status:1,
         },
       }
     },
-    async created() {
-      await axios.g(`/api/system/branches`)
-        .then(response => {
-        this.html.branches.list = response.data
-      })
+    created() {
       this.loadDetail();
     },
     methods: {
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/settings/rooms/show/${this.$route.params.id}`)
+        axios.g(`/api/settings/shifts/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
           if(response.data.length !== 0){
-            this.room = response.data
-            this.html.branches.item = this.html.branches.list.filter(item => item.id == response.data.branch_id)[0]
+            this.shift = response.data
           }else{
-            this.$router.push({ path: `/settings/rooms` });
+            this.$router.push({ path: `/settings/shifts` });
           }
         })
-      },
-      selectDate(date){
-        if (date) {
-          this.room.opened_date = moment(date).format("YYYY-MM-DD");
-        }
-      },
-      saveBranch(data = null){
-        if (data && typeof data === 'object') {
-          const branch_id = data.id
-          this.room.branch_id = branch_id
-        }else{
-          this.room.branch_id = ""
-        }
       },
       save() {
         let mess = "";
         let resp = true;
-        if (this.room.branch_id == "") {
-          mess += " - Trung tâm không được để trống<br/>";
+        if (this.shift.name == "") {
+          mess += " - Tên ca học không được để trống<br/>";
           resp = false;
         }
-        if (this.room.code == "") {
-          mess += " - Mã phòng học không được để trống<br/>";
+        if (this.shift.start_time == "") {
+          mess += " - Thời gian bắt đầu không được để trống<br/>";
           resp = false;
         }
-        if (this.room.name == "") {
-          mess += " - Tên phòng học không được để trống<br/>";
+        if (this.shift.end_time == "") {
+          mess += " - Thời gian kết thúc không được để trống<br/>";
           resp = false;
         }
         if (!resp) {
@@ -168,7 +136,7 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/settings/rooms/update",this.room)
+        axios.p("/api/settings/shifts/update",this.shift)
           .then((response) => {
             this.$vs.loading.close();
             if (response.data.status) {
@@ -179,7 +147,7 @@
                 iconPack: 'feather',
                 icon: 'icon-check'
               })
-              this.$router.push('/settings/rooms')
+              this.$router.push('/settings/shifts')
             }else{
               this.$vs.notify({
                 title: 'Lỗi',

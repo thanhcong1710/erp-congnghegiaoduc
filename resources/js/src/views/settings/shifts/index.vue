@@ -48,9 +48,9 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Phòng học</th>
-                  <th colspan="1" rowspan="1" class="text-center">Mã</th>
+                  <th colspan="1" rowspan="1">Ca học</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thời gian bắt đầu</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thời gian kết thúc</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -59,9 +59,9 @@
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td text-center">{{item.code}}</td>
+                <td class="td vs-table--td text-center">{{item.start_time}}</td>
+                <td class="td vs-table--td text-center">{{item.end_time}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/settings/shifts/edit/${item.id}`">
