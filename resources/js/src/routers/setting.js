@@ -207,6 +207,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/programs',
+        name: 'setting-programs',
+        component: () => import('@/views/settings/programs/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chương trình học', active: true }
+          ],
+          pageTitle: 'Danh sách chương trình học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/programs/add',
+        name: 'setting-programs-add',
+        component: () => import('@/views/settings/programs/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới chương trình học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/programs/edit/:id',
+        name: 'setting-programs-edit',
+        component: () => import('@/views/settings/programs/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật chương trình học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

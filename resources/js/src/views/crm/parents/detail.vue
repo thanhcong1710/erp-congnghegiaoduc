@@ -521,9 +521,9 @@
               </datepicker>
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
-            <label>Sản phẩm</label>
+            <label>Khóa học</label>
             <select class="vs-inputx vs-input--input normal" v-model="modal_checkin.type_product">
-              <option value="">Chọn sản phẩm</option>
+              <option value="">Chọn khóa học</option>
               <option value="1">CMS</option>
               <option value="2">Accelium</option>
             </select>
@@ -1326,7 +1326,7 @@
           resp = false;
         }
         if (this.modal_checkin.type_product == "") {
-          mess += " - Sản phẩm không được để trống<br/>";
+          mess += " - Khóa học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

@@ -8,7 +8,7 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Gói sản phẩm <span class="text-danger"> (*)</span></label>
+              <label>Gói khóa học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <vue-select
                       label="name"
@@ -118,7 +118,7 @@
                       <thead class="vs-table--thead">
                         <tr>
                           <!---->
-                          <th colspan="1" rowspan="1">Sản phẩm</th>
+                          <th colspan="1" rowspan="1">Khóa học</th>
                           <th colspan="1" rowspan="1">Gói phí</th>
                           <th colspan="1" rowspan="1">Thời gian</th>
                           <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>

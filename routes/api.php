@@ -175,6 +175,13 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'ProductsController@show');
                 Route::post('update', 'ProductsController@update');
             });
+            Route::prefix('programs')->group(function () {
+                Route::post('add', 'ProgramsController@add');
+                Route::post('list', 'ProgramsController@list');
+                Route::post('delete', 'ProgramsController@delete');
+                Route::get('show/{id}', 'ProgramsController@show');
+                Route::post('update', 'ProgramsController@update');
+            });
         });
     });
 });
