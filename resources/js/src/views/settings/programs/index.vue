@@ -48,6 +48,7 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Chương trình học</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -58,6 +59,7 @@
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{item.product_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td text-center">{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>

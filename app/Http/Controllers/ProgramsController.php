@@ -35,7 +35,8 @@ class ProgramsController extends Controller
         $total = u::first("SELECT count(b.id) AS total 
             FROM programs AS b WHERE $cond");
         
-        $list = u::query("SELECT b.*, (SELECT count(id) FROM contracts WHERE program_id=b.id) AS disabled_delete
+        $list = u::query("SELECT b.*, (SELECT count(id) FROM contracts WHERE program_id=b.id) AS disabled_delete,
+                (SELECT name FROM products WHERE id=b.product_id) AS product_name
             FROM programs AS b 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
