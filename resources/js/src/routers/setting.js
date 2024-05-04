@@ -166,6 +166,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/products',
+        name: 'setting-products',
+        component: () => import('@/views/settings/products/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách khóa học', active: true }
+          ],
+          pageTitle: 'Danh sách khóa học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/products/add',
+        name: 'setting-products-add',
+        component: () => import('@/views/settings/products/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới khóa học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/products/edit/:id',
+        name: 'setting-products-edit',
+        component: () => import('@/views/settings/products/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật khóa học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

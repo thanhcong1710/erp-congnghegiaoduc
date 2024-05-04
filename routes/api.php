@@ -168,6 +168,13 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'BranchesController@show');
                 Route::post('update', 'BranchesController@update');
             });
+            Route::prefix('products')->group(function () {
+                Route::post('add', 'ProductsController@add');
+                Route::post('list', 'ProductsController@list');
+                Route::post('delete', 'ProductsController@delete');
+                Route::get('show/{id}', 'ProductsController@show');
+                Route::post('update', 'ProductsController@update');
+            });
         });
     });
 });

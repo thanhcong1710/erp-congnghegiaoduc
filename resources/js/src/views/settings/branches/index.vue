@@ -170,8 +170,6 @@
     methods: {
       reset() {
         this.searchData.keyword = ""
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
         this.searchData.arr_status= ""
         this.searchData.status= ""
         this.searchData.pagination= this.pagination

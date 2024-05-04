@@ -8,7 +8,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên trung tâm" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên khóa học" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -31,7 +31,7 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/settings/branches/add'">
+            <router-link class="btn btn-success" :to="'/settings/products/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -48,13 +48,13 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Tên trung tâm</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in branches" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in products" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
@@ -62,7 +62,7 @@
                 <td class="td vs-table--td text-center">{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/settings/branches/edit/${item.id}`">
+                    <router-link :to="`/settings/products/edit/${item.id}`">
                       <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
                     </router-link>
                     <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
@@ -144,7 +144,7 @@
             ]
           }
         },
-        branches: [],
+        products: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -170,8 +170,6 @@
     methods: {
       reset() {
         this.searchData.keyword = ""
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
         this.searchData.arr_status= ""
         this.searchData.status= ""
         this.searchData.pagination= this.pagination
@@ -193,10 +191,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/settings/branches/list', data)
+        axios.p('/api/settings/products/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.branches = response.data.list
+            this.products = response.data.list
             this.pagination = response.data.paging;
             this.pagination.init = 1;
           })
@@ -221,7 +219,7 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn muốn xóa trung tâm - ${item.name}?`,
+          text: `Bạn chắc chắn muốn xóa khóa học - ${item.name}?`,
           accept: this.deletetuition_fee,
           acceptText: 'Xóa',
           cancelText: 'Hủy'
@@ -229,10 +227,10 @@
       },
       deletetuition_fee(){
         const data = {
-          branch_id: this.delete_id,
+          product_id: this.delete_id,
         };
         this.$vs.loading();
-        axios.p(`/api/settings/branches/delete`,data)
+        axios.p(`/api/settings/products/delete`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.getData();
