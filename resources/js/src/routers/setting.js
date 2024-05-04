@@ -84,6 +84,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/tuition-fees',
+        name: 'setting-tuition-fees',
+        component: () => import('@/views/settings/tuition_fees/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách gói phí', active: true }
+          ],
+          pageTitle: 'Danh sách gói phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/tuition-fees/add',
+        name: 'setting-tuition-fees-add',
+        component: () => import('@/views/settings/tuition_fees/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách gói phí', url: '/settings/tuition-fees' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới gói phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/tuition-fees/edit/:id',
+        name: 'setting-tuition-fees-edit',
+        component: () => import('@/views/settings/tuition_fees/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách gói phí', url: '/settings/tuition-fee' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật gói phí',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

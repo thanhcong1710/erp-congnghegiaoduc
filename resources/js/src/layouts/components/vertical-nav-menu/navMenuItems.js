@@ -159,6 +159,12 @@ export default [
         name: 'Lớp học',
         icon: 'FileIcon',
         slug: 'settings-classes',
+      },
+      {
+        url: '/settings/tuition-fees',
+        name: 'Gói phí',
+        icon: 'SlackIcon',
+        slug: 'settings-tuition-fee',
       }
     ]
   },

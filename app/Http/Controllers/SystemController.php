@@ -128,4 +128,13 @@ class SystemController extends Controller
         $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
         return response()->json($data);
     }
+
+    public function getTuitionFees(Request $request){
+        $status = data_get($request, 'status', null);
+        $cond = $status!==null ? '1' : " status = $status";
+        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date,
+                (SELECT name FROM products WHERE id=t.product_id) AS product_name    
+            FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
+        return response()->json($data);
+    }
 }
