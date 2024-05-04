@@ -45,6 +45,7 @@ class ProgramsController extends Controller
     public function add(Request $request)
     {
         $program_id = u::insertSimpleRow(array(
+            'product_id' => data_get($request, 'product_id'),
             'name' => data_get($request, 'name'),
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
