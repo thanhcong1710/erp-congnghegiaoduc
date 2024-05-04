@@ -148,7 +148,7 @@
       </vs-alert>
       <div class="vx-row">
         <div class="vx-col w-full">
-          <router-link class="btn btn-danger" :to="`/settings/users`">
+          <router-link class="btn btn-danger" :to="`/settings/tuition-fees`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
           <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>

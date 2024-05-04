@@ -7,26 +7,8 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm áp dụng</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên gói phí" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên trung tâm" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -49,7 +31,7 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/settings/tuition-fees/add'">
+            <router-link class="btn btn-success" :to="'/settings/branches/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -66,23 +48,21 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Tên gói phí</th>
-                  <th colspan="1" rowspan="1" class="text-center">Sản phẩm</th>
-                  <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
+                  <th colspan="1" rowspan="1">Tên trung tâm</th>
+                  <th colspan="1" rowspan="1" class="text-center">Mã</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_fees" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in branches" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td text-center">{{item.product_name}}</td>
-                <td class="td vs-table--td text-center">{{item.available_date | formatDateView}} - {{item.available_date | formatDateView}}</td>
+                <td class="td vs-table--td text-center">{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/settings/tuition-fees/edit/${item.id}`">
+                    <router-link :to="`/settings/branches/edit/${item.id}`">
                       <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
                     </router-link>
                     <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
@@ -133,10 +113,7 @@
     },
     data() {
       return {
-        branch_list: [],
         searchData: {
-          arr_branch: "",
-          branch_id:"",
           keyword: "",
           status: "",
           arr_status:"",
@@ -167,7 +144,7 @@
             ]
           }
         },
-        tuition_fees: [],
+        branches: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -188,10 +165,6 @@
       }
     },
     created() {
-      axios.g(`/api/system/branches-has-user`)
-        .then(response => {
-        this.branch_list = response.data
-      })
       this.getData();
     },
     methods: {
@@ -205,14 +178,6 @@
         this.getData();
       },
       getData() {
-        const ids_branch = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.map(item => {
-            ids_branch.push(item.id)
-          })
-        }
-        this.searchData.branch_id = ids_branch
-                
         const ids_status = []
         if (this.searchData.arr_status && this.searchData.arr_status.length) {
           this.searchData.arr_status.map(item => {
@@ -223,16 +188,15 @@
 
         const data = {
             keyword: this.searchData.keyword,
-            branch_id: this.searchData.branch_id,
             status:this.searchData.status,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/settings/tuition-fees/list', data)
+        axios.p('/api/settings/branches/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.tuition_fees = response.data.list
+            this.branches = response.data.list
             this.pagination = response.data.paging;
             this.pagination.init = 1;
           })
@@ -257,7 +221,7 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn muốn xóa gói phí - ${item.name}?`,
+          text: `Bạn chắc chắn muốn xóa trung tâm - ${item.name}?`,
           accept: this.deletetuition_fee,
           acceptText: 'Xóa',
           cancelText: 'Hủy'
@@ -265,10 +229,10 @@
       },
       deletetuition_fee(){
         const data = {
-          tuition_fee_id: this.delete_id,
+          branch_id: this.delete_id,
         };
         this.$vs.loading();
-        axios.p(`/api/settings/tuition-fees/delete`,data)
+        axios.p(`/api/settings/branches/delete`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.getData();

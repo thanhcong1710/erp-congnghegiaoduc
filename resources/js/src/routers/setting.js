@@ -125,6 +125,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/branches',
+        name: 'setting-branches',
+        component: () => import('@/views/settings/branches/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách trung tâm', active: true }
+          ],
+          pageTitle: 'Danh sách trung tâm',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/branches/add',
+        name: 'setting-branches-add',
+        component: () => import('@/views/settings/branches/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách trung tâm', url: '/settings/branches' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới trung tâm',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/branches/edit/:id',
+        name: 'setting-branches-edit',
+        component: () => import('@/views/settings/branches/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách trung tâm', url: '/settings/branches' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật trung tâm',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

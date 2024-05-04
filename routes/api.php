@@ -154,7 +154,6 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('classes/load-classes', 'ClassesController@loadClasses');
             Route::post('classes/save', 'ClassesController@save');
             Route::get('classes/info-config/{class_id}', 'ClassesController@infoConfig');
-
             Route::prefix('tuition-fees')->group(function () {
                 Route::post('add', 'TuitionFeesController@add');
                 Route::post('list', 'TuitionFeesController@list');
@@ -162,7 +161,13 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'TuitionFeesController@show');
                 Route::post('update', 'TuitionFeesController@update');
             });
-
+            Route::prefix('branches')->group(function () {
+                Route::post('add', 'BranchesController@add');
+                Route::post('list', 'BranchesController@list');
+                Route::post('delete', 'BranchesController@delete');
+                Route::get('show/{id}', 'BranchesController@show');
+                Route::post('update', 'BranchesController@update');
+            });
         });
     });
 });
