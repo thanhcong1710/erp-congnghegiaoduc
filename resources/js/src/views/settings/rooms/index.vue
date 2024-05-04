@@ -198,7 +198,9 @@
             this.$vs.loading.close()
             this.rooms = response.data.list
             this.pagination = response.data.paging;
-            this.pagination.init = 1;
+            setTimeout(() => {
+              this.pagination.init = 1;
+            }, 500)
           })
           .catch((error) => {
             console.log(error);

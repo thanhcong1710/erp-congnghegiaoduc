@@ -268,7 +268,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách phòng học', url: '/rooms/programs' },
+            { title: 'Danh sách phòng học', url: '/settings/rooms' },
             { title: 'Thêm mới', active: true }
           ],
           pageTitle: 'Thêm mới phòng học',
@@ -282,10 +282,51 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách phòng học', url: '/settings/rooms' },
+            { title: 'Danh sách ca học', url: '/settings/rooms' },
             { title: 'Cập nhật', active: true }
           ],
           pageTitle: 'Cập nhật phòng học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/shifts',
+        name: 'setting-shifts',
+        component: () => import('@/views/settings/shifts/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ca học', active: true }
+          ],
+          pageTitle: 'Danh sách ca học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/shifts/add',
+        name: 'setting-shifts-add',
+        component: () => import('@/views/settings/shifts/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ca học', url: '/settings/shifts' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới ca học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/shifts/edit/:id',
+        name: 'setting-shifts-edit',
+        component: () => import('@/views/settings/shifts/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách ca học', url: '/settings/shifts' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật ca học',
           rule: 'editor'
         }
       },

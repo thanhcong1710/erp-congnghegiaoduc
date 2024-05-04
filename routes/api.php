@@ -189,6 +189,20 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'RoomsController@show');
                 Route::post('update', 'RoomsController@update');
             });
+            Route::prefix('shifts')->group(function () {
+                Route::post('add', 'ShiftsController@add');
+                Route::post('list', 'ShiftsController@list');
+                Route::post('delete', 'ShiftsController@delete');
+                Route::get('show/{id}', 'ShiftsController@show');
+                Route::post('update', 'ShiftsController@update');
+            });
+            Route::prefix('holidays')->group(function () {
+                Route::post('add', 'HolidaysController@add');
+                Route::post('list', 'HolidaysController@list');
+                Route::post('delete', 'HolidaysController@delete');
+                Route::get('show/{id}', 'HolidaysController@show');
+                Route::post('update', 'HolidaysController@update');
+            });
         });
     });
 });

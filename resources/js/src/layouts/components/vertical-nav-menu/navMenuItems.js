@@ -173,6 +173,18 @@ export default [
         slug: 'settings-rooms',
       },
       {
+        url: '/settings/shifts',
+        name: 'Ca học',
+        icon: 'WatchIcon',
+        slug: 'settings-shifts',
+      },
+      {
+        url: '/settings/holidays',
+        name: 'Ngày nghỉ lễ',
+        icon: 'CloudOffIcon',
+        slug: 'settings-holidays',
+      },
+      {
         url: '/settings/tuition-fees',
         name: 'Gói phí',
         icon: 'SlackIcon',
