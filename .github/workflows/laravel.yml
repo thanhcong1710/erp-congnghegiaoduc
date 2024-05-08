@@ -2,9 +2,9 @@ name: erp-congnghegiaoduc
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, fastrackids ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, fastrackids ]
 
 jobs:
   congnghegiaoduc_production:
@@ -17,3 +17,14 @@ jobs:
     - name: Complete
       run: sudo npm run production
       working-directory: /var/www/html/erp
+      
+  congnghegiaoduc_fastrackids:
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/fastrackids'
+    steps:
+    - name: Pull
+      run: sudo git pull origin fastrackids
+      working-directory: /var/www/html/fastrackids
+    - name: Complete
+      run: sudo npm run production
+      working-directory: /var/www/html/fastrackids
