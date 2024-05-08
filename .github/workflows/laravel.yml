@@ -1,15 +1,11 @@
 name: erp-congnghegiaoduc
 
 on:
-push:
-    branches:
-      - master
-      - fastrackids
- pull_request:
-    branches:
-      - master
-      - fastrackids
-    
+  push:
+    branches: [ master, fastrackids ]
+  pull_request:
+    branches: [ master, fastrackids ]
+
 jobs:
   congnghegiaoduc_production:
     runs-on: self-hosted
