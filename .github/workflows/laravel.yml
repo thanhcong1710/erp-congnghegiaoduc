@@ -2,12 +2,10 @@ name: erp-congnghegiaoduc
 
 on:
   push:
-    branches: [ master ]
-    branches: [ fastrackids ]
+    branches: [ master, fastrackids ]
   pull_request:
-    branches: [ master ]
-    branches: [ fastrackids ]
-
+    branches: [ master, fastrackids ]
+    
 jobs:
   congnghegiaoduc_production:
     runs-on: self-hosted
