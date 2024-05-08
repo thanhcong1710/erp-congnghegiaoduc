@@ -608,11 +608,10 @@ class UtilityServiceProvider extends ServiceProvider
 	public static function getPublicHolidays($branch_id = 0, $product = 0)
     {
         $resp = [];
-        $where = ($product && $product !== 9999) ? "AND (h.products LIKE '[$product,%' OR h.products LIKE '%,$product]' OR h.products LIKE '%,$product,%' OR h.products LIKE '[$product]') AND h.`status` > 0" : ' AND h.`status` > 0 ';
+        $where = ($product && $product !== 9999) ? "AND (h.products LIKE '$product,%' OR h.products LIKE '%,$product' OR h.products LIKE '%,$product,%' OR h.products = '$product') AND h.`status` > 0" : ' AND h.`status` > 0 ';
         
 		$resp = self::query("SELECT h.start_date, h.end_date, h.products FROM public_holiday AS h
-						LEFT JOIN branches AS b ON h.zone_id = b.zone_id
-						WHERE b.id = $branch_id $where");
+						WHERE ( h.branch_id LIKE '$branch_id,%' OR h.branch_id LIKE '%,$branch_id,%' OR h.branch_id LIKE '%,$branch_id' OR h.branch_id = '$branch_id' ) $where");
         if (count($resp)) {
             usort($resp, function ($a, $b) {
                 return strcmp($a->start_date, $b->start_date);
@@ -626,7 +625,7 @@ class UtilityServiceProvider extends ServiceProvider
                 }
 
                 foreach ($resp as $re){
-                    $product_ids = explode(',',str_replace('[','',str_replace(']','',$re->products)));
+                    $product_ids = explode(',',$re->products);
                     foreach ($holidays as $key => $holiday){
                         if(in_array($key, $product_ids)){
                             $holidays[$key][] = (Object)[
@@ -659,5 +658,18 @@ class UtilityServiceProvider extends ServiceProvider
             $text.= $text ? ', '.$text_day : $text_day;
         }
         return $text;
+    }
+
+    public static function sendSingleMail($to=[],$subject, $body,$arr_cc = [], $arr_att = [],$from =[]){
+        DB::table('email_queues')->insert([
+            'email_from' => json_encode($from),
+            'email_to' => json_encode($to),
+            'email_subject' => $subject,
+            'email_body' => $body,
+            'email_cc' => json_encode($arr_cc),
+            'email_attack' => json_encode($arr_att),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        return true;
     }
 }

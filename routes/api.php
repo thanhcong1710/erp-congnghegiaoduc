@@ -45,6 +45,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
             Route::get('programs/{product_id}', 'SystemController@getProgramsByProduct');
+            Route::get('tuition-fees', 'SystemController@getTuitionFees');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -153,6 +154,55 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('classes/load-classes', 'ClassesController@loadClasses');
             Route::post('classes/save', 'ClassesController@save');
             Route::get('classes/info-config/{class_id}', 'ClassesController@infoConfig');
+            Route::prefix('tuition-fees')->group(function () {
+                Route::post('add', 'TuitionFeesController@add');
+                Route::post('list', 'TuitionFeesController@list');
+                Route::post('delete', 'TuitionFeesController@delete');
+                Route::get('show/{id}', 'TuitionFeesController@show');
+                Route::post('update', 'TuitionFeesController@update');
+            });
+            Route::prefix('branches')->group(function () {
+                Route::post('add', 'BranchesController@add');
+                Route::post('list', 'BranchesController@list');
+                Route::post('delete', 'BranchesController@delete');
+                Route::get('show/{id}', 'BranchesController@show');
+                Route::post('update', 'BranchesController@update');
+            });
+            Route::prefix('products')->group(function () {
+                Route::post('add', 'ProductsController@add');
+                Route::post('list', 'ProductsController@list');
+                Route::post('delete', 'ProductsController@delete');
+                Route::get('show/{id}', 'ProductsController@show');
+                Route::post('update', 'ProductsController@update');
+            });
+            Route::prefix('programs')->group(function () {
+                Route::post('add', 'ProgramsController@add');
+                Route::post('list', 'ProgramsController@list');
+                Route::post('delete', 'ProgramsController@delete');
+                Route::get('show/{id}', 'ProgramsController@show');
+                Route::post('update', 'ProgramsController@update');
+            });
+            Route::prefix('rooms')->group(function () {
+                Route::post('add', 'RoomsController@add');
+                Route::post('list', 'RoomsController@list');
+                Route::post('delete', 'RoomsController@delete');
+                Route::get('show/{id}', 'RoomsController@show');
+                Route::post('update', 'RoomsController@update');
+            });
+            Route::prefix('shifts')->group(function () {
+                Route::post('add', 'ShiftsController@add');
+                Route::post('list', 'ShiftsController@list');
+                Route::post('delete', 'ShiftsController@delete');
+                Route::get('show/{id}', 'ShiftsController@show');
+                Route::post('update', 'ShiftsController@update');
+            });
+            Route::prefix('holidays')->group(function () {
+                Route::post('add', 'HolidaysController@add');
+                Route::post('list', 'HolidaysController@list');
+                Route::post('delete', 'HolidaysController@delete');
+                Route::get('show/{id}', 'HolidaysController@show');
+                Route::post('update', 'HolidaysController@update');
+            });
         });
     });
 });

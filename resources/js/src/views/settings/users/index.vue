@@ -158,7 +158,9 @@
             this.users = response.data.list
             this.$vs.loading.close()
             this.pagination = response.data.paging;
-            this.pagination.init = 1;
+            setTimeout(() => {
+              this.pagination.init = 1;
+            }, 500)
           })
           .catch((error) => {
             console.log(error);

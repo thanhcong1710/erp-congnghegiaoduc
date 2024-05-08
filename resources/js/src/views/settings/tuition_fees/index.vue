@@ -7,7 +7,7 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
+            <label for="" class="vs-input--label">Trung tâm áp dụng</label>
             <multiselect
                 name="search_branch"
                 placeholder="Chọn trung tâm"
@@ -26,12 +26,30 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Nhập tên hoặc mã học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên gói phí" v-model="searchData.keyword"></vs-input>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <multiselect
+                name="search_status"
+                placeholder="Chọn trạng thái"
+                v-model="searchData.arr_status"
+                :options="statusOptions"
+                label="label"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
           </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/class_transfers/add'">
+            <router-link class="btn btn-success" :to="'/settings/tuition-fees/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -47,62 +65,27 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Mã học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Tên Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Lớp đi
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Lớp đến
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Ngày chuyển lớp
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Tên gói phí</th>
+                  <th colspan="1" rowspan="1" class="text-center">Khóa học</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in class_transfers" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_fees" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.from_branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.from_class_name}}</td>
-                <td class="td vs-table--td">{{item.to_class_name}}</td>
-                <td class="td vs-table--td">{{item.transfer_date}}</td>
+                <td class="td vs-table--td text-center">{{item.product_name}}</td>
+                <td class="td vs-table--td text-center">{{item.available_date | formatDateView}} - {{item.available_date | formatDateView}}</td>
+                <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
-                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                    </router-link> 
+                    <router-link :to="`/settings/tuition-fees/edit/${item.id}`">
+                      <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
+                    </router-link>
+                    <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -139,12 +122,14 @@
   import vSelect from 'vue-select'
   import axios from '../../../http/axios.js'
   import Multiselect from "vue-multiselect";
+  import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
 
   export default {
     components: { 
       vSelect,
-      Multiselect
+      Multiselect,
+      DatePicker
     },
     data() {
       return {
@@ -153,8 +138,36 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
+          status: "",
+          arr_status:"",
         },
-        class_transfers: [],
+        statusOptions:[
+          {id:0,label:'Không kích hoạt'},
+          {id:1,label:'Kích hoạt'},
+        ],
+        datepickerOptions: {
+          closed: true,
+          value: "",
+          minDate: "",
+          lang: {
+            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+            months: [
+              "Tháng 1",
+              "Tháng 2",
+              "Tháng 3",
+              "Tháng 4",
+              "Tháng 5",
+              "Tháng 6",
+              "Tháng 7",
+              "Tháng 8",
+              "Tháng 9",
+              "Tháng 10",
+              "Tháng 11",
+              "Tháng 12"
+            ]
+          }
+        },
+        tuition_fees: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -171,6 +184,7 @@
           pages: [],
           init: 0
         },
+        delete_id:'',
       }
     },
     created() {
@@ -185,6 +199,8 @@
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
+        this.searchData.arr_status= ""
+        this.searchData.status= ""
         this.searchData.pagination= this.pagination
         this.getData();
       },
@@ -196,18 +212,27 @@
           })
         }
         this.searchData.branch_id = ids_branch
-       
+                
+        const ids_status = []
+        if (this.searchData.arr_status && this.searchData.arr_status.length) {
+          this.searchData.arr_status.map(item => {
+            ids_status.push(item.id)
+          })
+        }
+        this.searchData.status = ids_status
+
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            status:this.searchData.status,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/class_transfers/list', data)
+        axios.p('/api/settings/tuition-fees/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.class_transfers = response.data.list
+            this.tuition_fees = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -227,6 +252,36 @@
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getData();
+      },
+      confirmDelete (item) {
+        this.delete_id = item.id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn xóa gói phí - ${item.name}?`,
+          accept: this.deletetuition_fee,
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      deletetuition_fee(){
+        const data = {
+          tuition_fee_id: this.delete_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/settings/tuition-fees/delete`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.getData();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
       },
     },
     filters: {

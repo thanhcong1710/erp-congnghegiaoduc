@@ -143,6 +143,54 @@ export default [
     icon: 'PackageIcon',
     items: [
       {
+        url: '/settings/branches',
+        name: 'Trung tâm',
+        icon: 'HomeIcon',
+        slug: 'settings-branches',
+      },
+      {
+        url: '/settings/products',
+        name: 'Khóa học',
+        icon: 'LayersIcon',
+        slug: 'settings-products',
+      },
+      {
+        url: '/settings/programs',
+        name: 'Chương trình học',
+        icon: 'ServerIcon',
+        slug: 'settings-programs',
+      },
+      {
+        url: '/settings/classes',
+        name: 'Lớp học',
+        icon: 'FileIcon',
+        slug: 'settings-classes',
+      },
+      {
+        url: '/settings/rooms',
+        name: 'Phòng học',
+        icon: 'CastIcon',
+        slug: 'settings-rooms',
+      },
+      {
+        url: '/settings/shifts',
+        name: 'Ca học',
+        icon: 'WatchIcon',
+        slug: 'settings-shifts',
+      },
+      {
+        url: '/settings/holidays',
+        name: 'Ngày nghỉ lễ',
+        icon: 'CloudOffIcon',
+        slug: 'settings-holidays',
+      },
+      {
+        url: '/settings/tuition-fees',
+        name: 'Gói phí',
+        icon: 'SlackIcon',
+        slug: 'settings-tuition-fee',
+      },
+      {
         url: '/settings/users',
         name: 'Người dùng',
         icon: 'UserIcon',
@@ -154,12 +202,6 @@ export default [
         icon: 'PocketIcon',
         slug: 'settings-roles',
       },
-      {
-        url: '/settings/classes',
-        name: 'Lớp học',
-        icon: 'FileIcon',
-        slug: 'settings-classes',
-      }
     ]
   },
 ]

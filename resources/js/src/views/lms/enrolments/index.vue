@@ -447,7 +447,9 @@
               this.studentSearch = response.data.list
               this.total = response.data.detail_total
               this.pagination = response.data.paging;
+              setTimeout(() => {
               this.pagination.init = 1;
+            }, 500)
             })
             .catch((error) => {
               console.log(error);
