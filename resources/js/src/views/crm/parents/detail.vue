@@ -30,6 +30,19 @@
             <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
+            <p>Level</p>
+            <p class="mb-1">
+              <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeLevel" v-model="tmp_level" >
+                <option value="C1">C1</option>
+                <option value="C2">C2</option>
+                <option value="C3">C3</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="L4">L4</option>
+                <option value="L5">L5</option>
+              </select>
+            </p> 
             <p>Trạng thái</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
@@ -288,6 +301,46 @@
               </div>
             </div>
           </vs-tab>
+          <vs-tab :label="'Ticket ('+ total_unsuccess +')'"  @click="changeTab()">
+            <div class="tab-text">
+              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalTicket"><i class="fa fa-plus"></i> Thêm mới Ticket</vs-button>
+              <div class="vs-component vs-con-table stripe vs-table-primary">
+                <div class="con-tablex vs-table--content">
+                  <div class="vs-con-tbody vs-table--tbody ">
+                    <table class="vs-table vs-table--tbody-table">
+                      <thead class="vs-table--thead">
+                        <tr>
+                          <!---->
+                          <th colspan="1" rowspan="1" class="text-center">Thời gian tạo</th>
+                          <th colspan="1" rowspan="1" class="text-center">Loại</th>
+                          <th colspan="1" rowspan="1" >Nội dung</th>
+                          <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                          <th colspan="1" rowspan="1" >Ghi chú xử lý</th>
+                        </tr>
+                      </thead>
+                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tickets" :key="index">
+                        <td class="td vs-table--td text-center">{{ item.created_at }}</td>
+                        <td class="td vs-table--td text-center">{{ item.type | genTypeTicket }}</td>
+                        <td class="td vs-table--td" style="max-width: 284px">{{ item.description }}</td>
+                        <td class="td vs-table--td text-center">
+                          <select class="vs-inputx vs-input--input normal" v-model="item.status" @change="updateTicket(item)">
+                            <option value="1">Mới tạo</option>
+                            <option value="2">Đã tiếp nhận</option>
+                            <option value="3">Chờ xử lý</option>
+                            <option value="4">Hoàn thành</option>
+                            <option value="5">Hủy</option>
+                          </select>
+                        </td>
+                        <td class="td vs-table--td">
+                          <textarea class="vs-inputx vs-input--input normal" v-model="item.note" @change="updateTicket(item)"></textarea>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </vs-tab>
           <vs-tab label="Chăm sóc"  @click="changeTab()">
             <div class="tab-text">
               <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalCare"><i class="fa fa-plus"></i> Thêm mới chăm sóc</vs-button>
@@ -298,44 +351,20 @@
                       <thead class="vs-table--thead">
                         <tr>
                           <!---->
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text text-center">Thời gian
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Phụ trách
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Trung tâm
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Phương thức
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Trạng thái cuộc gọi
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Chi tiết
-                              <!---->
-                            </div>
-                          </th>
+                          <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
+                          <th colspan="1" rowspan="1">Phụ trách</th>
+                          <!-- <th colspan="1" rowspan="1" class="text-center">Trung tâm</th> -->
+                          <th colspan="1" rowspan="1" class="text-center">Phương thức</th>
+                          <th colspan="1" rowspan="1" class="text-center">Trạng thái cuộc gọi</th>
+                          <th colspan="1" rowspan="1" >Chi tiết</th>
                         </tr>
                       </thead>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in cares" :key="index">
-                        <td class="td vs-table--td">{{ item.care_date }}</td>
+                        <td class="td vs-table--td text-center">{{ item.care_date }}</td>
                         <td class="td vs-table--td">{{ item.creator_name }}</td>
-                        <td class="td vs-table--td">{{ item.branch_name }}</td>
-                        <td class="td vs-table--td">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
-                        <td class="td vs-table--td">{{ item.call_status_label }}</td>
+                        <!-- <td class="td vs-table--td text-center">{{ item.branch_name }}</td> -->
+                        <td class="td vs-table--td text-center">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
+                        <td class="td vs-table--td text-center">{{ item.call_status_label }}</td>
                         <td class="td vs-table--td">
                           <p v-if="item.link_record">
                             <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
@@ -375,8 +404,9 @@
                       <p>Trạng thái: <b>{{ item.status | genStudentStatus}}</b></p>
                       <p v-if="item.status>0">Trung tâm checkin: {{ item.checkin_branch_name}}</p>
                       <p v-if="item.status>0">Thời gian checkin: {{ item.checkin_at}}</p>
-                      <p v-if="item.status>0 && item.status!=2" class="list-action">Cập nhật checkin: 
-                        <vs-button :disabled="disabled_action" v-if="item.status>0" @click="showModalUpdateCheckin(item)" class="small"><i class="fa fa-edit"></i></vs-button>
+                      <p v-if="item.status>0">Khóa học: {{ item.checkin_product_name}}</p>
+                      <p v-if="item.status==1" class="list-action">Cập nhật checkin: 
+                        <vs-button :disabled="disabled_action" v-if="item.status==1" @click="showModalUpdateCheckin(item)" class="small"><i class="fa fa-edit"></i></vs-button>
                       </p>
                     </div>
                   </vx-card>
@@ -524,8 +554,11 @@
             <label>Khóa học</label>
             <select class="vs-inputx vs-input--input normal" v-model="modal_checkin.type_product">
               <option value="">Chọn khóa học</option>
-              <option value="1">CMS</option>
-              <option value="2">Accelium</option>
+               <option
+                :value="product.id"
+                v-for="(product, index) in products"
+                :key="index"
+              >{{product.name}}</option>
             </select>
           </div>
           
@@ -535,6 +568,31 @@
           <div class="vx-col w-full">
             <vs-button color="dark" type="border" class="mr-3" @click="modal_checkin.show = false">Hủy</vs-button>
             <vs-button color="success" @click="checkin">Lưu</vs-button>
+          </div>
+        </div>
+      </vs-popup>
+      <vs-popup :class="'modal_'+ modal_ticket.color" :title="modal_ticket.title" :active.sync="modal_ticket.show">
+        <div class="vx-row"> 
+          <div class="vx-col w-full mb-4">
+            <label>Loại Ticket</label>
+            <select class="vs-inputx vs-input--input normal" v-model="ticket.type">
+              <option value="">Chọn loại</option>
+              <option value="1">Yêu cầu dịch vụ</option>
+              <option value="2">Yêu cầu hỗ trợ</option>
+              <option value="3">Khiếu lại</option>
+              <option value="4">Báo lỗi</option>
+            </select>
+          </div>
+          <div class="vx-col w-full mb-4">
+            <label>Nội dung</label>
+            <textarea rows="8" class="vs-inputx vs-input--input normal" v-model="ticket.description"></textarea>
+          </div>
+          <vs-alert :active.sync="modal_ticket.alert.active" class="mb-5  mr-4 ml-4" :color="modal_ticket.alert.color" closable icon-pack="feather" close-icon="icon-x">
+            <div v-html="modal_ticket.alert.body"></div>
+          </vs-alert>
+          <div class="vx-col w-full">
+            <vs-button color="dark" type="border" class="mr-3" @click="modal_ticket.show = false">Hủy</vs-button>
+            <vs-button color="success" @click="addTicket">Lưu</vs-button>
           </div>
         </div>
       </vs-popup>
@@ -612,6 +670,19 @@
           },
         },
         branches:[],
+        modal_ticket: {
+          title: "THÊM MỚI TICKET",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
+        },
         modal_care: {
           title: "THÊM MỚI CHĂM SÓC",
           show: false,
@@ -685,6 +756,15 @@
         },
         activeItem: 'customer_care',
         methods:[],
+        total_unsuccess:0,
+        tickets:[],
+        ticket:{
+          parent_id:"",
+          type:"",
+          description:"",
+          note:"",
+          status:"",
+        },
         cares:[],
         care:{
           method_id:"",
@@ -709,6 +789,7 @@
         users_manager:[],
         tmp_owner_id:"",
         tmp_status:"",
+        tmp_level:"",
         phone:{
           css_class: 'alert alert-success',
           show: false,
@@ -738,9 +819,14 @@
         disabled_action:false,
         disabled_edit:true,
         c2c_info:"",
+        products:[],
       };
     },
     async created() {
+      axios.g(`/api/system/products`)
+        .then(response => {
+        this.products = response.data
+      })
       axios.g(`/api/system/methods`)
         .then(response => {
         this.methods = response.data
@@ -771,6 +857,7 @@
       })
       this.loadDetail();
       this.loadCares();
+      this.loadTickets();
     },
     methods: {
       loadDetail(){
@@ -787,6 +874,7 @@
             this.tmp_district_id = response.data.district_id
             this.tmp_owner_id = response.data.owner_id
             this.tmp_status = response.data.status
+            this.tmp_level  = response.data.level
             this.getDistrict(this.parent_input.province);
           }else{
             this.$router.push({ path: `/crm/parent` });
@@ -999,6 +1087,42 @@
           this.$vs.loading.close();
         });
       },
+      openConfirmChangeLevel () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn cập nhật level của khách hàng?`,
+          accept: this.changeLevel,
+          cancel: this.cancelChangeLevel,
+          acceptText: 'Cập nhật',
+          cancelText: 'Hủy'
+        })
+      },
+      cancelChangeLevel(){
+        this.tmp_level = this.parent.level
+      },
+      changeLevel(){
+        const data = {
+          parent_id: this.parent.id,
+          level: this.tmp_level,
+        };
+        this.$vs.loading();
+        axios.p(`/api/crm/parents/change_level`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.loadDetail();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+        .catch((e) => {
+        });
+      },
       openConfirmChangeStatus () {
         this.$vs.dialog({
           type: 'confirm',
@@ -1091,10 +1215,12 @@
       },
       changeTab(){
         if(this.active_tab ==1){
-          this.loadCares();
+          this.loadTicket();
         }else if(this.active_tab ==2){
-          this.loadStudents();
+          this.loadCares();
         }else if(this.active_tab ==3){
+          this.loadStudents();
+        }else if(this.active_tab ==4){
           this.loadLogs();
         }else{
           this.loadDetail();
@@ -1106,6 +1232,79 @@
         .then((response) => {
           this.$vs.loading.close();
           this.logs=response.data;
+        })
+        .catch((e) => {
+        });
+      },
+      showModalTicket(){
+        this.modal_ticket.show =true
+        this.modal_ticket.error_message=""
+        this.ticket.parent_id=""
+        this.ticket.type=""
+        this.ticket.description=""
+        this.ticket.note=""
+        this.ticket.status=""
+      },
+      loadTickets(){
+        this.$vs.loading();
+          axios.g(`/api/crm/ticket/get_all_data/${this.$route.params.id}`)
+          .then((response) => {
+            this.$vs.loading.close();
+            this.tickets=response.data.list;
+            this.total_unsuccess = response.data.total_unsuccess
+          })
+          .catch((e) => {
+          });
+      },
+      addTicket(){
+        this.ticket.parent_id = this.parent.id
+        let mess = "";
+        let resp = true;
+        if (this.ticket.type == "") {
+          mess += " - Loại ticket không được để trống<br/>";
+          resp = false;
+        }
+        if (this.ticket.description == "") {
+          mess += " - Nội dung không được để trống<br/>";
+          resp = false;
+        }
+        
+        if (!resp) {
+          this.modal_ticket.alert.color = 'danger'
+          this.modal_ticket.alert.body = mess;
+          this.modal_ticket.alert.active = true;
+          return false;
+        }
+        this.$vs.loading();
+        this.modal_ticket.show = false
+        axios.p(`/api/crm/ticket/add`,this.ticket)
+        .then((response) => {
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$vs.loading.close();
+          this.loadTickets();
+        })
+        .catch((e) => {
+        });
+      },
+      updateTicket(data){
+        this.$vs.loading();
+        axios.p(`/api/crm/ticket/update`,data)
+        .then((response) => {
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$vs.loading.close();
+          this.loadTickets();
         })
         .catch((e) => {
         });
@@ -1141,10 +1340,10 @@
           mess += " - Nội dung chăm sóc không được để trống<br/>";
           resp = false;
         }
-        if (this.care.file_name == "") {
-          mess += " - File đính kèm không được để trống<br/>";
-          resp = false;
-        }
+        // if (this.care.file_name == "") {
+        //   mess += " - File đính kèm không được để trống<br/>";
+        //   resp = false;
+        // }
         if (!resp) {
           this.modal_care.alert.color = 'danger'
           this.modal_care.alert.body = mess;
@@ -1435,6 +1634,21 @@
           resp = 'Thêm mới checkin'
         }else if(item==2){
           resp = 'Đã đến checkin'
+        }else if(item==3){
+          resp = 'Đã lên chính thức'
+        }
+        return resp
+      },
+      genTypeTicket(item){
+        let resp = ''
+        if(item== 1){
+          resp = 'Yêu cầu dịch vụ'
+        }else if(item== 2){
+          resp = 'Yêu cầu hỗ trợ'
+        }else if(item== 2){
+          resp = 'Khiếu lại'
+        }else{
+          resp = 'Báo lỗi'
         }
         return resp
       },

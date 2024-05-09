@@ -78,6 +78,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('parents/show/{parent_id}', 'ParentsController@show');
             Route::post('parents/update', 'ParentsController@update');
             Route::post('parents/change_status', 'ParentsController@changeStatus');
+            Route::post('parents/change_level', 'ParentsController@changeLevel');
             Route::post('parents/assign', 'ParentsController@assign');
             Route::post('parents/update_next_care_date', 'ParentsController@updateNextCareDate');
             Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
@@ -88,6 +89,9 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('students/get_all_data/{parent_id}', 'StudentsController@getAllDataByParent');
             Route::post('students/checkin', 'StudentsController@checkin');
             Route::post('parents/assign_list', 'ParentsController@assignList');
+            Route::get('ticket/get_all_data/{parent_id}', 'ParentsController@getAllDataTicketByParent');
+            Route::post('ticket/add', 'ParentsController@addTicket');
+            Route::post('ticket/update', 'ParentsController@updateTicket');
         });
 
         Route::prefix('lms')->group(function () {

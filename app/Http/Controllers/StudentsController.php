@@ -56,7 +56,8 @@ class StudentsController extends Controller
     }
     public function getAllDataByParent($parent_id){
         $data = u::query("SELECT s.*, (SELECT name FROM users WHERE id=s.creator_id) AS creator_name,
-                (SELECT name FROM branches WHERE id=s.checkin_branch_id) AS checkin_branch_name
+                (SELECT name FROM branches WHERE id=s.checkin_branch_id) AS checkin_branch_name,
+                (SELECT name FROM products WHERE id=s.type_product) AS checkin_product_name
             FROM crm_students AS s WHERE s.parent_id=$parent_id ORDER BY s.id DESC");
         return response()->json($data);
     }

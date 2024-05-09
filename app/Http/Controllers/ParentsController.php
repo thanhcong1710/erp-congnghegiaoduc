@@ -14,13 +14,14 @@ class ParentsController extends Controller
     public function list(Request $request)
     {
         $status = isset($request->status) ? $request->status : [];
+        $level = isset($request->level) ? $request->level : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $owner_id = isset($request->owner_id) ? $request->owner_id :  [];
         $source_id = isset($request->source_id) ? $request->source_id : [];
         $source_detail_id = isset($request->source_detail_id) ? $request->source_detail_id : [];
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
-        $type_seach = isset($request->type_seach) ? $request->type_seach : 0;
+        $type_search = isset($request->type_search) ? $request->type_search : 0;
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -35,6 +36,13 @@ class ParentsController extends Controller
         
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
+        }
+        if (!empty($level)) {
+            $tmp_level ='';
+            foreach($level AS $l){
+                $tmp_level.= $tmp_level ? ", '".$l."'" : "'".$l."'";
+            }
+            $cond .= " AND p.level IN ($tmp_level)";
         }
         if (!empty($owner_id)) {
             $cond .= " AND p.owner_id IN (".implode(",",$owner_id).")" ;
@@ -61,16 +69,21 @@ class ParentsController extends Controller
         $cond_2 = " AND DATE_FORMAT(next_care_date,'%Y-%m-%d') = '".date('Y-m-d')."'";
         $cond_3 = " AND next_care_date < '".date('Y-m-d')."' 
             AND (p.care_date < p.next_care_date OR p.care_date IS NULL) AND p.status NOT IN (8,9,10,12)";
+        $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5)>0 ";
+
         $order_by = " ORDER BY p.id DESC ";
         $tmp_cond="";
-        if($type_seach==1){
+        if($type_search==1){
             $tmp_cond = $cond_1;
-        }elseif($type_seach==2){
+        }elseif($type_search==2){
             $tmp_cond = $cond_2;
             $order_by = " ORDER BY next_care_date ASC ";
-        }elseif($type_seach==3){
+        }elseif($type_search==3){
             $tmp_cond = $cond_3;
             $order_by = " ORDER BY next_care_date ASC ";
+        }elseif($type_search==4){
+            $tmp_cond = $cond_4;
+            $order_by = " ORDER BY p.last_ticket_date DESC ";
         }
 
         $total = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
@@ -89,11 +102,13 @@ class ParentsController extends Controller
         $total_1 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_1 ");
         $total_2 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
         $total_3 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
+        $total_4 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
         $data->detail_total = (object)array(
             'total_0' => $total_0->total,
             'total_1' => $total_1->total,
             'total_2' => $total_2->total,
             'total_3' => $total_3->total,
+            'total_4' => $total_4->total,
         );
         return response()->json($data);
     }
@@ -288,6 +303,23 @@ class ParentsController extends Controller
         return response()->json($result);
     }
 
+    public function changeLevel(Request $request)
+    {
+        $pre_parent_info = u::first("SELECT level FROM crm_parents WHERE id=$request->parent_id");
+        $data = u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'level'=>$request->level,
+        ), array('id' => $request->parent_id), 'crm_parents');
+        $content = "Thay đổi level khách hàng từ `$pre_parent_info->level` thành `$request->level`";
+        LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Cập nhật level khách hàng thành công'
+        );
+        return response()->json($result);
+    }
+
     public function assign(Request $request)
     {
         $pre_parent_info = u::first("SELECT owner_id,last_assign_date FROM crm_parents WHERE id=$request->parent_id");
@@ -364,5 +396,50 @@ class ParentsController extends Controller
             'message'=>'Gửi tin nhắn sms thành công'
         );
         return response()->json($result);
+    }
+
+    public function getAllDataTicketByParent(Request $request, $parent_id){
+        $list = u::query("SELECT t.*
+            FROM crm_tickets AS t WHERE parent_id=$parent_id ORDER BY t.id DESC");
+        $total = u::first("SELECT count(t.id) AS total
+            FROM crm_tickets AS t WHERE parent_id=$parent_id AND status NOT IN (4,5)");
+        return response()->json([
+            'list'=>$list,
+            'total_unsuccess'=>$total->total
+        ]);
+    }
+
+    public function addTicket(Request $request)
+    {
+        $id = u::insertSimpleRow(array(
+            'parent_id'=>data_get($request, 'parent_id'),
+            'type'=>data_get($request, 'type'),
+            'description' => data_get($request, 'description'),
+            'status' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+        ), 'crm_tickets');
+        $data = (object)[
+            'status' => 1 ,
+            'message' => "Thêm mới ticket thành công",
+            'data'=>$id
+        ];
+        u::updateSimpleRow(array('last_ticket_date'=>date('Y-m-d H:i:s')), array('id'=>data_get($request, 'parent_id')), 'crm_parents');
+       
+        return response()->json($data);
+    }
+
+    public function updateTicket(Request $request){
+        u::updateSimpleRow(array(
+            'status' => data_get($request, 'status'),
+            'note' => data_get($request, 'note'),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ), array('id'=>data_get($request, 'id')), 'crm_tickets');
+        $data = (object)[
+            'status' => 1 ,
+            'message' => "Cập nhật thành công",
+        ];
+        return response()->json($data);
     }
 }

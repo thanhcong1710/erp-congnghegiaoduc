@@ -156,6 +156,7 @@
                 <td class="td vs-table--td">
                   <p>{{ item.checkin_branch_name }}</p>
                   <p>Thời gian: {{ item.checkin_at }}</p>
+                  <p>Khóa học: {{ item.checkin_product_name }}</p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
@@ -392,7 +393,7 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_seach:this.searchData.type_seach,
+            type_search:this.searchData.type_search,
           }
 
         this.$vs.loading()
@@ -449,7 +450,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push(`/lms/students/${response.data.lms_student_id}/detail`)
+          this.$router.push(`/lms/students/${response.data.data.lms_student_id}/detail`)
         })
       },
 

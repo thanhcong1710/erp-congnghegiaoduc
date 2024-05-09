@@ -58,6 +58,7 @@ class CheckinController extends Controller
         $list = u::query("SELECT s.id, s.name, s.gender, s.birthday, p.name AS parent_name, p.mobile_1, p.address, 
                 (SELECT name FROM sources WHERE id = p.source_id) AS source_name,
                 (SELECT name FROM branches WHERE id = s.checkin_branch_id) AS checkin_branch_name,
+                (SELECT name FROM products WHERE id = s.type_product) AS checkin_product_name,
                 (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id= s.checkin_owner_id) AS checkin_owner_name,
                 s.checkin_at, s.status
             FROM crm_students AS s 
@@ -129,7 +130,7 @@ class CheckinController extends Controller
                 'status' => 1
             ), 'term_student_user');
 
-            u::updateSimpleRow(array('status'=>3), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
+            u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
 
             $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
             $lms_code = config('app.prefix_student_code').$last_lms_code;
