@@ -90,10 +90,15 @@ class EnrolmentsController extends Controller
         $class_info->num_students = count($students);
         $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 AND class_date >= CURRENT_DATE ORDER BY class_date");
 
+        $pre_schedules = u::query("SELECT s.class_date, s.subject_stt, sj.code FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.class_id = $class_id AND s.status=1 AND s.class_date < CURRENT_DATE ORDER BY s.class_date DESC LIMIT 3");
+        $next_schedules = u::query("SELECT s.class_date, s.subject_stt, sj.code FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.class_id = $class_id AND s.status=1 AND s.class_date >= CURRENT_DATE ORDER BY s.class_date LIMIT 3");
+        $reversed = array_reverse($pre_schedules);
         $data = [
             'class_info' =>$class_info,
             'students' => $students,
-            'class_dates' => $class_dates
+            'class_dates' => $class_dates,
+            'pre_schedules'=>$reversed,
+            'next_schedules'=>$next_schedules,
         ];
         return response()->json($data);
     }

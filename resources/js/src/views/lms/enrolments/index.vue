@@ -92,6 +92,20 @@
                   <span>{{class_info.cm_name}}</span>
                 </div>
             </div>
+            <div >
+              <div class="flex flex-wrap mt-5">
+                <div class="box-item-student active border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in pre_schedules" :key="index">
+                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
+                    <div class="text-center"><span class="box-status">Đã học</span></div>
+                </div>
+                <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in next_schedules" :key="index">
+                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
+                    <div class="text-center"><span class="box-status">Sắp học</span></div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
             <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
@@ -352,6 +366,8 @@
         },
         search_student : false,
         checked_list: [],
+        next_schedules:[],
+        pre_schedules:[],
       }
     },
     created() {
@@ -405,6 +421,8 @@
           this.class_info = {};
           this.students= []
           this.class_dates =[]
+          this.next_schedules=[]
+          this.pre_schedules=[]
         }
       },
       loadDataClassSelected(class_id){
@@ -415,6 +433,8 @@
           this.class_info = response.data.class_info
           this.class_dates = response.data.class_dates
           this.students = response.data.students
+          this.next_schedules = response.data.next_schedules
+          this.pre_schedules = response.data.pre_schedules
         })
       },
       showModalEnrol(){
@@ -529,5 +549,33 @@
 
 .td.vs-table--td{
   vertical-align: top;
+}
+.box-item-student.active{
+  border: 1px solid rgba(var(--vs-success), 1);
+  background: transparent !important;
+}
+.box-item-student .label-box-schedule{
+  font-size: 13px;
+}
+.box-item-student .text-date-box-schedule{
+  font-size: 11px;
+}
+.box-item-student.active .box-status{
+    font-size: 10px;
+    background: rgba(var(--vs-success), 1);
+    padding: 5px;
+    border-radius: 6px;
+    color: #fff;
+}
+.box-item-student .box-status{
+    font-size: 10px;
+    background: rgba(var(--vs-primary),1);
+    padding: 5px;
+    border-radius: 6px;
+    color: #fff;
+}
+.box-item-student{
+  border: 1px solid rgba(var(--vs-primary),1);
+  background: transparent !important;
 }
 </style>

@@ -137,4 +137,9 @@ class SystemController extends Controller
             FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
         return response()->json($data);
     }
+
+    public function getSubjects(){
+        $data = u::query("SELECT *, 0 AS selected, 0 AS stt, 0 AS session FROM subjects WHERE status=1");
+        return response()->json($data);
+    }
 }

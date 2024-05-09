@@ -136,13 +136,13 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi học</label>
+              <label>Tổng số buổi học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
                 v-model="config.session"
-                :disabled="disabled_input"
+                disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -162,6 +162,67 @@
                 <option value="0">Trải nghiệm</option>
                 <option value="1">Chính thức</option>
               </select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label><strong>Danh sách môn học </strong></label>
+              <div class=w-full>
+                <div class="vx-col  md:w-1/2 w-full mb-4">
+                  <vue-select
+                        label="name"
+                        placeholder="Chọn môn học"
+                        :options="html.subjects.list"
+                        v-model="html.subjects.item"
+                        :searchable="true"
+                        language="tv-VN"
+                        :disabled="disabled_input"
+                        @input="addSubject"
+                    ></vue-select>
+                </div>
+                <div class="vs-component vs-con-table stripe vs-table-primary">
+                  <div class="con-tablex vs-table--content">
+                    <div class="vs-con-tbody vs-table--tbody ">
+                      <table class="vs-table vs-table--tbody-table">
+                        <thead class="vs-table--thead">
+                          <tr>
+                            <!---->
+                            <th colspan="1" rowspan="1" class="text-center">Mã</th>
+                            <th colspan="1" rowspan="1">Môn học</th>
+                            <th colspan="1" rowspan="1" class="text-center">Thứ tự</th>
+                            <th colspan="1" rowspan="1" class="text-center">Số buổi</th>
+                            <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+                          </tr>
+                        </thead>
+                        <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in config.subjects" :key="index">
+                          <td class="td vs-table--td text-center">{{item.code}}</td>
+                          <td class="td vs-table--td">{{item.name}}</td>
+                          <td class="td vs-table--td text-center">
+                            <input
+                              class="vs-inputx vs-input--input normal"
+                              type="number"
+                              name="title"
+                              style="width: 70px"
+                              v-model="item.stt"
+                            />
+                          </td>
+                          <td class="td vs-table--td text-center">
+                            <input
+                              class="vs-inputx vs-input--input normal"
+                              type="number"
+                              name="title"
+                              style="width: 70px"
+                              v-model="item.session"
+                              @change="caculatorTotalSession"
+                            />
+                          </td>
+                          <td class="td vs-table--td text-center list-action"> 
+                            <vs-button size="small" color="danger" @click="deleteSubject(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -245,6 +306,10 @@
           cms:{
             item: '',
             list: []
+          },
+          subjects:{
+            item: '',
+            list: []
           }
         },
         config:{
@@ -272,6 +337,7 @@
           },
           title:'',
           program_id:'',
+          subjects:[]
         },
         alert:{
           active: false,
@@ -292,6 +358,10 @@
       axios.g(`/api/system/shifts`)
         .then(response => {
         this.html.shifts.list = response.data
+      })
+      axios.g(`/api/system/subjects`)
+        .then(response => {
+        this.html.subjects.list = response.data
       })
     },
     methods: {
@@ -448,6 +518,7 @@
         this.html.teachers.item = ''
         this.html.cms.item = ''
         this.html.shifts.item = ''
+        this.config.subjects=[]
       },
       save() {
         let mess = "";
@@ -517,6 +588,37 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      addSubject(data =null){
+        if (data && typeof data === 'object') {
+          const check_exit = 0;
+          this.config.subjects.map(item => {
+            if(item.id==data.id){
+              check_exit = 1;
+            }
+          })
+          if(!check_exit){
+            this.config.subjects.push(data)
+          }
+          this.html.subjects.item=''
+          this.caculatorTotalSession();
+        }
+      },
+      deleteSubject(data){
+        const ids_subject = []
+        this.config.subjects.map(item => {
+          if(data.id != item.id){
+            ids_subject.push(item)
+          }
+        })
+        this.config.subjects = ids_subject
+        this.caculatorTotalSession();
+      },
+      caculatorTotalSession(){
+        this.config.session = 0
+        this.config.subjects.map(item => {
+          this.config.session = Number(this.config.session) + Number(item.session)
+        })
       }
     },
   }

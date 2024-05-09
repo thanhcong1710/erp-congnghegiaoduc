@@ -110,3 +110,33 @@ Vue.filter('getStatusText', function (status) {
 Vue.filter('formatNumber', (v) => !isNaN(v) && v > 0 ? parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').slice(0, -2) : 0)
 Vue.filter('formatMoney', (v, c = 'đ') => !isNaN(v) && v > 0 && c !== '' ? `${parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').slice(0, -2)}${c}` : `0${c}`)
 Vue.filter('formatDateView', (v) => moment(v).format('DD/MM/YYYY'))
+
+Vue.filter('formatDateViewDay', function (v) {
+  var current_day = moment(v).day()
+  var day_name = '';
+ 
+  // Lấy tên thứ của ngày hiện tại
+  switch (current_day) {
+    case 0:
+        day_name = "CN";
+        break;
+    case 1:
+        day_name = "T2";
+        break;
+    case 2:
+        day_name = "T3";
+        break;
+    case 3:
+        day_name = "T4";
+        break;
+    case 4:
+        day_name = "T5";
+        break;
+    case 5:
+        day_name = "T6";
+        break;
+    case 6:
+        day_name = "T7";
+  }
+  return day_name+', '+moment(v).format('DD/MM/YYYY')
+})

@@ -74,59 +74,63 @@ class ClassesController extends Controller
         $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
         $start_date = data_get($request,'start_date');
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
+        $subjects = data_get($request,'subjects');
             
         if($request->is_edit){
             $class_id = data_get($request,'class_id');
-            $class_info = u::getObject(array('id'=>$class_id), 'classes');
-            $session_num = u::first("SELECT count(id) AS total FROM schedules WHERE class_id = ".(int)$class_id);
-            if($start_date !== data_get($class_info,'start_date') ||
-                implode(",", $arr_day) !== data_get($class_info,'class_day') || 
-                $session_num < data_get($request,'session')){
-                u::updateSimpleRow(array(
-                    'status'=>0,
-                    'updated_at'=> date('Y-m-d H:i:s'),
-                    'updator_id'=> Auth::user()->id,
-                ),array('class_id'=>data_get($request,'class_id')), 'sessions');
-                foreach($arr_day AS $session){
-                    $session_info = u::first("SELECT id FROM `sessions` WHERE class_id=$class_id AND class_day = $session");
-                    if($session_info){
-                        u::updateSimpleRow(array('status'=>1),array('id'=>data_get($session_info,'id')), 'sessions');
-                    }else{
-                        u::insertSimpleRow(array(
-                            'class_id'=> $class_id,
-                            'shift_id'=> data_get($request,'shift_id'),
-                            'room_id'=> data_get($request,'room_id'),
-                            'teacher_id'=> data_get($request,'teacher_id'),
-                            'class_day'=> $session,
-                            'status'=> 1,
-                            'branch_id'=> data_get($request,'branch_id'),
-                            'created_at'=> date('Y-m-d H:i:s'),
-                            'creator_id'=> Auth::user()->id
-                        ),'sessions');
-                    }
-                }
-                u::query("DELETE FROM schedules WHERE class_id=$class_id"); 
-                foreach(data_get($data_sessions, 'dates') AS $row){
-                    u::insertSimpleRow(array(
-                        'class_date'=> $row,
-                        'class_id'=> $class_id,
-                        'status'=> 1,
-                        'created_at'=> date('Y-m-d H:i:s'),
-                    ),'schedules');
-                }  
-            }elseif($session_num > data_get($request,'session')){
-                foreach(data_get($data_sessions, 'dates') AS $row){
-                    $schedule_info = u::first("SELECT id FROM schedules WHERE class_date='$row' AND class_id = $class_id");
-                    if(!$schedule_info){
-                        u::insertSimpleRow(array(
-                            'class_date'=> $row,
-                            'class_id'=> $class_id,
-                            'status'=> 1,
-                            'created_at'=> date('Y-m-d H:i:s'),
-                        ),'schedules');
-                    }
-                }
+            u::query("DELETE FROM sessions WHERE class_id= $class_id");
+            u::query("DELETE FROM subject_has_class WHERE class_id= $class_id");
+            u::query("DELETE FROM schedules WHERE class_id= $class_id");
+            foreach($arr_day AS $session){
+                u::insertSimpleRow(array(
+                    'class_id'=> $class_id,
+                    'shift_id'=> data_get($request,'shift_id'),
+                    'room_id'=> data_get($request,'room_id'),
+                    'teacher_id'=> data_get($request,'teacher_id'),
+                    'class_day'=> $session,
+                    'status'=> 1,
+                    'branch_id'=> data_get($request,'branch_id'),
+                    'created_at'=> date('Y-m-d H:i:s'),
+                    'creator_id'=> Auth::user()->id
+                ),'sessions');
             }
+            foreach($subjects AS $subject){
+                u::insertSimpleRow(array(
+                    'class_id'=> $class_id,
+                    'subject_id'=> data_get($subject,'id'),
+                    'session'=> data_get($subject,'session'),
+                    'stt'=> data_get($subject,'stt'),
+                    'created_at'=> date('Y-m-d H:i:s')
+                ),'subject_has_class');
+            }
+            foreach(data_get($data_sessions, 'dates') AS $row){
+                u::insertSimpleRow(array(
+                    'class_date'=> $row,
+                    'class_id'=> $class_id,
+                    'status'=> 1,
+                    'created_at'=> date('Y-m-d H:i:s'),
+                ),'schedules');
+            }
+
+            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+            foreach($arr_subject AS $subject){
+                u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
+
+            }
+            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
+            $tmp_subject = 0;
+            $subject_stt = 0;
+            $class_stt = 0;
+            foreach($arr_schedule AS $row){
+                if($tmp_subject != $row->subject_id){
+                    $tmp_subject = $row->subject_id;
+                    $subject_stt = 0;
+                }
+                $subject_stt++;
+                $class_stt++;
+                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+            }
+            
             u::updateSimpleRow(array(
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
@@ -172,6 +176,15 @@ class ClassesController extends Controller
                     'creator_id'=> Auth::user()->id
                 ),'sessions');
             }
+            foreach($subjects AS $subject){
+                u::insertSimpleRow(array(
+                    'class_id'=> $class_id,
+                    'subject_id'=> data_get($subject,'id'),
+                    'session'=> data_get($subject,'session'),
+                    'stt'=> data_get($subject,'stt'),
+                    'created_at'=> date('Y-m-d H:i:s')
+                ),'subject_has_class');
+            }
             foreach(data_get($data_sessions, 'dates') AS $row){
                 u::insertSimpleRow(array(
                     'class_date'=> $row,
@@ -179,6 +192,25 @@ class ClassesController extends Controller
                     'status'=> 1,
                     'created_at'=> date('Y-m-d H:i:s'),
                 ),'schedules');
+            }
+
+            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+            foreach($arr_subject AS $subject){
+                u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
+            }
+
+            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
+            $tmp_subject = 0;
+            $subject_stt = 0;
+            $class_stt = 0;
+            foreach($arr_schedule AS $row){
+                if($tmp_subject != $row->subject_id){
+                    $tmp_subject = $row->subject_id;
+                    $subject_stt = 0;
+                }
+                $subject_stt++;
+                $class_stt++;
+                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row['id']),'schedules');
             }
         }
         $result = array(
@@ -192,6 +224,7 @@ class ClassesController extends Controller
         $class_info = u::first("SELECT cl.* FROM classes AS cl WHERE cl.id = $class_id");
         $session_info = u::first("SELECT s.shift_id, s.room_id FROM `sessions` AS s WHERE s.class_id = $class_id AND s.status=1 LIMIT 1");
         $schedule_num = u::first("SELECT count(id) AS total FROM schedules WHERE class_id = $class_id");
+        $subjects = u::query("SELECT s.*, sc.session, sc.stt FROM subject_has_class AS sc LEFT JOIN subjects AS s ON s.id=sc.subject_id WHERE sc.class_id = $class_id ORDER BY sc.stt");
         $arr_day = explode(',',data_get($class_info, 'class_day'));
         $data = [
             'is_edit' => 1,
@@ -217,7 +250,8 @@ class ClassesController extends Controller
                 'day_7' => in_array(7,$arr_day) ? true : false,
                 'day_8' => in_array(8,$arr_day) ? true : false,
             ],
-            'session' => $schedule_num->total
+            'session' => $schedule_num->total,
+            'subjects' => $subjects
         ];
         return response()->json($data);
     }

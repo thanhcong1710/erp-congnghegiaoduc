@@ -161,6 +161,12 @@ export default [
         slug: 'settings-programs',
       },
       {
+        url: '/settings/subjects',
+        name: 'Môn học',
+        icon: 'ChromeIcon',
+        slug: 'settings-subjects',
+      },
+      {
         url: '/settings/classes',
         name: 'Lớp học',
         icon: 'FileIcon',

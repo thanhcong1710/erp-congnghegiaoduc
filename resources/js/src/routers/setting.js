@@ -385,6 +385,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/subjects',
+        name: 'setting-subjects',
+        component: () => import('@/views/settings/subjects/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', active: true }
+          ],
+          pageTitle: 'Danh sách môn học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/subjects/add',
+        name: 'setting-subjects-add',
+        component: () => import('@/views/settings/subjects/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', url: '/settings/subjects' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới môn học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/subjects/edit/:id',
+        name: 'setting-subjects-edit',
+        component: () => import('@/views/settings/subjects/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', url: '/settings/subjects' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật môn học',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
