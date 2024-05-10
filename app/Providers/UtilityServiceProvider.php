@@ -672,4 +672,56 @@ class UtilityServiceProvider extends ServiceProvider
         ]);
         return true;
     }
+    public static function formatDateView($date){
+        $weekday = date("l",strtotime($date));
+        $weekday = strtolower($weekday);
+        switch($weekday) {
+            case 'monday':
+                $weekday = 'T2';
+                break;
+            case 'tuesday':
+                $weekday = 'T3';
+                break;
+            case 'wednesday':
+                $weekday = 'T4';
+                break;
+            case 'thursday':
+                $weekday = 'T5';
+                break;
+            case 'friday':
+                $weekday = 'T6';
+                break;
+            case 'saturday':
+                $weekday = 'T7';
+                break;
+            default:
+                $weekday = 'CN';
+                break;
+        }
+        return $weekday.", ".date('d/m/Y',strtotime($date));
+    }
+
+    public static function updateDoneSessions($contract_id){
+        $done_sessions = self::first("SELECT count(id) AS total FROM schedule_has_student WHERE contract_id = $contract_id AND status=1 ");
+        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions FROM contracts WHERE id=$contract_id");
+		if($contract_info->status == 6){
+            $holidays = self::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
+            $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
+            $arr_day = explode(",",data_get($class_info, 'class_day'));
+            $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
+            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info,'start_date'), $left_sessions, $holidays, $arr_day);
+            self::updateSimpleRow(array(
+                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+                'done_sessions' => $done_sessions->total,
+                'left_sessions' => $contract_info->summary_sessions - $done_sessions->total
+            ), array('id'=>$contract_id),'contracts');
+
+        }else{
+            self::updateSimpleRow(array(
+                'done_sessions' => $done_sessions->total,
+                'left_sessions' => $contract_info->summary_sessions - $done_sessions->total
+            ), array('id'=>$contract_id),'contracts');
+        }
+        return true;
+	}
 }

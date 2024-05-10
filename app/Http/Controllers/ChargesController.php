@@ -71,6 +71,7 @@ class ChargesController extends Controller
                 'status' => 3,
                 'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
                 'summary_sessions' => data_get($contract_info, 'total_sessions'), 
+                'left_sessions' => data_get($contract_info, 'total_sessions'), 
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => 0,
                 'updated_at'=>date('Y-m-d H:i:s'),

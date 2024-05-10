@@ -150,9 +150,14 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('tuition_transfers/show/{reserve_id}', 'TuitionTransfersController@show');
             Route::post('tuition_transfers/approve', 'TuitionTransfersController@approve');
 
-            Route::post('attendances/load-classes', 'AttendancesController@loadClasses');
-            Route::post('attendances/load-students', 'AttendancesController@loadStudents');
-            Route::post('attendances/save', 'AttendancesController@save');
+            Route::prefix('attendances')->group(function () {
+                Route::post('load-classes', 'AttendancesController@loadClasses');
+                Route::post('load-students', 'AttendancesController@loadStudents');
+                Route::post('save', 'AttendancesController@save');
+                Route::get('loadReSessions/{class_id}', 'AttendancesController@loadReSessions');
+                Route::post('addReSession', 'AttendancesController@addReSession');
+                Route::post('updateReSession', 'AttendancesController@updateReSession');
+            });
         });
 
         Route::prefix('settings')->group(function () {
