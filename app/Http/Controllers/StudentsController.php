@@ -95,7 +95,28 @@ class StudentsController extends Controller
         $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         
         if (!empty($status)) {
-            $cond .= " AND s.status IN (".implode(",",$status).")";
+            $cond_status = "";
+            foreach($status AS $s){
+                if($s == 1){
+                    $qu = " (c.type=0 AND c.status NOT IN(6,7)) ";
+                }elseif($s == 2){
+                    $qu = " (c.type=0 AND c.status =6) "; 
+                }elseif($s == 3){
+                    $qu = " (c.type=0 AND c.status =7) ";
+                }elseif($s == 4){
+                    $qu = " (c.type=1 AND c.status =1) ";
+                }elseif($s == 5){
+                    $qu = " (c.type=1 AND c.status =2) ";
+                }elseif($s == 6){
+                    $qu = " (c.type=1 AND c.status IN (3,4,5)) ";
+                }elseif($s == 7){
+                    $qu = " (c.type=1 AND c.status =6) ";
+                }elseif($s == 8){
+                    $qu = " (c.type=1 AND c.status =8) ";
+                }
+                $cond_status.= $cond_status ? " OR ".$qu : $qu; 
+            }
+            $cond .= " AND ($cond_status)";
         }
         if (!empty($branch_id)) {
             $cond .= " AND s.branch_id IN (".implode(",",$branch_id).")";
@@ -107,11 +128,20 @@ class StudentsController extends Controller
         
         $order_by = " ORDER BY s.id DESC ";
 
-        $total = u::first("SELECT count(s.id) AS total FROM students AS s WHERE $cond");
+        $total = u::first("SELECT count(s.id) AS total FROM students AS s 
+            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id) WHERE $cond");
         
-        $list = u::query("SELECT s.*
+        $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, 
+                (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
+                (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
+                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
             FROM students AS s
+            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id)
             WHERE $cond $order_by $limitation");
+        foreach($list AS $k=> $row){
+            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+        }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }

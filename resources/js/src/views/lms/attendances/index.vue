@@ -1,6 +1,6 @@
 <template>
 
-  <div id="page-users-list">
+  <div id="page-attendances">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -553,19 +553,19 @@
   vertical-align: top;
 }
 
-[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th{
+[dir] #page-attendances .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th{
   border: 1px solid #ccc;
   padding: 5px 8px;
 }
-[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .tr-values .vs-table--td{
+[dir] #page-attendances .vs-con-table .vs-con-tbody .vs-table--tbody-table .tr-values .vs-table--td{
   border: 1px solid #ccc;
   padding: 5px 8px;
 }
-[dir] .input-attendance.vs-input--input.normal{
+[dir] #page-attendances .input-attendance.vs-input--input.normal{
   padding: 2px !important;
   font-size: 12px !important;
 }
-.vs-con-table .vs-con-tbody .vs-table--tbody-table{
+ #page-attendances .vs-con-table .vs-con-tbody .vs-table--tbody-table{
   font-size: 12px;
 }
 </style>
