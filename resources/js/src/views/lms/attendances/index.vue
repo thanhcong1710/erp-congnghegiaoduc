@@ -121,30 +121,27 @@
                   <thead class="vs-table--thead">
                     <tr>
                       <th colspan="1" rowspan="2" class="text-center">STT</th>
-                      <th colspan="1" rowspan="2" style="min-width:126px">Tên học sinh</th>
-                      <th colspan="1" rowspan="2" class="text-center">Mã học sinh</th>
+                      <th colspan="1" rowspan="2" style="min-width:126px">Học sinh</th>
                       <th :colspan="shedules.length" rowspan="1" class="text-center">{{att.date_select}}</th>
                     </tr>
                     <tr>
-                      <th colspan="1" rowspan="1" class="text-center" v-for="(item, index) in shedules" :key="index">{{item.date_label}}</th>
+                      <th colspan="1" rowspan="1" class="text-center" v-for="(item, index) in shedules" :key="index">
+                        <p style="font-weight: normal">{{item.code}} - buổi {{item.subject_stt}}</p>
+                        <p style="font-weight: normal; font-size: 11px">{{item.class_date | formatDateViewDay}}</p>
+                      </th>
                     </tr>
                   </thead>
                   <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
                     <td class="td vs-table--td text-center">{{index+1}}</td> 
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td text-center">{{item.lms_code}}</td>
+                    <td class="td vs-table--td">
+                      <p>{{item.name}}</p>
+                      <p>Mã: {{item.lms_code}}</p> </td>
                     <td class="td vs-table--td text-center" v-for="(att, index_att) in item.attendances" :key="index_att">
-                      <div v-if="att.status==1">
-                        <select class="input-attendance vs-inputx vs-input--input normal" v-model="att.attendance_status" @change="save(att)">
+                       <select v-if="att.id" class="input-attendance vs-inputx vs-input--input normal" v-model="att.attendance_status" @change="save(att)">
                           <option value="0">Chưa điểm danh</option>
                           <option value="1">Đi học</option>
-                          <option value="2">Nghỉ học</option>
+                          <option value="2">Học bù</option>
                         </select>
-                        <textarea class="input-attendance vs-inputx vs-input--input normal mt-1" placeholder="Ghi chú..." v-model="att.note" @change="save(att)"></textarea>
-                      </div>
-                      <div v-if="att.status==2">
-                        <span>Bảo lưu</span>
-                      </div>
                     </td>
                   </tr>
                 </table>
@@ -367,5 +364,8 @@
 [dir] .input-attendance.vs-input--input.normal{
   padding: 2px !important;
   font-size: 12px !important;
+}
+.vs-con-table .vs-con-tbody .vs-table--tbody-table{
+  font-size: 12px;
 }
 </style>

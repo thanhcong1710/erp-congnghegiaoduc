@@ -255,4 +255,28 @@ class ClassesController extends Controller
         ];
         return response()->json($data);
     }
+
+    public function listSessions(Request $request)
+    {
+        $class_id = isset($request->class_id) ? $request->class_id : 0;
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " s.status = 1 AND s.class_id= $class_id";
+        
+        $order_by = " ORDER BY class_date ";
+
+        $total = u::first("SELECT count(s.id) AS total FROM schedules AS s WHERE $cond");
+        
+        $list = u::query("SELECT s.class_date, sj.code AS subject_code, sj.name AS subject_name,
+                IF(class_date < CURRENT_DATE, 'Đã học', 'Sắp học') AS status_label
+            FROM schedules AS s 
+                LEFT JOIN subjects AS sj ON s.subject_id=sj.id
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
