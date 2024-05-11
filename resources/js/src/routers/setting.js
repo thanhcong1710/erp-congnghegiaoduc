@@ -426,6 +426,74 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/discount-codes',
+        name: 'setting-discount-codes',
+        component: () => import('@/views/settings/discount_codes/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', active: true }
+          ],
+          pageTitle: 'Danh sách mã chiết khấu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/discount-codes/add',
+        name: 'setting-discount-codes-add',
+        component: () => import('@/views/settings/discount_codes/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', url: '/settings/discount-codes' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới mã chiết khấu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/discount-codes/edit/:id',
+        name: 'setting-discount-codes-edit',
+        component: () => import('@/views/settings/discount_codes/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', url: '/settings/discount-codes' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật mã chiết khấu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/coupons',
+        name: 'setting-coupons',
+        component: () => import('@/views/settings/coupons/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách voucher', active: true }
+          ],
+          pageTitle: 'Danh sách voucher',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/coupons/add',
+        name: 'setting-coupons-add',
+        component: () => import('@/views/settings/coupons/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách voucher', url: '/settings/coupons' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới voucher',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

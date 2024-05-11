@@ -225,6 +225,20 @@ export default [
         permission:'settings_tuition_fees',
       },
       {
+        url: '/settings/discount-codes',
+        name: 'Mã chiết khấu',
+        icon: 'SquareIcon',
+        slug: 'settings-discount-codes',
+        permission:'settings_discount_codes',
+      },
+      {
+        url: '/settings/coupons',
+        name: 'Voucher',
+        icon: 'SquareIcon',
+        slug: 'settings-coupons',
+        permission:'settings_coupons',
+      },
+      {
         url: '/settings/users',
         name: 'Người dùng',
         icon: 'UserIcon',
@@ -238,6 +252,7 @@ export default [
         slug: 'settings-roles',
         permission:'settings_roles',
       },
+      
     ]
   },
 ]
