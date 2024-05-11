@@ -73,6 +73,7 @@
         </vs-tab>
         <vs-tab label="Buổi học">
           <div class="tab-text">
+            <student-sessions :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Vận hành">
@@ -105,6 +106,7 @@
   import studentInfo from './components/studentInfo.vue'
   import studentLogs from './components/studentLogs.vue'
   import studentContracts from './components/studentContracts.vue'
+  import studentSessions from './components/studentSessions.vue'
 
   export default {
     components: {
@@ -114,7 +116,8 @@
       datepicker,
       studentInfo,
       studentLogs,
-      studentContracts
+      studentContracts,
+      studentSessions
     },
     data() {
       return {

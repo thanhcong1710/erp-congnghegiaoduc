@@ -260,4 +260,31 @@ class StudentsController extends Controller
         }
         return response()->json($list);
     }
+
+    public function sessions(Request $request)
+    {
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+            FROM contracts AS c 
+            WHERE c.count_recharge = 
+                IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
+                    (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
+                    (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
+        if($contract_active){
+            $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.attendance_status FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
+                WHERE s.contract_id = $contract_active->id");
+            $limit = $contract_active->summary_sessions - count($done_sessions);
+            $limit = $limit > 0 ? $limit : 0;
+            if($contract_active->class_id){
+                $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
+                    WHERE s.class_id = $contract_active->class_id AND s.class_date > CURRENT_DATE ORDER BY s.class_date LIMIT $limit");
+            }
+        }
+        $result = [
+            'next_sessions' => $next_sessions ?? [],
+            'done_sessions' => $done_sessions ?? [],
+            'contract_info' => $contract_active
+        ];
+        return response()->json($result);
+    }
 }

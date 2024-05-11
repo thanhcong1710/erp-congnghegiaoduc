@@ -107,6 +107,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('search-contract', 'StudentsController@searchContract');
                 Route::post('logs', 'StudentsController@logs');
                 Route::post('contracts', 'StudentsController@contracts');
+                Route::post('sessions', 'StudentsController@sessions');
             });
            
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
