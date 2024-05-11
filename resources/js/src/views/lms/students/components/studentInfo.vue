@@ -236,29 +236,23 @@
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Nhân viên kinh doanh</label>
-          <vue-select
-                label="title"
-                placeholder="Chọn nghề nghiệp"
-                :options="html.jobs.list"
-                v-model="html.jobs.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveJob"
-                :disabled="disabled_edit"
-            ></vue-select>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="title"
+            v-model="student_info.ec_name"
+            disabled="true"
+          />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Nhân viên vận hành lớp</label>
-          <vue-select
-                label="title"
-                placeholder="Chọn nghề nghiệp"
-                :options="html.jobs.list"
-                v-model="html.jobs.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveJob"
-                :disabled="disabled_edit"
-            ></vue-select>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="title"
+            v-model="student_info.cm_name"
+            disabled="true"
+          />
         </div>
       </div>
       <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -358,7 +352,7 @@
     methods: {
       selectDate(date) {
         if (date) {
-          this.student_info.birthday = moment(date).format("YYYY-MM-DD");
+          this.student_info.date_of_birth = moment(date).format("YYYY-MM-DD");
         }
       },
       selectDateGudBirthDay1(date){

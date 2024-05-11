@@ -135,10 +135,15 @@ class StudentsController extends Controller
                 (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
-                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
+                (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
             FROM students AS s
-            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id)
-            WHERE $cond $order_by $limitation");
+            LEFT JOIN contracts AS c ON c.student_id=s.id
+            WHERE (c.count_recharge = 
+                    IF((SELECT count(id) FROM contracts WHERe student_id=s.id AND status!=7)>0,
+                        (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
+                        (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
+                OR c.id IS NULL) 
+                AND $cond $order_by $limitation");
         foreach($list AS $k=> $row){
             $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
         }
@@ -148,8 +153,20 @@ class StudentsController extends Controller
 
     public function show(Request $request,$student_id)
     {
-        $data = u::first("SELECT s.*
-            FROM students AS s WHERE s.id=$student_id");
+        $data = u::first("SELECT s.*, c.total_charged, c.type AS contract_type, c.status AS contract_status,
+                c.summary_sessions,c.done_sessions, c.left_sessions, 
+                (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label
+            FROM students AS s 
+                LEFT JOIN contracts AS c ON c.student_id=s.id 
+                LEFT JOIN term_student_user AS t ON t.student_id=s.id
+            WHERE (c.count_recharge = 
+                    IF((SELECT count(id) FROM contracts WHERe student_id=s.id AND status!=7)>0,
+                        (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
+                        (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
+                OR c.id IS NULL) AND s.id=$student_id");
+        $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
         return response()->json($data);
     }
 
@@ -202,4 +219,45 @@ class StudentsController extends Controller
                 WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')");
         return response()->json($data);
     } 
+
+    public function logs(Request $request)
+    {
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " l.status = 1 AND l.student_id = $student_id";
+        
+        $order_by = " ORDER BY l.id DESC ";
+
+        $total = u::first("SELECT count(l.id) AS total FROM student_logs AS l WHERE $cond");
+        
+        $list = u::query("SELECT l.created_at, l.content, CONCAT(u.name, ' - ', u.hrm_id) AS creator_name 
+            FROM student_logs AS l
+            LEFT  JOIN users AS u ON u.id=l.creator_id
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function contracts(Request $request)
+    {
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
+                c.must_charge, c.tuition_fee_amount, '' AS label_status, c.status, c.type,
+                (SELECT name FROM products WHERE id=c.product_id) AS product_name,
+                (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
+                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name
+            FROM contracts AS c
+            WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
+        foreach($list AS $k=> $row){
+            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+        }
+        return response()->json($list);
+    }
 }

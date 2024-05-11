@@ -42,6 +42,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('shifts', 'SystemController@getShifts');
             Route::get('rooms/{branch_id}', 'SystemController@getRooms');
             Route::get('cms/{branch_id}', 'SystemController@getCMs');
+            Route::get('ecs/{branch_id}', 'SystemController@getECs');
             Route::get('teachers/{branch_id}', 'SystemController@getTeachers');
             Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
@@ -99,10 +100,15 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('checkin/list', 'CheckinController@list');
             Route::post('checkin/student/checked', 'CheckinController@studentChecked');
             Route::post('checkin/upgrade', 'CheckinController@studentUpgrade');
-            Route::post('students/list', 'StudentsController@list');
-            Route::get('students/show/{student_id}', 'StudentsController@show');
-            Route::post('students/update', 'StudentsController@update');
-            Route::post('students/search-contract', 'StudentsController@searchContract');
+            Route::prefix('students')->group(function () {
+                Route::post('list', 'StudentsController@list');
+                Route::get('show/{student_id}', 'StudentsController@show');
+                Route::post('update', 'StudentsController@update');
+                Route::post('search-contract', 'StudentsController@searchContract');
+                Route::post('logs', 'StudentsController@logs');
+                Route::post('contracts', 'StudentsController@contracts');
+            });
+           
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');

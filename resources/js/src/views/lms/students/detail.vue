@@ -29,23 +29,20 @@
               <!--begin::Stats-->
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted" data-kt-countup="true" data-kt-countup-value="4500"
-                    data-kt-countup-prefix="$" data-kt-initialized="1">15.000.000</div>
+                  <div class="fs-2 fw-bold counted">{{student_info.total_charged | formatNumber}}</div>
                 </div>
                 <div class="fw-semibold fs-6 text-gray-400">Phí đã đóng (VNĐ)</div>
               </div>
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted" data-kt-countup="true" data-kt-countup-value="75"
-                    data-kt-initialized="1">96</div>
+                  <div class="fs-2 fw-bold counted">{{student_info.summary_sessions}}</div>
                 </div>
                 <div class="fw-semibold fs-6 text-gray-400">Tổng số buổi</div>
               </div>
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                 <!--begin::Number-->
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted" data-kt-countup="true" data-kt-countup-value="60"
-                    data-kt-countup-prefix="%" data-kt-initialized="1">54</div>
+                  <div class="fs-2 fw-bold counted">{{student_info.left_sessions}}</div>
                 </div>
                 <div class="fw-semibold fs-6 text-gray-400">Số buổi còn lại</div>
               </div>
@@ -53,9 +50,9 @@
             <div class="box-item-process">
               <div class="w-200">
                 <span class="fw-semibold fs-6 text-gray-400">Đã học</span>
-                <span class="fw-bold fs-6" style="float:right">40%</span>
+                <span class="fw-bold fs-6" style="float:right">{{Math.round(student_info.done_sessions* 100 /student_info.summary_sessions)}}%</span>
               </div>
-              <vs-progress :height="8" :percent="40" color="success"></vs-progress>
+              <vs-progress :height="8" :percent="Math.round(student_info.done_sessions* 100 /student_info.summary_sessions)" color="success"></vs-progress>
             </div>
           </div>
         </div>
@@ -64,29 +61,31 @@
 
     <vx-card no-shadow class="mt-5">
       <vs-tabs v-model="active_tab">
-        <vs-tab label="Thông tin">
+        <vs-tab label="Hồ sơ">
           <div class="tab-text">
              <student-info :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Gói phí">
           <div class="tab-text">
+            <student-contracts :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Buổi học">
           <div class="tab-text">
           </div>
         </vs-tab>
-        <vs-tab label="Đang chờ duyệt">
+        <vs-tab label="Vận hành">
           <div class="tab-text">
           </div>
         </vs-tab>
-        <vs-tab label="Chăm sóc">
+        <vs-tab label="Đánh giá & nhận xét">
           <div class="tab-text">
           </div>
         </vs-tab>
-        <vs-tab label="Lịch sử cập nhật">
+        <vs-tab label="Lịch sử">
           <div class="tab-text">
+            <student-logs :student_info="student_info" />
           </div>
         </vs-tab>
       </vs-tabs>
@@ -104,6 +103,8 @@
   import datepicker from "vue2-datepicker";
   import select from 'vue-select'
   import studentInfo from './components/studentInfo.vue'
+  import studentLogs from './components/studentLogs.vue'
+  import studentContracts from './components/studentContracts.vue'
 
   export default {
     components: {
@@ -111,7 +112,9 @@
       Multiselect,
       moment,
       datepicker,
-      studentInfo
+      studentInfo,
+      studentLogs,
+      studentContracts
     },
     data() {
       return {
