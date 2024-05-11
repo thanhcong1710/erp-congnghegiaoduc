@@ -45,12 +45,12 @@
                 <input type="text" v-model="price" class="vs-inputx vs-input--input normal">
               </div>
             </div>
-            <div class="mb-6 vx-col md:w-1/2 w-full">
+            <!-- <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Giá thực thu <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <input type="text" v-model="receivable" class="vs-inputx vs-input--input normal">
               </div>
-            </div>
+            </div> -->
             <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Ngày hiệu lực <span class="text-danger"> (*)</span></label>
               <div class=w-full>
@@ -337,10 +337,10 @@
           mess += " - Giá niêm yết không được để trống<br/>";
           resp = false;
         }
-         if (this.tuition_fee.receivable == "") {
-          mess += " - Giá thực thu không được để trống<br/>";
-          resp = false;
-        }
+        //  if (this.tuition_fee.receivable == "") {
+        //   mess += " - Giá thực thu không được để trống<br/>";
+        //   resp = false;
+        // }
          if (this.tuition_fee.available_date == "") {
           mess += " - Ngày hiệu lực không được để trống<br/>";
           resp = false;

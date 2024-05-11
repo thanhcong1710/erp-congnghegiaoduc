@@ -770,13 +770,21 @@ class UtilityServiceProvider extends ServiceProvider
     }
 
     public static function getPermissions($user_id){
-        $permissions = self::query("SELECT DISTINCT p.name 
+        $permissions = self::query("SELECT DISTINCT p.name , p.group_id
             FROM role_has_user AS ru 
                 LEFT JOIN permission_has_role AS pr ON pr.role_id=ru.role_id
                 LEFT JOIN permissions AS p ON p.id=pr.permission_id
             WHERE ru.user_id = $user_id");
         $arr = [];
+        $arr_group = [0];
         foreach($permissions AS $p){
+            $arr[] = $p->name;
+            if(!in_array($p->group_id,$arr_group)){
+                $arr_group[] = $p->group_id;
+            }
+        }
+        $permission_groups = self::query("SELECT DISTINCT g.name FROM permission_groups AS g WHERE g.id IN(".implode(",",$arr_group).")");
+        foreach($permission_groups AS $p){
             $arr[] = $p->name;
         }
         return $arr;

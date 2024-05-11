@@ -129,7 +129,7 @@ class AuthController extends Controller
                 'birthday' => auth()->user()->birthday ? date('d/m/Y', strtotime(auth()->user()->birthday )) : null,
                 'note' => auth()->user()->note,
                 'gender' => auth()->user()->gender,
-                'menuroles' => auth()->user()->menuroles,
+                'roleName' => auth()->user()->role_name,
                 'permissions' => u::getPermissions(auth()->user()->id)
             ]
         ]);
