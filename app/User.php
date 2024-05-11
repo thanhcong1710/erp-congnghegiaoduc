@@ -11,7 +11,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Traits\HasRoles;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Support\Facades\Auth;
-
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
