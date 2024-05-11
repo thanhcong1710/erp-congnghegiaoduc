@@ -78,10 +78,12 @@
         </vs-tab>
         <vs-tab label="Vận hành">
           <div class="tab-text">
+            <student-operating :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Đánh giá & nhận xét">
           <div class="tab-text">
+            <student-assessments :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Lịch sử">
@@ -107,6 +109,8 @@
   import studentLogs from './components/studentLogs.vue'
   import studentContracts from './components/studentContracts.vue'
   import studentSessions from './components/studentSessions.vue'
+  import studentAssessments from './components/studentAssessments.vue'
+  import studentOperating from './components/studentOperating.vue'
 
   export default {
     components: {
@@ -117,7 +121,9 @@
       studentInfo,
       studentLogs,
       studentContracts,
-      studentSessions
+      studentSessions,
+      studentAssessments,
+      studentOperating
     },
     data() {
       return {

@@ -287,4 +287,55 @@ class StudentsController extends Controller
         ];
         return response()->json($result);
     }
+
+    public function assessments(Request $request)
+    {
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " a.status = 1 AND a.student_id = $student_id";
+        
+        $order_by = " ORDER BY a.id DESC ";
+
+        $total = u::first("SELECT count(a.id) AS total FROM assessments AS a WHERE $cond");
+        
+        $list = u::query("SELECT a.created_at, a.description, a.title, CONCAT(u.name, ' - ', u.hrm_id) AS creator_name 
+            FROM assessments AS a
+            LEFT  JOIN users AS u ON u.id=a.creator_id
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function operating(Request $request)
+    {
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $class_transfer = u::query("SELECT s.lms_code , s.name, c.transfer_date ,
+                (SELECT cls_name FROM classes WHERE id=c.from_class_id) AS from_class_name,
+                (SELECT cls_name FROM classes WHERE id=c.to_class_id) AS to_class_name,
+                (SELECT name FROM branches WHERE id=c.from_branch_id) AS from_branch_name, c.status
+            FROM class_transfer AS c LEFT JOIN students AS s ON s.id=c.student_id
+            WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.id DESC");
+        $branch_transfer = u::query("SELECT s.lms_code , s.name, b.transfer_date ,b.status,
+                (SELECT name FROM branches WHERE id=b.from_branch_id) AS from_branch_name,
+                (SELECT name FROM branches WHERE id=b.to_branch_id) AS to_branch_name
+            FROM branch_transfer AS b LEFT JOIN students AS s ON s.id=b.student_id
+            WHERE b.status>0 AND b.student_id= $student_id ORDER BY b.id DESC");
+        $tuition_transfer = u::query("SELECT t.transferred_amount ,t.transfer_date,t.status,
+            (SELECT name FROM students WHERE id=t.from_student_id) AS from_student_name,
+            (SELECT lms_code FROM students WHERE id=t.from_student_id) AS from_student_lms_code,
+            (SELECT name FROM students WHERE id=t.to_student_id) AS to_student_name,
+            (SELECT lms_code FROM students WHERE id=t.to_student_id) AS to_student_lms_code
+        FROM tuition_transfer AS t 
+        WHERE t.status>0 AND (t.from_student_id= $student_id OR t.to_student_id= $student_id) ORDER BY t.id DESC");
+
+        return response()->json([
+            'class_transfer' => $class_transfer,
+            'branch_transfer' => $branch_transfer,
+            'tuition_transfer' => $tuition_transfer
+        ]);
+    }
 }

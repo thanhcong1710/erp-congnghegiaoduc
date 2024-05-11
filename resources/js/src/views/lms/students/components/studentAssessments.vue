@@ -1,5 +1,5 @@
 <template>
-  <div class="student-detail-logs mt-5">
+  <div class="student-detail-assessments mt-5">
     <div class="vs-component vs-con-table stripe vs-table-primary">
       <div class="con-tablex vs-table--content">
         <div class="vs-con-tbody vs-table--tbody ">
@@ -10,16 +10,19 @@
                 <th colspan="1" rowspan="1" class="text-center">STT</th>
                 <th colspan="1" rowspan="1" class="text-center">Thời gian thực hiện</th>
                 <th colspan="1" rowspan="1">Người thực hiện</th>
-                <th colspan="1" rowspan="1">Nội dung thay đổi</th>
+                <th colspan="1" rowspan="1">Đánh giá & nhận xét</th>
               </tr>
             </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
+            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in assessments" :key="index">
               <!---->
               
               <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="td vs-table--td text-center" style="min-width: 150px">{{item.created_at}}</td>
               <td class="td vs-table--td" style="min-width: 200px">{{item.creator_name}}</td>
-              <td class="td vs-table--td">{{item.content}}</td>
+              <td class="td vs-table--td">
+                <p><strong>{{item.title}}</strong></p>
+                {{item.description}}
+              </td>
             </tr>
           </table>
           
@@ -89,20 +92,20 @@
       }
     },
     async created() {
-      this.getLogs();
+      this.getAsssessments();
     },
     methods: {
-      getLogs(){
+      getAsssessments(){
         const data = {
             student_id: this.student_info.id,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/students/logs', data)
+        axios.p('/api/lms/students/assessments', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.logs = response.data.list
+            this.assessments = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -115,14 +118,19 @@
       },
       changePage() {
         if (this.pagination.init) {
-          this.getLogs();
+          this.getAsssessments();
         }
       },
       changePageLimit(limit) {
         this.pagination.cpage = 1
         this.pagination.limit = limit
-        this.getLogs();
+        this.getAsssessments();
       },
     }
   }
 </script>
+<style>
+.td.vs-table--td{
+  vertical-align: top;
+}
+</style>
