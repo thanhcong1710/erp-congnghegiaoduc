@@ -229,14 +229,14 @@ export default [
         name: 'Mã chiết khấu',
         icon: 'DivideSquareIcon',
         slug: 'settings-discount-codes',
-        // permission:'settings_discount_codes',
+        permission:'settings_discount_codes',
       },
       {
         url: '/settings/coupons',
         name: 'Voucher',
         icon: 'GiftIcon',
         slug: 'settings-coupons',
-        // permission:'settings_coupons',
+        permission:'settings_coupons',
       },
       {
         url: '/settings/users',
