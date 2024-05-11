@@ -240,6 +240,20 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'SubjectsController@show');
                 Route::post('update', 'SubjectsController@update');
             });
+            Route::prefix('discount-codes')->group(function () {
+                Route::post('add', 'DiscountCodesController@add');
+                Route::post('list', 'DiscountCodesController@list');
+                Route::post('delete', 'DiscountCodesController@delete');
+                Route::get('show/{id}', 'DiscountCodesController@show');
+                Route::post('update', 'DiscountCodesController@update');
+            });
+            Route::prefix('coupons')->group(function () {
+                Route::post('add', 'CouponsController@add');
+                Route::post('list', 'CouponsController@list');
+                Route::post('delete', 'CouponsController@delete');
+                Route::get('show/{id}', 'CouponsController@show');
+                Route::post('update', 'CouponsController@update');
+            });
         });
     });
 });

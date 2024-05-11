@@ -90,7 +90,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $list_users = u::query("SELECT u.id,u.manager_id FROM users AS u WHERE u.status=1");
         $staff_has_user = Auth::user()->id. ",".implode(",",self::data_tree($list_users, Auth::user()->id));
-        return $staff_has_user;
+        return trim($staff_has_user, ',');
     }
 
     private function data_tree($data, $manager_id = 0){

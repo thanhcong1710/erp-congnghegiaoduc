@@ -8,7 +8,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên môn học" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên, mã chiết khấu" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -31,7 +31,7 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/settings/subjects/add'">
+            <router-link class="btn btn-success" :to="'/settings/discount-codes/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -48,24 +48,32 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Khóa học</th>
-                  <th colspan="1" rowspan="1" class="text-center">Mã</th>
+                  <th colspan="1" rowspan="1" class="text-center">Mã chiết khấu</th>
+                  <th colspan="1" rowspan="1">Tên chiết khấu</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tỷ lệ</th>
+                  <th colspan="1" rowspan="1" class="text-center">Giá gốc</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tiền chiết khấu</th>
+                  <th colspan="1" rowspan="1" class="text-center">Buổi học bổng</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in subjects" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in discount_codes" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td text-center">{{item.code}}</td>
+                <td class="td vs-table--td ">{{item.name}}</td>
+                <td class="td vs-table--td text-center">{{item.percent}}%</td>
+                <td class="td vs-table--td text-right">{{item.price | formatMoney}}</td>
+                <td class="td vs-table--td text-right">{{item.discount| formatMoney}}</td>
+                <td class="td vs-table--td text-center">{{item.bonus_sessions}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/settings/subjects/edit/${item.id}`">
+                    <router-link :to="`/settings/discount-codes/edit/${item.id}`">
                       <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
                     </router-link>
-                    <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                    <!-- <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button> -->
                 </td>
               </tr>
             </table>
@@ -144,7 +152,7 @@
             ]
           }
         },
-        subjects: [],
+        discount_codes: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -191,10 +199,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/settings/subjects/list', data)
+        axios.p('/api/settings/discount-codes/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.subjects = response.data.list
+            this.discount_codes = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -221,7 +229,7 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn muốn xóa môn học - ${item.name}?`,
+          text: `Bạn chắc chắn muốn xóa mã chiết khấu - ${item.name}?`,
           accept: this.deletetuition_fee,
           acceptText: 'Xóa',
           cancelText: 'Hủy'
@@ -229,10 +237,10 @@
       },
       deletetuition_fee(){
         const data = {
-          subject_id: this.delete_id,
+          discount_code_id: this.delete_id,
         };
         this.$vs.loading();
-        axios.p(`/api/settings/subjects/delete`,data)
+        axios.p(`/api/settings/discount-codes/delete`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.getData();

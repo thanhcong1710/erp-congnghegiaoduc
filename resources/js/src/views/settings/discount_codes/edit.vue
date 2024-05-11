@@ -6,28 +6,107 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã môn học <span class="text-danger"> (*)</span></label>
+          <label>Mã chiết khấu <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="text" v-model="subject.code" class="vs-inputx vs-input--input normal">
+            <input type="text" v-model="discount_code.code" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên môn học <span class="text-danger"> (*)</span></label>
+          <label>Tên chiết khấu <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="text" v-model="subject.name" class="vs-inputx vs-input--input normal">
+            <input type="text" v-model="discount_code.name" class="vs-inputx vs-input--input normal">
           </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Buổi học bổng</label>
+          <div class=w-full>
+            <input type="number" v-model="discount_code.bonus_sessions" class="vs-inputx vs-input--input normal">
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Tỷ lệ chiết khấu % <span class="text-danger"> (*)</span></label>
+          <div class=w-full>
+            <input type="number" v-model="discount_code.percent" class="vs-inputx vs-input--input normal" @change="caculatorDiscount()">
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Giá gốc gói phí <span class="text-danger"> (*)</span></label>
+          <div class=w-full>
+            <input type="number" v-model="discount_code.price" class="vs-inputx vs-input--input normal" @change="caculatorDiscount()">
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Tiền chiết khấu</label>
+          <div class=w-full>
+            <input type="text" :value="discount_code.discount | formatNumber" class="vs-inputx vs-input--input normal" disabled="true">
+          </div>
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-6 ">
+          <label>Ngày bắt đầu <span class="text-danger"> (*)</span></label>
+          <datepicker class="w-full"
+            v-model="discount_code.start_date"
+            placeholder="Chọn ngày bắt đầu"
+            :lang="datepickerOptions.lang"
+            @change="selectDate"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-6 ">
+          <label>Ngày kết thúc <span class="text-danger"> (*)</span></label>
+          <datepicker class="w-full"
+            v-model="discount_code.end_date"
+            placeholder="Chọn ngày kết thúc"
+            :lang="datepickerOptions.lang"
+            @change="selectEndDate"
+          />
         </div>
         
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Trạng thái</label>
           <div class=w-full>
-            <vs-switch v-model="subject.status" color="success"/>
+            <vs-switch v-model="discount_code.status" color="success"/>
           </div>
         </div>
         <div class="mb-6 vx-col w-full">
-          <label>Mô tả</label>
+          <label><strong>Gói phí áp dụng </strong></label>
           <div class=w-full>
-            <textarea class="vs-inputx vs-input--input normal" v-model="subject.description"></textarea>
+            <div class="vx-col md:w-1/3  w-full mb-4">
+              <vue-select
+                    label="name"
+                    placeholder="Chọn gói phí áp dụng"
+                    :options="html.tuition_fees.list"
+                    v-model="html.tuition_fees.item"
+                    :searchable="true"
+                    language="tv-VN"
+                    @input="saveTuitionFee"
+                ></vue-select>
+            </div>
+            <div class="vs-component vs-con-table stripe vs-table-primary">
+              <div class="con-tablex vs-table--content">
+                <div class="vs-con-tbody vs-table--tbody ">
+                  <table class="vs-table vs-table--tbody-table">
+                    <thead class="vs-table--thead">
+                      <tr>
+                        <!---->
+                        <th colspan="1" rowspan="1" class="text-center">Khóa học</th>
+                        <th colspan="1" rowspan="1">Gói phí</th>
+                        <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
+                        <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                        <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_fees" :key="index">
+                      <td class="td vs-table--td text-center">{{item.product_name}}</td>
+                      <td class="td vs-table--td">{{item.name}}</td>
+                      <td class="td vs-table--td text-center">{{item.available_date | formatDateView}} - {{item.expired_date | formatDateView}}</td>
+                      <td class="td vs-table--td text-center">{{ item.status == 1 ? 'kích hoạt': 'Không kích hoạt'}}</td>
+                      <td class="td vs-table--td text-center list-action"> 
+                        <vs-button size="small" color="danger" @click="deleteTuitionFee(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -37,7 +116,7 @@
       </vs-alert>
       <div class="vx-row">
         <div class="vx-col w-full">
-          <router-link class="btn btn-danger" :to="`/settings/subjects`">
+          <router-link class="btn btn-danger" :to="`/settings/discount-codes`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
           <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
@@ -90,44 +169,112 @@
           body: '',
           color:'',
         },
-        subject:{
+        html:{
+          tuition_fees: {
+            item: '',
+            list: []
+          }
+        },
+        tuition_fees:[],
+        discount_code:{
           code:'',
           name: '',
-          description: '',
+          bonus_sessions: '',
+          start_date: '',
+          end_date: '',
           status:1,
+          discount:'',
+          percent:'',
+          price:''
         },
       }
     },
     created() {
-      this.loadDetail();
+      axios.g(`/api/system/tuition-fees?status=1`)
+      .then(response => {
+        this.html.tuition_fees.list = response.data
+      })
+      this.loadDetail()
     },
     methods: {
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/settings/subjects/show/${this.$route.params.id}`)
+        axios.g(`/api/settings/discount-codes/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
           if(response.data.length !== 0){
-            this.subject = response.data
+            this.discount_code = response.data.discount_code
+            this.tuition_fees = response.data.tuition_fees
           }else{
-            this.$router.push({ path: `/settings/subjects` });
+            this.$router.push({ path: `/settings/discount-codes` });
           }
         })
       },
       selectDate(date){
         if (date) {
-          this.subject.opened_date = moment(date).format("YYYY-MM-DD");
+          this.discount_code.start_date = moment(date).format("YYYY-MM-DD");
         }
+      },
+      selectEndDate(date){
+        if (date) {
+          this.discount_code.end_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      caculatorDiscount(){
+        if(this.discount_code.price && this.discount_code.percent){
+          this.discount_code.discount = Math.round(Number(this.discount_code.percent)* Number(this.discount_code.price)/100)
+        }else{
+          this.discount_code.discount=""
+        }
+      },
+      saveTuitionFee(data =null){
+        if (data && typeof data === 'object') {
+          let check_exit = 0;
+          this.tuition_fees.map(item => {
+            if(item.id==data.id){
+              check_exit = 1;
+            }
+          })
+          if(!check_exit){
+            this.tuition_fees.push(data)
+          }
+          this.html.tuition_fees.item=''
+        }
+      },
+      deleteTuitionFee(data){
+        const ids_tuition = []
+        this.tuition_fees.map(item => {
+          if(data.id != item.id){
+            ids_tuition.push(item)
+          }
+        })
+        this.tuition_fees = ids_tuition
       },
       save() {
         let mess = "";
         let resp = true;
-        if (this.subject.code == "") {
-          mess += " - Mã môn học không được để trống<br/>";
+        if (this.discount_code.code == "") {
+          mess += " - Mã chiết khấu không được để trống<br/>";
           resp = false;
         }
-        if (this.subject.name == "") {
-          mess += " - Tên môn học không được để trống<br/>";
+        if (this.discount_code.name == "") {
+          mess += " - Tên chiết khấu không được để trống<br/>";
+          resp = false;
+        }
+        if (this.discount_code.price == "") {
+          mess += " - Giá gốc gói phí không được để trống<br/>";
+          resp = false;
+        }
+        if (this.discount_code.percent == "") {
+          mess += " - Tỷ lệ chiết khấu không được để trống<br/>";
+          resp = false;
+        }
+        if (this.discount_code.start_date == "") {
+          mess += " - Ngày bắt đầu không được để trống<br/>";
+          resp = false;
+        }
+        if (this.discount_code.end_date == "") {
+          mess += " - Ngày kết thúc không được để trống<br/>";
           resp = false;
         }
         if (!resp) {
@@ -137,7 +284,10 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/settings/subjects/update",this.subject)
+        axios.p("/api/settings/discount-codes/update",{
+            discount_code : this.discount_code,
+            tuition_fees : this.tuition_fees
+          })
           .then((response) => {
             this.$vs.loading.close();
             if (response.data.status) {
@@ -148,7 +298,7 @@
                 iconPack: 'feather',
                 icon: 'icon-check'
               })
-              this.$router.push('/settings/subjects')
+              this.$router.push('/settings/discount-codes')
             }else{
               this.$vs.notify({
                 title: 'Lỗi',
