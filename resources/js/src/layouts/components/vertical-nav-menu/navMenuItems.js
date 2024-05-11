@@ -101,13 +101,14 @@ export default [
             name: 'Chuyển phí',
             slug: 'lms-tuition_transfers',
           },
-          // {
-          //   url: '/lms/exchange',
-          //   name: 'Quy đổi',
-          // },
           {
             url: '/lms/attendances',
             name: 'Điểm danh',
+            slug: 'lms-attendances',
+          },
+          {
+            url: '/lms/assessments',
+            name: 'Nhận xét & đánh giá',
             slug: 'lms-attendances',
           }
 

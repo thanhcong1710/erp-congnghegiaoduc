@@ -330,6 +330,61 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/assessments',
+        name: 'lms-assessments',
+        component: () => import('@/views/lms/assessments/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhận xét & đánh giá', active: true}
+          ],
+          pageTitle: 'Danh sách nhận xét & đánh giá',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/assessments/add',
+        name: 'lms-assessments-add',
+        component: () => import('@/views/lms/assessments/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
+            { title: 'Thêm mới nhận xét & đánh giá', active: true }
+          ],
+          pageTitle: 'Thêm mới nhận xét & đánh giá',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/assessments/edit/:id',
+        name: 'lms-assessments-edit',
+        component: () => import('@/views/lms/assessments/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments'},
+            { title: 'Cập nhật nhận xét & đánh giá', active: true}
+          ],
+          pageTitle: 'Cập nhật nhận xét & đánh giá',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/assessments/detail/:id',
+        name: 'lms-assessments-detail',
+        component: () => import('@/views/lms/assessments/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments'},
+            { title: 'Thông tin nhận xét & đánh giá', active: true}
+          ],
+          pageTitle: 'Thông tin nhận xét & đánh giá',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

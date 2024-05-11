@@ -165,6 +165,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('addReSession', 'AttendancesController@addReSession');
                 Route::post('updateReSession', 'AttendancesController@updateReSession');
             });
+            Route::prefix('assessments')->group(function () {
+                Route::post('add', 'AssessmentsController@add');
+                Route::post('list', 'AssessmentsController@list');
+                Route::post('delete', 'AssessmentsController@delete');
+                Route::get('show/{id}', 'AssessmentsController@show');
+                Route::post('update', 'AssessmentsController@update');
+                Route::post('search-student', 'AssessmentsController@searchStudent');
+            });
         });
 
         Route::prefix('settings')->group(function () {

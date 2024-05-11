@@ -59,7 +59,7 @@ class ClassTransfersController extends Controller
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 c.total_charged, c.summary_sessions, c.bonus_sessions, c.real_sessions,
                 c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date ,
-                0 AS done_sessions, 0 AS left_sessions 
+                c.done_sessions, c.left_sessions 
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
                 WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
                 AND c.status=6 AND c.enrolment_last_date >= CURRENT_DATE ");
@@ -69,7 +69,7 @@ class ClassTransfersController extends Controller
     public function getLeftSessions (Request $request){
         $transfer_date = data_get($request,'transfer_date');
         $contract_id = data_get($request,'contract_id');
-        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions, 0 AS done_sessions
+        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions
             FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
 
         $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
