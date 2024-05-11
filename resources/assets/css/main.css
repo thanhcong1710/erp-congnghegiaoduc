@@ -103,3 +103,6 @@ body {
     opacity: 0.9 !important;
     background: #c9d2d263 !important;
 }
+.v-nav-menu .scroll-area-v-nav-menu{
+    padding-bottom: 50px !important;
+}

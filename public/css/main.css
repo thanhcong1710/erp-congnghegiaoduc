@@ -9252,6 +9252,10 @@ body {
   background: #c9d2d263 !important;
 }
 
+[dir] .v-nav-menu .scroll-area-v-nav-menu{
+  padding-bottom: 50px !important;
+}
+
 @media (min-width: 576px) {
   .sm\:container {
     width: 100%;

@@ -88,7 +88,7 @@ class UserController extends Controller
         $role_name = '';
         foreach($request->roles AS $role){
             if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'name') : data_get($role,'name'); 
+                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
             }
         }
         $branch_name = '';
@@ -168,7 +168,7 @@ class UserController extends Controller
         $role_name = '';
         foreach($request->roles AS $role){
             if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'name') : data_get($role,'name'); 
+                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
             }
         }
         $branch_name = '';

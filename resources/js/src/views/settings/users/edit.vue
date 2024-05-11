@@ -68,7 +68,7 @@
             <label><strong>Phân quyền</strong></label>
             <div class=w-full>
               <div v-for="(item, index) in roles" :key="index" class="w-full pl-8">
-                <vs-checkbox v-model="item.selected" class="mt-1">{{item.name}}</vs-checkbox>
+                <vs-checkbox v-model="item.selected" class="mt-1">{{item.description}}</vs-checkbox>
               </div>
             </div>
           </div>

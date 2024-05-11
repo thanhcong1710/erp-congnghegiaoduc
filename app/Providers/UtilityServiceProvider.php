@@ -768,4 +768,17 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $text;
     }
+
+    public static function getPermissions($user_id){
+        $permissions = self::query("SELECT DISTINCT p.name 
+            FROM role_has_user AS ru 
+                LEFT JOIN permission_has_role AS pr ON pr.role_id=ru.role_id
+                LEFT JOIN permissions AS p ON p.id=pr.permission_id
+            WHERE ru.user_id = $user_id");
+        $arr = [];
+        foreach($permissions AS $p){
+            $arr[] = $p->name;
+        }
+        return $arr;
+    }
 }

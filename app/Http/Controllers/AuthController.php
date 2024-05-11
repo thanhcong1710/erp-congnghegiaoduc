@@ -130,7 +130,7 @@ class AuthController extends Controller
                 'note' => auth()->user()->note,
                 'gender' => auth()->user()->gender,
                 'menuroles' => auth()->user()->menuroles,
-                'permissions' => ['dashboard']
+                'permissions' => u::getPermissions(auth()->user()->id)
             ]
         ]);
     }
