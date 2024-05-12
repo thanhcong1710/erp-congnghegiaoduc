@@ -148,7 +148,7 @@
       </vs-alert>
       <div class="vx-row">
         <div class="vx-col w-full">
-          <router-link class="btn btn-danger" :to="`/settings/users`">
+          <router-link class="btn btn-danger" :to="`/settings/tuition-fees`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
           <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
@@ -266,6 +266,7 @@
             this.tuition_fee = response.data.tuition_fee
             this.branches = response.data.branches 
             this.tuition_fees_relation = response.data.tuition_fees_relation 
+            this.html.products.item = this.html.products.list.filter(item => item.id == response.data.tuition_fee.product_id)[0]
             this.price = this.tuition_fee.price
             this.receivable = this.tuition_fee.receivable
           }else{
