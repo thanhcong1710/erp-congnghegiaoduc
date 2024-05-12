@@ -316,7 +316,7 @@
           mess += " - Số tháng học không được để trống<br/>";
           resp = false;
         }
-         if (this.tuition_fee.price == "") {
+         if (this.tuition_fee.price === "") {
           mess += " - Giá niêm yết không được để trống<br/>";
           resp = false;
         }

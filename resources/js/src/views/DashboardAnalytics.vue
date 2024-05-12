@@ -15,7 +15,7 @@
             v-if="subscribersGained.analyticsData"
             icon="UsersIcon"
             :statistic="subscribersGained.analyticsData.subscribers | k_formatter"
-            statisticTitle="Subscribers Gained"
+            statisticTitle="Tổng số học sinh hiện tại"
             :chartData="subscribersGained.series"
             type="area" />
       </div>
@@ -23,9 +23,9 @@
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
           <statistics-card-line
             v-if="revenueGenerated.analyticsData"
-            icon="DollarSignIcon"
+            icon="UserPlusIcon"
             :statistic="revenueGenerated.analyticsData.revenue | k_formatter"
-            statisticTitle="Revenue Generated"
+            statisticTitle="Số học sinh tuyển mới tháng"
             :chartData="revenueGenerated.series"
             color="success"
             type="area" />
@@ -34,9 +34,9 @@
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
           <statistics-card-line
             v-if="quarterlySales.analyticsData"
-            icon="ShoppingCartIcon"
+            icon="HomeIcon"
             :statistic="quarterlySales.analyticsData.sales"
-            statisticTitle="Quarterly Sales"
+            statisticTitle="Số học sinh trung bình trên lớp"
             :chartData="quarterlySales.series"
             color="danger"
             type="area" />
@@ -44,20 +44,22 @@
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
           <statistics-card-line
             v-if="ordersRecevied.analyticsData"
-            icon="ShoppingBagIcon"
+            icon="DivideIcon"
             :statistic="ordersRecevied.analyticsData.orders | k_formatter"
-            statisticTitle="Orders Received"
+            statisticTitle="Tỷ lệ lấp đầy lớp"
             :chartData="ordersRecevied.series"
             color="warning"
             type="area" />
       </div>
       <div class="vx-col w-full md:w-1/3 mb-base">
-        <vx-card>
+        <vx-card class="text">
+          <h5 class="mb-4">Cơ cấu khóa học</h5>
           <vue-apex-charts type="pie" height="350" :options="pieChart.chartOptions" :series="pieChart.series"></vue-apex-charts>
         </vx-card>
       </div>
       <div class="vx-col w-full md:w-2/3 mb-base">
         <vx-card>
+          <h5>Kết quả kinh doanh</h5>
           <vue-apex-charts type="bar" height="350" :options="columnChart.chartOptions" :series="columnChart.series"></vue-apex-charts>
         </vx-card>
       </div>
@@ -78,57 +80,57 @@ export default {
       subscribersGained: {
         series: [
           {
-            name: 'Subscribers',
-            data: [28, 40, 36, 52, 38, 60, 55]
+            name: 'Học sinh',
+            data: [ 3328, 4320, 5361, 4980, 5690, 5789, 6489]
           }
         ],
         analyticsData: {
-          subscribers: 92600
+          subscribers: 6489
         }
       },
       revenueGenerated: {
         series: [
           {
-            name: 'Revenue',
-            data: [350, 275, 400, 300, 350, 300, 450]
+            name: 'Học sinh',
+            data: [350, 275, 400, 300, 350, 300, 307]
           }
         ],
         analyticsData: {
-          revenue: 97500
+          revenue: 307
         }
       },
       quarterlySales: {
         series: [
           {
-            name: 'Sales',
-            data: [10, 15, 7, 12, 3, 16]
+            name: 'Học sinh',
+            data: [10.4, 7.5, 9, 8, 11, 10.6]
           }
         ],
         analyticsData: {
-          sales: '36%'
+          sales: '10.6'
         }
       },
       ordersRecevied: {
         series: [
           {
-            name: 'Orders',
-            data: [10, 15, 8, 15, 7, 12, 8]
+            name: 'Tỷ lệ(%)',
+            data: [30, 45, 50, 55, 67, 58, 59]
           }
         ],
         analyticsData: {
-          orders: 97500
+          orders: '59%'
         }
       },
       pieChart: {
-        series: [44, 55, 13, 43],
+        series: [440, 550, 130, 430],
         chartOptions: {
-          labels: ['Team A', 'Team B', 'Team C', 'Team D'],
+          labels: ['Khóa học A', 'Khóa học B', 'Khóa học C', 'Khóa học D'],
           colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E1E1E'],
           responsive: [{
             breakpoint: 480,
             options: {
               chart: {
-                width: 200
+                width: 300
               },
               legend: {
                 position: 'bottom'
@@ -139,14 +141,14 @@ export default {
       },
       columnChart: {
         series: [{
-            name: 'Net Profit',
-            data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
+            name: 'Lãi/Lỗ',
+            data: [ 560, 610, 580, 630, 600, 660]
           }, {
-            name: 'Revenue',
-            data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
+            name: 'Doanh thu',
+            data: [ 980, 870, 1050, 910, 1140, 940]
           }, {
-            name: 'Free Cash Flow',
-            data: [35, 41, 36, 26, 45, 48, 52, 53, 41]
+            name: 'Chi phí',
+            data: [ 420, 260, 470, 280, 540, 220]
         }],
         chartOptions: {
           colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E1E1E'],
@@ -167,11 +169,11 @@ export default {
           },
 
           xaxis: {
-            categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+            categories: ['T12/2023', 'T1/2024', 'T2/2024', 'T3/2024', 'T4/2024', 'T5/2024'],
           },
           yaxis: {
             title: {
-              text: '$ (thousands)'
+              text: 'VND (triệu)'
             }
           },
           fill: {
@@ -181,7 +183,7 @@ export default {
           tooltip: {
             y: {
               formatter: function(val) {
-                return "$ " + val + " thousands"
+                return  val + " triệu đồng"
               }
             }
           }
