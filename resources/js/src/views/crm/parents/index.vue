@@ -149,66 +149,18 @@
                       </div>
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Tên khách hàng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số điện thoại
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn chi tiết
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Người phụ trách
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch chăm sóc tiếp theo
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch sử chăm sóc
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thời gian chăm sóc gần nhất
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1" >Tên khách hàng</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số điện thoại</th>
+                  <th colspan="1" rowspan="1" >Học sinh</th>
+                  <th colspan="1" rowspan="1" >Nguồn</th>
+                  <th colspan="1" rowspan="1">Nguồn chi tiết</th>
+                  <th colspan="1" rowspan="1">Người phụ trách</th>
+                  <th colspan="1" rowspan="1" class="text-center">Lịch chăm sóc tiếp theo</th>
+                  <th colspan="1" rowspan="1" >Lịch sử chăm sóc</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thời gian chăm sóc gần nhất</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in parents" :key="index">
@@ -223,9 +175,9 @@
                     </span>
                   </div>
                 </td>
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
-                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
+                <td class="td vs-table--td text-center"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
                 <td class="td vs-table--td">{{ item.hs1_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
                 <td class="td vs-table--td">{{ item.source_detail_name }}</td>

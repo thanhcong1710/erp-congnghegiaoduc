@@ -38,10 +38,7 @@ class SystemController extends Controller
 
     public function getSourceDetail(Request $request)
     {
-        $cond = "";
-        if (!Auth::user()->checkPermission('canViewAllSourceDetail')) {
-            $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
-        }
+        $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
         $data = u::query("SELECT *, id AS `value` FROM source_detail WHERE status=1 $cond");
         return response()->json($data);
     }
