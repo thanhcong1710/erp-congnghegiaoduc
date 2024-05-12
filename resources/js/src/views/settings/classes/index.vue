@@ -416,6 +416,7 @@
           pages: [],
           init: 0
         },
+        check_exit:0,
       }
     },
     created() {
@@ -593,6 +594,7 @@
         this.html.cms.item = ''
         this.html.shifts.item = ''
         this.config.subjects=[]
+        this.list_sessions=[]
       },
       save() {
         let mess = "";
@@ -665,13 +667,13 @@
       },
       addSubject(data =null){
         if (data && typeof data === 'object') {
-          const check_exit = 0;
+          this.check_exit = 0;
           this.config.subjects.map(item => {
             if(item.id==data.id){
-              check_exit = 1;
+              this.check_exit = 1;
             }
           })
-          if(!check_exit){
+          if(!this.check_exit){
             this.config.subjects.push(data)
           }
           this.html.subjects.item=''

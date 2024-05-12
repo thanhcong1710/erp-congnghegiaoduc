@@ -103,15 +103,15 @@ class ContractsController extends Controller
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
            'total_sessions' => data_get($request, 'total_session'),
-           'real_sessions' => data_get($request, 'tuition_fee_session'),
-           'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
-           'summary_sessions' => 0, // chưa đóng phí
+           'real_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'tuition_fee_session') : 0,
+           'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : (data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0),
+           'summary_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : 0, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
            'start_date'=> data_get($request, 'start_date'),
            'note'=> data_get($request, 'note'),
            'created_at'=>date('Y-m-d H:i:s'),
            'creator_id'=>Auth::user()->id,
-           'status' => 1,
+           'status' => data_get($request, 'type') ==0 ? 3 : 1,
            'count_recharge' => $last_contract ? $last_contract->count_recharge + 1 : 0,
         ), 'contracts');
 
@@ -186,10 +186,13 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_sessions,c.bonus_sessions, c.real_sessions, c.tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status
+                c.total_sessions,c.bonus_sessions, c.real_sessions, c.tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
+        foreach($list AS $k=> $row){
+            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+        }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }

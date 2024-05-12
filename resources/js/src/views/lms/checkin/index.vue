@@ -102,58 +102,35 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table">
+            <table class="vs-table vs-table--tbody-table" style="width: 1300px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Phụ huynh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Thông tin checkin
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Học sinh</th>
+                  <th colspan="1" rowspan="1">Phụ huynh</th>
+                  <th colspan="1" rowspan="1">Thông tin checkin</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+                  <th colspan="1" rowspan="1">Ghi chú</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in checkin_students" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td" style="width: 240px">
                   <p><strong>{{ item.name }}</strong></p>
                   <p>Giới tính: {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}</p>
                   <p>Ngày sinh: {{ item.birthday }}</p>
                 </td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td"  style="width: 240px">
                   <p><strong>{{ item.parent_name }}</strong></p>
                   <p>SĐT: {{ item.mobile_1 }}</p>
                   <p>Nguồn: {{ item.source_name }}</p>
                   <p>Phụ trách: {{ item.checkin_owner_name }}</p>
                 </td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td"  style="width: 240px">
                   <p>{{ item.checkin_branch_name }}</p>
                   <p>Thời gian: {{ item.checkin_at }}</p>
                   <p>Khóa học: {{ item.checkin_product_name }}</p>
@@ -163,6 +140,7 @@
                     <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item.id)"><i class="fa-solid fa-clipboard-check"></i></vs-button>
                     <vs-button size="small" color="danger" v-if="item.status==2" @click="openConfirmUpStudent(item.id,item.name)"><i class="fa-solid fa-paper-plane"></i></vs-button>
                 </td>
+                <td class="td vs-table--td">{{item.checkined_note}}</td>
               </tr>
             </table>
             

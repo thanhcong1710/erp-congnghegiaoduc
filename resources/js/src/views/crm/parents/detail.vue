@@ -1215,7 +1215,7 @@
       },
       changeTab(){
         if(this.active_tab ==1){
-          this.loadTicket();
+          this.loadTickets();
         }else if(this.active_tab ==2){
           this.loadCares();
         }else if(this.active_tab ==3){

@@ -128,10 +128,10 @@
                   <p>Trạng thái: <strong>{{item.label_status}}</strong></p>
                 </td>
                 <td class="td vs-table--td text-center">
-                  <div style="font-size: 16px;">
+                  <div style="font-size: 16px;" v-if="item.summary_sessions">
                     <span  style="font-size: 26px;">{{item.done_sessions}}</span> / <span>{{item.summary_sessions}}</span>
                   </div>
-                 <vs-progress :height="8" :percent="Math.round( item.done_sessions*100 / item.summary_sessions)" color="success"></vs-progress>
+                 <vs-progress v-if="item.summary_sessions" :height="8" :percent="Math.round( item.done_sessions*100 / item.summary_sessions)" color="success"></vs-progress>
                 </td>
                 <td class="text-center list-action"> 
                   <router-link :to="`/lms/students/${item.id}/detail`" >
@@ -140,7 +140,6 @@
                 </td>
               </tr>
             </table>
-            
           </div>
         </div>
       </div>

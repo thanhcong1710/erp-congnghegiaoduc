@@ -106,14 +106,14 @@
                   <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
                   <p>Khóa học: {{ item.product_name }}</p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
-                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} học bổng)</p>
+                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} buổi học bổng)</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>Giá gốc: <strong>{{ item.tuition_fee_amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
                   <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
                 </td>
-                <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
+                <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>

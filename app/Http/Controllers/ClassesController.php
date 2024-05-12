@@ -210,7 +210,7 @@ class ClassesController extends Controller
                 }
                 $subject_stt++;
                 $class_stt++;
-                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row['id']),'schedules');
+                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
             }
         }
         $result = array(

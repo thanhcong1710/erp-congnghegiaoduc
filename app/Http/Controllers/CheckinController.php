@@ -60,7 +60,7 @@ class CheckinController extends Controller
                 (SELECT name FROM branches WHERE id = s.checkin_branch_id) AS checkin_branch_name,
                 (SELECT name FROM products WHERE id = s.type_product) AS checkin_product_name,
                 (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id= s.checkin_owner_id) AS checkin_owner_name,
-                s.checkin_at, s.status
+                s.checkin_at, s.status, s.checkined_note
             FROM crm_students AS s 
             LEFT JOIN crm_parents AS p ON p.id =s.parent_id
             WHERE $cond $order_by $limitation");
