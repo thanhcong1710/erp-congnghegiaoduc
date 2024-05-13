@@ -362,7 +362,7 @@ class UtilityServiceProvider extends ServiceProvider
         $contract_info = (array)self::getObject(['id' => $contract_id], 'contracts');
         $class_date = date('Y-m-d');
         if (data_get($contract_info, 'status') == 6) {
-            $schedule = self::first("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id
+            $schedule = self::first("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id,s.subject_id, s.subject_stt
                 FROM contracts AS c 
                     LEFT JOIN classes AS cl ON cl.id = c.class_id
                     LEFT JOIN schedules AS s ON s.class_id=cl.id
@@ -378,6 +378,8 @@ class UtilityServiceProvider extends ServiceProvider
                         'class_id' => data_get($schedule, 'class_id'),
                         'product_id' => data_get($schedule, 'product_id'),
                         'program_id' => data_get($schedule, 'program_id'),
+                        'subject_id' => data_get($schedule, 'subject_id'),
+                        'subject_stt' => data_get($schedule, 'subject_stt'),
                         'status' => $reserve_info ? 2 : 1,
                     ), array('id' => data_get($schedule_has_student_info, 'id')), 'schedule_has_student');
                 } else {
@@ -391,6 +393,8 @@ class UtilityServiceProvider extends ServiceProvider
                         'class_date' => $class_date,
                         'created_at' => date('Y-m-d H:i:s'),
                         'status' => $reserve_info ? 2 : 1,
+                        'subject_id' => data_get($schedule, 'subject_id'),
+                        'subject_stt' => data_get($schedule, 'subject_stt')
                     ), 'schedule_has_student');
                 }
             } else {
