@@ -145,6 +145,7 @@ class ClassesController extends Controller
                 'updated_at'=> date('Y-m-d H:i:s'),
                 'updator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
+                'type'=> data_get($request,'type'),
             ), array('id'=>data_get($request,'class_id')), 'classes');
 
         }else{
@@ -162,6 +163,7 @@ class ClassesController extends Controller
                 'created_at'=> date('Y-m-d H:i:s'),
                 'creator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
+                'type'=> data_get($request,'type'),
             ),'classes');
             foreach($arr_day AS $session){
                 u::insertSimpleRow(array(
