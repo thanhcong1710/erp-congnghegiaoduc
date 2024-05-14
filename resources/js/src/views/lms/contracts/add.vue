@@ -522,27 +522,36 @@
         }
       },
       checkCoupon(){
-        this.$vs.loading.close();
-        this.contract.coupon_code_check = 0;
-         axios.p(`/api/lms/contracts/check-coupon`,{
-          coupon_code: this.contract.coupon_code
-        }).then((response) => {
+        if(this.contract.coupon_code){
           this.$vs.loading.close();
-          if(response.data.status == 0){
-            this.$vs.notify({
-              title: 'Lỗi',
-              text: response.data.message,
-              iconPack: 'feather',
-              icon: 'icon-alert-circle',
-              color: 'warning'
-            })
-          }else{
-            this.contract.coupon_code_check = 1;
-            this.contract.coupon_amount = response.data.data.coupon_amount
-            this.contract.coupon_session = response.data.data.coupon_session
-            this.caculatorSession()
-          }
-        }).catch(e => console.log(e))
+          this.contract.coupon_code_check = 0;
+          axios.p(`/api/lms/contracts/check-coupon`,{
+            coupon_code: this.contract.coupon_code
+          }).then((response) => {
+            this.$vs.loading.close();
+            if(response.data.status == 0){
+              this.$vs.notify({
+                title: 'Lỗi',
+                text: response.data.message,
+                iconPack: 'feather',
+                icon: 'icon-alert-circle',
+                color: 'warning'
+              })
+              this.contract.coupon_amount = 0
+              this.contract.coupon_session = 0
+              this.caculatorSession()
+            }else{
+              this.contract.coupon_code_check = 1;
+              this.contract.coupon_amount = response.data.data.coupon_amount
+              this.contract.coupon_session = response.data.data.coupon_session
+              this.caculatorSession()
+            }
+          }).catch(e => console.log(e))
+        }else{
+          this.contract.coupon_amount = 0
+          this.contract.coupon_session = 0
+          this.caculatorSession()
+        }
       },
       selectDate(date){
         if (date) {

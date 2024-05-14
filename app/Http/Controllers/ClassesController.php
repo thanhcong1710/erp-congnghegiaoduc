@@ -112,23 +112,26 @@ class ClassesController extends Controller
                 ),'schedules');
             }
 
-            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
-            foreach($arr_subject AS $subject){
-                u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-
-            }
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-            $tmp_subject = 0;
-            $subject_stt = 0;
-            $class_stt = 0;
-            foreach($arr_schedule AS $row){
-                if($tmp_subject != $row->subject_id){
-                    $tmp_subject = $row->subject_id;
-                    $subject_stt = 0;
+           
+            for($i=1;$i<= data_get($request,'total_cycles');$i++){
+                $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+                foreach($arr_subject AS $subject){
+                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
+
                 }
-                $subject_stt++;
-                $class_stt++;
-                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                $tmp_subject = 0;
+                $subject_stt = 0;
+                $class_stt = 0;
+                foreach($arr_schedule AS $row){
+                    if($tmp_subject != $row->subject_id){
+                        $tmp_subject = $row->subject_id;
+                        $subject_stt = 0;
+                    }
+                    $subject_stt++;
+                    $class_stt++;
+                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                }
             }
             
             u::updateSimpleRow(array(
@@ -146,6 +149,7 @@ class ClassesController extends Controller
                 'updator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
+                'total_cycles'=> data_get($request,'total_cycles'),
             ), array('id'=>data_get($request,'class_id')), 'classes');
 
         }else{
@@ -164,6 +168,7 @@ class ClassesController extends Controller
                 'creator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
+                'total_cycles'=> data_get($request,'total_cycles'),
             ),'classes');
             foreach($arr_day AS $session){
                 u::insertSimpleRow(array(
@@ -196,23 +201,24 @@ class ClassesController extends Controller
                 ),'schedules');
             }
 
-            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
-            foreach($arr_subject AS $subject){
-                u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-            }
-
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-            $tmp_subject = 0;
-            $subject_stt = 0;
-            $class_stt = 0;
-            foreach($arr_schedule AS $row){
-                if($tmp_subject != $row->subject_id){
-                    $tmp_subject = $row->subject_id;
-                    $subject_stt = 0;
+            for($i=1;$i<= data_get($request,'total_cycles');$i++){
+                $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+                foreach($arr_subject AS $subject){
+                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
                 }
-                $subject_stt++;
-                $class_stt++;
-                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                $tmp_subject = 0;
+                $subject_stt = 0;
+                $class_stt = 0;
+                foreach($arr_schedule AS $row){
+                    if($tmp_subject != $row->subject_id){
+                        $tmp_subject = $row->subject_id;
+                        $subject_stt = 0;
+                    }
+                    $subject_stt++;
+                    $class_stt++;
+                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                }
             }
         }
         $result = array(
@@ -243,6 +249,7 @@ class ClassesController extends Controller
             'teacher_id' => data_get($class_info, 'teacher_id'),
             'shift_id' => data_get($session_info, 'shift_id'),
             'room_id' => data_get($session_info, 'room_id'),
+            'total_cycles' => data_get($class_info, 'total_cycles'),
             'class_day' => [
                 'day_2' => in_array(2,$arr_day) ? true : false,
                 'day_3' => in_array(3,$arr_day) ? true : false,

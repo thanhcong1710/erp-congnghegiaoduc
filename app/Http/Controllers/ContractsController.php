@@ -103,7 +103,7 @@ class ContractsController extends Controller
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
            'total_sessions' => data_get($request, 'total_session'),
-           'real_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'tuition_fee_session') : 0,
+           'real_sessions' => data_get($request, 'type') ==0 ? 0 : data_get($request, 'tuition_fee_session'),
            'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : (data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0),
            'summary_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : 0, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,

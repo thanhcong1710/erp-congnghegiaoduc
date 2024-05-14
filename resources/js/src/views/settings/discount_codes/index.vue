@@ -53,7 +53,7 @@
                   <th colspan="1" rowspan="1" class="text-center">Tỷ lệ</th>
                   <th colspan="1" rowspan="1" class="text-center">Giá gốc</th>
                   <th colspan="1" rowspan="1" class="text-center">Tiền chiết khấu</th>
-                  <th colspan="1" rowspan="1" class="text-center">Buổi học bổng</th>
+                  <!-- <th colspan="1" rowspan="1" class="text-center">Buổi học bổng</th> -->
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -67,7 +67,7 @@
                 <td class="td vs-table--td text-center">{{item.percent}}%</td>
                 <td class="td vs-table--td text-right">{{item.price | formatMoney}}</td>
                 <td class="td vs-table--td text-right">{{item.discount| formatMoney}}</td>
-                <td class="td vs-table--td text-center">{{item.bonus_sessions}}</td>
+                <!-- <td class="td vs-table--td text-center">{{item.bonus_sessions}}</td> -->
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/settings/discount-codes/edit/${item.id}`">

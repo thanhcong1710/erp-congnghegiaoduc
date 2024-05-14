@@ -85,7 +85,7 @@ class DiscountCodesController extends Controller
     {
         $data = u::first("SELECT * FROM discount_codes WHERE id = $id");
         if($data->fee_ids){
-            $tuition_fees = u::query("SELECT t.name, t.id, t.available_date, t.expired_date,
+            $tuition_fees = u::query("SELECT t.name, t.id, t.available_date, t.expired_date,t.status,
                 (SELECT name FROM products WHERE id=t.product_id) AS product_name   
             FROM tuition_fee AS t WHERE t.id IN ($data->fee_ids)");
         }else{

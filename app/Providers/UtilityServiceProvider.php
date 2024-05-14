@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\LogStudents;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -399,14 +400,15 @@ class UtilityServiceProvider extends ServiceProvider
                 }
             } else {
                 if ($schedule_has_student_info) {
-                    self::query("UPDATE schedule_has_student SET status=0 WHERE id=" . (int)data_get($schedule_has_student_info, 'id'));
+                    self::query("DELETE FROM  schedule_has_student WHERE id=" . (int)data_get($schedule_has_student_info, 'id')." AND `status`=0");
                 }
             }
         } else {
-            self::query("UPDATE schedule_has_student SET status=0 WHERE contract_id=$contract_id AND class_date='$class_date'");
+            self::query("DELETE FROM  schedule_has_student WHERE contract_id=$contract_id AND class_date='$class_date'  AND `status`=0");
         }
         $contract_info['contract_id'] = data_get($contract_info, 'id');
         $contract_info['log_time'] = date('Y-m-d H:i:s');
+        self::updateDoneSessions(data_get($contract_info, 'id'));
         unset($contract_info['id']);
         $log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
         return $log_contract_id;
@@ -725,23 +727,32 @@ class UtilityServiceProvider extends ServiceProvider
     public static function updateDoneSessions($contract_id)
     {
         $done_sessions = self::first("SELECT count(id) AS total FROM schedule_has_student WHERE contract_id = $contract_id AND status=1 ");
-        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions FROM contracts WHERE id=$contract_id");
+        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code FROM contracts WHERE id=$contract_id");
         if ($contract_info->status == 6) {
             $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
             $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
             $arr_day = explode(",", data_get($class_info, 'class_day'));
             $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
-            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'start_date'), $left_sessions, $holidays, $arr_day);
+            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $left_sessions, $holidays, $arr_day);
             self::updateSimpleRow(array(
                 'enrolment_last_date' => data_get($data_sessions, 'end_date'),
                 'done_sessions' => $done_sessions->total,
-                'left_sessions' => $contract_info->summary_sessions - $done_sessions->total
+                'left_sessions' => $left_sessions
             ), array('id' => $contract_id), 'contracts');
         } else {
+            $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
             self::updateSimpleRow(array(
                 'done_sessions' => $done_sessions->total,
-                'left_sessions' => $contract_info->summary_sessions - $done_sessions->total
+                'left_sessions' => $left_sessions
             ), array('id' => $contract_id), 'contracts');
+        }
+        if($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info,'summary_sessions')>0){
+            self::updateSimpleRow(array(
+                'status' => 7,
+                'action' => 'Tự động withdraw do hết phí'
+            ), array('id' => $contract_id), 'contracts');
+            self::addLogContracts($contract_id);
+            LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " .data_get($contract_info, 'code')." hết phí", 0);
         }
         return true;
     }

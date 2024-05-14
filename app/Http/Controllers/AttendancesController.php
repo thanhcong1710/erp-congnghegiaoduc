@@ -43,7 +43,7 @@ class AttendancesController extends Controller
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT DISTINCT s.lastname, s.name, s.lms_code, s.id AS student_id
             FROM schedule_has_student AS ss LEFT JOIN students AS s ON ss.student_id=s.id
-            WHERE DATE_FORMAT(ss.class_date, '%Y-%m')='$date_select' ORDER BY s.lastname");
+            WHERE DATE_FORMAT(ss.class_date, '%Y-%m')='$date_select' AND class_id=$class_id ORDER BY s.lastname");
         $shedules = u::query("SELECT s.class_date, DATE_FORMAT(s.class_date, '%Y_%m_%d') AS date_key, sj.code, s.subject_stt
             FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id  WHERE s.class_id=$class_id AND DATE_FORMAT(s.class_date, '%Y-%m') ='$date_select' ORDER BY class_date ");
         foreach($students AS $k=>$stu){

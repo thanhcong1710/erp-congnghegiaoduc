@@ -163,23 +163,36 @@
                 <option value="1">Chính thức</option>
               </select>
             </div>
-            <div class="vx-col  md:w-1/2 w-full mb-4">
-              <vue-select
-                    label="name"
-                    placeholder="Chọn môn học"
-                    :options="html.subjects.list"
-                    v-model="html.subjects.item"
-                    :searchable="true"
-                    language="tv-VN"
-                    :disabled="disabled_input"
-                    @input="addSubject"
-                ></vue-select>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số vòng lặp các môn học</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="number"
+                name="title"
+                min="1"
+                max=20
+                v-model="config.total_cycles"
+                :disabled="disabled_input"
+                @change="caculatorTotalSession"
+              />
             </div>
             <div class="vx-col w-full mb-4">
               <vs-tabs>
                 <vs-tab label="Danh sách môn học">
                   <div class="tab-text">
                     <div class=w-full>
+                      <div class="vx-col  md:w-1/2 w-full mb-4">
+                        <vue-select
+                              label="name"
+                              placeholder="Chọn môn học"
+                              :options="html.subjects.list"
+                              v-model="html.subjects.item"
+                              :searchable="true"
+                              language="tv-VN"
+                              :disabled="disabled_input"
+                              @input="addSubject"
+                          ></vue-select>
+                      </div>
                       <div class="vs-component vs-con-table stripe vs-table-primary">
                         <div class="con-tablex vs-table--content">
                           <div class="vs-con-tbody vs-table--tbody ">
@@ -368,6 +381,7 @@
           }
         },
         config:{
+          total_cycles:1,
           is_edit:0,
           class_id:'',
           branch_id:'',
@@ -595,6 +609,7 @@
         this.html.shifts.item = ''
         this.config.subjects=[]
         this.list_sessions=[]
+        this.config.total_cycles = 1
       },
       save() {
         let mess = "";
@@ -691,10 +706,22 @@
         this.caculatorTotalSession();
       },
       caculatorTotalSession(){
+        if(this.config.total_cycles<1 || this.config.total_cycles>20){
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số vòng lặp chỉ được từ 1 đến 20',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle',
+            color: 'warning'
+          })
+          this.config.total_cycles = 1
+        }
+
         this.config.session = 0
         this.config.subjects.map(item => {
           this.config.session = Number(this.config.session) + Number(item.session)
         })
+        this.config.session = this.config.session *  Number(this.config.total_cycles)
       },
       getDataSessions() {
         const data = {
