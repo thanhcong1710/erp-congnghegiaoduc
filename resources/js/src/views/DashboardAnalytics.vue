@@ -69,6 +69,7 @@
 
 <script>
 import StatisticsCardLine from '@/components/statistics-cards/StatisticsCardLine.vue'
+import axios from '../http/axios.js'
 import VueApexCharts from 'vue-apexcharts'
 export default {
   components: {
@@ -192,6 +193,10 @@ export default {
     }
   },
   created () {
+    axios.g(`/api/dashboard`)
+      .then(response => {
+        console.log(response.data)
+    })
   }
 }
 </script>

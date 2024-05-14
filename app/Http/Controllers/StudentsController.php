@@ -306,6 +306,9 @@ class StudentsController extends Controller
             FROM assessments AS a
             LEFT  JOIN users AS u ON u.id=a.creator_id
             WHERE $cond $order_by $limitation");
+        foreach($list AS $k=>$row){
+            $list[$k]->description = nl2br($row->description);
+        }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }

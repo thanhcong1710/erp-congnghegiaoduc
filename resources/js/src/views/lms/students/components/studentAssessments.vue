@@ -21,7 +21,7 @@
               <td class="td vs-table--td" style="min-width: 200px">{{item.creator_name}}</td>
               <td class="td vs-table--td">
                 <p><strong>{{item.title}}</strong></p>
-                {{item.description}}
+                <div v-html="item.description"></div>
               </td>
             </tr>
           </table>

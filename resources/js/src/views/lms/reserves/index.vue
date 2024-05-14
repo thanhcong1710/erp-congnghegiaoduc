@@ -112,11 +112,11 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Lớp: {{item.class_name}}</p>
-                  <p>Trung tâm: {{item.branch_name}}</p>
+                  <p>{{item.branch_name}}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>Số buổi: <strong>{{item.session}}</strong></p>
-                  <p>Loại:{{item.is_reserved ? ' Bảo lưu giữ chỗ' : 'Bảo lưu không giữ chỗ'}}</p>
+                  <p>Loại:{{item.is_reserved ? ' Bảo lưu giữ chỗ' : ' Bảo lưu không giữ chỗ'}}</p>
                 </td>
                  <td class="td vs-table--td">
                   <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>

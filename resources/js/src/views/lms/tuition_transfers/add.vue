@@ -635,6 +635,7 @@
                 icon: 'icon-alert-circle',
                 color: 'warning'
               })
+              this.resetDataPrepareTransfer(); 
             }
           })
           .catch((e) => {

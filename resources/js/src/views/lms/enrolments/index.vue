@@ -152,9 +152,9 @@
                         <p>Đã đóng: {{item.total_charged}}</p>
                       </td>
                       <td class="td vs-table--td">
-                        <p>Số buổi đã học: <strong>{{item.done_session}}</strong></p>
+                        <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                        <p>Trạng thái: <strong></strong></p>
+                        <!-- <p>Trạng thái: <strong></strong></p> -->
                       </td>
                     </tr>
                   </table>

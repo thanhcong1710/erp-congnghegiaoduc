@@ -25,6 +25,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('import/{import_id}', 'ExportController@import');
     });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
+        Route::get('dashboard', 'DashboardController@index');
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {

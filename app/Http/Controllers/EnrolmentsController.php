@@ -83,7 +83,7 @@ class EnrolmentsController extends Controller
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
-                c.must_charge, c.total_charged, 0 AS done_session,
+                c.must_charge, c.total_charged, c.done_sessions,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id
             WHERE c.status!=7 AND c.class_id =$class_id");

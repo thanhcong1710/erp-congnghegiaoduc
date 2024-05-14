@@ -52,47 +52,19 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Hợp đồng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Đóng phí
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Học sinh</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1">Hợp đồng</th>
+                  <th colspan="1" rowspan="1">Đóng phí</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
                   <p><strong>{{ item.name }}</strong></p>
                   <p>Mã: {{item.lms_code}}</p>
@@ -119,7 +91,7 @@
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
                     <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
-                    <vs-button size="small" color="danger" v-if="item.total_charged == 0" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
