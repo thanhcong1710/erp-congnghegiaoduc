@@ -394,6 +394,9 @@
                       <strong>{{ item.name }}</strong>
                       <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)"> <i class="fa fa-edit"></i> </vs-button>
                       <vs-button :disabled="disabled_action" color="danger" v-if="item.status==0" class="small" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
+                      <router-link :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
+                        <vs-button v-if="item.status==3" class="small"> <i class="fa fa-eye"></i></vs-button>
+                      </router-link>
                     </div>
                     <div class="card-body">
                       <p>Ngày sinh: {{ item.birthday }}</p>
