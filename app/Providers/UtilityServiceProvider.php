@@ -381,7 +381,7 @@ class UtilityServiceProvider extends ServiceProvider
                         'program_id' => data_get($schedule, 'program_id'),
                         'subject_id' => data_get($schedule, 'subject_id'),
                         'subject_stt' => data_get($schedule, 'subject_stt'),
-                        'status' => $reserve_info ? 2 : 1,
+                        'status' => $reserve_info ? 2 : 0,
                     ), array('id' => data_get($schedule_has_student_info, 'id')), 'schedule_has_student');
                 } else {
                     self::insertSimpleRow(array(
@@ -393,7 +393,7 @@ class UtilityServiceProvider extends ServiceProvider
                         'program_id' => data_get($schedule, 'program_id'),
                         'class_date' => $class_date,
                         'created_at' => date('Y-m-d H:i:s'),
-                        'status' => $reserve_info ? 2 : 1,
+                        'status' => $reserve_info ? 2 : 0,
                         'subject_id' => data_get($schedule, 'subject_id'),
                         'subject_stt' => data_get($schedule, 'subject_stt')
                     ), 'schedule_has_student');
