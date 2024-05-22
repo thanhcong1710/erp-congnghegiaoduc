@@ -367,7 +367,7 @@ class UtilityServiceProvider extends ServiceProvider
                 FROM contracts AS c 
                     LEFT JOIN classes AS cl ON cl.id = c.class_id
                     LEFT JOIN schedules AS s ON s.class_id=cl.id
-                WHERE c.id=$contract_id AND s.status=1 AND s.class_date = '$class_date'");
+                WHERE c.id=$contract_id AND s.status=1 AND s.class_date = '$class_date' AND c.enrolment_start_date <= '$class_date'");
             $schedule_has_student_info = self::first("SELECT id FROM schedule_has_student WHERE contract_id= $contract_id AND class_date='$class_date'");
             if ($schedule) {
                 $reserve_info = self::first("SELECT id FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 
