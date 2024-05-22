@@ -55,7 +55,7 @@
           })
       },
       reset(){
-        location.reload();
+        this.$router.push('/settings/roles')
       },
       savePermissions(){
         axios.p(`/api/roles/permissions`,{
