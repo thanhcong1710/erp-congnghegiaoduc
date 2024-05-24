@@ -123,7 +123,7 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
-          dateRange: "",
+          dateRange: [],
         },
         datepickerOptions: {
           closed: true,
@@ -167,6 +167,9 @@
       }
     },
     created() {
+      let from_date =  new Date();
+      this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
+      this.searchData.dateRange[1] = new Date(from_date.getFullYear(), from_date.getMonth() + 1, 1);
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.branch_list = response.data
@@ -179,7 +182,9 @@
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
-        this.searchData.dateRange= ""
+        let from_date =  new Date();
+        this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
+        this.searchData.dateRange[1] = new Date(from_date.getFullYear(), from_date.getMonth() + 1, 1);
         this.getData();
       },
       getData() {
