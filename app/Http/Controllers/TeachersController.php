@@ -28,7 +28,7 @@ class TeachersController extends Controller
         $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
 
         if (!empty($branch_id)) {
-            $cond .= " AND (s.branch_id IN (".implode(",",$branch_id).") ";
+            $cond .= " AND s.branch_id IN (".implode(",",$branch_id).") ";
         }
         if ($keyword !== '') {
             $cond .= " AND (cl.cls_name LIKE '%$keyword%' OR ut.name LIKE '%$keyword%' OR uc.name LIKE '%$keyword%' 
