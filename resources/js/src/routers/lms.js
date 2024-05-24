@@ -385,6 +385,33 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/teachers',
+        name: 'lms-teachers',
+        component: () => import('@/views/lms/teachers/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách buổi dạy', active: true}
+          ],
+          pageTitle: 'Danh sách buổi dạy',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/teachers/edit/:id',
+        name: 'lms-teachers-edit',
+        component: () => import('@/views/lms/teachers/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách buổi dạy', url: '/lms/teachers'},
+            { title: 'Cập nhật buổi dạy', active: true}
+          ],
+          pageTitle: 'Cập nhật buổi dạy',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

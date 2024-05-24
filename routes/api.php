@@ -176,6 +176,11 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('update', 'AssessmentsController@update');
                 Route::post('search-student', 'AssessmentsController@searchStudent');
             });
+            Route::prefix('teachers')->group(function () {
+                Route::post('list', 'TeachersController@list');
+                Route::get('show/{id}', 'TeachersController@show');
+                Route::post('update', 'TeachersController@update');
+            });
         });
 
         Route::prefix('settings')->group(function () {

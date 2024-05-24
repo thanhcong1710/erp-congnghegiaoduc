@@ -94,10 +94,10 @@
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>CM - Giáo viên chủ nhiệm</label>
+              <label>CM - Trợ giảng</label>
               <vue-select
                     label="label"
-                    placeholder="Chọn giáo viên chủ nhiệm"
+                    placeholder="Chọn trợ giảng"
                     :options="html.cms.list"
                     v-model="html.cms.item"
                     :searchable="true"
@@ -643,7 +643,7 @@
           resp = false;
         }
         if (this.config.cm_id == "") {
-          mess += " - CM - Giáo viên chủ nhiệm không được để trống<br/>";
+          mess += " - CM - Trợ giảng không được để trống<br/>";
           resp = false;
         }
         if (this.config.start_date == "") {

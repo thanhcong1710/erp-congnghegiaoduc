@@ -106,7 +106,7 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>CM - giáo viên chủ nhiệm:</span>
+                  <span>CM - Trợ giảng:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
                   <span>{{class_info.cm_name}}</span>

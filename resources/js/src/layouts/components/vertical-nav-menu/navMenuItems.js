@@ -124,8 +124,13 @@ export default [
             name: 'Nhận xét & đánh giá',
             slug: 'lms-attendances',
             permission:'lms_assessments',
+          },
+          {
+            url: '/lms/teachers',
+            name: 'Giáo viên & trợ giảng',
+            slug: 'lms-teachers',
+            permission:'lms_teachers',
           }
-
         ]
       },
       {

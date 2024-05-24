@@ -109,6 +109,9 @@ class ClassesController extends Controller
                     'class_id'=> $class_id,
                     'status'=> 1,
                     'created_at'=> date('Y-m-d H:i:s'),
+                    'teacher_id'=> data_get($request,'teacher_id'),
+                    'branch_id'=> data_get($request,'branch_id'),
+                    'cm_id'=> data_get($request,'cm_id'),
                 ),'schedules');
             }
 
@@ -198,6 +201,9 @@ class ClassesController extends Controller
                     'class_id'=> $class_id,
                     'status'=> 1,
                     'created_at'=> date('Y-m-d H:i:s'),
+                    'teacher_id'=> data_get($request,'teacher_id'),
+                    'branch_id'=> data_get($request,'branch_id'),
+                    'cm_id'=> data_get($request,'cm_id'),
                 ),'schedules');
             }
 

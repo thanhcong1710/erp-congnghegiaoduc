@@ -82,22 +82,24 @@ class SystemController extends Controller
     }
 
     public function getCMs($branch_id){
+        $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 AND b.branch_id=$branch_id AND (r.code='".SystemCode::ROLE_CM."' OR r.code='".SystemCode::ROLE_CM_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_CM."' OR r.code='".SystemCode::ROLE_CM_LEADER."')");
         return response()->json($data);
     }
 
     public function getTeachers($branch_id){
+        $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 AND b.branch_id=$branch_id AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
         return response()->json($data);
     }
 
