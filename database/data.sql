@@ -11,7 +11,7 @@
  Target Server Version : 50729
  File Encoding         : 65001
 
- Date: 13/05/2024 14:09:33
+ Date: 24/05/2024 14:17:35
 */
 
 SET NAMES utf8mb4;
@@ -36,13 +36,14 @@ CREATE TABLE `assessments` (
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of assessments
 -- ----------------------------
 BEGIN;
 INSERT INTO `assessments` VALUES (2, 1, 101752, 'demo nhận xét', 'Trên mỗi phiếu sinh hoạt hè có đầy đủ thông tin như: họ tên học sinh, lớp, học lực, hạnh kiểm cuối năm, năng khiếu cá nhân, địa chỉ; họ tên cha, họ tên mẹ và kèm theo đó là chữ ký của giáo viên chủ nhiệm, đóng dấu của nhà trường; phía sau mỗi phiếu là phần nhận xét kết quả hoạt động của tiểu ban hoạt động hè và xác', '2024-05-11 14:20:51', 1, 1, '2024-05-11 14:44:03', '{\"assessment\":{\"branch_id\":1,\"student_id\":101752,\"title\":\"demo nh\\u1eadn x\\u00e9t\",\"description\":\"n\\u1ed9i dung nh\\u1eadn x\\u00e9t\"},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101752\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":\"demo@gmail.com\",\"address\":\"ha n\\u1ed9i\",\"student_id\":101752,\"label\":\"h\\u1ecdc sinh - LMS101752\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"product_id\":1,\"class_id\":1,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\"}}', 1);
+INSERT INTO `assessments` VALUES (3, NULL, 1, 'Nhận xét học sinh mới vào', '1. Hành vi: Giáo viên quan sát và đánh giá hành vi của trẻ trong các hoạt động, chơi và học để thấy được sự tiến bộ của trẻ. Ví dụ như trẻ có thể tự giữ đồ dùng cá nhân, giữ gìn vệ sinh cá nhân, chia sẻ đồ chơi và tôn trọng bạn bè.\n2. Cảm xúc: Giáo viên quan sát và đánh giá biểu hiện cảm xúc của trẻ trong các tình huống khác nhau, ở nhà trường và trong quá trình học tập, giúp trẻ hiểu và điều chỉnh cảm xúc của mình. Ví dụ như trẻ biết giúp đỡ bạn bè khi họ buồn, có thể tự xử lý và điều khiển cảm xúc của mình.\n3. Tiến bộ: Giáo viên đánh giá sự tiến bộ của trẻ từ khi vào lớp đến khi ra lớp bằng cách so sánh với bản thân trẻ và so sánh với những tiêu chuẩn của lớp. Ví dụ như trẻ có thể ghi tên, viết đúng các chữ cái, thuộc được số lượng và tên các món đồ chơi.', '2024-05-14 22:35:01', 1, NULL, NULL, '{\"assessment\":{\"branch_id\":1,\"student_id\":1,\"title\":\"Nh\\u1eadn x\\u00e9t h\\u1ecdc sinh m\\u1edbi v\\u00e0o\",\"description\":\"1. H\\u00e0nh vi: Gi\\u00e1o vi\\u00ean quan s\\u00e1t v\\u00e0 \\u0111\\u00e1nh gi\\u00e1 h\\u00e0nh vi c\\u1ee7a tr\\u1ebb trong c\\u00e1c ho\\u1ea1t \\u0111\\u1ed9ng, ch\\u01a1i v\\u00e0 h\\u1ecdc \\u0111\\u1ec3 th\\u1ea5y \\u0111\\u01b0\\u1ee3c s\\u1ef1 ti\\u1ebfn b\\u1ed9 c\\u1ee7a tr\\u1ebb. V\\u00ed d\\u1ee5 nh\\u01b0 tr\\u1ebb c\\u00f3 th\\u1ec3 t\\u1ef1 gi\\u1eef \\u0111\\u1ed3 d\\u00f9ng c\\u00e1 nh\\u00e2n, gi\\u1eef g\\u00ecn v\\u1ec7 sinh c\\u00e1 nh\\u00e2n, chia s\\u1ebb \\u0111\\u1ed3 ch\\u01a1i v\\u00e0 t\\u00f4n tr\\u1ecdng b\\u1ea1n b\\u00e8.\\n2. C\\u1ea3m x\\u00fac: Gi\\u00e1o vi\\u00ean quan s\\u00e1t v\\u00e0 \\u0111\\u00e1nh gi\\u00e1 bi\\u1ec3u hi\\u1ec7n c\\u1ea3m x\\u00fac c\\u1ee7a tr\\u1ebb trong c\\u00e1c t\\u00ecnh hu\\u1ed1ng kh\\u00e1c nhau, \\u1edf nh\\u00e0 tr\\u01b0\\u1eddng v\\u00e0 trong qu\\u00e1 tr\\u00ecnh h\\u1ecdc t\\u1eadp, gi\\u00fap tr\\u1ebb hi\\u1ec3u v\\u00e0 \\u0111i\\u1ec1u ch\\u1ec9nh c\\u1ea3m x\\u00fac c\\u1ee7a m\\u00ecnh. V\\u00ed d\\u1ee5 nh\\u01b0 tr\\u1ebb bi\\u1ebft gi\\u00fap \\u0111\\u1ee1 b\\u1ea1n b\\u00e8 khi h\\u1ecd bu\\u1ed3n, c\\u00f3 th\\u1ec3 t\\u1ef1 x\\u1eed l\\u00fd v\\u00e0 \\u0111i\\u1ec1u khi\\u1ec3n c\\u1ea3m x\\u00fac c\\u1ee7a m\\u00ecnh.\\n3. Ti\\u1ebfn b\\u1ed9: Gi\\u00e1o vi\\u00ean \\u0111\\u00e1nh gi\\u00e1 s\\u1ef1 ti\\u1ebfn b\\u1ed9 c\\u1ee7a tr\\u1ebb t\\u1eeb khi v\\u00e0o l\\u1edbp \\u0111\\u1ebfn khi ra l\\u1edbp b\\u1eb1ng c\\u00e1ch so s\\u00e1nh v\\u1edbi b\\u1ea3n th\\u00e2n tr\\u1ebb v\\u00e0 so s\\u00e1nh v\\u1edbi nh\\u1eefng ti\\u00eau chu\\u1ea9n c\\u1ee7a l\\u1edbp. V\\u00ed d\\u1ee5 nh\\u01b0 tr\\u1ebb c\\u00f3 th\\u1ec3 ghi t\\u00ean, vi\\u1ebft \\u0111\\u00fang c\\u00e1c ch\\u1eef c\\u00e1i, thu\\u1ed9c \\u0111\\u01b0\\u1ee3c s\\u1ed1 l\\u01b0\\u1ee3ng v\\u00e0 t\\u00ean c\\u00e1c m\\u00f3n \\u0111\\u1ed3 ch\\u01a1i.\"},\"student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long\",\"lms_code\":\"LMS000001\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":1,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long - LMS000001\",\"product_name\":\"FasTracKids\",\"program_name\":\"FasTracKids - Th\\u1ee7 l\\u0129nh nh\\u00ed\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 1\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\",\"product_id\":3,\"class_id\":2,\"contract_id\":3,\"enrolment_start_date\":\"2024-05-13\",\"enrolment_last_date\":\"2025-05-05\"}}', 1);
 COMMIT;
 
 -- ----------------------------
@@ -63,7 +64,6 @@ INSERT INTO `branch_has_user` VALUES (1, 1);
 INSERT INTO `branch_has_user` VALUES (1, 2);
 INSERT INTO `branch_has_user` VALUES (1, 3);
 INSERT INTO `branch_has_user` VALUES (1, 4);
-INSERT INTO `branch_has_user` VALUES (1, 5);
 INSERT INTO `branch_has_user` VALUES (1, 6);
 INSERT INTO `branch_has_user` VALUES (1, 7);
 INSERT INTO `branch_has_user` VALUES (1, 8);
@@ -85,7 +85,6 @@ INSERT INTO `branch_has_user` VALUES (3, 1);
 INSERT INTO `branch_has_user` VALUES (3, 2);
 INSERT INTO `branch_has_user` VALUES (3, 3);
 INSERT INTO `branch_has_user` VALUES (3, 4);
-INSERT INTO `branch_has_user` VALUES (3, 5);
 INSERT INTO `branch_has_user` VALUES (3, 6);
 INSERT INTO `branch_has_user` VALUES (3, 7);
 INSERT INTO `branch_has_user` VALUES (3, 8);
@@ -142,14 +141,13 @@ CREATE TABLE `branch_transfer` (
   KEY `creator_id` (`creator_id`) USING BTREE,
   KEY `to_branch_id` (`to_branch_id`) USING BTREE,
   KEY `from_branch_id` (`from_branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of branch_transfer
 -- ----------------------------
 BEGIN;
-INSERT INTO `branch_transfer` VALUES (1, 101750, 44066, NULL, 1, NULL, NULL, NULL, 2, NULL, NULL, '{\"branch_transfer\":{\"branch_id\":1,\"student_id\":101750,\"to_branch_id\":2,\"note\":\"ghi ch\\u00fa\",\"transfer_date\":\"2024-05-17\"},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"cm_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\",\"ec_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\"},\"from_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}],\"to_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":6,\"left_sessions\":0,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}]}', 1, '2024-04-26 06:49:24', 1, '2024-04-26 08:34:53', NULL, 4, 'ghi chú', '2024-05-17', NULL, NULL, NULL, NULL, 1, '2024-04-26 08:25:20', 'ghi chú  chuyển di', 1, '2024-04-26 08:34:53', 'không đồng ý', NULL, NULL, NULL);
-INSERT INTO `branch_transfer` VALUES (2, 101750, 44066, NULL, 1, NULL, NULL, NULL, 2, NULL, NULL, '{\"branch_transfer\":{\"branch_id\":1,\"student_id\":101750,\"to_branch_id\":2,\"note\":null,\"transfer_date\":\"2024-04-26\"},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"cm_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\",\"ec_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\"},\"from_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}],\"to_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}]}', 1, '2024-04-26 09:28:50', NULL, NULL, NULL, 1, NULL, '2024-04-26', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `branch_transfer` VALUES (3, 1, 3, NULL, 1, NULL, NULL, NULL, 2, NULL, NULL, '{\"branch_transfer\":{\"branch_id\":1,\"student_id\":1,\"to_branch_id\":2,\"note\":null,\"transfer_date\":\"2024-05-31\"},\"student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long\",\"lms_code\":\"LMS000001\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":1,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long - LMS000001\",\"cm_name\":\"V\\u1eadn h\\u00e0nh - C00004\",\"ec_name\":\"CSKH - C00005\"},\"from_contracts\":[{\"contract_id\":3,\"total_charged\":23400000,\"summary_sessions\":100,\"real_sessions\":96,\"branch_id\":1,\"product_id\":3,\"bonus_sessions\":4,\"done_sessions\":1,\"left_sessions\":99,\"class_id\":3,\"code\":\"C000003\",\"enrolment_start_date\":\"2024-05-15\",\"enrolment_last_date\":\"2025-05-02\",\"class_day\":\"5,7\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 2\",\"product_name\":\"FasTracKids\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\"}],\"to_contracts\":[{\"contract_id\":3,\"total_charged\":23400000,\"summary_sessions\":100,\"real_sessions\":96,\"branch_id\":1,\"product_id\":3,\"bonus_sessions\":4,\"done_sessions\":5,\"left_sessions\":95,\"class_id\":3,\"code\":\"C000003\",\"enrolment_start_date\":\"2024-05-15\",\"enrolment_last_date\":\"2025-05-02\",\"class_day\":\"5,7\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 2\",\"product_name\":\"FasTracKids\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\"}]}', 1, '2024-05-14 22:54:12', 1, '2024-05-14 22:55:48', NULL, 2, NULL, '2024-05-31', NULL, NULL, NULL, NULL, 1, '2024-05-14 22:55:48', 'từ chối phê duyệt', NULL, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -225,14 +223,13 @@ CREATE TABLE `class_transfer` (
   KEY `creator_id` (`creator_id`) USING BTREE,
   KEY `to_branch_id` (`to_branch_id`) USING BTREE,
   KEY `from_branch_id` (`from_branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=45425 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of class_transfer
 -- ----------------------------
 BEGIN;
-INSERT INTO `class_transfer` VALUES (45423, 101750, 44068, 3, 1, 1, 434, 1, 1, 1, 434, '{\"class_transfer\":{\"branch_id\":1,\"student_id\":101750,\"contract_id\":44068,\"product_id\":1,\"class_id\":1,\"note\":\"ghi ch\\u00fa\",\"transfer_date\":\"2024-04-25\",\"left_session\":28},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo 1\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"total_charged\":12000000,\"summary_sessions\":28,\"bonus_sessions\":4,\"real_sessions\":24,\"product_id\":1,\"class_id\":3,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"done_sessions\":0,\"left_sessions\":0}}', 1, '2024-04-24 16:39:32', NULL, '2024-04-24 16:39:32', NULL, 2, 'ghi chú', '2024-04-25');
-INSERT INTO `class_transfer` VALUES (45424, 101750, 44068, 3, 1, 1, 434, 1, 1, 1, 434, '{\"class_transfer\":{\"branch_id\":1,\"student_id\":101750,\"contract_id\":44068,\"product_id\":1,\"class_id\":1,\"note\":\"ghi ch\\u00fa\",\"transfer_date\":\"2024-04-25\",\"left_session\":28},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo 1\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"total_charged\":12000000,\"summary_sessions\":28,\"bonus_sessions\":4,\"real_sessions\":24,\"product_id\":1,\"class_id\":3,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"done_sessions\":0,\"left_sessions\":0}}', 1, '2024-04-24 16:40:20', NULL, '2024-04-24 16:40:20', NULL, 2, 'ghi chú', '2024-04-25');
+INSERT INTO `class_transfer` VALUES (1, 1, 3, 2, 1, 3, 4, 3, 1, 3, 4, '{\"class_transfer\":{\"branch_id\":1,\"student_id\":1,\"contract_id\":3,\"product_id\":3,\"class_id\":3,\"note\":null,\"transfer_date\":\"2024-05-15\",\"left_session\":99},\"student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long\",\"lms_code\":\"LMS000001\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":1,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long - LMS000001\",\"product_name\":\"FasTracKids\",\"program_name\":\"FasTracKids - Th\\u1ee7 l\\u0129nh nh\\u00ed\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 1\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\",\"total_charged\":23400000,\"summary_sessions\":100,\"bonus_sessions\":4,\"real_sessions\":96,\"product_id\":3,\"class_id\":2,\"contract_id\":3,\"enrolment_start_date\":\"2024-05-15\",\"enrolment_last_date\":\"2025-04-30\",\"done_sessions\":1,\"left_sessions\":99}}', 1, '2024-05-14 22:50:43', NULL, '2024-05-14 22:50:43', NULL, 2, NULL, '2024-05-15');
 COMMIT;
 
 -- ----------------------------
@@ -257,21 +254,23 @@ CREATE TABLE `classes` (
   `updator_id` int(11) DEFAULT NULL,
   `branch_id` int(11) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL COMMENT 'Trạng thái sử dụng của lớp:\r\n0 - Lớp đang available mọi chức năng\r\n1 - Lớp không được phép sử dụng để thêm học sinh',
+  `total_cycles` tinyint(2) DEFAULT '1',
   `type` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `program_id` (`program_id`) USING BTREE,
   KEY `product_id` (`product_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of classes
 -- ----------------------------
 BEGIN;
-INSERT INTO `classes` VALUES (1, 3, 'Lớp học thử', 3, 4, 4, '2024-05-01', '2024-06-17', NULL, '2,3,4,5,6,7,8', 16, '2024-05-12 22:01:20', '2024-05-12 22:28:42', 1, 1, 1, 1, 0);
-INSERT INTO `classes` VALUES (2, 3, 'Lớp chính thức 1', 3, 4, 4, '2024-05-01', '2024-10-21', NULL, '3,8', 16, '2024-05-12 22:20:52', '2024-05-12 22:31:55', 1, 1, 1, 1, 1);
-INSERT INTO `classes` VALUES (3, 3, 'Lớp chính thức 2', 3, 4, 4, '2024-05-01', '2024-10-20', NULL, '5,7', 16, '2024-05-12 22:22:14', '2024-05-12 22:32:00', 1, 1, 1, 1, 1);
-INSERT INTO `classes` VALUES (4, 6, 'Lớp chính thức 1', 1, 1, 4, '2024-05-01', '2024-10-22', NULL, '2,7', 16, '2024-05-12 22:25:24', '2024-05-12 22:31:46', 1, 1, 1, 1, 1);
+INSERT INTO `classes` VALUES (1, 3, 'Lớp học thử', 3, 4, 4, '2024-05-01', '2024-06-17', NULL, '2,3,4,5,6,7,8', 16, '2024-05-12 22:01:20', '2024-05-12 22:28:42', 1, 1, 1, 1, 1, 0);
+INSERT INTO `classes` VALUES (2, 3, 'Lớp chính thức 1', 3, 4, 4, '2024-05-01', '2024-10-21', NULL, '3,8', 16, '2024-05-12 22:20:52', '2024-05-12 22:31:55', 1, 1, 1, 1, 1, 1);
+INSERT INTO `classes` VALUES (3, 3, 'Lớp chính thức 2', 3, 4, 4, '2024-05-01', '2024-10-20', NULL, '5,7', 16, '2024-05-12 22:22:14', '2024-05-12 22:32:00', 1, 1, 1, 1, 1, 1);
+INSERT INTO `classes` VALUES (4, 6, 'Lớp chính thức 1', 1, 1, 4, '2024-05-01', '2024-10-22', NULL, '2,7', 16, '2024-05-12 22:25:24', '2024-05-12 22:31:46', 1, 1, 1, 1, 1, 1);
+INSERT INTO `classes` VALUES (5, 3, 'Lớp  học thử', 1, 1, 4, '2024-05-01', '2024-08-01', NULL, '3,4,5,6,7,8', 16, '2024-05-14 15:59:16', '2024-05-14 16:11:48', 1, 1, 1, 1, 10, 1);
 COMMIT;
 
 -- ----------------------------
@@ -340,13 +339,14 @@ CREATE TABLE `contracts` (
   KEY `student_id` (`student_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE,
   KEY `ceo_branch_id` (`ceo_branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of contracts
 -- ----------------------------
 BEGIN;
-INSERT INTO `contracts` VALUES (2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-12', NULL, 6, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, NULL, 0, NULL);
+INSERT INTO `contracts` VALUES (2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 0, 2, 2, 0, 0, 2, 0, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-09', NULL, 7, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, 'Tự động withdraw do hết phí', 0, NULL);
+INSERT INTO `contracts` VALUES (3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 3, 4, 1, 99, NULL, NULL, '2024-05-14', NULL, 3, '2024-05-15', '2025-05-02', 6, '2024-05-14 18:02:16', 1, '2024-05-14 22:50:43', 1, 'nhập học chính thức cho học sinh', '', 1, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -361,12 +361,13 @@ CREATE TABLE `coupon_logs` (
   `created_at` datetime DEFAULT NULL,
   `creator_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1002 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1003 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of coupon_logs
 -- ----------------------------
 BEGIN;
+INSERT INTO `coupon_logs` VALUES (1002, 257, 3, 0, '2024-05-14 18:02:16', 1);
 COMMIT;
 
 -- ----------------------------
@@ -407,7 +408,7 @@ INSERT INTO `coupons` VALUES (234, 'VC0001', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4,
 INSERT INTO `coupons` VALUES (235, 'VC0002', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `coupons` VALUES (250, 'VC0003', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `coupons` VALUES (251, 'VC0004', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
-INSERT INTO `coupons` VALUES (257, 'VC0005', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `coupons` VALUES (257, 'VC0005', NULL, 1, 1, 0, NULL, NULL, 0, 0, 4, 1900000, '2024-05-01', '2025-05-01', '2024-05-14', NULL, 2, NULL, NULL, '2024-05-14 18:02:16', 1);
 INSERT INTO `coupons` VALUES (271, 'VC1001', NULL, 1, 1, 0, NULL, NULL, 0, 1000000, 0, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `coupons` VALUES (272, 'VC1002', NULL, 1, 1, 0, NULL, NULL, 0, 1000000, 0, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
 INSERT INTO `coupons` VALUES (278, 'VC1003', NULL, 1, 1, 0, NULL, NULL, 0, 1000000, 0, 1900000, '2024-05-01', '2025-05-01', NULL, NULL, 1, NULL, NULL, NULL, NULL);
@@ -466,7 +467,7 @@ CREATE TABLE `crm_customer_care` (
   KEY `creator_id` (`creator_id`) USING BTREE,
   KEY `care_date` (`care_date`) USING BTREE,
   KEY `method_id` (`method_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of crm_customer_care
@@ -475,6 +476,9 @@ BEGIN;
 INSERT INTO `crm_customer_care` VALUES (1, 1, 'Khách hàng đồng ý  tư vấn', '2024-05-12 20:35:30', 1, 1, '2024-05-12 20:35:30', NULL, NULL, NULL, 3, 1, '', NULL, 7, 71);
 INSERT INTO `crm_customer_care` VALUES (2, 1, 'Không có con', '2024-05-12 20:39:17', 1, 1, '2024-05-12 20:39:17', NULL, NULL, NULL, 3, 1, '', NULL, 6, 61);
 INSERT INTO `crm_customer_care` VALUES (3, 1, 'Nhan tin sms tu van khach hang', '2024-05-12 20:40:02', 1, 4, '2024-05-12 20:40:02', NULL, NULL, '0389941902', 3, 1, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_customer_care` VALUES (4, 1, 'acds', '2024-05-24 10:43:40', 1, 5, '2024-05-24 10:43:40', NULL, NULL, NULL, 3, 1, '', NULL, NULL, NULL);
+INSERT INTO `crm_customer_care` VALUES (5, 1, 'ghi chú', '2024-05-24 10:50:40', 1, 5, '2024-05-24 10:50:40', NULL, NULL, NULL, 3, 1, '', NULL, NULL, NULL);
+INSERT INTO `crm_customer_care` VALUES (6, 1, 'ghi chú', '2024-05-24 10:51:25', 1, 3, '2024-05-24 10:51:25', NULL, NULL, NULL, 3, 1, '', NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -571,7 +575,7 @@ CREATE TABLE `crm_parent_logs` (
   `status` tinyint(2) DEFAULT '1',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `parent_id` (`parent_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of crm_parent_logs
@@ -583,6 +587,7 @@ INSERT INTO `crm_parent_logs` VALUES (3, 1, 'Thay đổi level khách hàng từ
 INSERT INTO `crm_parent_logs` VALUES (4, 1, 'Cập nhật lịch chăm sóc tiếp theo: 2024-05-18 09:34:00', '2024-05-12 20:34:19', 1, 1);
 INSERT INTO `crm_parent_logs` VALUES (5, 1, 'Thêm mới học sinh: Lương Bảo Hân (ID: 1)', '2024-05-12 20:42:16', 1, 1);
 INSERT INTO `crm_parent_logs` VALUES (6, 1, 'Thêm mới học sinh: Lương Bảo Long (ID: 2)', '2024-05-12 20:43:31', 1, 1);
+INSERT INTO `crm_parent_logs` VALUES (7, 8, 'Khởi tạo khách hàng thủ công', '2024-05-24 10:26:09', 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -633,9 +638,9 @@ CREATE TABLE `crm_parents` (
   `source_id` int(11) DEFAULT NULL,
   `note` text COLLATE utf8_unicode_ci,
   `status` tinyint(2) DEFAULT '0',
-  `last_care_date` datetime DEFAULT NULL,
   `last_assign_date` datetime DEFAULT NULL,
   `owner_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `updator_id` int(11) DEFAULT NULL,
   `is_lock` tinyint(2) DEFAULT '1',
@@ -654,24 +659,26 @@ CREATE TABLE `crm_parents` (
   KEY `source_id` (`source_id`) USING BTREE,
   KEY `tmp_branch_id` (`tmp_branch_id`) USING BTREE,
   KEY `creator_id` (`creator_id`) USING BTREE,
-  KEY `last_care_date` (`last_care_date`) USING BTREE,
   KEY `last_assign_date` (`last_assign_date`) USING BTREE,
   KEY `status` (`status`) USING BTREE,
   KEY `source_detail_id` (`source_detail_id`) USING BTREE,
-  KEY `level` (`level`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  KEY `level` (`level`) USING BTREE,
+  KEY `branch_id` (`branch_id`) USING BTREE,
+  KEY `care_date` (`care_date`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of crm_parents
 -- ----------------------------
 BEGIN;
-INSERT INTO `crm_parents` VALUES (1, 'Lương Thành Công', 'thanhcong1710@gmail.com', '0389941902', NULL, NULL, 1, 1, '2024-05-12 19:55:38', 1, 'M', '1990-05-09', 7, 232, 26, NULL, 71, NULL, '2024-05-12 20:08:19', 5, '2024-05-12 20:35:30', 1, 1, NULL, '2024-05-18 09:34:00', NULL, NULL, 0, NULL, '2024-05-12 20:34:54', 'C2');
-INSERT INTO `crm_parents` VALUES (2, 'Nguyễn Văn A', '', '0954112542', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 5, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `crm_parents` VALUES (3, 'Nguyễn Văn B', '', '0954112543', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 8, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `crm_parents` VALUES (4, 'Nguyễn Văn C', '', '0954112544', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 5, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `crm_parents` VALUES (5, 'Nguyễn Văn D', '', '0954112545', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 8, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `crm_parents` VALUES (6, 'Nguyễn Văn E', '', '0954112546', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 5, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `crm_parents` VALUES (7, 'Nguyễn Văn F', '', '0954112547', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, NULL, '2024-05-12 20:26:22', 8, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (1, 'Lương Thành Công', 'thanhcong1710@gmail.com', '0389941902', NULL, NULL, 1, 1, '2024-05-12 19:55:38', 1, 'M', '1990-05-09', 7, 232, 26, NULL, 71, '2024-05-12 20:08:19', 5, 2, '2024-05-12 20:35:30', 1, 1, '2024-05-24 10:51:25', '2024-05-18 09:34:00', NULL, NULL, 0, NULL, '2024-05-12 20:34:54', 'C2');
+INSERT INTO `crm_parents` VALUES (2, 'Nguyễn Văn A', '', '0954112542', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 5, 2, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (3, 'Nguyễn Văn B', '', '0954112543', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 8, 1, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (4, 'Nguyễn Văn C', '', '0954112544', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 5, 2, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (5, 'Nguyễn Văn D', '', '0954112545', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 8, 1, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (6, 'Nguyễn Văn E', '', '0954112546', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 5, 2, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (7, 'Nguyễn Văn F', '', '0954112547', '', '', NULL, NULL, '2024-05-12 20:26:22', 1, NULL, NULL, NULL, 55, 26, '', 0, '2024-05-12 20:26:22', 8, 1, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `crm_parents` VALUES (8, 'khách hàng', NULL, '0389941906', NULL, NULL, NULL, NULL, '2024-05-24 10:26:09', 1, 'M', NULL, NULL, NULL, 27, NULL, 0, '2024-05-24 10:26:09', 5, 2, NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -713,7 +720,7 @@ CREATE TABLE `crm_students` (
 -- Records of crm_students
 -- ----------------------------
 BEGIN;
-INSERT INTO `crm_students` VALUES (1, 1, 'Lương Bảo Hân', 'F', NULL, NULL, '2018-09-08', '2024-05-12 20:42:16', 1, 2, 'Ghi chú học sinh Lương Bảo Hân', NULL, '2024-05-12 20:45:23', 1, 5, 1, '2024-05-07 10:00:00', '2024-05-09 09:00:00', 1, 'Đã đến checkin', NULL, NULL, 3);
+INSERT INTO `crm_students` VALUES (1, 1, 'Lương Bảo Hân', 'F', NULL, NULL, '2018-09-08', '2024-05-12 20:42:16', 1, 3, 'Ghi chú học sinh Lương Bảo Hân', NULL, '2024-05-12 20:45:23', 1, 5, 1, '2024-05-07 10:00:00', '2024-05-09 09:00:00', 1, 'Đã đến checkin', 2, NULL, 3);
 INSERT INTO `crm_students` VALUES (2, 1, 'Lương Bảo Long', 'M', NULL, NULL, '2021-05-27', '2024-05-12 20:43:31', 1, 3, 'Ghi chú học sinh Lương Bảo Long', NULL, '2024-05-12 20:44:32', 1, 5, 1, '2024-05-10 09:00:00', '2024-05-10 10:00:00', 1, 'Đã đến checkin và hướng dẫn test đầu vào', 1, NULL, 3);
 COMMIT;
 
@@ -1682,7 +1689,7 @@ CREATE TABLE `log_contracts` (
   KEY `branch_id` (`branch_id`) USING BTREE,
   KEY `ceo_branch_id` (`ceo_branch_id`) USING BTREE,
   KEY `contract_id` (`contract_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=44093 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of log_contracts
@@ -1714,6 +1721,17 @@ INSERT INTO `log_contracts` VALUES (44089, 44068, 1, 'LMS044068', 101750, NULL, 
 INSERT INTO `log_contracts` VALUES (44090, 1, 0, 'C000001', 1, NULL, NULL, 1, 2, 5, NULL, NULL, NULL, 3, NULL, 2, 0, 0, 1, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, NULL, NULL, '2024-05-05', NULL, NULL, NULL, NULL, 1, '2024-05-12 21:03:41', 1, NULL, NULL, NULL, NULL, 0, NULL, '2024-05-12 21:03:41');
 INSERT INTO `log_contracts` VALUES (44091, 2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, NULL, NULL, 3, NULL, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, NULL, NULL, '2024-05-01', NULL, NULL, NULL, NULL, 3, '2024-05-12 21:55:13', 1, NULL, NULL, NULL, NULL, 0, NULL, '2024-05-12 21:55:13');
 INSERT INTO `log_contracts` VALUES (44092, 2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-12', NULL, 6, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, NULL, 0, NULL, '2024-05-12 22:26:11');
+INSERT INTO `log_contracts` VALUES (44093, 2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-12', NULL, 6, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, NULL, 0, NULL, '2024-05-14 16:42:37');
+INSERT INTO `log_contracts` VALUES (44094, 2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 2, 2, 2, 0, 0, 1, 1, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-12', '1970-01-01', 6, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, NULL, 0, NULL, '2024-05-14 16:44:34');
+INSERT INTO `log_contracts` VALUES (44095, 2, 0, 'C000002', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 3, 0, 0, 2, 0, 0, 0, 0, NULL, NULL, NULL, NULL, '', 0, 0, 2, 0, 2, 2, 0, 0, 2, 0, NULL, NULL, '2024-05-01', NULL, 1, '2024-05-09', NULL, 7, '2024-05-12 21:55:13', 1, '2024-05-12 22:26:10', 1, NULL, 'Tự động withdraw do hết phí', 0, NULL, '2024-05-14 17:45:44');
+INSERT INTO `log_contracts` VALUES (44096, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, NULL, 5, 26000000, 26000000, 96, 23400000, 0, 23400000, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 0, 0, 0, 0, 0, NULL, NULL, '2024-05-14', NULL, NULL, NULL, NULL, 7, '2024-05-14 18:02:16', 1, NULL, NULL, 'nhập học chính thức', 'Tự động withdraw do hết phí', 1, NULL, '2024-05-14 18:02:16');
+INSERT INTO `log_contracts` VALUES (44097, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, NULL, 5, 26000000, 26000000, 96, 23400000, 0, 23400000, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 0, 0, 0, 0, 0, NULL, NULL, '2024-05-14', NULL, NULL, NULL, NULL, 1, '2024-05-14 18:02:16', 1, '2024-05-14 18:06:54', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 18:06:54');
+INSERT INTO `log_contracts` VALUES (44098, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, NULL, 5, 26000000, 26000000, 96, 23400000, 1000000, 22400000, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 0, 0, 0, 0, 0, NULL, NULL, '2024-05-14', NULL, NULL, NULL, NULL, 2, '2024-05-14 18:02:16', 1, '2024-05-14 22:18:50', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:18:50');
+INSERT INTO `log_contracts` VALUES (44099, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, NULL, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 0, 4, 0, 100, NULL, NULL, '2024-05-14', NULL, NULL, NULL, NULL, 3, '2024-05-14 18:02:16', 1, '2024-05-14 22:25:53', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:25:54');
+INSERT INTO `log_contracts` VALUES (44100, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 0, 4, 0, 100, NULL, NULL, '2024-05-14', NULL, 2, '2024-05-15', NULL, 6, '2024-05-14 18:02:16', 1, '2024-05-14 22:27:35', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:27:36');
+INSERT INTO `log_contracts` VALUES (44101, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 3, 4, 1, 99, NULL, NULL, '2024-05-14', NULL, NULL, '2024-05-13', '2025-04-30', 4, '2024-05-14 18:02:16', 1, '2024-05-14 22:45:21', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:45:21');
+INSERT INTO `log_contracts` VALUES (44102, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 3, 4, 1, 99, NULL, NULL, '2024-05-14', NULL, 2, '2024-05-15', NULL, 6, '2024-05-14 18:02:16', 1, '2024-05-14 22:46:56', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:46:56');
+INSERT INTO `log_contracts` VALUES (44103, 3, 1, 'C000003', 1, NULL, NULL, 1, 2, 5, NULL, 4, 4, 3, 4, 5, 26000000, 26000000, 96, 23400000, 23400000, 0, 23400000, NULL, 2, 2600000, 10, 'VC0005', 0, 4, 100, 96, 4, 100, 3, 4, 1, 99, NULL, NULL, '2024-05-14', NULL, 3, '2024-05-15', '2025-04-30', 6, '2024-05-14 18:02:16', 1, '2024-05-14 22:50:43', 1, 'nhập học chính thức cho học sinh', '', 1, NULL, '2024-05-14 22:50:43');
 COMMIT;
 
 -- ----------------------------
@@ -1726,7 +1744,7 @@ CREATE TABLE `log_jobs` (
   `data` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1342 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1358 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of log_jobs
@@ -1743,6 +1761,22 @@ INSERT INTO `log_jobs` VALUES (1338, 'ProcessDataScheduleHasStudent', '2024-05-0
 INSERT INTO `log_jobs` VALUES (1339, 'AddScheduleHasStudent', '2024-05-02', '2024-05-01 20:53:28');
 INSERT INTO `log_jobs` VALUES (1340, 'AddScheduleHasStudent', '2024-05-02', '2024-05-01 20:54:49');
 INSERT INTO `log_jobs` VALUES (1341, 'AddScheduleHasStudent', '2024-05-02', '2024-05-01 20:56:27');
+INSERT INTO `log_jobs` VALUES (1342, 'AddScheduleHasStudent', '2024-05-01', '2024-05-14 16:15:39');
+INSERT INTO `log_jobs` VALUES (1343, 'AddScheduleHasStudent', '2024-05-02', '2024-05-14 16:15:47');
+INSERT INTO `log_jobs` VALUES (1344, 'AddScheduleHasStudent', '2024-05-03', '2024-05-14 16:15:54');
+INSERT INTO `log_jobs` VALUES (1345, 'AddScheduleHasStudent', '2024-05-04', '2024-05-14 16:16:03');
+INSERT INTO `log_jobs` VALUES (1346, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 16:21:05');
+INSERT INTO `log_jobs` VALUES (1347, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 16:27:43');
+INSERT INTO `log_jobs` VALUES (1348, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 16:57:14');
+INSERT INTO `log_jobs` VALUES (1349, 'ProcessDataScheduleHasStudent', '2024-05-13', '2024-05-14 17:01:08');
+INSERT INTO `log_jobs` VALUES (1350, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 17:06:41');
+INSERT INTO `log_jobs` VALUES (1351, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 17:07:03');
+INSERT INTO `log_jobs` VALUES (1352, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 17:10:09');
+INSERT INTO `log_jobs` VALUES (1353, 'ProcessDataScheduleHasStudent', '2024-05-13', '2024-05-14 17:10:16');
+INSERT INTO `log_jobs` VALUES (1354, 'ProcessDataScheduleHasStudent', '2024-05-13', '2024-05-14 17:14:23');
+INSERT INTO `log_jobs` VALUES (1355, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 17:14:32');
+INSERT INTO `log_jobs` VALUES (1356, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 17:31:17');
+INSERT INTO `log_jobs` VALUES (1357, 'AddScheduleHasStudent', '2024-05-15', '2024-05-14 22:33:00');
 COMMIT;
 
 -- ----------------------------
@@ -1763,14 +1797,13 @@ CREATE TABLE `make_up_sessions` (
   `updator_id` int(11) DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of make_up_sessions
 -- ----------------------------
 BEGIN;
-INSERT INTO `make_up_sessions` VALUES (1, 101751, 5, 3, '0000-00-00', 3, '2024-05-12', 3, '2024-05-10 17:35:22', 1, 1, '2024-05-10 18:29:13');
-INSERT INTO `make_up_sessions` VALUES (2, 101751, 5, 1, '2024-05-07', 3, '2024-05-12', 2, '2024-05-10 22:01:30', 1, 1, '2024-05-10 22:01:48');
+INSERT INTO `make_up_sessions` VALUES (3, 1, 32, 2, '2024-05-13', 3, '2024-05-17', 2, '2024-05-14 22:40:05', 1, 1, '2024-05-14 22:40:50');
 COMMIT;
 
 -- ----------------------------
@@ -1799,7 +1832,7 @@ CREATE TABLE `payments` (
   KEY `contract_id` (`contract_id`) USING BTREE,
   KEY `creator_id` (`creator_id`) USING BTREE,
   KEY `student_id` (`student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=37092 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37094 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of payments
@@ -1811,6 +1844,8 @@ INSERT INTO `payments` VALUES (37088, 44068, NULL, 1, 0, 12000000, 2000000, 2001
 INSERT INTO `payments` VALUES (37089, 44068, NULL, 1, 0, 12000000, 2000000, 4001000, 7999000, '2024-04-20', '2024-04-20 09:02:48', 1, NULL, 0, NULL, 101750, 'ghi chú');
 INSERT INTO `payments` VALUES (37090, 44068, NULL, 1, 0, 12000000, 7999000, 12000000, 0, '2024-04-20', '2024-04-20 09:04:45', 1, NULL, 0, NULL, 101750, 'ghi chú');
 INSERT INTO `payments` VALUES (37091, 44066, NULL, 1, 0, 12000000, 1000000, 1000000, 11000000, '2024-04-17', '2024-04-20 09:09:15', 1, NULL, 0, NULL, 101750, NULL);
+INSERT INTO `payments` VALUES (37092, 3, NULL, 1, 0, 23400000, 1000000, 1000000, 22400000, '2024-05-13', '2024-05-14 22:18:50', 1, NULL, 0, NULL, 1, 'đặt cọc 1tr');
+INSERT INTO `payments` VALUES (37093, 3, NULL, 1, 0, 23400000, 22400000, 23400000, 0, '2024-05-14', '2024-05-14 22:25:53', 1, NULL, 0, NULL, 1, 'thu đủ phí');
 COMMIT;
 
 -- ----------------------------
@@ -1928,6 +1963,7 @@ INSERT INTO `permission_has_role` VALUES (999999, 29);
 INSERT INTO `permission_has_role` VALUES (999999, 30);
 INSERT INTO `permission_has_role` VALUES (999999, 31);
 INSERT INTO `permission_has_role` VALUES (999999, 32);
+INSERT INTO `permission_has_role` VALUES (999999, 34);
 COMMIT;
 
 -- ----------------------------
@@ -1942,7 +1978,7 @@ CREATE TABLE `permissions` (
   `display_order` tinyint(2) DEFAULT NULL,
   `status` tinyint(2) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of permissions
@@ -1980,6 +2016,7 @@ INSERT INTO `permissions` VALUES (30, 'settings_coupons', 'Voucher', 3, 13, 1);
 INSERT INTO `permissions` VALUES (31, 'canViewAllSale', 'Xem tất cả CSKH', 4, 2, 1);
 INSERT INTO `permissions` VALUES (32, 'canViewAllParents', 'Xem tất cả khách hàng', 4, 3, 1);
 INSERT INTO `permissions` VALUES (33, 'canViewAllImport', 'Xem tất cả import', 4, 4, 1);
+INSERT INTO `permissions` VALUES (34, 'lms_teachers', 'Giáo viên & trợ giảng', 2, 14, 1);
 COMMIT;
 
 -- ----------------------------
@@ -2313,15 +2350,13 @@ CREATE TABLE `reserves` (
   KEY `approver_id` (`approver_id`) USING BTREE,
   KEY `contract_id` (`contract_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=57559 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of reserves
 -- ----------------------------
 BEGIN;
-INSERT INTO `reserves` VALUES (57556, 101750, 2, '2024-04-26', 1, '2024-04-27', 2, 1, '2024-04-24 04:24:35', NULL, NULL, NULL, '{\"reserve\":{\"branch_id\":1,\"student_id\":101750,\"contract_id\":44068,\"note\":\"ghi ch\\u00fa\",\"start_date\":\"2024-05-16\",\"end_date\":\"2024-05-18\",\"session\":\"2\",\"is_reserved\":1},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo 1\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"total_charged\":12000000,\"summary_sessions\":28,\"bonus_sessions\":4,\"real_sessions\":24,\"reservable_sessions\":1,\"reserved_sessions\":0,\"product_id\":1,\"class_id\":3,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\"}}', 1, NULL, 44068, 1, 1, 434, 3, 'ghi chú bảo lưu', NULL, NULL);
-INSERT INTO `reserves` VALUES (57557, 101751, 1, '2024-04-30', 2, '2024-05-07', 2, 1, '2024-04-24 04:30:22', NULL, NULL, NULL, '{\"reserve\":{\"branch_id\":1,\"student_id\":101750,\"contract_id\":44068,\"note\":\"ghi ch\\u00fa\",\"start_date\":\"2024-05-16\",\"end_date\":\"2024-05-18\",\"session\":\"2\",\"is_reserved\":1},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo 1\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"total_charged\":12000000,\"summary_sessions\":28,\"bonus_sessions\":4,\"real_sessions\":24,\"reservable_sessions\":1,\"reserved_sessions\":0,\"product_id\":1,\"class_id\":3,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\"}}', 1, NULL, 44068, 1, 1, 434, 3, 'ghi chú bảo lưu', NULL, NULL);
-INSERT INTO `reserves` VALUES (57558, 101750, 1, '2024-05-16', 2, '2024-05-18', 2, 1, '2024-04-24 05:11:58', 1, '2024-04-24 07:34:14', 'rgdfgfdg', '{\"reserve\":{\"branch_id\":1,\"student_id\":101750,\"contract_id\":44068,\"note\":\"ghi ch\\u00fa\",\"start_date\":\"2024-05-16\",\"end_date\":\"2024-05-18\",\"session\":\"2\",\"is_reserved\":1},\"student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"product_name\":\"UCREA\",\"program_name\":\"U2019\",\"class_name\":\"demo 1\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"total_charged\":12000000,\"summary_sessions\":28,\"bonus_sessions\":4,\"real_sessions\":24,\"reservable_sessions\":1,\"reserved_sessions\":0,\"product_id\":1,\"class_id\":3,\"contract_id\":44068,\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\"}}', 1, NULL, 44068, 1, 1, 434, 3, 'ghi chú', '2024-04-24 07:34:14', 1);
+INSERT INTO `reserves` VALUES (1, 1, 1, '2024-05-14', 3, '2024-05-22', 2, 1, '2024-05-14 22:45:02', 1, '2024-05-14 22:45:21', NULL, '{\"reserve\":{\"branch_id\":1,\"student_id\":1,\"contract_id\":3,\"note\":null,\"start_date\":\"2024-05-14\",\"end_date\":\"2024-05-22\",\"session\":\"3\",\"is_reserved\":\"0\"},\"student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long\",\"lms_code\":\"LMS000001\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":1,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long - LMS000001\",\"product_name\":\"FasTracKids\",\"program_name\":\"FasTracKids - Th\\u1ee7 l\\u0129nh nh\\u00ed\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 1\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\",\"total_charged\":23400000,\"summary_sessions\":100,\"bonus_sessions\":4,\"real_sessions\":96,\"reservable_sessions\":4,\"reserved_sessions\":0,\"product_id\":3,\"class_id\":2,\"contract_id\":3,\"enrolment_start_date\":\"2024-05-13\",\"enrolment_last_date\":\"2025-04-30\"}}', 0, NULL, 3, 1, 3, 4, 2, NULL, '2024-05-14 22:45:21', 1);
 COMMIT;
 
 -- ----------------------------
@@ -2438,14 +2473,15 @@ CREATE TABLE `schedule_has_student` (
   KEY `contract_id` (`contract_id`) USING BTREE,
   KEY `class_date` (`class_date`) USING BTREE,
   KEY `subject_id` (`subject_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of schedule_has_student
 -- ----------------------------
 BEGIN;
-INSERT INTO `schedule_has_student` VALUES (5, 101751, 1, 1, 44067, 1, 434, 1, 2, '2024-05-07', '2024-05-01 19:43:14', '2024-05-10 22:28:32', 1, NULL, 1, 3);
-INSERT INTO `schedule_has_student` VALUES (6, 1, 1, 1, 2, 3, 4, NULL, NULL, '2024-05-12', '2024-05-12 22:26:11', NULL, NULL, NULL, 1, 0);
+INSERT INTO `schedule_has_student` VALUES (30, 1, 1, 1, 2, 3, 4, 3, 1, '2024-05-09', '2024-05-14 17:31:17', '2024-05-14 17:45:39', 1, NULL, 1, 1);
+INSERT INTO `schedule_has_student` VALUES (31, 1, 1, 1, 2, 3, 4, 3, 2, '2024-05-10', '2024-05-14 17:31:17', '2024-05-14 17:45:44', 1, NULL, 1, 1);
+INSERT INTO `schedule_has_student` VALUES (32, 1, 1, 2, 3, 3, 4, 1, 4, '2024-05-13', '2024-05-14 22:33:00', '2024-05-14 22:40:50', 1, NULL, 1, 3);
 COMMIT;
 
 -- ----------------------------
@@ -2460,210 +2496,298 @@ CREATE TABLE `schedules` (
   `subject_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `creator_id` int(11) DEFAULT NULL,
+  `updator_id` int(11) DEFAULT NULL,
   `class_stt` int(11) DEFAULT NULL,
   `subject_stt` int(11) DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `cm_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `class_id` (`class_id`) USING BTREE,
   KEY `class_date` (`class_date`) USING BTREE,
-  KEY `subject_id` (`subject_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=907 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `subject_id` (`subject_id`) USING BTREE,
+  KEY `teacher_id` (`teacher_id`) USING BTREE,
+  KEY `cm_id` (`cm_id`) USING BTREE,
+  KEY `branch_id` (`branch_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of schedules
 -- ----------------------------
 BEGIN;
-INSERT INTO `schedules` VALUES (715, '2024-05-01', 1, 1, 1, '2024-05-12 22:28:42', NULL, 1, 1);
-INSERT INTO `schedules` VALUES (716, '2024-05-02', 1, 1, 1, '2024-05-12 22:28:42', NULL, 2, 2);
-INSERT INTO `schedules` VALUES (717, '2024-05-03', 1, 1, 1, '2024-05-12 22:28:42', NULL, 3, 3);
-INSERT INTO `schedules` VALUES (718, '2024-05-04', 1, 1, 1, '2024-05-12 22:28:42', NULL, 4, 4);
-INSERT INTO `schedules` VALUES (719, '2024-05-05', 1, 1, 2, '2024-05-12 22:28:42', NULL, 5, 1);
-INSERT INTO `schedules` VALUES (720, '2024-05-06', 1, 1, 2, '2024-05-12 22:28:42', NULL, 6, 2);
-INSERT INTO `schedules` VALUES (721, '2024-05-07', 1, 1, 2, '2024-05-12 22:28:42', NULL, 7, 3);
-INSERT INTO `schedules` VALUES (722, '2024-05-08', 1, 1, 2, '2024-05-12 22:28:42', NULL, 8, 4);
-INSERT INTO `schedules` VALUES (723, '2024-05-09', 1, 1, 3, '2024-05-12 22:28:42', NULL, 9, 1);
-INSERT INTO `schedules` VALUES (724, '2024-05-10', 1, 1, 3, '2024-05-12 22:28:42', NULL, 10, 2);
-INSERT INTO `schedules` VALUES (725, '2024-05-11', 1, 1, 3, '2024-05-12 22:28:42', NULL, 11, 3);
-INSERT INTO `schedules` VALUES (726, '2024-05-12', 1, 1, 3, '2024-05-12 22:28:42', NULL, 12, 4);
-INSERT INTO `schedules` VALUES (727, '2024-05-13', 1, 1, 4, '2024-05-12 22:28:42', NULL, 13, 1);
-INSERT INTO `schedules` VALUES (728, '2024-05-14', 1, 1, 4, '2024-05-12 22:28:42', NULL, 14, 2);
-INSERT INTO `schedules` VALUES (729, '2024-05-15', 1, 1, 4, '2024-05-12 22:28:42', NULL, 15, 3);
-INSERT INTO `schedules` VALUES (730, '2024-05-16', 1, 1, 4, '2024-05-12 22:28:42', NULL, 16, 4);
-INSERT INTO `schedules` VALUES (731, '2024-05-17', 1, 1, 5, '2024-05-12 22:28:42', NULL, 17, 1);
-INSERT INTO `schedules` VALUES (732, '2024-05-18', 1, 1, 5, '2024-05-12 22:28:42', NULL, 18, 2);
-INSERT INTO `schedules` VALUES (733, '2024-05-19', 1, 1, 5, '2024-05-12 22:28:42', NULL, 19, 3);
-INSERT INTO `schedules` VALUES (734, '2024-05-20', 1, 1, 5, '2024-05-12 22:28:42', NULL, 20, 4);
-INSERT INTO `schedules` VALUES (735, '2024-05-21', 1, 1, 6, '2024-05-12 22:28:42', NULL, 21, 1);
-INSERT INTO `schedules` VALUES (736, '2024-05-22', 1, 1, 6, '2024-05-12 22:28:42', NULL, 22, 2);
-INSERT INTO `schedules` VALUES (737, '2024-05-23', 1, 1, 6, '2024-05-12 22:28:42', NULL, 23, 3);
-INSERT INTO `schedules` VALUES (738, '2024-05-24', 1, 1, 6, '2024-05-12 22:28:42', NULL, 24, 4);
-INSERT INTO `schedules` VALUES (739, '2024-05-25', 1, 1, 7, '2024-05-12 22:28:42', NULL, 25, 1);
-INSERT INTO `schedules` VALUES (740, '2024-05-26', 1, 1, 7, '2024-05-12 22:28:42', NULL, 26, 2);
-INSERT INTO `schedules` VALUES (741, '2024-05-27', 1, 1, 7, '2024-05-12 22:28:42', NULL, 27, 3);
-INSERT INTO `schedules` VALUES (742, '2024-05-28', 1, 1, 7, '2024-05-12 22:28:42', NULL, 28, 4);
-INSERT INTO `schedules` VALUES (743, '2024-05-29', 1, 1, 8, '2024-05-12 22:28:42', NULL, 29, 1);
-INSERT INTO `schedules` VALUES (744, '2024-05-30', 1, 1, 8, '2024-05-12 22:28:42', NULL, 30, 2);
-INSERT INTO `schedules` VALUES (745, '2024-05-31', 1, 1, 8, '2024-05-12 22:28:42', NULL, 31, 3);
-INSERT INTO `schedules` VALUES (746, '2024-06-01', 1, 1, 8, '2024-05-12 22:28:42', NULL, 32, 4);
-INSERT INTO `schedules` VALUES (747, '2024-06-02', 1, 1, 9, '2024-05-12 22:28:42', NULL, 33, 1);
-INSERT INTO `schedules` VALUES (748, '2024-06-03', 1, 1, 9, '2024-05-12 22:28:42', NULL, 34, 2);
-INSERT INTO `schedules` VALUES (749, '2024-06-04', 1, 1, 9, '2024-05-12 22:28:42', NULL, 35, 3);
-INSERT INTO `schedules` VALUES (750, '2024-06-05', 1, 1, 9, '2024-05-12 22:28:42', NULL, 36, 4);
-INSERT INTO `schedules` VALUES (751, '2024-06-06', 1, 1, 10, '2024-05-12 22:28:42', NULL, 37, 1);
-INSERT INTO `schedules` VALUES (752, '2024-06-07', 1, 1, 10, '2024-05-12 22:28:42', NULL, 38, 2);
-INSERT INTO `schedules` VALUES (753, '2024-06-08', 1, 1, 10, '2024-05-12 22:28:42', NULL, 39, 3);
-INSERT INTO `schedules` VALUES (754, '2024-06-09', 1, 1, 10, '2024-05-12 22:28:42', NULL, 40, 4);
-INSERT INTO `schedules` VALUES (755, '2024-06-10', 1, 1, 11, '2024-05-12 22:28:42', NULL, 41, 1);
-INSERT INTO `schedules` VALUES (756, '2024-06-11', 1, 1, 11, '2024-05-12 22:28:42', NULL, 42, 2);
-INSERT INTO `schedules` VALUES (757, '2024-06-12', 1, 1, 11, '2024-05-12 22:28:42', NULL, 43, 3);
-INSERT INTO `schedules` VALUES (758, '2024-06-13', 1, 1, 11, '2024-05-12 22:28:42', NULL, 44, 4);
-INSERT INTO `schedules` VALUES (759, '2024-06-14', 1, 1, 12, '2024-05-12 22:28:42', NULL, 45, 1);
-INSERT INTO `schedules` VALUES (760, '2024-06-15', 1, 1, 12, '2024-05-12 22:28:42', NULL, 46, 2);
-INSERT INTO `schedules` VALUES (761, '2024-06-16', 1, 1, 12, '2024-05-12 22:28:42', NULL, 47, 3);
-INSERT INTO `schedules` VALUES (762, '2024-06-17', 1, 1, 12, '2024-05-12 22:28:42', NULL, 48, 4);
-INSERT INTO `schedules` VALUES (763, '2024-05-05', 1, 4, 1, '2024-05-12 22:31:46', NULL, 1, 1);
-INSERT INTO `schedules` VALUES (764, '2024-05-07', 1, 4, 1, '2024-05-12 22:31:46', NULL, 2, 2);
-INSERT INTO `schedules` VALUES (765, '2024-05-12', 1, 4, 1, '2024-05-12 22:31:46', NULL, 3, 3);
-INSERT INTO `schedules` VALUES (766, '2024-05-14', 1, 4, 1, '2024-05-12 22:31:46', NULL, 4, 4);
-INSERT INTO `schedules` VALUES (767, '2024-05-19', 1, 4, 1, '2024-05-12 22:31:46', NULL, 5, 5);
-INSERT INTO `schedules` VALUES (768, '2024-05-21', 1, 4, 1, '2024-05-12 22:31:46', NULL, 6, 6);
-INSERT INTO `schedules` VALUES (769, '2024-05-26', 1, 4, 1, '2024-05-12 22:31:46', NULL, 7, 7);
-INSERT INTO `schedules` VALUES (770, '2024-05-28', 1, 4, 1, '2024-05-12 22:31:46', NULL, 8, 8);
-INSERT INTO `schedules` VALUES (771, '2024-06-02', 1, 4, 2, '2024-05-12 22:31:46', NULL, 9, 1);
-INSERT INTO `schedules` VALUES (772, '2024-06-04', 1, 4, 2, '2024-05-12 22:31:46', NULL, 10, 2);
-INSERT INTO `schedules` VALUES (773, '2024-06-09', 1, 4, 2, '2024-05-12 22:31:46', NULL, 11, 3);
-INSERT INTO `schedules` VALUES (774, '2024-06-11', 1, 4, 2, '2024-05-12 22:31:46', NULL, 12, 4);
-INSERT INTO `schedules` VALUES (775, '2024-06-16', 1, 4, 3, '2024-05-12 22:31:46', NULL, 13, 1);
-INSERT INTO `schedules` VALUES (776, '2024-06-18', 1, 4, 3, '2024-05-12 22:31:46', NULL, 14, 2);
-INSERT INTO `schedules` VALUES (777, '2024-06-23', 1, 4, 3, '2024-05-12 22:31:46', NULL, 15, 3);
-INSERT INTO `schedules` VALUES (778, '2024-06-25', 1, 4, 3, '2024-05-12 22:31:46', NULL, 16, 4);
-INSERT INTO `schedules` VALUES (779, '2024-06-30', 1, 4, 4, '2024-05-12 22:31:46', NULL, 17, 1);
-INSERT INTO `schedules` VALUES (780, '2024-07-02', 1, 4, 4, '2024-05-12 22:31:46', NULL, 18, 2);
-INSERT INTO `schedules` VALUES (781, '2024-07-07', 1, 4, 4, '2024-05-12 22:31:46', NULL, 19, 3);
-INSERT INTO `schedules` VALUES (782, '2024-07-09', 1, 4, 4, '2024-05-12 22:31:46', NULL, 20, 4);
-INSERT INTO `schedules` VALUES (783, '2024-07-14', 1, 4, 5, '2024-05-12 22:31:46', NULL, 21, 1);
-INSERT INTO `schedules` VALUES (784, '2024-07-16', 1, 4, 5, '2024-05-12 22:31:46', NULL, 22, 2);
-INSERT INTO `schedules` VALUES (785, '2024-07-21', 1, 4, 5, '2024-05-12 22:31:46', NULL, 23, 3);
-INSERT INTO `schedules` VALUES (786, '2024-07-23', 1, 4, 5, '2024-05-12 22:31:46', NULL, 24, 4);
-INSERT INTO `schedules` VALUES (787, '2024-07-28', 1, 4, 6, '2024-05-12 22:31:46', NULL, 25, 1);
-INSERT INTO `schedules` VALUES (788, '2024-07-30', 1, 4, 6, '2024-05-12 22:31:46', NULL, 26, 2);
-INSERT INTO `schedules` VALUES (789, '2024-08-04', 1, 4, 6, '2024-05-12 22:31:46', NULL, 27, 3);
-INSERT INTO `schedules` VALUES (790, '2024-08-06', 1, 4, 6, '2024-05-12 22:31:46', NULL, 28, 4);
-INSERT INTO `schedules` VALUES (791, '2024-08-11', 1, 4, 7, '2024-05-12 22:31:46', NULL, 29, 1);
-INSERT INTO `schedules` VALUES (792, '2024-08-13', 1, 4, 7, '2024-05-12 22:31:46', NULL, 30, 2);
-INSERT INTO `schedules` VALUES (793, '2024-08-18', 1, 4, 7, '2024-05-12 22:31:46', NULL, 31, 3);
-INSERT INTO `schedules` VALUES (794, '2024-08-20', 1, 4, 7, '2024-05-12 22:31:46', NULL, 32, 4);
-INSERT INTO `schedules` VALUES (795, '2024-08-25', 1, 4, 8, '2024-05-12 22:31:46', NULL, 33, 1);
-INSERT INTO `schedules` VALUES (796, '2024-08-27', 1, 4, 8, '2024-05-12 22:31:46', NULL, 34, 2);
-INSERT INTO `schedules` VALUES (797, '2024-09-08', 1, 4, 8, '2024-05-12 22:31:46', NULL, 35, 3);
-INSERT INTO `schedules` VALUES (798, '2024-09-10', 1, 4, 8, '2024-05-12 22:31:46', NULL, 36, 4);
-INSERT INTO `schedules` VALUES (799, '2024-09-15', 1, 4, 9, '2024-05-12 22:31:46', NULL, 37, 1);
-INSERT INTO `schedules` VALUES (800, '2024-09-17', 1, 4, 9, '2024-05-12 22:31:46', NULL, 38, 2);
-INSERT INTO `schedules` VALUES (801, '2024-09-22', 1, 4, 9, '2024-05-12 22:31:46', NULL, 39, 3);
-INSERT INTO `schedules` VALUES (802, '2024-09-24', 1, 4, 9, '2024-05-12 22:31:46', NULL, 40, 4);
-INSERT INTO `schedules` VALUES (803, '2024-09-29', 1, 4, 10, '2024-05-12 22:31:46', NULL, 41, 1);
-INSERT INTO `schedules` VALUES (804, '2024-10-01', 1, 4, 10, '2024-05-12 22:31:46', NULL, 42, 2);
-INSERT INTO `schedules` VALUES (805, '2024-10-06', 1, 4, 10, '2024-05-12 22:31:46', NULL, 43, 3);
-INSERT INTO `schedules` VALUES (806, '2024-10-08', 1, 4, 10, '2024-05-12 22:31:46', NULL, 44, 4);
-INSERT INTO `schedules` VALUES (807, '2024-10-13', 1, 4, 11, '2024-05-12 22:31:46', NULL, 45, 1);
-INSERT INTO `schedules` VALUES (808, '2024-10-15', 1, 4, 11, '2024-05-12 22:31:46', NULL, 46, 2);
-INSERT INTO `schedules` VALUES (809, '2024-10-20', 1, 4, 11, '2024-05-12 22:31:46', NULL, 47, 3);
-INSERT INTO `schedules` VALUES (810, '2024-10-22', 1, 4, 11, '2024-05-12 22:31:46', NULL, 48, 4);
-INSERT INTO `schedules` VALUES (811, '2024-05-01', 1, 2, 1, '2024-05-12 22:31:55', NULL, 1, 1);
-INSERT INTO `schedules` VALUES (812, '2024-05-06', 1, 2, 1, '2024-05-12 22:31:55', NULL, 2, 2);
-INSERT INTO `schedules` VALUES (813, '2024-05-08', 1, 2, 1, '2024-05-12 22:31:55', NULL, 3, 3);
-INSERT INTO `schedules` VALUES (814, '2024-05-13', 1, 2, 1, '2024-05-12 22:31:55', NULL, 4, 4);
-INSERT INTO `schedules` VALUES (815, '2024-05-15', 1, 2, 2, '2024-05-12 22:31:55', NULL, 5, 1);
-INSERT INTO `schedules` VALUES (816, '2024-05-20', 1, 2, 2, '2024-05-12 22:31:55', NULL, 6, 2);
-INSERT INTO `schedules` VALUES (817, '2024-05-22', 1, 2, 2, '2024-05-12 22:31:55', NULL, 7, 3);
-INSERT INTO `schedules` VALUES (818, '2024-05-27', 1, 2, 2, '2024-05-12 22:31:55', NULL, 8, 4);
-INSERT INTO `schedules` VALUES (819, '2024-05-29', 1, 2, 3, '2024-05-12 22:31:55', NULL, 9, 1);
-INSERT INTO `schedules` VALUES (820, '2024-06-03', 1, 2, 3, '2024-05-12 22:31:55', NULL, 10, 2);
-INSERT INTO `schedules` VALUES (821, '2024-06-05', 1, 2, 3, '2024-05-12 22:31:55', NULL, 11, 3);
-INSERT INTO `schedules` VALUES (822, '2024-06-10', 1, 2, 3, '2024-05-12 22:31:55', NULL, 12, 4);
-INSERT INTO `schedules` VALUES (823, '2024-06-12', 1, 2, 4, '2024-05-12 22:31:55', NULL, 13, 1);
-INSERT INTO `schedules` VALUES (824, '2024-06-17', 1, 2, 4, '2024-05-12 22:31:55', NULL, 14, 2);
-INSERT INTO `schedules` VALUES (825, '2024-06-19', 1, 2, 4, '2024-05-12 22:31:55', NULL, 15, 3);
-INSERT INTO `schedules` VALUES (826, '2024-06-24', 1, 2, 4, '2024-05-12 22:31:55', NULL, 16, 4);
-INSERT INTO `schedules` VALUES (827, '2024-06-26', 1, 2, 5, '2024-05-12 22:31:55', NULL, 17, 1);
-INSERT INTO `schedules` VALUES (828, '2024-07-01', 1, 2, 5, '2024-05-12 22:31:55', NULL, 18, 2);
-INSERT INTO `schedules` VALUES (829, '2024-07-03', 1, 2, 5, '2024-05-12 22:31:55', NULL, 19, 3);
-INSERT INTO `schedules` VALUES (830, '2024-07-08', 1, 2, 5, '2024-05-12 22:31:55', NULL, 20, 4);
-INSERT INTO `schedules` VALUES (831, '2024-07-10', 1, 2, 6, '2024-05-12 22:31:55', NULL, 21, 1);
-INSERT INTO `schedules` VALUES (832, '2024-07-15', 1, 2, 6, '2024-05-12 22:31:55', NULL, 22, 2);
-INSERT INTO `schedules` VALUES (833, '2024-07-17', 1, 2, 6, '2024-05-12 22:31:55', NULL, 23, 3);
-INSERT INTO `schedules` VALUES (834, '2024-07-22', 1, 2, 6, '2024-05-12 22:31:55', NULL, 24, 4);
-INSERT INTO `schedules` VALUES (835, '2024-07-24', 1, 2, 7, '2024-05-12 22:31:55', NULL, 25, 1);
-INSERT INTO `schedules` VALUES (836, '2024-07-29', 1, 2, 7, '2024-05-12 22:31:55', NULL, 26, 2);
-INSERT INTO `schedules` VALUES (837, '2024-07-31', 1, 2, 7, '2024-05-12 22:31:55', NULL, 27, 3);
-INSERT INTO `schedules` VALUES (838, '2024-08-05', 1, 2, 7, '2024-05-12 22:31:55', NULL, 28, 4);
-INSERT INTO `schedules` VALUES (839, '2024-08-07', 1, 2, 8, '2024-05-12 22:31:55', NULL, 29, 1);
-INSERT INTO `schedules` VALUES (840, '2024-08-12', 1, 2, 8, '2024-05-12 22:31:55', NULL, 30, 2);
-INSERT INTO `schedules` VALUES (841, '2024-08-14', 1, 2, 8, '2024-05-12 22:31:55', NULL, 31, 3);
-INSERT INTO `schedules` VALUES (842, '2024-08-19', 1, 2, 8, '2024-05-12 22:31:55', NULL, 32, 4);
-INSERT INTO `schedules` VALUES (843, '2024-08-21', 1, 2, 9, '2024-05-12 22:31:55', NULL, 33, 1);
-INSERT INTO `schedules` VALUES (844, '2024-08-26', 1, 2, 9, '2024-05-12 22:31:55', NULL, 34, 2);
-INSERT INTO `schedules` VALUES (845, '2024-08-28', 1, 2, 9, '2024-05-12 22:31:55', NULL, 35, 3);
-INSERT INTO `schedules` VALUES (846, '2024-09-09', 1, 2, 9, '2024-05-12 22:31:55', NULL, 36, 4);
-INSERT INTO `schedules` VALUES (847, '2024-09-11', 1, 2, 10, '2024-05-12 22:31:55', NULL, 37, 1);
-INSERT INTO `schedules` VALUES (848, '2024-09-16', 1, 2, 10, '2024-05-12 22:31:55', NULL, 38, 2);
-INSERT INTO `schedules` VALUES (849, '2024-09-18', 1, 2, 10, '2024-05-12 22:31:55', NULL, 39, 3);
-INSERT INTO `schedules` VALUES (850, '2024-09-23', 1, 2, 10, '2024-05-12 22:31:55', NULL, 40, 4);
-INSERT INTO `schedules` VALUES (851, '2024-09-25', 1, 2, 11, '2024-05-12 22:31:55', NULL, 41, 1);
-INSERT INTO `schedules` VALUES (852, '2024-09-30', 1, 2, 11, '2024-05-12 22:31:55', NULL, 42, 2);
-INSERT INTO `schedules` VALUES (853, '2024-10-02', 1, 2, 11, '2024-05-12 22:31:55', NULL, 43, 3);
-INSERT INTO `schedules` VALUES (854, '2024-10-07', 1, 2, 11, '2024-05-12 22:31:55', NULL, 44, 4);
-INSERT INTO `schedules` VALUES (855, '2024-10-09', 1, 2, 12, '2024-05-12 22:31:55', NULL, 45, 1);
-INSERT INTO `schedules` VALUES (856, '2024-10-14', 1, 2, 12, '2024-05-12 22:31:55', NULL, 46, 2);
-INSERT INTO `schedules` VALUES (857, '2024-10-16', 1, 2, 12, '2024-05-12 22:31:55', NULL, 47, 3);
-INSERT INTO `schedules` VALUES (858, '2024-10-21', 1, 2, 12, '2024-05-12 22:31:55', NULL, 48, 4);
-INSERT INTO `schedules` VALUES (859, '2024-05-03', 1, 3, 1, '2024-05-12 22:32:00', NULL, 1, 1);
-INSERT INTO `schedules` VALUES (860, '2024-05-05', 1, 3, 1, '2024-05-12 22:32:00', NULL, 2, 2);
-INSERT INTO `schedules` VALUES (861, '2024-05-10', 1, 3, 1, '2024-05-12 22:32:00', NULL, 3, 3);
-INSERT INTO `schedules` VALUES (862, '2024-05-12', 1, 3, 1, '2024-05-12 22:32:00', NULL, 4, 4);
-INSERT INTO `schedules` VALUES (863, '2024-05-17', 1, 3, 2, '2024-05-12 22:32:00', NULL, 5, 1);
-INSERT INTO `schedules` VALUES (864, '2024-05-19', 1, 3, 2, '2024-05-12 22:32:00', NULL, 6, 2);
-INSERT INTO `schedules` VALUES (865, '2024-05-24', 1, 3, 2, '2024-05-12 22:32:00', NULL, 7, 3);
-INSERT INTO `schedules` VALUES (866, '2024-05-26', 1, 3, 2, '2024-05-12 22:32:00', NULL, 8, 4);
-INSERT INTO `schedules` VALUES (867, '2024-05-31', 1, 3, 3, '2024-05-12 22:32:00', NULL, 9, 1);
-INSERT INTO `schedules` VALUES (868, '2024-06-02', 1, 3, 3, '2024-05-12 22:32:00', NULL, 10, 2);
-INSERT INTO `schedules` VALUES (869, '2024-06-07', 1, 3, 3, '2024-05-12 22:32:00', NULL, 11, 3);
-INSERT INTO `schedules` VALUES (870, '2024-06-09', 1, 3, 3, '2024-05-12 22:32:00', NULL, 12, 4);
-INSERT INTO `schedules` VALUES (871, '2024-06-14', 1, 3, 4, '2024-05-12 22:32:00', NULL, 13, 1);
-INSERT INTO `schedules` VALUES (872, '2024-06-16', 1, 3, 4, '2024-05-12 22:32:00', NULL, 14, 2);
-INSERT INTO `schedules` VALUES (873, '2024-06-21', 1, 3, 4, '2024-05-12 22:32:00', NULL, 15, 3);
-INSERT INTO `schedules` VALUES (874, '2024-06-23', 1, 3, 4, '2024-05-12 22:32:00', NULL, 16, 4);
-INSERT INTO `schedules` VALUES (875, '2024-06-28', 1, 3, 5, '2024-05-12 22:32:00', NULL, 17, 1);
-INSERT INTO `schedules` VALUES (876, '2024-06-30', 1, 3, 5, '2024-05-12 22:32:00', NULL, 18, 2);
-INSERT INTO `schedules` VALUES (877, '2024-07-05', 1, 3, 5, '2024-05-12 22:32:00', NULL, 19, 3);
-INSERT INTO `schedules` VALUES (878, '2024-07-07', 1, 3, 5, '2024-05-12 22:32:00', NULL, 20, 4);
-INSERT INTO `schedules` VALUES (879, '2024-07-12', 1, 3, 6, '2024-05-12 22:32:00', NULL, 21, 1);
-INSERT INTO `schedules` VALUES (880, '2024-07-14', 1, 3, 6, '2024-05-12 22:32:00', NULL, 22, 2);
-INSERT INTO `schedules` VALUES (881, '2024-07-19', 1, 3, 6, '2024-05-12 22:32:00', NULL, 23, 3);
-INSERT INTO `schedules` VALUES (882, '2024-07-21', 1, 3, 6, '2024-05-12 22:32:00', NULL, 24, 4);
-INSERT INTO `schedules` VALUES (883, '2024-07-26', 1, 3, 7, '2024-05-12 22:32:00', NULL, 25, 1);
-INSERT INTO `schedules` VALUES (884, '2024-07-28', 1, 3, 7, '2024-05-12 22:32:00', NULL, 26, 2);
-INSERT INTO `schedules` VALUES (885, '2024-08-02', 1, 3, 7, '2024-05-12 22:32:00', NULL, 27, 3);
-INSERT INTO `schedules` VALUES (886, '2024-08-04', 1, 3, 7, '2024-05-12 22:32:00', NULL, 28, 4);
-INSERT INTO `schedules` VALUES (887, '2024-08-09', 1, 3, 8, '2024-05-12 22:32:00', NULL, 29, 1);
-INSERT INTO `schedules` VALUES (888, '2024-08-11', 1, 3, 8, '2024-05-12 22:32:00', NULL, 30, 2);
-INSERT INTO `schedules` VALUES (889, '2024-08-16', 1, 3, 8, '2024-05-12 22:32:00', NULL, 31, 3);
-INSERT INTO `schedules` VALUES (890, '2024-08-18', 1, 3, 8, '2024-05-12 22:32:00', NULL, 32, 4);
-INSERT INTO `schedules` VALUES (891, '2024-08-23', 1, 3, 9, '2024-05-12 22:32:00', NULL, 33, 1);
-INSERT INTO `schedules` VALUES (892, '2024-08-25', 1, 3, 9, '2024-05-12 22:32:00', NULL, 34, 2);
-INSERT INTO `schedules` VALUES (893, '2024-08-30', 1, 3, 9, '2024-05-12 22:32:00', NULL, 35, 3);
-INSERT INTO `schedules` VALUES (894, '2024-09-08', 1, 3, 9, '2024-05-12 22:32:00', NULL, 36, 4);
-INSERT INTO `schedules` VALUES (895, '2024-09-13', 1, 3, 10, '2024-05-12 22:32:00', NULL, 37, 1);
-INSERT INTO `schedules` VALUES (896, '2024-09-15', 1, 3, 10, '2024-05-12 22:32:00', NULL, 38, 2);
-INSERT INTO `schedules` VALUES (897, '2024-09-20', 1, 3, 10, '2024-05-12 22:32:00', NULL, 39, 3);
-INSERT INTO `schedules` VALUES (898, '2024-09-22', 1, 3, 10, '2024-05-12 22:32:00', NULL, 40, 4);
-INSERT INTO `schedules` VALUES (899, '2024-09-27', 1, 3, 11, '2024-05-12 22:32:00', NULL, 41, 1);
-INSERT INTO `schedules` VALUES (900, '2024-09-29', 1, 3, 11, '2024-05-12 22:32:00', NULL, 42, 2);
-INSERT INTO `schedules` VALUES (901, '2024-10-04', 1, 3, 11, '2024-05-12 22:32:00', NULL, 43, 3);
-INSERT INTO `schedules` VALUES (902, '2024-10-06', 1, 3, 11, '2024-05-12 22:32:00', NULL, 44, 4);
-INSERT INTO `schedules` VALUES (903, '2024-10-11', 1, 3, 12, '2024-05-12 22:32:00', NULL, 45, 1);
-INSERT INTO `schedules` VALUES (904, '2024-10-13', 1, 3, 12, '2024-05-12 22:32:00', NULL, 46, 2);
-INSERT INTO `schedules` VALUES (905, '2024-10-18', 1, 3, 12, '2024-05-12 22:32:00', NULL, 47, 3);
-INSERT INTO `schedules` VALUES (906, '2024-10-20', 1, 3, 12, '2024-05-12 22:32:00', NULL, 48, 4);
+INSERT INTO `schedules` VALUES (715, '2024-05-01', 1, 1, 1, '2024-05-12 22:28:42', NULL, NULL, NULL, 1, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (716, '2024-05-02', 1, 1, 1, '2024-05-12 22:28:42', NULL, NULL, NULL, 2, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (717, '2024-05-03', 1, 1, 1, '2024-05-12 22:28:42', NULL, NULL, NULL, 3, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (718, '2024-05-04', 1, 1, 1, '2024-05-12 22:28:42', NULL, NULL, NULL, 4, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (719, '2024-05-05', 1, 1, 2, '2024-05-12 22:28:42', NULL, NULL, NULL, 5, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (720, '2024-05-06', 1, 1, 2, '2024-05-12 22:28:42', NULL, NULL, NULL, 6, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (721, '2024-05-07', 1, 1, 2, '2024-05-12 22:28:42', NULL, NULL, NULL, 7, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (722, '2024-05-08', 1, 1, 2, '2024-05-12 22:28:42', NULL, NULL, NULL, 8, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (723, '2024-05-09', 1, 1, 3, '2024-05-12 22:28:42', NULL, NULL, NULL, 9, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (724, '2024-05-10', 1, 1, 3, '2024-05-12 22:28:42', NULL, NULL, NULL, 10, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (725, '2024-05-11', 1, 1, 3, '2024-05-12 22:28:42', NULL, NULL, NULL, 11, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (726, '2024-05-12', 1, 1, 3, '2024-05-12 22:28:42', NULL, NULL, NULL, 12, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (727, '2024-05-13', 1, 1, 4, '2024-05-12 22:28:42', NULL, NULL, NULL, 13, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (728, '2024-05-14', 1, 1, 4, '2024-05-12 22:28:42', NULL, NULL, NULL, 14, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (729, '2024-05-15', 1, 1, 4, '2024-05-12 22:28:42', NULL, NULL, NULL, 15, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (730, '2024-05-16', 1, 1, 4, '2024-05-12 22:28:42', NULL, NULL, NULL, 16, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (731, '2024-05-17', 1, 1, 5, '2024-05-12 22:28:42', NULL, NULL, NULL, 17, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (732, '2024-05-18', 1, 1, 5, '2024-05-12 22:28:42', NULL, NULL, NULL, 18, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (733, '2024-05-19', 1, 1, 5, '2024-05-12 22:28:42', NULL, NULL, NULL, 19, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (734, '2024-05-20', 1, 1, 5, '2024-05-12 22:28:42', NULL, NULL, NULL, 20, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (735, '2024-05-21', 1, 1, 6, '2024-05-12 22:28:42', NULL, NULL, NULL, 21, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (736, '2024-05-22', 1, 1, 6, '2024-05-12 22:28:42', NULL, NULL, NULL, 22, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (737, '2024-05-23', 1, 1, 6, '2024-05-12 22:28:42', NULL, NULL, NULL, 23, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (738, '2024-05-24', 1, 1, 6, '2024-05-12 22:28:42', NULL, NULL, NULL, 24, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (739, '2024-05-25', 1, 1, 7, '2024-05-12 22:28:42', NULL, NULL, NULL, 25, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (740, '2024-05-26', 1, 1, 7, '2024-05-12 22:28:42', NULL, NULL, NULL, 26, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (741, '2024-05-27', 1, 1, 7, '2024-05-12 22:28:42', NULL, NULL, NULL, 27, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (742, '2024-05-28', 1, 1, 7, '2024-05-12 22:28:42', NULL, NULL, NULL, 28, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (743, '2024-05-29', 1, 1, 8, '2024-05-12 22:28:42', NULL, NULL, NULL, 29, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (744, '2024-05-30', 1, 1, 8, '2024-05-12 22:28:42', NULL, NULL, NULL, 30, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (745, '2024-05-31', 1, 1, 8, '2024-05-12 22:28:42', NULL, NULL, NULL, 31, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (746, '2024-06-01', 1, 1, 8, '2024-05-12 22:28:42', NULL, NULL, NULL, 32, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (747, '2024-06-02', 1, 1, 9, '2024-05-12 22:28:42', NULL, NULL, NULL, 33, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (748, '2024-06-03', 1, 1, 9, '2024-05-12 22:28:42', NULL, NULL, NULL, 34, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (749, '2024-06-04', 1, 1, 9, '2024-05-12 22:28:42', NULL, NULL, NULL, 35, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (750, '2024-06-05', 1, 1, 9, '2024-05-12 22:28:42', NULL, NULL, NULL, 36, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (751, '2024-06-06', 1, 1, 10, '2024-05-12 22:28:42', NULL, NULL, NULL, 37, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (752, '2024-06-07', 1, 1, 10, '2024-05-12 22:28:42', NULL, NULL, NULL, 38, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (753, '2024-06-08', 1, 1, 10, '2024-05-12 22:28:42', NULL, NULL, NULL, 39, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (754, '2024-06-09', 1, 1, 10, '2024-05-12 22:28:42', NULL, NULL, NULL, 40, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (755, '2024-06-10', 1, 1, 11, '2024-05-12 22:28:42', NULL, NULL, NULL, 41, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (756, '2024-06-11', 1, 1, 11, '2024-05-12 22:28:42', NULL, NULL, NULL, 42, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (757, '2024-06-12', 1, 1, 11, '2024-05-12 22:28:42', NULL, NULL, NULL, 43, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (758, '2024-06-13', 1, 1, 11, '2024-05-12 22:28:42', NULL, NULL, NULL, 44, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (759, '2024-06-14', 1, 1, 12, '2024-05-12 22:28:42', NULL, NULL, NULL, 45, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (760, '2024-06-15', 1, 1, 12, '2024-05-12 22:28:42', NULL, NULL, NULL, 46, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (761, '2024-06-16', 1, 1, 12, '2024-05-12 22:28:42', NULL, NULL, NULL, 47, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (762, '2024-06-17', 1, 1, 12, '2024-05-12 22:28:42', NULL, NULL, NULL, 48, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (763, '2024-05-05', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 1, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (764, '2024-05-07', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 2, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (765, '2024-05-12', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 3, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (766, '2024-05-14', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 4, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (767, '2024-05-19', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 5, 5, 6, 4, 1);
+INSERT INTO `schedules` VALUES (768, '2024-05-21', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 6, 6, 6, 4, 1);
+INSERT INTO `schedules` VALUES (769, '2024-05-26', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 7, 7, 6, 4, 1);
+INSERT INTO `schedules` VALUES (770, '2024-05-28', 1, 4, 1, '2024-05-12 22:31:46', NULL, NULL, NULL, 8, 8, 6, 4, 1);
+INSERT INTO `schedules` VALUES (771, '2024-06-02', 1, 4, 2, '2024-05-12 22:31:46', NULL, NULL, NULL, 9, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (772, '2024-06-04', 1, 4, 2, '2024-05-12 22:31:46', NULL, NULL, NULL, 10, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (773, '2024-06-09', 1, 4, 2, '2024-05-12 22:31:46', NULL, NULL, NULL, 11, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (774, '2024-06-11', 1, 4, 2, '2024-05-12 22:31:46', NULL, NULL, NULL, 12, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (775, '2024-06-16', 1, 4, 3, '2024-05-12 22:31:46', NULL, NULL, NULL, 13, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (776, '2024-06-18', 1, 4, 3, '2024-05-12 22:31:46', NULL, NULL, NULL, 14, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (777, '2024-06-23', 1, 4, 3, '2024-05-12 22:31:46', NULL, NULL, NULL, 15, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (778, '2024-06-25', 1, 4, 3, '2024-05-12 22:31:46', NULL, NULL, NULL, 16, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (779, '2024-06-30', 1, 4, 4, '2024-05-12 22:31:46', NULL, NULL, NULL, 17, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (780, '2024-07-02', 1, 4, 4, '2024-05-12 22:31:46', NULL, NULL, NULL, 18, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (781, '2024-07-07', 1, 4, 4, '2024-05-12 22:31:46', NULL, NULL, NULL, 19, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (782, '2024-07-09', 1, 4, 4, '2024-05-12 22:31:46', NULL, NULL, NULL, 20, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (783, '2024-07-14', 1, 4, 5, '2024-05-12 22:31:46', NULL, NULL, NULL, 21, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (784, '2024-07-16', 1, 4, 5, '2024-05-12 22:31:46', NULL, NULL, NULL, 22, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (785, '2024-07-21', 1, 4, 5, '2024-05-12 22:31:46', NULL, NULL, NULL, 23, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (786, '2024-07-23', 1, 4, 5, '2024-05-12 22:31:46', NULL, NULL, NULL, 24, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (787, '2024-07-28', 1, 4, 6, '2024-05-12 22:31:46', NULL, NULL, NULL, 25, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (788, '2024-07-30', 1, 4, 6, '2024-05-12 22:31:46', NULL, NULL, NULL, 26, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (789, '2024-08-04', 1, 4, 6, '2024-05-12 22:31:46', NULL, NULL, NULL, 27, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (790, '2024-08-06', 1, 4, 6, '2024-05-12 22:31:46', NULL, NULL, NULL, 28, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (791, '2024-08-11', 1, 4, 7, '2024-05-12 22:31:46', NULL, NULL, NULL, 29, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (792, '2024-08-13', 1, 4, 7, '2024-05-12 22:31:46', NULL, NULL, NULL, 30, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (793, '2024-08-18', 1, 4, 7, '2024-05-12 22:31:46', NULL, NULL, NULL, 31, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (794, '2024-08-20', 1, 4, 7, '2024-05-12 22:31:46', NULL, NULL, NULL, 32, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (795, '2024-08-25', 1, 4, 8, '2024-05-12 22:31:46', NULL, NULL, NULL, 33, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (796, '2024-08-27', 1, 4, 8, '2024-05-12 22:31:46', NULL, NULL, NULL, 34, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (797, '2024-09-08', 1, 4, 8, '2024-05-12 22:31:46', NULL, NULL, NULL, 35, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (798, '2024-09-10', 1, 4, 8, '2024-05-12 22:31:46', NULL, NULL, NULL, 36, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (799, '2024-09-15', 1, 4, 9, '2024-05-12 22:31:46', NULL, NULL, NULL, 37, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (800, '2024-09-17', 1, 4, 9, '2024-05-12 22:31:46', NULL, NULL, NULL, 38, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (801, '2024-09-22', 1, 4, 9, '2024-05-12 22:31:46', NULL, NULL, NULL, 39, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (802, '2024-09-24', 1, 4, 9, '2024-05-12 22:31:46', NULL, NULL, NULL, 40, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (803, '2024-09-29', 1, 4, 10, '2024-05-12 22:31:46', NULL, NULL, NULL, 41, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (804, '2024-10-01', 1, 4, 10, '2024-05-12 22:31:46', NULL, NULL, NULL, 42, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (805, '2024-10-06', 1, 4, 10, '2024-05-12 22:31:46', NULL, NULL, NULL, 43, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (806, '2024-10-08', 1, 4, 10, '2024-05-12 22:31:46', NULL, NULL, NULL, 44, 4, 6, 4, 1);
+INSERT INTO `schedules` VALUES (807, '2024-10-13', 1, 4, 11, '2024-05-12 22:31:46', NULL, NULL, NULL, 45, 1, 6, 4, 1);
+INSERT INTO `schedules` VALUES (808, '2024-10-15', 1, 4, 11, '2024-05-12 22:31:46', NULL, NULL, NULL, 46, 2, 6, 4, 1);
+INSERT INTO `schedules` VALUES (809, '2024-10-20', 1, 4, 11, '2024-05-12 22:31:46', NULL, NULL, NULL, 47, 3, 6, 4, 1);
+INSERT INTO `schedules` VALUES (810, '2024-10-22', 1, 4, 11, '2024-05-12 22:31:46', '2024-05-24 14:03:26', NULL, 1, 48, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (811, '2024-05-01', 1, 2, 1, '2024-05-12 22:31:55', NULL, NULL, NULL, 1, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (812, '2024-05-06', 1, 2, 1, '2024-05-12 22:31:55', NULL, NULL, NULL, 2, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (813, '2024-05-08', 1, 2, 1, '2024-05-12 22:31:55', NULL, NULL, NULL, 3, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (814, '2024-05-13', 1, 2, 1, '2024-05-12 22:31:55', NULL, NULL, NULL, 4, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (815, '2024-05-15', 1, 2, 2, '2024-05-12 22:31:55', NULL, NULL, NULL, 5, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (816, '2024-05-20', 1, 2, 2, '2024-05-12 22:31:55', NULL, NULL, NULL, 6, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (817, '2024-05-22', 1, 2, 2, '2024-05-12 22:31:55', NULL, NULL, NULL, 7, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (818, '2024-05-27', 1, 2, 2, '2024-05-12 22:31:55', NULL, NULL, NULL, 8, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (819, '2024-05-29', 1, 2, 3, '2024-05-12 22:31:55', NULL, NULL, NULL, 9, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (820, '2024-06-03', 1, 2, 3, '2024-05-12 22:31:55', NULL, NULL, NULL, 10, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (821, '2024-06-05', 1, 2, 3, '2024-05-12 22:31:55', NULL, NULL, NULL, 11, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (822, '2024-06-10', 1, 2, 3, '2024-05-12 22:31:55', NULL, NULL, NULL, 12, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (823, '2024-06-12', 1, 2, 4, '2024-05-12 22:31:55', NULL, NULL, NULL, 13, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (824, '2024-06-17', 1, 2, 4, '2024-05-12 22:31:55', NULL, NULL, NULL, 14, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (825, '2024-06-19', 1, 2, 4, '2024-05-12 22:31:55', NULL, NULL, NULL, 15, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (826, '2024-06-24', 1, 2, 4, '2024-05-12 22:31:55', NULL, NULL, NULL, 16, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (827, '2024-06-26', 1, 2, 5, '2024-05-12 22:31:55', NULL, NULL, NULL, 17, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (828, '2024-07-01', 1, 2, 5, '2024-05-12 22:31:55', NULL, NULL, NULL, 18, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (829, '2024-07-03', 1, 2, 5, '2024-05-12 22:31:55', NULL, NULL, NULL, 19, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (830, '2024-07-08', 1, 2, 5, '2024-05-12 22:31:55', NULL, NULL, NULL, 20, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (831, '2024-07-10', 1, 2, 6, '2024-05-12 22:31:55', NULL, NULL, NULL, 21, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (832, '2024-07-15', 1, 2, 6, '2024-05-12 22:31:55', NULL, NULL, NULL, 22, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (833, '2024-07-17', 1, 2, 6, '2024-05-12 22:31:55', NULL, NULL, NULL, 23, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (834, '2024-07-22', 1, 2, 6, '2024-05-12 22:31:55', NULL, NULL, NULL, 24, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (835, '2024-07-24', 1, 2, 7, '2024-05-12 22:31:55', NULL, NULL, NULL, 25, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (836, '2024-07-29', 1, 2, 7, '2024-05-12 22:31:55', NULL, NULL, NULL, 26, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (837, '2024-07-31', 1, 2, 7, '2024-05-12 22:31:55', NULL, NULL, NULL, 27, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (838, '2024-08-05', 1, 2, 7, '2024-05-12 22:31:55', NULL, NULL, NULL, 28, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (839, '2024-08-07', 1, 2, 8, '2024-05-12 22:31:55', NULL, NULL, NULL, 29, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (840, '2024-08-12', 1, 2, 8, '2024-05-12 22:31:55', NULL, NULL, NULL, 30, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (841, '2024-08-14', 1, 2, 8, '2024-05-12 22:31:55', NULL, NULL, NULL, 31, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (842, '2024-08-19', 1, 2, 8, '2024-05-12 22:31:55', NULL, NULL, NULL, 32, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (843, '2024-08-21', 1, 2, 9, '2024-05-12 22:31:55', NULL, NULL, NULL, 33, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (844, '2024-08-26', 1, 2, 9, '2024-05-12 22:31:55', NULL, NULL, NULL, 34, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (845, '2024-08-28', 1, 2, 9, '2024-05-12 22:31:55', NULL, NULL, NULL, 35, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (846, '2024-09-09', 1, 2, 9, '2024-05-12 22:31:55', NULL, NULL, NULL, 36, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (847, '2024-09-11', 1, 2, 10, '2024-05-12 22:31:55', NULL, NULL, NULL, 37, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (848, '2024-09-16', 1, 2, 10, '2024-05-12 22:31:55', NULL, NULL, NULL, 38, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (849, '2024-09-18', 1, 2, 10, '2024-05-12 22:31:55', NULL, NULL, NULL, 39, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (850, '2024-09-23', 1, 2, 10, '2024-05-12 22:31:55', NULL, NULL, NULL, 40, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (851, '2024-09-25', 1, 2, 11, '2024-05-12 22:31:55', NULL, NULL, NULL, 41, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (852, '2024-09-30', 1, 2, 11, '2024-05-12 22:31:55', NULL, NULL, NULL, 42, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (853, '2024-10-02', 1, 2, 11, '2024-05-12 22:31:55', NULL, NULL, NULL, 43, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (854, '2024-10-07', 1, 2, 11, '2024-05-12 22:31:55', NULL, NULL, NULL, 44, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (855, '2024-10-09', 1, 2, 12, '2024-05-12 22:31:55', NULL, NULL, NULL, 45, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (856, '2024-10-14', 1, 2, 12, '2024-05-12 22:31:55', NULL, NULL, NULL, 46, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (857, '2024-10-16', 1, 2, 12, '2024-05-12 22:31:55', NULL, NULL, NULL, 47, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (858, '2024-10-21', 1, 2, 12, '2024-05-12 22:31:55', NULL, NULL, NULL, 48, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (859, '2024-05-03', 1, 3, 1, '2024-05-12 22:32:00', NULL, NULL, NULL, 1, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (860, '2024-05-05', 1, 3, 1, '2024-05-12 22:32:00', NULL, NULL, NULL, 2, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (861, '2024-05-10', 1, 3, 1, '2024-05-12 22:32:00', NULL, NULL, NULL, 3, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (862, '2024-05-12', 1, 3, 1, '2024-05-12 22:32:00', NULL, NULL, NULL, 4, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (863, '2024-05-17', 1, 3, 2, '2024-05-12 22:32:00', NULL, NULL, NULL, 5, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (864, '2024-05-19', 1, 3, 2, '2024-05-12 22:32:00', NULL, NULL, NULL, 6, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (865, '2024-05-24', 1, 3, 2, '2024-05-12 22:32:00', NULL, NULL, NULL, 7, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (866, '2024-05-26', 1, 3, 2, '2024-05-12 22:32:00', NULL, NULL, NULL, 8, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (867, '2024-05-31', 1, 3, 3, '2024-05-12 22:32:00', NULL, NULL, NULL, 9, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (868, '2024-06-02', 1, 3, 3, '2024-05-12 22:32:00', NULL, NULL, NULL, 10, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (869, '2024-06-07', 1, 3, 3, '2024-05-12 22:32:00', NULL, NULL, NULL, 11, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (870, '2024-06-09', 1, 3, 3, '2024-05-12 22:32:00', NULL, NULL, NULL, 12, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (871, '2024-06-14', 1, 3, 4, '2024-05-12 22:32:00', NULL, NULL, NULL, 13, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (872, '2024-06-16', 1, 3, 4, '2024-05-12 22:32:00', NULL, NULL, NULL, 14, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (873, '2024-06-21', 1, 3, 4, '2024-05-12 22:32:00', NULL, NULL, NULL, 15, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (874, '2024-06-23', 1, 3, 4, '2024-05-12 22:32:00', NULL, NULL, NULL, 16, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (875, '2024-06-28', 1, 3, 5, '2024-05-12 22:32:00', NULL, NULL, NULL, 17, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (876, '2024-06-30', 1, 3, 5, '2024-05-12 22:32:00', NULL, NULL, NULL, 18, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (877, '2024-07-05', 1, 3, 5, '2024-05-12 22:32:00', NULL, NULL, NULL, 19, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (878, '2024-07-07', 1, 3, 5, '2024-05-12 22:32:00', NULL, NULL, NULL, 20, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (879, '2024-07-12', 1, 3, 6, '2024-05-12 22:32:00', NULL, NULL, NULL, 21, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (880, '2024-07-14', 1, 3, 6, '2024-05-12 22:32:00', NULL, NULL, NULL, 22, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (881, '2024-07-19', 1, 3, 6, '2024-05-12 22:32:00', NULL, NULL, NULL, 23, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (882, '2024-07-21', 1, 3, 6, '2024-05-12 22:32:00', NULL, NULL, NULL, 24, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (883, '2024-07-26', 1, 3, 7, '2024-05-12 22:32:00', NULL, NULL, NULL, 25, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (884, '2024-07-28', 1, 3, 7, '2024-05-12 22:32:00', NULL, NULL, NULL, 26, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (885, '2024-08-02', 1, 3, 7, '2024-05-12 22:32:00', NULL, NULL, NULL, 27, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (886, '2024-08-04', 1, 3, 7, '2024-05-12 22:32:00', NULL, NULL, NULL, 28, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (887, '2024-08-09', 1, 3, 8, '2024-05-12 22:32:00', NULL, NULL, NULL, 29, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (888, '2024-08-11', 1, 3, 8, '2024-05-12 22:32:00', NULL, NULL, NULL, 30, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (889, '2024-08-16', 1, 3, 8, '2024-05-12 22:32:00', NULL, NULL, NULL, 31, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (890, '2024-08-18', 1, 3, 8, '2024-05-12 22:32:00', NULL, NULL, NULL, 32, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (891, '2024-08-23', 1, 3, 9, '2024-05-12 22:32:00', NULL, NULL, NULL, 33, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (892, '2024-08-25', 1, 3, 9, '2024-05-12 22:32:00', NULL, NULL, NULL, 34, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (893, '2024-08-30', 1, 3, 9, '2024-05-12 22:32:00', NULL, NULL, NULL, 35, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (894, '2024-09-08', 1, 3, 9, '2024-05-12 22:32:00', NULL, NULL, NULL, 36, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (895, '2024-09-13', 1, 3, 10, '2024-05-12 22:32:00', NULL, NULL, NULL, 37, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (896, '2024-09-15', 1, 3, 10, '2024-05-12 22:32:00', NULL, NULL, NULL, 38, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (897, '2024-09-20', 1, 3, 10, '2024-05-12 22:32:00', NULL, NULL, NULL, 39, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (898, '2024-09-22', 1, 3, 10, '2024-05-12 22:32:00', NULL, NULL, NULL, 40, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (899, '2024-09-27', 1, 3, 11, '2024-05-12 22:32:00', NULL, NULL, NULL, 41, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (900, '2024-09-29', 1, 3, 11, '2024-05-12 22:32:00', NULL, NULL, NULL, 42, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (901, '2024-10-04', 1, 3, 11, '2024-05-12 22:32:00', NULL, NULL, NULL, 43, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (902, '2024-10-06', 1, 3, 11, '2024-05-12 22:32:00', NULL, NULL, NULL, 44, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (903, '2024-10-11', 1, 3, 12, '2024-05-12 22:32:00', NULL, NULL, NULL, 45, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (904, '2024-10-13', 1, 3, 12, '2024-05-12 22:32:00', NULL, NULL, NULL, 46, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (905, '2024-10-18', 1, 3, 12, '2024-05-12 22:32:00', NULL, NULL, NULL, 47, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (906, '2024-10-20', 1, 3, 12, '2024-05-12 22:32:00', NULL, NULL, NULL, 48, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1067, '2024-05-01', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 1, 1, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1068, '2024-05-02', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 2, 2, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1069, '2024-05-03', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 3, 3, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1070, '2024-05-04', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 4, 4, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1071, '2024-05-05', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 5, 5, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1072, '2024-05-06', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 6, 6, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1073, '2024-05-08', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 7, 7, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1074, '2024-05-09', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 8, 8, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1075, '2024-05-10', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 9, 9, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1076, '2024-05-11', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 10, 10, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1077, '2024-05-12', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 11, 11, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1078, '2024-05-13', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 12, 12, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1079, '2024-05-15', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 13, 13, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1080, '2024-05-16', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 14, 14, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1081, '2024-05-17', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 15, 15, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1082, '2024-05-18', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 16, 16, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1083, '2024-05-19', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 17, 17, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1084, '2024-05-20', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 18, 18, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1085, '2024-05-22', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 19, 19, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1086, '2024-05-23', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 20, 20, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1087, '2024-05-24', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 21, 21, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1088, '2024-05-25', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 22, 22, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1089, '2024-05-26', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 23, 23, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1090, '2024-05-27', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 24, 24, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1091, '2024-05-29', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 25, 25, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1092, '2024-05-30', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 26, 26, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1093, '2024-05-31', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 27, 27, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1094, '2024-06-01', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 28, 28, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1095, '2024-06-02', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 29, 29, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1096, '2024-06-03', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 30, 30, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1097, '2024-06-05', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 31, 31, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1098, '2024-06-06', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 32, 32, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1099, '2024-06-07', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 33, 33, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1100, '2024-06-08', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 34, 34, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1101, '2024-06-09', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 35, 35, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1102, '2024-06-10', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 36, 36, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1103, '2024-06-12', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 37, 37, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1104, '2024-06-13', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 38, 38, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1105, '2024-06-14', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 39, 39, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1106, '2024-06-15', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 40, 40, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1107, '2024-06-16', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 41, 41, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1108, '2024-06-17', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 42, 42, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1109, '2024-06-19', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 43, 43, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1110, '2024-06-20', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 44, 44, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1111, '2024-06-21', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 45, 45, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1112, '2024-06-22', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 46, 46, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1113, '2024-06-23', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 47, 47, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1114, '2024-06-24', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 48, 48, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1115, '2024-06-26', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 49, 49, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1116, '2024-06-27', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 50, 50, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1117, '2024-06-28', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 51, 51, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1118, '2024-06-29', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 52, 52, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1119, '2024-06-30', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 53, 53, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1120, '2024-07-01', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 54, 54, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1121, '2024-07-03', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 55, 55, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1122, '2024-07-04', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 56, 56, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1123, '2024-07-05', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 57, 57, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1124, '2024-07-06', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 58, 58, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1125, '2024-07-07', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 59, 59, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1126, '2024-07-08', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 60, 60, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1127, '2024-07-10', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 61, 61, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1128, '2024-07-11', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 62, 62, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1129, '2024-07-12', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 63, 63, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1130, '2024-07-13', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 64, 64, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1131, '2024-07-14', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 65, 65, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1132, '2024-07-15', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 66, 66, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1133, '2024-07-17', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 67, 67, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1134, '2024-07-18', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 68, 68, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1135, '2024-07-19', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 69, 69, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1136, '2024-07-20', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 70, 70, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1137, '2024-07-21', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 71, 71, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1138, '2024-07-22', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 72, 72, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1139, '2024-07-24', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 73, 73, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1140, '2024-07-25', 1, 5, 1, '2024-05-14 16:11:45', NULL, NULL, NULL, 74, 74, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1141, '2024-07-26', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 75, 75, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1142, '2024-07-27', 1, 5, 2, '2024-05-14 16:11:45', NULL, NULL, NULL, 76, 76, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1143, '2024-07-28', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 77, 77, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1144, '2024-07-29', 1, 5, 3, '2024-05-14 16:11:45', NULL, NULL, NULL, 78, 78, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1145, '2024-07-31', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 79, 79, 3, 4, 1);
+INSERT INTO `schedules` VALUES (1146, '2024-08-01', 1, 5, 4, '2024-05-14 16:11:45', NULL, NULL, NULL, 80, 80, 3, 4, 1);
 COMMIT;
 
 -- ----------------------------
@@ -2688,14 +2812,12 @@ CREATE TABLE `sessions` (
   KEY `shift_id` (`shift_id`) USING BTREE,
   KEY `teacher_id` (`teacher_id`) USING BTREE,
   KEY `room_id` (`room_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of sessions
 -- ----------------------------
 BEGIN;
-INSERT INTO `sessions` VALUES (12, 5, 1, 1, 3289, 2, 1, '2024-05-09 22:12:50', 1, NULL, NULL, 1);
-INSERT INTO `sessions` VALUES (13, 5, 1, 1, 3289, 8, 1, '2024-05-09 22:12:50', 1, NULL, NULL, 1);
 INSERT INTO `sessions` VALUES (14, 6, 1, 1, 3289, 2, 1, '2024-05-09 22:14:55', 1, NULL, NULL, 1);
 INSERT INTO `sessions` VALUES (15, 6, 1, 1, 3289, 7, 1, '2024-05-09 22:14:55', 1, NULL, NULL, 1);
 INSERT INTO `sessions` VALUES (66, 1, NULL, 1, 3, 2, 1, '2024-05-12 22:28:41', 1, NULL, NULL, 1);
@@ -2711,6 +2833,12 @@ INSERT INTO `sessions` VALUES (75, 2, NULL, 2, 3, 3, 1, '2024-05-12 22:31:55', 1
 INSERT INTO `sessions` VALUES (76, 2, NULL, 2, 3, 8, 1, '2024-05-12 22:31:55', 1, NULL, NULL, 1);
 INSERT INTO `sessions` VALUES (77, 3, 1, 2, 3, 5, 1, '2024-05-12 22:32:00', 1, NULL, NULL, 1);
 INSERT INTO `sessions` VALUES (78, 3, 1, 2, 3, 7, 1, '2024-05-12 22:32:00', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (91, 5, 1, 1, 3, 3, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (92, 5, 1, 1, 3, 4, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (93, 5, 1, 1, 3, 5, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (94, 5, 1, 1, 3, 6, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (95, 5, 1, 1, 3, 7, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
+INSERT INTO `sessions` VALUES (96, 5, 1, 1, 3, 8, 1, '2024-05-14 16:11:45', 1, NULL, NULL, 1);
 COMMIT;
 
 -- ----------------------------
@@ -3234,7 +3362,7 @@ CREATE TABLE `sources` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of sources
@@ -3262,7 +3390,7 @@ CREATE TABLE `student_logs` (
   `status` tinyint(2) DEFAULT '1',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `student_id` (`student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of student_logs
@@ -3272,6 +3400,14 @@ INSERT INTO `student_logs` VALUES (1, 1, 'Chuyển lên danh sách học sinh ch
 INSERT INTO `student_logs` VALUES (2, 1, 'Thêm mới hợp đồng nhập học - C000001', '2024-05-12 21:03:41', 1, 1);
 INSERT INTO `student_logs` VALUES (3, 1, 'Thêm mới hợp đồng nhập học - C000002', '2024-05-12 21:55:13', 1, 1);
 INSERT INTO `student_logs` VALUES (4, 1, 'Xếp vào lớp FasTracKids lớp học thử', '2024-05-12 22:26:11', 1, 1);
+INSERT INTO `student_logs` VALUES (5, 1, 'Tự động withdraw học sinh khỏi lớp do hợp đồng C000002 hết phí', '2024-05-14 17:45:44', 0, 1);
+INSERT INTO `student_logs` VALUES (6, 1, 'Đặt cọc 1,000,000đ cho hợp đồng - C000003', '2024-05-14 22:18:50', 1, 1);
+INSERT INTO `student_logs` VALUES (7, 1, 'Thu đủ phí cho hợp đồng - C000003', '2024-05-14 22:25:53', 1, 1);
+INSERT INTO `student_logs` VALUES (8, 1, 'Xếp vào lớp Lớp chính thức 1', '2024-05-14 22:27:36', 1, 1);
+INSERT INTO `student_logs` VALUES (9, NULL, 'Bảo lưu 3 buổi từ ngày 2024-05-14 đến ngày 2024-05-22', '2024-05-14 22:45:21', 1, 1);
+INSERT INTO `student_logs` VALUES (10, 1, 'Xếp vào lớp Lớp chính thức 1', '2024-05-14 22:46:56', 1, 1);
+INSERT INTO `student_logs` VALUES (11, 1, 'Chuyển từ lớp Lớp chính thức 1 sang lớp Lớp chính thức 2', '2024-05-14 22:50:43', 1, 1);
+INSERT INTO `student_logs` VALUES (12, 2, 'Chuyển lên danh sách học sinh chính thức', '2024-05-14 22:56:26', 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -3353,13 +3489,14 @@ CREATE TABLE `students` (
   KEY `gud_mobile2` (`gud_mobile2`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE,
   KEY `status` (`status`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of students
 -- ----------------------------
 BEGIN;
 INSERT INTO `students` VALUES (1, 'LMS000001', 'Lương Bảo Long', 'Lương', 'Bảo', 'Long', NULL, 'M', 0, '2021-05-27', '0389941902', 'Lương Thành Công', 'thanhcong1710@gmail.com', NULL, NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, '2024-05-12 20:58:19', 1, '2024-05-12 13:58:19', NULL, NULL, NULL, 1, NULL, NULL, NULL, '1990-05-09', NULL, 'M', NULL, 7, NULL, 1, 232, 26);
+INSERT INTO `students` VALUES (2, 'LMS000002', 'Lương Bảo Hân', 'Lương', 'Bảo', 'Hân', NULL, 'F', 0, '2018-09-08', '0389941902', 'Lương Thành Công', 'thanhcong1710@gmail.com', NULL, NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, '2024-05-14 22:56:26', 1, '2024-05-14 15:56:26', NULL, NULL, NULL, 1, NULL, NULL, NULL, '1990-05-09', NULL, 'M', NULL, 7, NULL, 1, 232, 26);
 COMMIT;
 
 -- ----------------------------
@@ -3376,20 +3513,12 @@ CREATE TABLE `subject_has_class` (
   PRIMARY KEY (`id`),
   KEY `subject_id` (`subject_id`) USING BTREE,
   KEY `class_id` (`class_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=203 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=215 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- ----------------------------
 -- Records of subject_has_class
 -- ----------------------------
 BEGIN;
-INSERT INTO `subject_has_class` VALUES (2, 1, 5, 4, 0, '2024-05-09 22:12:50');
-INSERT INTO `subject_has_class` VALUES (3, 2, 5, 4, 0, '2024-05-09 22:12:50');
-INSERT INTO `subject_has_class` VALUES (4, 3, 5, 4, 0, '2024-05-09 22:12:50');
-INSERT INTO `subject_has_class` VALUES (5, 4, 5, 4, 0, '2024-05-09 22:12:50');
-INSERT INTO `subject_has_class` VALUES (6, 1, 6, 4, 1, '2024-05-09 22:14:55');
-INSERT INTO `subject_has_class` VALUES (7, 2, 6, 4, 2, '2024-05-09 22:14:55');
-INSERT INTO `subject_has_class` VALUES (8, 3, 6, 4, 3, '2024-05-09 22:14:55');
-INSERT INTO `subject_has_class` VALUES (9, 4, 6, 4, 4, '2024-05-09 22:14:55');
 INSERT INTO `subject_has_class` VALUES (154, 1, 1, 4, 1, '2024-05-12 22:28:42');
 INSERT INTO `subject_has_class` VALUES (155, 2, 1, 4, 2, '2024-05-12 22:28:42');
 INSERT INTO `subject_has_class` VALUES (156, 3, 1, 4, 3, '2024-05-12 22:28:42');
@@ -3439,6 +3568,10 @@ INSERT INTO `subject_has_class` VALUES (199, 9, 3, 4, 9, '2024-05-12 22:32:00');
 INSERT INTO `subject_has_class` VALUES (200, 10, 3, 4, 10, '2024-05-12 22:32:00');
 INSERT INTO `subject_has_class` VALUES (201, 11, 3, 4, 11, '2024-05-12 22:32:00');
 INSERT INTO `subject_has_class` VALUES (202, 12, 3, 4, 12, '2024-05-12 22:32:00');
+INSERT INTO `subject_has_class` VALUES (211, 1, 5, 2, 1, '2024-05-14 16:11:45');
+INSERT INTO `subject_has_class` VALUES (212, 2, 5, 2, 2, '2024-05-14 16:11:45');
+INSERT INTO `subject_has_class` VALUES (213, 3, 5, 2, 3, '2024-05-14 16:11:45');
+INSERT INTO `subject_has_class` VALUES (214, 4, 5, 2, 4, '2024-05-14 16:11:45');
 COMMIT;
 
 -- ----------------------------
@@ -3500,13 +3633,14 @@ CREATE TABLE `term_student_user` (
   KEY `ec_id` (`ec_id`) USING BTREE,
   KEY `cm_id` (`cm_id`) USING BTREE,
   KEY `student_id` (`student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of term_student_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `term_student_user` VALUES (1, 1, 5, NULL, 4, 4, 2, 3, '2024-05-12 20:58:19', '2024-05-12 22:26:11', 1, 1, 1, 1);
+INSERT INTO `term_student_user` VALUES (1, 1, 5, NULL, 4, 4, 2, 3, '2024-05-12 20:58:19', '2024-05-14 22:50:43', 1, 1, 1, 1);
+INSERT INTO `term_student_user` VALUES (2, 2, 5, NULL, NULL, NULL, 2, NULL, '2024-05-14 22:56:26', NULL, 1, 1, 1, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -3615,13 +3749,13 @@ CREATE TABLE `tuition_transfer` (
   KEY `to_student_id` (`to_student_id`) USING BTREE,
   KEY `creator_id` (`creator_id`) USING BTREE,
   KEY `from_student_id` (`from_student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=7065 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of tuition_transfer
 -- ----------------------------
 BEGIN;
-INSERT INTO `tuition_transfer` VALUES (7064, 101750, 101751, 'chuyển phí demo', '2024-05-09', 5, 1, '2024-04-30 15:41:54', 10000000, 10000000, '{\"tuition_transfer\":{\"from_branch_id\":1,\"from_student_id\":101750,\"to_branch_id\":1,\"to_student_id\":101751,\"to_product_id\":2,\"note\":\"chuy\\u1ec3n ph\\u00ed demo\",\"transfer_date\":\"2024-05-09\",\"received_amount\":10000000,\"transferred_amount\":10000000},\"from_student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101750\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":null,\"address\":null,\"student_id\":101750,\"label\":\"h\\u1ecdc sinh - LMS101750\",\"cm_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\",\"ec_name\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng - C00001\"},\"from_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"tuition_fee_id\":262,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":4,\"left_sessions\":24,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"tuition_fee_id\":262,\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}],\"to_student_info\":{\"name\":\"h\\u1ecdc sinh\",\"lms_code\":\"LMS101751\",\"gud_name1\":\"demo23\",\"gud_mobile1\":\"0389946902\",\"gud_email1\":\"demo@gmail.com\",\"address\":\"h\\u00e0 n\\u1ed9i c\\u1ea7u di\\u1ec5n\",\"student_id\":101751,\"label\":\"h\\u1ecdc sinh - LMS101751\",\"cm_name\":null,\"ec_name\":null},\"to_contracts\":[{\"contract_id\":44067,\"total_charged\":0,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":3,\"code\":\"LMS044067\",\"enrolment_start_date\":\"2024-04-26\",\"enrolment_last_date\":\"2024-07-19\",\"tuition_fee_id\":262,\"class_day\":\"2,4,6,7\",\"class_name\":\"demo 1\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\"}],\"transferred_contracts\":[{\"contract_id\":44066,\"total_charged\":1000000,\"summary_sessions\":0,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":0,\"left_sessions\":0,\"class_id\":null,\"code\":\"C044066\",\"enrolment_start_date\":null,\"enrolment_last_date\":null,\"tuition_fee_id\":262,\"class_day\":null,\"class_name\":null,\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"left_real_sessions\":24,\"left_amount\":1000000},{\"contract_id\":44068,\"total_charged\":12000000,\"summary_sessions\":28,\"real_sessions\":24,\"branch_id\":1,\"product_id\":1,\"bonus_sessions\":4,\"done_sessions\":6,\"left_sessions\":22,\"class_id\":1,\"code\":\"LMS044068\",\"enrolment_start_date\":\"2024-04-25\",\"enrolment_last_date\":\"2024-10-17\",\"tuition_fee_id\":262,\"class_day\":\"2,3,6\",\"class_name\":\"demo\",\"product_name\":\"UCREA\",\"tuition_fee_name\":\"UCREA - 6 th\\u00e1ng\",\"left_real_sessions\":18,\"left_amount\":9000000}],\"received_contracts\":[{\"tuition_fee_id\":268,\"tuition_fee_name\":\"BRIGHT IG - 6 th\\u00e1ng\",\"total_charged\":1000000,\"real_sessions\":2,\"bonus_sessions\":0,\"product_name\":\"BRIGHT IG\"},{\"tuition_fee_id\":268,\"tuition_fee_name\":\"BRIGHT IG - 6 th\\u00e1ng\",\"total_charged\":9000000,\"real_sessions\":18,\"bonus_sessions\":0,\"product_name\":\"BRIGHT IG\"}]}', 1, 1, NULL, 2, 1, 1, '2024-04-30 16:28:35', 'ghi chú đồng ý', 1, '2024-04-30 16:29:54', 'ghi chú', '2024-04-30 16:29:54', NULL);
+INSERT INTO `tuition_transfer` VALUES (1, 1, 2, NULL, '2024-05-14', 2, 1, '2024-05-14 22:58:59', 23156250, 23156250, '{\"tuition_transfer\":{\"from_branch_id\":1,\"from_student_id\":1,\"to_branch_id\":1,\"to_student_id\":2,\"to_product_id\":1,\"note\":null,\"transfer_date\":\"2024-05-14\",\"received_amount\":23156250,\"transferred_amount\":23156250},\"from_student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long\",\"lms_code\":\"LMS000001\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":1,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o Long - LMS000001\",\"cm_name\":\"V\\u1eadn h\\u00e0nh - C00004\",\"ec_name\":\"CSKH - C00005\"},\"from_contracts\":[{\"contract_id\":3,\"total_charged\":23400000,\"summary_sessions\":100,\"real_sessions\":96,\"branch_id\":1,\"product_id\":3,\"bonus_sessions\":4,\"done_sessions\":1,\"left_sessions\":99,\"class_id\":3,\"code\":\"C000003\",\"enrolment_start_date\":\"2024-05-15\",\"enrolment_last_date\":\"2025-05-02\",\"tuition_fee_id\":5,\"class_day\":\"5,7\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 2\",\"product_name\":\"FasTracKids\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\"}],\"to_student_info\":{\"name\":\"L\\u01b0\\u01a1ng B\\u1ea3o H\\u00e2n\",\"lms_code\":\"LMS000002\",\"gud_name1\":\"L\\u01b0\\u01a1ng Th\\u00e0nh C\\u00f4ng\",\"gud_mobile1\":\"0389941902\",\"gud_email1\":\"thanhcong1710@gmail.com\",\"address\":null,\"student_id\":2,\"label\":\"L\\u01b0\\u01a1ng B\\u1ea3o H\\u00e2n - LMS000002\",\"cm_name\":null,\"ec_name\":\"CSKH - C00005\"},\"to_contracts\":[],\"transferred_contracts\":[{\"contract_id\":3,\"total_charged\":23400000,\"summary_sessions\":100,\"real_sessions\":96,\"branch_id\":1,\"product_id\":3,\"bonus_sessions\":4,\"done_sessions\":1,\"left_sessions\":99,\"class_id\":3,\"code\":\"C000003\",\"enrolment_start_date\":\"2024-05-15\",\"enrolment_last_date\":\"2025-05-02\",\"tuition_fee_id\":5,\"class_day\":\"5,7\",\"class_name\":\"L\\u1edbp ch\\u00ednh th\\u1ee9c 2\",\"product_name\":\"FasTracKids\",\"tuition_fee_name\":\"FasTracKids - 12 th\\u00e1ng\",\"left_real_sessions\":95,\"left_amount\":23156250}],\"received_contracts\":[{\"tuition_fee_id\":6,\"tuition_fee_name\":\"FasTrack Tots - 12 th\\u00e1ng\",\"total_charged\":23156250,\"real_sessions\":80,\"bonus_sessions\":0,\"product_name\":\"FasTrack Tots\"}]}', 1, 1, NULL, 1, 1, 1, '2024-05-14 22:59:18', 'Từ chối', NULL, NULL, NULL, '2024-05-14 22:59:18', NULL);
 COMMIT;
 
 -- ----------------------------
@@ -3666,7 +3800,7 @@ INSERT INTO `users` VALUES (1, 'Lương Thành Công', '0389941902', 'admin@admi
 INSERT INTO `users` VALUES (2, 'Giám đốc trung tâm', '0388888888', 'gdtt@gmail.com', NULL, '$2y$10$Oj6RZMdDQ43LadutsxpXZet.dVDDYm7rd7q1Aj8541XMwvgJdSDPS', NULL, '', 1, NULL, '2024-05-12 14:43:31', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00002', NULL, NULL, 0, 'Giám đốc trung tâm', NULL);
 INSERT INTO `users` VALUES (3, 'Giáo viên', '0388888888', 'giaovien@gmail.com', NULL, '$2y$10$Q33qboMMmLejTZRJ28GsMOv5f.ZGOnfd6BJhDnQztAlTDNHMVVYPa', NULL, '', 1, NULL, '2024-05-12 14:44:40', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00003', NULL, NULL, 0, 'Giáo viên', NULL);
 INSERT INTO `users` VALUES (4, 'Vận hành', '0388888888', 'vanhanh@gmail.com', NULL, '$2y$10$AuQRTmWhgKyfvUau7zOsb.nv7u6/jls8o2uJNt0RpoQhXwhElqENK', NULL, '', 1, NULL, '2024-05-12 14:45:39', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00004', NULL, NULL, 0, 'Vận hành', NULL);
-INSERT INTO `users` VALUES (5, 'CSKH', '0388888888', 'cskh@gmail.com', NULL, '$2y$10$fniRs3v1mKsaJFNgkffhb.FDotIpYgnBjqd/XIXxEbD.ss/4yRmo2', NULL, '', 1, NULL, '2024-05-12 14:46:47', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00005', NULL, NULL, 0, 'CSKH', NULL);
+INSERT INTO `users` VALUES (5, 'CSKH', '0388888888', 'cskh@gmail.com', NULL, '$2y$10$fniRs3v1mKsaJFNgkffhb.FDotIpYgnBjqd/XIXxEbD.ss/4yRmo2', NULL, '', 1, NULL, '2024-05-12 14:46:47', '2024-05-24 10:37:12', 1, 1, NULL, 2, 'Trung tâm Mỹ Đình', 'C00005', NULL, NULL, 0, 'CSKH', NULL);
 INSERT INTO `users` VALUES (6, 'Giáo viên 1', '0388888888', 'giaovien1@gmail.com', NULL, '$2y$10$PZ21PfVuQ6FGt/D93XyHhetjnmLMdBJ5LA9703PpOk.fIC1kwJeya', NULL, '', 1, NULL, '2024-05-12 19:46:09', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00006', NULL, NULL, 0, 'Giáo viên', NULL);
 INSERT INTO `users` VALUES (7, 'Vận hành 1', '0388888888', 'vanhanh1@gmail.com', NULL, '$2y$10$2y/yvZK36FbSozhMe8gkUOKSx8e84bJZsRwxAKzjTf.z3ol4urnHO', NULL, '', 1, NULL, '2024-05-12 19:46:53', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00007', NULL, NULL, 0, 'Vận hành', NULL);
 INSERT INTO `users` VALUES (8, 'CSKH 1', '0388888888', 'cskh1@gmail.com', NULL, '$2y$10$iUiGUMExBuJnMS4CglN5tub4My34DS7EATVXYJ.zFPS7FlzETHO.G', NULL, '', 1, NULL, '2024-05-12 19:47:32', NULL, 1, NULL, NULL, 3, 'Trung tâm Giảng Võ, Trung tâm Mỹ Đình, Trung tâm Cầu Giấy', 'C00008', NULL, NULL, 0, 'CSKH', NULL);
