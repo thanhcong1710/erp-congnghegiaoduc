@@ -75,6 +75,7 @@ class AuthController extends Controller
             ]);
         }
 
+        u::updateSimpleRow(array('api_token'=>$token), array('id'=>auth()->user()->id), 'users');
         return $this->respondWithToken($token, $request->email);
     }
 
@@ -232,5 +233,31 @@ class AuthController extends Controller
                 'message' => 'Email không hợp lệ, vui lòng liên hệ với quản trị viên để được hỗ trợ.'
             ], 200);
         }
+    }
+
+    public function revokeToken(Request $request){
+        if($request->user_id){
+            $user = u::first("SELECT api_token AS token FROM users WHERE status = 1 AND id= $request->user_id");
+            if($user && $user->token){
+                JWTAuth::manager()->invalidate(new \Tymon\JWTAuth\Token( $user->token)); 
+            }
+            $result = array(
+                'status' => 1,
+                'message' => 'Xóa token đăng nhập thành công'
+            );
+        }else{
+            $users = u::query("SELECT api_token AS token FROM users WHERE status = 1");
+            foreach($users AS $user){
+                if($user->token){
+                    JWTAuth::manager()->invalidate(new \Tymon\JWTAuth\Token( $user->token)); 
+                }
+            }
+            $result = array(
+                'status' => 1,
+                'message' => 'Xóa tất cả token đăng nhập thành công'
+            );
+        }
+        
+        return response()->json($result);
     }
 }
