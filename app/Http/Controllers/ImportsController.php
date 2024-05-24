@@ -286,6 +286,7 @@ class ImportsController extends Controller
         u::query("UPDATE crm_students AS s LEFT JOIN branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
         $data = u::first("SELECT (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status=6) AS total_success,
             (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status!=6) AS total_error");
+        u::updateBranchIDParents();
         return response()->json($data);
     }
     public function addItemDataParent($list,$arr_owner,$source_id,$creator_id,$source_detail_id) {

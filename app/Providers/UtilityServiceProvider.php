@@ -804,4 +804,9 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $arr;
     }
+
+    public static function updateBranchIDParents(){
+        self::query("UPDATE crm_parents AS p LEFT JOIN branch_has_user AS b ON b.user_id = p.owner_id SET p.branch_id=b.branch_id");
+        return true;
+    }
 }

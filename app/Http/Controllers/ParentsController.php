@@ -28,7 +28,7 @@ class ParentsController extends Controller
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " 1 ";
+        $cond = " p.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
 
         if(!Auth::user()->checkPermission('canViewAllParents')){
             $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
@@ -231,6 +231,7 @@ class ParentsController extends Controller
             'status'=>$request->status,
             'c2c_mobile'=>$request->c2c_mobile,
         ), 'crm_parents');
+        u::updateBranchIDParents();
         LogParents::logAdd($id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
         $result =(object)array(
             'status'=>1,
@@ -326,9 +327,10 @@ class ParentsController extends Controller
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'owner_id'=>$request->owner_id,
-            'last_assign_date'=>$request->owner_id != $pre_parent_info->owner_id ? date('Y-m-d H:i:s') : $pre_parent_info->last_assign_date,
+            'owner_id' => $request->owner_id,
+            'last_assign_date' => $request->owner_id != $pre_parent_info->owner_id ? date('Y-m-d H:i:s') : $pre_parent_info->last_assign_date,
         ), array('id' => $request->parent_id), 'crm_parents');
+        u::updateBranchIDParents();
         LogParents::logAssign($request->parent_id,$pre_parent_info->owner_id,$request->owner_id,Auth::user()->id);
         $result =(object)array(
             'status'=>1,
@@ -348,6 +350,7 @@ class ParentsController extends Controller
             u::query("UPDATE crm_parents SET owner_id= $owner_id,last_assign_date='$last_assign_date' WHERE id =$row->parent_id");
             LogParents::logAssign($row->parent_id,$row->owner_id,$owner_id,Auth::user()->id);
         }
+        u::updateBranchIDParents();
         $result =(object)array(
             'status'=>1,
             'message'=>'Bàn giao thành công'

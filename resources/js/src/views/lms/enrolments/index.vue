@@ -1,6 +1,6 @@
 <template>
 
-  <div id="page-users-list">
+  <div id="page-enrolments-list">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="vx-col md:w-1/4 w-full item-first" style="border-right: 1px solid #ccc;">
@@ -164,7 +164,7 @@
           </div>
         </div>
       </div>
-      <vs-popup :class="'modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
+      <vs-popup :class="'view-enrolments modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
         <div class="vx-row" > 
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <vs-input class="w-full" placeholder="Nhập tên, mã học sinh" v-model="searchData.keyword"></vs-input>
@@ -485,7 +485,7 @@
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
-            if (moment(item.cjrn_classdate).isSameOrAfter(student.start_date)) {
+            if (moment(item.class_date).isSameOrAfter(student.start_date)) {
               resp.push(item)
             }
             return item
@@ -543,7 +543,7 @@
   }
 </script>
 <style>
-.con-vs-popup .vs-popup{
+.view-enrolments.con-vs-popup .vs-popup{
   width: 90%;
 }
 
