@@ -419,7 +419,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+            { title: 'Danh sách báo cáo', active: true},
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
