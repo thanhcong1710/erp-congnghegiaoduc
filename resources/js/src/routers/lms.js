@@ -412,6 +412,19 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/lms/reports',
+        name: 'lms-reports',
+        component: () => import('@/views/lms/report/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+          ],
+          pageTitle: 'Báo cáo',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }
