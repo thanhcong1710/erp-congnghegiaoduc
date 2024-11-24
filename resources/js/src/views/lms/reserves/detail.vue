@@ -170,7 +170,7 @@
               <div v-html="alert.body"></div>
             </vs-alert>
             <div class="vx-col w-full mb-4" v-if="status!=1">
-              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt'}}</strong></label>
+              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==4 ? 'Đã bảo lưu' : (status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt')}}</strong></label>
             </div>
           </div>
 
@@ -373,6 +373,9 @@
                 break;
             case 3:
                 resp = 'Từ chối phê duyệt';
+                break;
+            case 4:
+                resp = 'Đã bảo lưu';
                 break;
             default:
                 resp = 'Chờ phê duyệt'

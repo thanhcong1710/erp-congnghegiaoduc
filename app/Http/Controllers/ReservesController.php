@@ -181,7 +181,6 @@ class ReservesController extends Controller
         $reserve_info = u::getObject(array('id'=>$reserve_id), 'reserves');
         $result=[];
         if($reserve_info){
-            $contract_info = u::first("SELECT id, reserved_sessions FROM contracts WHERE id = $reserve_info->contract_id");
             if($status == 3){
                 u::updateSimpleRow(array(
                     'status' => 3,
@@ -195,20 +194,18 @@ class ReservesController extends Controller
                     'status' => 1,
                     'message' => 'Từ chối phê duyệt bảo lưu thành công.'
                 );
-            }else{
-                $reserve_session = data_get($reserve_info,'session');
-                $start_date = data_get($reserve_info,'start_date'); 
-                $end_date = data_get($reserve_info,'end_date'); 
-                u::updateSimpleRow(array(
-                    'status' => 2,
-                    'approver_id' => Auth::user()->id,
-                    'approved_at' => date('Y-m-d H:i:s'),
-                    'comment' => data_get($request,'comment'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                    'updator_id' => Auth::user()->id,
-                ),array('id'=>$reserve_id),'reserves');
-                
+            }else{ 
                 if(data_get($reserve_info,'is_reserved')){
+                    u::updateSimpleRow(array(
+                        'status' => 4,
+                        'approver_id' => Auth::user()->id,
+                        'approved_at' => date('Y-m-d H:i:s'),
+                        'comment' => data_get($request,'comment'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updator_id' => Auth::user()->id,
+                    ),array('id'=>$reserve_id),'reserves');
+                    $contract_info = u::first("SELECT id, reserved_sessions FROM contracts WHERE id = $reserve_info->contract_id");
+                    $reserve_session = data_get($reserve_info,'session');
                     u::updateSimpleRow(array(
                         'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
                         'updated_at' => date('Y-m-d H:i:s'),
@@ -216,15 +213,25 @@ class ReservesController extends Controller
                     ),array('id'=>$contract_info->id),'contracts');
                 }else{
                     u::updateSimpleRow(array(
-                        'class_id' => null,
-                        'status' => 4,
-                        'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
+                        'status' => 2,
+                        'approver_id' => Auth::user()->id,
+                        'approved_at' => date('Y-m-d H:i:s'),
+                        'comment' => data_get($request,'comment'),
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
-                    ),array('id'=>$contract_info->id),'contracts');
+                    ),array('id'=>$reserve_id),'reserves');
+                    if(data_get($reserve_info,'start_date') > date('Y-m-d')){
+                        u::insertSimpleRow(array(
+                            'student_id'=>data_get($reserve_info, 'student_id'),
+                            'data_id'=>$reserve_id,
+                            'type' => 1,
+                            'status' => 1,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ),'student_waitting_process');
+                    } else {
+                        self::processReserve($reserve_id);
+                    }
                 }
-                u::addLogContracts(data_get($contract_info,'id'));
-                LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
                 $result = array(
                     'status' => 1,
                     'message' => 'Phê duyệt bảo lưu thành công.'
@@ -243,5 +250,23 @@ class ReservesController extends Controller
             FROM reserves AS r 
             WHERE r.student_id = $student_id AND r.status > 0 ORDER BY r.id DESC");
         return response()->json($data);
+    }
+
+    public static function processReserve($reserve_id){
+        $reserve_info = u::getObject(array('id'=>$reserve_id), 'reserves');
+        $contract_info = u::first("SELECT id, reserved_sessions FROM contracts WHERE id = $reserve_info->contract_id");
+        $reserve_session = data_get($reserve_info,'session');
+        $start_date = data_get($reserve_info,'start_date'); 
+        $end_date = data_get($reserve_info,'end_date');
+        u::updateSimpleRow(array(
+            'class_id' => null,
+            'status' => 4,
+            'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ),array('id'=>$contract_info->id),'contracts');
+        u::addLogContracts(data_get($contract_info,'id'));
+        LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
+        return true;
     }
 }

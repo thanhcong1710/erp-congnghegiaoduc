@@ -187,6 +187,7 @@
           {id:1,label:'Chờ duyệt'},
           {id:2,label:'Đã duyệt'},
           {id:3,label:'Từ chối'},
+          {id:4,label:'Đã bảo lưu'},
         ],
         reserves: [],
         limitSource: [20, 50, 100, 500],
