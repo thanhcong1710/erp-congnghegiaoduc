@@ -191,7 +191,7 @@ class BranchTransfersController extends Controller
                         'updator_id' => Auth::user()->id,
                     ),array('id'=>$branch_transfer_id),'branch_transfer');
 
-                    if(data_get($branch_transfer_info, 'transfer_date') <= date('Y-m-d')){
+                    if(data_get($branch_transfer_info, 'transfer_date') > date('Y-m-d')){
                         u::insertSimpleRow(array(
                             'student_id'=>data_get($branch_transfer_info, 'student_id'),
                             'data_id'=>$branch_transfer_id,

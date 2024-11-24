@@ -108,7 +108,7 @@ class ClassTransfersController extends Controller
             'meta_data' => json_encode($request->input())
         ), 'class_transfer');
 
-        if($transfer_date == date('Y-m-d')){
+        if($transfer_date > date('Y-m-d')){
             u::insertSimpleRow(array(
                 'student_id'=>data_get($contract_info, 'student_id'),
                 'data_id'=>$class_transfer_id,

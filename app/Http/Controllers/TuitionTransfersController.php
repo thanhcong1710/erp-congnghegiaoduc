@@ -253,7 +253,7 @@ class TuitionTransfersController extends Controller
                         'updator_id' => Auth::user()->id,
                     ),array('id'=>$tuition_transfer_id),'tuition_transfer');
 
-                    if(data_get($tuition_transfer_info, 'transfer_date') <= date('Y-m-d')){
+                    if(data_get($tuition_transfer_info, 'transfer_date') > date('Y-m-d')){
                         u::insertSimpleRow(array(
                             'student_id'=>data_get($tuition_transfer_info, 'from_student_id'),
                             'data_id'=>$tuition_transfer_id,

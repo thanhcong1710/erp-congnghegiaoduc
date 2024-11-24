@@ -585,6 +585,10 @@
           mess += " - Gói học phí không được để trống<br/>";
           resp = false;
         }
+        if (this.contract.start_date == "") {
+          mess += " - Ngày dự kiến học không được để trống<br/>";
+          resp = false;
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
