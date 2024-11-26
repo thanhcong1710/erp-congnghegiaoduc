@@ -108,6 +108,10 @@
             disabled="true"
           />
         </div>
+        <div class="vx-col md:w-2/3 w-full mb-4">
+          <label>Ghi chú</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="student_info.note"  :disabled="disabled_edit"></textarea>
+        </div>
       </div>
       <vs-divider/>
       <h5 class="w-full"><i class="fa-solid fa-person-breastfeeding"></i> THÔNG TIN PHỤ HUYNH</h5>
@@ -219,6 +223,10 @@
                 @input="saveJob2"
                 :disabled="disabled_edit"
             ></vue-select>
+        </div>
+        <div class="vx-col md:w-2/3 w-full mb-4">
+          <label>Nguyện vọng của phụ huynh</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="student_info.aspiration"  :disabled="disabled_edit"></textarea>
         </div>
       </div>
       <vs-divider/>

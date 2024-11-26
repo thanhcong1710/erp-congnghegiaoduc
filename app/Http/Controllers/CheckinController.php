@@ -105,6 +105,7 @@ class CheckinController extends Controller
                 'district_id' => data_get($crm_parent_info, 'district_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
+                'note' => data_get($crm_student_info, 'note'),
                 'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
                 'gud_birth_day1' => data_get($crm_parent_info, 'birthday'),
                 'gud_gender1' => data_get($crm_parent_info, 'gender'),

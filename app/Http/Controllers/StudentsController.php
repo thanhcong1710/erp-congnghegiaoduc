@@ -194,6 +194,8 @@ class StudentsController extends Controller
             'gud_email2' => $request->gud_email2,
             'gud_mobile2' => $request->gud_mobile2,
             'gud_birth_day2' => $request->gud_birth_day2,
+            'note' => $request->note,
+            'aspiration' => $request->aspiration,
             'gud_job2' => $request->gud_job2,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
