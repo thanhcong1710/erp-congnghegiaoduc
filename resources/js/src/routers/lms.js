@@ -318,6 +318,33 @@ export default {
         }
       },
       {
+        path: '/lms/exchange',
+        name: 'lms-exchange',
+        component: () => import('@/views/lms/exchange/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách quy đổi', active: true}
+          ],
+          pageTitle: 'Danh sách quy đổi',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/exchange/add',
+        name: 'lms-exchange-add',
+        component: () => import('@/views/lms/exchange/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách quy đổi', url: '/lms/exchange' },
+            { title: 'Thêm mới quy đổi', active: true }
+          ],
+          pageTitle: 'Thêm mới quy đổi',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/attendances',
         name: 'lms-attendances',
         component: () => import('@/views/lms/attendances/index.vue'),
@@ -422,6 +449,62 @@ export default {
             { title: 'Danh sách báo cáo', active: true},
           ],
           pageTitle: 'Báo cáo',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/report-01',
+        name: 'lms-report-01',
+        component: () => import('@/views/lms/report/report01.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+            { title: 'Báo cáo full fee active', active: true}
+          ],
+          pageTitle: 'Báo cáo full fee active',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/report-02a',
+        name: 'lms-report-02a',
+        component: () => import('@/views/lms/report/report02a.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+            { title: 'Báo cáo tái phí - chi tiết', active: true}
+          ],
+          pageTitle: 'Báo cáo tái phí - chi tiết',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/report-02b',
+        name: 'lms-report-02b',
+        component: () => import('@/views/lms/report/report02b.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+            { title: 'Báo cáo tái phí - tổng hợp', active: true}
+          ],
+          pageTitle: 'Báo cáo tái phí - tổng hợp',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/report-02c',
+        name: 'lms-report-02c',
+        component: () => import('@/views/lms/report/report02c.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo', url: '/lms/reports'},
+            { title: 'Báo cáo tái phí - EC', active: true}
+          ],
+          pageTitle: 'Báo cáo tái phí - EC',
           rule: 'editor'
         }
       },

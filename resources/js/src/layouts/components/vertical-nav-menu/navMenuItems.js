@@ -114,6 +114,12 @@ export default [
             permission:'lms_tuition_transfers',
           },
           {
+            url: '/lms/exchange',
+            name: 'Quy đổi',
+            slug: 'lms-exchange',
+            permission:'lms_exchange',
+          },
+          {
             url: '/lms/attendances',
             name: 'Điểm danh',
             slug: 'lms-attendances',

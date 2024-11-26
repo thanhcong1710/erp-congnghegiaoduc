@@ -107,7 +107,7 @@ class TuitionTransfersController extends Controller
             $contract->left_real_sessions = $left_real_sessions;
             $contract->left_amount = $left_real_amount;
             $transferred_contracts[$k] = $contract;
-            $data_calc_transfer = self::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id);
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id);
             if(!data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                 $result = array(
                     'status' => 0,
@@ -133,31 +133,6 @@ class TuitionTransfersController extends Controller
             'total_amount_transfer' => $total_amount_transfer
         ];
         return response()->json($data);
-    }
-
-    public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
-    {
-        $resp = (object)[];
-        if ($from_tuition_fee_id && (int)$transfer_amount >= 0) {
-            $available_tuiotion_fee_ids = u::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
-            if (count($available_tuiotion_fee_ids)) {
-                $available_ids = [];
-                foreach ($available_tuiotion_fee_ids as $id) {
-                    $available_ids[] = (int)$id->exchange_tuition_fee_id;
-                }
-                $available_ids = implode(',', $available_ids);
-                $to_tuition_fee = u::first("SELECT t.*, p.name AS product_name 
-                    FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
-                    WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
-                        AND t.id IN ($available_ids)");
-                if($to_tuition_fee){
-                    $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
-                    $resp->receive_tuition_fee = $to_tuition_fee;
-                    $resp->transfer_amount = $transfer_amount;
-                }
-            }
-        }
-        return $resp;
     }
 
     public function add(Request $request){
@@ -285,7 +260,7 @@ class TuitionTransfersController extends Controller
             $contract_id = 0;
             if($left_real_amount > 0){
                 $last_contract_to_student = u::first("SELECT count_recharge FROM contracts WHERE student_id=$to_student_id ORDER BY count_recharge DESC LIMIT 1");
-                $data_calc_transfer = self::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, data_get($tuition_transfer_info, 'to_branch_id'), data_get($tuition_transfer_info, 'to_product_id'));
+                $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, data_get($tuition_transfer_info, 'to_branch_id'), data_get($tuition_transfer_info, 'to_product_id'));
                 $term_student_user = u::first("SELECT * FROM term_student_user WHERE student_id = $to_student_id");
                 $contract_id = u::insertSimpleRow(array(
                     'type' => data_get($contract, 'type'),

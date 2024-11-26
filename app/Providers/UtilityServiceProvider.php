@@ -809,4 +809,29 @@ class UtilityServiceProvider extends ServiceProvider
         self::query("UPDATE crm_parents AS p LEFT JOIN branch_has_user AS b ON b.user_id = p.owner_id SET p.branch_id=b.branch_id");
         return true;
     }
+
+    public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
+    {
+        $resp = (object)[];
+        if ($from_tuition_fee_id && (int)$transfer_amount >= 0) {
+            $available_tuiotion_fee_ids = self::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
+            if (count($available_tuiotion_fee_ids)) {
+                $available_ids = [];
+                foreach ($available_tuiotion_fee_ids as $id) {
+                    $available_ids[] = (int)$id->exchange_tuition_fee_id;
+                }
+                $available_ids = implode(',', $available_ids);
+                $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
+                    FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
+                    WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
+                        AND t.id IN ($available_ids)");
+                if($to_tuition_fee){
+                    $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
+                    $resp->receive_tuition_fee = $to_tuition_fee;
+                    $resp->transfer_amount = $transfer_amount;
+                }
+            }
+        }
+        return $resp;
+    }
 }
