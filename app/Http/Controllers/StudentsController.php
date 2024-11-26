@@ -247,7 +247,7 @@ class StudentsController extends Controller
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
-                c.must_charge, c.tuition_fee_amount, '' AS label_status, c.status, c.type,
+                c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,

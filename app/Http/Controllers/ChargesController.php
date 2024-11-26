@@ -73,6 +73,7 @@ class ChargesController extends Controller
                 'summary_sessions' => data_get($contract_info, 'total_sessions'), 
                 'left_sessions' => data_get($contract_info, 'total_sessions'), 
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => 0,
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'updator_id'=>Auth::user()->id,
@@ -82,6 +83,7 @@ class ChargesController extends Controller
             u::updateSimpleRow(array(
                 'status' => 2,
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => $debt_amount,
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'updator_id'=>Auth::user()->id,

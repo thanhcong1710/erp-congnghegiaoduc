@@ -152,24 +152,16 @@
                     </thead>
                     <tbody>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td" width="160px"><span>Số phí đã đóng:</span></td> 
-                        <td class="td vs-table--td"><span>{{item.total_charged | formatMoney}}</span></td> 
+                        <td class="td vs-table--td" width="160px"><span>Số phí:</span></td> 
+                        <td class="td vs-table--td"><strong>{{item.total_charged | formatMoney}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Số buổi chính thức:</span></td> 
-                        <td class="td vs-table--td"><span>{{item.real_sessions}}</span></td> 
+                        <td class="td vs-table--td"><strong>{{item.real_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Số buổi học bổng:</span></td> 
-                        <td class="td vs-table--td"><span>{{item.bonus_sessions}}</span></td> 
-                      </tr>
-                      <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Số buổi đã học:</span></td> 
-                        <td class="td vs-table--td"><strong>{{item.done_sessions}}</strong></td> 
-                      </tr>
-                      <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Số buổi còn:</span></td> 
-                        <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
+                        <td class="td vs-table--td"><strong>{{item.bonus_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
                         <td class="td vs-table--td"><span>Khóa học:</span></td> 
@@ -190,11 +182,11 @@
             <router-link class="btn btn-danger" :to="`/lms/exchanges`">
               <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
             </router-link>
-            <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
+            <vs-button class="mb-2" color="success" @click="save">Quy đổi</vs-button>
           </div>
         </div>
       </div>
-      <p style="color:red"> Lưu ý: chỉ quy đổi các gói phí không ở trong lớp</p>
+      <p style="color:red"> Lưu ý: chỉ được quy đổi các gói phí không ở trong lớp</p>
     </vx-card>
   </div>
 </template>
@@ -261,6 +253,7 @@
           branch_id:'',
           student_id: '',
           to_product_id:'',
+          contract_exchange:0
         },
         student_info:{},
         from_contracts:[],
@@ -313,18 +306,21 @@
         this.getContractsActive(student.student_id)
       },
       getContractsActive(student_id){
-        this.$vs.loading()
-        axios.p("/api/lms/exchanges/get-data-from-contract",{
-          student_id: student_id
-        })
-        .then((response) => {
-          this.from_contracts = response.data
-          this.$vs.loading.close();
-        })
-        .catch((e) => {
-          console.log(e);
-          this.$vs.loading.close();
-        });
+        this.from_contracts = []
+        if(student_id) {
+          this.$vs.loading()
+          axios.p("/api/lms/exchanges/get-data-from-contract",{
+            student_id: student_id
+          })
+          .then((response) => {
+            this.from_contracts = response.data
+            this.$vs.loading.close();
+          })
+          .catch((e) => {
+            console.log(e);
+            this.$vs.loading.close();
+          });
+        }
       },
       resetInputBranchTransfer(){
         this.input_disabled = true
@@ -348,13 +344,22 @@
         }
       },
       prepareChangeData(){
+        this.to_contracts = [];
         this.$vs.loading()
         axios.p("/api/lms/exchanges/get-data-to-contract",{
           to_product_id: this.exchange.to_product_id,
           student_id: this.exchange.student_id,
         })
         .then((response) => {
-          this.to_contracts = response.data
+          if(!response.data.contract_exchange){
+            this.alert.color = 'danger'
+            this.alert.body = 'Không có gói phí hợp lệ hoặc chưa cấu hình gói phí quy đổi';
+            this.alert.active = true;
+          }else{
+            this.exchange.contract_exchange = response.data.contract_exchange
+            this.to_contracts = response.data.to_contracts
+            this.alert.active = false;
+          }
           this.$vs.loading.close();
         })
         .catch((e) => {
@@ -366,16 +371,8 @@
       save() {
         let mess = "";
         let resp = true;
-        if (this.exchange.to_branch_id == "") {
-          mess += " - Trung tâm nhận không được để trống<br/>";
-          resp = false;
-        }
-        if (this.exchange.to_branch_id!="" && this.exchange.branch_id == this.exchange.to_branch_id) {
-          mess += " - Trung tâm nhận phải khác trung tâm hiện tại<br/>";
-          resp = false;
-        }
-        if (this.exchange.transfer_date == "") {
-          mess += " - Ngày bắt đầu chuyển lớp không được để trống<br/>";
+        if (!this.exchange.contract_exchange) {
+          mess += " - Không có gói phí hợp lệ để quy đổi<br/>";
           resp = false;
         }
         if (!resp) {
@@ -386,10 +383,7 @@
         }
         this.$vs.loading()
         axios.p("/api/lms/exchanges/add",{
-          exchange: this.exchange,
-          student_info: this.student_info,
-          from_contracts : this.from_contracts,
-          to_contracts : this.to_contracts,
+          exchange: this.exchange
         })
         .then((response) => {
           this.$vs.loading.close();
@@ -401,7 +395,7 @@
               iconPack: 'feather',
               icon: 'icon-check'
             })
-            this.$router.push('/lms/exchanges')
+            this.$router.push('/lms/exchange')
           }else{
             this.$vs.notify({
               title: 'Lỗi',

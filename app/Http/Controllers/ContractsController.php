@@ -75,7 +75,7 @@ class ContractsController extends Controller
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
-        $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
+        $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." ORDER BY count_recharge DESC LIMIT 1");
         $contract_id = u::insertSimpleRow(array(
             'type' => data_get($request, 'type'),
@@ -88,9 +88,10 @@ class ContractsController extends Controller
            'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_total_charged'=>0,
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),
@@ -186,7 +187,7 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_sessions,c.bonus_sessions, c.real_sessions, c.tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type
+                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
@@ -246,10 +247,10 @@ class ContractsController extends Controller
            'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_total_charged'=>0,
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),

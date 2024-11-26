@@ -53,17 +53,17 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Trung tâm
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Mã hợp đồng
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Trung tâm
                       <!---->
                     </div>
                   </th>
@@ -79,28 +79,31 @@
                   </th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_transfers" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in exchanges" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
-                  <p>{{item.from_student_name}}</p>
-                  <p>Mã: {{item.from_student_lms_code}}</p>
+                  <p>{{item.branch_name}}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>{{item.to_student_name}}</p>
-                  <p>Mã: {{item.to_student_lms_code}}</p>
+                  <p>{{item.contract_code}}</p>
                 </td>
-                <td class="td vs-table--td">{{item.transferred_amount | formatMoney}}</td>
-                <td class="td vs-table--td">{{item.transfer_date}}</td>
-                <td class="td vs-table--td">{{item.note}}</td>
                 <td class="td vs-table--td">
-                  <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusName}}</vs-chip>
+                  <p>{{item.name}}</p>
+                  <p>Mã: {{item.lms_code}}</p>
                 </td>
-                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/tuition_transfers/${item.id}/detail`" >
-                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                    </router-link> 
+                <td class="td vs-table--td">
+                  <p>{{item.from_tuition_fee_name}}</p>
+                  <p>Khóa học: {{item.from_product_name}}</p>
+                  <p>Số phí còn lại: {{item.amount | formatMoney}}</p>
+                  <p>Số buổi còn lại: <strong>{{item.from_left_sessions}}</strong></p>
+                </td>
+                <td class="td vs-table--td">
+                  <p>{{item.to_tuition_fee_name}}</p>
+                  <p>Khóa học: {{item.to_product_name}}</p>
+                  <p>Số phí còn lại: {{item.amount | formatMoney}}</p>
+                  <p>Số buổi còn lại: <strong>{{item.to_left_sessions}}</strong></p>
                 </td>
               </tr>
             </table>
@@ -154,15 +157,7 @@
           arr_status: "",
           status: "",
         },
-        statusOptions:[
-          {id:1,label:'Chờ GĐTT duyệt'},
-          {id:2,label:'GĐTT đã từ chối duyệt'},
-          {id:3,label:'Chờ kế toán duyệt'},
-          {id:4,label:'Kế toán đã từ chối duyệt'},
-          {id:5,label:'Đã phê duyệt'},
-          {id:6,label:'Đã xử lý'},
-        ],
-        tuition_transfers: [],
+        exchanges: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -223,10 +218,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/tuition_transfers/list', data)
+        axios.p('/api/lms/exchanges/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.tuition_transfers = response.data.list
+            this.exchanges = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;

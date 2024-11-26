@@ -813,7 +813,7 @@ class UtilityServiceProvider extends ServiceProvider
     public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
     {
         $resp = (object)[];
-        if ($from_tuition_fee_id && (int)$transfer_amount >= 0) {
+        if ($from_tuition_fee_id) {
             $available_tuiotion_fee_ids = self::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
             if (count($available_tuiotion_fee_ids)) {
                 $available_ids = [];

@@ -161,10 +161,13 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('tuition_transfers/show/{reserve_id}', 'TuitionTransfersController@show');
             Route::post('tuition_transfers/approve', 'TuitionTransfersController@approve');
 
-            Route::post('exchanges/list', 'ExchangesController@list');
-            Route::post('exchanges/search-student', 'ExchangesController@searchStudent');
-            Route::post('exchanges/get-data-from-contract', 'ExchangesController@getDataFromContractActive');
-            Route::post('exchanges/get-data-to-contract', 'ExchangesController@getDataContractExchange');
+            Route::prefix('exchanges')->group(function () {
+                Route::post('list', 'ExchangesController@list');
+                Route::post('search-student', 'ExchangesController@searchStudent');
+                Route::post('get-data-from-contract', 'ExchangesController@getDataFromContractActive');
+                Route::post('get-data-to-contract', 'ExchangesController@getDataContractExchange');
+                Route::post('add', 'ExchangesController@add');
+            });
 
             Route::prefix('attendances')->group(function () {
                 Route::post('load-classes', 'AttendancesController@loadClasses');
