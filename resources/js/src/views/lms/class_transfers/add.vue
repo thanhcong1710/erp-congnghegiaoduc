@@ -407,7 +407,8 @@
           this.$vs.loading()
           axios.p("/api/lms/class_transfers/get-left-sessions",{
             transfer_date: this.class_transfer.transfer_date,
-            contract_id: this.student_info.contract_id
+            contract_id: this.student_info.contract_id,
+            to_product_id: this.class_transfer.product_id
           })
           .then((response) => {
             this.class_transfer.left_session = response.data

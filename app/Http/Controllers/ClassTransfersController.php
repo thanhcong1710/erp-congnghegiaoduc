@@ -69,14 +69,30 @@ class ClassTransfersController extends Controller
     public function getLeftSessions (Request $request){
         $transfer_date = data_get($request,'transfer_date');
         $contract_id = data_get($request,'contract_id');
-        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions
+        $to_product_id = data_get($request,'to_product_id');
+        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions 
             FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
-
-        $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
-        $arr_day = explode(",",data_get($contract_info, 'class_day'));
-        $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d',strtotime($transfer_date)-24*3600), $holidays, $arr_day);
-        $left_sessions = (int)data_get($contract_info, 'summary_sessions') - (int)data_get($contract_info, 'done_sessions') - (int)data_get($data_sessions, 'total');
-        $left_sessions = $left_sessions > 0 ? $left_sessions : 0;  
+        if(data_get($contract_info, 'product_id') == $to_product_id){
+            $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
+            $arr_day = explode(",",data_get($contract_info, 'class_day'));
+            $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d',strtotime($transfer_date)-24*3600), $holidays, $arr_day);
+            $left_sessions = (int)data_get($contract_info, 'summary_sessions') - (int)data_get($contract_info, 'done_sessions') - (int)data_get($data_sessions, 'total');
+            $left_sessions = $left_sessions > 0 ? $left_sessions : 0; 
+        } else {
+            $left_real_sessions = $contract_info->real_sessions > $contract_info->done_sessions ? $contract_info->real_sessions - $contract_info->done_sessions : 0;
+            $left_real_amount = $contract_info->real_sessions ? ceil($left_real_sessions * ($contract_info->total_charged / $contract_info->real_sessions)) : 0; 
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id);
+            if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                $tuition_fee_id = data_get($data_calc_transfer, 'receive_tuition_fee.id');
+                $total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
+                $real_sessions = data_get($data_calc_transfer, 'sessions', 0);
+                $bonus_sessions = $contract_info->bonus_sessions > $contract_info->left_sessions ? $contract_info->left_sessions : $contract_info->bonus_sessions;
+                $summary_sessions = $real_sessions + $bonus_sessions;
+                $left_sessions = $summary_sessions;
+            } else {
+                $left_sessions = 0;
+            }
+        } 
         return response()->json($left_sessions);
     }  
 
@@ -143,27 +159,74 @@ class ClassTransfersController extends Controller
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
             WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".(int)$cm_id." LIMIT 1");
         $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
-        u::updateSimpleRow(array(
-            'cm_id'=> $cm_id,
-            'teacher_id'=>$teacher_id,
-            'cm_leader_id' => $cm_leader_id,
-            'updated_at' => date('Y-m-d H:i:s')
-        ), array('student_id'=>$student_id), 'term_student_user');
-        u::updateSimpleRow(array(
-            'status'=> 2,
-            'updated_at' => date('Y-m-d H:i:s')
-        ), array('id'=>$class_transfer_id), 'class_transfer');
-        u::updateSimpleRow(array(
-            'cm_id'=>$cm_id,
-            'cm_leader_id'=>$cm_leader_id,
-            'program_id' => data_get($class_transfer_info, 'to_program_id'),
-            'product_id' => data_get($class_transfer_info, 'to_product_id'),
-            'class_id' => data_get($class_transfer_info, 'to_class_id'),
-            'updated_at' => date('Y-m-d H:i:s'),
-            'updator_id' => Auth::user()->id,
-        ),array('id'=>$contract_id),'contracts');
-        u::addLogContracts($contract_id);
-        LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
+       
+        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions 
+            FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
+        if(data_get($contract_info, 'product_id') == data_get($class_transfer_info, 'to_product_id')){
+            u::updateSimpleRow(array(
+                'cm_id'=> $cm_id,
+                'teacher_id'=>$teacher_id,
+                'cm_leader_id' => $cm_leader_id,
+                'updated_at' => date('Y-m-d H:i:s')
+            ), array('student_id'=>$student_id), 'term_student_user');
+            u::updateSimpleRow(array(
+                'cm_id'=>$cm_id,
+                'cm_leader_id'=>$cm_leader_id,
+                'program_id' => data_get($class_transfer_info, 'to_program_id'),
+                'product_id' => data_get($class_transfer_info, 'to_product_id'),
+                'class_id' => data_get($class_transfer_info, 'to_class_id'),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+            ),array('id'=>$contract_id),'contracts');
+            u::addLogContracts($contract_id);
+
+            LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
+            u::updateSimpleRow(array(
+                'status'=> 2,
+                'updated_at' => date('Y-m-d H:i:s')
+            ), array('id'=>$class_transfer_id), 'class_transfer');
+        } else {
+            $left_real_sessions = $contract_info->real_sessions > $contract_info->done_sessions ? $contract_info->real_sessions - $contract_info->done_sessions : 0;
+            $left_real_amount = $contract_info->real_sessions ? ceil($left_real_sessions * ($contract_info->total_charged / $contract_info->real_sessions)) : 0; 
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id);
+            if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                $bonus_sessions = $contract_info->bonus_sessions > $contract_info->left_sessions ? $contract_info->left_sessions : $contract_info->bonus_sessions;
+                
+                u::updateSimpleRow(array(
+                    'cm_id'=> $cm_id,
+                    'teacher_id'=>$teacher_id,
+                    'cm_leader_id' => $cm_leader_id,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ), array('student_id'=>$student_id), 'term_student_user');
+                u::updateSimpleRow(array(
+                    'cm_id'=>$cm_id,
+                    'cm_leader_id'=>$cm_leader_id,
+                    'program_id' => data_get($class_transfer_info, 'to_program_id'),
+                    'product_id' => data_get($class_transfer_info, 'to_product_id'),
+                    'class_id' => data_get($class_transfer_info, 'to_class_id'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                    'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
+                    'total_charged' => data_get($data_calc_transfer, 'transfer_amount', 0),
+                    'real_sessions' => data_get($data_calc_transfer, 'sessions', 0),
+                    'bonus_sessions' => $bonus_sessions,
+                    'summary_sessions' => data_get($data_calc_transfer, 'sessions', 0) + $bonus_sessions,
+                    'done_sessions' => 0,
+                    'left_sessions' => data_get($data_calc_transfer, 'sessions', 0) + $bonus_sessions,
+                    'last_done_sessions' => $contract_info->done_sessions,
+                    'updator_id' => Auth::user()->id,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'action' => 'contract_class_transfer'
+                ),array('id'=>$contract_id),'contracts');
+                u::addLogContracts($contract_id);
+    
+                LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
+                u::updateSimpleRow(array(
+                    'status'=> 2,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ), array('id'=>$class_transfer_id), 'class_transfer');
+            }
+        }
         return true;
     }
 
