@@ -74,7 +74,7 @@ class AttendancesController extends Controller
         if($schedule_has_student_info){
             u::updateSimpleRow(array(
                 'attendance_status'=>data_get($request, 'attendance_status'),
-                'status' => data_get($request, 'attendance_status') == 1 || data_get($request, 'attendance_status') == 3 ? 1 :0,
+                // 'status' => data_get($request, 'attendance_status') == 1 || data_get($request, 'attendance_status') == 3 ? 1 :0,
                 'note'=>data_get($request, 'note'),
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
@@ -129,7 +129,7 @@ class AttendancesController extends Controller
         ),array('id'=>data_get($request, 'id')), 'make_up_sessions');
         u::updateSimpleRow(array(
             'attendance_status'=>data_get($request, 'status') == 2 ? 3 : 0,
-            'status'=> data_get($request, 'status') == 2 ? 1 : 0,
+            //'status'=> data_get($request, 'status') == 2 ? 1 : 0,
             'note'=>data_get($request, 'note'),
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,

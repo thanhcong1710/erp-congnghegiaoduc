@@ -49,7 +49,7 @@ class AddScheduleHasStudent extends Command
         }else{
             self::addNewScheduleHasStudent($class_date);
         }
-        // self::processReserve($class_date);
+        self::processReserve($class_date);
 
         u::query("INSERT INTO log_jobs (`action`, created_at, `data`) VALUES ('AddScheduleHasStudent','".date('Y-m-d H:i:s')."', '$class_date')");
         return "ok";
@@ -68,11 +68,11 @@ class AddScheduleHasStudent extends Command
         return "ok";
     }
 
-    // private function processReserve($class_date){
-    //     u::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$class_date' 
-    //         AND (SELECT count(id) FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
-    //     return "ok";
-    // }
+    private function processReserve($class_date){
+        u::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$class_date' 
+            AND (SELECT count(id) FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
+        return "ok";
+    }
 
     public function addItem($list, $class_date) {
         if ($list) {
