@@ -288,4 +288,70 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report02b(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " b.status = 1 AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND b.id IN (".implode(",",$branch_id).")";
+        }
+        
+        $order_by = " ORDER BY b.id ";
+        $total = u::first("SELECT COUNT(b.id) total FROM branches b WHERE $cond");
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND  r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id =b.id";
+        $list = u::query("SELECT
+                        ($renewSql AND r.status>0) total_item,
+                        ($renewSql AND r.status=1) success_item,
+                        b.name branch_name
+                    FROM branches b
+                    WHERE $cond $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function report02c(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        if (!empty($branch_id)) {
+            $branch_query=implode(",",$branch_id);
+        }
+        
+        $order_by = " ORDER BY u.id ";
+        $total = u::first("SELECT COUNT(u.id) total
+                FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0))");
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.ec_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS ec_name, u.id AS ec_id, b.id AS branch_id,
+            (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
+            ($renewSql AND r.status >0) total_item,
+            ($renewSql AND r.status=1) success_item
+            FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+                LEFT JOIN branches AS b ON b.id=bu.branch_id
+            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }

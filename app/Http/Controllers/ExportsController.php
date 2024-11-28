@@ -178,6 +178,7 @@ class ExportsController extends Controller
         $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
+        $start_date = date('Y-m');
         foreach($arr_key AS $k=>$key){
             if($key=='keyword'){
                 $keyword = $arr_value[$k];
@@ -248,6 +249,123 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo chi tiết học sinh tái phí.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report02b(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+        }
+
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND  r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id =b.id";
+        $order_by = " ORDER BY b.id DESC ";
+        $list = u::query("SELECT
+                        ($renewSql AND r.status>0) total_item,
+                        ($renewSql AND r.status=1) success_item,
+                        b.name branch_name
+                    FROM branches b
+                    WHERE $cond $order_by ");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Số học sinh đến hạn tái tục');
+        $sheet->setCellValue('C1', 'Học sinh đóng phí tái tục');
+        $sheet->setCellValue('D1', 'Tỷ lệ tái tục (%');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->total_item) ;
+            $sheet->setCellValue('C' . $x, $list[$i]->success_item );
+            $sheet->setCellValue('D' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng hợp học sinh tái phí.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report02c(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.ec_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $order_by = " ORDER BY b.id DESC ";
+        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS ec_name, u.id AS ec_id, b.id AS branch_id,
+            (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
+            ($renewSql AND r.status >0) total_item,
+            ($renewSql AND r.status=1) success_item
+            FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+                LEFT JOIN branches AS b ON b.id=bu.branch_id
+            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Nhân viên');
+        $sheet->setCellValue('C1', 'Chức Danh');
+        $sheet->setCellValue('D1', 'Số học sinh đến hạn tái tục');
+        $sheet->setCellValue('E1', 'Học sinh đóng phí tái tục');
+        $sheet->setCellValue('F1', 'Tỷ lệ tái tục (%');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->ec_name);
+            $sheet->setCellValue('C' . $x, $list[$i]->role_name);
+            $sheet->setCellValue('D' . $x, $list[$i]->total_item) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->success_item );
+            $sheet->setCellValue('F' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo học sinh tái phí theo EC.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

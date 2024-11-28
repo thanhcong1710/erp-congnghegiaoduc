@@ -5,7 +5,7 @@
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
       <h5>BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE</h5>
-      <hr class="mt-2 mb-2">
+      <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
