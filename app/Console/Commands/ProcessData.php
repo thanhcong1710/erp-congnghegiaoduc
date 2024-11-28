@@ -43,7 +43,12 @@ class ProcessData extends Command
     public function handle(Request $request)
     {
         $report = new ReportsController();
+        // report_full_fee_active
         $report->collectFullFeeActive( $request,'_','_');
+        //report_renews
+        $report->updateCompletedDate();
+        $report->updateRenewedDates();
+        $report->updateRenewReport();
 
         u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('ProcessData','".date('Y-m-d H:i:s')."')");
         return "ok";

@@ -4,6 +4,8 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
+      <h5>BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE</h5>
+      <hr class="mt-2 mb-2">
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
@@ -37,7 +39,7 @@
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="dark" type="border" class="mr-3 mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
             <vs-button color="success"  class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button>
           </div>
         </div>

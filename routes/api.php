@@ -22,7 +22,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('reset-password', 'AuthController@resetPassword');
     });
     Route::prefix('export')->group(function () {
-        Route::get('import/{import_id}', 'ExportController@import');
+        Route::get('import/{import_id}', 'ExportsController@import');
     });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
