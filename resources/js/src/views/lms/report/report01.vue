@@ -260,8 +260,7 @@
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"
-        url += this.key+"/"+this.value +`?token=${localStorage.getItem("api_token")}`
-        console.log(url)
+        url += this.key+"/"+this.value +`?token=${localStorage.getItem("accessToken")}`
         window.open(url, '_blank');
       },
     },

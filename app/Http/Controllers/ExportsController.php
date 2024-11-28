@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\ProcessExcel;
 use Illuminate\Support\Facades\Auth;
 
-class ExportController extends Controller
+class ExportsController extends Controller
 {
     public function report01(Request $request , $key,$value) {
         set_time_limit(300);
