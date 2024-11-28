@@ -196,6 +196,12 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('02b', 'ReportsController@report02b');
                 Route::post('02c', 'ReportsController@report02c');
             });
+            Route::prefix('exports')->group(function () {
+                Route::post('report01/{key}/{value}', 'ExportsController@report01');
+                Route::post('report02a/{key}/{value}', 'ExportsController@report02a');
+                Route::post('report02b/{key}/{value}', 'ExportsController@report02b');
+                Route::post('report02c/{key}/{value}', 'ExportsController@report02c');
+            });
         });
 
         Route::prefix('settings')->group(function () {

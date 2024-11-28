@@ -137,6 +137,18 @@ function isGreaterThan (_from, _to) {
   return (_from_time.getTime() > _to_time.getTime())?true:false
 }
 
+function getDateMonth(date) {
+  let day =
+    date instanceof Date && !isNaN(date.valueOf()) ? date : new Date();
+  if (day instanceof Date && !isNaN(day.valueOf())) {
+    var year = day.getFullYear();
+    var month = (day.getMonth() + 1).toString();
+    var formatedMonth = month.length === 1 ? "0" + month : month;
+    return `${year}-${formatedMonth}`;
+  }
+  return "";
+}
+
 export default {
   dateToString,
   checkPermission,
@@ -144,5 +156,6 @@ export default {
   is,
   fmc,
   convertDateToString,
-  isGreaterThan
+  isGreaterThan,
+  getDateMonth
 }

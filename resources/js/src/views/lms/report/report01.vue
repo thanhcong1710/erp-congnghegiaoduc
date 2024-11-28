@@ -30,7 +30,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian tạo</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
+            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
         </div>
@@ -38,6 +38,7 @@
           <div class="vx-col w-full">
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="success"  class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button>
           </div>
         </div>
       </div>
@@ -45,7 +46,7 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table">
+            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
@@ -56,7 +57,7 @@
                   <th colspan="1" rowspan="1">Tên phụ huynh</th>
                   <th colspan="1" rowspan="1">Lớp</th>
                   <th colspan="1" rowspan="1">Sản phẩm</th>
-                  <th colspan="1" rowspan="1">Giáo viên</th>
+                  <th colspan="1" rowspan="1">CM</th>
                   <th colspan="1" rowspan="1">Gói phí</th>
                   <th colspan="1" rowspan="1">Loại</th>
                   <th colspan="1" rowspan="1">Tổng số buổi</th>
@@ -65,38 +66,23 @@
                   <th colspan="1" rowspan="1">Ngày kết thúc</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.name }}</strong></p>
-                  <p>Mã: {{item.lms_code}}</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.branch_name }}</strong></p>
-                  <p>EC: {{ item.ec_name }}</p>
-                  <p>CM: {{ item.cm_name }}</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-                  <p>Khóa học: {{ item.product_name }}</p>
-                  <p>Gói phí: {{ item.tuition_fee_name }}</p>
-                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} buổi học bổng)</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.tuition_fee_amount | formatMoney }}</strong></p>
-                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
-                  <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
-                </td>
-                <td class="td vs-table--td text-center">{{ item.label_status}}</td>
-                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
-                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                    </router-link> 
-                    <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
-                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
-                </td>
+                <td class="td vs-table--td">{{item.branch_name}}</td>
+                <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td">{{item.name}}</td>
+                <td class="td vs-table--td">{{item.gud_name1}}</td>
+                <td class="td vs-table--td">{{ item.cls_name}}</td>
+                <td class="td vs-table--td">{{ item.product_name}}</td>
+                <td class="td vs-table--td">{{ item.cm_name}}</td>
+                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
+                <td class="td vs-table--td">{{ item.type_fee}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.start_date}}</td>
+                <td class="td vs-table--td">{{ item.end_date}}</td>
               </tr>
             </table>
             
@@ -172,7 +158,7 @@
             ]
           }
         },
-        contracts: [],
+        datas: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -198,6 +184,7 @@
         this.branch_list = response.data
       })
       this.getData();
+      this.searchData.dateRange = new Date();
     },
     methods: {
       reset() {
@@ -209,9 +196,6 @@
         this.getData();
       },
       getData() {
-        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-        
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -222,8 +206,7 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
-            start_date:startDate,
-            end_date:endDate,
+            start_date: u.getDateMonth(this.searchData.dateRange),
             pagination:this.pagination,
           }
 
@@ -231,7 +214,7 @@
         axios.p('/api/lms/reports/01', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contracts = response.data.list
+            this.datas = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -251,6 +234,35 @@
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getData();
+      },
+      exportExcel() {
+        var url = `/api/lms/exports/report01/`;
+        var ids_branch = "";
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            ids_branch += ids_branch ? "-" + item.id : item.id;
+          })
+        }
+        this.key ='';
+        this.value = ''
+        if (this.searchData.keyword){
+          this.key += "keyword,"
+          this.value += this.searchData.keyword+","
+        }
+        if (ids_branch){
+          this.key += "branch_id,"
+          this.value += ids_branch+","
+        }
+        if (this.searchData.dateRange){
+          this.key += "start_date,"
+          this.value +=u.getDateMonth(this.searchData.dateRange)+","
+          console.log(u.getDateMonth(this.searchData.dateRange))
+        }
+        this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
+        this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"
+        url += this.key+"/"+this.value +`?token=${localStorage.getItem("api_token")}`
+        console.log(url)
+        window.open(url, '_blank');
       },
     },
     filters: {

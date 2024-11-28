@@ -9,20 +9,20 @@
           <div class="vx-col w-full mb-4">
             <h4 class="w-full mb-4"><i class="fa-solid fa-file-contract mr-1"></i> DANH SÁCH BÁO CÁO</h4>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/exchange/add'">
+              <router-link class="link-report" :to="'/lms/report-01'">
                 <p>01. BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE</p>
               </router-link>
             </div>
             <div class="mb-2">
               <p class="mb-1">02. BÁO CÁO HỌC SINH TÁI PHÍ</p>
               <div class="ml-4">
-              <router-link class="link-report" :to="'/lms/exchange/add'">
+              <router-link class="link-report" :to="'/lms/report-02a'">
                 <p> - BÁO CÁO CHI TIẾT</p>
               </router-link>
-              <router-link class="link-report" :to="'/lms/exchange/add'">
+              <router-link class="link-report" :to="'/lms/report-02b'">
                 <p> - BÁO CÁO TỔNG HỢP</p>
               </router-link>
-              <router-link class="link-report" :to="'/lms/exchange/add'">
+              <router-link class="link-report" :to="'/lms/report-02c'">
                 <p> - BÁO CÁO THEO EC</p>
               </router-link>
               </div>
