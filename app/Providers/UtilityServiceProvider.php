@@ -834,4 +834,45 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $resp;
     }
+
+    public static function update_file_name($file) 
+	{
+	  $pos = strrpos($file,'.');
+	  $ext = substr($file,$pos); 
+	  $dir = strrpos($file,'/');
+	  $dr  = substr($file,0,($dir+1)); 
+  
+	  $arr = explode('/',$file);
+	  $fName = self::convert_slug(trim($arr[(count($arr) - 1)],$ext));
+  
+	  $exist = FALSE;
+	  $i = 0;
+	  
+	  while(!$exist)
+	  {
+		$file = $i > 0 ? $dr.$fName.'_'.$i.$ext : $dr.$fName.$ext;
+		
+		if(!file_exists($file))
+		  $exist = TRUE;
+		
+		$i++;
+	  }
+  
+	  return $file;
+	}
+
+    public static function convert_slug($str) {
+		
+        $str = trim(mb_strtolower($str));
+		$str = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $str);
+		$str = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $str);
+		$str = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $str);
+		$str = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $str);
+		$str = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $str);
+		$str = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $str);
+		$str = preg_replace('/(đ)/', 'd', $str);
+		$str = preg_replace('/[^a-z0-9-\s]/', '', $str);
+		$str = preg_replace('/([\s]+)/', '_', $str);
+		return $str;
+    }
 }

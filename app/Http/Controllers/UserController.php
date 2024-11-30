@@ -249,4 +249,47 @@ class UserController extends Controller
         return response()->json($data);
     }
     
+    public function uploadAvatar(Request $request)
+    {
+        $total = count($_FILES['files']['name']);
+        if ($total > 0){
+            $tmpFilePath = $_FILES['files']['tmp_name'][0];
+            if ($tmpFilePath != ""){
+                $dir = __DIR__.'/../../../public/static/upload/avatars/'. date('Y_m').'/';
+                if(!file_exists($dir)){
+                    mkdir($dir);
+                }
+                $newFilePath = $dir . $_FILES['files']['name'][0];
+                $newFilePath = u::update_file_name($newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public/','',$newFilePath);
+                $title = str_replace(__DIR__.'/../../../public/static/upload/avatars/'. date('Y_m').'/','',$newFilePath);
+                u::updateSimpleRow(array(
+                    'title' => $title
+                ), array(), 'upload_files');
+            }
+        }
+        for( $i=0 ; $i < $total ; $i++ ) {
+            
+        }
+        $data = $request->data;
+        if ($data) {
+            $arr_update = [];
+            foreach ($data as $k => $item) {
+                if ($k == 'birthday') {
+                    $date = str_replace('/', '-', $item);
+                    $arr_update[$k] = date('Y-m-d', strtotime($date));
+                } else {
+                    $arr_update[$k] = $item;
+                }
+            }
+            u::updateSimpleRow($arr_update, array('id' => Auth::user()->id), 'users');
+        }
+        $uesr_info = u::getObject(array('id' => Auth::user()->id), 'users');
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cập nhật thành công.',
+            'userData' => u::transformUser($uesr_info)
+        ]);
+    }
 }

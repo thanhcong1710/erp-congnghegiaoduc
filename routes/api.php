@@ -54,6 +54,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
             Route::post('change-password', 'UserController@changePassword');
+            Route::post('upload-avatar', 'UserController@uploadAvatar');
         });
         Route::prefix('roles')->group(function () {
             Route::get('{id}', 'RolesController@info');
