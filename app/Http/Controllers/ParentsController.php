@@ -447,6 +447,7 @@ class ParentsController extends Controller
     }
 
     public function uploadAvatar(Request $request){
+        $parent_id = isset($_POST['parent_id']) ? $_POST['parent_id'] : '';
         $total = count($_FILES['files']['name']);
         if ($total > 0){
             $tmpFilePath = $_FILES['files']['tmp_name'][0];
@@ -461,7 +462,7 @@ class ParentsController extends Controller
                 move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
-                ), array('id' => data_get($request, 'parent_id')), 'crm_parents');
+                ), array('id' => $parent_id), 'crm_parents');
                 return response()->json([
                     'status' => 1,
                     'message' => 'Upload avatar thành công.',

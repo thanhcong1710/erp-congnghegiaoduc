@@ -346,6 +346,7 @@ class StudentsController extends Controller
     }
 
     public function uploadAvatar(Request $request){
+        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : '';
         $total = count($_FILES['files']['name']);
         if ($total > 0){
             $tmpFilePath = $_FILES['files']['tmp_name'][0];
@@ -360,7 +361,7 @@ class StudentsController extends Controller
                 move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
-                ), array('id' => data_get($request, 'student_id')), 'students');
+                ), array('id' => $student_id), 'students');
                 return response()->json([
                     'status' => 1,
                     'message' => 'Upload avatar thành công.',
