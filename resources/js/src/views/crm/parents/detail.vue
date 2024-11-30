@@ -6,8 +6,10 @@
     <vx-card no-shadow class="mb-base">
         <div class="vx-row">
           <div class="vx-col md:w-1/3 w-full item-first">
-            <div style="float: left; width: 110px;">
-              <img class="rounded" src="@assets/images/common/avatar-default.jpg" width="100%">
+            <div style="float: left; width: 110px; text-align: center">
+              <img class="rounded" :src="parent.avatar_url ? parent.avatar_url :'/images/common/avatar-default.jpg'" width="100%">
+              <label for="account-upload" style="padding: 5px 10px; font-size: 12px;" class="vs-component vs-button vs-button-primary vs-button-filled mb-2">Upload Avatar</label>
+              <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
             </div>
             <div style="float: left; padding: 10px; width: calc(100% - 110px);">
                <h5><strong>{{parent.name}}</strong></h5>
@@ -1617,6 +1619,25 @@
         })
         .catch((e) => {
         });
+      },
+      submitFiles() {
+        if(this.$refs.file.files.length){
+          this.$vs.loading()
+          const formData = new FormData();
+          for (var i = 0; i < this.$refs.file.files.length; i++) {
+            let file = this.$refs.file.files[i];
+            formData.append('files[' + i + ']', file);
+          }
+          formData.append('parent_id', this.$route.params.id);
+          axios.p('/api/crm/parents/upload-avatar', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+            }).then((response) => {  
+              this.loadDetail();
+            })
+          .catch((error)   => { console.log(error); this.$vs.loading.close(); })
+        }
       },
     },
     filters: {

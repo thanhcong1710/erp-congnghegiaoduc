@@ -261,35 +261,23 @@ class UserController extends Controller
                 }
                 $newFilePath = $dir . $_FILES['files']['name'][0];
                 $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__.'/../../../public/','',$newFilePath);
-                $title = str_replace(__DIR__.'/../../../public/static/upload/avatars/'. date('Y_m').'/','',$newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
-                    'title' => $title
-                ), array(), 'upload_files');
+                    'avatar_url' => $dir_file_insert
+                ), array('id' => Auth::user()->id), 'users');
+                $uesr_info = u::getObject(array('id' => Auth::user()->id), 'users');
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Upload avatar thành công.',
+                    'userData' => u::transformUser($uesr_info)
+                ]);
             }
         }
-        for( $i=0 ; $i < $total ; $i++ ) {
-            
-        }
-        $data = $request->data;
-        if ($data) {
-            $arr_update = [];
-            foreach ($data as $k => $item) {
-                if ($k == 'birthday') {
-                    $date = str_replace('/', '-', $item);
-                    $arr_update[$k] = date('Y-m-d', strtotime($date));
-                } else {
-                    $arr_update[$k] = $item;
-                }
-            }
-            u::updateSimpleRow($arr_update, array('id' => Auth::user()->id), 'users');
-        }
-        $uesr_info = u::getObject(array('id' => Auth::user()->id), 'users');
 
         return response()->json([
-            'status' => 1,
-            'message' => 'Cập nhật thành công.',
-            'userData' => u::transformUser($uesr_info)
+            'status' => 0,
+            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
         ]);
     }
 }

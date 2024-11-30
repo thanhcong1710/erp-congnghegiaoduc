@@ -97,6 +97,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('ticket/get_all_data/{parent_id}', 'ParentsController@getAllDataTicketByParent');
             Route::post('ticket/add', 'ParentsController@addTicket');
             Route::post('ticket/update', 'ParentsController@updateTicket');
+            Route::post('parents/upload-avatar', 'ParentsController@uploadAvatar');
         });
 
         Route::prefix('lms')->group(function () {
@@ -113,6 +114,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('sessions', 'StudentsController@sessions');
                 Route::post('assessments', 'StudentsController@assessments');
                 Route::post('operating', 'StudentsController@operating');
+                Route::post('upload-avatar', 'StudentsController@uploadAvatar');
             });
            
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');

@@ -7,7 +7,7 @@
       <div>
         <label for="account-upload" class="vs-component vs-button vs-button-primary vs-button-filled mb-2">Upload Avatar</label>
         <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
-        <p class="text-sm mt-2">Allowed JPG, GIF or PNG. Max size of 800kB</p>
+        <p class="text-sm mt-4">Allowed JPG, GIF or PNG. Max size of 800kB</p>
       </div>
     </div>
 
@@ -61,8 +61,14 @@ export default {
               'Content-Type': 'multipart/form-data'
             },
           }).then((response) => {  
-            // this.$vs.loading.close()
-            this.getListFileByRoom();
+            if(response.data.status){
+              this.$store.dispatch('updateUserInfo', response.data.userData)
+            }
+            this.$vs.loading.close()
+            this.alert.show=true
+            this.alert.status=response.data.status
+            this.alert.message=response.data.message  
+            this.alert.color = response.data.status ? 'success' : 'danger'
           })
         .catch((error)   => { console.log(error); this.$vs.loading.close(); })
       }

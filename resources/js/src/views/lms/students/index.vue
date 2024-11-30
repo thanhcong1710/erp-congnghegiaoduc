@@ -104,8 +104,7 @@
                   <router-link :to="`/lms/students/${item.id}/detail`">
                     <div class="con-vs-avatar 60px" style="width: 60px; height: 60px; background: rgb(237 237 237);"><!---->
                       <div class="con-img vs-avatar--con-img">
-                        <img class="student-avatar" src="@assets/images/common/avatar-girl.svg"  v-if="item.gender == 'F'"/>
-                        <img class="student-avatar" src="@assets/images/common/avatar-boy.svg"  v-else/>
+                        <img class="student-avatar" :src="item.avatar_url"  />
                       </div>
                     </div>
                   </router-link>

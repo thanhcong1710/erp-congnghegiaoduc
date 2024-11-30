@@ -113,6 +113,7 @@ class CheckinController extends Controller
                 'status' => 1,
                 'source_detail_id' => data_get($crm_parent_info, 'source_detail_id'),
                 'source_id' => data_get($crm_parent_info, 'source_id', ),
+                'avatar_url' => data_get($crm_student_info, 'gender') =='F' ?'@assets/images/common/avatar-girl.svg' : '@assets/images/common/avatar-boy.svg'
             ), 'students');
 
             $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 

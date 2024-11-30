@@ -445,4 +445,33 @@ class ParentsController extends Controller
         ];
         return response()->json($data);
     }
+
+    public function uploadAvatar(Request $request){
+        $total = count($_FILES['files']['name']);
+        if ($total > 0){
+            $tmpFilePath = $_FILES['files']['tmp_name'][0];
+            if ($tmpFilePath != ""){
+                $dir = __DIR__.'/../../../public/static/upload/avatar_parents/'. date('Y_m').'/';
+                if(!file_exists($dir)){
+                    mkdir($dir);
+                }
+                $newFilePath = $dir . $_FILES['files']['name'][0];
+                $newFilePath = u::update_file_name($newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                move_uploaded_file($tmpFilePath, $newFilePath);
+                u::updateSimpleRow(array(
+                    'avatar_url' => $dir_file_insert
+                ), array('id' => data_get($request, 'parent_id')), 'crm_parents');
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Upload avatar thành công.',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
+        ]);
+    }
 }

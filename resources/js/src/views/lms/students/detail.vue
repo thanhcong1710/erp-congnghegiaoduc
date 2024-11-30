@@ -3,9 +3,10 @@
   <div id="page-parent-detail">
     <vx-card no-shadow class="mb-base">
       <div class="flex flex-wrap items-center">
-        <div class="me-7 mb-4">
-          <img alt="image" width="160px" src="@assets/images/common/avatar-girl.svg"  v-if="student_info.gender == 'F'"/>
-          <img alt="image" width="160px" src="@assets/images/common/avatar-boy.svg"  v-else/>
+        <div class="me-7 mb-4 pr-2" style="width:160px; text-align: center">
+          <img alt="image" width="100%" :src="student_info.avatar_url"/>
+          <label for="account-upload" style="padding: 5px 10px;" class="vs-component vs-button vs-button-primary vs-button-filled mb-2">Upload Avatar</label>
+          <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
         </div>
        <div class="flex-grow-1">
           <!--begin::Title-->
@@ -135,6 +136,25 @@
       this.loadDetail();
     },
     methods: {
+      submitFiles() {
+        if(this.$refs.file.files.length){
+          this.$vs.loading()
+          const formData = new FormData();
+          for (var i = 0; i < this.$refs.file.files.length; i++) {
+            let file = this.$refs.file.files[i];
+            formData.append('files[' + i + ']', file);
+          }
+          formData.append('student_id', this.$route.params.id);
+          axios.p('/api/lms/students/upload-avatar', formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+            }).then((response) => {  
+              this.loadDetail();
+            })
+          .catch((error)   => { console.log(error); this.$vs.loading.close(); })
+        }
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/lms/students/show/${this.$route.params.id}`)

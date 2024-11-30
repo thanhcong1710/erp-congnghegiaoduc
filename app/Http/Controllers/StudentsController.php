@@ -131,7 +131,7 @@ class StudentsController extends Controller
         $total = u::first("SELECT count(s.id) AS total FROM students AS s 
             LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id) WHERE $cond");
         
-        $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, 
+        $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, s.avatar_url,
                 (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
@@ -342,6 +342,35 @@ class StudentsController extends Controller
             'class_transfer' => $class_transfer,
             'branch_transfer' => $branch_transfer,
             'tuition_transfer' => $tuition_transfer
+        ]);
+    }
+
+    public function uploadAvatar(Request $request){
+        $total = count($_FILES['files']['name']);
+        if ($total > 0){
+            $tmpFilePath = $_FILES['files']['tmp_name'][0];
+            if ($tmpFilePath != ""){
+                $dir = __DIR__.'/../../../public/static/upload/avatar_students/'. date('Y_m').'/';
+                if(!file_exists($dir)){
+                    mkdir($dir);
+                }
+                $newFilePath = $dir . $_FILES['files']['name'][0];
+                $newFilePath = u::update_file_name($newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                move_uploaded_file($tmpFilePath, $newFilePath);
+                u::updateSimpleRow(array(
+                    'avatar_url' => $dir_file_insert
+                ), array('id' => data_get($request, 'student_id')), 'students');
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Upload avatar thành công.',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
         ]);
     }
 }
