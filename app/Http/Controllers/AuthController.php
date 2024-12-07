@@ -57,13 +57,13 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = request(['email', 'password']);
-        $user = u::getObject(array('email'=>$request->email), 'users');
+        $credentials = request(['hrm_id', 'password']);
+        $user = u::getObject(array('hrm_id'=>$request->hrm_id), 'users');
         if($user && $user->status!=1){
             return response()->json([
                 'status' => 0,
                 'type' => 'inactive',
-                'message'=>'Tài khoản chưa được kích hoạt, vui lòng truy cập email để kích hoạt.'
+                'message'=>'Tài khoản chưa được kích hoạt.'
             ]);
         }
 
@@ -71,12 +71,12 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 0, 
                 'type' => 'account',
-                'message'=>'Email hoặc mật khẩu không chính xác.'
+                'message'=>'Mã nhân viên hoặc mật khẩu không chính xác.'
             ]);
         }
 
         u::updateSimpleRow(array('api_token'=>$token), array('id'=>auth()->user()->id), 'users');
-        return $this->respondWithToken($token, $request->email);
+        return $this->respondWithToken($token, $request->hrm_id);
     }
 
     /**
@@ -112,7 +112,7 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $email)
+    protected function respondWithToken($token, $hrm_id)
     {
         return response()->json([
             'status' => 1,

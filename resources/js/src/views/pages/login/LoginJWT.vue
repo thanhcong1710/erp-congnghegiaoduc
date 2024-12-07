@@ -1,16 +1,16 @@
 <template>
   <div>
     <vs-input
-        v-validate="'required|email|min:3'"
+        v-validate="'required'"
         data-vv-validate-on="blur"
-        name="email"
+        name="hrm_id"
         icon-no-border
         icon="icon icon-user"
         icon-pack="feather"
-        label-placeholder="Email"
-        v-model="email"
+        label-placeholder="Mã nhân viên"
+        v-model="hrm_id"
         class="w-full"/>
-    <span class="text-danger text-sm">{{ errors.first('email') }}</span>
+    <span class="text-danger text-sm">{{ errors.first('hrm_id') }}</span>
 
     <vs-input
         @keyup.enter="loginJWT"
@@ -45,7 +45,7 @@
 export default {
   data () {
     return {
-      email: '',
+      hrm_id: '',
       password: '',
       checkbox_remember_me: false,
       resendActive: false
@@ -87,7 +87,7 @@ export default {
       const payload = {
         checkbox_remember_me: this.checkbox_remember_me,
         userDetails: {
-          email: this.email,
+          hrm_id: this.hrm_id,
           password: this.password
         },
         redirect_url :  '/admin/dashboard'
