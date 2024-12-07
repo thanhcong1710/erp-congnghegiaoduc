@@ -43,7 +43,7 @@ export default {
   // JWT
   loginJWT ({ commit }, payload) {
     return new Promise((resolve, reject) => {
-      jwt.login(payload.userDetails.email, payload.userDetails.password)
+      jwt.login(payload.userDetails.hrm_id, payload.userDetails.password)
         .then(response => {
           // If there's user data in response
           if (response.data && response.data.status && response.data.userData) {
