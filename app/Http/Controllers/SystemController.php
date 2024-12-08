@@ -124,7 +124,12 @@ class SystemController extends Controller
     }
 
     public function getProgramsByProduct(Request $request, $product_id){
-        $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+        $is_parent = data_get($request,'is_parent', 0);
+        if ($is_parent) {
+            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND parent_id =0 AND product_id=$product_id ");
+        } else {
+            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+        }
         return response()->json($data);
     }
 

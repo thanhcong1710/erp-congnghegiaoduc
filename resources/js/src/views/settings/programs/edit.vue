@@ -20,6 +20,20 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Chương trình cha</label>
+          <div class=w-full>
+            <vue-select
+                  label="name"
+                  placeholder="Chọn chương trình cha"
+                  :options="html.programs.list"
+                  v-model="html.programs.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveProgram"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.code" class="vs-inputx vs-input--input normal">
@@ -104,6 +118,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
         },
         alert:{
           active: false,
@@ -127,6 +145,23 @@
       this.loadDetail();
     },
     methods: {
+      loadProgram(program_id=0){
+        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1`)
+          .then(response => {
+          this.html.programs.list = response.data
+          if(program_id > 0){
+            this.html.programs.item = this.html.programs.list.filter(item => item.id == program_id)[0]
+          }
+        })
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const parent_id = data.id
+          this.program.parent_id = parent_id
+        }else{
+          this.program.parent_id = ""
+        }
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/settings/programs/show/${this.$route.params.id}`)
@@ -135,6 +170,7 @@
           if(response.data.length !== 0){
             this.program = response.data
             this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
+            this.loadProgram(this.program.parent_id)
           }else{
             this.$router.push({ path: `/settings/programs` });
           }
@@ -152,6 +188,7 @@
         }else{
           this.program.product_id = ""
         }
+        this.loadProgram();
       },
       save() {
         let mess = "";

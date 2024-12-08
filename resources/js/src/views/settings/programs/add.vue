@@ -20,6 +20,20 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Chương trình cha</label>
+          <div class=w-full>
+            <vue-select
+                  label="name"
+                  placeholder="Chọn chương trình cha"
+                  :options="html.programs.list"
+                  v-model="html.programs.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveProgram"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.code" class="vs-inputx vs-input--input normal">
@@ -104,6 +118,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
         },
         alert:{
           active: false,
@@ -112,6 +130,7 @@
         },
         program:{
           product_id:'',
+          parent_id:'',
           code:'',
           name: '',
           description: '',
@@ -126,6 +145,12 @@
       })
     },
     methods: {
+      loadProgram(){
+        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1`)
+          .then(response => {
+          this.html.programs.list = response.data
+        })
+      },
       selectDate(date){
         if (date) {
           this.program.opened_date = moment(date).format("YYYY-MM-DD");
@@ -137,6 +162,15 @@
           this.program.product_id = product_id
         }else{
           this.program.product_id = ""
+        }
+        this.loadProgram();
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const parent_id = data.id
+          this.program.parent_id = parent_id
+        }else{
+          this.program.parent_id = ""
         }
       },
       save() {

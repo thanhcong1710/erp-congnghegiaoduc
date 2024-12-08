@@ -47,6 +47,7 @@ class ProgramsController extends Controller
     {
         $program_id = u::insertSimpleRow(array(
             'product_id' => data_get($request, 'product_id'),
+            'parent_id' => data_get($request, 'parent_id', 0),
             'name' => data_get($request, 'name'),
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
@@ -84,6 +85,7 @@ class ProgramsController extends Controller
     {
         u::updateSimpleRow(array(
             'product_id' => data_get($request, 'product_id'),
+            'parent_id' => data_get($request, 'parent_id', 0),
             'name' => data_get($request, 'name'),
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
