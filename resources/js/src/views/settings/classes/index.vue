@@ -716,11 +716,12 @@
           this.config.total_cycles = 1
         }
 
-        this.config.session = 0
-        this.config.subjects.map(item => {
-          this.config.session = Number(this.config.session) + Number(item.session)
-        })
-        this.config.session = this.config.session *  Number(this.config.total_cycles)
+        // this.config.session = 0
+        // this.config.subjects.map(item => {
+        //   this.config.session = Number(this.config.session) + Number(item.session)
+        // })
+        // this.config.session = this.config.session *  Number(this.config.total_cycles)
+        this.config.session = Number(this.config.total_cycles)
       },
       getDataSessions() {
         const data = {
