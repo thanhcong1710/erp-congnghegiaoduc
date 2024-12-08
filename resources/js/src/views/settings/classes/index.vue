@@ -164,7 +164,7 @@
               </select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số vòng lặp các môn học</label>
+              <label>Số buổi học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="number"
@@ -178,7 +178,7 @@
             </div>
             <div class="vx-col w-full mb-4">
               <vs-tabs>
-                <vs-tab label="Danh sách môn học">
+                <!-- <vs-tab label="Danh sách môn học">
                   <div class="tab-text">
                     <div class=w-full>
                       <div class="vx-col  md:w-1/2 w-full mb-4">
@@ -199,7 +199,6 @@
                             <table class="vs-table vs-table--tbody-table">
                               <thead class="vs-table--thead">
                                 <tr>
-                                  <!---->
                                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
                                   <th colspan="1" rowspan="1">Môn học</th>
                                   <th colspan="1" rowspan="1" class="text-center">Thứ tự</th>
@@ -239,7 +238,7 @@
                       </div>
                     </div>
                   </div>
-                </vs-tab>
+                </vs-tab> -->
                 <vs-tab label="Danh sách buổi học">
                   <div class="tab-text">
                     <div class=w-full>
@@ -251,16 +250,16 @@
                                 <tr>
                                   <!---->
                                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                                  <th colspan="1" rowspan="1" class="text-center">Mã môn học</th>
-                                  <th colspan="1" rowspan="1">Môn học</th>
+                                  <!-- <th colspan="1" rowspan="1" class="text-center">Mã môn học</th>
+                                  <th colspan="1" rowspan="1">Môn học</th> -->
                                   <th colspan="1" rowspan="1" class="text-center">Ngày học</th>
                                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                                 </tr>
                               </thead>
                               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_sessions" :key="index">
                                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                                <td class="td vs-table--td text-center">{{item.subject_code}}</td>
-                                <td class="td vs-table--td">{{item.subject_name}}</td>
+                                <!-- <td class="td vs-table--td text-center">{{item.subject_code}}</td>
+                                <td class="td vs-table--td">{{item.subject_name}}</td> -->
                                 <td class="td vs-table--td text-center">{{item.class_date | formatDateViewDay}}</td>
                                 <td class="td vs-table--td text-center">{{item.status_label}}</td>
                               </tr>
@@ -706,10 +705,10 @@
         this.caculatorTotalSession();
       },
       caculatorTotalSession(){
-        if(this.config.total_cycles<1 || this.config.total_cycles>20){
+        if(this.config.total_cycles<1 || this.config.total_cycles>200){
           this.$vs.notify({
             title: 'Lỗi',
-            text: 'Số vòng lặp chỉ được từ 1 đến 20',
+            text: 'Số buổi học chỉ được từ 1 đến 200',
             iconPack: 'feather',
             icon: 'icon-alert-circle',
             color: 'warning'

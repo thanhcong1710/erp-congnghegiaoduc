@@ -74,7 +74,8 @@ class ClassesController extends Controller
         $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
         $start_date = data_get($request,'start_date');
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
-        $subjects = data_get($request,'subjects');
+        // $subjects = data_get($request,'subjects');
+        $subjects = ['id'=>1,'session'=>$data_sessions, 'stt'=>1];
             
         if($request->is_edit){
             $class_id = data_get($request,'class_id');

@@ -193,13 +193,13 @@ export default [
         slug: 'settings-programs',
         permission:'settings_programs',
       },
-      {
-        url: '/settings/subjects',
-        name: 'Môn học',
-        icon: 'ChromeIcon',
-        slug: 'settings-subjects',
-        permission:'settings_subjects',
-      },
+      // {
+      //   url: '/settings/subjects',
+      //   name: 'Môn học',
+      //   icon: 'ChromeIcon',
+      //   slug: 'settings-subjects',
+      //   permission:'settings_subjects',
+      // },
       {
         url: '/settings/classes',
         name: 'Lớp học',
