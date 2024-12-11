@@ -23,7 +23,7 @@
             <div class="vx-col sm:w-full md:w-full lg:w-1/2 d-theme-dark-bg">
               <div class="px-8 pt-8 login-tabs-container">
                 <div class="text-center">
-                  <img src="@assets/images/logo/logo.png" alt="Logo" style="margin:auto; height: 86px;">
+                  <img src="@assets/images/logo/logo.png" alt="Logo" style="margin:auto; height: 68px;">
                 </div>
 
                 <div class="vx-card__title mt-6 mb-4">
