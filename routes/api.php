@@ -277,12 +277,25 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'DiscountCodesController@show');
                 Route::post('update', 'DiscountCodesController@update');
             });
+        });
+
+        Route::prefix('marketing')->group(function () {
+            Route::prefix('campaigns')->group(function () {
+                Route::post('list', 'CampaignsController@list');
+                Route::post('add', 'CampaignsController@add');
+                Route::get('show/{id}', 'CampaignsController@show');
+                Route::post('update', 'CampaignsController@update');
+            });
             Route::prefix('coupons')->group(function () {
-                Route::post('add', 'CouponsController@add');
                 Route::post('list', 'CouponsController@list');
-                Route::post('delete', 'CouponsController@delete');
-                Route::get('show/{id}', 'CouponsController@show');
                 Route::post('update', 'CouponsController@update');
+            });
+            Route::prefix('b2b/sources')->group(function () {
+                Route::post('add', 'B2BSourcesController@add');
+                Route::post('list', 'B2BSourcesController@list');
+                Route::post('delete', 'B2BSourcesController@delete');
+                Route::get('show/{id}', 'B2BSourcesController@show');
+                Route::post('update', 'B2BSourcesController@update');
             });
         });
     });

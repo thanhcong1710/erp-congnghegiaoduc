@@ -242,7 +242,7 @@ class UtilityServiceProvider extends ServiceProvider
                 $tmp = 'KH đồng ý đặt lịch Checkin';
                 break;
             case 81:
-                $tmp = 'KH đến hạn tái tục';
+                $tmp = 'KH đã đến checkin';
                 break;
             case 82:
                 $tmp = 'KH đã mua gói phí';
@@ -874,5 +874,20 @@ class UtilityServiceProvider extends ServiceProvider
 		$str = preg_replace('/[^a-z0-9-\s]/', '', $str);
 		$str = preg_replace('/([\s]+)/', '_', $str);
 		return $str;
+    }
+
+    public static function generateRandomAlphanumeric($length = 10) {
+        // Define the characters to be used
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        
+        // Generate random string
+        for ($i = 0; $i < $length; $i++) {
+            $randomIndex = rand(0, $charactersLength - 1); // Generate random index
+            $randomString .= $characters[$randomIndex];   // Append character
+        }
+        
+        return $randomString;
     }
 }

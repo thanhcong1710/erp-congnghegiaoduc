@@ -466,34 +466,7 @@ export default {
           pageTitle: 'Cập nhật mã chiết khấu',
           rule: 'editor'
         }
-      },
-      {
-        path: '/settings/coupons',
-        name: 'setting-coupons',
-        component: () => import('@/views/settings/coupons/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách voucher', active: true }
-          ],
-          pageTitle: 'Danh sách voucher',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/settings/coupons/add',
-        name: 'setting-coupons-add',
-        component: () => import('@/views/settings/coupons/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách voucher', url: '/settings/coupons' },
-            { title: 'Thêm mới', active: true }
-          ],
-          pageTitle: 'Thêm mới voucher',
-          rule: 'editor'
-        }
-      },
+      }
     ]
   },
 }

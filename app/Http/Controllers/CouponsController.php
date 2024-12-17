@@ -35,10 +35,20 @@ class CouponsController extends Controller
         $total = u::first("SELECT count(b.id) AS total 
             FROM coupons AS b WHERE $cond");
         
-        $list = u::query("SELECT b.*
+        $list = u::query("SELECT b.*, IF(b.type=0, (SELECT title FROM campaigns WHERE id=b.campaign_id), '') AS title
             FROM coupons AS b 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function update(Request $request)
+    {
+        $data = u::updateSimpleRow(array(
+            'status' => data_get($request, 'status'),
+            'updated_at'=>date('Y-m-d H:i:s'),
+            'updator_id'=>Auth::user()->id,
+        ),array('id'=> data_get($request, 'id')), 'coupons');
         return response()->json($data);
     }
 }

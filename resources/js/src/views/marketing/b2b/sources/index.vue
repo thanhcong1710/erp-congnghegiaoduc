@@ -8,7 +8,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã voucher" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên đối tác B2B" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -31,8 +31,8 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/settings/coupons/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fas fa-upload"></i> Import</vs-button>
+            <router-link class="btn btn-success" :to="'/marketing/b2b/sources/add'">
+              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
@@ -48,23 +48,23 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã voucher</th>
-                  <th colspan="1" rowspan="1" class="text-center">Giá trị voucher</th>
-                  <th colspan="1" rowspan="1" class="text-center">Học bổng</th>
-                  <th colspan="1" rowspan="1" class="text-center">Ngày bắt đầu</th>
-                  <th colspan="1" rowspan="1" class="text-center">Ngày kết thúc</th>
+                  <th colspan="1" rowspan="1">Tên đối tác</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in coupons" :key="index">
-                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.code}}</td>
-                <td class="td vs-table--td text-right">{{item.coupon_amount | formatMoney}}</td>
-                <td class="td vs-table--td text-center">{{item.coupon_session}}</td>
-                <td class="td vs-table--td text-center">{{item.start_date | formatDateView}}</td>
-                <td class="td vs-table--td text-center">{{item.end_date | formatDateView}}</td>
-                <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : (item.status == 2 ? 'Đã sử dụng' : 'Không kích hoạt')}}</td>
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in sources" :key="index">
+                <!---->
                 
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{item.title}}</td>
+                <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
+                <td class="td vs-table--td text-center list-action"> 
+                    <router-link :to="`/marketing/b2b/sources/edit/${item.id}`">
+                      <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
+                    </router-link>
+                    <vs-button size="small" color="danger"  v-if="!item.disabled_delete" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                </td>
               </tr>
             </table>
             
@@ -98,10 +98,10 @@
 <script>
 
   import vSelect from 'vue-select'
-  import axios from '../../../http/axios.js'
+  import axios from '../../../../http/axios.js'
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
-  import u from '../../../until/helper.js'
+  import u from '../../../../until/helper.js'
 
   export default {
     components: { 
@@ -119,7 +119,6 @@
         statusOptions:[
           {id:0,label:'Không kích hoạt'},
           {id:1,label:'Kích hoạt'},
-          {id:2,label:'Đã sử dụng'},
         ],
         datepickerOptions: {
           closed: true,
@@ -143,7 +142,7 @@
             ]
           }
         },
-        coupons: [],
+        sources: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -190,10 +189,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/settings/coupons/list', data)
+        axios.p('/api/marketing/b2b/sources/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.coupons = response.data.list
+            this.sources = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -214,7 +213,36 @@
         this.pagination.limit = limit
         this.getData();
       },
-      
+      confirmDelete (item) {
+        this.delete_id = item.id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn xóa đối tác - ${item.title}?`,
+          accept: this.deletetuition_fee,
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      deletetuition_fee(){
+        const data = {
+          b2b_source_id: this.delete_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/marketing/b2b/sources/delete`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.getData();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      },
     },
     filters: {
     },

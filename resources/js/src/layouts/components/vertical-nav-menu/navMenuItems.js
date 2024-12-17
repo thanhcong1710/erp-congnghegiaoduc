@@ -168,6 +168,53 @@ export default [
     ]
   },
   {
+    header: 'MARKETING',
+    icon: 'PackageIcon',
+    items: [
+      {
+        url: '/marketing/campaigns',
+        name: 'Chiến dịch',
+        icon: 'Volume2Icon',
+        slug: 'marketing-campaigns',
+        permission:'marketing_campaigns',
+      },
+      {
+        url: '/marketing/b2b',
+        name: 'B2B',
+        icon: 'CommandIcon',
+        slug: 'marketing-b2b',
+        submenu: [
+          {
+            url: '/marketing/b2b/sources',
+            name: 'Nguồn đối tác',
+            slug: 'marketing-b2b-sources',
+            permission:'marketing_b2b_sources',
+          },
+          {
+            url: '/marketing/b2b/campaigns',
+            name: 'Chính sách B2B',
+            slug: 'marketing-b2b-campaigns',
+            permission:'marketing_b2b_campaigns',
+          }
+        ],
+      },
+      {
+        url: '/crm/parent',
+        name: 'C2C',
+        icon: 'UsersIcon',
+        slug: 'marketing-c2c',
+        permission:'marketing_c2c_campaigns',
+      },
+      {
+        url: '/marketing/coupons',
+        name: 'Voucher',
+        icon: 'GiftIcon',
+        slug: 'marketing-coupons',
+        permission:'marketing_coupons',
+      },
+    ]
+  },
+  {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
     permission:'Config',
@@ -241,13 +288,6 @@ export default [
         icon: 'DivideSquareIcon',
         slug: 'settings-discount-codes',
         permission:'settings_discount_codes',
-      },
-      {
-        url: '/settings/coupons',
-        name: 'Voucher',
-        icon: 'GiftIcon',
-        slug: 'settings-coupons',
-        permission:'settings_coupons',
       },
       {
         url: '/settings/users',

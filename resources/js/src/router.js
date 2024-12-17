@@ -24,6 +24,7 @@ import User from './routers/user'
 import Setting from './routers/setting'
 import CRM from './routers/crm'
 import LMS from './routers/lms'
+import Marketing from './routers/marketing'
 Vue.use(Router)
 
 const router = new Router({
@@ -37,6 +38,7 @@ const router = new Router({
     Setting.router,
     CRM.router,
     LMS.router,
+    Marketing.router,
     {
     // =============================================================================
     // MAIN LAYOUT ROUTES
