@@ -242,7 +242,7 @@ class UtilityServiceProvider extends ServiceProvider
                 $tmp = 'KH đồng ý đặt lịch Checkin';
                 break;
             case 81:
-                $tmp = 'KH đến hạn tái tục';
+                $tmp = 'KH đã đến checkin';
                 break;
             case 82:
                 $tmp = 'KH đã mua gói phí';
