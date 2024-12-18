@@ -153,6 +153,47 @@ export default {
           pageTitle: 'Cập nhật chính sách B2B',
           rule: 'editor'
         }
+      },
+      {
+        path: '/marketing/c2c/campaigns',
+        name: 'marketing-c2c-campaigns',
+        component: () => import('@/views/marketing/c2c/campaigns/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách C2C', active: true }
+          ],
+          pageTitle: 'Danh sách chính sách C2C',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/marketing/c2c/campaigns/add',
+        name: 'marketing-c2c-campaigns-add',
+        component: () => import('@/views/marketing/c2c/campaigns/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách C2C', url: '/marketing/c2c/campaigns' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới chính sách C2C',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/marketing/c2c/campaigns/edit/:id',
+        name: 'marketing-c2c-campaigns-edit',
+        component: () => import('@/views/marketing/c2c/campaigns/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách C2C', url: '/marketing/c2c/campaigns' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật chính sách C2C',
+          rule: 'editor'
+        }
       }
     ]
   },

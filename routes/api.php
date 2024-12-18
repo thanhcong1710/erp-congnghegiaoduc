@@ -304,6 +304,12 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'B2BCampaignsController@show');
                 Route::post('update', 'B2BCampaignsController@update');
             });
+            Route::prefix('c2c/campaigns')->group(function () {
+                Route::post('list', 'C2CCampaignsController@list');
+                Route::post('add', 'C2CCampaignsController@add');
+                Route::get('show/{id}', 'C2CCampaignsController@show');
+                Route::post('update', 'C2CCampaignsController@update');
+            });
         });
     });
 });

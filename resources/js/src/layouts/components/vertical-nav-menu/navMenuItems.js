@@ -199,7 +199,7 @@ export default [
         ],
       },
       {
-        url: '/crm/parent',
+        url: '/marketing/c2c/campaigns',
         name: 'C2C',
         icon: 'UsersIcon',
         slug: 'marketing-c2c',
