@@ -50,6 +50,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
             Route::get('programs/{product_id}', 'SystemController@getProgramsByProduct');
             Route::get('tuition-fees', 'SystemController@getTuitionFees');
+            Route::get('b2b/sources', 'SystemController@getB2BSources');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -296,6 +297,12 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('delete', 'B2BSourcesController@delete');
                 Route::get('show/{id}', 'B2BSourcesController@show');
                 Route::post('update', 'B2BSourcesController@update');
+            });
+            Route::prefix('b2b/campaigns')->group(function () {
+                Route::post('list', 'B2BCampaignsController@list');
+                Route::post('add', 'B2BCampaignsController@add');
+                Route::get('show/{id}', 'B2BCampaignsController@show');
+                Route::post('update', 'B2BCampaignsController@update');
             });
         });
     });

@@ -39,6 +39,7 @@ class SystemController extends Controller
     public function getSourceDetail(Request $request)
     {
         $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
+        $cond.= data_get($request, 'source_id') ? " AND source_id = ".data_get($request, 'source_id') : '';
         $data = u::query("SELECT *, id AS `value` FROM source_detail WHERE status=1 $cond");
         return response()->json($data);
     }
@@ -144,6 +145,12 @@ class SystemController extends Controller
 
     public function getSubjects(){
         $data = u::query("SELECT *, 0 AS selected, 0 AS stt, 0 AS session FROM subjects WHERE status=1");
+        return response()->json($data);
+    }
+
+    public function getB2BSources()
+    {
+        $data = u::query("SELECT *, id AS `value` FROM b2b_sources WHERE status=1");
         return response()->json($data);
     }
 }

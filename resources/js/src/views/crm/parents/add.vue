@@ -202,7 +202,7 @@
   import axios from '../../../http/axios.js'
   import u from '../../../until/helper.js'
   import datepicker from "vue2-datepicker";
-  import moment from 'moment';
+  import moment, { localeData } from 'moment';
 
   export default {
     components: {
@@ -392,10 +392,13 @@
         }
       },
       saveSource(data = null){
+        this.parent.source_detail = ""
+        this.parent.source_detail_id = ""
         if (data && typeof data === 'object') {
           const source_id = data.id
           this.parent.source = data
           this.parent.source_id = source_id
+          this.localeDataSourceDetail();
         }else{
           this.parent.source = ""
           this.parent.source_id = ""
@@ -508,6 +511,12 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      localeDataSourceDetail(){
+        axios.g(`/api/system/source_detail?source_id=${this.parent.source_id}`)
+          .then(response => {
+          this.html.source_detail.list = response.data
+        })
       }
     },
     created() {
@@ -526,10 +535,6 @@
       axios.g(`/api/system/sources`)
         .then(response => {
         this.html.source.list = response.data
-      })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.html.source_detail.list = response.data
       })
     },
   }

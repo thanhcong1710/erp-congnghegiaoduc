@@ -259,7 +259,7 @@
                             v-model="parent_input.source"
                             :searchable="true"
                             language="tv-VN"
-                            @input="saveSource"
+                            @input="localeDataSourceDetail"
                             :disabled="disabled_edit"
                         ></vue-select>
                     </div>
@@ -795,6 +795,7 @@
         tmp_owner_id:"",
         tmp_status:"",
         tmp_level:"",
+        tmp_source_detail_id:"",
         phone:{
           css_class: 'alert alert-success',
           show: false,
@@ -852,19 +853,37 @@
         .then(response => {
         this.html.jobs.list = response.data
       })
-      axios.g(`/api/system/sources`)
+      await axios.g(`/api/system/sources`)
         .then(response => {
         this.html.source.list = response.data
-      })
-      await axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.html.source_detail.list = response.data
       })
       this.loadDetail();
       this.loadCares();
       this.loadTickets();
     },
     methods: {
+      localeDataSourceDetail(data=null){
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.parent.source = data
+          this.parent.source_id = source_id
+          this.$vs.loading()
+          axios.g(`/api/system/source_detail?source_id=${this.parent.source_id}`).then(response => {
+            this.$vs.loading.close();
+            this.html.source_detail.list = response.data
+            if(this.tmp_source_detail_id){
+              this.parent_input.source_detail = this.html.source_detail.list.filter(item => item.id == this.tmp_source_detail_id)[0]
+            }else{
+              this.parent.source_detail_id = ""
+              this.parent_input.source_detail = ""
+            } 
+          })
+        }else{
+          this.html.source_detail.list = []
+          this.parent_input.source_detail = ""
+          this.parent.source_detail_id = ""
+        }
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/crm/parents/show/${this.$route.params.id}`)
@@ -874,13 +893,14 @@
             this.parent = response.data
             this.parent_input.job = this.html.jobs.list.filter(item => item.id == response.data.job_id)[0]
             this.parent_input.source = this.html.source.list.filter(item => item.id == response.data.source_id)[0]
-            this.parent_input.source_detail = this.html.source_detail.list.filter(item => item.id == response.data.source_detail_id)[0]
             this.parent_input.province = this.html.province.list.filter(item => item.id == response.data.province_id)[0]
             this.tmp_district_id = response.data.district_id
             this.tmp_owner_id = response.data.owner_id
             this.tmp_status = response.data.status
             this.tmp_level  = response.data.level
+            this.tmp_source_detail_id = response.data.source_detail_id
             this.getDistrict(this.parent_input.province);
+            this.localeDataSourceDetail(this.parent_input.source)
           }else{
             this.$router.push({ path: `/crm/parent` });
           }
@@ -1016,16 +1036,6 @@
         }else{
           this.parent_input.job = ""
           this.parent.job_id = ""
-        }
-      },
-      saveSource(data = null){
-        if (data && typeof data === 'object') {
-          const source_id = data.id
-          this.parent_input.source = data
-          this.parent.source_id = source_id
-        }else{
-          this.parent_input.source = ""
-          this.parent.source_id = ""
         }
       },
       saveSourceDetail(data = null){

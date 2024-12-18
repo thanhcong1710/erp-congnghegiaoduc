@@ -112,6 +112,47 @@ export default {
           pageTitle: 'Cập nhật đối tác B2B',
           rule: 'editor'
         }
+      },
+      {
+        path: '/marketing/b2b/campaigns',
+        name: 'marketing-b2b-campaigns',
+        component: () => import('@/views/marketing/b2b/campaigns/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách B2B', active: true }
+          ],
+          pageTitle: 'Danh sách chính sách B2B',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/marketing/b2b/campaigns/add',
+        name: 'marketing-b2b-campaigns-add',
+        component: () => import('@/views/marketing/b2b/campaigns/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách B2B', url: '/marketing/b2b/campaigns' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới chính sách B2B',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/marketing/b2b/campaigns/edit/:id',
+        name: 'marketing-b2b-campaigns-edit',
+        component: () => import('@/views/marketing/b2b/campaigns/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chính sách B2B', url: '/marketing/b2b/campaigns' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật chính sách B2B',
+          rule: 'editor'
+        }
       }
     ]
   },
