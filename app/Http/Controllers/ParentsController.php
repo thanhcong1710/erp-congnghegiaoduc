@@ -475,4 +475,12 @@ class ParentsController extends Controller
             'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
         ]);
     }
+
+    public function getVouchers(Request $request, $parent_id){
+        $parent_info = u::first("SELECT mobile_1 FROM crm_parents WHERE id=$parent_id");
+        $data = u::query("SELECT c.*
+            FROM coupons AS c WHERE c.c2c_mobile = '".data_get($parent_info,'mobile_1')."' 
+            ORDER BY c.id DESC");
+        return response()->json($data);
+    }
 }

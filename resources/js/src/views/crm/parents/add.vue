@@ -133,6 +133,20 @@
                      @input="saveSourceDetail"
                 ></vue-select>
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="parent.source_id==3">
+              <label  >Người giới thiệu (ĐT)</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="parent.c2c_mobile"
+                @change="validatePhoneC2C"
+              />
+            </div>
+            <div class="vx-col w-full mb-4" v-if="parent.source_id==3">
+               <p><i>{{c2c_info}}</i></p>
+            </div>
+            
             <div class="vx-col md:w-1/2 w-full mb-4">
               <div class="form-group col-sm-6">
                 <label >Trạng thái</label>
@@ -153,19 +167,6 @@
                   <option value="90">9. Danh sách đen</option>
                 </select>
               </div>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label  >Người giới thiệu (ĐT)</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.c2c_mobile"
-                @change="validatePhoneC2C"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-               <p><i>{{c2c_info}}</i></p>
             </div>
           </div>
         </div>

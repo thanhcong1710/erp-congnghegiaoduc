@@ -99,6 +99,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('ticket/add', 'ParentsController@addTicket');
             Route::post('ticket/update', 'ParentsController@updateTicket');
             Route::post('parents/upload-avatar', 'ParentsController@uploadAvatar');
+            Route::get('parents/get_vouchers/{parent_id}', 'ParentsController@getVouchers');
         });
 
         Route::prefix('lms')->group(function () {

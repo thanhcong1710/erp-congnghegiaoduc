@@ -77,7 +77,7 @@ class CampaignsController extends Controller
                 }
                 u::insertSimpleRow(array(
                     'code' => $voucher_code,
-                    'type' => 0,
+                    'source_id' => 1,
                     'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
                     'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
                     'start_date'=> data_get($request, 'campaign.start_date'),
@@ -163,7 +163,7 @@ class CampaignsController extends Controller
                     }
                     u::insertSimpleRow(array(
                         'code' => $voucher_code,
-                        'type' => 0,
+                        'source_id' => 1,
                         'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
                         'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
                         'start_date'=> data_get($request, 'campaign.start_date'),

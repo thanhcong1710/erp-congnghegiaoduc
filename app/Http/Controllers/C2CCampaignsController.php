@@ -60,6 +60,16 @@ class C2CCampaignsController extends Controller
             'list_tuition_fee' => $list_tuition_fee,
             'meta_data' => json_encode($tuition_fees)
         ), 'c2c_campaigns');
+        if($campaign_id) {
+            u::insertSimpleRow(array(
+                'name' => data_get($request, 'campaign.title'),
+                'status' => data_get($request, 'campaign.status'),
+                'campaign_id' => $campaign_id,
+                'source_id' => 3,
+                'created_at'=>date('Y-m-d H:i:s'),
+                'creator_id'=>Auth::user()->id,
+            ), 'source_detail');
+        }
         
         $result = array(
             'status' => 1,
@@ -98,6 +108,12 @@ class C2CCampaignsController extends Controller
             'updator_id'=>Auth::user()->id,
         ),array('id'=>data_get($request, 'campaign.id')), 'c2c_campaigns');
 
+        u::updateSimpleRow(array(
+            'name' => data_get($request, 'campaign.title'),
+            'status' => data_get($request, 'campaign.status'),
+            'updated_at'=>date('Y-m-d H:i:s'),
+            'updator_id'=>Auth::user()->id,
+        ), array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 3), 'source_detail');
         $result = array(
             'status' => 1,
             'message' => 'Cập nhật chính sách thành công'

@@ -276,7 +276,7 @@
                             :disabled="disabled_edit"
                         ></vue-select>
                     </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
+                    <div class="vx-col md:w-1/2 w-full mb-4" v-if="this.parent.source_id ==3">
                       <label  >Người giới thiệu (ĐT)</label>
                       <input
                         class="vs-inputx vs-input--input normal"
@@ -287,7 +287,7 @@
                         :disabled="disabled_edit"
                       />
                     </div>
-                    <div class="vx-col w-full mb-4">
+                    <div class="vx-col w-full mb-4" v-if="this.parent.source_id ==3">
                       <p><i>{{c2c_info}}</i></p>
                     </div>
                   </div>
@@ -457,6 +457,36 @@
               </div>
             </div>
           </vs-tab>
+          <vs-tab label="Vouchers"  @click="changeTab()">
+            <div class="tab-text">
+              <div class="vs-component vs-con-table stripe vs-table-primary">
+                <div class="con-tablex vs-table--content">
+                  <div class="vs-con-tbody vs-table--tbody ">
+                    <table class="vs-table vs-table--tbody-table">
+                      <thead class="vs-table--thead">
+                        <tr>
+                          <!---->
+                          <th colspan="1" rowspan="1" class="text-center">Mã voucher</th>
+                          <th colspan="1" rowspan="1" class="text-center">Số tiền giảm trừ</th>
+                          <th colspan="1" rowspan="1" class="text-center">Số buổi học bổng</th>
+                          <th colspan="1" rowspan="1" class="text-center">Ngày hiệu lực</th>
+                          <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                          
+                        </tr>
+                      </thead>
+                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in vouchers" :key="index">
+                        <td class="td vs-table--td text-center">{{ item.code }}</td>
+                        <td class="td vs-table--td text-center">{{ item.coupon_amount | formatMoney}}</td>
+                        <td class="td vs-table--td text-center">{{ item.coupon_session }}</td>
+                        <td class="td vs-table--td text-center">{{ item.end_date | formatDateView }}</td>
+                        <td class="td vs-table--td text-center">{{ item.status == 2 ? "Đã sử dụng" : "Chưa sử dụng"}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </vs-tab>
         </vs-tabs>
       </vx-card>
       <vs-popup :class="'modal_'+ modal_care.color" :title="modal_care.title" :active.sync="modal_care.show">
@@ -600,6 +630,9 @@
             <vs-button color="success" @click="addTicket">Lưu</vs-button>
           </div>
         </div>
+      </vs-popup>
+      <vs-popup :class="'modal_'+ modal.color" :title="modal.title" :active.sync="modal.show">
+        <div v-html="modal.body"></div>
       </vs-popup>
   </div>
 
@@ -791,6 +824,7 @@
           note:"",
         },
         logs:[],
+        vouchers:[],
         users_manager:[],
         tmp_owner_id:"",
         tmp_status:"",
@@ -826,6 +860,13 @@
         disabled_edit:true,
         c2c_info:"",
         products:[],
+        modal: {
+          title: "THÔNG BÁO",
+          show: false,
+          color: "success",
+          body: "Thêm mới lớp học thành công",
+          action_exit: "exit",
+        },
       };
     },
     async created() {
@@ -971,7 +1012,7 @@
             phone: this.parent.c2c_mobile,
           };
           this.$vs.loading();
-          u.p(`/api/crm/parents/validate_c2c_phone`,data).then(response => {
+          axios.p(`/api/crm/parents/validate_c2c_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
               this.parent.c2c_mobile ="";
@@ -1237,6 +1278,8 @@
           this.loadStudents();
         }else if(this.active_tab ==4){
           this.loadLogs();
+        }else if(this.active_tab ==5){
+          this.loadVouchers();
         }else{
           this.loadDetail();
         }
@@ -1247,6 +1290,16 @@
         .then((response) => {
           this.$vs.loading.close();
           this.logs=response.data;
+        })
+        .catch((e) => {
+        });
+      },
+      loadVouchers(){
+        this.$vs.loading();
+        axios.g(`/api/crm/parents/get_vouchers/${this.parent.id}`)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.vouchers=response.data;
         })
         .catch((e) => {
         });

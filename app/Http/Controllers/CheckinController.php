@@ -112,7 +112,8 @@ class CheckinController extends Controller
                 'gud_job1' => data_get($crm_parent_info, 'job_id'),
                 'status' => 1,
                 'source_detail_id' => data_get($crm_parent_info, 'source_detail_id'),
-                'source_id' => data_get($crm_parent_info, 'source_id', ),
+                'source_id' => data_get($crm_parent_info, 'source_id'),
+                'c2c_mobile' => data_get($crm_parent_info, 'c2c_mobile'),
                 'avatar_url' => data_get($crm_student_info, 'gender') =='F' ?'/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'
             ), 'students');
 
