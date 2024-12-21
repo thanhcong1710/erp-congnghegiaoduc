@@ -89,6 +89,7 @@ class ContractsController extends Controller
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
            'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
            'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
            'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
            'init_total_charged'=>0,
@@ -114,6 +115,9 @@ class ContractsController extends Controller
            'creator_id'=>Auth::user()->id,
            'status' => data_get($request, 'type') ==0 ? 3 : 1,
            'count_recharge' => $last_contract ? $last_contract->count_recharge + 1 : 0,
+           'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
+           'b2b_amount' => data_get($request,'b2b_amount'),
+           'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
         ), 'contracts');
 
         if(data_get($request,'coupon_code_check') == 1){
@@ -222,7 +226,9 @@ class ContractsController extends Controller
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
             (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
-            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+            (SELECT title FROM b2b_campaigns WHERE id= c.b2b_campaign_id) AS b2b_campaign_title,
+            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
         return response()->json($data);
@@ -248,6 +254,7 @@ class ContractsController extends Controller
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
            'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
            'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
            'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
            'init_total_charged'=>0,
@@ -271,7 +278,10 @@ class ContractsController extends Controller
            'note'=> data_get($request, 'note'),
            'updated_at'=>date('Y-m-d H:i:s'),
            'updator_id'=>Auth::user()->id,
-           'status' => 1
+           'status' => 1,
+           'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
+           'b2b_amount' => data_get($request,'b2b_amount'),
+           'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
         ), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){

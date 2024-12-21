@@ -81,7 +81,7 @@
                   <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} buổi học bổng)</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.tuition_fee_amount | formatMoney }}</strong></p>
+                  <p>Giá gốc: <strong>{{ item.init_tuition_fee_amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
                   <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
                 </td>

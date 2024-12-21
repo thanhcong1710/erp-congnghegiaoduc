@@ -137,7 +137,7 @@ class SystemController extends Controller
     public function getTuitionFees(Request $request){
         $status = data_get($request, 'status', null);
         $cond = $status!==null ? '1' : " status = $status";
-        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date,
+        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status,
                 (SELECT name FROM products WHERE id=t.product_id) AS product_name    
             FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
         return response()->json($data);

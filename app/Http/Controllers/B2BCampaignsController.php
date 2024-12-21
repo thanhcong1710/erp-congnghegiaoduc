@@ -106,4 +106,33 @@ class B2BCampaignsController extends Controller
         );
         return response()->json($result);
     }
+    public function loadB2BCampaign(Request $request){
+        $data = [];
+        $student_id = data_get($request,'student_id');
+        $tuition_fee_id = data_get($request,'tuition_fee_id');
+        $student_info = u::first("SELECT s.source_id, (SELECT campaign_id FROM source_detail WHERE id= s.source_detail_id) AS b2b_source_id 
+            FROM students AS s WHERE s.id=$student_id");
+        if(data_get($student_info,'source_id') == 2 && data_get($student_info,'b2b_source_id')){
+            $list = u::query("SELECT id, title, meta_data 
+                FROM b2b_campaigns 
+                WHERE  `start_date` <= '".date('Y-m-d')."' AND end_date >= '".date('Y-m-d')."' AND b2b_source_id =".(int)data_get($student_info,'b2b_source_id').
+                " AND (list_tuition_fee LIKE '$tuition_fee_id,%' OR list_tuition_fee LIKE '%,$tuition_fee_id,%' AND list_tuition_fee LIKE '%,$tuition_fee_id' AND list_tuition_fee = '$tuition_fee_id' ) ");
+            
+            foreach($list AS $row){
+                $meta_data = json_decode(data_get($row, 'meta_data'));
+                foreach ( $meta_data AS $mt){
+                    $tuition_fee = data_get($mt, 'tuition_fee');
+                    if(data_get($tuition_fee,'id')== $tuition_fee_id){
+                        $data[] = [
+                            'id' => data_get($row,'id'),
+                            'title' => data_get($row,'title'),
+                            'amount'=>data_get($mt, 'amount'),
+                            'bonus_session'=>data_get($mt, 'bonus_session'),
+                        ];
+                    }
+                }
+            }
+        }
+        return response()->json($data);
+    }
 }

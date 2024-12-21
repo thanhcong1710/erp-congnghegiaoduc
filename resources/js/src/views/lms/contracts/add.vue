@@ -257,6 +257,38 @@
                 disabled="true"
               />
             </div>
+              <div class="vx-col w-full mb-4">
+                <label >Chính sách B2B</label>
+                <vue-select
+                      label="title"
+                      placeholder="Chọn chính sách cho đối tác B2B"
+                      :options="html.b2b_campaign.list"
+                      v-model="html.b2b_campaign.item"
+                      :searchable="true"
+                      language="tv-VN"
+                      @input="saveDiscountB2B"
+                  ></vue-select>
+              </div>
+              <div class="vx-col md:w-1/2 w-full mb-4">
+                <label>Số tiền giảm B2B</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  :value="contract.b2b_amount | formatNumber"
+                  disabled="true"
+                />
+              </div>
+              <div class="vx-col md:w-1/2 w-full mb-4">
+                <label>Số buổi học bổng B2B</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  v-model="contract.b2b_bonus_session"
+                  disabled="true"
+                />
+              </div>
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>
@@ -376,6 +408,10 @@
           discount_codes:{
             item: '',
             list: []
+          },
+          b2b_campaign:{
+            item: '',
+            list: []
           }
         },
         contract:{
@@ -399,6 +435,9 @@
           total_session:'',
           start_date:'',
           note:'',
+          b2b_campaign_id:'',
+          b2b_amount:'',
+          b2b_bonus_session:''
         },
         student_info:{
 
@@ -479,7 +518,8 @@
           this.contract.tuition_fee_receivable = data.receivable
           this.contract.tuition_fee_session = data.session
           this.loadDiscountCode();
-          this.caculatorSession()
+          this.caculatorSession();
+          this.loadB2BCampaign();
         }else{
           this.contract.tuition_fee_id = ""
         }
@@ -513,13 +553,37 @@
           this.contract.discount_code = data.code
           this.contract.discount_code_percent = data.percent
           this.contract.discount_code_amount = data.discount
-           this.caculatorSession()
         }else{
           this.contract.discount_code_id = ""
           this.contract.discount_code_percent = ""
           this.contract.discount_code = ""
           this.contract.discount_code_amount = ""
         }
+        this.caculatorSession()
+      },
+      saveDiscountB2B(data = null){
+        console.log(data);
+        if (data && typeof data === 'object') {
+          const b2b_campaign_id = data.id
+          this.contract.b2b_campaign_id = b2b_campaign_id
+          this.contract.b2b_amount = data.amount
+          this.contract.b2b_bonus_session = data.bonus_session
+        }else{
+          this.contract.b2b_campaign_id = ""
+          this.contract.b2b_amount = ""
+          this.contract.b2b_bonus_session = ""
+        }
+        this.caculatorSession()
+      },
+      loadB2BCampaign(){
+        this.$vs.loading();
+        axios.p(`/api/marketing/b2b/campaigns/load-b2b-campaign`,{
+          tuition_fee_id: this.contract.tuition_fee_id,
+          student_id: this.contract.student_id
+        }).then((response) => {
+          this.$vs.loading.close();
+          this.html.b2b_campaign.list = response.data
+        }).catch(e => console.log(e))
       },
       checkCoupon(){
         if(this.contract.coupon_code){
@@ -559,8 +623,8 @@
         }
       },
       caculatorSession(){
-        this.contract.total_amount = this.contract.tuition_fee_amount - this.contract.discount_code_amount - this.contract.coupon_amount > 0 ? this.contract.tuition_fee_amount - this.contract.discount_code_amount - this.contract.coupon_amount : 0;
-        this.contract.total_session = this.contract.tuition_fee_session + this.contract.coupon_session;
+        this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
+        this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },
       save() {
         let mess = "";

@@ -229,6 +229,36 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col w-full mb-4" v-if="contract_info.b2b_campaign_id">
+              <label >Chính sách B2B</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                :value="contract_info.b2b_campaign_title"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4"  v-if="contract_info.b2b_campaign_id">
+              <label>Số tiền giảm B2B</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                :value="contract_info.b2b_amount | formatNumber"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4"  v-if="contract_info.b2b_campaign_id">
+              <label>Số buổi học bổng B2B</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="contract_info.b2b_bonus_session"
+                disabled="true"
+              />
+            </div>
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>

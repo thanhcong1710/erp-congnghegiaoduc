@@ -303,6 +303,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'B2BCampaignsController@add');
                 Route::get('show/{id}', 'B2BCampaignsController@show');
                 Route::post('update', 'B2BCampaignsController@update');
+                Route::post('load-b2b-campaign', 'B2BCampaignsController@loadB2BCampaign');
             });
             Route::prefix('c2c/campaigns')->group(function () {
                 Route::post('list', 'C2CCampaignsController@list');

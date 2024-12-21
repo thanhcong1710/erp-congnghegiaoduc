@@ -246,6 +246,38 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col w-full mb-4">
+                <label >Chính sách B2B</label>
+                <vue-select
+                      label="title"
+                      placeholder="Chọn chính sách cho đối tác B2B"
+                      :options="html.b2b_campaign.list"
+                      v-model="html.b2b_campaign.item"
+                      :searchable="true"
+                      language="tv-VN"
+                      @input="saveDiscountB2B"
+                  ></vue-select>
+              </div>
+              <div class="vx-col md:w-1/2 w-full mb-4">
+                <label>Số tiền giảm B2B</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  :value="contract.b2b_amount | formatNumber"
+                  disabled="true"
+                />
+              </div>
+              <div class="vx-col md:w-1/2 w-full mb-4">
+                <label>Số buổi học bổng B2B</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  v-model="contract.b2b_bonus_session"
+                  disabled="true"
+                />
+              </div>
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>
@@ -365,6 +397,10 @@
           discount_codes:{
             item: '',
             list: []
+          },
+          b2b_campaign:{
+            item: '',
+            list: []
           }
         },
         contract:{
@@ -388,6 +424,9 @@
           total_session:'',
           start_date:'',
           note:'',
+          b2b_campaign_id:'',
+          b2b_amount:'',
+          b2b_bonus_session:''
         },
         student_info:{
 
@@ -413,6 +452,32 @@
       this.loadDetail();
     },
     methods: {
+      saveDiscountB2B(data = null){
+        console.log(data);
+        if (data && typeof data === 'object') {
+          const b2b_campaign_id = data.id
+          this.contract.b2b_campaign_id = b2b_campaign_id
+          this.contract.b2b_amount = data.amount
+          this.contract.b2b_bonus_session = data.bonus_session
+        }else{
+          this.contract.b2b_campaign_id = ""
+          this.contract.b2b_amount = ""
+          this.contract.b2b_bonus_session = ""
+        }
+        console.log(this.contract);
+        this.caculatorSession()
+      },
+      loadB2BCampaign(){
+        this.$vs.loading();
+        axios.p(`/api/marketing/b2b/campaigns/load-b2b-campaign`,{
+          tuition_fee_id: this.contract.tuition_fee_id,
+          student_id: this.contract.student_id
+        }).then((response) => {
+          this.$vs.loading.close();
+          this.html.b2b_campaign.list = response.data
+          this.html.b2b_campaign.item = this.html.b2b_campaign.list.filter(item => item.id == this.contract.b2b_campaign_id)[0]
+        }).catch(e => console.log(e))
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
@@ -421,6 +486,10 @@
           this.contract = response.data
           this.contract.total_amount = response.data.must_charge
           this.contract.total_session = response.data.total_sessions
+          this.contract.tuition_fee_amount = response.data.init_tuition_fee_amount
+          this.contract.tuition_fee_session = response.data.init_tuition_fee_session
+          this.contract.tuition_fee_receivable = response.data.init_tuition_fee_receivable
+          console.log(this.contract)
           if(this.contract.coupon_code){
             this.contract.coupon_code_check=1
           }
@@ -428,6 +497,7 @@
           this.tmp_discount_code_id = response.data.discount_code_id
           this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
           this.loadTuitionFee();
+          this.loadB2BCampaign();
         })
       },
       
@@ -537,8 +607,9 @@
         }
       },
       caculatorSession(){
-        this.contract.total_amount = this.contract.tuition_fee_amount - this.contract.discount_code_amount - this.contract.coupon_amount > 0 ? this.contract.tuition_fee_amount - this.contract.discount_code_amount - this.contract.coupon_amount : 0;
-        this.contract.total_session = this.contract.tuition_fee_session + this.contract.coupon_session;
+        console.log(this.contract);
+        this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
+        this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },
       save() {
         let mess = "";
