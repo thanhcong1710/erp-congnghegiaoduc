@@ -35,7 +35,8 @@ class CouponsController extends Controller
         $total = u::first("SELECT count(b.id) AS total 
             FROM coupons AS b WHERE $cond");
         
-        $list = u::query("SELECT b.*, IF(b.type=0, (SELECT title FROM campaigns WHERE id=b.campaign_id), '') AS title
+        $list = u::query("SELECT b.*, IF(b.source_id=1, (SELECT title FROM campaigns WHERE id=b.campaign_id), 
+                IF(c.source_id=3, (SELECT title FROM c2c_campaigns WHERE id=b.campaign_id))) AS title
             FROM coupons AS b 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
