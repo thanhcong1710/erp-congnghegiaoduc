@@ -57,7 +57,7 @@
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in coupons" :key="index">
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td text-center">{{item.type | genTextType}}</td>
+                <td class="td vs-table--td text-center">{{item.source_id | genTextType}}</td>
                 <td class="td vs-table--td text-center" >{{item.title}}</td>
                 <td class="td vs-table--td text-center" >{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.coupon_amount | formatMoney}}</td>
@@ -231,11 +231,11 @@
       
     },
     filters: {
-      genTextType(type){
+      genTextType(source_id){
         let resp = ''
-        if(type == 1){
+        if(source_id == 2){
           resp = 'B2B'
-        }else if(type == 2){
+        }else if(source_id == 3){
           resp = 'C2C'
         } else {
           resp = 'Chiến dịch'
