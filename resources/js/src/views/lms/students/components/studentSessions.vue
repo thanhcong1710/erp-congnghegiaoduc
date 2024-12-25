@@ -22,7 +22,7 @@
         <div v-for="(item, index) in next_sessions" :key="index">
           <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1">
               <div class="label-box-schedule text-center">{{item.cls_name}}</div>
-              <div class="text-date-box-schedule text-center">Buổi {{index+1}} - {{item.class_date | formatDateViewDay}}</div>
+              <div class="text-date-box-schedule text-center">Buổi {{index+1 + done_sessions.length}} - {{item.class_date | formatDateViewDay}}</div>
               <div class="text-center"><span class="box-status">Sắp học</span></div>
           </div>
         </div>
