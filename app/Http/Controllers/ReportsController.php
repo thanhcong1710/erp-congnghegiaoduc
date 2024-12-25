@@ -193,7 +193,7 @@ class ReportsController extends Controller
                     t.cm_leader_id, t.ceo_branch_id, c.renewed_date, c.success_renewed_date,
                     IF (c.success_renewed_date IS NOT NULL AND DATE_FORMAT(c.success_renewed_date, '%Y-%m') <= '$renewed_month', 1, 2) renewed_status,
                     IF ( DATE_FORMAT(c.renewed_date, '%Y-%m')< '$renewed_month' , '$renewed_month', DATE_FORMAT(c.renewed_date, '%Y-%m') ) renewed_month,
-                    c1.init_tuition_fee_id AS renew_init_tuition_fee_id, c.init_tuition_fee_id AS init_tuition_fee_id,
+                    c1.init_tuition_fee_id AS init_renew_tuition_fee_id, c.init_tuition_fee_id AS init_tuition_fee_id,
                     c1.must_charge AS renew_amount 
                 FROM contracts c 
                     LEFT JOIN students s ON c.student_id = s.id 
@@ -214,13 +214,13 @@ class ReportsController extends Controller
     {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $query = "INSERT INTO report_renews (student_id, contract_id, branch_id, product_id, class_id, renew_init_tuition_fee_id, init_tuition_fee_id, ec_id, cm_id, renewed_cm_id, ec_leader_id, cm_leader_id, ceo_id, renew_amount, `status`, renewed_month, last_date, created_at) VALUES ";
+            $query = "INSERT INTO report_renews (student_id, contract_id, branch_id, product_id, class_id, init_renew_tuition_fee_id, init_tuition_fee_id, ec_id, cm_id, renewed_cm_id, ec_leader_id, cm_leader_id, ceo_id, renew_amount, `status`, renewed_month, last_date, created_at) VALUES ";
             if (count($list) > 5000) {
                 for ($i = 0; $i < 5000; $i++) {
                 $item = $list[$i];
                 $renewed_cm_id = $item->cm_id;
                 $renew_amount = $item->renew_amount;
-                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id', '".(int)$item->renew_init_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
+                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id', '".(int)$item->init_renew_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
                                 '".(int)$item->ceo_branch_id."', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
                 }
                 $query = substr($query, 0, -1);
@@ -230,7 +230,7 @@ class ReportsController extends Controller
                 foreach ($list as $item) {
                 $renewed_cm_id = $item->cm_id;
                 $renew_amount = $item->renew_amount;
-                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id','".(int)$item->renew_init_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
+                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id','".(int)$item->init_renew_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
                                 '".(int)$item->ceo_branch_id."', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
                 }
                 $query = substr($query, 0, -1);
