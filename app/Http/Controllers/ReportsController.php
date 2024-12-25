@@ -219,7 +219,7 @@ class ReportsController extends Controller
                 for ($i = 0; $i < 5000; $i++) {
                 $item = $list[$i];
                 $renewed_cm_id = $item->cm_id;
-                $renew_amount = $item->renew_amount;
+                $renew_amount = (int)$item->renew_amount;
                 $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id', '".(int)$item->init_renew_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
                                 '".(int)$item->ceo_branch_id."', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
                 }
