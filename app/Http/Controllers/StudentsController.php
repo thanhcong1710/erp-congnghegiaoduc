@@ -274,12 +274,12 @@ class StudentsController extends Controller
                     (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
                     (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
         if($contract_active){
-            $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.attendance_status FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
+            $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
                 WHERE s.contract_id = $contract_active->id");
             $limit = $contract_active->summary_sessions - count($done_sessions);
             $limit = $limit > 0 ? $limit : 0;
             if($contract_active->class_id){
-                $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
+                $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
                     WHERE s.class_id = $contract_active->class_id AND s.class_date > CURRENT_DATE ORDER BY s.class_date LIMIT $limit");
             }
         }
