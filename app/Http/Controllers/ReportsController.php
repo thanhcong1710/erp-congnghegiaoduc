@@ -40,7 +40,7 @@ class ReportsController extends Controller
             c.product_id,
             '$report_month' report_month,
             c.enrolment_last_date,
-            c.summary_sessions, c.done_sessions,c.enrolment_start_date,
+            c.summary_sessions, c.done_sessions,c.enrolment_start_date, c.last_done_sessions,
             IF(c.count_recharge =0 , 0, 1) AS type_fee
         FROM
             contracts c
