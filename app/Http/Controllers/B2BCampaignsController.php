@@ -116,8 +116,7 @@ class B2BCampaignsController extends Controller
             $list = u::query("SELECT id, title, meta_data 
                 FROM b2b_campaigns 
                 WHERE  `start_date` <= '".date('Y-m-d')."' AND end_date >= '".date('Y-m-d')."' AND b2b_source_id =".(int)data_get($student_info,'b2b_source_id').
-                " AND (list_tuition_fee LIKE '$tuition_fee_id,%' OR list_tuition_fee LIKE '%,$tuition_fee_id,%' AND list_tuition_fee LIKE '%,$tuition_fee_id' AND list_tuition_fee = '$tuition_fee_id' ) ");
-            
+                " AND (list_tuition_fee LIKE '$tuition_fee_id,%' OR list_tuition_fee LIKE '%,$tuition_fee_id,%' OR list_tuition_fee LIKE '%,$tuition_fee_id' OR list_tuition_fee = '$tuition_fee_id' ) ");
             foreach($list AS $row){
                 $meta_data = json_decode(data_get($row, 'meta_data'));
                 foreach ( $meta_data AS $mt){
