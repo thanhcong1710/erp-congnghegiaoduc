@@ -344,7 +344,7 @@
         }
       },
        localeDataSourceDetail(){
-        axios.g(`/api/system/source_detail?source_id=${this.parent.source_id}`)
+        axios.g(`/api/system/source_detail?source_id=${this.data_assign.source_id}`)
           .then(response => {
           this.list_source_detail = response.data
         })
