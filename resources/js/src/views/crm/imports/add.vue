@@ -331,14 +331,23 @@
       },
       selectSource(data = null){
         console.log(data);
+        this.data_assign.source_detail = ""
+        this.data_assign.source_detail_id = ""
         if (data && typeof data === 'object') {
           const source_id = data.id
           this.data_assign.source = data
           this.data_assign.source_id = source_id
+          this.localeDataSourceDetail();
         }else{
           this.data_assign.source = ""
           this.data_assign.source_id = ""
         }
+      },
+       localeDataSourceDetail(){
+        axios.g(`/api/system/source_detail?source_id=${this.parent.source_id}`)
+          .then(response => {
+          this.list_source_detail = response.data
+        })
       },
       selectSourceDetail(data = null){
         if (data && typeof data === 'object') {
@@ -396,10 +405,10 @@
         .then(response => {
         this.list_source = response.data
       })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.list_source_detail = response.data
-      })
+      // axios.g(`/api/system/source_detail`)
+      //   .then(response => {
+      //   this.list_source_detail = response.data
+      // })
     },
   }
 </script>
