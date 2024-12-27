@@ -124,7 +124,7 @@
                   <p>{{item.branch_name}}</p>
                   <p>Lớp: {{item.class_name}}</p>
                   <p>EC: {{item.ec_name}}</p>
-                  <p>CM: {{item.cm_name}}</p>
+                  <p>AF: {{item.cm_name}}</p>
                   <p>Trạng thái: <strong>{{item.label_status}}</strong></p>
                 </td>
                 <td class="td vs-table--td text-center">

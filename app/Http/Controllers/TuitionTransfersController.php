@@ -77,7 +77,7 @@ class TuitionTransfersController extends Controller
                 (SELECT cls_name FROM classes WHERE id=c.class_id) AS class_name,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
-            FROM contracts AS c WHERE c.student_id =$student_id AND c.status!=7");
+            FROM contracts AS c WHERE c.student_id =$student_id AND c.status!=7 AND c.type>0");
         return response()->json($contracts);
     }  
 

@@ -59,7 +59,7 @@
                   <th colspan="1" rowspan="1">Tên phụ huynh</th>
                   <th colspan="1" rowspan="1">Lớp</th>
                   <th colspan="1" rowspan="1">Sản phẩm</th>
-                  <th colspan="1" rowspan="1">CM</th>
+                  <th colspan="1" rowspan="1">AF</th>
                   <th colspan="1" rowspan="1">Gói phí</th>
                   <th colspan="1" rowspan="1">Loại</th>
                   <th colspan="1" rowspan="1">Tổng số buổi</th>

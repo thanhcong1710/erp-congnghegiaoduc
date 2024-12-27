@@ -529,6 +529,7 @@ class UtilityServiceProvider extends ServiceProvider
         $days = [];
         while ($numberOfSessions >= 0) {
             foreach ($classdays as $key => $classday) {
+                $classday = $classday -1;
                 if ($weekday > $classday) {
                     if ($key >= $maxLength) {
                         $startTime += (7 - $weekday) * $timeOfDay;

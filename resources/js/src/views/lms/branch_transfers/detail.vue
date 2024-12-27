@@ -51,7 +51,7 @@
                         <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.ec_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>CM:</span></td> 
+                        <td class="td vs-table--td"><span>AF:</span></td> 
                         <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.cm_name}}</span></td> 
                       </tr>
                     </table>

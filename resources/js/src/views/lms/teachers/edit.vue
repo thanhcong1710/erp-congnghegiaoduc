@@ -47,10 +47,10 @@
             ></vue-select>
           </div>
           <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Trợ giảng</label>
+            <label>Quản lý lớp học</label>
             <vue-select
                 label="label"
-                placeholder="Chọn trợ giảng"
+                placeholder="Chọn quản lý lớp học"
                 :options="html.cms.list"
                 v-model="html.cms.item"
                 :searchable="true"

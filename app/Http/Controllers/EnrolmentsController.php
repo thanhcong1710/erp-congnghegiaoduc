@@ -65,6 +65,7 @@ class EnrolmentsController extends Controller
         $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
+                (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.ta_id) AS ta_name,
                 cl.max_students, cl.class_day,'' AS room_text, '' AS shift_text, '' AS class_day_text
             FROM classes AS cl WHERE id = $class_id");
         $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);

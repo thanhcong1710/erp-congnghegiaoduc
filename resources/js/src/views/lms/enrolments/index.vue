@@ -86,10 +86,18 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>CM - Trợ giảng:</span>
+                  <span>AF - Quản lý lớp học:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
                   <span>{{class_info.cm_name}}</span>
+                </div>
+            </div>
+            <div class="vx-row">
+                <div class="vx-col md:w-1/3 w-full text-right">
+                  <span>TA - Trợ giảng:</span>
+                </div>
+                <div class="vx-col md:w-2/3 w-full text-left">
+                  <span>{{class_info.ta_name}}</span>
                 </div>
             </div>
             <div >

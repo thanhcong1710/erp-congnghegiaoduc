@@ -94,15 +94,28 @@
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>CM - Trợ giảng</label>
+              <label>AF - Quản lý lớp học</label>
               <vue-select
                     label="label"
-                    placeholder="Chọn trợ giảng"
+                    placeholder="Chọn quản lý lớp học"
                     :options="html.cms.list"
                     v-model="html.cms.item"
                     :searchable="true"
                     language="tv-VN"
                     @input="saveCM"
+                    :disabled="disabled_input"
+                ></vue-select>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>TA - Trợ giảng</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trợ giảng"
+                    :options="html.ta.list"
+                    v-model="html.ta.item"
+                    :searchable="true"
+                    language="tv-VN"
+                    @input="saveTA"
                     :disabled="disabled_input"
                 ></vue-select>
             </div>
@@ -374,6 +387,10 @@
             item: '',
             list: []
           },
+          ta:{
+            item: '',
+            list: []
+          },
           subjects:{
             item: '',
             list: []
@@ -469,6 +486,7 @@
         this.loadClasses();
         this.loadRooms();
         this.loadCMs();
+        this.loadTAs();
         this.loadTeachers();
       },
       saveProduct(data = null){
@@ -486,6 +504,14 @@
           this.config.cm_id = cm_id
         }else{
           this.config.cm_id = ""
+        }
+      },
+      saveTA(data = null){
+        if (data && typeof data === 'object') {
+          const ta_id = data.id
+          this.config.ta_id = ta_id
+        }else{
+          this.config.ta_id = ""
         }
       },
       saveShift(data = null){
@@ -549,6 +575,18 @@
           })
         }else{
           this.html.cms.list =[]
+        }
+      },
+      loadTAs(){
+        if(this.config.branch_id){
+          this.$vs.loading();
+          axios.g(`/api/system/ta/${this.config.branch_id}`)
+            .then(response => {
+            this.$vs.loading.close();
+            this.html.ta.list = response.data
+          })
+        }else{
+          this.html.ta.list =[]
         }
       },
       loadTeachers(){

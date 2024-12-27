@@ -72,7 +72,7 @@
                 <td class="td vs-table--td">
                   <p><strong>{{ item.branch_name }}</strong></p>
                   <p>EC: {{ item.ec_name }}</p>
-                  <p>CM: {{ item.cm_name }}</p>
+                  <p>AF: {{ item.cm_name }}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
