@@ -29,23 +29,21 @@
             <div class="flex flex-wrap">
               <!--begin::Stats-->
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
+                <div class="fw-semibold fs-6 text-gray-400"> Học phí (VNĐ)</div>
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted">{{student_info.total_charged | formatNumber}}</div>
+                  <div class="fs-2 fw-bold counted"><span class="text-success">{{student_info.left_amount | formatNumber}}</span>
+                    <span style="font-size: 16px;">/ {{student_info.init_total_charged | formatNumber}}</span>
+                  </div>
                 </div>
-                <div class="fw-semibold fs-6 text-gray-400">Phí đã đóng (VNĐ)</div>
-              </div>
-              <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted">{{student_info.summary_sessions}}</div>
-                </div>
-                <div class="fw-semibold fs-6 text-gray-400">Tổng số buổi</div>
               </div>
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                 <!--begin::Number-->
+                <div class="fw-semibold fs-6 text-gray-400">Số buổi học</div>
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted">{{student_info.left_sessions}}</div>
+                  <div class="fs-2 fw-bold counted"><span class="text-success">{{student_info.left_sessions}}</span> 
+                    <span style="font-size: 16px;">/ {{student_info.summary_sessions}}</span>
+                  </div>
                 </div>
-                <div class="fw-semibold fs-6 text-gray-400">Số buổi còn lại</div>
               </div>
             </div>
             <div class="box-item-process" v-if="student_info.done_sessions">

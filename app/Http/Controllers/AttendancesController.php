@@ -79,7 +79,7 @@ class AttendancesController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
             ),array('id'=>data_get($request, 'id')), 'schedule_has_student');
-            u::updateDoneSessions(data_get($schedule_has_student_info, 'contract_id'));
+            // u::updateDoneSessions(data_get($schedule_has_student_info, 'contract_id'));
         }
         $result = array(
             'status' => 1,
@@ -134,8 +134,8 @@ class AttendancesController extends Controller
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ),array('id'=>data_get($make_up_session, 'schedule_student_id')), 'schedule_has_student');
-        $schedule_has_student = u::first("SELECT contract_id FROM schedule_has_student WHERE id =".data_get($make_up_session, 'schedule_student_id'));
-        u::updateDoneSessions(data_get($schedule_has_student, 'contract_id'));
+        // $schedule_has_student = u::first("SELECT contract_id FROM schedule_has_student WHERE id =".data_get($make_up_session, 'schedule_student_id'));
+        // u::updateDoneSessions(data_get($schedule_has_student, 'contract_id'));
         $result = array(
             'status' => 1,
             'message' => 'Cập nhật thành công'

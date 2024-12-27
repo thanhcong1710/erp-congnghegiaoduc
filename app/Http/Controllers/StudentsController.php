@@ -154,11 +154,12 @@ class StudentsController extends Controller
 
     public function show(Request $request,$student_id)
     {
-        $data = u::first("SELECT s.*, c.total_charged, c.type AS contract_type, c.status AS contract_status,
-                c.summary_sessions,c.done_sessions, c.left_sessions, 
+        $data = u::first("SELECT s.*, c.init_total_charged, c.type AS contract_type, c.status AS contract_status,
+                c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
-                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
+                '' AS left_amount
             FROM students AS s 
                 LEFT JOIN contracts AS c ON c.student_id=s.id 
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id
@@ -168,6 +169,12 @@ class StudentsController extends Controller
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) AND s.id=$student_id");
         $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
+        if ( $data->real_sessions > $data->done_sessions) {
+            $data->left_amount = round($data->total_charged * ($data->left_sessions -  $data->done_sessions) / $data->left_sessions);
+        } else {
+            $data->left_amount =  0;
+        }
+        
         return response()->json($data);
     }
 
