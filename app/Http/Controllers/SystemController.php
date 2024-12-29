@@ -164,4 +164,11 @@ class SystemController extends Controller
             WHERE u.status=1 $cond AND r.code='".SystemCode::ROLE_TA."'");
         return response()->json($data);
     }
+
+    public function getClassByCM($cm_id) {
+        $data = u::query("SELECT cl.* 
+            FROM classes AS cl 
+            WHERE cl.status=1 AND cl.cm_id=$cm_id");
+        return response()->json($data);
+    }
 }

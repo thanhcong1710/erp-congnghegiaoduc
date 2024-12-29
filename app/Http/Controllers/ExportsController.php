@@ -178,17 +178,25 @@ class ExportsController extends Controller
         $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
-        $start_date = date('Y-m');
         foreach($arr_key AS $k=>$key){
             if($key=='keyword'){
                 $keyword = $arr_value[$k];
                 $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%')";
             }
-            if($key=='start_date'){
-                $cond .= " AND r.renewed_month = '$arr_value[$k]'";
-            }
             if($key=='branch_id'){
                 $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='cm_id'){
+                $cond .=  " AND r.cm_id = ".$arr_value[$k];
+            }
+            if($key=='class_id'){
+                $cond .=  " AND r.class_id = ".$arr_value[$k];
+            }
+            if($key=='start_date'){
+                $cond .=  " AND r.last_date >= '".$arr_value[$k]."'";
+            }
+            if($key=='end_date'){
+                $cond .=  " AND r.last_date <= '".$arr_value[$k]."'";
             }
         }
         
@@ -199,10 +207,10 @@ class ExportsController extends Controller
                 cl.cls_name AS class_name,
                 IF(r.status=1,'Thành công','Thất bại') AS status_title,
                 t.name AS tuition_fee_name,
-                CONCAT(u.name,' - ', u.hrm_id) AS ec_name, r.renewed_month
+                CONCAT(u.name,' - ', u.hrm_id) AS cm_name, r.renewed_month
             FROM report_renews AS r 
                 LEFT JOIN students AS s ON s.id=r.student_id 
-                LEFT JOIN users AS u ON u.id=r.ec_id 
+                LEFT JOIN users AS u ON u.id=r.cm_id 
                 LEFT JOIN branches AS b ON b.id=r.branch_id
                 LEFT JOIN products AS p ON p.id=r.product_id
                 LEFT JOIN classes AS cl ON cl.id=r.class_id
@@ -219,7 +227,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('G1', 'Kết quả');
         $sheet->setCellValue('H1', 'Gói tái phí');
         $sheet->setCellValue('I1', 'Số tiền tái phí');
-        $sheet->setCellValue('J1', 'EC');
+        $sheet->setCellValue('J1', 'AF');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(20);
@@ -242,7 +250,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('G' . $x, $list[$i]->status_title);
             $sheet->setCellValue('H' . $x, $list[$i]->status==1 ? $list[$i]->tuition_fee_name : '');
             $sheet->setCellValue('I' . $x, $list[$i]->status==1 ? $$list[$i]->renew_amount : '');
-            $sheet->setCellValue('J' . $x, $list[$i]->ec_name);
+            $sheet->setCellValue('J' . $x, $list[$i]->cm_name);
             $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
@@ -326,9 +334,9 @@ class ExportsController extends Controller
             }
         }
 
-        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.ec_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
         $order_by = " ORDER BY b.id DESC ";
-        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS ec_name, u.id AS ec_id, b.id AS branch_id,
+        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS cm_name, u.id AS cm_id, b.id AS branch_id,
             (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
             ($renewSql AND r.status >0) total_item,
             ($renewSql AND r.status=1) success_item
@@ -336,7 +344,7 @@ class ExportsController extends Controller
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
                 LEFT JOIN branches AS b ON b.id=bu.branch_id
-            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by");
+            WHERE ru.role_id IN (55,56) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE cm_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by");
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'Trung tâm');
@@ -355,7 +363,7 @@ class ExportsController extends Controller
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
-            $sheet->setCellValue('B' . $x, $list[$i]->ec_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->cm_name);
             $sheet->setCellValue('C' . $x, $list[$i]->role_name);
             $sheet->setCellValue('D' . $x, $list[$i]->total_item) ;
             $sheet->setCellValue('E' . $x, $list[$i]->success_item );

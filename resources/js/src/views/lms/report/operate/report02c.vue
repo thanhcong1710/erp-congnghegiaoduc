@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH TÁI PHÍ THEO EC</h5>
+      <h5>BÁO CÁO HỌC SINH TÁI PHÍ THEO AF</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5 mt-5">
         <div class="vx-row">
@@ -62,7 +62,7 @@
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.ec_name}}</td>
+                <td class="td vs-table--td">{{item.cm_name}}</td>
                 <td class="td vs-table--td">{{item.role_name}}</td>
                 <td class="td vs-table--td">{{item.total_item}}</td>
                 <td class="td vs-table--td">{{item.success_item}}</td>

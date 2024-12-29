@@ -243,7 +243,10 @@ class ReportsController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
-        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+        $start_date = data_get($request, 'start_date');
+        $end_date = data_get($request, 'end_date');
+        $class_id = data_get($request, 'class_id');
+        $cm_id = data_get($request, 'cm_id');
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -260,8 +263,18 @@ class ReportsController extends Controller
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
 
-        if ($start_date !== '') {
-            $cond .= " AND r.renewed_month = '$start_date'";
+        if ($start_date) {
+            $cond .= " AND r.last_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND r.last_date <= '$end_date'";
+        }
+
+        if ($class_id) {
+            $cond .= " AND r.class_id = '$class_id'";
+        }
+        if ($cm_id) {
+            $cond .= " AND r.cm_id = '$cm_id'";
         }
         
         $order_by = " ORDER BY r.id DESC ";
@@ -275,10 +288,10 @@ class ReportsController extends Controller
                         cl.cls_name AS class_name,
                         IF(r.status=1,'Thành công','Thất bại') AS status_title,
                         t.name AS tuition_fee_name,
-                        CONCAT(u.name,' - ', u.hrm_id) AS ec_name, r.renewed_month
+                        CONCAT(u.name,' - ', u.hrm_id) AS cm_name, r.renewed_month
                     FROM report_renews AS r 
                         LEFT JOIN students AS s ON s.id=r.student_id 
-                        LEFT JOIN users AS u ON u.id=r.ec_id 
+                        LEFT JOIN users AS u ON u.id=r.cm_id 
                         LEFT JOIN branches AS b ON b.id=r.branch_id
                         LEFT JOIN products AS p ON p.id=r.product_id
                         LEFT JOIN classes AS cl ON cl.id=r.class_id
@@ -339,9 +352,9 @@ class ReportsController extends Controller
                 FROM users AS u 
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
-            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0))");
-        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.ec_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
-        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS ec_name, u.id AS ec_id, b.id AS branch_id,
+            WHERE ru.role_id IN (55,56) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE cm_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0))");
+        $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS cm_name, u.id AS cm_id, b.id AS branch_id,
             (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
             ($renewSql AND r.status >0) total_item,
             ($renewSql AND r.status=1) success_item
@@ -349,7 +362,7 @@ class ReportsController extends Controller
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
                 LEFT JOIN branches AS b ON b.id=bu.branch_id
-            WHERE ru.role_id IN (68,69) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE ec_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by $limitation ");
+            WHERE ru.role_id IN (55,56) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE cm_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by $limitation ");
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

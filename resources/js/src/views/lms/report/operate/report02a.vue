@@ -8,7 +8,7 @@
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5 mt-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Trung tâm</label>
             <multiselect
                 name="search_branch"
@@ -22,17 +22,42 @@
                 :searchable="true"
                 track-by="id"
                 selectedLabel="" selectLabel="" deselectLabel=""
+                @input="slectBranch"
               >
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label>AF - Quản lý lớp học</label>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn quản lý lớp học"
+                  :options="cms_list"
+                  v-model="cms_item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveAF"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label>Lớp học</label>
+            <vue-select
+                  label="cls_name"
+                  placeholder="Chọn lớp học"
+                  :options="class_list"
+                  v-model="class_item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveClass"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
+            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
         </div>
@@ -62,7 +87,7 @@
                   <th colspan="1" rowspan="1">Kết quả</th>
                   <th colspan="1" rowspan="1">Gói tái phí</th>
                   <th colspan="1" rowspan="1">Số tiền tái phí</th>
-                  <th colspan="1" rowspan="1">EC</th>
+                  <th colspan="1" rowspan="1">AF</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
@@ -78,7 +103,7 @@
                 <td class="td vs-table--td">{{ item.status_title}}</td>
                 <td class="td vs-table--td"><span v-if="item.status==1">{{ item.tuition_fee_name }}</span></td>
                 <td class="td vs-table--td"><span v-if="item.status==1">{{ item.renew_amount | formatMoney }}</span></td>
-                <td class="td vs-table--td">{{ item.ec_name}}</td>
+                <td class="td vs-table--td">{{ item.cm_name}}</td>
               </tr>
             </table>
             
@@ -121,16 +146,23 @@
     components: { 
       vSelect,
       Multiselect,
-      DatePicker
+      DatePicker,
+      "vue-select": vSelect,
     },
     data() {
       return {
         branch_list: [],
+        cms_list: [],
+        cms_item:"",
+        class_list: [],
+        class_item:"",
         searchData: {
           arr_branch: "",
           branch_id:"",
           keyword: "",
           dateRange: "",
+          cm_id:"",
+          class_id:"",
         },
         datepickerOptions: {
           closed: true,
@@ -180,18 +212,54 @@
         this.branch_list = response.data
       })
       this.getData();
-      this.searchData.dateRange = new Date();
     },
     methods: {
+      slectBranch(){
+        var branch_id = 0
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            branch_id = item.id
+          })
+        }
+        axios.g(`/api/system/cms/${branch_id}`)
+        .then(response => {
+          this.cms_list = response.data
+          this.cms_item=""
+          this.searchData.cm_id = ''
+          this.class_list = ""
+          this.class_item = ""
+        })
+      },
+      saveAF(data = null){
+        if (data && typeof data === 'object') {
+          const cm_id = data.id
+          this.searchData.cm_id = cm_id
+          axios.g(`/api/system/get-class-by-cm/${cm_id}`)
+            .then(response => {
+              this.class_list = response.data
+              this.searchData.class_id = ''
+              this.class_item = ""
+            })
+        }else{
+          this.searchData.cm_id=""
+          this.searchData.class_id = ""
+          this.class_item = ""
+        }
+      },
+      saveClass(data = null){
+        if (data && typeof data === 'object') {
+          const class_id = data.id
+          this.searchData.class_id = class_id
+        }else{
+          this.searchData.class_id = ""
+        }
+      },
       reset() {
-        this.searchData.keyword = ""
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
-        this.searchData.pagination= this.pagination
-        this.searchData.dateRange= ""
-        this.getData();
+        location.reload();
       },
       getData() {
+        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
+        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -202,7 +270,10 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
-            start_date: u.getDateMonth(this.searchData.dateRange),
+            cm_id: this.searchData.cm_id,
+            class_id: this.searchData.class_id, 
+            start_date: startDate,
+            end_date: endDate,
             pagination:this.pagination,
           }
 
@@ -249,10 +320,24 @@
           this.key += "branch_id,"
           this.value += ids_branch+","
         }
-        if (this.searchData.dateRange){
+        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
+        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
+        
+        if (startDate){
           this.key += "start_date,"
-          this.value +=u.getDateMonth(this.searchData.dateRange)+","
-          console.log(u.getDateMonth(this.searchData.dateRange))
+          this.value +=startDate+","
+        }
+        if (endDate){
+          this.key += "end_date,"
+          this.value +=endDate+","
+        }
+        if (this.searchData.cm_id){
+          this.key += "cm_id,"
+          this.value +=this.searchData.cm_id+","
+        }
+        if (this.searchData.class_id){
+          this.key += "class_id,"
+          this.value +=this.searchData.class_id+","
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"

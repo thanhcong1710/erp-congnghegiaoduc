@@ -502,9 +502,9 @@ export default {
           breadcrumb: [
             { title: 'Home', url: '/' },
             { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - EC', active: true}
+            { title: 'Báo cáo tái phí - AF', active: true}
           ],
-          pageTitle: 'Báo cáo tái phí - EC',
+          pageTitle: 'Báo cáo tái phí - AF',
           rule: 'editor'
         }
       },

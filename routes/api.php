@@ -52,6 +52,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('tuition-fees', 'SystemController@getTuitionFees');
             Route::get('b2b/sources', 'SystemController@getB2BSources');
             Route::get('ta/{branch_id}', 'SystemController@getTAs');
+            Route::get('get-class-by-cm/{cm_id}', 'SystemController@getClassByCM');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
