@@ -4,9 +4,9 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH TÁI PHÍ THEO EC</h5>
+      <h5>BÁO CÁO TỶ LỆ ACS CỦA TỪNG TRUNG TÂM</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
-      <div class="mb-5 mt-5">
+      <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trung tâm</label>
@@ -27,7 +27,7 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian tạo</label>
+            <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
@@ -44,29 +44,51 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" >
+            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Nhân viên</th>
-                  <th colspan="1" rowspan="1">Chức danh</th>
-                  <th colspan="1" rowspan="1">Số học sinh đến hạn tái tục</th>
-                  <th colspan="1" rowspan="1">Học sinh đóng phí tái tục</th>
-                  <th colspan="1" rowspan="1">Tỷ lệ tái tục (%)</th>
+                  <th colspan="1" rowspan="3" class="text-center">STT</th>
+                  <th colspan="1" rowspan="3">Trung tâm</th>
+                  <th colspan="12" rowspan="1">Class type: Group class/ Mode of learning: Offline</th>
+                  <th colspan="1" rowspan="3">ACS</th>
+                </tr>
+                <tr>
+                  <th colspan="5" rowspan="1">HỌC VIÊN</th>
+                  <th colspan="1" rowspan="2">Tổng</th>
+                  <th colspan="5" rowspan="1">LỚP</th>
+                  <th colspan="1" rowspan="2">Tổng</th>
+                </tr>
+                <tr>
+                  <th colspan="1" rowspan="1">Kindy</th>
+                  <th colspan="1" rowspan="1">Kids</th>
+                  <th colspan="1" rowspan="1">Aca</th>
+                  <th colspan="1" rowspan="1">Start-Up</th>
+                  <th colspan="1" rowspan="1">IELTS</th>
+                  <th colspan="1" rowspan="1">Kindy</th>
+                  <th colspan="1" rowspan="1">Kids</th>
+                  <th colspan="1" rowspan="1">Aca</th>
+                  <th colspan="1" rowspan="1">Start-Up</th>
+                  <th colspan="1" rowspan="1">IELTS</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.ec_name}}</td>
-                <td class="td vs-table--td">{{item.role_name}}</td>
-                <td class="td vs-table--td">{{item.total_item}}</td>
-                <td class="td vs-table--td">{{item.success_item}}</td>
-                <td class="td vs-table--td">{{ item.total_item > 0 ? (item.success_item/item.total_item * 100).toFixed(2) : '--' }}</td>
+                <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td">{{item.name}}</td>
+                <td class="td vs-table--td">{{item.gud_name1}}</td>
+                <td class="td vs-table--td">{{ item.cls_name}}</td>
+                <td class="td vs-table--td">{{ item.product_name}}</td>
+                <td class="td vs-table--td">{{ item.cm_name}}</td>
+                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
+                <td class="td vs-table--td">{{ item.type_fee}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.start_date}}</td>
+                <td class="td vs-table--td">{{ item.end_date}}</td> -->
               </tr>
             </table>
             
@@ -100,10 +122,10 @@
 <script>
 
   import vSelect from 'vue-select'
-  import axios from '../../../http/axios.js'
+  import axios from '../../../../http/axios.js'
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
-  import u from '../../../until/helper.js'
+  import u from '../../../../until/helper.js'
 
   export default {
     components: { 
@@ -195,7 +217,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/02c', data)
+        axios.p('/api/lms/reports/01', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -220,7 +242,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report02c/`;
+        var url = `/api/lms/exports/report01/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -269,5 +291,10 @@ th .sort-th, th .vs-table-text{
 }
 .td.vs-table--td{
   vertical-align: top;
+}
+[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    text-align: center;
 }
 </style>

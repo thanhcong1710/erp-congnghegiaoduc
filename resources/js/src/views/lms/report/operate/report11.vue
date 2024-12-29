@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE</h5>
+      <h5>BÁO CÁO HỌC SINH PENDING</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -31,7 +31,7 @@
             <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian tạo</label>
+            <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
@@ -53,25 +53,25 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Mã học sinh</th>
+                  <th colspan="1" rowspan="1">Mã HS</th>
                   <th colspan="1" rowspan="1">Học sinh</th>
                   <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">Lớp</th>
-                  <th colspan="1" rowspan="1">Sản phẩm</th>
-                  <th colspan="1" rowspan="1">AF</th>
-                  <th colspan="1" rowspan="1">Gói phí</th>
-                  <th colspan="1" rowspan="1">Loại</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1">Chương trình</th>
                   <th colspan="1" rowspan="1">Tổng số buổi</th>
-                  <th colspan="1" rowspan="1">Số buổi còn lại</th>
-                  <th colspan="1" rowspan="1">Ngày bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày kết thúc</th>
+                  <th colspan="1" rowspan="1">Học phí còn lại</th>
+                  <th colspan="1" rowspan="1">Ca học</th>
+                  <th colspan="1" rowspan="1">Lịch học</th>
+                  <th colspan="1" rowspan="1">Số ngày PENDING</th>
+                  <th colspan="1" rowspan="1">Ngày dự kiến bắt đầu</th>
+                  <th colspan="1" rowspan="1">Ngày full phí</th>
+                  <th colspan="1" rowspan="1">TVTS</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.lms_code}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
@@ -84,7 +84,7 @@
                 <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
                 <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
                 <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td>
+                <td class="td vs-table--td">{{ item.end_date}}</td> -->
               </tr>
             </table>
             
@@ -118,10 +118,10 @@
 <script>
 
   import vSelect from 'vue-select'
-  import axios from '../../../http/axios.js'
+  import axios from '../../../../http/axios.js'
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
-  import u from '../../../until/helper.js'
+  import u from '../../../../until/helper.js'
 
   export default {
     components: { 

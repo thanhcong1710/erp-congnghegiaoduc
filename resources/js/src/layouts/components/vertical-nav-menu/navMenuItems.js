@@ -162,8 +162,38 @@ export default [
         url: '/lms/reports',
         name: 'Báo cáo',
         icon: 'TrendingUpIcon',
-        slug: 'lms-reports',
-        permission:'lms_reports',
+        submenu: [
+          {
+            url: '/lms/reports/business',
+            name: 'Kinh doanh',
+            slug: 'lms-reports-business',
+            permission:'lms_reports',
+          },
+          {
+            url: '/lms/reports/finance',
+            name: 'Tài chính kế toán',
+            slug: 'lms-reports-finance',
+            permission:'lms_reports',
+          },
+          {
+            url: '/lms/reports/operate',
+            name: 'Vận hành',
+            slug: 'lms-reports-operate',
+            permission:'lms_reports',
+          },
+          {
+            url: '/lms/reports/academic',
+            name: 'Học thuật',
+            slug: 'lms-reports-academic',
+            permission:'lms_reports',
+          },
+          {
+            url: '/lms/reports/teacher',
+            name: 'Giáo viên',
+            slug: 'lms-reports-teacher',
+            permission:'lms_reports',
+          }
+        ],
       },
     ]
   },
