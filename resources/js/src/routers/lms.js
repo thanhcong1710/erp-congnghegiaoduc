@@ -634,6 +634,34 @@ export default {
         }
       },
       {
+        path: '/lms/reports/academic/report-01',
+        name: 'lms-report-academic-01',
+        component: () => import('@/views/lms/report/academic/report01.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic'},
+            { title: 'Giờ dạy trợ giảng', active: true}
+          ],
+          pageTitle: 'Giờ dạy trợ giảng',
+          rule: 'editor'
+        },
+      },
+      {
+        path: '/lms/reports/academic/report-02',
+        name: 'lms-report-academic-02',
+        component: () => import('@/views/lms/report/academic/report02.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic'},
+            { title: 'Danh sách lớp test', active: true}
+          ],
+          pageTitle: 'Danh sách lớp test',
+          rule: 'editor'
+        },
+      },
+      {
         path: '/lms/reports/teacher',
         name: 'lms-reports-teacher',
         component: () => import('@/views/lms/report/teacher/index.vue'),
@@ -645,6 +673,20 @@ export default {
           pageTitle: 'Báo cáo',
           rule: 'editor'
         }
+      },
+      {
+        path: '/lms/reports/teacher/report-01',
+        name: 'lms-report-teacher-01',
+        component: () => import('@/views/lms/report/teacher/report01.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo giáo viên', url: '/lms/reports/teacher'},
+            { title: 'Báo cáo chi tiết giờ dạy của giáo viên', active: true}
+          ],
+          pageTitle: 'Báo cáo chi tiết giờ dạy của giáo viên',
+          rule: 'editor'
+        },
       },
       {
         path: '/lms/reports/business',
@@ -660,6 +702,20 @@ export default {
         }
       },
       {
+        path: '/lms/reports/business/report-01',
+        name: 'lms-report-business-01',
+        component: () => import('@/views/lms/report/business/report01.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo kinh doanh', url: '/lms/reports/business'},
+            { title: 'Kết quả kinh doanh ngày', active: true}
+          ],
+          pageTitle: 'Kết quả kinh doanh ngày',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/reports/finance',
         name: 'lms-reports-finance',
         component: () => import('@/views/lms/report/finance/index.vue'),
@@ -669,6 +725,76 @@ export default {
             { title: 'Danh sách báo cáo tài chính kế toán', active: true},
           ],
           pageTitle: 'Báo cáo',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reports/finance/report-01',
+        name: 'lms-report-finance-01',
+        component: () => import('@/views/lms/report/finance/report01.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
+            { title: 'Báo cáo chi tiết doanh số', active: true}
+          ],
+          pageTitle: 'Báo cáo chi tiết doanh số',
+          rule: 'editor'
+        },
+      },
+      {
+        path: '/lms/reports/finance/report-02',
+        name: 'lms-report-finance-02',
+        component: () => import('@/views/lms/report/finance/report02.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
+            { title: 'Báo cáo doanh số theo trung tâm', active: true}
+          ],
+          pageTitle: 'Báo cáo doanh số theo trung tâm',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reports/finance/report-03',
+        name: 'lms-report-finance-03',
+        component: () => import('@/views/lms/report/finance/report03.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
+            { title: 'Báo cáo doanh thu thực hiện', active: true}
+          ],
+          pageTitle: 'Báo cáo doanh thu thực hiện',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reports/finance/report-04',
+        name: 'lms-report-finance-04',
+        component: () => import('@/views/lms/report/finance/report04.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
+            { title: 'Báo cáo doanh số theo nhân viên', active: true}
+          ],
+          pageTitle: 'Báo cáo doanh số theo nhân viên',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reports/finance/report-05',
+        name: 'lms-report-finance-05',
+        component: () => import('@/views/lms/report/finance/report05.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
+            { title: 'Báo cáo chi tiết đơn hàng', active: true}
+          ],
+          pageTitle: 'Báo cáo chi tiết đơn hàng',
           rule: 'editor'
         }
       },

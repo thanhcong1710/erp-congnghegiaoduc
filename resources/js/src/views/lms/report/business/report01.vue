@@ -4,32 +4,10 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH PENDING</h5>
+      <h5>KẾT QUẢ KINH DOANH NGÀY</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã học sinh, tên học sinh" v-model="searchData.keyword"></vs-input>
-          </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
@@ -53,19 +31,19 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã HS</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Tổng số buổi</th>
-                  <th colspan="1" rowspan="1">Học phí còn lại</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Lịch học</th>
-                  <th colspan="1" rowspan="1">Số ngày PENDING</th>
-                  <th colspan="1" rowspan="1">Ngày dự kiến bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày full phí</th>
-                  <th colspan="1" rowspan="1">TVTS</th>
+                  <th colspan="1" rowspan="1">Chi Nhánh</th>
+                  <th colspan="1" rowspan="1">KPI Tháng</th>
+                  <th colspan="1" rowspan="1">Số checkin</th>
+                  <th colspan="1" rowspan="1">Số học sinh New</th>
+                  <th colspan="1" rowspan="1">Số học sinh Renew</th>
+                  <th colspan="1" rowspan="1">DS HS New</th>
+                  <th colspan="1" rowspan="1">DS HS Renew</th>
+                  <th colspan="1" rowspan="1">DS Digital</th>
+                  <th colspan="1" rowspan="1">DS Thực thu</th>
+                  <th colspan="1" rowspan="1">Công nơ phát sinh ngày</th>
+                  <th colspan="1" rowspan="1">DS Thực thu + công nợ</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành thực thu</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành bao gồm cả công nợ</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">

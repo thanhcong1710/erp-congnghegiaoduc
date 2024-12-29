@@ -10,7 +10,7 @@
             <h4 class="w-full mb-4"><i class="fa-solid fa-file-contract mr-1"></i> DANH SÁCH BÁO CÁO GIÁO VIÊN</h4>
             <hr class="mb-3" style="border: 0.5px solid #ccc;">
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/report-01'">
+              <router-link class="link-report" :to="'/lms/reports/teacher/report-01'">
                 <p>01. BÁO CÁO CHI TIẾT GIỜ DẠY CỦA GIÁO VIÊN</p>
               </router-link>
             </div>

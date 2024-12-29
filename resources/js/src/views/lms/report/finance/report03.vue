@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH PENDING</h5>
+      <h5>BÁO CÁO DOANH THU THỰC HIỆN</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -53,19 +53,20 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã HS</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1">Mã vùng</th>
+                  <th colspan="1" rowspan="1">Tên vùng</th>
+                  <th colspan="1" rowspan="1">Mã TT</th>
+                  <th colspan="1" rowspan="1">Tên TT</th>
                   <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Tổng số buổi</th>
-                  <th colspan="1" rowspan="1">Học phí còn lại</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Lịch học</th>
-                  <th colspan="1" rowspan="1">Số ngày PENDING</th>
-                  <th colspan="1" rowspan="1">Ngày dự kiến bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày full phí</th>
-                  <th colspan="1" rowspan="1">TVTS</th>
+                  <th colspan="1" rowspan="1">Trình độ</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
+                  <th colspan="1" rowspan="1">Lớp on-going</th>
+                  <th colspan="1" rowspan="1">Ngày bắt đầu học</th>
+                  <th colspan="1" rowspan="1">Ngày dự kiến kết thúc</th>
+                  <th colspan="1" rowspan="1">ID học viên</th>
+                  <th colspan="1" rowspan="1">Họ và tên học viên</th>
+                  <th colspan="1" rowspan="1">Số buổi học trong kỳ</th>
+                  <th colspan="1" rowspan="1">Số tiền học trong kỳ</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">

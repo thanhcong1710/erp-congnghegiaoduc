@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH PENDING</h5>
+      <h5>KẾT QUẢ KINH DOANH NGÀY</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -28,7 +28,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã học sinh, tên học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã nhân viên, tên nhân viên" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
@@ -48,24 +48,31 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
+            <table class="vs-table vs-table--tbody-table" style="width: 1600px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã HS</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Tổng số buổi</th>
-                  <th colspan="1" rowspan="1">Học phí còn lại</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Lịch học</th>
-                  <th colspan="1" rowspan="1">Số ngày PENDING</th>
-                  <th colspan="1" rowspan="1">Ngày dự kiến bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày full phí</th>
-                  <th colspan="1" rowspan="1">TVTS</th>
+                  <th colspan="1" rowspan="2" class="text-center">STT</th>
+                  <th colspan="1" rowspan="2">Mã vùng</th>
+                  <th colspan="1" rowspan="2">Tên vùng</th>
+                  <th colspan="1" rowspan="2">Mã TT</th>
+                  <th colspan="1" rowspan="2">Tên TT</th>
+                  <th colspan="1" rowspan="2">Mã NV</th>
+                  <th colspan="1" rowspan="2">Tên NV</th>
+                  <th colspan="2" rowspan="1">Học viên mới</th>
+                  <th colspan="2" rowspan="1">Học viên tái ký</th>
+                  <th colspan="2" rowspan="1">Học viên chuyển phí</th>
+                  <th colspan="2" rowspan="1">TỔNG</th>
+                </tr>
+                <tr>
+                  <th colspan="1" rowspan="1">Số học viên</th>
+                  <th colspan="1" rowspan="1">Số tiền</th>
+                  <th colspan="1" rowspan="1">Số học viên</th>
+                  <th colspan="1" rowspan="1">Số tiền</th>
+                  <th colspan="1" rowspan="1">Số học viên</th>
+                  <th colspan="1" rowspan="1">Số tiền</th>
+                  <th colspan="1" rowspan="1">Số học viên</th>
+                  <th colspan="1" rowspan="1">Số tiền</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
@@ -287,5 +294,10 @@ th .sort-th, th .vs-table-text{
 }
 .td.vs-table--td{
   vertical-align: top;
+}
+[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    text-align: center;
 }
 </style>

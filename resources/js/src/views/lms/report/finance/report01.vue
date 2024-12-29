@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC SINH PENDING</h5>
+      <h5>KẾT QUẢ KINH DOANH NGÀY</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -28,7 +28,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã học sinh, tên học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
@@ -53,19 +53,22 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã HS</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Tổng số buổi</th>
-                  <th colspan="1" rowspan="1">Học phí còn lại</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Lịch học</th>
-                  <th colspan="1" rowspan="1">Số ngày PENDING</th>
-                  <th colspan="1" rowspan="1">Ngày dự kiến bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày full phí</th>
+                  <th colspan="1" rowspan="1">Đơn hàng</th>
+                  <th colspan="1" rowspan="1">Khách hàng</th>
+                  <th colspan="1" rowspan="1">Mã học viên</th>
+                  <th colspan="1" rowspan="1">Tên học viên</th>
                   <th colspan="1" rowspan="1">TVTS</th>
+                  <th colspan="1" rowspan="1">Mã phiếu thu</th>
+                  <th colspan="1" rowspan="1">Loại hình thanh toán</th>
+                  <th colspan="1" rowspan="1">Hình thức thanh toán</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1">Người tạo</th>
+                  <th colspan="1" rowspan="1">Ngày tạo</th>
+                  <th colspan="1" rowspan="1">Ngày thanh toán</th>
+                  <th colspan="1" rowspan="1">Ngày tính doanh số</th>
+                  <th colspan="1" rowspan="1">Số tiền</th>
+                  <th colspan="1" rowspan="1">Số trạng thái</th>
+                  <th colspan="1" rowspan="1">Loại đơn hàng</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
