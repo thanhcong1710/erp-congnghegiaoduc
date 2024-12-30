@@ -26,7 +26,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
-        Route::get('dashboard', 'DashboardController@index');
+        Route::post('dashboard', 'DashboardController@index');
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
