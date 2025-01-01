@@ -12,6 +12,9 @@
             <vs-checkbox v-model="item.active" class="mt-1" @input="changeGroup(index)"><strong>{{item.description}}</strong></vs-checkbox>
             <div v-for="(item_per, index_per) in item.permissions" :key="index_per" class="w-full pl-8">
               <vs-checkbox v-model="item_per.active" class="mt-1">{{item_per.description}}</vs-checkbox>
+               <div v-for="(item_sub_per, index_sub_per) in item_per.listSub" :key="index_sub_per" class="w-full pl-8">
+                <vs-checkbox v-model="item_sub_per.active" class="mt-1">{{item_sub_per.description}}</vs-checkbox>
+              </div>
             </div>
           </div>
         </div>

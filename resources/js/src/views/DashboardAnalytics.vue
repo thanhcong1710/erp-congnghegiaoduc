@@ -10,84 +10,128 @@
 <template>
   <div id="dashboard-analytics">
     <div class="vx-row">
-      <div class="vx-col sm:w-1/2 w-full mb-4">
-        <multiselect
-            name="search_branch"
-            placeholder="Chọn trung tâm để hiển thị dữ liệu"
-            v-model="searchData.arr_branch"
-            :options="branch_list"
-            label="name"
-            :close-on-select="false"
-            :hide-selected="true"
-            :multiple="true"
-            :searchable="true"
-            track-by="id"
-            selectedLabel="" selectLabel="" deselectLabel=""
-            @input="loadData"
-          >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
-          </multiselect>
+      <div class="vx-col w-full mb-4 dash-select-branch">
+        <vx-input-group class="mb-base mr-3">
+            <multiselect
+              name="search_branch"
+              placeholder="Chọn trung tâm để hiển thị dữ liệu"
+              v-model="searchData.arr_branch"
+              :options="branch_list"
+              label="name"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              track-by="id"
+              selectedLabel="" selectLabel="" deselectLabel=""
+              class="vs-inputx vs-input--input"
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+
+            <template slot="append">
+              <div class="append-text btn-addon">
+                <vs-button class="whitespace-no-wrap" @click="loadData">Tìm kiếm</vs-button>
+              </div>
+            </template>
+          </vx-input-group>
+        
       </div>
     </div>
     <div class="vx-row">
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
+      <div class="vx-col w-full lg:w-1/2 mb-base">
+        <vx-card slot="no-body" class="text-center bg-primary-gradient greet-user">
+                    <img src="@assets/images/elements/decore-left.png" class="decore-left" alt="Decore Left" width="200" >
+                    <img src="@assets/images/elements/decore-right.png" class="decore-right" alt="Decore Right" width="175">
+          <feather-icon icon="AwardIcon" class="p-6 mb-8 bg-primary inline-flex rounded-full text-white shadow" svgClasses="h-8 w-8"></feather-icon>
+          <h1 class="mb-6 text-white">Xin chào {{ $store.state.AppActiveUser.displayName }},</h1>
+          <p class="xl:w-3/4 lg:w-4/5 md:w-2/3 w-4/5 mx-auto text-white">You have done <b>57.6%</b> more sales today. Check your new badge in your profile.</p>
+        </vx-card>
+      </div>
+
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_09')">
+        <statistics-card-line icon="DollarSignIcon" 
+          v-if="totalRevenueDay.analyticsData" 
+          :statistic="totalRevenueDay.analyticsData.data" 
+          statisticTitle="Doanh số ngày (triệu đồng)" 
+          :chartData="totalRevenueDay.series" 
+          type="area"
+        ></statistics-card-line>
+      </div>
+
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_10')">
+        <statistics-card-line icon="DollarSignIcon" 
+          v-if="totalRevenueMonth.analyticsData" 
+          :statistic="totalRevenueMonth.analyticsData.data " 
+          statisticTitle="Doanh số tháng (triệu đồng)" 
+          :chartData="totalRevenueMonth.series" 
+          color="warning" type="area"
+        ></statistics-card-line>
+      </div>
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
           <statistics-card-line
             ref="apexChart"
             v-if="numDashStudent.analyticsData"
             icon="UsersIcon"
             :statistic="numDashStudent.analyticsData.data | formatNumber"
-            statisticTitle="HỌC VIÊN ĐANG HỌC"
+            statisticTitle="Học viên đang học"
             :chartData="numDashStudent.series"
             type="area" />
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_02')">
           <statistics-card-line
             v-if="numDashClass.analyticsData"
             icon="FileIcon"
             :statistic="numDashClass.analyticsData.data | formatNumber"
-            statisticTitle="TỔNG SỐ LỚP"
+            statisticTitle="Tổng số lớp"
             :chartData="numDashClass.series"
             color="success"
             type="area" />
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base"  v-if="checkPermission('dashboard_03')">
           <statistics-card-line
             v-if="numDashTeacher.analyticsData"
             icon="UserIcon"
             :statistic="numDashTeacher.analyticsData.data | formatNumber"
-            statisticTitle="TỔNG SỐ GIÁO VIÊN"
+            statisticTitle="Tổng số giáo viên"
             :chartData="numDashTeacher.series"
             color="danger"
             type="area" />
       </div>
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
           <statistics-card-line
             v-if="numDashRooms.analyticsData"
             icon="LayersIcon"
             :statistic="numDashRooms.analyticsData.data | formatNumber"
-            statisticTitle="TỔNG SỐ PHÒNG HỌC"
+            statisticTitle="Tổng số phòng học"
             :chartData="numDashRooms.series"
             color="warning"
             type="area" />
       </div>
-      <div class="vx-col w-full md:w-1/2 mb-base">
+      <div class="vx-col w-full md:w-1/2 mb-base"  v-if="checkPermission('dashboard_05')">
         <vx-card class="text">
-          <h5 class="mb-4">Biểu đồ tình hình học viên</h5>
+          <h5 class="mb-4 text-center">Biểu đồ tình hình học viên</h5>
           <vue-apex-charts type="pie" :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full md:w-1/2 mb-base">
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_06')">
         <vx-card class="text">
-          <h5 class="mb-4">Biểu đồ đăng ký khóa học</h5>
+          <h5 class="mb-4 text-center">Biểu đồ đăng ký khóa học</h5>
           <vue-apex-charts type="pie" :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full mb-base">
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_07')">
         <vx-card class="text">
-          <h5 class="mb-4">Biểu đồ doanh thu theo trung tâm</h5>
+          <h5 class="mb-4 text-center">Biểu đồ doanh thu theo trung tâm</h5>
           <vue-apex-charts type="line" :options="lineChartRevenue.chartOptions" :series="lineChartRevenue.series"></vue-apex-charts>
+        </vx-card>
+      </div>
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_08')">
+        <vx-card class="text">
+          <h5 class="mb-4 text-center">Biểu đồ doanh thu theo EC</h5>
+          <vue-apex-charts type="line" :options="lineChartRevenueEC.chartOptions" :series="lineChartRevenueEC.series"></vue-apex-charts>
         </vx-card>
       </div>
     </div>
@@ -99,6 +143,8 @@ import Multiselect from "vue-multiselect";
 import StatisticsCardLine from '@/components/statistics-cards/StatisticsCardLine.vue'
 import axios from '../http/axios.js'
 import VueApexCharts from 'vue-apexcharts'
+import u from '../until/helper.js';
+
 export default {
   components: {
     StatisticsCardLine,
@@ -112,14 +158,12 @@ export default {
         arr_branch: "",
         branch_id:"",
       },
-      numDashStudent: {
-      },
-      numDashClass: {
-      },
-      numDashTeacher: {
-      },
-      numDashRooms: {
-      },
+      totalRevenueDay: {},
+      totalRevenueMonth: {},
+      numDashStudent: {},
+      numDashClass: {},
+      numDashTeacher: {},
+      numDashRooms: {},
       pieChartStudent: {
         series: [],
         chartOptions: {
@@ -160,16 +204,33 @@ export default {
         chartOptions: {
           xaxis: {
             type: 'text',
-            categories: ['10/2024','11/2024','12/2024','01/2025'],
+            categories: [],
+          },
+          yaxis: {
+            labels: {
+              formatter: function (value) {
+                return value + " tr";
+              }
+            },
           },
         },
-        series: [{
-          name: 'Series A',
-          data: [30, 40, 45, 50, 49, 60, 70, 91]
-        }, {
-          name: 'Series B',
-          data: [23, 43, 54, 12, 44, 52, 32, 11]
-        }]
+        series: []
+      },
+      lineChartRevenueEC:{
+        chartOptions: {
+          xaxis: {
+            type: 'text',
+            categories: [],
+          },
+          yaxis: {
+            labels: {
+              formatter: function (value) {
+                return value + " tr";
+              }
+            },
+          },
+        },
+        series: []
       }
     }
   },
@@ -181,7 +242,10 @@ export default {
     this.loadData();
   },
   methods: {
-    loadData(){
+    checkPermission(text){
+      return u.checkPermission(this.$store.state.AppActiveUser, text)
+    },
+    loadDataDashboard01(){
       const ids_branch = []
       if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
         this.searchData.arr_branch.map(item => {
@@ -190,7 +254,7 @@ export default {
       }
       this.searchData.branch_id = ids_branch
       this.$vs.loading()
-      axios.p(`/api/dashboard`,{
+      axios.p(`/api/dashboard/01`,{
         branch_id: this.searchData.branch_id,
       })
       .then(response => {
@@ -206,6 +270,22 @@ export default {
             data: response.data.numDashStudent.data
           }
         }
+      })
+    },
+    loadDataDashboard02(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/02`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
         this.numDashClass = {
           series: [
             {
@@ -217,6 +297,22 @@ export default {
             data: response.data.numDashClass.data
           }
         }
+      })
+    },
+    loadDataDashboard03(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/03`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
         this.numDashTeacher = {
           series: [
             {
@@ -228,6 +324,22 @@ export default {
             data: response.data.numDashTeacher.data
           }
         }
+      })
+    },
+    loadDataDashboard04(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/04`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
         this.numDashRooms = {
           series: [
             {
@@ -239,6 +351,22 @@ export default {
             data: response.data.numDashRooms.data
           }
         }
+      })
+    },
+    loadDataDashboard05(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/05`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
         this.pieChartStudent = {
           series: [response.data.pieChartStudent.studentActive, response.data.pieChartStudent.studentTrial, response.data.pieChartStudent.studentPending, response.data.pieChartStudent.studentWithdraw],
           chartOptions: {
@@ -256,7 +384,23 @@ export default {
               }
             }]
           }
-        },
+        }
+      })
+    },
+    loadDataDashboard06(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/06`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
         this.pieChartProduct = {
           series: response.data.pieChartProduct.seriesChartProduct,
           chartOptions: {
@@ -276,12 +420,156 @@ export default {
           }
         }
       })
+    },
+    loadDataDashboard07(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/07`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.lineChartRevenue = {
+          chartOptions: {
+            xaxis: {
+              type: 'text',
+              categories: response.data.lineChartRevenue.categories,
+            },
+          },
+          series: response.data.lineChartRevenue.series
+        }
+      })
+    },
+    loadDataDashboard08(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/08`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.lineChartRevenueEC = {
+          chartOptions: {
+            xaxis: {
+              type: 'text',
+              categories: response.data.lineChartRevenueEC.categories,
+            },
+          },
+          series: response.data.lineChartRevenueEC.series
+        }
+      })
+    },
+    loadDataDashboard09(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/09`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.totalRevenueDay = {
+          series: [
+            {
+              name: 'Doanh số ngày',
+              data: response.data.totalRevenueDay.series
+            }
+          ],
+          analyticsData: {
+            data: response.data.totalRevenueDay.data
+          }
+        }
+      })
+    },
+    loadDataDashboard10(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/10`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.totalRevenueMonth = {
+          series: [
+            {
+              name: 'Doanh số tháng',
+              data: response.data.totalRevenueMonth.series
+            }
+          ],
+          analyticsData: {
+            data: response.data.totalRevenueMonth.data
+          }
+        }
+      })
+    },
+    loadData(){
+      if(this.checkPermission('dashboard_01')){
+        this.loadDataDashboard01();
+      }
+      if(this.checkPermission('dashboard_02')){
+        this.loadDataDashboard02();
+      }
+      if(this.checkPermission('dashboard_03')){
+        this.loadDataDashboard03();
+      }
+      if(this.checkPermission('dashboard_04')){
+        this.loadDataDashboard04();
+      }
+      if(this.checkPermission('dashboard_05')){
+        this.loadDataDashboard05();
+      }
+      if(this.checkPermission('dashboard_06')){
+        this.loadDataDashboard06();
+      }
+      if(this.checkPermission('dashboard_07')){
+        this.loadDataDashboard07();
+      }
+      if(this.checkPermission('dashboard_08')){
+        this.loadDataDashboard08();
+      }
+      if(this.checkPermission('dashboard_09')){
+        this.loadDataDashboard09();
+      }
+      if(this.checkPermission('dashboard_10')){
+        this.loadDataDashboard10();
+      }
     }
   },
 }
 </script>
 
 <style lang="scss">
+.dash-select-branch .multiselect.vs-inputx.vs-input--input{
+  padding: 0px;
+  border: none;
+}
+.dash-select-branch .multiselect__tags{
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
 /*! rtl:begin:ignore */
 #dashboard-analytics {
   .greet-user{

@@ -26,7 +26,6 @@ Route::group(['middleware' => 'api'], function ($router) {
     });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
-        Route::post('dashboard', 'DashboardController@index');
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
@@ -314,6 +313,20 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'C2CCampaignsController@show');
                 Route::post('update', 'C2CCampaignsController@update');
             });
+        });
+
+        Route::post('dashboard', 'DashboardController@index');
+        Route::prefix('dashboard')->group(function () {
+            Route::post('01', 'DashboardController@dashboard01');
+            Route::post('02', 'DashboardController@dashboard02');
+            Route::post('03', 'DashboardController@dashboard03');
+            Route::post('04', 'DashboardController@dashboard04');
+            Route::post('05', 'DashboardController@dashboard05');
+            Route::post('06', 'DashboardController@dashboard06');
+            Route::post('07', 'DashboardController@dashboard07');
+            Route::post('08', 'DashboardController@dashboard08');
+            Route::post('09', 'DashboardController@dashboard09');
+            Route::post('10', 'DashboardController@dashboard10');
         });
     });
 });

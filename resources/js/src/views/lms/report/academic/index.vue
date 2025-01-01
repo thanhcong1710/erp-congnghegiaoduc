@@ -10,12 +10,12 @@
             <h4 class="w-full mb-4"><i class="fa-solid fa-file-contract mr-1"></i> DANH SÁCH BÁO CÁO HỌC THUẬT</h4>
             <hr class="mb-3" style="border: 0.5px solid #ccc;">
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/academic/report-01'">
+              <router-link class="link-report" :to="'/lms/reports/academic/report-01'" v-if="checkPermission('lms_reports_academic_01')">
                 <p>01. BÁO CÁO CHI TIẾT GIỜ DẠY CỦA TRỢ GIẢNG</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/academic/report-02'">
+              <router-link class="link-report" :to="'/lms/reports/academic/report-02'" v-if="checkPermission('lms_reports_academic_02')">
                 <p>02. DANH SÁCH LỚP TEST</p>
               </router-link>
             </div>
@@ -49,6 +49,9 @@
     created() {
     },
     methods: {
+      checkPermission(text){
+        return u.checkPermission(this.$store.state.AppActiveUser, text)
+      }
     },
     filters: {
     },

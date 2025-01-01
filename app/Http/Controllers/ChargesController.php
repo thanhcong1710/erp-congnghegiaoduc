@@ -54,6 +54,9 @@ class ChargesController extends Controller
         u::insertSimpleRow(array(
             'contract_id' => data_get($contract_info, 'id'),
             'student_id' => data_get($contract_info, 'student_id'), 
+            'branch_id' => data_get($contract_info, 'branch_id'), 
+            'cm_id' => data_get($contract_info, 'cm_id'), 
+            'ec_id' => data_get($contract_info, 'ec_id'), 
             'method' => data_get($request, 'method'),
             'must_charge' => data_get($contract_info, 'must_charge'),
             'amount' => data_get($request, 'amount'),
