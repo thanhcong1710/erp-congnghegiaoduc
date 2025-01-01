@@ -428,8 +428,9 @@ export default {
             ],
           },
           legend: {
-            position: 'right',
-            offsetY: 40
+            position: 'bottom',
+            horizontalAlign: 'center',
+            offsetX: 20
           },
           fill: {
             opacity: 1
