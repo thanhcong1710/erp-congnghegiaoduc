@@ -327,6 +327,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('08', 'DashboardController@dashboard08');
             Route::post('09', 'DashboardController@dashboard09');
             Route::post('10', 'DashboardController@dashboard10');
+            Route::post('11', 'DashboardController@dashboard11');
+            Route::post('12', 'DashboardController@dashboard12');
         });
     });
 });

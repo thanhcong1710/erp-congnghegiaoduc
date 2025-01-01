@@ -25,7 +25,7 @@ export default [
     name: 'Dashboard',
     icon: 'HomeIcon',
     slug: 'dashboard',
-    permission:'dashboard',
+    permission:'Dashboard',
   },
   {
     header: 'CRM',

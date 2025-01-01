@@ -151,7 +151,7 @@ class DashboardController extends Controller
         $dataRevenue = [];
         foreach ($branches AS $row){
             $series[data_get($row,'id')] = [
-                'name' => str_replace('Trung tâm','',data_get($row, 'branch_name')),
+                'name' => str_replace('Trung tâm Scots English','SE',data_get($row, 'branch_name')),
                 'data' => [0, 0, 0, 0, 0, 0]
             ];
         }
@@ -256,6 +256,70 @@ class DashboardController extends Controller
             'totalRevenueMonth' => [
                 'series' => [ 0, 0, 0, 0, 0, round(data_get($totalRevenueMonth, 'total', 0)/1000000, 2)],
                 'data' => round(data_get($totalRevenueMonth, 'total', 0)/1000000, 2)
+            ]
+        ];
+        return response()->json($data);
+    }
+
+    public function dashboard11(Request $request)
+    {
+        if(data_get($request, 'branch_id')) {
+            $cond= " AND b.id IN (" . implode(",", data_get($request, 'branch_id')) .")";
+        } else {
+            $cond= " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        }
+        $branches = u::query("SELECT b.name AS branch_name, b.code, b.id
+            FROM branches AS b WHERE b.status=1 $cond");
+        $categories = [];
+        $arr1 = [44, 55, 41, 37, 22, 43, 21];
+        $arr2 = [53, 32, 33, 52, 13, 43, 32];
+        $dataRenew = [];
+        $dataFalseRenew = [];
+        $i=0;
+        foreach ($branches AS $row){
+            $categories[] = str_replace('Trung tâm Scots English','SE',data_get($row, 'branch_name'));
+            $dataRenew[] = $arr1[$i];
+            $dataFalseRenew[] = $arr2[2];
+            $i++;
+        }
+        $data = [
+            'lineChartRenew' => [
+                'dataRenew' => $dataRenew,
+                'dataFalseRenew' => $dataFalseRenew,
+                'categories' => $categories
+            ]
+        ];
+        return response()->json($data);
+    }
+    public function dashboard12(Request $request)
+    {
+        if(data_get($request, 'branch_id')) {
+            $cond= " AND b.branch_id IN (" . implode(",", data_get($request, 'branch_id')) .")";
+        } else {
+            $cond= " AND b.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        }
+        $CMs = u::query("SELECT CONCAT(u.hrm_id,'-', u.name) AS cm_name , b.user_id
+            FROM branch_has_user AS b LEFT JOIN users AS u ON u.id=b.user_id 
+            LEFT JOIN role_has_user AS r ON r.user_id = u.id
+            WHERE u.status=1 AND r.role_id IN(".SystemCode::ROLE_CM.",".SystemCode::ROLE_CM_LEADER.") $cond");
+        
+        $categories = [];
+        $arr1 = [44, 55, 41, 37, 22, 43, 21];
+        $arr2 = [53, 32, 33, 52, 13, 43, 32];
+        $dataRenew = [];
+        $dataFalseRenew = [];
+        $i=0;
+        foreach ($CMs AS $row){
+            $categories[] = data_get($row, 'cm_name');
+            $dataRenew[] = $arr1[$i];
+            $dataFalseRenew[] = $arr2[2];
+            $i++;
+        }
+        $data = [
+            'lineChartRenewAF' => [
+                'dataRenew' => $dataRenew,
+                'dataFalseRenew' => $dataFalseRenew,
+                'categories' => $categories
             ]
         ];
         return response()->json($data);

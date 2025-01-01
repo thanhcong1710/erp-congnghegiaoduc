@@ -112,26 +112,44 @@
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base"  v-if="checkPermission('dashboard_05')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Biểu đồ tình hình học viên</h5>
+          <h5 class="mb-4 text-center">Tình hình học viên</h5>
           <vue-apex-charts type="pie" :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
         </vx-card>
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_06')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Biểu đồ đăng ký khóa học</h5>
+          <h5 class="mb-4 text-center">Đăng ký khóa học</h5>
           <vue-apex-charts type="pie" :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
         </vx-card>
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_07')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Biểu đồ doanh thu theo trung tâm</h5>
+          <h5 class="mb-4 text-center">Doanh thu theo trung tâm</h5>
           <vue-apex-charts type="line" :options="lineChartRevenue.chartOptions" :series="lineChartRevenue.series"></vue-apex-charts>
         </vx-card>
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_08')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Biểu đồ doanh thu theo EC</h5>
+          <h5 class="mb-4 text-center">Doanh thu theo EC</h5>
           <vue-apex-charts type="line" :options="lineChartRevenueEC.chartOptions" :series="lineChartRevenueEC.series"></vue-apex-charts>
+        </vx-card>
+      </div>
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_11')">
+        <vx-card class="text">
+          <h5 class="mb-4 text-center">Học sinh Renew theo trung tâm</h5>
+          <vue-apex-charts type="bar" :options="lineChartRenew.chartOptions" :series="lineChartRenew.series"></vue-apex-charts>
+        </vx-card>
+      </div>
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_12')">
+        <vx-card class="text">
+          <h5 class="mb-4 text-center">Học sinh Renew theo AF</h5>
+          <vue-apex-charts type="bar" :options="lineChartRenewAF.chartOptions" :series="lineChartRenewAF.series"></vue-apex-charts>
+        </vx-card>
+      </div>
+      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_13')">
+        <vx-card class="text">
+          <h5 class="mb-4 text-center">Học sinh Renew theo tháng</h5>
+          <vue-apex-charts type="bar" :options="lineChartRenewLog.chartOptions" :series="lineChartRenewLog.series"></vue-apex-charts>
         </vx-card>
       </div>
     </div>
@@ -231,7 +249,193 @@ export default {
           },
         },
         series: []
-      }
+      },
+      lineChartRenew:{
+        series: [{
+          name: 'Thành công',
+          data: [44, 55, 41, 37, 22, 43, 21]
+        }, {
+          name: 'Thất bại',
+          data: [53, 32, 33, 52, 13, 43, 32]
+        }],
+        chartOptions: {
+          chart: {
+            type: 'bar',
+            height: 350,
+            stacked: true,
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              dataLabels: {
+                total: {
+                  enabled: true,
+                  offsetX: 0,
+                  style: {
+                    fontSize: '13px',
+                    fontWeight: 900
+                  }
+                }
+              }
+            },
+          },
+          stroke: {
+            width: 1,
+            colors: ['#fff']
+          },
+          xaxis: {
+            categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+            labels: {
+              formatter: function (val) {
+                return val
+              }
+            }
+          },
+          yaxis: {
+            title: {
+              text: undefined
+            },
+          },
+          tooltip: {
+            y: {
+              formatter: function (val) {
+                return val
+              }
+            }
+          },
+          fill: {
+            opacity: 1
+          },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            offsetX: 40
+          }
+        },
+      },
+      lineChartRenewAF:{
+        series: [{
+          name: 'Thành công',
+          data: [44, 55, 41, 37, 22, 43, 21]
+        }, {
+          name: 'Thất bại',
+          data: [53, 32, 33, 52, 13, 43, 32]
+        }],
+        chartOptions: {
+          chart: {
+            type: 'bar',
+            height: 350,
+            stacked: true,
+          },
+          plotOptions: {
+            bar: {
+              horizontal: true,
+              dataLabels: {
+                total: {
+                  enabled: true,
+                  offsetX: 0,
+                  style: {
+                    fontSize: '13px',
+                    fontWeight: 900
+                  }
+                }
+              }
+            },
+          },
+          stroke: {
+            width: 1,
+            colors: ['#fff']
+          },
+          xaxis: {
+            categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
+            labels: {
+              formatter: function (val) {
+                return val
+              }
+            }
+          },
+          yaxis: {
+            title: {
+              text: undefined
+            },
+          },
+          tooltip: {
+            y: {
+              formatter: function (val) {
+                return val
+              }
+            }
+          },
+          fill: {
+            opacity: 1
+          },
+          legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            offsetX: 40
+          }
+        },
+      },
+      lineChartRenewLog: {
+        series: [{
+          name: 'Thất bại',
+          data: [44, 55, 41, 67, 22, 43]
+        }, {
+          name: 'Thành công',
+          data: [13, 23, 20, 8, 13, 27]
+        }],
+        chartOptions: {
+          chart: {
+            type: 'bar',
+            height: 350,
+            stacked: true,
+            toolbar: {
+              show: true
+            },
+            zoom: {
+              enabled: true
+            }
+          },
+          responsive: [{
+            breakpoint: 480,
+            options: {
+              legend: {
+                position: 'bottom',
+                offsetX: -10,
+                offsetY: 0
+              }
+            }
+          }],
+          plotOptions: {
+            bar: {
+              horizontal: false,
+              borderRadiusApplication: 'end', // 'around', 'end'
+              borderRadiusWhenStacked: 'last', // 'all', 'last'
+              dataLabels: {
+                total: {
+                  enabled: true,
+                  style: {
+                    fontSize: '13px',
+                    fontWeight: 900
+                  }
+                }
+              }
+            },
+          },
+          xaxis: {
+            type: 'text',
+            categories: ['08/2024', '09/2024', '10/2024', '11/2024', '12/2024', '01/2025'
+            ],
+          },
+          legend: {
+            position: 'right',
+            offsetY: 40
+          },
+          fill: {
+            opacity: 1
+          }
+        },
+      },
     }
   },
   created () {
@@ -525,6 +729,164 @@ export default {
         }
       })
     },
+    loadDataDashboard11(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/11`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.lineChartRenew = {
+          series: [ {
+            name: 'Thất bại',
+            data: response.data.lineChartRenew.dataFalseRenew
+          },{
+            name: 'Thành công',
+            data: response.data.lineChartRenew.dataRenew
+          }],
+          chartOptions: {
+            chart: {
+              type: 'bar',
+              height: 350,
+              stacked: true,
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                dataLabels: {
+                  total: {
+                    enabled: true,
+                    offsetX: 0,
+                    style: {
+                      fontSize: '13px',
+                      fontWeight: 900
+                    }
+                  }
+                }
+              },
+            },
+            stroke: {
+              width: 1,
+              colors: ['#fff']
+            },
+            xaxis: {
+              categories: response.data.lineChartRenew.categories,
+              labels: {
+                formatter: function (val) {
+                  return val
+                }
+              }
+            },
+            yaxis: {
+              title: {
+                text: undefined
+              },
+            },
+            tooltip: {
+              y: {
+                formatter: function (val) {
+                  return val
+                }
+              }
+            },
+            fill: {
+              opacity: 1
+            },
+            legend: {
+              position: 'top',
+              horizontalAlign: 'left',
+              offsetX: 40
+            }
+          },
+        }
+      })
+    },
+    loadDataDashboard12(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/12`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.lineChartRenewAF = {
+          series: [ {
+            name: 'Thất bại',
+            data: response.data.lineChartRenewAF.dataFalseRenew
+          },{
+            name: 'Thành công',
+            data: response.data.lineChartRenewAF.dataRenew
+          }],
+          chartOptions: {
+            chart: {
+              type: 'bar',
+              height: 350,
+              stacked: true,
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                dataLabels: {
+                  total: {
+                    enabled: true,
+                    offsetX: 0,
+                    style: {
+                      fontSize: '13px',
+                      fontWeight: 900
+                    }
+                  }
+                }
+              },
+            },
+            stroke: {
+              width: 1,
+              colors: ['#fff']
+            },
+            xaxis: {
+              categories: response.data.lineChartRenewAF.categories,
+              labels: {
+                formatter: function (val) {
+                  return val
+                }
+              }
+            },
+            yaxis: {
+              title: {
+                text: undefined
+              },
+            },
+            tooltip: {
+              y: {
+                formatter: function (val) {
+                  return val
+                }
+              }
+            },
+            fill: {
+              opacity: 1
+            },
+            legend: {
+              position: 'top',
+              horizontalAlign: 'left',
+              offsetX: 40
+            }
+          },
+        }
+      })
+    },
     loadData(){
       if(this.checkPermission('dashboard_01')){
         this.loadDataDashboard01();
@@ -555,6 +917,12 @@ export default {
       }
       if(this.checkPermission('dashboard_10')){
         this.loadDataDashboard10();
+      }
+      if(this.checkPermission('dashboard_11')){
+        this.loadDataDashboard11();
+      }
+      if(this.checkPermission('dashboard_12')){
+        this.loadDataDashboard12();
       }
     }
   },
