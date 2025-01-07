@@ -1,17 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : DB - XGenius - 34.126.131.120
+ Source Server         : GCP - ERP
  Source Server Type    : MySQL
  Source Server Version : 80040
- Source Host           : 34.126.131.120:3306
+ Source Host           : 34.143.164.62:3306
  Source Schema         : scots_erp
 
  Target Server Type    : MySQL
  Target Server Version : 80040
  File Encoding         : 65001
 
- Date: 21/12/2024 21:14:11
+ Date: 07/01/2025 23:08:11
 */
 
 SET NAMES utf8mb4;
@@ -60,8 +60,8 @@ CREATE TABLE `b2b_campaigns` (
   `creator_id` int DEFAULT NULL,
   `updator_id` int DEFAULT NULL,
   `status` tinyint DEFAULT NULL,
-  `list_tuition_fee` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `meta_data` text COLLATE utf8mb4_unicode_ci,
+  `list_tuition_fee` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `meta_data` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`id`),
   KEY `b2b_source_id` (`b2b_source_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -80,8 +80,8 @@ COMMIT;
 DROP TABLE IF EXISTS `b2b_sources`;
 CREATE TABLE `b2b_sources` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `note` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `status` tinyint DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -117,6 +117,7 @@ INSERT INTO `branch_has_user` VALUES (4, 3);
 INSERT INTO `branch_has_user` VALUES (4, 4);
 INSERT INTO `branch_has_user` VALUES (4, 5);
 INSERT INTO `branch_has_user` VALUES (4, 6);
+INSERT INTO `branch_has_user` VALUES (4, 14);
 INSERT INTO `branch_has_user` VALUES (5, 1);
 INSERT INTO `branch_has_user` VALUES (5, 7);
 INSERT INTO `branch_has_user` VALUES (5, 8);
@@ -259,7 +260,7 @@ COMMIT;
 DROP TABLE IF EXISTS `campaigns`;
 CREATE TABLE `campaigns` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `type` int DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
@@ -267,7 +268,7 @@ CREATE TABLE `campaigns` (
   `voucher_amount` int DEFAULT NULL,
   `voucher_num` int DEFAULT NULL,
   `voucher_bonus_sessions` int DEFAULT NULL,
-  `note` text COLLATE utf8mb4_unicode_ci,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `creator_id` int DEFAULT NULL,
@@ -335,6 +336,7 @@ CREATE TABLE `classes` (
   `product_id` int DEFAULT NULL,
   `program_id` int DEFAULT NULL COMMENT 'program id crm (cấp chia nhỏ nhất) VD: Seed 1, Seed 2, Seedbed 1, Seedbed 2',
   `cm_id` int DEFAULT NULL,
+  `ta_id` int DEFAULT NULL,
   `cls_startdate` date DEFAULT NULL COMMENT 'ngày bắt đầu lớp trên lms',
   `cls_enddate` date DEFAULT NULL COMMENT 'ngày kết thúc lớp trên lms',
   `level_id` int DEFAULT NULL COMMENT 'program level id lms',
@@ -358,9 +360,9 @@ CREATE TABLE `classes` (
 -- Records of classes
 -- ----------------------------
 BEGIN;
-INSERT INTO `classes` VALUES (14, 10, '***KD1C/TS 5/ Room 2/ Thomas', 8, 10, 6, '2024-12-01', '2025-03-24', NULL, '5,8', 16, '2024-12-08 20:26:21', '2024-12-11 20:38:48', 1, 1, 4, 1, 32, 1);
-INSERT INTO `classes` VALUES (15, 9, '***PP/SS 6/ Room 2/ Marry', 8, 8, 4, '2024-12-01', '2025-03-24', NULL, '7,8', 16, '2024-12-08 20:32:28', NULL, 1, NULL, 5, 1, 32, 1);
-INSERT INTO `classes` VALUES (16, 9, '***PP/TF 5/ Room 2/ Thomas', 8, 8, 4, '2024-12-01', '2025-03-22', NULL, '3,6', 16, '2024-12-08 20:33:15', NULL, 1, NULL, 6, 1, 32, 1);
+INSERT INTO `classes` VALUES (14, 10, '***KD1C/TS 5/ Room 2/ Thomas', 8, 10, 6, 14, '2024-12-01', '2025-03-23', NULL, '5,8', 16, '2024-12-08 20:26:21', '2025-01-07 23:03:42', 1, 1, 4, 1, 32, 1);
+INSERT INTO `classes` VALUES (15, 9, '***PP/SS 6/ Room 2/ Marry', 8, 8, 4, NULL, '2024-12-01', '2025-03-24', NULL, '7,8', 16, '2024-12-08 20:32:28', NULL, 1, NULL, 5, 1, 32, 1);
+INSERT INTO `classes` VALUES (16, 9, '***PP/TF 5/ Room 2/ Thomas', 8, 8, 4, NULL, '2024-12-01', '2025-03-22', NULL, '3,6', 16, '2024-12-08 20:33:15', NULL, 1, NULL, 6, 1, 32, 1);
 COMMIT;
 
 -- ----------------------------
@@ -439,14 +441,15 @@ CREATE TABLE `contracts` (
   KEY `student_id` (`student_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE,
   KEY `ceo_branch_id` (`ceo_branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of contracts
 -- ----------------------------
 BEGIN;
-INSERT INTO `contracts` VALUES (7, 1, 'C000007', 7, NULL, NULL, 4, 2, 1, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 0, 19600000, 0, 19600000, 19600000, NULL, 3, 2400000, 10, '', 0, 0, 56, 48, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 1, '2024-12-20 12:15:41', 1, '2024-12-21 19:25:01', 1, NULL, NULL, 0, NULL, NULL, NULL, NULL, '2024-12-21', 6, 2000000, 8);
-INSERT INTO `contracts` VALUES (8, 1, 'C000008', 10, NULL, NULL, 4, 2, 5, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 3, '2024-12-21 20:45:35', 1, '2024-12-21 20:46:44', 1, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `contracts` VALUES (7, 1, 'C000007', 7, NULL, NULL, 4, 2, 1, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 19600000, 19600000, 19600000, 0, 19600000, NULL, 3, 2400000, 10, '', 0, 0, 56, 48, 0, 56, 0, 2, 0, 56, 0, NULL, NULL, '2024-12-01', NULL, 14, '2025-01-09', '2025-07-20', 6, '2024-12-20 12:15:41', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, NULL, NULL, NULL, '2024-12-21', 6, 2000000, 8);
+INSERT INTO `contracts` VALUES (8, 1, 'C000008', 10, NULL, NULL, 4, 2, 5, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2024-12-01', NULL, 14, '2025-01-09', '2025-06-22', 6, '2024-12-21 20:45:35', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `contracts` VALUES (9, 1, 'C000009', 6, NULL, NULL, 4, 2, 1, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2025-01-01', NULL, 14, '2025-01-09', '2025-06-22', 6, '2025-01-07 22:56:43', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -607,13 +610,24 @@ CREATE TABLE `crm_import_parents` (
   KEY `gud_mobile1` (`gud_mobile1`) USING BTREE,
   KEY `gud_mobile2` (`gud_mobile2`) USING BTREE,
   KEY `parent_id` (`parent_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of crm_import_parents
 -- ----------------------------
 BEGIN;
 INSERT INTO `crm_import_parents` VALUES (25, 10126, 'Nguyễn Thị Huế', 'demo@gmail.com', '0954112541', '0954112542', 'hà nội', 'ghi chú', 1, '2024-12-11 23:15:27', 1, '', 'Nguyễn Văn A', 'Nguyễn Văn B', '2015-07-08', '2016-08-16', 'C00001', NULL, '2022-07-24 00:00:00', 'C01', 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (26, 10127, 'Đào Thị Phương Dung', '', '0367341544', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Gia Huy', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (27, 10127, 'Nguyễn Thị Hải Vân', '', '0988837511', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Ngô Minh Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (28, 10127, 'Nguyễn Phương Dung', '', '0943691486', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Minh Khánh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (29, 10127, 'Nguyễn Phương Dung', '', '0934213816', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Khánh An', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (30, 10127, 'Trịnh Thị Vân Anh', '', '0966189669', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Cao Cát Linh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (31, 10127, 'Tăng Thị Phương Thảo', '', '0912312384', '', '', '', 3, '2025-01-07 22:26:22', 1, 'Trùng lặp dữ liệu trong file import', 'Nguyễn Minh Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (32, 10127, 'Tăng Thị Phương Thảo', '', '0923693333', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Huyền Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (33, 10127, 'Tăng Thị Phương Thảo', '', '0912312384', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Hoàng Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (34, 10127, 'Vũ Thu Thảo', '', '0987575449', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Bảo Phương', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (35, 10127, 'Vũ Thu Thảo', '', '0987585449', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Phương Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `crm_import_parents` VALUES (36, 10127, 'Vũ Thu Thảo', '', '0987595449', '', '', '', 1, '2025-01-07 22:26:22', 1, '', 'Nguyễn Phương Anh', '', NULL, NULL, '', NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -630,13 +644,14 @@ CREATE TABLE `crm_imports` (
   `updated_at` datetime DEFAULT NULL,
   `updator_id` int DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10127 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10128 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of crm_imports
 -- ----------------------------
 BEGIN;
 INSERT INTO `crm_imports` VALUES (10126, 'e35bbaef5d241a6dff8fe5da340bc76a.xlsx', 'static/upload/e35bbaef5d241a6dff8fe5da340bc76a.xlsx', 0, '2024-12-11 23:15:27', 1, NULL, NULL);
+INSERT INTO `crm_imports` VALUES (10127, '635ea400958fdd8ab0b3a34e9e37282d.xlsx', 'static/upload/635ea400958fdd8ab0b3a34e9e37282d.xlsx', 0, '2025-01-07 22:26:22', 1, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -1799,7 +1814,7 @@ CREATE TABLE `log_contracts` (
   `renew_runtime` date DEFAULT NULL,
   `b2b_campaign_id` int DEFAULT NULL,
   `b2b_amount` int DEFAULT NULL,
-  `b2b_bonus_session` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `b2b_bonus_session` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `ec_id` (`ec_id`) USING BTREE,
   KEY `tuition_fee_id` (`tuition_fee_id`) USING BTREE,
@@ -1809,7 +1824,7 @@ CREATE TABLE `log_contracts` (
   KEY `branch_id` (`branch_id`) USING BTREE,
   KEY `ceo_branch_id` (`ceo_branch_id`) USING BTREE,
   KEY `contract_id` (`contract_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=44119 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=44125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of log_contracts
@@ -1819,6 +1834,12 @@ INSERT INTO `log_contracts` VALUES (44115, 7, 1, 'C000007', 7, NULL, NULL, 4, 2,
 INSERT INTO `log_contracts` VALUES (44116, 7, 1, 'C000007', 7, NULL, NULL, 4, 2, 1, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 0, 19600000, 0, 19600000, 19600000, NULL, 3, 2400000, 10, '', 0, 0, 56, 48, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 1, '2024-12-20 12:15:41', 1, '2024-12-21 19:25:01', 1, NULL, NULL, 0, NULL, '2024-12-21 19:25:01', NULL, NULL, NULL, '2024-12-21', 6, 2000000, '8');
 INSERT INTO `log_contracts` VALUES (44117, 8, 1, 'C000008', 10, NULL, NULL, 4, 2, 5, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 0, 24000000, 0, 24000000, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 1, '2024-12-21 20:45:35', 1, NULL, NULL, NULL, NULL, 0, NULL, '2024-12-21 20:45:36', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `log_contracts` VALUES (44118, 8, 1, 'C000008', 10, NULL, NULL, 4, 2, 5, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 3, '2024-12-21 20:45:35', 1, '2024-12-21 20:46:44', 1, NULL, NULL, 0, NULL, '2024-12-21 20:46:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `log_contracts` VALUES (44119, 7, 1, 'C000007', 7, NULL, NULL, 4, 2, 1, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 19600000, 19600000, 19600000, 0, 19600000, NULL, 3, 2400000, 10, '', 0, 0, 56, 48, 0, 56, 0, 2, 0, 56, 0, NULL, NULL, '2024-12-01', NULL, NULL, NULL, NULL, 3, '2024-12-20 12:15:41', 1, '2025-01-07 22:53:57', 1, NULL, NULL, 0, NULL, '2025-01-07 22:53:57', NULL, NULL, NULL, '2024-12-21', 6, 2000000, '8');
+INSERT INTO `log_contracts` VALUES (44120, 9, 1, 'C000009', 6, NULL, NULL, 4, 2, 1, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 0, 24000000, 0, 24000000, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, '2025-01-01', NULL, NULL, NULL, NULL, 1, '2025-01-07 22:56:43', 1, NULL, NULL, NULL, NULL, 0, NULL, '2025-01-07 22:56:43', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `log_contracts` VALUES (44121, 9, 1, 'C000009', 6, NULL, NULL, 4, 2, 1, NULL, NULL, NULL, 8, NULL, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2025-01-01', NULL, NULL, NULL, NULL, 3, '2025-01-07 22:56:43', 1, '2025-01-07 22:57:10', 1, NULL, NULL, 0, NULL, '2025-01-07 22:57:11', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `log_contracts` VALUES (44122, 8, 1, 'C000008', 10, NULL, NULL, 4, 2, 5, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2024-12-01', NULL, 14, '2025-01-09', NULL, 6, '2024-12-21 20:45:35', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, '2025-01-07 23:04:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `log_contracts` VALUES (44123, 7, 1, 'C000007', 7, NULL, NULL, 4, 2, 1, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 19600000, 19600000, 19600000, 0, 19600000, NULL, 3, 2400000, 10, '', 0, 0, 56, 48, 0, 56, 0, 2, 0, 56, 0, NULL, NULL, '2024-12-01', NULL, 14, '2025-01-09', NULL, 6, '2024-12-20 12:15:41', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, '2025-01-07 23:04:09', NULL, NULL, NULL, '2024-12-21', 6, 2000000, '8');
+INSERT INTO `log_contracts` VALUES (44124, 9, 1, 'C000009', 6, NULL, NULL, 4, 2, 1, NULL, 6, 6, 8, 10, 8, 8, 24000000, 24000000, 48, 24000000, 24000000, 24000000, 0, 24000000, NULL, NULL, NULL, NULL, '', 0, 0, 48, 48, 0, 48, 0, 2, 0, 48, 0, NULL, NULL, '2025-01-01', NULL, 14, '2025-01-09', NULL, 6, '2025-01-07 22:56:43', 1, '2025-01-07 23:04:09', 1, NULL, NULL, 0, NULL, '2025-01-07 23:04:09', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -1950,17 +1971,25 @@ CREATE TABLE `payments` (
   `type` tinyint(1) DEFAULT NULL COMMENT '0 - bỏ cọc, 1 - lần đầu, 2 - tái phí',
   `student_id` int DEFAULT NULL,
   `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `branch_id` int DEFAULT NULL,
+  `ec_id` int DEFAULT NULL,
+  `cm_id` int DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   KEY `contract_id` (`contract_id`) USING BTREE,
   KEY `creator_id` (`creator_id`) USING BTREE,
-  KEY `student_id` (`student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=37097 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `student_id` (`student_id`) USING BTREE,
+  KEY `branch_id` (`branch_id`) USING BTREE,
+  KEY `cm_id` (`cm_id`) USING BTREE,
+  KEY `ec_id` (`ec_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=37099 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of payments
 -- ----------------------------
 BEGIN;
-INSERT INTO `payments` VALUES (37096, 8, NULL, 1, 0, 24000000, 24000000, 24000000, 0, '2024-12-21', '2024-12-21 20:46:44', 1, NULL, 0, NULL, 10, NULL);
+INSERT INTO `payments` VALUES (37096, 8, NULL, 1, 0, 24000000, 24000000, 24000000, 0, '2024-12-21', '2024-12-21 20:46:44', 1, NULL, 0, NULL, 10, NULL, 4, 5, NULL);
+INSERT INTO `payments` VALUES (37097, 7, NULL, 1, 0, 19600000, 19600000, 19600000, 0, '2025-01-07', '2025-01-07 22:53:57', 1, NULL, 0, NULL, 7, NULL, 4, 8, NULL);
+INSERT INTO `payments` VALUES (37098, 9, NULL, 1, 0, 24000000, 24000000, 24000000, 0, '2025-01-01', '2025-01-07 22:57:10', 1, NULL, 0, NULL, 6, NULL, 4, 5, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -1974,7 +2003,7 @@ CREATE TABLE `permission_groups` (
   `status` tinyint DEFAULT NULL,
   `display_order` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of permission_groups
@@ -1983,8 +2012,10 @@ BEGIN;
 INSERT INTO `permission_groups` VALUES (1, 'CRM', 'CRM', 1, 3);
 INSERT INTO `permission_groups` VALUES (2, 'LMS', 'LMS', 1, 2);
 INSERT INTO `permission_groups` VALUES (3, 'Config', 'Cấu hình hệ thống', 1, 1);
-INSERT INTO `permission_groups` VALUES (4, 'Orther', 'Khác', 1, 4);
-INSERT INTO `permission_groups` VALUES (5, 'Marketing', 'Marketing', 1, 5);
+INSERT INTO `permission_groups` VALUES (4, 'Orther', 'Khác', 1, 7);
+INSERT INTO `permission_groups` VALUES (5, 'Marketing', 'Marketing', 1, 4);
+INSERT INTO `permission_groups` VALUES (6, 'Dashboard', 'Dashboard', 1, 6);
+INSERT INTO `permission_groups` VALUES (7, 'Reports', 'Báo cáo', 1, 5);
 COMMIT;
 
 -- ----------------------------
@@ -2087,6 +2118,45 @@ INSERT INTO `permission_has_role` VALUES (999999, 37);
 INSERT INTO `permission_has_role` VALUES (999999, 38);
 INSERT INTO `permission_has_role` VALUES (999999, 39);
 INSERT INTO `permission_has_role` VALUES (999999, 40);
+INSERT INTO `permission_has_role` VALUES (999999, 41);
+INSERT INTO `permission_has_role` VALUES (999999, 42);
+INSERT INTO `permission_has_role` VALUES (999999, 43);
+INSERT INTO `permission_has_role` VALUES (999999, 44);
+INSERT INTO `permission_has_role` VALUES (999999, 45);
+INSERT INTO `permission_has_role` VALUES (999999, 46);
+INSERT INTO `permission_has_role` VALUES (999999, 47);
+INSERT INTO `permission_has_role` VALUES (999999, 48);
+INSERT INTO `permission_has_role` VALUES (999999, 49);
+INSERT INTO `permission_has_role` VALUES (999999, 50);
+INSERT INTO `permission_has_role` VALUES (999999, 51);
+INSERT INTO `permission_has_role` VALUES (999999, 52);
+INSERT INTO `permission_has_role` VALUES (999999, 53);
+INSERT INTO `permission_has_role` VALUES (999999, 54);
+INSERT INTO `permission_has_role` VALUES (999999, 55);
+INSERT INTO `permission_has_role` VALUES (999999, 56);
+INSERT INTO `permission_has_role` VALUES (999999, 57);
+INSERT INTO `permission_has_role` VALUES (999999, 58);
+INSERT INTO `permission_has_role` VALUES (999999, 59);
+INSERT INTO `permission_has_role` VALUES (999999, 60);
+INSERT INTO `permission_has_role` VALUES (999999, 61);
+INSERT INTO `permission_has_role` VALUES (999999, 62);
+INSERT INTO `permission_has_role` VALUES (999999, 63);
+INSERT INTO `permission_has_role` VALUES (999999, 64);
+INSERT INTO `permission_has_role` VALUES (999999, 65);
+INSERT INTO `permission_has_role` VALUES (999999, 66);
+INSERT INTO `permission_has_role` VALUES (999999, 67);
+INSERT INTO `permission_has_role` VALUES (999999, 68);
+INSERT INTO `permission_has_role` VALUES (999999, 69);
+INSERT INTO `permission_has_role` VALUES (999999, 70);
+INSERT INTO `permission_has_role` VALUES (999999, 71);
+INSERT INTO `permission_has_role` VALUES (999999, 72);
+INSERT INTO `permission_has_role` VALUES (999999, 73);
+INSERT INTO `permission_has_role` VALUES (999999, 74);
+INSERT INTO `permission_has_role` VALUES (999999, 75);
+INSERT INTO `permission_has_role` VALUES (999999, 76);
+INSERT INTO `permission_has_role` VALUES (999999, 77);
+INSERT INTO `permission_has_role` VALUES (999999, 78);
+INSERT INTO `permission_has_role` VALUES (999999, 79);
 COMMIT;
 
 -- ----------------------------
@@ -2100,52 +2170,92 @@ CREATE TABLE `permissions` (
   `group_id` int DEFAULT NULL,
   `display_order` tinyint DEFAULT NULL,
   `status` tinyint DEFAULT NULL,
+  `parent_id` int DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of permissions
 -- ----------------------------
 BEGIN;
-INSERT INTO `permissions` VALUES (1, 'crm_parent', 'Khách hàng', 1, 1, 1);
-INSERT INTO `permissions` VALUES (2, 'crm_imports', 'Import', 1, 2, 1);
-INSERT INTO `permissions` VALUES (3, 'lms_students', 'DS học sinh', 2, 1, 1);
-INSERT INTO `permissions` VALUES (4, 'lms_checkin', 'DS checkin', 2, 2, 1);
-INSERT INTO `permissions` VALUES (5, 'lms_contracts', 'Nhập học', 2, 3, 1);
-INSERT INTO `permissions` VALUES (6, 'lms_enrolments', 'Xếp lớp', 2, 4, 1);
-INSERT INTO `permissions` VALUES (7, 'lms_reserves', 'Bảo lưu', 2, 5, 1);
-INSERT INTO `permissions` VALUES (8, 'lms_class_transfers', 'Chuyển lớp', 2, 6, 1);
-INSERT INTO `permissions` VALUES (9, 'lms_branch_transfers', 'Chuyển trung tâm', 2, 7, 1);
-INSERT INTO `permissions` VALUES (10, 'lms_tuition_transfers', 'Chuyển phí', 2, 8, 1);
-INSERT INTO `permissions` VALUES (11, 'lms_attendances', 'Điểm danh', 2, 9, 1);
-INSERT INTO `permissions` VALUES (12, 'lms_assessments', 'Nhận xét & đánh giá', 2, 10, 1);
-INSERT INTO `permissions` VALUES (13, 'settings_branches', 'Trung tâm', 3, 1, 1);
-INSERT INTO `permissions` VALUES (14, 'settings_products', 'Khóa học', 3, 2, 1);
-INSERT INTO `permissions` VALUES (15, 'settings_programs', 'Chương trình học', 3, 3, 1);
-INSERT INTO `permissions` VALUES (16, 'settings_subjects', 'Môn học', 3, 4, 1);
-INSERT INTO `permissions` VALUES (17, 'settings_classes', 'Lớp học', 3, 5, 1);
-INSERT INTO `permissions` VALUES (18, 'settings_rooms', 'Phòng học', 3, 6, 1);
-INSERT INTO `permissions` VALUES (19, 'settings_shifts', 'Ca học', 3, 7, 1);
-INSERT INTO `permissions` VALUES (20, 'settings_holidays', 'Ngày nghỉ lễ', 3, 8, 1);
-INSERT INTO `permissions` VALUES (21, 'settings_tuition_fees', 'Gói phí', 3, 9, 1);
-INSERT INTO `permissions` VALUES (22, 'settings_users', 'Người dùng', 3, 10, 1);
-INSERT INTO `permissions` VALUES (23, 'settings_roles', 'Chức vụ, phân quyền', 3, 11, 1);
-INSERT INTO `permissions` VALUES (24, 'dashboard', 'Dashboard', 4, 1, 1);
-INSERT INTO `permissions` VALUES (26, 'lms_charges', 'Đã thu phí', 2, 11, 1);
-INSERT INTO `permissions` VALUES (27, 'lms_waitcharges', 'Chờ thu phí', 2, 12, 1);
-INSERT INTO `permissions` VALUES (28, 'lms_reports', 'Báo cáo', 2, 13, 1);
-INSERT INTO `permissions` VALUES (29, 'settings_discount_codes', 'Mã chiết khấu', 3, 12, 1);
-INSERT INTO `permissions` VALUES (30, 'settings_coupons', 'Voucher', 3, 13, 1);
-INSERT INTO `permissions` VALUES (31, 'canViewAllSale', 'Xem tất cả CSKH', 4, 2, 1);
-INSERT INTO `permissions` VALUES (32, 'canViewAllParents', 'Xem tất cả khách hàng', 4, 3, 1);
-INSERT INTO `permissions` VALUES (33, 'canViewAllImport', 'Xem tất cả import', 4, 4, 1);
-INSERT INTO `permissions` VALUES (34, 'lms_teachers', 'Giáo viên & trợ giảng', 2, 14, 1);
-INSERT INTO `permissions` VALUES (35, 'lms_exchange', 'Quy đổi', 2, 8, 1);
-INSERT INTO `permissions` VALUES (36, 'marketing_coupons', 'Voucher', 5, 2, 1);
-INSERT INTO `permissions` VALUES (37, 'marketing_campaigns', 'Chiến dịch', 5, 1, 1);
-INSERT INTO `permissions` VALUES (38, 'marketing_b2b_sources', 'Nguồn B2B', 5, 3, 1);
-INSERT INTO `permissions` VALUES (39, 'marketing_b2b_campaigns', 'Chính sách B2B', 5, 3, 1);
-INSERT INTO `permissions` VALUES (40, 'marketing_c2c_campaigns', 'Chính sách C2C', 5, 3, 1);
+INSERT INTO `permissions` VALUES (1, 'crm_parent', 'Khách hàng', 1, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (2, 'crm_imports', 'Import', 1, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (3, 'lms_students', 'DS học sinh', 2, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (4, 'lms_checkin', 'DS checkin', 2, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (5, 'lms_contracts', 'Nhập học', 2, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (6, 'lms_enrolments', 'Xếp lớp', 2, 4, 1, NULL);
+INSERT INTO `permissions` VALUES (7, 'lms_reserves', 'Bảo lưu', 2, 5, 1, NULL);
+INSERT INTO `permissions` VALUES (8, 'lms_class_transfers', 'Chuyển lớp', 2, 6, 1, NULL);
+INSERT INTO `permissions` VALUES (9, 'lms_branch_transfers', 'Chuyển trung tâm', 2, 7, 1, NULL);
+INSERT INTO `permissions` VALUES (10, 'lms_tuition_transfers', 'Chuyển phí', 2, 8, 1, NULL);
+INSERT INTO `permissions` VALUES (11, 'lms_attendances', 'Điểm danh', 2, 9, 1, NULL);
+INSERT INTO `permissions` VALUES (12, 'lms_assessments', 'Nhận xét & đánh giá', 2, 10, 1, NULL);
+INSERT INTO `permissions` VALUES (13, 'settings_branches', 'Trung tâm', 3, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (14, 'settings_products', 'Khóa học', 3, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (15, 'settings_programs', 'Chương trình học', 3, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (16, 'settings_subjects', 'Môn học', 3, 4, 1, NULL);
+INSERT INTO `permissions` VALUES (17, 'settings_classes', 'Lớp học', 3, 5, 1, NULL);
+INSERT INTO `permissions` VALUES (18, 'settings_rooms', 'Phòng học', 3, 6, 1, NULL);
+INSERT INTO `permissions` VALUES (19, 'settings_shifts', 'Ca học', 3, 7, 1, NULL);
+INSERT INTO `permissions` VALUES (20, 'settings_holidays', 'Ngày nghỉ lễ', 3, 8, 1, NULL);
+INSERT INTO `permissions` VALUES (21, 'settings_tuition_fees', 'Gói phí', 3, 9, 1, NULL);
+INSERT INTO `permissions` VALUES (22, 'settings_users', 'Người dùng', 3, 10, 1, NULL);
+INSERT INTO `permissions` VALUES (23, 'settings_roles', 'Chức vụ, phân quyền', 3, 11, 1, NULL);
+INSERT INTO `permissions` VALUES (24, 'dashboard', 'Dashboard', 4, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (26, 'lms_charges', 'Đã thu phí', 2, 11, 1, NULL);
+INSERT INTO `permissions` VALUES (27, 'lms_waitcharges', 'Chờ thu phí', 2, 12, 1, NULL);
+INSERT INTO `permissions` VALUES (28, 'lms_reports', 'Báo cáo', 2, 13, 1, NULL);
+INSERT INTO `permissions` VALUES (29, 'settings_discount_codes', 'Mã chiết khấu', 3, 12, 1, NULL);
+INSERT INTO `permissions` VALUES (30, 'settings_coupons', 'Voucher', 3, 13, 1, NULL);
+INSERT INTO `permissions` VALUES (31, 'canViewAllSale', 'Xem tất cả CSKH', 4, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (32, 'canViewAllParents', 'Xem tất cả khách hàng', 4, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (33, 'canViewAllImport', 'Xem tất cả import', 4, 4, 1, NULL);
+INSERT INTO `permissions` VALUES (34, 'lms_teachers', 'Giáo viên & trợ giảng', 2, 14, 1, NULL);
+INSERT INTO `permissions` VALUES (35, 'lms_exchange', 'Quy đổi', 2, 8, 1, NULL);
+INSERT INTO `permissions` VALUES (36, 'marketing_coupons', 'Voucher', 5, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (37, 'marketing_campaigns', 'Chiến dịch', 5, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (38, 'marketing_b2b_sources', 'Nguồn B2B', 5, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (39, 'marketing_b2b_campaigns', 'Chính sách B2B', 5, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (40, 'marketing_c2c_campaigns', 'Chính sách C2C', 5, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (41, 'lms_reports_business', 'Kinh doanh', 7, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (42, 'lms_reports_finance', 'Tài chính kế toán', 7, 2, 1, NULL);
+INSERT INTO `permissions` VALUES (43, 'lms_reports_operate', 'Vận hành', 7, 3, 1, NULL);
+INSERT INTO `permissions` VALUES (44, 'lms_reports_academic', 'Học thuật', 7, 4, 1, NULL);
+INSERT INTO `permissions` VALUES (45, 'lms_reports_teacher', 'Giáo viên', 7, 5, 1, NULL);
+INSERT INTO `permissions` VALUES (46, 'lms_reports_academic_01', 'BÁO CÁO CHI TIẾT GIỜ DẠY CỦA TRỢ GIẢNG', NULL, 1, 1, 44);
+INSERT INTO `permissions` VALUES (47, 'lms_reports_academic_02', 'DANH SÁCH LỚP TEST', NULL, 1, 1, 44);
+INSERT INTO `permissions` VALUES (48, 'lms_reports_business_01', 'KẾT QUẢ KINH DOANH NGÀY', NULL, 1, 1, 41);
+INSERT INTO `permissions` VALUES (49, 'lms_reports_operate_01', 'BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (50, 'lms_reports_operate_02', 'BÁO CÁO CHI TIẾT HỌC SINH TÁI PHÍ', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (51, 'lms_reports_operate_03', 'BÁO CÁO TỔNG HỢP HỌC SINH TÁI PHÍ', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (52, 'lms_reports_operate_04', 'BÁO CÁO THEO AF HỌC SINH TÁI PHÍ', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (53, 'lms_reports_operate_05', 'BÁO CÁO HỌC SINH PENDING', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (54, 'lms_reports_operate_06', 'BÁO CÁO HỌC SINH BẢO LƯU', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (55, 'lms_reports_operate_07', 'BÁO CÁO LỚP HỌC', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (56, 'lms_reports_operate_08', 'CHỈ SỐ VẬN HÀNH ACS', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (57, 'lms_reports_operate_09', 'BÁO CÁO TỶ LỆ ACS CỦA TỪNG AF', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (58, 'lms_reports_operate_10', 'BÁO CÁO TỶ LỆ ACS CỦA TỪNG TRUNG TÂM', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (59, 'lms_reports_operate_11', 'BÁO CÁO HỌC VIÊN TRIAL', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (60, 'lms_reports_operate_12', 'BÁO CÁO HỌC VIÊN ĐẶT CỌC', NULL, 1, 1, 43);
+INSERT INTO `permissions` VALUES (61, 'lms_reports_finance_01', 'BÁO CÁO CHI TIẾT DOANH SỐ', NULL, 1, 1, 42);
+INSERT INTO `permissions` VALUES (62, 'lms_reports_finance_02', 'BÁO CÁO DOANH SỐ THEO TRUNG TÂM', NULL, 1, 1, 42);
+INSERT INTO `permissions` VALUES (63, 'lms_reports_finance_03', 'BÁO CÁO DOANH THU THỰC HIỆN', NULL, 1, 1, 42);
+INSERT INTO `permissions` VALUES (64, 'lms_reports_finance_04', 'BÁO CÁO DOANH SỐ THEO NHÂN VIÊN', NULL, 1, 1, 42);
+INSERT INTO `permissions` VALUES (65, 'lms_reports_finance_05', 'BÁO CÁO CHI TIẾT ĐƠN HÀNG', NULL, 1, 1, 42);
+INSERT INTO `permissions` VALUES (66, 'lms_reports_teacher_01', 'BÁO CÁO CHI TIẾT GIỜ DẠY CỦA GIÁO VIÊN', NULL, 1, 1, 45);
+INSERT INTO `permissions` VALUES (67, 'dashboard_01', 'Học viên đang học', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (68, 'dashboard_02', 'Tổng số lớp', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (69, 'dashboard_03', 'Tổng số giáo viên', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (70, 'dashboard_04', 'Tổng số phòng học', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (71, 'dashboard_05', 'Tình hình học viên', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (72, 'dashboard_06', 'Đăng ký khóa học', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (73, 'dashboard_07', 'Doanh thu theo trung tâm', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (74, 'dashboard_08', 'Doanh thu theo EC', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (75, 'dashboard_09', 'Doanh số ngày', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (76, 'dashboard_10', 'Doanh số tháng', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (77, 'dashboard_11', 'Học sinh Renew theo trung tâm', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (78, 'dashboard_12', 'Học sinh Renew theo AF', 6, 1, 1, NULL);
+INSERT INTO `permissions` VALUES (79, 'dashboard_13', 'Học sinh Renew theo tháng', 6, 1, 1, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -2489,6 +2599,7 @@ INSERT INTO `role_has_user` VALUES (10, 36);
 INSERT INTO `role_has_user` VALUES (11, 686868);
 INSERT INTO `role_has_user` VALUES (12, 686868);
 INSERT INTO `role_has_user` VALUES (13, 686868);
+INSERT INTO `role_has_user` VALUES (14, 54);
 COMMIT;
 
 -- ----------------------------
@@ -2515,6 +2626,7 @@ CREATE TABLE `roles` (
 BEGIN;
 INSERT INTO `roles` VALUES (36, '36', 'teacher', 'Giáo viên', 'api', NULL, NULL, NULL, NULL);
 INSERT INTO `roles` VALUES (37, '37', 'teacher_leader', 'Trưởng nhóm giáo viên', 'api', NULL, NULL, NULL, NULL);
+INSERT INTO `roles` VALUES (54, '54', 'ta', 'Trợ giảng', 'api', NULL, NULL, NULL, NULL);
 INSERT INTO `roles` VALUES (55, '55', 'cm', 'Vận hành', 'api', '2020-08-27 02:04:43', '2020-08-27 02:04:43', NULL, NULL);
 INSERT INTO `roles` VALUES (56, '56', 'cm_leader', 'Trưởng nhóm vận hành', 'api', '2024-04-06 15:17:25', '2024-04-06 15:17:33', 1, 1);
 INSERT INTO `roles` VALUES (68, '68', 'ec', 'CSKH', 'api', '2020-08-27 02:04:43', '2020-08-27 02:04:43', NULL, NULL);
@@ -2616,7 +2728,7 @@ CREATE TABLE `schedules` (
   KEY `teacher_id` (`teacher_id`) USING BTREE,
   KEY `cm_id` (`cm_id`) USING BTREE,
   KEY `branch_id` (`branch_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1431 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1463 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of schedules
@@ -2686,38 +2798,38 @@ INSERT INTO `schedules` VALUES (1395, '2025-03-12', 1, 16, 1, '2024-12-08 20:33:
 INSERT INTO `schedules` VALUES (1396, '2025-03-15', 1, 16, 1, '2024-12-08 20:33:15', NULL, NULL, NULL, 30, 30, 9, 4, 6);
 INSERT INTO `schedules` VALUES (1397, '2025-03-19', 1, 16, 1, '2024-12-08 20:33:15', NULL, NULL, NULL, 31, 31, 9, 4, 6);
 INSERT INTO `schedules` VALUES (1398, '2025-03-22', 1, 16, 1, '2024-12-08 20:33:15', NULL, NULL, NULL, 32, 32, 9, 4, 6);
-INSERT INTO `schedules` VALUES (1399, '2024-12-06', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 1, 1, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1400, '2024-12-09', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 2, 2, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1401, '2024-12-13', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 3, 3, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1402, '2024-12-16', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 4, 4, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1403, '2024-12-20', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 5, 5, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1404, '2024-12-23', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 6, 6, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1405, '2024-12-27', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 7, 7, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1406, '2024-12-30', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 8, 8, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1407, '2025-01-03', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 9, 9, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1408, '2025-01-06', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 10, 10, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1409, '2025-01-10', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 11, 11, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1410, '2025-01-13', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 12, 12, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1411, '2025-01-17', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 13, 13, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1412, '2025-01-20', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 14, 14, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1413, '2025-01-24', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 15, 15, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1414, '2025-01-27', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 16, 16, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1415, '2025-01-31', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 17, 17, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1416, '2025-02-03', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 18, 18, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1417, '2025-02-07', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 19, 19, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1418, '2025-02-10', 1, 14, 1, '2024-12-11 20:38:47', NULL, NULL, NULL, 20, 20, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1419, '2025-02-14', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 21, 21, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1420, '2025-02-17', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 22, 22, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1421, '2025-02-21', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 23, 23, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1422, '2025-02-24', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 24, 24, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1423, '2025-02-28', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 25, 25, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1424, '2025-03-03', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 26, 26, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1425, '2025-03-07', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 27, 27, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1426, '2025-03-10', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 28, 28, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1427, '2025-03-14', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 29, 29, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1428, '2025-03-17', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 30, 30, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1429, '2025-03-21', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 31, 31, 10, 6, 4);
-INSERT INTO `schedules` VALUES (1430, '2025-03-24', 1, 14, 1, '2024-12-11 20:38:48', NULL, NULL, NULL, 32, 32, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1431, '2024-12-05', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 1, 1, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1432, '2024-12-08', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 2, 2, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1433, '2024-12-12', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 3, 3, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1434, '2024-12-15', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 4, 4, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1435, '2024-12-19', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 5, 5, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1436, '2024-12-22', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 6, 6, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1437, '2024-12-26', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 7, 7, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1438, '2024-12-29', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 8, 8, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1439, '2025-01-02', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 9, 9, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1440, '2025-01-05', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 10, 10, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1441, '2025-01-09', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 11, 11, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1442, '2025-01-12', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 12, 12, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1443, '2025-01-16', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 13, 13, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1444, '2025-01-19', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 14, 14, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1445, '2025-01-23', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 15, 15, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1446, '2025-01-26', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 16, 16, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1447, '2025-01-30', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 17, 17, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1448, '2025-02-02', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 18, 18, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1449, '2025-02-06', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 19, 19, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1450, '2025-02-09', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 20, 20, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1451, '2025-02-13', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 21, 21, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1452, '2025-02-16', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 22, 22, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1453, '2025-02-20', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 23, 23, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1454, '2025-02-23', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 24, 24, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1455, '2025-02-27', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 25, 25, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1456, '2025-03-02', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 26, 26, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1457, '2025-03-06', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 27, 27, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1458, '2025-03-09', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 28, 28, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1459, '2025-03-13', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 29, 29, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1460, '2025-03-16', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 30, 30, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1461, '2025-03-20', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 31, 31, 10, 6, 4);
+INSERT INTO `schedules` VALUES (1462, '2025-03-23', 1, 14, 1, '2025-01-07 23:03:40', NULL, NULL, NULL, 32, 32, 10, 6, 4);
 COMMIT;
 
 -- ----------------------------
@@ -2742,7 +2854,7 @@ CREATE TABLE `sessions` (
   KEY `shift_id` (`shift_id`) USING BTREE,
   KEY `teacher_id` (`teacher_id`) USING BTREE,
   KEY `room_id` (`room_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=127 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of sessions
@@ -2752,8 +2864,8 @@ INSERT INTO `sessions` VALUES (119, 15, 7, 8, 9, 7, 1, '2024-12-08 20:32:28', 1,
 INSERT INTO `sessions` VALUES (120, 15, 7, 8, 9, 8, 1, '2024-12-08 20:32:28', 1, NULL, NULL, 5);
 INSERT INTO `sessions` VALUES (121, 16, 7, 9, 9, 3, 1, '2024-12-08 20:33:15', 1, NULL, NULL, 6);
 INSERT INTO `sessions` VALUES (122, 16, 7, 9, 9, 6, 1, '2024-12-08 20:33:15', 1, NULL, NULL, 6);
-INSERT INTO `sessions` VALUES (123, 14, 7, 5, 10, 5, 1, '2024-12-11 20:38:47', 1, NULL, NULL, 4);
-INSERT INTO `sessions` VALUES (124, 14, 7, 5, 10, 8, 1, '2024-12-11 20:38:47', 1, NULL, NULL, 4);
+INSERT INTO `sessions` VALUES (125, 14, 7, 5, 10, 5, 1, '2025-01-07 23:03:40', 1, NULL, NULL, 4);
+INSERT INTO `sessions` VALUES (126, 14, 7, 5, 10, 8, 1, '2025-01-07 23:03:40', 1, NULL, NULL, 4);
 COMMIT;
 
 -- ----------------------------
@@ -2856,7 +2968,7 @@ CREATE TABLE `student_logs` (
   `status` tinyint DEFAULT '1',
   PRIMARY KEY (`id`) USING BTREE,
   KEY `student_id` (`student_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of student_logs
@@ -2871,6 +2983,12 @@ INSERT INTO `student_logs` VALUES (33, 7, 'Thêm mới hợp đồng nhập họ
 INSERT INTO `student_logs` VALUES (34, 10, 'Chuyển lên danh sách học sinh chính thức', '2024-12-21 20:44:17', 1, 1);
 INSERT INTO `student_logs` VALUES (35, 10, 'Thêm mới hợp đồng nhập học - C000008', '2024-12-21 20:45:36', 1, 1);
 INSERT INTO `student_logs` VALUES (36, 10, 'Thu đủ phí cho hợp đồng - C000008', '2024-12-21 20:46:45', 1, 1);
+INSERT INTO `student_logs` VALUES (37, 7, 'Thu đủ phí cho hợp đồng - C000007', '2025-01-07 22:53:57', 1, 1);
+INSERT INTO `student_logs` VALUES (38, 6, 'Thêm mới hợp đồng nhập học - C000009', '2025-01-07 22:56:44', 1, 1);
+INSERT INTO `student_logs` VALUES (39, 6, 'Thu đủ phí cho hợp đồng - C000009', '2025-01-07 22:57:11', 1, 1);
+INSERT INTO `student_logs` VALUES (40, 10, 'Xếp vào lớp ***KD1C/TS 5/ Room 2/ Thomas', '2025-01-07 23:04:09', 1, 1);
+INSERT INTO `student_logs` VALUES (41, 7, 'Xếp vào lớp ***KD1C/TS 5/ Room 2/ Thomas', '2025-01-07 23:04:09', 1, 1);
+INSERT INTO `student_logs` VALUES (42, 6, 'Xếp vào lớp ***KD1C/TS 5/ Room 2/ Thomas', '2025-01-07 23:04:09', 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -2946,7 +3064,7 @@ CREATE TABLE `students` (
   `source_detail_id` int DEFAULT NULL,
   `source_id` tinyint(1) DEFAULT '1',
   `avatar_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `c2c_mobile` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `c2c_mobile` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `index_student` (`lms_code`) USING BTREE,
   KEY `province_id` (`province_id`) USING BTREE,
@@ -2961,7 +3079,7 @@ CREATE TABLE `students` (
 -- Records of students
 -- ----------------------------
 BEGIN;
-INSERT INTO `students` VALUES (6, 'LMS000006', 'Lương Bảo Hân', 'Lương', 'Bảo', 'Hân', NULL, 'F', 0, '2018-09-08', '0389941902', 'Lương Thành Công', NULL, NULL, NULL, NULL, NULL, 1, 5, NULL, NULL, NULL, '2024-11-30 21:03:14', 1, '2024-12-18 10:56:13', NULL, NULL, NULL, NULL, 4, NULL, NULL, NULL, NULL, NULL, 'M', NULL, NULL, NULL, 1, 465, 2, '/static/upload/avatar_students/2024_12/avatar.png', NULL);
+INSERT INTO `students` VALUES (6, 'LMS000006', 'Lương Bảo Hân', 'Lương', 'Bảo', 'Hân', NULL, 'F', 0, '2018-09-08', '0389941902', 'Lương Thành Công', NULL, NULL, NULL, NULL, NULL, 1, 5, NULL, NULL, NULL, '2024-11-30 21:03:14', 1, '2025-01-07 15:23:30', NULL, NULL, NULL, NULL, 4, NULL, NULL, NULL, NULL, NULL, 'M', NULL, NULL, NULL, 1, 465, 2, '/static/upload/avatar_students/2025_01/img0607.JPG', NULL);
 INSERT INTO `students` VALUES (7, 'LMS000007', 'Lương Bảo Long', 'Lương', 'Bảo', 'Long', NULL, 'M', 0, '2021-05-27', '0389941902', 'Lương Thành Công', NULL, NULL, NULL, NULL, NULL, 1, 5, NULL, NULL, NULL, '2024-11-30 21:20:20', 1, '2024-12-18 10:54:24', NULL, NULL, NULL, NULL, 4, NULL, NULL, NULL, NULL, NULL, 'M', NULL, NULL, NULL, 1, 465, 2, '/images/common/avatar-boy.svg', NULL);
 INSERT INTO `students` VALUES (8, 'LMS000008', 'trần bảo nam', 'trần', 'bảo', 'nam', NULL, 'M', 0, '2013-03-18', '0987683713', 'Đinh Thị Ngọc Hân', NULL, NULL, NULL, NULL, NULL, 22, 195, NULL, NULL, NULL, '2024-12-09 12:27:46', 13, '2024-12-18 10:56:15', NULL, NULL, NULL, NULL, 6, NULL, NULL, NULL, NULL, NULL, 'F', NULL, 3, NULL, 1, 465, 2, '/images/common/avatar-boy.svg', NULL);
 INSERT INTO `students` VALUES (9, 'LMS000009', 'Hồ Bảo Phong', 'Hồ', 'Bảo', 'Phong', NULL, 'M', 0, '2014-04-14', '0868036633', 'Hồ Thị Ngân', 'a@gmail.com', NULL, NULL, NULL, NULL, 22, 195, NULL, NULL, NULL, '2024-12-11 09:35:15', 13, '2024-12-18 10:56:17', 13, NULL, NULL, NULL, 6, NULL, NULL, NULL, '2024-12-11', NULL, 'F', NULL, 3, NULL, 1, 465, 2, '/images/common/avatar-boy.svg', NULL);
@@ -2982,7 +3100,7 @@ CREATE TABLE `subject_has_class` (
   PRIMARY KEY (`id`) USING BTREE,
   KEY `subject_id` (`subject_id`) USING BTREE,
   KEY `class_id` (`class_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=232 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=233 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 -- ----------------------------
 -- Records of subject_has_class
@@ -2990,7 +3108,7 @@ CREATE TABLE `subject_has_class` (
 BEGIN;
 INSERT INTO `subject_has_class` VALUES (229, 1, 15, 32, 1, '2024-12-08 20:32:28');
 INSERT INTO `subject_has_class` VALUES (230, 1, 16, 32, 1, '2024-12-08 20:33:15');
-INSERT INTO `subject_has_class` VALUES (231, 1, 14, 32, 1, '2024-12-11 20:38:47');
+INSERT INTO `subject_has_class` VALUES (232, 1, 14, 32, 1, '2025-01-07 23:03:40');
 COMMIT;
 
 -- ----------------------------
@@ -3047,11 +3165,11 @@ CREATE TABLE `term_student_user` (
 -- Records of term_student_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `term_student_user` VALUES (6, 6, 1, NULL, NULL, NULL, 2, NULL, '2024-11-30 21:03:15', NULL, 1, 4, 1, NULL);
-INSERT INTO `term_student_user` VALUES (7, 7, 1, NULL, NULL, NULL, 2, NULL, '2024-11-30 21:20:21', NULL, 1, 4, 1, NULL);
+INSERT INTO `term_student_user` VALUES (6, 6, 1, NULL, 6, 6, 2, 10, '2024-11-30 21:03:15', '2025-01-07 23:04:09', 1, 4, 1, 1);
+INSERT INTO `term_student_user` VALUES (7, 7, 1, NULL, 6, 6, 2, 10, '2024-11-30 21:20:21', '2025-01-07 23:04:09', 1, 4, 1, 1);
 INSERT INTO `term_student_user` VALUES (8, 8, 13, NULL, NULL, NULL, 2, NULL, '2024-12-09 12:27:46', NULL, 1, 6, 13, NULL);
 INSERT INTO `term_student_user` VALUES (9, 9, 13, NULL, NULL, NULL, 2, NULL, '2024-12-11 09:35:15', NULL, 1, 6, 13, NULL);
-INSERT INTO `term_student_user` VALUES (10, 10, 5, NULL, NULL, NULL, 2, NULL, '2024-12-21 20:44:17', NULL, 1, 4, 1, NULL);
+INSERT INTO `term_student_user` VALUES (10, 10, 5, NULL, 6, 6, 2, 10, '2024-12-21 20:44:17', '2025-01-07 23:04:09', 1, 4, 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -3094,9 +3212,9 @@ CREATE TABLE `tuition_fee` (
 -- Records of tuition_fee
 -- ----------------------------
 BEGIN;
-INSERT INTO `tuition_fee` VALUES (7, 'Gói KINDY 12 tháng', NULL, 8, NULL, 96, 40000000, NULL, NULL, 40000000, '2024-11-30 19:38:11', 1, '2024-12-11 20:37:56', 1, '2024-11-30', '2024-12-31', NULL, NULL, 1, 0, '4,5,6,7,8', NULL, 12, 1);
-INSERT INTO `tuition_fee` VALUES (8, 'Gói KINDY 6 tháng', NULL, 8, NULL, 48, 24000000, NULL, NULL, 24000000, '2024-11-30 19:41:48', 1, '2024-12-11 20:38:05', 1, '2024-11-01', '2024-12-31', NULL, NULL, 1, 0, '4,5,6', NULL, 6, 1);
-INSERT INTO `tuition_fee` VALUES (9, 'Gói KINDY 3 tháng', NULL, 8, NULL, 24, 12000000, NULL, NULL, 12000000, '2024-11-30 19:42:23', 1, '2024-12-11 20:38:13', 1, '2024-11-01', '2024-12-31', NULL, NULL, 1, 0, '4,5,6', NULL, 3, 1);
+INSERT INTO `tuition_fee` VALUES (7, 'Gói KINDY 12 tháng', NULL, 8, NULL, 96, 40000000, NULL, NULL, 40000000, '2024-11-30 19:38:11', 1, '2024-12-11 20:37:56', 1, '2024-11-30', '2025-12-31', NULL, NULL, 1, 0, '4,5,6,7,8', NULL, 12, 1);
+INSERT INTO `tuition_fee` VALUES (8, 'Gói KINDY 6 tháng', NULL, 8, NULL, 48, 24000000, NULL, NULL, 24000000, '2024-11-30 19:41:48', 1, '2024-12-11 20:38:05', 1, '2024-11-01', '2025-12-31', NULL, NULL, 1, 0, '4,5,6', NULL, 6, 1);
+INSERT INTO `tuition_fee` VALUES (9, 'Gói KINDY 3 tháng', NULL, 8, NULL, 24, 12000000, NULL, NULL, 12000000, '2024-11-30 19:42:23', 1, '2024-12-11 20:38:13', 1, '2024-11-01', '2025-12-31', NULL, NULL, 1, 0, '4,5,6', NULL, 3, 1);
 COMMIT;
 
 -- ----------------------------
@@ -3195,13 +3313,13 @@ CREATE TABLE `users` (
   KEY `manager_id` (`manager_id`) USING BTREE,
   KEY `hrm_id` (`hrm_id`) USING BTREE,
   KEY `manager_hrm_id` (`manager_hrm_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` VALUES (1, 'Lương Thành Công', '0389941902', 'admin@admin.com', '2020-08-27 02:04:43', '$2y$10$upeEWEPRUHvriPrThSy8hOMzfqxFGRFPrBP0UgkBwC8C54RBz/6C6', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWwtZXJwLmNvbmduZ2hlZ2lhb2R1Yy5jb20vYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3MzQ0NTU4NjcsImV4cCI6MTczNTA2MDY2NywibmJmIjoxNzM0NDU1ODY3LCJqdGkiOiJ6MHpuZFhjb1FsZ0NtVDZIIiwic3ViIjoiMSIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.uu8KPwoM42-f0Kyarn61UPKTNR1H9hQWZU_y4tEF4nk', 'admin,user', 1, 'EQt3UDeo4F', '2020-08-27 02:04:43', '2024-12-17 10:47:12', NULL, 1, NULL, 8, 'Trung tâm Scots English Tây Hồ, Trung tâm Scots English Times city, Trung tâm Scots English Hoàng Đạo Thuý, Trung tâm Scots English Linh Đàm, Trung tâm Scots English Mỹ Đình', 'admin', NULL, NULL, 0, 'Quản trị hệ thống', NULL, '');
+INSERT INTO `users` VALUES (1, 'Lương Thành Công', '0389941902', 'admin@admin.com', '2020-08-27 02:04:43', '$2y$10$upeEWEPRUHvriPrThSy8hOMzfqxFGRFPrBP0UgkBwC8C54RBz/6C6', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3Njb3RzLmNvbmduZ2hlZ2lhb2R1Yy5jb20vYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3MzYyNjQ5OTUsImV4cCI6MTczNjg2OTc5NSwibmJmIjoxNzM2MjY0OTk1LCJqdGkiOiJ3UlRsOUd2TUpJUFRDdHZ1Iiwic3ViIjoiMSIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.4h_9YynlHXIHKQ9PgLFF3nlkmZDyyBQz-NoEXnPHYUA', 'admin,user', 1, 'EQt3UDeo4F', '2020-08-27 02:04:43', '2024-12-17 10:47:12', NULL, 1, NULL, 8, 'Trung tâm Scots English Tây Hồ, Trung tâm Scots English Times city, Trung tâm Scots English Hoàng Đạo Thuý, Trung tâm Scots English Linh Đàm, Trung tâm Scots English Mỹ Đình', 'admin', NULL, NULL, 0, 'Quản trị hệ thống', NULL, '');
 INSERT INTO `users` VALUES (2, 'Giám đốc trung tâm', '0388888888', 'gdtt@gmail.com', NULL, '$2y$10$Oj6RZMdDQ43LadutsxpXZet.dVDDYm7rd7q1Aj8541XMwvgJdSDPS', NULL, '', 1, NULL, '2024-05-12 14:43:31', '2024-12-17 10:47:32', 1, 1, NULL, 4, 'Trung tâm Scots English Tây Hồ', 'C00002', NULL, NULL, 0, 'Giám đốc trung tâm', NULL, NULL);
 INSERT INTO `users` VALUES (3, 'Giáo viên', '0388888888', 'giaovien@gmail.com', NULL, '$2y$10$Q33qboMMmLejTZRJ28GsMOv5f.ZGOnfd6BJhDnQztAlTDNHMVVYPa', NULL, '', 1, NULL, '2024-05-12 14:44:40', '2024-12-17 10:47:40', 1, 1, NULL, 4, 'Trung tâm Scots English Tây Hồ', 'C00003', NULL, NULL, 0, 'Giáo viên', NULL, NULL);
 INSERT INTO `users` VALUES (4, 'Vận hành', '0388888888', 'vanhanh@gmail.com', NULL, '$2y$10$AuQRTmWhgKyfvUau7zOsb.nv7u6/jls8o2uJNt0RpoQhXwhElqENK', NULL, '', 1, NULL, '2024-05-12 14:45:39', '2024-12-17 10:47:50', 1, 1, NULL, 4, 'Trung tâm Scots English Tây Hồ', 'C00004', NULL, NULL, 0, 'Vận hành', NULL, NULL);
@@ -3214,6 +3332,7 @@ INSERT INTO `users` VALUES (10, 'Thomas', '0972416619', 'test@gmail.com', NULL, 
 INSERT INTO `users` VALUES (11, 'GĐTT Hoàng đạo thúy', '0111111111', 'hoangdaothuy@scots.edu.vn', NULL, '$2y$10$qH7gaimwpmJkHOgmyEoP2OAL4g6gS4kHFPovT9j5sQ4Y.vPau53GG', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2VycC54Z2VuaXVzLmVkdS52bi9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczMzU3ODgyNywiZXhwIjoxNzM0MTgzNjI3LCJuYmYiOjE3MzM1Nzg4MjcsImp0aSI6IklYMDFpYXNkOXozaHgyODAiLCJzdWIiOiIxMSIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.JMWkY9afPDsMifTuqtM2H_Q6Ioezt1BLo6tb36K8oBQ', '', 1, NULL, '2024-12-07 20:00:05', '2024-12-17 10:49:46', 1, 1, NULL, 5, 'Trung tâm Scots English Times city', 'hoangdaothuy', NULL, NULL, 0, 'Giám đốc trung tâm', NULL, NULL);
 INSERT INTO `users` VALUES (12, 'GĐTT Linh Đàm', '0111111112', 'linhdam@scots.edu.vn', NULL, '$2y$10$5LlOFYwdZRH5TK7MC1ifN.t0JJJmXoG5BLy9Dp4VkjF8NPcazQwu6', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2VycC54Z2VuaXVzLmVkdS52bi9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczMzcxMzg0OCwiZXhwIjoxNzM0MzE4NjQ4LCJuYmYiOjE3MzM3MTM4NDgsImp0aSI6InYwR1p3MXR6UVNTRmh4UzkiLCJzdWIiOiIxMiIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.2kvVIujaSSPKPP7FRJwuIrAv8SB3fGMDh0KKaeCujaw', '', 1, NULL, '2024-12-07 20:01:33', '2024-12-17 10:50:30', 1, 1, NULL, 7, 'Trung tâm Scots English Linh Đàm', 'linhdam', NULL, NULL, 0, 'Giám đốc trung tâm', NULL, NULL);
 INSERT INTO `users` VALUES (13, 'GĐTT Mỹ đình', '0111111113', 'mydinh@scots.edu.vn', NULL, '$2y$10$vlGjf4kGGQzyFzqTJ5THVeRySbza3wPEdV.R4gAwOLz57pLB2z/Ey', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2VycC54Z2VuaXVzLmVkdS52bi9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczMzg4MzkwMSwiZXhwIjoxNzM0NDg4NzAxLCJuYmYiOjE3MzM4ODM5MDEsImp0aSI6IkFJdmR1VHFubURTRDhJUWMiLCJzdWIiOiIxMyIsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.HSoXwUGCnWX0a7FdKv6-sQmldiffhHBiJShYcc3IVLU', '', 1, NULL, '2024-12-07 20:02:21', '2024-12-17 10:51:17', 1, 1, NULL, 8, 'Trung tâm Scots English Mỹ Đình', 'mydinh', NULL, NULL, 0, 'Giám đốc trung tâm', NULL, NULL);
+INSERT INTO `users` VALUES (14, 'Trợ giảng 001', '0389941905', 'TA@scotsenglish.edu.vn', NULL, '$2y$10$Q5S.LxBPa64rTaGqt.Sj0.LewJ7Pj2XUz8RElpnOubwZ0gDk..CE2', NULL, '', 1, NULL, '2025-01-07 23:03:25', NULL, 1, NULL, NULL, 4, 'Trung tâm Scots English Tây Hồ', 'TA001', NULL, NULL, 0, 'Trợ giảng', NULL, NULL);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
