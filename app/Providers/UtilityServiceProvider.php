@@ -182,7 +182,7 @@ class UtilityServiceProvider extends ServiceProvider
             'name' => data_get($data, 'name'),
             'email' =>  data_get($data, 'email'),
             'phone' => data_get($data, 'phone'),
-            'photoURL' => data_get($data, 'avatar_url') ? data_get($data, 'avatar_url') :"/images/avatar-s-5.jpg?99691e543d9e33cf745f6ac56f5800b8",
+            'photoURL' => data_get($data, 'avatar_url') ? data_get($data, 'avatar_url') : "/images/avatar-default.jpg",
             'providerId' => "jwt",
             'uid' => data_get($data, 'id'),
             'address' => data_get($data, 'address'),
