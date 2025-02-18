@@ -123,7 +123,7 @@ class AuthController extends Controller
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
                 'phone' => auth()->user()->phone,
-                'photoURL' => "/images/avatar-s-5.jpg?99691e543d9e33cf745f6ac56f5800b8",
+                'photoURL' => auth()->user()->avatar_url ? auth()->user()->avatar_url : "/images/avatar-default.jpg",
                 'providerId' => "jwt",
                 'uid' => auth()->user()->id,
                 'address' =>  auth()->user()->address,
