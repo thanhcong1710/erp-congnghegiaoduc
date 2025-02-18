@@ -52,54 +52,114 @@ class ChargesController extends Controller
     public function add(Request $request){
         $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
         u::insertSimpleRow(array(
-            'contract_id' => data_get($contract_info, 'id'),
-            'student_id' => data_get($contract_info, 'student_id'), 
-            'branch_id' => data_get($contract_info, 'branch_id'), 
-            'cm_id' => data_get($contract_info, 'cm_id'), 
-            'ec_id' => data_get($contract_info, 'ec_id'), 
-            'method' => data_get($request, 'method'),
-            'must_charge' => data_get($contract_info, 'must_charge'),
-            'amount' => data_get($request, 'amount'),
-            'total' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-            'debt' => (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'contract_id' => data_get($request, 'contract_id'),
+            'charge_amount' => data_get($request, 'amount'),
+            'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
             'charge_date' => data_get($request, 'charge_date'),
+            'method' =>  data_get($request, 'method'),
             'note' => data_get($request, 'note'),
-            'created_at'=>date('Y-m-d H:i:s'),
-            'creator_id'=>Auth::user()->id,
-        ), 'payments');
-
-        $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount');
-        if($debt_amount == 0){
-            u::updateSimpleRow(array(
-                'status' => 3,
-                'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
-                'summary_sessions' => data_get($contract_info, 'total_sessions'), 
-                'left_sessions' => data_get($contract_info, 'total_sessions'), 
-                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'debt_amount' => 0,
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
-            self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
-        }else{
-            u::updateSimpleRow(array(
-                'status' => 2,
-                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'debt_amount' => $debt_amount,
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($request, 'amount')).' cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
-        }
-        
-        u::addLogContracts(data_get($contract_info, 'id'));
+            'meta_data' => json_encode($request->input()),
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'status' => 0), 'tmp_payments');
         $result = array(
             'status' => 1,
             'message' => 'Thêm mới phiếu thu thành công.'
         );
+        return response()->json($result);
+    }
+
+    public function update(Request $request){
+        $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
+        u::updateSimpleRow(array(
+            'contract_id' => data_get($request, 'contract_id'),
+            'charge_amount' => data_get($request, 'amount'),
+            'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+            'charge_date' => data_get($request, 'charge_date'),
+            'method' =>  data_get($request, 'method'),
+            'note' => data_get($request, 'note'),
+            'meta_data' => json_encode($request->input()),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id), array('id'=> data_get($request, 'id')), 'tmp_payments');
+        $result = array(
+            'status' => 1,
+            'message' => 'Cập nhật phiếu thu thành công.'
+        );
+        return response()->json($result);
+    }
+
+    public function approve(Request $request){
+        $tmp_payment = u::getObject(array('id'=>$request->id), 'tmp_payments');
+        if (data_get($request, 'status') == 1){
+            $contract_info = u::getObject(array('id'=>data_get($tmp_payment, 'contract_id')), 'contracts');
+            u::insertSimpleRow(array(
+                'contract_id' => data_get($contract_info, 'id'),
+                'student_id' => data_get($contract_info, 'student_id'), 
+                'branch_id' => data_get($contract_info, 'branch_id'), 
+                'cm_id' => data_get($contract_info, 'cm_id'), 
+                'ec_id' => data_get($contract_info, 'ec_id'), 
+                'method' => data_get($tmp_payment, 'method'),
+                'must_charge' => data_get($contract_info, 'must_charge'),
+                'amount' => data_get($tmp_payment, 'charge_amount'),
+                'total' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
+                'debt' => (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount'),
+                'charge_date' => data_get($tmp_payment, 'charge_date'),
+                'note' => data_get($tmp_payment, 'note'),
+                'created_at'=>date('Y-m-d H:i:s'),
+                'creator_id'=>Auth::user()->id,
+            ), 'payments');
+
+            $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount');
+            if($debt_amount == 0){
+                u::updateSimpleRow(array(
+                    'status' => 3,
+                    'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
+                    'summary_sessions' => data_get($contract_info, 'total_sessions'), 
+                    'left_sessions' => data_get($contract_info, 'total_sessions'), 
+                    'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
+                    'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
+                    'debt_amount' => 0,
+                    'updated_at'=>date('Y-m-d H:i:s'),
+                    'updator_id'=>Auth::user()->id,
+                ), array('id'=>data_get($contract_info, 'id')), 'contracts');
+                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+                self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
+            }else{
+                u::updateSimpleRow(array(
+                    'status' => 2,
+                    'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
+                    'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
+                    'debt_amount' => $debt_amount,
+                    'updated_at'=>date('Y-m-d H:i:s'),
+                    'updator_id'=>Auth::user()->id,
+                ), array('id'=>data_get($contract_info, 'id')), 'contracts');
+                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($tmp_payment, 'charge_amount')).' cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+            }
+            
+            u::addLogContracts(data_get($contract_info, 'id'));
+            u::updateSimpleRow(array(
+                'status' => 1,
+                'approver_id' => Auth::user()->id,
+                'approved_at' => date('Y-m-d H:i:s'),
+            ), array('id'=>data_get($tmp_payment, 'id')), 'tmp_payments');
+            $result = array(
+                'status' => 1,
+                'message' => 'Duyệt phiếu thu thành công.'
+            );
+        }else {
+            u::updateSimpleRow(array(
+                'status' => data_get($request, 'status'),
+                'approver_id' => Auth::user()->id,
+                'approved_at' => date('Y-m-d H:i:s'),
+            ), array('id'=>data_get($request, 'id')), 'tmp_payments');
+            $result = array(
+                'status' => 1,
+                'message' => 'Từ chối duyệt phiếu thu thành công.'
+            );
+        }
+        
         return response()->json($result);
     }
 
@@ -218,5 +278,68 @@ class ChargesController extends Controller
             }
         }
         return "ok";
+    }
+
+    public function waitchargeApproveList(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+        }
+        
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+        }
+        
+        $order_by = " ORDER BY tp.id DESC ";
+
+        $total = u::first("SELECT count(c.id) AS total 
+            FROM tmp_payments AS tp 
+                LEFT JOIN contracts AS c ON c.id = tp.contract_id
+                LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+        
+        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
+                (SELECT name FROM products WHERE id =c.product_id) AS product_name,
+                c.code, (SELECT name FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
+                tp.*
+            FROM tmp_payments AS tp 
+                 LEFT JOIN contracts AS c ON c.id = tp.contract_id
+                LEFT JOIN students AS s ON s.id=c.student_id
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function getWaitchargeApproveInfo(Request $request, $id){
+        $paymentInfo = u::getObject(array('id'=>$id), 'tmp_payments');
+        $contractInfo = u::first("SELECT c.*,c.id AS contract_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1,
+            (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ceo_branch_id) AS ceo_branch_name,
+            (SELECT name FROM products WHERE id =c.product_id) AS product_name,
+            (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+            (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+            (SELECT title FROM b2b_campaigns WHERE id= c.b2b_campaign_id) AS b2b_campaign_title,
+            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session
+        FROM contracts AS c 
+            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=".data_get($paymentInfo, 'contract_id', 0));
+        return response()->json([
+            'payment_info' => $paymentInfo,
+            'contract_info' => $contractInfo
+        ]);
     }
 }

@@ -141,6 +141,33 @@ export default {
         }
       },
       {
+        path: '/lms/waitcharge-approve',
+        name: 'lms-waitcharge-approve',
+        component: () => import('@/views/lms/accounting/waitchargeApprove.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chờ duyệt phí', active: true}
+          ],
+          pageTitle: 'Danh sách chờ duyệt phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/waitcharge-approve/:id/detail',
+        name: 'lms-waitcharge-approve-detail',
+        component: () => import('@/views/lms/accounting/waitchargeApproveDetail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve'},
+            { title: 'Thông tin phiếu thu chờ duyệt', active: true}
+          ],
+          pageTitle: 'Thông tin phiếu thu chờ duyệt',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/enrolments',
         name: 'lms-enrolments',
         component: () => import('@/views/lms/enrolments/index.vue'),
