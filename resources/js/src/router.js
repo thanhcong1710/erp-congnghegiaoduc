@@ -80,6 +80,14 @@ const router = new Router({
       path: '',
       component: () => import('@/layouts/full-page/FullPage.vue'),
       children: [
+        {
+          path: '/pages/print/receipt',
+          name: 'print-receipt',
+          component: () => import('@/views/pages/print/receipt.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
         // =============================================================================
         // PAGES
         // =============================================================================

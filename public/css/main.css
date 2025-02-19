@@ -9183,12 +9183,12 @@ body {
   color: #252525 !important;
 }
 
-.list-action .vs-button.small:not(.includeIconOnly){
+.list-action .vs-button.small:not(.includeIconOnly) {
   width: 28px;
   font-size: 13px;
 }
 
-[dir] .list-action .vs-button.small:not(.includeIconOnly){
+[dir] .list-action .vs-button.small:not(.includeIconOnly) {
   padding: 6px;
   margin: 1px;
 }
@@ -9207,27 +9207,30 @@ body {
   background: #ffa044;
 }
 
-.modal_success .vs-popup--header{
+.modal_success .vs-popup--header {
   color: #fff;
 }
 
-[dir] .modal_success .vs-popup--header{
+[dir] .modal_success .vs-popup--header {
   background: #28c76f;
 }
 
-.modal_info .vs-popup--header{
+.modal_info .vs-popup--header {
   color: #fff;
 }
 
-[dir] .modal_info .vs-popup--header{
+[dir] .modal_info .vs-popup--header {
   background-color: #938af4;
 }
 
-.modal_info .vs-popup--title h3, .modal_success .vs-popup--title h3, .modal_warning .vs-popup--title h3{
+.modal_info .vs-popup--title h3,
+.modal_success .vs-popup--title h3,
+.modal_warning .vs-popup--title h3 {
   color: #fff;
 }
 
-.vs-input--input:disabled, .vs-input--input:disabled+.vs-input--placeholder {
+.vs-input--input:disabled,
+.vs-input--input:disabled+.vs-input--placeholder {
   opacity: 0.9 !important;
 }
 
@@ -9235,25 +9238,366 @@ body {
   background: #c9d2d263 !important;
 }
 
-.vs-tabs--li button.vs-tabs--btn{
+.vs-tabs--li button.vs-tabs--btn {
   font-size: 16px;
 }
 
-[dir] .vs--disabled .vs__search{
+[dir] .vs--disabled .vs__search {
   opacity: 0.9 !important;
   /* background: #c9d2d263 !important; */
 }
 
-.mx-input:disabled, .mx-input.disabled{
+.mx-input:disabled,
+.mx-input.disabled {
   opacity: 0.9 !important;
 }
 
-[dir] .mx-input:disabled, [dir] .mx-input.disabled{
+[dir] .mx-input:disabled, [dir] .mx-input.disabled {
   background: #c9d2d263 !important;
 }
 
-[dir] .v-nav-menu .scroll-area-v-nav-menu{
+[dir] .v-nav-menu .scroll-area-v-nav-menu {
   padding-bottom: 50px !important;
+}
+
+.erp-printing-detail .print-box .ajax-load {
+  height: 100%;
+  top: 0;
+}
+
+.erp-printing-detail .print-content .table.cms-print-table th {
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+[dir] .erp-printing-detail .print-box {
+  background: transparent;
+}
+
+.erp-printing-detail .print-box .container {
+  max-width: 990px;
+}
+
+.erp-printing-detail .print-box .print-body {
+  font-family: 'Times New Roman';
+  font-size: 19px;
+  position: relative;
+  color: #000;
+}
+
+[dir] .erp-printing-detail .print-box .print-body {
+  background: #FFF;
+}
+
+.erp-printing-detail .print-box .print-body::after {
+  content: '';
+  display: block;
+  height: 20px;
+}
+
+[dir] .erp-printing-detail .print-box .print-body::after {
+  background: red;
+}
+
+[dir] .erp-printing-detail .print-box .inner {
+  padding: 10px 40px;
+}
+
+.erp-printing-detail .print-box .inner::before,
+.erp-printing-detail .print-box .inner::after {
+  content: '';
+  display: table;
+}
+
+[dir] .erp-printing-detail .print-box .inner::before, [dir] .erp-printing-detail .print-box .inner::after {
+  clear: both;
+}
+
+[dir] .erp-printing-detail .print-box hr {
+  border: 2px solid red;
+}
+
+.erp-printing-detail .print-header {
+  display: flex;
+}
+
+[dir] .erp-printing-detail .print-header {
+  padding-top: 20px;
+  margin-bottom: 25px;
+}
+
+.erp-printing-detail .print-header .h-right {
+  width: 55%;
+  font-family: Arial;
+}
+
+[dir] .erp-printing-detail .print-header .h-right {
+  padding-top: 5px;
+}
+
+[dir=ltr] .erp-printing-detail .print-header .h-right {
+    padding-left: 12px;
+}
+
+[dir=rtl] .erp-printing-detail .print-header .h-right {
+  padding-right: 12px;
+}
+
+.erp-printing-detail .print-header .h-right h4 {
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: red;
+}
+
+[dir] .erp-printing-detail .print-header .h-right h4 {
+  margin-bottom: 5px;
+}
+
+.erp-printing-detail .print-header .h-right p {
+  font-size: 12px;
+  line-height: 20px;
+  color: #000;
+}
+
+[dir] .erp-printing-detail .print-header .h-right p {
+  margin-bottom: 0;
+}
+
+.erp-printing-detail .print-header .h-left {
+  width: 45%;
+}
+
+.erp-printing-detail .print-header .logo {
+  width: 170px;
+  display: block;
+  overflow: hidden;
+}
+
+[dir] .erp-printing-detail .print-header .logo {
+  margin-top: 6px;
+}
+
+[dir=ltr] .erp-printing-detail .print-header .logo {
+    float: left;
+    margin-right: 25px;
+}
+
+[dir=rtl] .erp-printing-detail .print-header .logo {
+  float: right;
+  margin-left: 25px;
+}
+
+.erp-printing-detail .print-header .logo img {
+  width: 100%;
+  vertical-align: middle;
+}
+
+.erp-printing-detail .print-header h3 {
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.erp-printing-detail .print-content {
+  line-height: 30px;
+}
+
+.erp-printing-detail .print-content h2.title {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 34px;
+}
+
+[dir] .erp-printing-detail .print-content h2.title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+[dir] .erp-printing-detail .print-content h2.title.sub {
+  margin-bottom: 15px;
+}
+
+.erp-printing-detail .print-content h2.title.sub+strong {
+  display: block;
+}
+
+[dir] .erp-printing-detail .print-content h2.title.sub+strong {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.erp-printing-detail .print-content h2.title strong,
+.erp-printing-detail .print-content h2.title span {
+  font-size: 20px;
+  display: block;
+}
+
+.erp-printing-detail .print-content h2.title span {
+  font-weight: 400;
+}
+
+.erp-printing-detail .print-content h3 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+[dir] .erp-printing-detail .print-content h3 {
+  margin-bottom: 12px;
+}
+
+.erp-printing-detail .print-content .row span {
+  display: inline-block;
+}
+
+[dir] .erp-printing-detail .print-content .row span input[type="checkbox"] {
+  margin: 0 10px;
+}
+
+[dir=ltr] .erp-printing-detail .print-content .row span+span {
+    margin-left: 15px;
+}
+
+[dir=rtl] .erp-printing-detail .print-content .row span+span {
+  margin-right: 15px;
+}
+
+[dir=ltr] .erp-printing-detail .print-content .row span.dot-line+span {
+    margin-left: 0;
+}
+
+[dir=rtl] .erp-printing-detail .print-content .row span.dot-line+span {
+  margin-right: 0;
+}
+
+[dir] .erp-printing-detail .print-content .row+.row {
+  margin-top: 5px;
+}
+
+.erp-printing-detail .print-content strong {
+  display: block;
+}
+
+.erp-printing-detail .print-content strong+i {
+  font-weight: 400;
+}
+
+.erp-printing-detail .print-content .flex-box .input-line {
+  width: 100px;
+}
+
+[dir=ltr] .erp-printing-detail .print-content .flex-box .input-line {
+    margin-left: 15px;
+}
+
+[dir=rtl] .erp-printing-detail .print-content .flex-box .input-line {
+  margin-right: 15px;
+}
+
+[dir] .erp-printing-detail .print-content .table.table-bordered {
+  border-color: #000 !important;
+  border-width: 2px !important;
+}
+
+[dir] .erp-printing-detail .print-content .table.table-bordered th, [dir] .erp-printing-detail .print-content .table.table-bordered tr, [dir] .erp-printing-detail .print-content .table.table-bordered td {
+  border-color: #000 !important;
+  border-width: 2px !important;
+}
+
+.erp-printing-detail .print-content .table th,
+.erp-printing-detail .print-content .table td {
+  font-size: 19px;
+}
+
+.erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
+  content: '\2713';
+  color: #000;
+  font-size: 22px;
+  line-height: 26px;
+  position: absolute;
+  font-weight: 600;
+}
+
+[dir] .erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
+  text-align: center;
+}
+
+[dir=ltr] .erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
+    left: 8px;
+}
+
+[dir=rtl] .erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
+  right: 8px;
+}
+
+.erp-printing-detail .print-content input[type=checkbox]:disabled {
+  outline: 1px solid #000;
+  color: #000;
+}
+
+.erp-printing-detail .print-content span.label {
+  position: relative;
+}
+
+[dir=ltr] .erp-printing-detail .print-content span.label.r input[type=checkbox]:checked+i::before {
+    left: auto;
+    right: 8px;
+}
+
+[dir=rtl] .erp-printing-detail .print-content span.label.r input[type=checkbox]:checked+i::before {
+  right: auto;
+  left: 8px;
+}
+
+.erp-printing-detail .print-footer {
+  height: 10px;
+}
+
+[dir] .erp-printing-detail .print-footer {
+  background: red;
+}
+
+[dir] .erp-printing-detail .center {
+  text-align: center;
+}
+
+.erp-printing-detail .input-line {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+}
+
+.erp-printing-detail .input-line .label {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+[dir=ltr] .erp-printing-detail .input-line .label {
+    padding-right: 7px;
+}
+
+[dir=rtl] .erp-printing-detail .input-line .label {
+  padding-left: 7px;
+}
+
+.erp-printing-detail .input-line .doted::after {
+  content: '';
+  display: block;
+  position: absolute;
+  width: 100%;
+  bottom: 7px;
+}
+
+[dir] .erp-printing-detail .input-line .doted::after {
+  border-top: 1px dashed #000;
+}
+
+.erp-printing-detail .dot-line {
+  font-size: 10px;
+  color: #000;
+  letter-spacing: 2px;
+  display: inline-block;
+  line-height: 28px;
 }
 
 @media (min-width: 576px) {
