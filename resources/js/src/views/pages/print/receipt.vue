@@ -99,26 +99,22 @@
 </template>
 
 <script>
-    import u from '../../../until/helper.js'
+    import axios from '../../../http/axios.js'
     export default {
         name : 'Contract',
         data() {
             return {
                 contract: {},
-                student: {},
-                gender : true,
-                std_class : {},
-                is_ucrea : false,
-                is_bright : false,
-                is_blkhole : false,
-                sources:[],
             }
         },
         created() {
-
+            axios.g(`/api/lms/accounting/waitcharge-print/${this.$route.params.id}`)
+            .then(response => {
+                this.contract = response.data.payment_info
+            })
             setTimeout(function () {
                 window.print();
-            }, 1000)
+            }, 2000)
         },
         methods: {
         }

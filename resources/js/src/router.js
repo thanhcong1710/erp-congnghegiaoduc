@@ -81,7 +81,7 @@ const router = new Router({
       component: () => import('@/layouts/full-page/FullPage.vue'),
       children: [
         {
-          path: '/pages/print/receipt',
+          path: '/pages/print/receipt/:id',
           name: 'print-receipt',
           component: () => import('@/views/pages/print/receipt.vue'),
           meta: {
