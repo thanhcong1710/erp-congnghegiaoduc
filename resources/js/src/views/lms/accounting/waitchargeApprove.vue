@@ -136,7 +136,7 @@
                     <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
-                    <router-link :to="`/lms/waitcharge/${item.id}/detail`" >
+                    <router-link :to="`/pages/print/receipt/${item.id}`" target="_blank"> 
                       <vs-button color="warning" size="small"><i class="fa fa-print"></i></vs-button>
                     </router-link> 
                     
