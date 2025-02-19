@@ -176,7 +176,7 @@
               type="text"
               name="title"
               v-model="amount"
-              :disabled="payment.status!=0"
+              :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"
             />
           </div>
           <div class="vx-col md:w-1/4 w-full mb-4">
@@ -191,7 +191,7 @@
           </div>
           <div class="vx-col md:w-1/4 w-full mb-4">
             <label>Phương thức đóng phí</label>
-            <select class="vs-inputx vs-input--input normal" v-model="payment.method" :disabled="payment.status!=0">
+            <select class="vs-inputx vs-input--input normal" v-model="payment.method" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')">
               <option value="0">Tiền mặt</option>
               <option value="1">Chuyển khoản</option>
               <option value="2">Thẻ tín dụng</option>
@@ -204,12 +204,12 @@
               placeholder="Chọn ngày thu phí"
               :lang="datepickerOptions.lang"
               @change="selectDate"
-              :disabled="payment.status!=0"
+              :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"
             />
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>Ghi chú</label>
-            <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" :disabled="payment.status!=0"></textarea>
+            <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"></textarea>
           </div>
         </div>
         <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -220,9 +220,9 @@
           <router-link class="btn btn-danger" :to="`/lms/waitcharge-approve`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <vs-button class="mb-2 mr-3" color="success" @click="save" v-if="payment.status==0">Lưu</vs-button>
-          <vs-button class="mb-2 mr-3" color="success" @click="approve(1)" v-if="payment.status==0">Phê duyệt</vs-button>
-          <vs-button class="mb-2 mr-3" color="danger" @click="approve(2)" v-if="payment.status==0">Từ chối</vs-button>
+          <vs-button class="mb-2 mr-3" color="success" @click="save" v-if="payment.status==0 && checkPermission('approve_add_fee')">Lưu</vs-button>
+          <vs-button class="mb-2 mr-3" color="success" @click="approve(1)" v-if="payment.status==0 && checkPermission('approve_add_fee')">Phê duyệt</vs-button>
+          <vs-button class="mb-2 mr-3" color="danger" @click="approve(2)" v-if="payment.status==0 && checkPermission('approve_add_fee')">Từ chối</vs-button>
         </div>
       </div>
     </vx-card>
@@ -306,6 +306,9 @@
       }
     },
     methods: {
+      checkPermission(text){
+        return u.checkPermission(this.$store.state.AppActiveUser, text)
+      },
       selectDate(date){
         if (date) {
           this.payment.charge_date = moment(date).format("YYYY-MM-DD");
