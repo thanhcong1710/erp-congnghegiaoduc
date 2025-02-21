@@ -42,6 +42,8 @@ class ProcessData extends Command
      */
     public function handle(Request $request)
     {
+        $jobs = new JobsController();
+        $jobs->processWaittingStudent();
         $report = new ReportsController();
         // report_full_fee_active
         $report->collectFullFeeActive( $request,'_','_');

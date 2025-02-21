@@ -197,7 +197,8 @@ class BranchTransfersController extends Controller
                             'data_id'=>$branch_transfer_id,
                             'type' => 3,
                             'status' => 1,
-                            'created_at' => date('Y-m-d H:i:s')
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'processed_at' => data_get($branch_transfer_info, 'transfer_date')
                         ),'student_waitting_process');
                     }else{
                         self::processBranchTransfer($branch_transfer_id);

@@ -226,7 +226,8 @@ class ReservesController extends Controller
                             'data_id'=>$reserve_id,
                             'type' => 1,
                             'status' => 1,
-                            'created_at' => date('Y-m-d H:i:s')
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'processed_at' => data_get($reserve_info, 'start_date')
                         ),'student_waitting_process');
                     } else {
                         self::processReserve($reserve_id);

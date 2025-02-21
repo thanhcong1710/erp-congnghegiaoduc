@@ -234,7 +234,8 @@ class TuitionTransfersController extends Controller
                             'data_id'=>$tuition_transfer_id,
                             'type' => 4,
                             'status' => 1,
-                            'created_at' => date('Y-m-d H:i:s')
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'processed_at' => data_get($tuition_transfer_info, 'transfer_date')
                         ),'student_waitting_process');
                     }else{
                         self::processTuitionTransfer($tuition_transfer_id);
