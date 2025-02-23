@@ -130,7 +130,7 @@
                   <p>{{item.status==1 ? 'Đã duyệt' : ( item.status==2 ? 'Từ chối duyệt' : 'Chưa duyệt')}}</p>
                 </td>
                 <td class="td vs-table--td text-right ">
-                  <p>{{ item.approve_name }}</p>
+                  <p>{{ item.approver_name }}</p>
                 </td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >
