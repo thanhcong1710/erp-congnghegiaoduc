@@ -112,7 +112,7 @@
                   <p>{{ item.name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
+                  <p> <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
                 <td class="td vs-table--td">
                   <p>{{ item.product_name }}</p>
