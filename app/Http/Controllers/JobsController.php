@@ -31,4 +31,19 @@ class JobsController extends Controller
         }
         return "ok";
     }
+
+    public function processAutoWithdrawStudent()
+    {
+        $list = u::query("SELECT id FROM contracts WHERE status!=7 AND left_sessions =0 AND summary_sessions > 0'");
+        foreach ($list AS $row) {
+            u::updateSimpleRow(array(
+                'status' => 7,
+                'type_withdraw' =>1,
+                'action' => 'Withdraw học sinh do quá hạn số buổi học',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ), array('id'=>$row->id),'contracts');
+            u::addLogContracts(data_get($row, 'id'));
+        }
+        return "ok";
+    }
 }

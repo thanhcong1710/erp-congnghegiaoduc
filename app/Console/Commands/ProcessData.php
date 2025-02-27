@@ -44,6 +44,7 @@ class ProcessData extends Command
     {
         $jobs = new JobsController();
         $jobs->processWaittingStudent();
+        $jobs->processAutoWithdrawStudent();
         $report = new ReportsController();
         // report_full_fee_active
         $report->collectFullFeeActive( $request,'_','_');
