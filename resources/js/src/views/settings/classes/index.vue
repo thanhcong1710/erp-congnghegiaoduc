@@ -743,16 +743,16 @@
         this.caculatorTotalSession();
       },
       caculatorTotalSession(){
-        if(this.config.total_cycles<1 || this.config.total_cycles>200){
-          this.$vs.notify({
-            title: 'Lỗi',
-            text: 'Số buổi học chỉ được từ 1 đến 200',
-            iconPack: 'feather',
-            icon: 'icon-alert-circle',
-            color: 'warning'
-          })
-          this.config.total_cycles = 1
-        }
+        // if(this.config.total_cycles<1 || this.config.total_cycles>200){
+        //   this.$vs.notify({
+        //     title: 'Lỗi',
+        //     text: 'Số buổi học chỉ được từ 1 đến 200',
+        //     iconPack: 'feather',
+        //     icon: 'icon-alert-circle',
+        //     color: 'warning'
+        //   })
+        //   this.config.total_cycles = 1
+        // }
 
         // this.config.session = 0
         // this.config.subjects.map(item => {
