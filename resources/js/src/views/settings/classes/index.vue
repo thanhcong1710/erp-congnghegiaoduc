@@ -687,10 +687,10 @@
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.session == "") {
-          mess += " - Số buổi học không được để trống<br/>";
-          resp = false;
-        }
+        // if (this.config.session == "") {
+        //   mess += " - Số buổi học không được để trống<br/>";
+        //   resp = false;
+        // }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
