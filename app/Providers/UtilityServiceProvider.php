@@ -520,13 +520,17 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function getSessionsByNumberOfSessions($startTime, $numberOfSessions, $classdays, $holidays, $onlyEndDate = false)
     {
-        $weekday = (int) date('N', $startTime);
-        if ($weekday === 7) {
-            $weekday = 0;
-        }
         $timeOfDay = 24 * 60 * 60;
         $maxLength = count($classdays) - 1;
         $days = [];
+        $weekday = (int) date('N', $startTime);
+        if ($weekday === 7) {
+            if(in_array(8,$classdays)){
+                --$numberOfSessions;
+                $days[] = date("Y-m-d", $startTime);
+            }
+            $weekday = 0;
+        }
         while ($numberOfSessions >= 0) {
             foreach ($classdays as $key => $classday) {
                 $classday = $classday -1;
