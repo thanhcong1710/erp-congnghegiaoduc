@@ -461,6 +461,7 @@ class UtilityServiceProvider extends ServiceProvider
         $days = self::getDaysForCalcSession($startTime, $endTime, $classdays, $holidays, $onlyTotal);
         $resp->dates = $days;
         $resp->total = $onlyTotal ? $days : count($days);
+        $resp->start_date = $onlyTotal ? null : reset($days);
         $resp->end_date = $onlyTotal ? null : end($days);
         return $resp;
     }
@@ -481,6 +482,7 @@ class UtilityServiceProvider extends ServiceProvider
         $resp = new \stdClass();
         $resp->dates = $sessions;
         $resp->total = count($sessions);
+        $resp->start_date = reset($sessions);
         $resp->end_date = end($sessions);
         return $resp;
     }
@@ -738,7 +740,7 @@ class UtilityServiceProvider extends ServiceProvider
             $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
             $arr_day = explode(",", data_get($class_info, 'class_day'));
             $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
-            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $left_sessions, $holidays, $arr_day);
+            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $contract_info->summary_sessions, $holidays, $arr_day);
             self::updateSimpleRow(array(
                 'enrolment_last_date' => data_get($data_sessions, 'end_date'),
                 'done_sessions' => $done_sessions->total,
@@ -751,14 +753,14 @@ class UtilityServiceProvider extends ServiceProvider
                 'left_sessions' => $left_sessions
             ), array('id' => $contract_id), 'contracts');
         }
-        if($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info,'summary_sessions')>0){
-            self::updateSimpleRow(array(
-                'status' => 7,
-                'action' => 'Tự động withdraw do hết phí'
-            ), array('id' => $contract_id), 'contracts');
-            self::addLogContracts($contract_id);
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " .data_get($contract_info, 'code')." hết phí", 0);
-        }
+        // if($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info,'summary_sessions')>0){
+        //     self::updateSimpleRow(array(
+        //         'status' => 7,
+        //         'action' => 'Tự động withdraw do hết phí'
+        //     ), array('id' => $contract_id), 'contracts');
+        //     self::addLogContracts($contract_id);
+        //     LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " .data_get($contract_info, 'code')." hết phí", 0);
+        // }
         return true;
     }
 
@@ -1013,5 +1015,52 @@ class UtilityServiceProvider extends ServiceProvider
         }
 
         return $string;
+    }
+
+    public static function processDataContractsPast($contract_id, $process_date)
+    {
+        $contract_info = (array)self::getObject(['id' => $contract_id], 'contracts');
+        $curr_date = date('Y-m-d');
+        if (data_get($contract_info, 'status') == 6) {
+            $schedules = self::query("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id,s.subject_id, s.subject_stt, s.class_date
+                FROM contracts AS c 
+                    LEFT JOIN classes AS cl ON cl.id = c.class_id
+                    LEFT JOIN schedules AS s ON s.class_id=cl.id
+                WHERE c.id=$contract_id AND s.status=1 AND s.class_date < '$curr_date' AND s.class_date >= '$process_date'");
+            foreach($schedules AS $schedule){
+                $class_date = data_get($schedule, 'class_date');
+                $schedule_has_student_info = self::first("SELECT id FROM schedule_has_student WHERE contract_id= $contract_id AND class_date='$class_date'");
+                $reserve_info = self::first("SELECT id FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 
+                    AND student_id=" . data_get($schedule, 'student_id') . " AND contract_id=" . data_get($schedule, 'contract_id') . " AND is_reserved=1");
+                if ($schedule_has_student_info) {
+                    self::updateSimpleRow(array(
+                        'student_id' => data_get($schedule, 'student_id'),
+                        'branch_id' => data_get($schedule, 'branch_id'),
+                        'class_id' => data_get($schedule, 'class_id'),
+                        'product_id' => data_get($schedule, 'product_id'),
+                        'program_id' => data_get($schedule, 'program_id'),
+                        'subject_id' => data_get($schedule, 'subject_id'),
+                        'subject_stt' => data_get($schedule, 'subject_stt'),
+                        'status' => $reserve_info ? 2 : 1,
+                    ), array('id' => data_get($schedule_has_student_info, 'id')), 'schedule_has_student');
+                } else {
+                    self::insertSimpleRow(array(
+                        'student_id' => data_get($schedule, 'student_id'),
+                        'branch_id' => data_get($schedule, 'branch_id'),
+                        'class_id' => data_get($schedule, 'class_id'),
+                        'contract_id' => data_get($schedule, 'contract_id'),
+                        'product_id' => data_get($schedule, 'product_id'),
+                        'program_id' => data_get($schedule, 'program_id'),
+                        'class_date' => $class_date,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'status' => $reserve_info ? 2 : 1,
+                        'subject_id' => data_get($schedule, 'subject_id'),
+                        'subject_stt' => data_get($schedule, 'subject_stt')
+                    ), 'schedule_has_student');
+                }
+            }
+        }
+        self::updateDoneSessions(data_get($contract_info, 'id'));
+        return true;
     }
 }

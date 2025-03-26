@@ -34,7 +34,9 @@ class JobsController extends Controller
 
     public function processAutoWithdrawStudent()
     {
-        $list = u::query("SELECT id FROM contracts WHERE status!=7 AND left_sessions =0 AND summary_sessions > 0");
+        $tmpTimeWithdraw = date('Y-m-d',time()-3*24*3600);
+
+        $list = u::query("SELECT id FROM contracts WHERE status!=7 AND left_sessions =0 AND summary_sessions > 0 AND enrolment_last_date < ' $tmpTimeWithdraw' ");
         foreach ($list AS $row) {
             u::updateSimpleRow(array(
                 'status' => 7,

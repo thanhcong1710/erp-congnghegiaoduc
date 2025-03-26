@@ -156,13 +156,20 @@
                       </td>
                       <td class="td vs-table--td">
                         <p><strong>{{item.tuition_fee_name}}</strong></p>
-                        <p>Phải đóng: {{item.must_charge}}</p>
-                        <p>Đã đóng: {{item.total_charged}}</p>
+                        <p>Phải đóng: {{item.must_charge | formatCurrency}}</p>
+                        <p>Đã đóng: {{item.total_charged | formatCurrency}}</p>
                       </td>
                       <td class="td vs-table--td">
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                        <!-- <p>Trạng thái: <strong></strong></p> -->
+                        <p>Trạng thái: 
+                          <strong v-if="item.left_sessions" class="text-success">Đang học</strong>
+                          <strong v-else class="text-danger">Hết số buổi học</strong>
+                        </p>
+                        <div v-if="item.left_sessions==0">
+                          <vs-button class="mr-3" style="padding: 5px 10px;" size="sm" color="danger" @click="withdrawContract(item)"><i class="fa-solid fa-x"></i></vs-button>
+                          <vs-button class="mr-3"  style="padding: 5px 10px;" size="sm" color="success" @click="showJoinContract(item)"><i class="fa-solid fa-plus"></i></vs-button>
+                        </div>
                       </td>
                     </tr>
                   </table>
@@ -290,6 +297,53 @@
           </div>
         </div>
       </vs-popup>
+
+      <vs-popup :class="'modal_'+ modal_join.color" :title="modal_join.title" :active.sync="modal_join.show" >
+        <div>
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th colspan="1" rowspan="1" class="text-center">
+                        <div class="vs-table-text">Gói phí
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1" class="text-center">
+                        <div class="vs-table-text">Số buổi chính thức
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1" class="text-center">
+                        <div class="vs-table-text">Số buổi học bổng
+                          <!---->
+                        </div>
+                      </th>
+                      <th colspan="1" rowspan="1" class="text-center">
+                        <div class="vs-table-text">Tổng số buổi
+                          <!---->
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tr class="tr-values vs-table--tr tr-table-state-null" >
+                    <td class="td vs-table--td">{{ modal_join.join_contract.tuition_fee_name }}</td>
+                    <td class="td vs-table--td text-center">{{ modal_join.join_contract.real_sessions }}</td>
+                    <td class="td vs-table--td text-center">{{ modal_join.join_contract.bonus_sessions}}</td>
+                    <td class="td vs-table--td text-center">{{ modal_join.join_contract.summary_sessions}}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center mt-4">
+            <vs-button class="p-3" color="success"  @click="joinContract()"><i class="fa-solid fa-plus"></i> Nối phí</vs-button>
+            <vs-button  color="dark" type="border" class="ml-3 p-3" @click="modal_join.show=false"> Hủy</vs-button>
+          </div>
+        </div>
+      </vs-popup>
     </vx-card>
   </div>
 
@@ -376,6 +430,16 @@
         checked_list: [],
         next_schedules:[],
         pre_schedules:[],
+        withdraw_id: '',
+        modal_join: {
+          title: "NỐI PHÍ CHO HỌC SINH",
+          show: false,
+          color: "info",
+          closeOnBackdrop: true,
+          error_message:"",
+          join_contract:{},
+          student_id:""
+        },
       }
     },
     created() {
@@ -546,6 +610,78 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      withdrawContract(data){
+        this.withdraw_id = data.contract_id
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn withdraw học sinh ${data.name} ra khỏi lớp ?`,
+          accept: this.processWithdaw,
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      processWithdaw(){
+        const data = {
+          contract_id: this.withdraw_id,
+        };
+        this.$vs.loading();
+        axios.p(`/api/lms/enrolments/withdraw`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.loadDataClassSelected(this.class_info.class_id);
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      },
+      showJoinContract(data){
+        this.$vs.loading();
+        axios.p(`/api/lms/enrolments/get-contract-join`,{
+          student_id: data.student_id,
+          product_id:  this.class_info.product_id
+        })
+        .then((response) => {
+          this.$vs.loading.close();
+          if(response.data.status == 1){
+            this.modal_join.title= "Nối phí học sinh: "+ data.name
+            this.modal_join.show = true
+            this.modal_join.join_contract = response.data.join_contract
+            this.modal_join.student_id = data.student_id
+          }else{
+            this.$vs.notify({
+              title: 'THÔNG BÁO',
+              text: response.data.message,
+              color: 'warning',
+            })
+          }
+        })
+      },
+      joinContract(){
+        this.$vs.loading();
+         axios.p(`/api/lms/enrolments/contract-join`,{
+          student_id:  this.modal_join.student_id,
+          contract_id:  this.modal_join.join_contract.id,
+          class_id:  this.class_info.class_id
+        })
+        .then((response) => {
+          this.$vs.loading.close();
+          this.modal_join.show = false
+          this.loadDataClassSelected(this.class_info.class_id);
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
       }
     },
   }

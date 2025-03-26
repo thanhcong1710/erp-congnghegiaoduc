@@ -66,6 +66,7 @@ class EnrolmentsController extends Controller
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.ta_id) AS ta_name,
+                cl.product_id,
                 cl.max_students, cl.class_day,'' AS room_text, '' AS shift_text, '' AS class_day_text
             FROM classes AS cl WHERE id = $class_id");
         $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
@@ -84,7 +85,7 @@ class EnrolmentsController extends Controller
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
-                c.must_charge, c.total_charged, c.done_sessions,
+                c.must_charge, c.total_charged, c.done_sessions,c.left_sessions, c.student_id, c.product_id,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id
             WHERE c.status!=7 AND c.class_id =$class_id");
@@ -185,6 +186,102 @@ class EnrolmentsController extends Controller
         $result = array(
             'status' => 1,
             'message' => 'Thêm học sinh vào lớp thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function withdraw(Request $request){
+        $contract_id = data_get($request,'contract_id');
+        $contract_info =  u::getObject(['id'=>$contract_id], 'contracts');
+        if($contract_info->left_sessions == 0){
+            u::updateSimpleRow(array(
+                'status' => 7,
+                'type_withdraw' =>1,
+                'action' => 'Withdraw học sinh do quá hạn số buổi học',
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id
+            ), array('id'=>$contract_id),'contracts');
+            u::addLogContracts($contract_id);
+        }
+        $result = array(
+            'status' => 1,
+            'message' => 'Withdraw học sinh ra khỏi lớp thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function getContractJoin(Request $request){
+        $student_id = data_get($request,'student_id');
+        $product_id = data_get($request,'product_id');
+        $contract_join = u::first("SELECT c.* ,(SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name  FROM contracts AS c WHERE c.student_id = $student_id 
+            AND c.status!=7 AND (c.class_id IS NULL OR c.class_id=0) AND c.product_id=$product_id");
+        if($contract_join){
+            $result = array(
+                'status' => 1,
+                'message' => 'ok',
+                'join_contract' => $contract_join
+            );
+        }else {
+            $result = array(
+                'status' => 0,
+                'message' => 'Không có hợp đồng nhập học nào hợp lệ'
+            );
+        }
+        return response()->json($result);
+    }
+
+    public function contractJoin(Request $request){
+        $student_id = data_get($request,'student_id');
+        $contract_id = data_get($request,'contract_id');
+        $class_id = data_get($request,'class_id');
+        $contract_withdraw = u::first("SELECT c.* FROM contracts AS c WHERE c.student_id = $student_id 
+            AND c.status!=7 AND (c.class_id IS NOT NULL AND c.class_id!=0) AND c.left_sessions=0");
+        if($contract_withdraw){
+            u::updateSimpleRow(array(
+                'status' => 7,
+                'type_withdraw' =>1,
+                'action' => 'Withdraw học sinh do quá hạn số buổi học',
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id
+            ), array('id'=>data_get($contract_withdraw, 'id')),'contracts');
+            u::addLogContracts(data_get($contract_withdraw, 'id'));
+
+            $contractJoinInfo = u::getObject(array('id'=>$contract_id), 'contracts');
+            $class_info = u::getObject(array('id'=>$class_id), 'classes');
+            $cm_id =data_get($class_info,'cm_id', null);
+            $cm_leader = u::first("SELECT ul.id 
+                FROM users AS u 
+                    LEFT JOIN users AS ul ON ul.id=u.manager_id
+                    LEFT JOIN role_has_user AS ru ON ru.user_id= ul.id 
+                    LEFT JOIN roles AS r ON r.id=ru.role_id 
+                WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
+            $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
+            $holidays = u::getPublicHolidays(data_get($class_info,'branch_id'), data_get($class_info,'product_id'));
+            $arr_day = explode(",",data_get($class_info, 'class_day'));
+            $join_date = date('Y-m-d', strtotime(data_get($contract_withdraw,'enrolment_last_date'))+24*3600);
+            $data_sessions = u::calculatorSessionsByNumberOfSessions($join_date, data_get($contractJoinInfo,'summary_sessions'), $holidays, $arr_day);
+            u::updateSimpleRow(array(
+                'cm_id' => $cm_id,
+                'cm_leader_id' => $cm_leader_id,
+                'program_id' => data_get($class_info,'program_id', null),
+                'class_id' => data_get($class_info,'id', null),
+                'class_id' => data_get($class_info,'id', null),
+                'enrolment_start_date' => data_get($data_sessions, 'start_date'),
+                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+                'status' => 6,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+            ),array('id'=>$contract_id),'contracts');
+            if(data_get($data_sessions,'start_date') < date('Y-m-d')){
+                u::processDataContractsPast($contract_id, data_get($data_sessions,'start_date'));
+            }
+            u::addLogContracts($contract_id);
+            LogStudents::logAdd($student_id, 'Nối phí cho học sinh trong lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
+        }
+
+        $result = array(
+            'status' => 1,
+            'message' => 'Thực hiện nối phí thành công'
         );
         return response()->json($result);
     }
