@@ -65,7 +65,7 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Khóa học
+                    <div class="vs-table-text">Chương trình học
                       <!---->
                     </div>
                   </th>

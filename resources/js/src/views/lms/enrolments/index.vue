@@ -18,10 +18,10 @@
               ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
-              <label >Khóa học</label>
+              <label >Chương trình học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn khóa học"
+                    placeholder="Chọn chương trình học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"

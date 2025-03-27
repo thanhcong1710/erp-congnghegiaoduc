@@ -354,7 +354,7 @@ class ChargesController extends Controller
             LEFT JOIN students AS s ON c.student_id = s.id
           WHERE tp.id = $id");
         $data->text_1 = "Ngày ".date('d').  " tháng ". date('m'). " năm ". date('Y');
-        $data->text_2 = "Thanh toán học phí khóa học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name;
+        $data->text_2 = "Thanh toán học phí chương trình học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name;
         $data->text_debt_amount = number_format($data->debt_amount, 0, '', '.');
         $data->text_amount = number_format($data->charge_amount, 0, '', '.');
         $data->text_amount_words = u::convert_number_to_words($data->charge_amount)." đồng";

@@ -47,7 +47,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Khóa học</label>
+              <label>Chương trình học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -57,7 +57,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình</label>
+              <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -142,10 +142,10 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin lớp chuyển đến</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chọn khóa học <span class="text-danger"> (*)</span></label>
+              <label>Chọn chương trình học <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="name"
-                    placeholder="Chọn khóa học"
+                    placeholder="Chọn chương trình học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
@@ -434,7 +434,7 @@
           resp = false;
         }
         if (this.class_transfer.product_id == "") {
-          mess += " - khóa học không được để trống<br/>";
+          mess += " - chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.class_transfer.class_id == "") {

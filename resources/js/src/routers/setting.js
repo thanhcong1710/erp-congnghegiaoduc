@@ -173,9 +173,9 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', active: true }
+            { title: 'Danh sách chương trình học', active: true }
           ],
-          pageTitle: 'Danh sách khóa học',
+          pageTitle: 'Danh sách chương trình học',
           rule: 'editor'
         }
       },
@@ -186,10 +186,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Danh sách chương trình học', url: '/settings/products' },
             { title: 'Thêm mới', active: true }
           ],
-          pageTitle: 'Thêm mới khóa học',
+          pageTitle: 'Thêm mới chương trình học',
           rule: 'editor'
         }
       },
@@ -200,10 +200,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Danh sách chương trình học', url: '/settings/products' },
             { title: 'Cập nhật', active: true }
           ],
-          pageTitle: 'Cập nhật khóa học',
+          pageTitle: 'Cập nhật chương trình học',
           rule: 'editor'
         }
       },
@@ -214,9 +214,9 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', active: true }
+            { title: 'Danh sách khóa học', active: true }
           ],
-          pageTitle: 'Danh sách chương trình học',
+          pageTitle: 'Danh sách khóa học',
           rule: 'editor'
         }
       },
@@ -227,10 +227,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Danh sách khóa học', url: '/settings/programs' },
             { title: 'Thêm mới', active: true }
           ],
-          pageTitle: 'Thêm mới chương trình học',
+          pageTitle: 'Thêm mới khóa học',
           rule: 'editor'
         }
       },
@@ -241,10 +241,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Danh sách khóa học', url: '/settings/programs' },
             { title: 'Cập nhật', active: true }
           ],
-          pageTitle: 'Cập nhật chương trình học',
+          pageTitle: 'Cập nhật khóa học',
           rule: 'editor'
         }
       },

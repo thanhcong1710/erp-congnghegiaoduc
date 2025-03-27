@@ -108,7 +108,7 @@
                         <td class="td vs-table--td"><strong>{{item.left_amount | formatMoney}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -131,9 +131,9 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin quy đổi</h5>
           <div class="vx-row">
             <div class="vx-col w-full mb-4">
-              <label>Khóa học quy đổi <span class="text-danger"> (*)</span></label>
+              <label>Chương trình học quy đổi <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="exchange.to_product_id" @change="prepareChangeData()" :disabled="input_disabled">
-                <option value="" disabled>Chọn khóa học</option>
+                <option value="" disabled>Chọn chương trình học</option>
                 <option :value="item.id" v-for="(item, index) in html.products.list" :key="index">{{item.name}}</option>
               </select>
             </div>
@@ -164,7 +164,7 @@
                         <td class="td vs-table--td"><strong>{{item.bonus_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                     </tbody>

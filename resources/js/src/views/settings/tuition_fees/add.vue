@@ -8,11 +8,11 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Gói khóa học <span class="text-danger"> (*)</span></label>
+              <label>Gói chương trình học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <vue-select
                       label="name"
-                      placeholder="Chọn khóa học"
+                      placeholder="Chọn chương trình học"
                       :options="html.products.list"
                       v-model="html.products.item"
                       :searchable="true"
@@ -118,7 +118,7 @@
                       <thead class="vs-table--thead">
                         <tr>
                           <!---->
-                          <th colspan="1" rowspan="1">Khóa học</th>
+                          <th colspan="1" rowspan="1">Chương trình học</th>
                           <th colspan="1" rowspan="1">Gói phí</th>
                           <th colspan="1" rowspan="1">Thời gian</th>
                           <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -301,7 +301,7 @@
         let mess = "";
         let resp = true;
         if (this.tuition_fee.product_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.tuition_fee.name == "") {

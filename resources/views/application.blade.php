@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/vue-multiselect@2.1.6"></script>
     <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.6/dist/vue-multiselect.min.css">
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('images/logo/favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo/favicon.gif') }}">
   </head>
   <body>
     <noscript>

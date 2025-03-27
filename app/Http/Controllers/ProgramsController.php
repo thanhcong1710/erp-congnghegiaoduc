@@ -58,7 +58,7 @@ class ProgramsController extends Controller
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới chương trình học thành công'
+            'message' => 'Thêm mới khóa học thành công'
         );
         return response()->json($result);
     }
@@ -70,7 +70,7 @@ class ProgramsController extends Controller
         u::query("DELETE FROM programs WHERE id=$program_id");
         $result = array(
             'status' => 1,
-            'message' => 'Xóa chương trình học thành công.'
+            'message' => 'Xóa khóa học thành công.'
         );
         return response()->json($result);
     } 
@@ -95,7 +95,7 @@ class ProgramsController extends Controller
         ),array('id'=>data_get($request, 'id')), 'programs');
         $result = array(
             'status' => 1,
-            'message' => 'Cập nhật thông tin chương trình học thành công'
+            'message' => 'Cập nhật thông tin khóa học thành công'
         );
         return response()->json($result);
     }

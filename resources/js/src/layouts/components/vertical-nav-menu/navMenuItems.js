@@ -264,14 +264,14 @@ export default [
       },
       {
         url: '/settings/products',
-        name: 'Khóa học',
+        name: 'Chương trình học',
         icon: 'LayersIcon',
         slug: 'settings-products',
         permission:'settings_products',
       },
       {
         url: '/settings/programs',
-        name: 'Chương trình học',
+        name: 'Khóa học',
         icon: 'ServerIcon',
         slug: 'settings-programs',
         permission:'settings_programs',

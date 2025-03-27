@@ -409,7 +409,7 @@
                       <p>Trạng thái: <b>{{ item.status | genStudentStatus}}</b></p>
                       <p v-if="item.status>0">Trung tâm checkin: {{ item.checkin_branch_name}}</p>
                       <p v-if="item.status>0">Thời gian checkin: {{ item.checkin_at}}</p>
-                      <p v-if="item.status>0">Khóa học: {{ item.checkin_product_name}}</p>
+                      <p v-if="item.status>0">Chương trình học: {{ item.checkin_product_name}}</p>
                       <p v-if="item.status==1" class="list-action">Cập nhật checkin: 
                         <vs-button :disabled="disabled_action" v-if="item.status==1" @click="showModalUpdateCheckin(item)" class="small"><i class="fa fa-edit"></i></vs-button>
                       </p>
@@ -586,9 +586,9 @@
               </datepicker>
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
-            <label>Khóa học</label>
+            <label>Chương trình học</label>
             <select class="vs-inputx vs-input--input normal" v-model="modal_checkin.type_product">
-              <option value="">Chọn khóa học</option>
+              <option value="">Chọn chương trình học</option>
                <option
                 :value="product.id"
                 v-for="(product, index) in products"
@@ -1593,7 +1593,7 @@
           resp = false;
         }
         if (this.modal_checkin.type_product == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

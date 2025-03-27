@@ -6,11 +6,11 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Khóa học <span class="text-danger"> (*)</span></label>
+          <label>Chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <vue-select
                   label="name"
-                  placeholder="Chọn khóa học"
+                  placeholder="Chọn chương trình học"
                   :options="html.products.list"
                   v-model="html.products.item"
                   :searchable="true"
@@ -20,11 +20,11 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Chương trình cha</label>
+          <label>Khóa học cha</label>
           <div class=w-full>
             <vue-select
                   label="name"
-                  placeholder="Chọn chương trình cha"
+                  placeholder="Chọn khóa học cha"
                   :options="html.programs.list"
                   v-model="html.programs.item"
                   :searchable="true"
@@ -34,13 +34,13 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Mã khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.code" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Tên khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.name" class="vs-inputx vs-input--input normal">
           </div>
@@ -194,15 +194,15 @@
         let mess = "";
         let resp = true;
         if (this.program.product_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.program.code == "") {
-          mess += " - Mã chương trình học không được để trống<br/>";
+          mess += " - Mã khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.program.name == "") {
-          mess += " - Tên chương trình học không được để trống<br/>";
+          mess += " - Tên khóa học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

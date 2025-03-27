@@ -98,7 +98,7 @@
                         <td class="td vs-table--td"><span>{{item.left_amount | formatMoney}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -203,7 +203,7 @@
                         <td class="td vs-table--td"><span>{{item.bonus_sessions}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                     </tbody>
@@ -216,7 +216,7 @@
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.received_amount | formatMoney"  disabled="true" />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Khóa học quy đổi</label>
+              <label>Chương trình học quy đổi</label>
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.to_product_name"  disabled="true" />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">

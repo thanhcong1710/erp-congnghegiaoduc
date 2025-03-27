@@ -118,7 +118,7 @@
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_06')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Đăng ký khóa học</h5>
+          <h5 class="mb-4 text-center">Đăng ký chương trình học</h5>
           <vue-apex-charts type="pie" :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
         </vx-card>
       </div>

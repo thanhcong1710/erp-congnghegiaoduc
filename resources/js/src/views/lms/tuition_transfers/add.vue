@@ -104,7 +104,7 @@
                         <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -159,7 +159,7 @@
                         <td class="td vs-table--td"><span>{{item.left_amount | formatMoney}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -283,7 +283,7 @@
                         <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -326,7 +326,7 @@
                         <td class="td vs-table--td"><span>{{item.bonus_sessions}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                     </tbody>
@@ -339,9 +339,9 @@
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer.received_amount | formatMoney"  disabled="true" />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4" v-if="tuition_transfer.to_student_id">
-              <label>Khóa học quy đổi <span class="text-danger"> (*)</span></label>
+              <label>Chương trình học quy đổi <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="tuition_transfer.to_product_id" @change="prepareTransferData()" :disabled="input_disabled">
-                <option value="" disabled>Chọn khóa học</option>
+                <option value="" disabled>Chọn chương trình học</option>
                 <option :value="item.id" v-for="(item, index) in html.products.list" :key="index">{{item.name}}</option>
               </select>
             </div>
@@ -665,7 +665,7 @@
           resp = false;
         }
         if (this.tuition_transfer.to_product_id == "") {
-          mess += " - Khóa học quy đổi không được để trống<br/>";
+          mess += " - Chương trình học quy đổi không được để trống<br/>";
           resp = false;
         }
         if (this.tuition_transfer.transfer_date == "") {

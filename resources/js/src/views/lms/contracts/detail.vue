@@ -130,7 +130,7 @@
               </select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Khóa học</label>
+              <label >Chương trình học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"

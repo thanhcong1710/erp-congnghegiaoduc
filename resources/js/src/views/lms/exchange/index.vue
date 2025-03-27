@@ -95,13 +95,13 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>{{item.from_tuition_fee_name}}</p>
-                  <p>Khóa học: {{item.from_product_name}}</p>
+                  <p>Chương trình học: {{item.from_product_name}}</p>
                   <p>Số phí còn lại: {{item.amount | formatMoney}}</p>
                   <p>Số buổi còn lại: <strong>{{item.from_left_sessions}}</strong></p>
                 </td>
                 <td class="td vs-table--td">
                   <p>{{item.to_tuition_fee_name}}</p>
-                  <p>Khóa học: {{item.to_product_name}}</p>
+                  <p>Chương trình học: {{item.to_product_name}}</p>
                   <p>Số phí còn lại: {{item.amount | formatMoney}}</p>
                   <p>Số buổi còn lại: <strong>{{item.to_left_sessions}}</strong></p>
                 </td>
