@@ -523,9 +523,9 @@
       saveTypeFee(data = null){
         if (data && typeof data === 'object') {
           const type_fee = data.id
-          this.enrol.type_fee = type_fee
+          this.enrol.search_type_fee = type_fee
         }else{
-          this.enrol.type_fee = ""
+          this.enrol.search_type_fee = ""
         }
         this.loadClasses();
       },
