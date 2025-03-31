@@ -123,7 +123,7 @@ class EnrolmentsController extends Controller
     }
 
     public function getStudentsAdd(Request $request){
-        $class_info =u::first("SELECT id, branch_id, product_id,type, program_id FROM classes WHERE id=$request->class_id");
+        $class_info =u::first("SELECT id, branch_id, product_id,type, program_id, type_fee FROM classes WHERE id=$request->class_id");
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
         $pagination = (object)$request->pagination;
