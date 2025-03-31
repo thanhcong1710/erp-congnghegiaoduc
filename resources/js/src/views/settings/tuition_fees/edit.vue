@@ -81,6 +81,17 @@
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Loại gói phí <span class="text-danger"> (*)</span></label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_fee">
+                  <option value="">Chọn loại gói phí </option>
+                  <option value="1">Gói phí Cooper</option>
+                  <option value="2">Gói phí Silver</option>
+                  <option value="3">Gói phí Gold</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Trạng thái</label>
               <div class=w-full>
                 <vs-switch v-model="tuition_fee.status" color="success"/>
@@ -229,6 +240,7 @@
           expired_date: '',
           type_contract: 1,
           status:1,
+          type_fee:''
         },
         price:'',
         receivable:'',
@@ -365,6 +377,10 @@
         }
         if (this.tuition_fee.expired_date == "") {
           mess += " - Ngày hết hiệu lực không được để trống<br/>";
+          resp = false;
+        }
+        if (this.tuition_fee.type_fee === "") {
+          mess += " - Loại gói phí không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

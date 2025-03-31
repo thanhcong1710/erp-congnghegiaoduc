@@ -19,7 +19,7 @@ class EnrolmentsController extends Controller
         $product_id = (int)$request->product_id;
         $lo_trinh_id = (int)$request->lo_trinh_id;
         $option_id = (int)$request->option_id;
-        $type_fee = (int)$request->type_fee;
+        $type_fee = (int)$request->search_type_fee;
         $type_day_of_week = (int)$request->type_day_of_week;
         $cond = " 1 ";
         $cond1 = " AND 1 ";
@@ -136,7 +136,7 @@ class EnrolmentsController extends Controller
         $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
             AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))
-            AND t.program_id = ".(int)$class_info->program_id;
+            AND t.type_fee = ".(int)$class_info->type_fee." AND t.program_id = ".(int)$class_info->program_id;
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
