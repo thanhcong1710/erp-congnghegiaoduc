@@ -8,16 +8,16 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Gói chương trình học <span class="text-danger"> (*)</span></label>
+              <label>Khóa học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <vue-select
                       label="name"
-                      placeholder="Chọn chương trình học"
-                      :options="html.products.list"
-                      v-model="html.products.item"
+                      placeholder="Chọn khóa học"
+                      :options="html.programs.list"
+                      v-model="html.programs.item"
                       :searchable="true"
                       language="tv-VN"
-                      @input="saveProduct"
+                      @input="saveProgram"
                   ></vue-select>
               </div>
             </div>
@@ -206,6 +206,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
           tuition_fees: {
             item: '',
             list: []
@@ -215,6 +219,7 @@
         tuition_fees_relation: [],
         tuition_fee:{
           product_id:'',
+          program_id:'',
           name: '',
           session: '',
           number_of_months:'',
@@ -246,6 +251,10 @@
         .then(response => {
         this.html.products.list = response.data
       })
+       axios.g(`/api/system/programs`)
+        .then(response => {
+        this.html.programs.list = response.data
+      })
       axios.g(`/api/system/branches`)
       .then(response => {
         this.branches = response.data
@@ -274,6 +283,14 @@
           this.tuition_fee.product_id = ""
         }
       },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const program_id = data.id
+          this.tuition_fee.program_id = program_id
+        }else{
+          this.tuition_fee.program_id = ""
+        }
+      },
       saveTuitionFeeRelation(data =null){
         if (data && typeof data === 'object') {
           const check_exit = 0;
@@ -300,8 +317,8 @@
       save() {
         let mess = "";
         let resp = true;
-        if (this.tuition_fee.product_id == "") {
-          mess += " - Chương trình học không được để trống<br/>";
+        if (this.tuition_fee.program_id == "") {
+          mess += " - Khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.tuition_fee.name == "") {

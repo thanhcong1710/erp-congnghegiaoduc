@@ -17,6 +17,24 @@ class EnrolmentsController extends Controller
         $data = [];
         $branch_id = (int)$request->branch_id;
         $product_id = (int)$request->product_id;
+        $lo_trinh_id = (int)$request->lo_trinh_id;
+        $option_id = (int)$request->option_id;
+        $type_fee = (int)$request->type_fee;
+        $type_day_of_week = (int)$request->type_day_of_week;
+        $cond = " 1 ";
+        $cond1 = " AND 1 ";
+        if($lo_trinh_id){
+            $cond.= " AND p.lo_trinh_id = $lo_trinh_id";
+        }
+        if($option_id){
+            $cond.= " AND p.option_id = $option_id";
+        }
+        if($type_day_of_week){
+            $cond.= " AND p.type = $type_day_of_week";
+        }
+        if($type_fee){
+            $cond1.= " AND c.type_fee = $type_fee";
+        }
         $query = "SELECT id, 
             id AS item_id, 
             'program' AS item_type, 
@@ -24,8 +42,8 @@ class EnrolmentsController extends Controller
             parent_id, 
             'fa fa-folder' AS icon, 
             0 AS status 
-        FROM programs 
-        WHERE id > 0 AND status = 1 AND product_id = $product_id
+        FROM programs AS p
+        WHERE p.id > 0 AND p.status = 1 AND p.product_id = $product_id AND $cond
         UNION ALL
         SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
@@ -38,7 +56,7 @@ class EnrolmentsController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE c.status = 1 AND p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE()";
+        WHERE c.status = 1 AND p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND $cond $cond1 AND DATE(c.cls_enddate) >= CURDATE()";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {
@@ -105,7 +123,7 @@ class EnrolmentsController extends Controller
     }
 
     public function getStudentsAdd(Request $request){
-        $class_info =u::first("SELECT id, branch_id, product_id,type FROM classes WHERE id=$request->class_id");
+        $class_info =u::first("SELECT id, branch_id, product_id,type, program_id FROM classes WHERE id=$request->class_id");
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
         $pagination = (object)$request->pagination;
@@ -117,7 +135,8 @@ class EnrolmentsController extends Controller
         $product_id = data_get($class_info, 'product_id');
         $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
-            AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
+            AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))
+            AND t.program_id = ".(int)$class_info->program_id;
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
@@ -126,12 +145,14 @@ class EnrolmentsController extends Controller
         $order_by = " ORDER BY s.id DESC ";
 
         $total = u::first("SELECT count(s.id) AS total  FROM contracts AS c 
+                LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id
                 LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
             FROM contracts AS c 
+                LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);

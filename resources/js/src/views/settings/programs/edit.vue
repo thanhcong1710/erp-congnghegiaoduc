@@ -20,16 +20,44 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Khóa học cha</label>
+          <label>Lộ trình học</label>
           <div class=w-full>
             <vue-select
-                  label="name"
-                  placeholder="Chọn khóa học cha"
-                  :options="html.programs.list"
-                  v-model="html.programs.item"
+                  label="label"
+                  placeholder="Chọn lộ trình học"
+                  :options="html.loTrinh.list"
+                  v-model="html.loTrinh.item"
                   :searchable="true"
                   language="tv-VN"
-                  @input="saveProgram"
+                  @input="saveLoTrinh"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Option</label>
+          <div class=w-full>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn option"
+                  :options="html.option.list"
+                  v-model="html.option.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveOption"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Số buổi trên tuần</label>
+          <div class=w-full>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn số buổi trên tuần"
+                  :options="html.type.list"
+                  v-model="html.type.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveType"
               ></vue-select>
           </div>
         </div>
@@ -122,6 +150,39 @@
             item: '',
             list: []
           },
+          loTrinh: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
+              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
+              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
+              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
+              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
+              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
+              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
+              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
+              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
+            ]
+          },
+          option: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Option 1'},
+              {'id': 2, 'label' : 'Option 2'},
+            ]
+          },
+          type: {
+            item: '',
+            list: [
+              {'id': 4, 'label' : 'Normal'},
+              {'id': 5, 'label' : 'FT5'},
+              {'id': 6, 'label' : 'FT6'},
+              {'id': 8, 'label' : 'FT8'},
+              {'id': 10, 'label' : 'FT10'},
+            ]
+          },
         },
         alert:{
           active: false,
@@ -134,6 +195,9 @@
           name: '',
           description: '',
           status:1,
+          lo_trinh_id:'',
+          option_id:'',
+          type:'',
         },
       }
     },
@@ -149,9 +213,6 @@
         axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1`)
           .then(response => {
           this.html.programs.list = response.data
-          if(program_id > 0){
-            this.html.programs.item = this.html.programs.list.filter(item => item.id == program_id)[0]
-          }
         })
       },
       saveProgram(data = null){
@@ -170,6 +231,9 @@
           if(response.data.length !== 0){
             this.program = response.data
             this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
+            this.html.loTrinh.item = this.html.loTrinh.list.filter(item => item.id == response.data.lo_trinh_id)[0]
+            this.html.option.item = this.html.option.list.filter(item => item.id == response.data.option_id)[0]
+            this.html.type.item = this.html.type.list.filter(item => item.id == response.data.type)[0]
             this.loadProgram(this.program.parent_id)
           }else{
             this.$router.push({ path: `/settings/programs` });
@@ -189,6 +253,30 @@
           this.program.product_id = ""
         }
         this.loadProgram();
+      },
+      saveLoTrinh(data = null){
+        if (data && typeof data === 'object') {
+          const lo_trinh_id = data.id
+          this.program.lo_trinh_id = lo_trinh_id
+        }else{
+          this.program.lo_trinh_id = ""
+        }
+      },
+      saveOption(data = null){
+        if (data && typeof data === 'object') {
+          const option_id = data.id
+          this.program.option_id = option_id
+        }else{
+          this.program.option_id = ""
+        }
+      },
+      saveType(data = null){
+        if (data && typeof data === 'object') {
+          const type = data.id
+          this.program.type = type
+        }else{
+          this.program.type = ""
+        }
       },
       save() {
         let mess = "";

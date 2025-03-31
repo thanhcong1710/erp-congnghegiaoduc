@@ -8,16 +8,16 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Gói chương trình học <span class="text-danger"> (*)</span></label>
+              <label>Khóa học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <vue-select
                       label="name"
-                      placeholder="Chọn chương trình học"
-                      :options="html.products.list"
-                      v-model="html.products.item"
+                      placeholder="Chọn khóa học"
+                      :options="html.programs.list"
+                      v-model="html.programs.item"
                       :searchable="true"
                       language="tv-VN"
-                      @input="saveProduct"
+                      @input="saveProgram"
                   ></vue-select>
               </div>
             </div>
@@ -206,6 +206,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
           tuition_fees: {
             item: '',
             list: []
@@ -215,6 +219,7 @@
         tuition_fees_relation: [],
         tuition_fee:{
           product_id:'',
+          program_id:'',
           name: '',
           session: '',
           number_of_months:'',
@@ -246,6 +251,10 @@
         .then(response => {
         this.html.products.list = response.data
       })
+      axios.g(`/api/system/programs`)
+        .then(response => {
+        this.html.programs.list = response.data
+      })
       axios.g(`/api/system/branches`)
       .then(response => {
         this.branches = response.data
@@ -266,7 +275,7 @@
             this.tuition_fee = response.data.tuition_fee
             this.branches = response.data.branches 
             this.tuition_fees_relation = response.data.tuition_fees_relation 
-            this.html.products.item = this.html.products.list.filter(item => item.id == response.data.tuition_fee.product_id)[0]
+            this.html.programs.item = this.html.programs.list.filter(item => item.id == response.data.tuition_fee.program_id)[0]
             this.price = this.tuition_fee.price
             this.receivable = this.tuition_fee.receivable
           }else{
@@ -290,6 +299,14 @@
           this.tuition_fee.product_id = product_id
         }else{
           this.tuition_fee.product_id = ""
+        }
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const program_id = data.id
+          this.tuition_fee.program_id = program_id
+        }else{
+          this.tuition_fee.program_id = ""
         }
       },
       saveTuitionFeeRelation(data =null){
