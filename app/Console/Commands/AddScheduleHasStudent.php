@@ -83,14 +83,14 @@ class AddScheduleHasStudent extends Command
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '$item->subject_id', '$item->subject_stt', '$class_date', '$created_at', '$status'),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."', '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status'),";
                 }
                 $query = substr($query, 0, -1);
                 $this->addItem(array_slice($list, 10000), $class_date);
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '$item->subject_id', '$item->subject_stt', '$class_date', '$created_at', '$status'),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."',  '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
