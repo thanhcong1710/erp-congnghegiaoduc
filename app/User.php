@@ -11,7 +11,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Traits\HasRoles;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Support\Facades\Auth;
-
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
@@ -45,7 +44,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'status'
+        'name', 'email', 'password', 'status','hrm_id'
     ];
 
     /**
@@ -90,7 +89,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $list_users = u::query("SELECT u.id,u.manager_id FROM users AS u WHERE u.status=1");
         $staff_has_user = Auth::user()->id. ",".implode(",",self::data_tree($list_users, Auth::user()->id));
-        return $staff_has_user;
+        return trim($staff_has_user, ',');
     }
 
     private function data_tree($data, $manager_id = 0){

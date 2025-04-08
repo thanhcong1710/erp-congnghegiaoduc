@@ -286,6 +286,7 @@ class ImportsController extends Controller
         u::query("UPDATE crm_students AS s LEFT JOIN branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
         $data = u::first("SELECT (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status=6) AS total_success,
             (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status!=6) AS total_error");
+        u::updateBranchIDParents();
         return response()->json($data);
     }
     public function addItemDataParent($list,$arr_owner,$source_id,$creator_id,$source_detail_id) {
@@ -326,7 +327,7 @@ class ImportsController extends Controller
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
                     $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
-                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',1,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at'),";
+                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at'),";
                     if($item->student_name_1){
                         $check_import_student =1;
                         $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';

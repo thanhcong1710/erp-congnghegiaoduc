@@ -173,9 +173,9 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', active: true }
+            { title: 'Danh sách chương trình học', active: true }
           ],
-          pageTitle: 'Danh sách khóa học',
+          pageTitle: 'Danh sách chương trình học',
           rule: 'editor'
         }
       },
@@ -186,10 +186,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Danh sách chương trình học', url: '/settings/products' },
             { title: 'Thêm mới', active: true }
           ],
-          pageTitle: 'Thêm mới khóa học',
+          pageTitle: 'Thêm mới chương trình học',
           rule: 'editor'
         }
       },
@@ -200,10 +200,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách khóa học', url: '/settings/products' },
+            { title: 'Danh sách chương trình học', url: '/settings/products' },
             { title: 'Cập nhật', active: true }
           ],
-          pageTitle: 'Cập nhật khóa học',
+          pageTitle: 'Cập nhật chương trình học',
           rule: 'editor'
         }
       },
@@ -214,9 +214,9 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', active: true }
+            { title: 'Danh sách khóa học', active: true }
           ],
-          pageTitle: 'Danh sách chương trình học',
+          pageTitle: 'Danh sách khóa học',
           rule: 'editor'
         }
       },
@@ -227,10 +227,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Danh sách khóa học', url: '/settings/programs' },
             { title: 'Thêm mới', active: true }
           ],
-          pageTitle: 'Thêm mới chương trình học',
+          pageTitle: 'Thêm mới khóa học',
           rule: 'editor'
         }
       },
@@ -241,10 +241,10 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chương trình học', url: '/settings/programs' },
+            { title: 'Danh sách khóa học', url: '/settings/programs' },
             { title: 'Cập nhật', active: true }
           ],
-          pageTitle: 'Cập nhật chương trình học',
+          pageTitle: 'Cập nhật khóa học',
           rule: 'editor'
         }
       },
@@ -385,6 +385,88 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/settings/subjects',
+        name: 'setting-subjects',
+        component: () => import('@/views/settings/subjects/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', active: true }
+          ],
+          pageTitle: 'Danh sách môn học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/subjects/add',
+        name: 'setting-subjects-add',
+        component: () => import('@/views/settings/subjects/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', url: '/settings/subjects' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới môn học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/subjects/edit/:id',
+        name: 'setting-subjects-edit',
+        component: () => import('@/views/settings/subjects/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách môn học', url: '/settings/subjects' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật môn học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/discount-codes',
+        name: 'setting-discount-codes',
+        component: () => import('@/views/settings/discount_codes/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', active: true }
+          ],
+          pageTitle: 'Danh sách mã chiết khấu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/discount-codes/add',
+        name: 'setting-discount-codes-add',
+        component: () => import('@/views/settings/discount_codes/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', url: '/settings/discount-codes' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới mã chiết khấu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/discount-codes/edit/:id',
+        name: 'setting-discount-codes-edit',
+        component: () => import('@/views/settings/discount_codes/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách mã chiết khấu', url: '/settings/discount-codes' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật mã chiết khấu',
+          rule: 'editor'
+        }
+      }
     ]
   },
 }

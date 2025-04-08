@@ -51,7 +51,7 @@
                         <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.ec_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>CM:</span></td> 
+                        <td class="td vs-table--td"><span>AF:</span></td> 
                         <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.cm_name}}</span></td> 
                       </tr>
                     </table>
@@ -94,7 +94,7 @@
                         <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-if="item.class_id">
@@ -170,7 +170,7 @@
                         <td class="td vs-table--td"><strong>{{item.left_sessions}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Khóa học:</span></td> 
+                        <td class="td vs-table--td"><span>Chương trình học:</span></td> 
                         <td class="td vs-table--td"><span>{{item.product_name}}</span></td> 
                       </tr>
                     </tbody>

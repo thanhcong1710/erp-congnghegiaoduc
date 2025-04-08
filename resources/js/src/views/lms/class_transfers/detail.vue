@@ -37,7 +37,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Khóa học</label>
+              <label>Chương trình học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -47,7 +47,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình</label>
+              <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -132,7 +132,7 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin chuyển lớp</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Khóa học</label>
+              <label>Chương trình học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"

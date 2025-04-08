@@ -6,11 +6,11 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Khóa học <span class="text-danger"> (*)</span></label>
+          <label>Chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <vue-select
                   label="name"
-                  placeholder="Chọn khóa học"
+                  placeholder="Chọn chương trình học"
                   :options="html.products.list"
                   v-model="html.products.item"
                   :searchable="true"
@@ -20,13 +20,55 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Lộ trình học</label>
+          <div class=w-full>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn lộ trình học"
+                  :options="html.loTrinh.list"
+                  v-model="html.loTrinh.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveLoTrinh"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Option</label>
+          <div class=w-full>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn option"
+                  :options="html.option.list"
+                  v-model="html.option.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveOption"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Số buổi trên tuần</label>
+          <div class=w-full>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn số buổi trên tuần"
+                  :options="html.type.list"
+                  v-model="html.type.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveType"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Mã khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.code" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Tên khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.name" class="vs-inputx vs-input--input normal">
           </div>
@@ -104,6 +146,43 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
+          loTrinh: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
+              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
+              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
+              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
+              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
+              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
+              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
+              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
+              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
+            ]
+          },
+          option: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Option 1'},
+              {'id': 2, 'label' : 'Option 2'},
+            ]
+          },
+          type: {
+            item: '',
+            list: [
+              {'id': 4, 'label' : 'Normal'},
+              {'id': 5, 'label' : 'FT5'},
+              {'id': 6, 'label' : 'FT6'},
+              {'id': 8, 'label' : 'FT8'},
+              {'id': 10, 'label' : 'FT10'},
+            ]
+          },
         },
         alert:{
           active: false,
@@ -116,6 +195,9 @@
           name: '',
           description: '',
           status:1,
+          lo_trinh_id:'',
+          option_id:'',
+          type:'',
         },
       }
     },
@@ -127,6 +209,20 @@
       this.loadDetail();
     },
     methods: {
+      loadProgram(program_id=0){
+        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1`)
+          .then(response => {
+          this.html.programs.list = response.data
+        })
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const parent_id = data.id
+          this.program.parent_id = parent_id
+        }else{
+          this.program.parent_id = ""
+        }
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/settings/programs/show/${this.$route.params.id}`)
@@ -135,6 +231,10 @@
           if(response.data.length !== 0){
             this.program = response.data
             this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
+            this.html.loTrinh.item = this.html.loTrinh.list.filter(item => item.id == response.data.lo_trinh_id)[0]
+            this.html.option.item = this.html.option.list.filter(item => item.id == response.data.option_id)[0]
+            this.html.type.item = this.html.type.list.filter(item => item.id == response.data.type)[0]
+            this.loadProgram(this.program.parent_id)
           }else{
             this.$router.push({ path: `/settings/programs` });
           }
@@ -152,20 +252,45 @@
         }else{
           this.program.product_id = ""
         }
+        this.loadProgram();
+      },
+      saveLoTrinh(data = null){
+        if (data && typeof data === 'object') {
+          const lo_trinh_id = data.id
+          this.program.lo_trinh_id = lo_trinh_id
+        }else{
+          this.program.lo_trinh_id = ""
+        }
+      },
+      saveOption(data = null){
+        if (data && typeof data === 'object') {
+          const option_id = data.id
+          this.program.option_id = option_id
+        }else{
+          this.program.option_id = ""
+        }
+      },
+      saveType(data = null){
+        if (data && typeof data === 'object') {
+          const type = data.id
+          this.program.type = type
+        }else{
+          this.program.type = ""
+        }
       },
       save() {
         let mess = "";
         let resp = true;
         if (this.program.product_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.program.code == "") {
-          mess += " - Mã chương trình học không được để trống<br/>";
+          mess += " - Mã khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.program.name == "") {
-          mess += " - Tên chương trình học không được để trống<br/>";
+          mess += " - Tên khóa học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

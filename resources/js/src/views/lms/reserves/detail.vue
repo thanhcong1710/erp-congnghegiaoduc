@@ -37,7 +37,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Khóa học</label>
+              <label>Chương trình học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -47,7 +47,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình</label>
+              <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -170,7 +170,7 @@
               <div v-html="alert.body"></div>
             </vs-alert>
             <div class="vx-col w-full mb-4" v-if="status!=1">
-              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt'}}</strong></label>
+              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==4 ? 'Đã bảo lưu' : (status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt')}}</strong></label>
             </div>
           </div>
 
@@ -373,6 +373,9 @@
                 break;
             case 3:
                 resp = 'Từ chối phê duyệt';
+                break;
+            case 4:
+                resp = 'Đã bảo lưu';
                 break;
             default:
                 resp = 'Chờ phê duyệt'

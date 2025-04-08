@@ -1,6 +1,6 @@
 <template>
 
-  <div id="page-users-list">
+  <div id="page-enrolments-list">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="vx-col md:w-1/4 w-full item-first" style="border-right: 1px solid #ccc;">
@@ -18,10 +18,10 @@
               ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
-              <label >Khóa học</label>
+              <label >Chương trình học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn khóa học"
+                    placeholder="Chọn chương trình học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
@@ -29,8 +29,57 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label >Lộ trình học</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn lộ trình học"
+                  :options="html.loTrinh.list"
+                  v-model="html.loTrinh.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveLoTrinh"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Option</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn option"
+                  :options="html.option.list"
+                  v-model="html.option.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveOption"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Số buổi trên tuần</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn số buổi trên tuần"
+                  :options="html.typeDayOfWeek.list"
+                  v-model="html.typeDayOfWeek.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveTypeDayOfWeek"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Loại gói phí</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn loại gói phí"
+                  :options="html.typeFee.list"
+                  v-model="html.typeFee.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveTypeFee"
+              ></vue-select>
+            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
+              Danh sách lớp học
               <tree
                 :data="classes"
                 text-field-name="text"
@@ -86,11 +135,33 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>CM - giáo viên chủ nhiệm:</span>
+                  <span>AF - Quản lý lớp học:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
                   <span>{{class_info.cm_name}}</span>
                 </div>
+            </div>
+            <div class="vx-row">
+                <div class="vx-col md:w-1/3 w-full text-right">
+                  <span>TA - Trợ giảng:</span>
+                </div>
+                <div class="vx-col md:w-2/3 w-full text-left">
+                  <span>{{class_info.ta_name}}</span>
+                </div>
+            </div>
+            <div >
+              <div class="flex flex-wrap mt-5">
+                <div class="box-item-student active border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in pre_schedules" :key="'P'+index">
+                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
+                    <div class="text-center"><span class="box-status">Đã học</span></div>
+                </div>
+                <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in next_schedules" :key="'N'+index">
+                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
+                    <div class="text-center"><span class="box-status">Sắp học</span></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
@@ -138,9 +209,9 @@
                         <p>Đã đóng: {{item.total_charged}}</p>
                       </td>
                       <td class="td vs-table--td">
-                        <p>Số buổi đã học: <strong>{{item.done_session}}</strong></p>
+                        <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                        <p>Trạng thái: <strong></strong></p>
+                        <!-- <p>Trạng thái: <strong></strong></p> -->
                       </td>
                     </tr>
                   </table>
@@ -150,7 +221,7 @@
           </div>
         </div>
       </div>
-      <vs-popup :class="'modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
+      <vs-popup :class="'view-enrolments modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
         <div class="vx-row" > 
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <vs-input class="w-full" placeholder="Nhập tên, mã học sinh" v-model="searchData.keyword"></vs-input>
@@ -319,11 +390,57 @@
           discount_codes:{
             item: '',
             list: []
-          }
+          },
+          loTrinh: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
+              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
+              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
+              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
+              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
+              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
+              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
+              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
+              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
+            ]
+          },
+          option: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Option 1'},
+              {'id': 2, 'label' : 'Option 2'},
+            ]
+          },
+          typeDayOfWeek: {
+            item: '',
+            list: [
+              {'id': 4, 'label' : 'Normal'},
+              {'id': 5, 'label' : 'FT5'},
+              {'id': 6, 'label' : 'FT6'},
+              {'id': 8, 'label' : 'FT8'},
+              {'id': 10, 'label' : 'FT10'},
+            ]
+          },
+          typeFee:{
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Gói phí Cooper'},
+              {'id': 2, 'label' : 'Gói phí Silver'},
+              {'id': 3, 'label' : 'Gói phí Gold'},
+            ]
+          },
         },
         enrol:{
           branch_id:'',
-          product_id:''
+          product_id:'',
+          type_day_of_week: '',
+          lo_trinh_id:'',
+          option_id:'',
+          search_type_fee:'',
+          type_fee:'',
         },
         class_info:{
           class_id:'',
@@ -352,6 +469,8 @@
         },
         search_student : false,
         checked_list: [],
+        next_schedules:[],
+        pre_schedules:[],
       }
     },
     created() {
@@ -383,12 +502,52 @@
         }
         this.loadClasses();
       },
+      saveLoTrinh(data = null){
+        if (data && typeof data === 'object') {
+          const lo_trinh_id = data.id
+          this.enrol.lo_trinh_id = lo_trinh_id
+        }else{
+          this.enrol.lo_trinh_id = ""
+        }
+        this.loadClasses();
+      },
+      saveOption(data = null){
+        if (data && typeof data === 'object') {
+          const option_id = data.id
+          this.enrol.option_id = option_id
+        }else{
+          this.enrol.option_id = ""
+        }
+        this.loadClasses();
+      },
+      saveTypeFee(data = null){
+        if (data && typeof data === 'object') {
+          const type_fee = data.id
+          this.enrol.search_type_fee = type_fee
+        }else{
+          this.enrol.search_type_fee = ""
+        }
+        this.loadClasses();
+      },
+      saveTypeDayOfWeek(data = null){
+        if (data && typeof data === 'object') {
+          const type_day_of_week = data.id
+          this.enrol.type_day_of_week = type_day_of_week
+        }else{
+          this.enrol.type_day_of_week = ""
+        }
+        this.loadClasses();
+      },
       loadClasses(){
         if(this.enrol.branch_id && this.enrol.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/enrolments/load-classes`, {
             branch_id: this.enrol.branch_id,
-            product_id: this.enrol.product_id
+            product_id: this.enrol.product_id,
+            lo_trinh_id: this.enrol.lo_trinh_id,
+            option_id: this.enrol.option_id,
+            type_day_of_week: this.enrol.type_day_of_week,
+            search_type_fee: this.enrol.search_type_fee,
           })
             .then(response => {
             this.$vs.loading.close();
@@ -405,6 +564,8 @@
           this.class_info = {};
           this.students= []
           this.class_dates =[]
+          this.next_schedules=[]
+          this.pre_schedules=[]
         }
       },
       loadDataClassSelected(class_id){
@@ -415,6 +576,8 @@
           this.class_info = response.data.class_info
           this.class_dates = response.data.class_dates
           this.students = response.data.students
+          this.next_schedules = response.data.next_schedules
+          this.pre_schedules = response.data.pre_schedules
         })
       },
       showModalEnrol(){
@@ -465,7 +628,7 @@
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
-            if (moment(item.cjrn_classdate).isSameOrAfter(student.start_date)) {
+            if (moment(item.class_date).isSameOrAfter(student.start_date)) {
               resp.push(item)
             }
             return item
@@ -523,11 +686,39 @@
   }
 </script>
 <style>
-.con-vs-popup .vs-popup{
+.view-enrolments.con-vs-popup .vs-popup{
   width: 90%;
 }
 
 .td.vs-table--td{
   vertical-align: top;
+}
+.box-item-student.active{
+  border: 1px solid rgba(var(--vs-success), 1);
+  background: transparent !important;
+}
+.box-item-student .label-box-schedule{
+  font-size: 13px;
+}
+.box-item-student .text-date-box-schedule{
+  font-size: 11px;
+}
+.box-item-student.active .box-status{
+    font-size: 10px;
+    background: rgba(var(--vs-success), 1);
+    padding: 5px;
+    border-radius: 6px;
+    color: #fff;
+}
+.box-item-student .box-status{
+    font-size: 10px;
+    background: rgba(var(--vs-primary),1);
+    padding: 5px;
+    border-radius: 6px;
+    color: #fff;
+}
+.box-item-student{
+  border: 1px solid rgba(var(--vs-primary),1);
+  background: transparent !important;
 }
 </style>

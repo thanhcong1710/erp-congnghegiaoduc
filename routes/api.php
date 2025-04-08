@@ -22,9 +22,10 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('reset-password', 'AuthController@resetPassword');
     });
     Route::prefix('export')->group(function () {
-        Route::get('import/{import_id}', 'ExportController@import');
+        Route::get('import/{import_id}', 'ExportsController@import');
     });
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
+        Route::post('revoke-token', 'AuthController@revokeToken');
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
@@ -38,18 +39,25 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
             Route::get('branches-has-user', 'SystemController@getBranchesHasUser');
             Route::get('products', 'SystemController@getProducts');
+            Route::get('programs', 'SystemController@getPrograms');
+            Route::get('subjects', 'SystemController@getSubjects');
             Route::get('shifts', 'SystemController@getShifts');
             Route::get('rooms/{branch_id}', 'SystemController@getRooms');
             Route::get('cms/{branch_id}', 'SystemController@getCMs');
+            Route::get('ecs/{branch_id}', 'SystemController@getECs');
             Route::get('teachers/{branch_id}', 'SystemController@getTeachers');
             Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
             Route::get('programs/{product_id}', 'SystemController@getProgramsByProduct');
             Route::get('tuition-fees', 'SystemController@getTuitionFees');
+            Route::get('b2b/sources', 'SystemController@getB2BSources');
+            Route::get('ta/{branch_id}', 'SystemController@getTAs');
+            Route::get('get-class-by-cm/{cm_id}', 'SystemController@getClassByCM');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
             Route::post('change-password', 'UserController@changePassword');
+            Route::post('upload-avatar', 'UserController@uploadAvatar');
         });
         Route::prefix('roles')->group(function () {
             Route::get('{id}', 'RolesController@info');
@@ -78,6 +86,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('parents/show/{parent_id}', 'ParentsController@show');
             Route::post('parents/update', 'ParentsController@update');
             Route::post('parents/change_status', 'ParentsController@changeStatus');
+            Route::post('parents/change_level', 'ParentsController@changeLevel');
             Route::post('parents/assign', 'ParentsController@assign');
             Route::post('parents/update_next_care_date', 'ParentsController@updateNextCareDate');
             Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
@@ -88,16 +97,30 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('students/get_all_data/{parent_id}', 'StudentsController@getAllDataByParent');
             Route::post('students/checkin', 'StudentsController@checkin');
             Route::post('parents/assign_list', 'ParentsController@assignList');
+            Route::get('ticket/get_all_data/{parent_id}', 'ParentsController@getAllDataTicketByParent');
+            Route::post('ticket/add', 'ParentsController@addTicket');
+            Route::post('ticket/update', 'ParentsController@updateTicket');
+            Route::post('parents/upload-avatar', 'ParentsController@uploadAvatar');
+            Route::get('parents/get_vouchers/{parent_id}', 'ParentsController@getVouchers');
         });
 
         Route::prefix('lms')->group(function () {
             Route::post('checkin/list', 'CheckinController@list');
             Route::post('checkin/student/checked', 'CheckinController@studentChecked');
             Route::post('checkin/upgrade', 'CheckinController@studentUpgrade');
-            Route::post('students/list', 'StudentsController@list');
-            Route::get('students/show/{student_id}', 'StudentsController@show');
-            Route::post('students/update', 'StudentsController@update');
-            Route::post('students/search-contract', 'StudentsController@searchContract');
+            Route::prefix('students')->group(function () {
+                Route::post('list', 'StudentsController@list');
+                Route::get('show/{student_id}', 'StudentsController@show');
+                Route::post('update', 'StudentsController@update');
+                Route::post('search-contract', 'StudentsController@searchContract');
+                Route::post('logs', 'StudentsController@logs');
+                Route::post('contracts', 'StudentsController@contracts');
+                Route::post('sessions', 'StudentsController@sessions');
+                Route::post('assessments', 'StudentsController@assessments');
+                Route::post('operating', 'StudentsController@operating');
+                Route::post('upload-avatar', 'StudentsController@uploadAvatar');
+            });
+           
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
@@ -109,6 +132,11 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
+            Route::post('accounting/charges/update', 'ChargesController@update');
+            Route::post('accounting/waitcharge-approve/list', 'ChargesController@waitchargeApproveList');
+            Route::get('accounting/waitcharge-approve/{id}', 'ChargesController@getWaitchargeApproveInfo');
+            Route::post('accounting/waitcharge-approve/update', 'ChargesController@approve');
+            Route::get('accounting/waitcharge-print/{id}', 'ChargesController@printWaitcharge');
             Route::post('enrolments/load-classes', 'EnrolmentsController@loadClasses');
             Route::get('enrolments/info-class/{class_id}', 'EnrolmentsController@getClassInfo');
             Route::post('enrolments/get-students-add', 'EnrolmentsController@getStudentsAdd');
@@ -145,15 +173,57 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('tuition_transfers/show/{reserve_id}', 'TuitionTransfersController@show');
             Route::post('tuition_transfers/approve', 'TuitionTransfersController@approve');
 
-            Route::post('attendances/load-classes', 'AttendancesController@loadClasses');
-            Route::post('attendances/load-students', 'AttendancesController@loadStudents');
-            Route::post('attendances/save', 'AttendancesController@save');
+            Route::prefix('exchanges')->group(function () {
+                Route::post('list', 'ExchangesController@list');
+                Route::post('search-student', 'ExchangesController@searchStudent');
+                Route::post('get-data-from-contract', 'ExchangesController@getDataFromContractActive');
+                Route::post('get-data-to-contract', 'ExchangesController@getDataContractExchange');
+                Route::post('add', 'ExchangesController@add');
+            });
+
+            Route::prefix('attendances')->group(function () {
+                Route::post('load-classes', 'AttendancesController@loadClasses');
+                Route::post('load-students', 'AttendancesController@loadStudents');
+                Route::post('save', 'AttendancesController@save');
+                Route::get('loadReSessions/{class_id}', 'AttendancesController@loadReSessions');
+                Route::post('addReSession', 'AttendancesController@addReSession');
+                Route::post('updateReSession', 'AttendancesController@updateReSession');
+            });
+            Route::prefix('assessments')->group(function () {
+                Route::post('add', 'AssessmentsController@add');
+                Route::post('list', 'AssessmentsController@list');
+                Route::post('delete', 'AssessmentsController@delete');
+                Route::get('show/{id}', 'AssessmentsController@show');
+                Route::post('update', 'AssessmentsController@update');
+                Route::post('search-student', 'AssessmentsController@searchStudent');
+            });
+            Route::prefix('teachers')->group(function () {
+                Route::post('list', 'TeachersController@list');
+                Route::get('show/{id}', 'TeachersController@show');
+                Route::post('update', 'TeachersController@update');
+            });
+            Route::prefix('reports')->group(function () {
+                Route::post('01', 'ReportsController@report01');
+                Route::post('02a', 'ReportsController@report02a');
+                Route::post('02b', 'ReportsController@report02b');
+                Route::post('02c', 'ReportsController@report02c');
+            });
+            Route::prefix('exports')->group(function () {
+                Route::get('report01/{key}/{value}', 'ExportsController@report01');
+                Route::get('report02a/{key}/{value}', 'ExportsController@report02a');
+                Route::get('report02b/{key}/{value}', 'ExportsController@report02b');
+                Route::get('report02c/{key}/{value}', 'ExportsController@report02c');
+            });
         });
 
         Route::prefix('settings')->group(function () {
-            Route::post('classes/load-classes', 'ClassesController@loadClasses');
-            Route::post('classes/save', 'ClassesController@save');
-            Route::get('classes/info-config/{class_id}', 'ClassesController@infoConfig');
+            Route::prefix('classes')->group(function () {
+                Route::post('load-classes', 'ClassesController@loadClasses');
+                Route::post('save', 'ClassesController@save');
+                Route::get('info-config/{class_id}', 'ClassesController@infoConfig');
+                Route::post('sessions', 'ClassesController@listSessions');
+                Route::post('update-schedule', 'ClassesController@updateSchedule');
+            });
             Route::prefix('tuition-fees')->group(function () {
                 Route::post('add', 'TuitionFeesController@add');
                 Route::post('list', 'TuitionFeesController@list');
@@ -203,6 +273,69 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'HolidaysController@show');
                 Route::post('update', 'HolidaysController@update');
             });
+            Route::prefix('subjects')->group(function () {
+                Route::post('add', 'SubjectsController@add');
+                Route::post('list', 'SubjectsController@list');
+                Route::post('delete', 'SubjectsController@delete');
+                Route::get('show/{id}', 'SubjectsController@show');
+                Route::post('update', 'SubjectsController@update');
+            });
+            Route::prefix('discount-codes')->group(function () {
+                Route::post('add', 'DiscountCodesController@add');
+                Route::post('list', 'DiscountCodesController@list');
+                Route::post('delete', 'DiscountCodesController@delete');
+                Route::get('show/{id}', 'DiscountCodesController@show');
+                Route::post('update', 'DiscountCodesController@update');
+            });
+        });
+
+        Route::prefix('marketing')->group(function () {
+            Route::prefix('campaigns')->group(function () {
+                Route::post('list', 'CampaignsController@list');
+                Route::post('add', 'CampaignsController@add');
+                Route::get('show/{id}', 'CampaignsController@show');
+                Route::post('update', 'CampaignsController@update');
+            });
+            Route::prefix('coupons')->group(function () {
+                Route::post('list', 'CouponsController@list');
+                Route::post('update', 'CouponsController@update');
+            });
+            Route::prefix('b2b/sources')->group(function () {
+                Route::post('add', 'B2BSourcesController@add');
+                Route::post('list', 'B2BSourcesController@list');
+                Route::post('delete', 'B2BSourcesController@delete');
+                Route::get('show/{id}', 'B2BSourcesController@show');
+                Route::post('update', 'B2BSourcesController@update');
+            });
+            Route::prefix('b2b/campaigns')->group(function () {
+                Route::post('list', 'B2BCampaignsController@list');
+                Route::post('add', 'B2BCampaignsController@add');
+                Route::get('show/{id}', 'B2BCampaignsController@show');
+                Route::post('update', 'B2BCampaignsController@update');
+                Route::post('load-b2b-campaign', 'B2BCampaignsController@loadB2BCampaign');
+            });
+            Route::prefix('c2c/campaigns')->group(function () {
+                Route::post('list', 'C2CCampaignsController@list');
+                Route::post('add', 'C2CCampaignsController@add');
+                Route::get('show/{id}', 'C2CCampaignsController@show');
+                Route::post('update', 'C2CCampaignsController@update');
+            });
+        });
+
+        Route::post('dashboard', 'DashboardController@index');
+        Route::prefix('dashboard')->group(function () {
+            Route::post('01', 'DashboardController@dashboard01');
+            Route::post('02', 'DashboardController@dashboard02');
+            Route::post('03', 'DashboardController@dashboard03');
+            Route::post('04', 'DashboardController@dashboard04');
+            Route::post('05', 'DashboardController@dashboard05');
+            Route::post('06', 'DashboardController@dashboard06');
+            Route::post('07', 'DashboardController@dashboard07');
+            Route::post('08', 'DashboardController@dashboard08');
+            Route::post('09', 'DashboardController@dashboard09');
+            Route::post('10', 'DashboardController@dashboard10');
+            Route::post('11', 'DashboardController@dashboard11');
+            Route::post('12', 'DashboardController@dashboard12');
         });
     });
 });

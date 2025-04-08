@@ -8,7 +8,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên chương trình học" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên khóa học" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -48,8 +48,8 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Chương trình học</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
@@ -223,7 +223,7 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn muốn xóa chương trình học - ${item.name}?`,
+          text: `Bạn chắc chắn muốn xóa khóa học - ${item.name}?`,
           accept: this.deletetuition_fee,
           acceptText: 'Xóa',
           cancelText: 'Hủy'

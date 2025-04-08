@@ -57,13 +57,13 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = request(['email', 'password']);
-        $user = u::getObject(array('email'=>$request->email), 'users');
+        $credentials = request(['hrm_id', 'password']);
+        $user = u::getObject(array('hrm_id'=>$request->hrm_id), 'users');
         if($user && $user->status!=1){
             return response()->json([
                 'status' => 0,
                 'type' => 'inactive',
-                'message'=>'Tài khoản chưa được kích hoạt, vui lòng truy cập email để kích hoạt.'
+                'message'=>'Tài khoản chưa được kích hoạt.'
             ]);
         }
 
@@ -71,11 +71,12 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 0, 
                 'type' => 'account',
-                'message'=>'Email hoặc mật khẩu không chính xác.'
+                'message'=>'Mã nhân viên hoặc mật khẩu không chính xác.'
             ]);
         }
 
-        return $this->respondWithToken($token, $request->email);
+        u::updateSimpleRow(array('api_token'=>$token), array('id'=>auth()->user()->id), 'users');
+        return $this->respondWithToken($token, $request->hrm_id);
     }
 
     /**
@@ -111,7 +112,7 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $email)
+    protected function respondWithToken($token, $hrm_id)
     {
         return response()->json([
             'status' => 1,
@@ -122,15 +123,15 @@ class AuthController extends Controller
                 'name' => auth()->user()->name,
                 'email' => auth()->user()->email,
                 'phone' => auth()->user()->phone,
-                'photoURL' => "/images/avatar-s-5.jpg?99691e543d9e33cf745f6ac56f5800b8",
+                'photoURL' => auth()->user()->avatar_url ? auth()->user()->avatar_url : "/images/avatar-default.jpg",
                 'providerId' => "jwt",
                 'uid' => auth()->user()->id,
                 'address' =>  auth()->user()->address,
                 'birthday' => auth()->user()->birthday ? date('d/m/Y', strtotime(auth()->user()->birthday )) : null,
                 'note' => auth()->user()->note,
                 'gender' => auth()->user()->gender,
-                'menuroles' => auth()->user()->menuroles,
-                'permissions' => ['dashboard']
+                'roleName' => auth()->user()->role_name,
+                'permissions' => u::getPermissions(auth()->user()->id)
             ]
         ]);
     }
@@ -232,5 +233,31 @@ class AuthController extends Controller
                 'message' => 'Email không hợp lệ, vui lòng liên hệ với quản trị viên để được hỗ trợ.'
             ], 200);
         }
+    }
+
+    public function revokeToken(Request $request){
+        if($request->user_id){
+            $user = u::first("SELECT api_token AS token FROM users WHERE status = 1 AND id= $request->user_id");
+            if($user && $user->token){
+                JWTAuth::manager()->invalidate(new \Tymon\JWTAuth\Token( $user->token)); 
+            }
+            $result = array(
+                'status' => 1,
+                'message' => 'Xóa token đăng nhập thành công'
+            );
+        }else{
+            $users = u::query("SELECT api_token AS token FROM users WHERE status = 1");
+            foreach($users AS $user){
+                if($user->token){
+                    JWTAuth::manager()->invalidate(new \Tymon\JWTAuth\Token( $user->token)); 
+                }
+            }
+            $result = array(
+                'status' => 1,
+                'message' => 'Xóa tất cả token đăng nhập thành công'
+            );
+        }
+        
+        return response()->json($result);
     }
 }

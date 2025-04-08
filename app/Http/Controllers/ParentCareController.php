@@ -57,6 +57,7 @@ class ParentCareController extends Controller
             'call_status' => data_get($dataRequest, 'call_status' ),
             'call_status_sub' => data_get($dataRequest, 'call_status_sub' ),
         ), 'crm_customer_care');
+        u::updateSimpleRow(array('care_date'=>date('Y-m-d H:i:s')), array('id'=>$request->parent_id), 'crm_parents');
         $data = (object)[
             'status' => 1 ,
             'message' => "Thành công",

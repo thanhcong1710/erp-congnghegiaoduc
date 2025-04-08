@@ -13,7 +13,7 @@ class AddScheduleHasStudent extends Command
      *
      * @var string
      */
-    protected $signature = 'scheduleHasStudent:add {--date=}';
+    protected $signature = 'scheduleHasStudent:add {--date=} {--all=}';
 
     /**
      * The console command description.
@@ -40,21 +40,30 @@ class AddScheduleHasStudent extends Command
     public function handle(Request $request)
     {
         $class_date = $this->option('date') ? $this->option('date') : date('Y-m-d');
-        u::addLogContracts(44068);
-        // self::addNewScheduleHasStudent($class_date);
-        // self::processReserve($class_date);
+        $all = $this->option('all') ? $this->option('all') : 0;
+        if($all== 1 && $class_date < date('Y-m-d')){
+            while ($class_date <= date('Y-m-d')) {
+                self::addNewScheduleHasStudent($class_date);
+                $class_date = date('Y-m-d',strtotime($class_date)+24*3600);
+            }
+        }else{
+            self::addNewScheduleHasStudent($class_date);
+        }
+        self::processReserve($class_date);
 
         u::query("INSERT INTO log_jobs (`action`, created_at, `data`) VALUES ('AddScheduleHasStudent','".date('Y-m-d H:i:s')."', '$class_date')");
         return "ok";
     }
     
     private function addNewScheduleHasStudent($class_date){
-        u::query("DELETE FROM schedule_has_student WHERE class_date = '$class_date'");
-        $list_student = u::query("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id
+        $list_student = u::query("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, 
+            c.product_id, cl.program_id, s.subject_stt, s.subject_id
         FROM contracts AS c 
             LEFT JOIN classes AS cl ON cl.id = c.class_id
             LEFT JOIN schedules AS s ON s.class_id=cl.id
-        WHERE c.status=6 AND s.status=1 AND s.class_date = '$class_date'");
+        WHERE c.status=6 AND s.status=1 AND s.class_date = '$class_date' 
+            AND enrolment_start_date <= '$class_date' AND enrolment_last_date >= '$class_date'
+            AND (SELECT count(id) FROM schedule_has_student WHERE contract_id=c.id AND class_date = '$class_date') =0 ");
         self::addItem($list_student, $class_date);
         return "ok";
     }
@@ -68,20 +77,20 @@ class AddScheduleHasStudent extends Command
     public function addItem($list, $class_date) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $status = 1; 
-            $query = "INSERT INTO schedule_has_student (student_id, branch_id, class_id, contract_id, product_id, program_id, class_date, created_at, `status`) VALUES ";
+            $status = 0; 
+            $query = "INSERT INTO schedule_has_student (student_id, branch_id, class_id, contract_id, product_id, program_id, subject_id, subject_stt, class_date, created_at, `status`) VALUES ";
            
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '$class_date', '$created_at', '$status'),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."', '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status'),";
                 }
                 $query = substr($query, 0, -1);
                 $this->addItem(array_slice($list, 10000), $class_date);
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '$class_date', '$created_at', '$status'),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."',  '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);

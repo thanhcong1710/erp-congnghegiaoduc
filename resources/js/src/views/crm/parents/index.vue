@@ -11,6 +11,29 @@
             <vs-input class="w-full" placeholder="Tên khách hàng, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
+            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
+              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Level</label>
+            <multiselect
+                name="search_level"
+                placeholder="Chọn level"
+                v-model="searchData.arr_level"
+                :options="levelOptions"
+                label="label"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
                 name="search_status"
@@ -49,7 +72,6 @@
           
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Nguồn</label>
-            <label for="ccmonth">Nguồn</label>
             <multiselect
                 name="search_source"
                 placeholder="Chọn nguồn"
@@ -67,7 +89,7 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <!-- <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Nguồn chi tiết</label>
             <multiselect
                 name="search_source_detail"
@@ -84,12 +106,7 @@
               >
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
-          </div>
+          </div> -->
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -111,6 +128,7 @@
         <vs-tab :label="'Chưa chăm sóc ('+ total.total_1 +')'" @click.prevent="setActive(1)"></vs-tab>
         <vs-tab :label="'Lịch chăm sóc trong ngày ('+ total.total_2 +')'" @click.prevent="setActive(2)"></vs-tab>
         <vs-tab :label="'KH quá hạn xử lý ('+ total.total_3+')'" @click.prevent="setActive(3)"></vs-tab>
+        <vs-tab :label="'Ticket chưa xử lý ('+ total.total_4 +')'" @click.prevent="setActive(4)"></vs-tab>
       </vs-tabs>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
@@ -131,66 +149,18 @@
                       </div>
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Tên khách hàng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số điện thoại
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Nguồn chi tiết
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Người phụ trách
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch chăm sóc tiếp theo
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Lịch sử chăm sóc
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thời gian chăm sóc gần nhất
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1" >Tên khách hàng</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số điện thoại</th>
+                  <th colspan="1" rowspan="1" >Học sinh</th>
+                  <th colspan="1" rowspan="1" >Nguồn</th>
+                  <th colspan="1" rowspan="1">Nguồn chi tiết</th>
+                  <th colspan="1" rowspan="1">Người phụ trách</th>
+                  <th colspan="1" rowspan="1" class="text-center">Lịch chăm sóc tiếp theo</th>
+                  <th colspan="1" rowspan="1" >Lịch sử chăm sóc</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thời gian chăm sóc gần nhất</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in parents" :key="index">
@@ -205,9 +175,9 @@
                     </span>
                   </div>
                 </td>
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
-                <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
+                <td class="td vs-table--td text-center"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
                 <td class="td vs-table--td">{{ item.hs1_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
                 <td class="td vs-table--td">{{ item.source_detail_name }}</td>
@@ -300,21 +270,34 @@
           total_1:0,
           total_2:0,
           total_3:0,
+          total_4:0,
         },
         searchData: {
           keyword: "",
           arr_status: "",
+          arr_level: "",
           arr_owner: "",
           arr_source: "",
           arr_source_detail: "",
+          level:"",
           status: "",
           owner_id: "",
           source_id: "",
           source_detail_id: "",
           pagination: this.pagination,
           dateRange: "",
-          type_seach: 1,
+          type_search: 0,
         },
+        levelOptions:[
+          {id:'C1',label:'C1'},
+          {id:'C2',label:'C2'},
+          {id:'C3',label:'C3'},
+          {id:'L1',label:'L1'},
+          {id:'L2',label:'L2'},
+          {id:'L3',label:'L3'},
+          {id:'L4',label:'L4'},
+          {id:'L5',label:'L5'},
+        ],
         statusOptions:[
           {id:0,label:'KH mới'},
           {id:10,label:'KH không liên lạc được'},
@@ -414,16 +397,19 @@
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
+        this.searchData.arr_level= ""
         this.searchData.arr_owner= ""
         this.searchData.arr_source= ""
         this.searchData.arr_source_detail= ""
         this.searchData.status= ""
+        this.searchData.level= ""
         this.searchData.owner_id= ""
         this.searchData.source_id= ""
         this.searchData.source_detail_id= ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
-        this.searchData.type_seach= 1
+        this.searchData.type_search= 0
+        this.activeItem = 0
         this.getData();
       },
       getData() {
@@ -460,15 +446,24 @@
         }
         this.searchData.source_detail_id = ids_source_detail
 
+        const ids_level = []
+        if (this.searchData.arr_level && this.searchData.arr_level.length) {
+          this.searchData.arr_level.map(item => {
+            ids_level.push(item.id)
+          })
+        }
+        this.searchData.ids_level = ids_level
         const data = {
             status: this.searchData.status,
             owner_id: this.searchData.owner_id,
             source_id: this.searchData.source_id,
             source_detail_id: this.searchData.source_detail_id,
+            level: this.searchData.ids_level,
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_seach:this.searchData.type_seach
+            type_search:this.searchData.type_search,
+            keyword: this.searchData.keyword
           }
         localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 
@@ -499,7 +494,7 @@
         this.getData();
       },
       setActive (menuItem) {
-        this.searchData.type_seach = menuItem
+        this.searchData.type_search = menuItem
         this.activeItem = menuItem
         this.getData();
       },
@@ -551,7 +546,7 @@
       })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
-        this.activeItem = this.searchData.type_seach
+        this.activeItem = this.searchData.type_search
       }
 
       this.getData();

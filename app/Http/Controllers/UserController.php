@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SystemCode;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Providers\UtilityServiceProvider as u;
@@ -88,7 +89,7 @@ class UserController extends Controller
         $role_name = '';
         foreach($request->roles AS $role){
             if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'name') : data_get($role,'name'); 
+                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
             }
         }
         $branch_name = '';
@@ -168,7 +169,7 @@ class UserController extends Controller
         $role_name = '';
         foreach($request->roles AS $role){
             if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'name') : data_get($role,'name'); 
+                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
             }
         }
         $branch_name = '';
@@ -228,11 +229,13 @@ class UserController extends Controller
 
     public function getUsersManager(Request $request){
         $cond = "";
-        if(!Auth::user()->checkPermission('canViewAllUser')){
-            $cond = " AND id IN (".Auth::user()->getStaffHasUser().")";
+        if(!Auth::user()->checkPermission('canViewAllSale')){
+            $cond = " AND u.id IN (".Auth::user()->getStaffHasUser().")";
+        } else {
+            $cond = " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER."))";
         }
-        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name, id AS `value` 
-            FROM users WHERE status=1 $cond");
+        $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
+            FROM users AS u WHERE status=1 $cond");
         return response()->json($data);
     }
 
@@ -246,4 +249,35 @@ class UserController extends Controller
         return response()->json($data);
     }
     
+    public function uploadAvatar(Request $request)
+    {
+        $total = count($_FILES['files']['name']);
+        if ($total > 0){
+            $tmpFilePath = $_FILES['files']['tmp_name'][0];
+            if ($tmpFilePath != ""){
+                $dir = __DIR__.'/../../../public/static/upload/avatars/'. date('Y_m').'/';
+                if(!file_exists($dir)){
+                    mkdir($dir);
+                }
+                $newFilePath = $dir . $_FILES['files']['name'][0];
+                $newFilePath = u::update_file_name($newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                move_uploaded_file($tmpFilePath, $newFilePath);
+                u::updateSimpleRow(array(
+                    'avatar_url' => $dir_file_insert
+                ), array('id' => Auth::user()->id), 'users');
+                $uesr_info = u::getObject(array('id' => Auth::user()->id), 'users');
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Upload avatar thành công.',
+                    'userData' => u::transformUser($uesr_info)
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
+        ]);
+    }
 }

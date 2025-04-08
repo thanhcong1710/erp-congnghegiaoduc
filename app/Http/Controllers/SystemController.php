@@ -38,10 +38,8 @@ class SystemController extends Controller
 
     public function getSourceDetail(Request $request)
     {
-        $cond = "";
-        if (!Auth::user()->checkPermission('canViewAllSourceDetail')) {
-            $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
-        }
+        $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
+        $cond.= data_get($request, 'source_id') ? " AND source_id = ".data_get($request, 'source_id') : '';
         $data = u::query("SELECT *, id AS `value` FROM source_detail WHERE status=1 $cond");
         return response()->json($data);
     }
@@ -74,6 +72,11 @@ class SystemController extends Controller
         return response()->json($data);
     }
 
+    public function getPrograms(){
+        $data = u::query("SELECT *, 0 AS selected FROM programs WHERE status=1");
+        return response()->json($data);
+    }
+
     public function getShifts(){
         $data = u::query("SELECT * FROM shifts WHERE status=1");
         return response()->json($data);
@@ -85,22 +88,24 @@ class SystemController extends Controller
     }
 
     public function getCMs($branch_id){
+        $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 AND b.branch_id=$branch_id AND (r.code='".SystemCode::ROLE_CM."' OR r.code='".SystemCode::ROLE_CM_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_CM."' OR r.code='".SystemCode::ROLE_CM_LEADER."')");
         return response()->json($data);
     }
 
     public function getTeachers($branch_id){
+        $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 AND b.branch_id=$branch_id AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
         return response()->json($data);
     }
 
@@ -125,16 +130,50 @@ class SystemController extends Controller
     }
 
     public function getProgramsByProduct(Request $request, $product_id){
-        $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+        $is_parent = data_get($request,'is_parent', 0);
+        if ($is_parent) {
+            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND parent_id =0 AND product_id=$product_id ");
+        } else {
+            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+        }
         return response()->json($data);
     }
 
     public function getTuitionFees(Request $request){
         $status = data_get($request, 'status', null);
         $cond = $status!==null ? '1' : " status = $status";
-        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date,
+        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status,
                 (SELECT name FROM products WHERE id=t.product_id) AS product_name    
             FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
+        return response()->json($data);
+    }
+
+    public function getSubjects(){
+        $data = u::query("SELECT *, 0 AS selected, 0 AS stt, 0 AS session FROM subjects WHERE status=1");
+        return response()->json($data);
+    }
+
+    public function getB2BSources()
+    {
+        $data = u::query("SELECT *, id AS `value` FROM b2b_sources WHERE status=1");
+        return response()->json($data);
+    }
+
+    public function getTAs($branch_id){
+        $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
+        $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
+            FROM role_has_user AS ru 
+                LEFT JOIN users AS u ON ru.user_id=u.id 
+                LEFT JOIN roles AS r ON r.id=ru.role_id 
+                LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
+            WHERE u.status=1 $cond AND r.code='".SystemCode::ROLE_TA."'");
+        return response()->json($data);
+    }
+
+    public function getClassByCM($cm_id) {
+        $data = u::query("SELECT cl.* 
+            FROM classes AS cl 
+            WHERE cl.status=1 AND cl.cm_id=$cm_id");
         return response()->json($data);
     }
 }

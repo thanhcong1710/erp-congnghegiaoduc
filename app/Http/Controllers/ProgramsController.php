@@ -47,17 +47,21 @@ class ProgramsController extends Controller
     {
         $program_id = u::insertSimpleRow(array(
             'product_id' => data_get($request, 'product_id'),
+            'parent_id' => (int)data_get($request, 'parent_id'),
             'name' => data_get($request, 'name'),
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($request, 'status'),
+            'lo_trinh_id' => data_get($request, 'lo_trinh_id'),
+            'option_id' => data_get($request, 'option_id'),
+            'type' => data_get($request, 'type'),
         ), 'programs');
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới chương trình học thành công'
+            'message' => 'Thêm mới khóa học thành công'
         );
         return response()->json($result);
     }
@@ -69,7 +73,7 @@ class ProgramsController extends Controller
         u::query("DELETE FROM programs WHERE id=$program_id");
         $result = array(
             'status' => 1,
-            'message' => 'Xóa chương trình học thành công.'
+            'message' => 'Xóa khóa học thành công.'
         );
         return response()->json($result);
     } 
@@ -83,16 +87,21 @@ class ProgramsController extends Controller
     public function update(Request $request)
     {
         u::updateSimpleRow(array(
+            'product_id' => data_get($request, 'product_id'),
+            'parent_id' => (int)data_get($request, 'parent_id', 0),
             'name' => data_get($request, 'name'),
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
             'status' =>  data_get($request, 'status'),
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
+            'lo_trinh_id' => data_get($request, 'lo_trinh_id'),
+            'option_id' => data_get($request, 'option_id'),
+            'type' => data_get($request, 'type'),
         ),array('id'=>data_get($request, 'id')), 'programs');
         $result = array(
             'status' => 1,
-            'message' => 'Cập nhật thông tin chương trình học thành công'
+            'message' => 'Cập nhật thông tin khóa học thành công'
         );
         return response()->json($result);
     }

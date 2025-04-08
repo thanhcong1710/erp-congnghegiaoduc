@@ -104,8 +104,7 @@
                   <router-link :to="`/lms/students/${item.id}/detail`">
                     <div class="con-vs-avatar 60px" style="width: 60px; height: 60px; background: rgb(237 237 237);"><!---->
                       <div class="con-img vs-avatar--con-img">
-                        <img class="student-avatar" src="@assets/images/common/avatar-girl.svg"  v-if="item.gender == 'F'"/>
-                        <img class="student-avatar" src="@assets/images/common/avatar-boy.svg"  v-else/>
+                        <img class="student-avatar" :src="item.avatar_url"  />
                       </div>
                     </div>
                   </router-link>
@@ -114,24 +113,25 @@
                   <p><strong><router-link :to="`/lms/students/${item.id}/detail`"><a>{{item.name}}</a></router-link></strong></p>
                   <p>Mã: {{item.lms_code}}</p>
                   <p>Giới tính: {{item.gender == 'F' ? 'Nữ' : 'Nam'}}</p>
-                  <p>Ngày sinh: {{item.date_of_birth}}</p>
+                  <p>Ngày sinh: {{item.date_of_birth | formatDateView}}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p><strong>{{item.gud_name1}}</strong></p>
                   <p>SĐT: {{item.gud_mobile1}}</p>
-                  <p>Nguồn: </p>
+                  <p>Nguồn: {{item.source_name}}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>{{item.branch_name}}</p>
-                  <p>Lớp: {{item.branch_name}}</p>
-                  <p>EC: {{item.branch_name}}</p>
-                  <p>Trạng thái: {{item.branch_name}}</p>
+                  <p>Lớp: {{item.class_name}}</p>
+                  <p>EC: {{item.ec_name}}</p>
+                  <p>AF: {{item.cm_name}}</p>
+                  <p>Trạng thái: <strong>{{item.label_status}}</strong></p>
                 </td>
                 <td class="td vs-table--td text-center">
-                  <div style="font-size: 16px;">
-                    <span  style="font-size: 26px;">64</span> / <span>96</span>
+                  <div style="font-size: 16px;" v-if="item.summary_sessions">
+                    <span  style="font-size: 26px;">{{item.done_sessions}}</span> / <span>{{item.summary_sessions}}</span>
                   </div>
-                 <vs-progress :height="8" :percent="40" color="success"></vs-progress>
+                 <vs-progress v-if="item.summary_sessions" :height="8" :percent="Math.round( item.done_sessions*100 / item.summary_sessions)" color="success"></vs-progress>
                 </td>
                 <td class="text-center list-action"> 
                   <router-link :to="`/lms/students/${item.id}/detail`" >
@@ -140,7 +140,6 @@
                 </td>
               </tr>
             </table>
-            
           </div>
         </div>
       </div>
@@ -194,9 +193,14 @@
           pagination: this.pagination
         },
         statusOptions:[
-          {id:1,label:'Chưa đến checkin'},
-          {id:2,label:'Đã checkin'},
-          {id:3,label:'Đã lên chính thức'},
+          {id:1,label:'Chờ xếp lớp học thử'},
+          {id:2,label:'Đang học thử'},
+          {id:3,label:'Kết thúc học thử'},
+          {id:4,label:'Chưa đóng phí'},
+          {id:5,label:'Đặt cọc'},
+          {id:6,label:'Chờ xếp lớp'},
+          {id:7,label:'Đang học chính thức'},
+          {id:8,label:'Hết phí'},
         ],
 
         students: [],
@@ -288,25 +292,13 @@
     },
     
     filters: {
-      getStatusName(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 2:
-                resp = 'Đã checkin';
-                break;
-            case 3:
-                resp = 'Đã lên chính thức';
-                break;
-            default:
-                resp = 'Chưa đến checkin'
-                break
-        }
-        return resp
-      },
     },
   }
 </script>
 <style>
+.td.vs-table--td{
+  vertical-align: top;
+}
 @media only screen and (min-width: 600px) {
   #page-roles-list .vs-table--search {
     max-width: 360px;

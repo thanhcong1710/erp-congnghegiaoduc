@@ -67,7 +67,7 @@
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Tên gói phí</th>
-                  <th colspan="1" rowspan="1" class="text-center">Khóa học</th>
+                  <th colspan="1" rowspan="1" class="text-center">Chương trình học</th>
                   <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
@@ -79,7 +79,7 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td text-center">{{item.product_name}}</td>
-                <td class="td vs-table--td text-center">{{item.available_date | formatDateView}} - {{item.available_date | formatDateView}}</td>
+                <td class="td vs-table--td text-center">{{item.available_date | formatDateView}} - {{item.expired_date | formatDateView}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/settings/tuition-fees/edit/${item.id}`">

@@ -40,10 +40,16 @@ class ProcessDataScheduleHasStudent extends Command
     public function handle(Request $request)
     {
         $class_date = $this->option('date') ? $this->option('date') : date('Y-m-d', time()-24*3600);
+        self::processRunFee($class_date);
         self::processReserve($class_date);
         self::updateContractDoneSessions();
 
         u::query("INSERT INTO log_jobs (`action`, created_at, `data`) VALUES ('ProcessDataScheduleHasStudent','".date('Y-m-d H:i:s')."', '$class_date')");
+        return "ok";
+    }
+
+    private function processRunFee($class_date){
+        u::query("UPDATE schedule_has_student AS s SET s.status=1 WHERE s.class_date = '$class_date' AND s.status=0");
         return "ok";
     }
     

@@ -6,13 +6,13 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã khóa học <span class="text-danger"> (*)</span></label>
+          <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="product.code" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên khóa học <span class="text-danger"> (*)</span></label>
+          <label>Tên chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="product.name" class="vs-inputx vs-input--input normal">
           </div>
@@ -110,11 +110,11 @@
         let mess = "";
         let resp = true;
         if (this.product.code == "") {
-          mess += " - Mã khóa học không được để trống<br/>";
+          mess += " - Mã chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.product.name == "") {
-          mess += " - Tên khóa học không được để trống<br/>";
+          mess += " - Tên chương trình học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

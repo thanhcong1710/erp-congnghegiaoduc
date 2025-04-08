@@ -282,9 +282,32 @@ export default {
     updateMenu(){
       const new_list = []
       this.navMenuItems.map(item => {
-          if ( typeof item.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item.permission)) {
-              new_list.push(item)
+        if ( typeof item.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item.permission)) {
+          const new_list_1 = []
+          if(typeof item.items != 'undefined'){
+            item.items.map(item_1 =>{
+              if ( typeof item_1.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item_1.permission)) {
+                let check_active_item_1 = 1
+                if(typeof item_1.submenu != 'undefined'){
+                  const new_submenu_2 = []
+                  check_active_item_1 = 0
+                  item_1.submenu.map(submenu_2 =>{
+                    if ( typeof submenu_2.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, submenu_2.permission)) {
+                      new_submenu_2.push(submenu_2)
+                      check_active_item_1 = 1
+                    }
+                  })
+                  item_1.submenu = new_submenu_2
+                }
+                if(check_active_item_1){
+                  new_list_1.push(item_1)
+                }
+              }
+            })
           }
+          item.items = new_list_1;
+          new_list.push(item)
+        }
       })
       this.navMenuItems = new_list
     }

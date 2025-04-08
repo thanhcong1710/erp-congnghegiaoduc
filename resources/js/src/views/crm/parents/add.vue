@@ -133,6 +133,20 @@
                      @input="saveSourceDetail"
                 ></vue-select>
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="parent.source_id==3">
+              <label  >Người giới thiệu (ĐT)</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="parent.c2c_mobile"
+                @change="validatePhoneC2C"
+              />
+            </div>
+            <div class="vx-col w-full mb-4" v-if="parent.source_id==3">
+               <p><i>{{c2c_info}}</i></p>
+            </div>
+            
             <div class="vx-col md:w-1/2 w-full mb-4">
               <div class="form-group col-sm-6">
                 <label >Trạng thái</label>
@@ -153,19 +167,6 @@
                   <option value="90">9. Danh sách đen</option>
                 </select>
               </div>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label  >Người giới thiệu (ĐT)</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.c2c_mobile"
-                @change="validatePhoneC2C"
-              />
-            </div>
-            <div class="vx-col w-full mb-4">
-               <p><i>{{c2c_info}}</i></p>
             </div>
           </div>
         </div>
@@ -202,7 +203,7 @@
   import axios from '../../../http/axios.js'
   import u from '../../../until/helper.js'
   import datepicker from "vue2-datepicker";
-  import moment from 'moment';
+  import moment, { localeData } from 'moment';
 
   export default {
     components: {
@@ -392,10 +393,13 @@
         }
       },
       saveSource(data = null){
+        this.parent.source_detail = ""
+        this.parent.source_detail_id = ""
         if (data && typeof data === 'object') {
           const source_id = data.id
           this.parent.source = data
           this.parent.source_id = source_id
+          this.localeDataSourceDetail();
         }else{
           this.parent.source = ""
           this.parent.source_id = ""
@@ -508,6 +512,12 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      localeDataSourceDetail(){
+        axios.g(`/api/system/source_detail?source_id=${this.parent.source_id}`)
+          .then(response => {
+          this.html.source_detail.list = response.data
+        })
       }
     },
     created() {
@@ -526,10 +536,6 @@
       axios.g(`/api/system/sources`)
         .then(response => {
         this.html.source.list = response.data
-      })
-      axios.g(`/api/system/source_detail`)
-        .then(response => {
-        this.html.source_detail.list = response.data
       })
     },
   }

@@ -74,6 +74,13 @@ class RolesController extends Controller
                 if ($p->active == 0) {
                     $check_group_active = 0;
                 }
+                if(in_array($p->id, [41,42,43,44,45])){
+                    $listSub = u::query("SELECT p.*, IF(r.role_id IS NOT NULL, 1, 0) AS active 
+                        FROM permissions AS p 
+                            LEFT JOIN permission_has_role AS r ON r.permission_id = p.id AND r.role_id = " .$role_info->id . " 
+                        WHERE p.status=1 AND p.parent_id=$p->id  ORDER BY p.display_order");
+                    $p->listSub = $listSub;
+                }
             }
             $groups[$k]->active = $check_group_active;
         }
@@ -97,6 +104,16 @@ class RolesController extends Controller
                             'role_id' => $request->role_id,
                             'permission_id' => data_get($per, 'id')
                         ), 'permission_has_role');
+                    }
+                    if(!empty(data_get($per, 'listSub'))){
+                        foreach(data_get($per, 'listSub') AS $sub){
+                            if (data_get($sub, 'active')) {
+                                u::insertSimpleRow(array(
+                                    'role_id' => $request->role_id,
+                                    'permission_id' => data_get($sub, 'id')
+                                ), 'permission_has_role');
+                            }
+                        }
                     }
                 }
             }

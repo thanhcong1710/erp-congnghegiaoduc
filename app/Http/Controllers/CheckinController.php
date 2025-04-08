@@ -58,8 +58,9 @@ class CheckinController extends Controller
         $list = u::query("SELECT s.id, s.name, s.gender, s.birthday, p.name AS parent_name, p.mobile_1, p.address, 
                 (SELECT name FROM sources WHERE id = p.source_id) AS source_name,
                 (SELECT name FROM branches WHERE id = s.checkin_branch_id) AS checkin_branch_name,
+                (SELECT name FROM products WHERE id = s.type_product) AS checkin_product_name,
                 (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id= s.checkin_owner_id) AS checkin_owner_name,
-                s.checkin_at, s.status
+                s.checkin_at, s.status, s.checkined_note
             FROM crm_students AS s 
             LEFT JOIN crm_parents AS p ON p.id =s.parent_id
             WHERE $cond $order_by $limitation");
@@ -104,13 +105,16 @@ class CheckinController extends Controller
                 'district_id' => data_get($crm_parent_info, 'district_id'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
+                'note' => data_get($crm_student_info, 'note'),
                 'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
                 'gud_birth_day1' => data_get($crm_parent_info, 'birthday'),
                 'gud_gender1' => data_get($crm_parent_info, 'gender'),
                 'gud_job1' => data_get($crm_parent_info, 'job_id'),
                 'status' => 1,
                 'source_detail_id' => data_get($crm_parent_info, 'source_detail_id'),
-                'source_id' => data_get($crm_parent_info, 'source_id', ),
+                'source_id' => data_get($crm_parent_info, 'source_id'),
+                'c2c_mobile' => data_get($crm_parent_info, 'c2c_mobile'),
+                'avatar_url' => data_get($crm_student_info, 'gender') =='F' ?'/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'
             ), 'students');
 
             $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
@@ -129,7 +133,7 @@ class CheckinController extends Controller
                 'status' => 1
             ), 'term_student_user');
 
-            u::updateSimpleRow(array('status'=>3), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
+            u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
 
             $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
             $lms_code = config('app.prefix_student_code').$last_lms_code;

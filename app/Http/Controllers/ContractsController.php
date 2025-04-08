@@ -74,8 +74,8 @@ class ContractsController extends Controller
     {
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
-        $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
+        $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." ORDER BY count_recharge DESC LIMIT 1");
         $contract_id = u::insertSimpleRow(array(
             'type' => data_get($request, 'type'),
@@ -88,9 +88,11 @@ class ContractsController extends Controller
            'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
+           'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_total_charged'=>0,
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),
@@ -103,16 +105,19 @@ class ContractsController extends Controller
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
            'total_sessions' => data_get($request, 'total_session'),
-           'real_sessions' => data_get($request, 'tuition_fee_session'),
-           'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
-           'summary_sessions' => 0, // chưa đóng phí
+           'real_sessions' => data_get($request, 'type') ==0 ? 0 : data_get($request, 'tuition_fee_session'),
+           'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : (data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0),
+           'summary_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : 0, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
            'start_date'=> data_get($request, 'start_date'),
            'note'=> data_get($request, 'note'),
            'created_at'=>date('Y-m-d H:i:s'),
            'creator_id'=>Auth::user()->id,
-           'status' => 1,
+           'status' => data_get($request, 'type') ==0 ? 3 : 1,
            'count_recharge' => $last_contract ? $last_contract->count_recharge + 1 : 0,
+           'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
+           'b2b_amount' => data_get($request,'b2b_amount'),
+           'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
         ), 'contracts');
 
         if(data_get($request,'coupon_code_check') == 1){
@@ -186,10 +191,13 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_sessions,c.bonus_sessions, c.real_sessions, c.tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status
+                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
+        foreach($list AS $k=> $row){
+            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+        }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
@@ -218,7 +226,9 @@ class ContractsController extends Controller
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
             (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
-            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+            (SELECT title FROM b2b_campaigns WHERE id= c.b2b_campaign_id) AS b2b_campaign_title,
+            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
         return response()->json($data);
@@ -230,7 +240,7 @@ class ContractsController extends Controller
         $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'total_amount');
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
@@ -243,10 +253,11 @@ class ContractsController extends Controller
            'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
-           'tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+           'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
+           'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
+           'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
+           'init_total_charged'=>0,
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=>0,
            'debt_amount' => data_get($request, 'total_amount'),
@@ -267,7 +278,10 @@ class ContractsController extends Controller
            'note'=> data_get($request, 'note'),
            'updated_at'=>date('Y-m-d H:i:s'),
            'updator_id'=>Auth::user()->id,
-           'status' => 1
+           'status' => 1,
+           'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
+           'b2b_amount' => data_get($request,'b2b_amount'),
+           'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
         ), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
