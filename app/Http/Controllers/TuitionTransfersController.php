@@ -276,7 +276,7 @@ class TuitionTransfersController extends Controller
                     'product_id' => data_get($data_calc_transfer, 'receive_tuition_fee.product_id'),
                     'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                     'init_tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
-                    'init_total_charge' => $left_real_amount,
+                    'init_total_charged' => $left_real_amount,
                     'must_charge' => $left_real_amount,
                     'total_charged'=> $left_real_amount,
                     'debt_amount' => 0,
