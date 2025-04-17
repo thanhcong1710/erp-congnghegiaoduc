@@ -303,7 +303,7 @@
           <router-link class="btn btn-danger" :to="`/lms/contracts`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`">
+          <router-link class="btn btn-danger" v-if="contract_info.total_charged==0" :to="`/lms/contracts/${contract_info.contract_id}/edit`">
             <vs-button class="mb-2" color="success" >Cập nhật hợp đồng</vs-button>
           </router-link>
         </div>
