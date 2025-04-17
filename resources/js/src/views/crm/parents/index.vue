@@ -454,6 +454,7 @@
         }
         this.searchData.ids_level = ids_level
         const data = {
+            keyword: this.searchData.keyword,
             status: this.searchData.status,
             owner_id: this.searchData.owner_id,
             source_id: this.searchData.source_id,
