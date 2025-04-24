@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\AddScheduleHasStudent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
+use App\Console\Commands\SyncLMS;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
         ProcessDataScheduleHasStudent::class,
         AddScheduleHasStudent::class,
         JobsSendEmail::class,
+        SyncLMS::class,
     ];
 
     /**
