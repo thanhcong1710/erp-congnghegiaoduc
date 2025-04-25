@@ -443,7 +443,7 @@
         };
         this.$vs.loading();
         this.modal_overwrite.show = false;
-        u.p(`/api/crm/parents/overwrite`,data).then(response => {
+        axios.p(`/api/crm/parents/overwrite`,data).then(response => {
           this.$vs.loading.close();
           this.$vs.notify({
             title: 'Thành Công',

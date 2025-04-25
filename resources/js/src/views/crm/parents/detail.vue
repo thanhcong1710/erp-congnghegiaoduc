@@ -950,7 +950,7 @@
             next_care_date: document.getElementById('next_care_date').value
           };
           this.$vs.loading();;
-          u.p(`/api/parents/update_next_care_date`,data)
+          axios.p(`/api/parents/update_next_care_date`,data)
           .then((response) => {
             this.loadDetail();
           })
@@ -1474,7 +1474,7 @@
       },
       callPhone(phone){
         this.$vs.loading()
-        u.g(`/api/crm/parents/make_to_call/${this.$route.params.id}?phone=${phone}`)
+        axios.g(`/api/crm/parents/make_to_call/${this.$route.params.id}?phone=${phone}`)
         .then((response) => {
           this.$vs.loading.close();
           if(response.data.status == 0){
