@@ -483,4 +483,59 @@ class ParentsController extends Controller
             ORDER BY c.id DESC");
         return response()->json($data);
     }
+
+    public function makeToCall(Request $request,$parent_id){
+        $parent_info = u::first("SELECT * FROM crm_parents WHERE id='$parent_id'");
+        $phone = $request->phone ? $request->phone :$parent_info->mobile_1;
+        if($request->user()->sip_id && $parent_info){
+            $sip_id = $request->user()->sip_id;
+            $voip = new VoipController();
+            $result = $voip->makeToCall($phone, $sip_id);
+            return response()->json($result);
+        }else{
+            return response()->json(['status'=>0, 'message'=>'Vui lòng đăng nhập lại và nhập đúng đầu số điện thoại để gọi!']);
+        }
+    }
+
+    public function processParentLock(){
+        u::query("UPDATE crm_parents SET is_lock = 1");
+        u::query("UPDATE crm_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET p.tmp_branch_id = u.branch_id");
+        u::query("UPDATE crm_parents AS p SET p.care_date=(SELECT  IF(care_date IS NULL, p.care_date,care_date) FROM crm_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
+        u::query("UPDATE crm_parents AS p SET p.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
+        u::query("UPDATE crm_parents SET is_lock = 0 
+            WHERE
+                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status NOT IN( 9,10)) OR
+                (
+                    last_care_date IS NOT NULL  
+                    AND is_lock=1 AND status NOT IN( 9,10)
+                    AND ( 
+                        (DATEDIFF( CURRENT_DATE, last_care_date )> 15 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status IN (1,2,5))
+                        OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 30 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 30 AND status IN (3,4,6,7,11))
+                        OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 60 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 60 AND status IN (8))
+                    ) 
+                )");
+        return "ok";
+    }
+
+    public static function processParentLockById($parent_id){
+        u::query("UPDATE crm_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET 
+                p.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1) ,
+                p.care_date=(SELECT IF(care_date IS NULL, p.care_date,care_date) FROM crm_customer_care WHERE parent_id=p.id AND `status`=1 ORDER BY id DESC LIMIT 1)
+            WHERE p.id=$parent_id ");
+        u::query("UPDATE crm_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET p.tmp_branch_id = u.branch_id,p.is_lock = 1
+            WHERE p.id=$parent_id ");
+        u::query("UPDATE crm_parents SET is_lock = 0 
+            WHERE
+                id=$parent_id AND (
+                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status NOT IN( 9,10)) OR
+                    (last_care_date IS NOT NULL  
+                        AND is_lock=1 AND status NOT IN( 9,10)
+                        AND ( 
+                            (DATEDIFF( CURRENT_DATE, last_care_date )> 15 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status IN (1,2,5))
+                            OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 30 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 30 AND status IN (3,4,6,7,11))
+                            OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 60 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 60 AND status IN (8))
+                        ))
+                ) ");
+        return true;
+    }
 }

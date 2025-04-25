@@ -15,7 +15,7 @@
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <!-- <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Level</label>
             <multiselect
                 name="search_level"
@@ -32,7 +32,7 @@
               >
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
-          </div>
+          </div> -->
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
@@ -299,20 +299,17 @@
           {id:'L5',label:'L5'},
         ],
         statusOptions:[
-          {id:0,label:'KH mới'},
-          {id:10,label:'KH không liên lạc được'},
-          {id:20,label:'KH ở vùng CMS không có cơ sở'},
-          {id:30,label:'KH không nghe máy'},
-          {id:40,label:'KH hẹn gọi lại sau'},
-          {id:50,label:'KH không quan tâm'},
-          {id:60,label:'KH không tiềm năng'},
-          {id:71,label:'KH quan tâm, cần follow up date'},
-          {id:72,label:'KH tiềm năng nhưng không muốn làm phiền'},
-          {id:73,label:'KH đồng ý đặt lịch Checkin'},
-          {id:81,label:'KH đã đến checkin'},
-          {id:82,label:'KH đã mua gói phí'},
-          {id:83,label:'KH đến hạn tái tục'},
-          {id:90,label:'Danh sách đen'}
+          {id:1,label:'KH mới'},
+          {id:2,label:'KH không liên lạc được'},
+          {id:3,label:'KH ở vùng CMS không có cơ sở'},
+          {id:4,label:'KH hẹn gọi lại sau'},
+          {id:5,label:'KH không quan tâm'},
+          {id:6,label:'KH quan tâm, cần follow up date'},
+          {id:7,label:'KH đồng ý đặt lịch Checkin'},
+          {id:8,label:'KH đã đến checkin'},
+          {id:9,label:'KH đã mua gói phí'},
+          {id:10,label:'KH đến hạn tái tục'},
+          {id:11,label:'Danh sách đen'},
         ],
         users_manager_list:[],
         source_list:[],
@@ -555,51 +552,42 @@
       getStatusName(value) {
         let resp = ''
         switch (Number(value)) {
-            case 0:
-                resp = 'KH mới';
-                break;
-            case 10:
-                resp = 'KH không liên lạc được';
-                break;
-            case 20:
-                resp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                resp = 'KH không nghe máy';
-                break;
-            case 40:
-                resp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                resp = 'KH không quan tâm';
-                break;
-            case 60:
-                resp = 'KH không tiềm năng';
-                break;
-            case 71:
-                resp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                resp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                resp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 82:
-                resp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                resp = 'Danh sách đen';
-                break;
-            default:
-                resp = 'KH mới'
-                break
+          case 1:
+              resp = 'KH mới';
+              break;
+          case 2:
+              resp = 'KH không liên lạc được';
+              break;
+          case 3:
+              resp = 'KH ở vùng CMS không có cơ sở';
+              break;
+          case 4:
+              resp = 'KH hẹn gọi lại sau';
+              break;
+          case 5:
+              resp = 'KH không quan tâm';
+              break;
+          case 6:
+              resp = 'KH quan tâm, cần follow up date';
+              break;
+          case 7:
+              resp = 'KH đồng ý đặt lịch Checkin';
+              break;
+          case 8:
+              resp = 'KH đã đến checkin';
+              break;
+          case 9:
+              resp = 'KH đã mua gói phí';
+              break;
+          case 10:
+              resp = 'KH đến hạn tái tục';
+              break;
+          case 11:
+              resp = 'Danh sách đen';
+              break;
+          default:
+              resp = 'KH mới'
+              break
         }
         return resp
       },

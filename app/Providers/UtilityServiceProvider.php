@@ -211,46 +211,37 @@ class UtilityServiceProvider extends ServiceProvider
     {
         $tmp = "";
         switch ($status) {
-            case 0:
+            case 1:
                 $tmp = 'KH mới';
                 break;
-            case 10:
+            case 2:
                 $tmp = 'KH không liên lạc được';
                 break;
-            case 20:
+            case 3:
                 $tmp = 'KH ở vùng CMS không có cơ sở';
                 break;
-            case 30:
-                $tmp = 'KH không nghe máy';
-                break;
-            case 40:
+            case 4:
                 $tmp = 'KH hẹn gọi lại sau';
                 break;
-            case 50:
+            case 5:
                 $tmp = 'KH không quan tâm';
                 break;
-            case 60:
-                $tmp = 'KH không tiềm năng';
-                break;
-            case 71:
+            case 6:
                 $tmp = 'KH quan tâm, cần follow up date';
                 break;
-            case 72:
-                $tmp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
+            case 7:
                 $tmp = 'KH đồng ý đặt lịch Checkin';
                 break;
-            case 81:
+            case 8:
                 $tmp = 'KH đã đến checkin';
                 break;
-            case 82:
+            case 9:
                 $tmp = 'KH đã mua gói phí';
                 break;
-            case 83:
+            case 10:
                 $tmp = 'KH đến hạn tái tục';
                 break;
-            case 90:
+            case 11:
                 $tmp = 'Danh sách đen';
                 break;
             default:
@@ -1061,6 +1052,18 @@ class UtilityServiceProvider extends ServiceProvider
             }
         }
         self::updateDoneSessions(data_get($contract_info, 'id'));
+        return true;
+    }
+
+    public static function logRequest($url,$method,$header,$body,$response,$table){
+        self::insertSimpleRow(array(
+            'url'=>$url,
+            'method'=>$method,
+            'header'=>is_string($header) ? $header : json_encode($header),
+            'body'=>is_string($body) ? $body :json_encode($body),
+            'response'=>is_string($response) ? $response :json_encode($response),
+            'created_at'=>date('Y-m-d H:i:s')
+        ),$table);
         return true;
     }
 }

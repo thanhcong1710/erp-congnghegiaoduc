@@ -56,6 +56,7 @@ class ParentCareController extends Controller
             'next_care_date' =>  data_get($dataRequest, 'next_care_date' )?  date('Y-m-d H:i:s',strtotime(data_get($dataRequest, 'next_care_date' ))) : null,
             'call_status' => data_get($dataRequest, 'call_status' ),
             'call_status_sub' => data_get($dataRequest, 'call_status_sub' ),
+            'data_id' =>  data_get($dataRequest, 'data_id' )
         ), 'crm_customer_care');
         u::updateSimpleRow(array('care_date'=>date('Y-m-d H:i:s')), array('id'=>$request->parent_id), 'crm_parents');
         $data = (object)[
@@ -83,6 +84,7 @@ class ParentCareController extends Controller
                 }
             }
         }
+        ParentsController::processParentLockById($request->parent_id);
        
         return response()->json($data);
     }
@@ -94,16 +96,16 @@ class ParentCareController extends Controller
             WHERE c.id=$care_id");
         return response()->json($data);
     }
-    public function updateNoteCare(Request $request){
-        u::updateSimpleRow(array('note'=>$request->note,'status'=>1),array('id'=>$request->care_id),'crm_customer_care');
-        $data_info=u::first("SELECT parent_id FROM crm_customer_care WHERE id=".$request->care_id);
-        Log::info("updateNoteCare $request->care_id",['parent_id'=>$data_info->parent_id]);
-        if($data_info){
-            ParentsController::processParentLockById($data_info->parent_id);
-            Log::info("updateNoteCare processParentLockById $request->care_id",['parent_id'=>$data_info->parent_id]);
-        }
-        return "ok";
-    }
+    // public function updateNoteCare(Request $request){
+    //     u::updateSimpleRow(array('note'=>$request->note,'status'=>1),array('id'=>$request->care_id),'crm_customer_care');
+    //     $data_info=u::first("SELECT parent_id FROM crm_customer_care WHERE id=".$request->care_id);
+    //     Log::info("updateNoteCare $request->care_id",['parent_id'=>$data_info->parent_id]);
+    //     if($data_info){
+    //         ParentsController::processParentLockById($data_info->parent_id);
+    //         Log::info("updateNoteCare processParentLockById $request->care_id",['parent_id'=>$data_info->parent_id]);
+    //     }
+    //     return "ok";
+    // }
     public function deleteFileAttached(){
         $list = u::query("SELECT id,attached_file FROM crm_customer_care WHERE attached_file IS NOT NULL AND created_at<'".date('Y-m-d 23:59:59',time()-24*3600*60)."'");
         foreach($list AS $row){
