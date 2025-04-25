@@ -189,6 +189,7 @@ class UtilityServiceProvider extends ServiceProvider
             'birthday' => data_get($data, 'birthday') ? date('d/m/Y', strtotime(data_get($data, 'birthday'))) : null,
             'note' => data_get($data, 'note'),
             'gender' => data_get($data, 'gender'),
+            'sip_id' => data_get($data, 'sip_id'),
         );
     }
     public static function phoneNew($number = '')
