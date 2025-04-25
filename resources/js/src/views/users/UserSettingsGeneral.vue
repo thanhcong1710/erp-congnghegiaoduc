@@ -80,7 +80,9 @@ export default {
       axios.p('/api/user/update-info', {
         data: { 
           'name' : this.name,
-          'email' : this.email
+          'email' : this.email,
+          'phone' : this.phone,
+          'sip_id' : this.sip_id
         }
       })
       .then((response) => {  
@@ -97,6 +99,7 @@ export default {
       this.phone = this.$store.state.AppActiveUser.phone
       this.name = this.$store.state.AppActiveUser.name
       this.email = this.$store.state.AppActiveUser.email
+      this.sip_id = this.$store.state.AppActiveUser.sip_id
     }
   },
 }
