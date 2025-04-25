@@ -1063,4 +1063,33 @@ class UtilityServiceProvider extends ServiceProvider
         self::updateDoneSessions(data_get($contract_info, 'id'));
         return true;
     }
+
+    public static function convertDayToInt($day)
+    {
+        $weekday = strtolower($day);
+        switch ($weekday) {
+            case 'monday':
+                $weekday = '2';
+                break;
+            case 'tuesday':
+                $weekday = '3';
+                break;
+            case 'wednesday':
+                $weekday = '4';
+                break;
+            case 'thursday':
+                $weekday = '5';
+                break;
+            case 'friday':
+                $weekday = '6';
+                break;
+            case 'saturday':
+                $weekday = '7';
+                break;
+            default:
+                $weekday = '8';
+                break;
+        }
+        return $weekday;
+    }
 }
