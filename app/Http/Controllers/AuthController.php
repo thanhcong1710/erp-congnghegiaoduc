@@ -131,7 +131,8 @@ class AuthController extends Controller
                 'note' => auth()->user()->note,
                 'gender' => auth()->user()->gender,
                 'roleName' => auth()->user()->role_name,
-                'permissions' => u::getPermissions(auth()->user()->id)
+                'permissions' => u::getPermissions(auth()->user()->id),
+                'sip_id'=>auth()->user()->sip_id,
             ]
         ]);
     }

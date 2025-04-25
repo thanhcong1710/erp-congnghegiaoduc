@@ -35,6 +35,7 @@ export default {
       phone: this.$store.state.AppActiveUser.phone,
       name: this.$store.state.AppActiveUser.name,
       email: this.$store.state.AppActiveUser.email,
+      sip_id: this.$store.state.AppActiveUser.sip_id,
       alert: {
         status:'',
         show: false,
