@@ -1473,10 +1473,10 @@
         }
       },
       callPhone(phone){
-        this.loading.processing = true;
+        this.$vs.loading()
         u.g(`/api/crm/parents/make_to_call/${this.$route.params.id}?phone=${phone}`)
         .then((response) => {
-          this.loading.processing = false;
+          this.$vs.loading.close();
           if(response.data.status == 0){
             alert(response.data.message);
           }else{

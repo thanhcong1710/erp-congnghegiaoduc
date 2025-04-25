@@ -441,7 +441,7 @@
         const data = {
           phone: this.parent.mobile_1,
         };
-        this.loading.processing = true
+        this.$vs.loading();
         this.modal_overwrite.show = false;
         u.p(`/api/crm/parents/overwrite`,data).then(response => {
           this.$vs.loading.close();
