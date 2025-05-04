@@ -407,6 +407,10 @@
           this.key += "keyword,"
           this.value += this.searchData.keyword+","
         }
+        if (this.searchData.call_status){
+          this.key += "call_status,"
+          this.value += this.searchData.call_status+","
+        }
         if (ids_branch){
           this.key += "branch_id,"
           this.value += ids_branch+","

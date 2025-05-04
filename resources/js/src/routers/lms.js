@@ -549,7 +549,20 @@ export default {
           rule: 'editor'
         }
       },
-
+      {
+        path: '/lms/reports/operate/report-06',
+        name: 'lms-report-operate-06',
+        component: () => import('@/views/lms/report/operate/report06.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
+            { title: 'Báo cáo doanh thu', active: true}
+          ],
+          pageTitle: 'Báo cáo doanh thu',
+          rule: 'editor'
+        }
+      },
 
 
       {
@@ -563,20 +576,6 @@ export default {
             { title: 'Báo cáo tái phí - AF', active: true}
           ],
           pageTitle: 'Báo cáo tái phí - AF',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-06',
-        name: 'lms-report-operate-06',
-        component: () => import('@/views/lms/report/operate/report05.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học sinh bảo lưu', active: true}
-          ],
-          pageTitle: 'Báo cáo học sinh bảo lưu',
           rule: 'editor'
         }
       },

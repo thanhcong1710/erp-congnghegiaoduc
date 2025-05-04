@@ -470,4 +470,57 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report06(Request $request)
+    {
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = "1";
+        if($keyword!==''){
+            $cond .= " AND (s.name LIKE '%$keyword%' OR s.lms_code LIKE '%$keyword%')";
+        }
+        if (!empty($request->branch_id)) {
+            $cond .= " AND  c.branch_id IN (".implode(",",$request->branch_id).")" ;
+        }
+        if (!empty($request->owner_id)) {
+            $cond .= " AND  c.ec_id IN (".implode(",",$request->owner_id).")" ;
+        }
+        if($request->start_date){
+            $cond .= " AND p.charge_date >= '".date('Y-m-d',strtotime($request->start_date))."'";
+        }
+        if($request->end_date){
+            $cond .= " AND p.charge_date <= '".date('Y-m-d',strtotime($request->end_date))."'";
+        }
+        
+        $total = u::first("SELECT
+                        count(DISTINCT c.student_id) as total
+                    FROM
+                        payments AS p 
+                        LEFT JOIN contracts AS c ON c.id=p.contract_id
+                        LEFT JOIN students AS s ON s.id=c.student_id
+                    WHERE
+                        $cond  ");
+        $list = u::query("SELECT DATE_FORMAT(p.created_at,'%Y-%m-%d') AS created_date,
+                        p.charge_date,c.count_recharge, s.name,s.lms_code,s.gud_name1,
+                        (SELECT name  FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
+                        (SELECT name FROM branches WHERE id=p.branch_id) AS branch_name,
+                        c.start_date, (SELECT hrm_id FROM users WHERE id=p.ec_id) AS ec_hrm,
+                        (SELECT `name` FROM  users WHERE id=p.ec_id) AS ec_name, c.init_tuition_fee_amount,
+                        p.note, c.total_discount,c.discount_code_amount,
+                        (SELECT `code` FROM  discount_codes WHERE id=c.discount_code_id) AS discount_code,
+                        p.must_charge,p.amount,p.debt, p.total
+                    FROM
+                        payments AS p 
+                        LEFT JOIN contracts AS c ON c.id=p.contract_id
+                        LEFT JOIN students AS s ON s.id=c.student_id
+                    WHERE
+                       $cond ORDER BY p.id DESC $limitation");
+            
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
