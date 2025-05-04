@@ -232,10 +232,12 @@ class UserController extends Controller
         if(!Auth::user()->checkPermission('canViewAllSale')){
             $cond = " AND u.id IN (".Auth::user()->getStaffHasUser().")";
         } else {
-            $cond = " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER."))";
+            $cond = " AND r.role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER.")";
         }
-        $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
-            FROM users AS u WHERE status=1 $cond");
+        $data = u::query("SELECT DISTINCT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
+            FROM users AS u 
+                LEFT JOIN role_has_user AS r ON r.user_id = u.id
+            WHERE u.status=1 $cond");
         return response()->json($data);
     }
 

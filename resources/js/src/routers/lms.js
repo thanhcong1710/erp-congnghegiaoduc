@@ -522,16 +522,16 @@ export default {
         }
       },
       {
-        path: '/lms/reports/operate/report-02c',
-        name: 'lms-report-operate-02c',
-        component: () => import('@/views/lms/report/operate/report02c.vue'),
+        path: '/lms/reports/operate/report-04',
+        name: 'lms-report-operate-04',
+        component: () => import('@/views/lms/report/operate/report04.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - AF', active: true}
+            { title: 'Danh sách báo cáo', url: '/lms/reports/operate'},
+            { title: 'Báo cáo cuộc gọi - tổng hợp', active: true}
           ],
-          pageTitle: 'Báo cáo tái phí - AF',
+          pageTitle: 'Báo cáo cuộc gọi - tổng hợp',
           rule: 'editor'
         }
       },
@@ -542,10 +542,27 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học sinh pending', active: true}
+            { title: 'Danh sách báo cáo', url: '/lms/reports/operate'},
+            { title: 'Báo cáo cuộc gọi - chi tiết', active: true}
           ],
-          pageTitle: 'Báo cáo học sinh pending',
+          pageTitle: 'Báo cáo cuộc gọi - chi tiết',
+          rule: 'editor'
+        }
+      },
+
+
+
+      {
+        path: '/lms/reports/operate/report-02c',
+        name: 'lms-report-operate-02c',
+        component: () => import('@/views/lms/report/operate/report02c.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
+            { title: 'Báo cáo tái phí - AF', active: true}
+          ],
+          pageTitle: 'Báo cáo tái phí - AF',
           rule: 'editor'
         }
       },

@@ -80,30 +80,17 @@
               <label for="nf-email">Trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status">
                 <option value="">Chọn trạng thái</option>
-                <!-- <option value="0">Blank</option> -->
-                <option value="1">Thuê bao - Tắt máy - Sai số</option>
-                <option value="2">Location</option>
-                <option value="3">Máy bận - Không nghe máy</option>
-                <option value="4">KH hẹn gọi lại sau</option>
-                <option value="5">KH Từ chối nói chuyện</option>
+                <option value="1">Blank</option>
+                <option value="2">Thuê bao - Tắt máy - Sai số</option>
+                <option value="3">Location</option>
+                <option value="4">Máy bận - Không nghe máy</option>
+                <option value="5">KH hẹn gọi lại sau</option>
                 <option value="6">KH không phù hợp</option>
-                <option value="7">KH tiềm năng</option>
-                <option value="9">Blacklist</option>
-              </select>
-            </div>
-            <div v-if="['5','6','7'].indexOf(phone.select_note_status) > -1" class="mt-3">
-              <label >Chi tiết trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status_sub">
-                <option value="">Chọn chi tiết trạng thái</option>
-                <option value="51" v-if="phone.select_note_status==5">KH đã từng sử dụng dịch vụ</option>
-                <option value="52" v-if="phone.select_note_status==5">KH không quan tâm</option>
-                <option value="53" v-if="phone.select_note_status==5">KH thực sự không muốn nói chuyện</option>
-                <option value="61" v-if="phone.select_note_status==6">Không có con</option>
-                <option value="62" v-if="phone.select_note_status==6">Lý do khác</option>
-                <option value="71" v-if="phone.select_note_status==7">KH đang cân nhắc</option>
-                <option value="72" v-if="phone.select_note_status==7">KH hẹn thời gian khác</option>
-                <option value="73" v-if="phone.select_note_status==7">KH ko muốn làm phiền</option>
-                <option value="74" v-if="phone.select_note_status==7">Confirm 1</option>
+                <option value="7">Không có con/Không có con trong độ tuổi CMS</option>
+                <option value="8">Lý do khác</option>
+                <option value="9">KH quan tâm cần follow update</option>
+                <option value="10">KH đồng ý đặt lịch checkin</option>
+                <option value="11">Danh sách đen</option>
               </select>
             </div>
             <div class="mt-3">
@@ -1506,10 +1493,6 @@
         this.phone.alert.color=''
         if (this.phone.select_note_status == "") {
           mess += " - Trạng thái cuộc gọi không được để trống<br/>";
-          resp = false;
-        }
-        if (['5','6','7'].indexOf(this.phone.select_note_status) > -1 && this.phone.select_note_status_sub =='') {
-          mess += " - Chi tiết trạng thái cuộc gọi không được để trống<br/>";
           resp = false;
         }
         

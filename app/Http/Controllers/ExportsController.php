@@ -380,4 +380,99 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report05(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $cond = " 1 ";
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        foreach($arr_key AS $k=>$key){
+            if($key=='keyword'){
+                $keyword = $arr_value[$k];
+                $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%')";
+            }
+            if($key=='branch_id'){
+                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='owner_id'){
+                $cond.= " AND  u.id IN (".str_replace("-",",", $arr_value[$k]).")" ;
+            }
+            if($key=='source_id'){
+                $cond .= " AND  p.source_id IN (".str_replace("-",",", $arr_value[$k]).")" ;
+            }
+            if($key=='source_detail_id'){
+                $cond .= " AND  p.source_detail_id IN (".str_replace("-",",", $arr_value[$k]).")" ;
+            }
+            if ($key=='call_status') {
+                $cond.=" AND c.call_status=".$arr_value[$k];
+            }
+            if($key=='start_date'){
+                $cond .= " AND c.created_at >= '".date('Y-m-d 00:00:00',strtotime($arr_value[$k]))."'";
+            }
+            if($key=='end_date'){
+                $cond .= " AND c.created_at <= '".date('Y-m-d 23:59:59',strtotime($arr_value[$k]))."'";
+            }
+        }
+        
+        $list = u::query("SELECT p.id AS parent_id, p.name, p.mobile_1, c.call_status, c.call_status_sub, c.next_care_date,
+            u.branch_name, CONCAT(u.name, ' - ', u.hrm_id) AS sale_name, c.created_at,
+                s.name AS source_name, sd.name AS source_detail_name, c.note    
+            FROM crm_customer_care AS c
+                LEFT JOIN crm_parents AS p ON c.parent_id=p.id
+                LEFT JOIN users AS u ON u.id =c.creator_id 
+                LEFT JOIN sources AS s ON s.id=p.source_id
+                LEFT JOIN source_detail AS sd ON sd.id=p.source_detail_id 
+            WHERE c.status=1 AND c.method_id = 1 AND $cond 
+            ORDER BY c.id DESC");
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Tên khách hàng');
+        $sheet->setCellValue('C1', 'SĐT');
+        $sheet->setCellValue('D1', 'Trạng thái cuộc gọi');
+        $sheet->setCellValue('E1', 'Trung tâm');
+        $sheet->setCellValue('F1', 'Sale');
+        $sheet->setCellValue('G1', 'Ngày cập nhật');
+        $sheet->setCellValue('H1', 'Nguồn');
+        $sheet->setCellValue('I1', 'Nguồn chi tiết');
+        $sheet->setCellValue('J1', 'Ghi chú');
+
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        $sheet->getColumnDimension("J")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $i+1);
+            $sheet->setCellValue('B' . $x, $list[$i]->name);
+            $sheet->setCellValue('C' . $x, $list[$i]->mobile_1) ;
+            $sheet->setCellValue('D' . $x, u::getTitleCallStatus($list[$i]->call_status) );
+            $sheet->setCellValue('E' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('F' . $x, $list[$i]->sale_name);
+            $sheet->setCellValue('G' . $x, $list[$i]->created_at);
+            $sheet->setCellValue('H' . $x, $list[$i]->source_name);
+            $sheet->setCellValue('I' . $x, $list[$i]->source_detail_name);
+            $sheet->setCellValue('J' . $x, $list[$i]->note);
+            
+            $sheet->getRowDimension($x)->setRowHeight(23);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo cuộc gọi chi tiết.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

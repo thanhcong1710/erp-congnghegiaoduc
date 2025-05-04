@@ -16,10 +16,10 @@ class SystemController extends Controller
         $data = u::query("SELECT *, 0 AS selected, id AS `value`  FROM branches WHERE status = 1");
         return response()->json($data);
     }
-    
+
     public function getBranchesHasUser(Request $request)
     {
-        $cond = " AND id IN (" . Auth::user()->getBranchesHasUser().")";
+        $cond = " AND id IN (" . Auth::user()->getBranchesHasUser() . ")";
         $data = u::query("SELECT *, 0 AS selected, id AS `value`  FROM branches WHERE status = 1 $cond");
         return response()->json($data);
     }
@@ -39,11 +39,25 @@ class SystemController extends Controller
     public function getSourceDetail(Request $request)
     {
         $cond = " AND (branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR branch_id IS NULL OR branch_id=0)";
-        $cond.= data_get($request, 'source_id') ? " AND source_id = ".data_get($request, 'source_id') : '';
+        $cond .= data_get($request, 'source_id') ? " AND source_id = " . data_get($request, 'source_id') : '';
         $data = u::query("SELECT *, id AS `value` FROM source_detail WHERE status=1 $cond");
         return response()->json($data);
     }
 
+    public function getSourceDetailByArrSource(Request $request)
+    {
+        $arr_source = data_get($request, 'arr_source') ? data_get($request, 'arr_source') : [];
+        $cond = "";
+        foreach($arr_source AS $row){
+            $cond.=$cond ? ",".data_get($row, 'id') : data_get($row, 'id');
+        }
+        if ($cond) {
+            $cond = " AND source_id IN (" . $cond . ")";
+        }
+        
+        $data = u::query("SELECT *, id AS `value` FROM source_detail WHERE status=1 $cond");
+        return response()->json($data);
+    }
     public function getProvinces()
     {
         $data = u::getMultiObject([], 'provinces');
@@ -62,88 +76,99 @@ class SystemController extends Controller
         return response()->json($data);
     }
 
-    public function getMethods(){
+    public function getMethods()
+    {
         $data = u::query("SELECT * FROM crm_contact_methods WHERE status=1");
         return response()->json($data);
     }
 
-    public function getProducts(){
+    public function getProducts()
+    {
         $data = u::query("SELECT *, 0 AS selected FROM products WHERE status=1");
         return response()->json($data);
     }
 
-    public function getShifts(){
+    public function getShifts()
+    {
         $data = u::query("SELECT * FROM shifts WHERE status=1");
         return response()->json($data);
     }
-    
-    public function getRooms($branch_id){
+
+    public function getRooms($branch_id)
+    {
         $data = u::query("SELECT *, name AS label FROM rooms WHERE status=1 AND branch_id=$branch_id");
         return response()->json($data);
     }
 
-    public function getCMs($branch_id){
+    public function getCMs($branch_id)
+    {
         $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_CM."' OR r.code='".SystemCode::ROLE_CM_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='" . SystemCode::ROLE_CM . "' OR r.code='" . SystemCode::ROLE_CM_LEADER . "')");
         return response()->json($data);
     }
 
-    public function getTeachers($branch_id){
+    public function getTeachers($branch_id)
+    {
         $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 $cond AND (r.code='".SystemCode::ROLE_TEACHER."' OR r.code='".SystemCode::ROLE_TEACHER_LEADER."')");
+            WHERE u.status=1 $cond AND (r.code='" . SystemCode::ROLE_TEACHER . "' OR r.code='" . SystemCode::ROLE_TEACHER_LEADER . "')");
         return response()->json($data);
     }
 
-    public function getEndDateInClass(Request $request){
-        $start_date = data_get($request,'start_date');
-        $session = data_get($request,'session');
-        $class_id = data_get($request,'class_id');
+    public function getEndDateInClass(Request $request)
+    {
+        $start_date = data_get($request, 'start_date');
+        $session = data_get($request, 'session');
+        $class_id = data_get($request, 'class_id');
         $class_info = u::first("SELECT class_day, branch_id, product_id FROM classes WHERE id= $class_id");
 
-        $holidays = u::getPublicHolidays(data_get($class_info,'branch_id'), data_get($class_info,'product_id'));
-        $arr_day = explode(",",data_get($class_info, 'class_day'));
+        $holidays = u::getPublicHolidays(data_get($class_info, 'branch_id'), data_get($class_info, 'product_id'));
+        $arr_day = explode(",", data_get($class_info, 'class_day'));
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
 
         return data_get($data_sessions, 'end_date');
     }
 
-    public function getClassesActiveByBranchProduct(Request $request){
-        $branch_id = data_get($request,'branch_id');
-        $product_id = data_get($request,'product_id');
-        $data= u::query("SELECT cls_name AS label, id FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id");
+    public function getClassesActiveByBranchProduct(Request $request)
+    {
+        $branch_id = data_get($request, 'branch_id');
+        $product_id = data_get($request, 'product_id');
+        $data = u::query("SELECT cls_name AS label, id FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id");
         return response()->json($data);
     }
 
-    public function getProgramsByProduct(Request $request, $product_id){
-        $is_parent = data_get($request,'is_parent', 0);
+    public function getProgramsByProduct(Request $request, $product_id)
+    {
+        $is_parent = data_get($request, 'is_parent', 0);
         if ($is_parent) {
-            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND parent_id =0 AND product_id=$product_id ");
+            $data = u::query("SELECT name, id FROM programs WHERE status=1 AND parent_id =0 AND product_id=$product_id ");
         } else {
-            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
+            $data = u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ");
         }
         return response()->json($data);
     }
 
-    public function getTuitionFees(Request $request){
+    public function getTuitionFees(Request $request)
+    {
         $status = data_get($request, 'status', null);
-        $cond = $status!==null ? '1' : " status = $status";
-        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status,
+        $cond = $status !== null ? '1' : " status = $status";
+        $data = u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status,
                 (SELECT name FROM products WHERE id=t.product_id) AS product_name    
             FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
         return response()->json($data);
     }
 
-    public function getSubjects(){
+    public function getSubjects()
+    {
         $data = u::query("SELECT *, 0 AS selected, 0 AS stt, 0 AS session FROM subjects WHERE status=1");
         return response()->json($data);
     }
@@ -154,21 +179,41 @@ class SystemController extends Controller
         return response()->json($data);
     }
 
-    public function getTAs($branch_id){
+    public function getTAs($branch_id)
+    {
         $cond = $branch_id ? " AND b.branch_id=$branch_id " : "";
         $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
                 LEFT JOIN branch_has_user AS b ON b.user_id= ru.user_id
-            WHERE u.status=1 $cond AND r.code='".SystemCode::ROLE_TA."'");
+            WHERE u.status=1 $cond AND r.code='" . SystemCode::ROLE_TA . "'");
         return response()->json($data);
     }
 
-    public function getClassByCM($cm_id) {
+    public function getClassByCM($cm_id)
+    {
         $data = u::query("SELECT cl.* 
             FROM classes AS cl 
             WHERE cl.status=1 AND cl.cm_id=$cm_id");
+        return response()->json($data);
+    }
+
+    public function getOwnerByBranch(Request $request) {
+        $arr_branch = data_get($request, 'arr_branch') ? data_get($request, 'arr_branch') : [];
+        $sqlBranch = "";
+        foreach($arr_branch AS $row){
+            $sqlBranch.=$sqlBranch ? ",".data_get($row, 'id') : data_get($row, 'id');
+        }
+        $cond = " AND r.role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER.")";
+        if ($sqlBranch) {
+            $cond.= " AND b.branch_id IN ($sqlBranch)";
+        }
+        $data = u::query("SELECT DISTINCT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
+            FROM users AS u 
+                LEFT JOIN role_has_user AS r ON r.user_id=u.id
+                LEFT JOIN branch_has_user AS b ON b.user_id=u.id
+            WHERE u.status=1 $cond");
         return response()->json($data);
     }
 }

@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO CUỘC GỌI - CHI TIẾT</h5>
+      <h5>BÁO CÁO CUỘC GỌI - TỔNG HỢP</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -84,100 +84,111 @@
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>   
           </div>  
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <!-- <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên khách hàng, SĐT" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trạng thái cuộc gọi</label>
-            <select class="vs-inputx vs-input--input normal"  v-model="searchData.call_status">
-              <option value="">Chọn trạng thái cuộc gọi</option>
-              <option value="1">Blank</option>
-              <option value="2">Thuê bao - Tắt máy - Sai số</option>
-              <option value="3">Location</option>
-              <option value="4">Máy bận - Không nghe máy</option>
-              <option value="5">KH hẹn gọi lại sau</option>
-              <option value="6">KH không phù hợp</option>
-              <option value="7">Không có con/Không có con trong độ tuổi CMS</option>
-              <option value="8">Lý do khác</option>
-              <option value="9">KH quan tâm cần follow update</option>
-              <option value="10">KH đồng ý đặt lịch checkin</option>
-              <option value="11">Danh sách đen</option>
-            </select>
-          </div>
+            <vs-input class="w-full" placeholder="Mã học sinh, tên học sinh" v-model="searchData.keyword"></vs-input>
+          </div> -->
+          
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mr-3 mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
-            <vs-button color="success"  class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button>
+            <!-- <vs-button color="success"  class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button> -->
           </div>
         </div>
       </div>
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
-              <thead class="vs-table--thead">
-                <tr>
-                  <!---->
-                  <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Tên khách hàng</th>
-                  <th colspan="1" rowspan="1">SĐT</th>
-                  <th colspan="1" rowspan="1">Trạng thái cuộc gọi</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Sale</th>
-                  <th colspan="1" rowspan="1">Ngày cập nhật</th>
-                  <th colspan="1" rowspan="1">Nguồn</th>
-                  <th colspan="1" rowspan="1">Nguồn chi tiết</th>
-                  <th colspan="1" rowspan="1">Ghi chú</th>
-                  <th colspan="1" rowspan="1">Thao tác</th>
-                </tr>
-              </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
-                <!---->
+      <div class="vx-row">
+        <div class="vx-col sm:w-1/3 w-full mb-4">
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <tr class="tr-values vs-table--tr tr-table-state-null" style="background-color: rgba(0, 0, 21, 0.05)">
+                    <td colspan="2">
+                      Thông tin chung
+                    </td>
+                  </tr>
+                  <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td class="text-left">Tổng số data đã chia chưa xử lý</td>
+                      <td class="text-right"> {{data_report.total_new}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">Tổng số data kết nối được</td>
+                      <td class="text-right">{{data_report.total_connect}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">Tổng số data không kết nối được</td>
+                      <td class="text-right">{{data_report.total_not_connect}}</td>
+                    </tr>
+                </table>
                 
-                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.mobile_1}}</td>
-                <td class="td vs-table--td">{{item.call_status | callStatus}}</td>
-                <td class="td vs-table--td">{{ item.branch_name}}</td>
-                <td class="td vs-table--td">{{ item.sale_name}}</td>
-                <td class="td vs-table--td">{{ item.created_at}}</td>
-                <td class="td vs-table--td">{{ item.source_name}}</td>
-                <td class="td vs-table--td">{{ item.source_detail_name}}</td>
-                <td class="td vs-table--td">{{ item.note}}</td>
-                <td class="td vs-table--td">
-                  <router-link
-                        class="btn btn-sm  btn-info" target="_blank"
-                        :to="`/crm/parent/${item.parent_id}/detail`"
-                      >
-                        <i class="fa fa-eye"></i></router-link>
-                </td>
-              </tr>
-            </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="vx-col sm:w-2/3 w-full mb-4">
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody ">
+                <table class="vs-table vs-table--tbody-table">
+                  <tr class="tr-values vs-table--tr tr-table-state-null" style="background-color: rgba(0, 0, 21, 0.05)">
+                    <td colspan="2">
+                      Thông tin chi tiết
+                    </td>
+                  </tr>
+                  <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td class="text-left">1. Blank</td>
+                      <td class="text-right">{{data_report.detail_1}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">2. Thuê bao - Tắt máy - Sai số</td>
+                      <td class="text-right">{{data_report.detail_2}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">3. Location</td>
+                      <td class="text-right">{{data_report.detail_3}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">4. Máy bận - Không nghe máy</td>
+                      <td class="text-right">{{data_report.detail_4}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">5. KH hẹn gọi lại sau</td>
+                      <td class="text-right">{{data_report.detail_5}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">6. KH không có nhu cầu</td>
+                      <td class="text-right">{{data_report.detail_6}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">7. Không có con/Không có con trong độ tuổi CMS</td>
+                      <td class="text-right">{{data_report.detail_7}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">8. Lý do khác</td>
+                      <td class="text-right">{{data_report.detail_8}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">9. KH quan tâm cần follow update</td>
+                      <td class="text-right">{{data_report.detail_9}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">10.KH đồng ý đặt lịch check in</td>
+                      <td class="text-right">{{data_report.detail_10}}</td>
+                    </tr>
+                    <tr class="tr-values vs-table--tr tr-table-state-null">
+                      <td  class="text-left">11. Danh sách đen</td>
+                      <td class="text-right">{{data_report.detail_11}}</td>
+                    </tr>
+                    
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="flex flex-wrap items-center mt-5">
-        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
-          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-            <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
-            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-          </div>
-          <vs-dropdown-menu>
-            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="pagination.limit=item" >
-              <span>{{item}}</span>
-            </vs-dropdown-item>
-          </vs-dropdown-menu>
-        </vs-dropdown>
-        <vs-pagination
-              style="width: calc(100% - 160px);"
-              v-if="Math.ceil(pagination.total / pagination.limit) >1"
-              :total="Math.ceil(pagination.total / pagination.limit)"
-              :max="7"
-              v-model="pagination.cpage" @change="changePage()"/>
-      </div>
+      
     </vx-card>
   </div>
 
@@ -207,14 +218,13 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
-          dateRange: "",
+          dateRange: [new Date(), new Date()],
           arr_owner: "",
           owner_id:"",
           arr_source: "",
           source_id:"",
           arr_source_detail: "",
           source_detail_id:"",
-          call_status:"",
         },
         datepickerOptions: {
           closed: true,
@@ -303,7 +313,7 @@
       getData() {
         const startDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
         const endDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-
+      
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -337,25 +347,17 @@
             branch_id: this.searchData.branch_id,
             owner_id: this.searchData.owner_id,
             source_id: this.searchData.source_id,
-            ids_source_detail: this.searchData.source_detail_id,
+            ids_source_detail: this.searchData.ids_source_detail,
             start_date: startDate,
             end_date: endDate,
-            call_status: this.searchData.call_status,
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/05', data)
+        axios.p('/api/lms/reports/04', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.datas = response.data.list;
-            this.pagination.spage = response.data.paging.spage;
-            this.pagination.ppage = response.data.paging.ppage;
-            this.pagination.npage = response.data.paging.npage;
-            this.pagination.lpage = response.data.paging.lpage;
-            this.pagination.cpage = response.data.paging.cpage;
-            this.pagination.total = response.data.paging.total;
-            this.pagination.limit = response.data.paging.limit;
+            this.data_report = response.data;
           })
           .catch((error) => {
             console.log(error);
@@ -373,32 +375,11 @@
         this.getData();
       },
       exportExcel() {
-        const startDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-      
-        var url = `/api/lms/exports/report05/`;
+        var url = `/api/lms/exports/report01/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
             ids_branch += ids_branch ? "-" + item.id : item.id;
-          })
-        }
-        const ids_owner = ""
-        if (this.searchData.arr_owner && this.searchData.arr_owner.length) {
-          this.searchData.arr_owner.map(item => {
-            ids_owner += ids_owner ? "-" + item.id : item.id;
-          })
-        }
-        const ids_source = ""
-        if (this.searchData.arr_source && this.searchData.arr_source.length) {
-          this.searchData.arr_owner.map(item => {
-            ids_source += ids_source ? "-" + item.id : item.id;
-          })
-        }
-        const ids_source_detail = ""
-        if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) {
-          this.searchData.arr_source_detail.map(item => {
-            ids_source_detail += ids_source_detail ? "-" + item.id : item.id;
           })
         }
         this.key ='';
@@ -411,25 +392,10 @@
           this.key += "branch_id,"
           this.value += ids_branch+","
         }
-        if (ids_owner){
-          this.key += "owner_id,"
-          this.value += ids_owner+","
-        }
-        if (ids_source){
-          this.key += "source_id,"
-          this.value += ids_source+","
-        }
-        if (ids_source_detail){
-          this.key += "source_detail_id,"
-          this.value += ids_source_detail+","
-        }
-        if (startDate){
+        if (this.searchData.dateRange){
           this.key += "start_date,"
-          this.value += startDate+","
-        }
-        if (endDate){
-          this.key += "end_date,"
-          this.value += endDate+","
+          this.value +=u.getDateMonth(this.searchData.dateRange)+","
+          console.log(u.getDateMonth(this.searchData.dateRange))
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"
@@ -438,36 +404,6 @@
       },
     },
     filters: {
-      callStatus(item){
-        let resp = ''
-        if(item== 1){
-          resp = 'Blank'
-        }else if(item==2){
-          resp = 'Thuê bao - Tắt máy - Sai số'
-        }else if(item==3){
-          resp = 'Location'
-        }else if(item==4){
-          resp = 'Máy bận - Không nghe máy'
-        }else if(item==5){
-          resp = 'KH hẹn gọi lại sau'
-        }else if(item==6){
-          resp = 'KH không có nhu cầu'
-        }else if(item==7){
-          resp = 'Không có con/Không có con trong độ tuổi CMS'
-        }else if(item==8){
-          resp = 'Lý do khác'
-        }else if(item==9){
-          resp = 'KH quan tâm cần follow update'
-        }else if(item==10){
-          resp = 'KH đồng ý đặt lịch checkin'
-        }else if(item==11){
-          resp = 'Danh sách đen'
-        }else{
-          resp = ''
-        }
-
-        return resp
-      },
     },
   }
 </script>
