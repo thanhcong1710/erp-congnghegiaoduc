@@ -62,6 +62,7 @@
           </div>
         </div>
       </div>
+      <p class="mb-2 float-right"><span>Tổng doanh thu: <strong>{{ total_summary | formatNumber }}</strong> đ</span></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -85,9 +86,9 @@
                   <th colspan="1" rowspan="1">Giảm trừ theo mã CK</th>
                   <th colspan="1" rowspan="1">Tiền giảm khác</th>
                   <th colspan="1" rowspan="1">Tiền sau giảm trừ</th>
-                  <th colspan="1" rowspan="1">Số tiền đóng</th>
                   <th colspan="1" rowspan="1">Tổng đã nộp</th>
                   <th colspan="1" rowspan="1">Số tiền còn lại phải thu</th>
+                  <th colspan="1" rowspan="1">Số tiền đóng</th>
                   <th colspan="1" rowspan="1">Doanh số thực thu của trung tâm</th>
                 </tr>
               </thead>
@@ -110,9 +111,9 @@
                 <td class="td vs-table--td">{{ item.discount_code_amount | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.total_discount - item.discount_code_amount | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.must_charge | formatNumber}}</td>
-                <td class="td vs-table--td"><strong>{{ item.amount | formatNumber}}</strong></td>
                 <td class="td vs-table--td">{{ item.total | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.debt | formatNumber}}</td>
+                <td class="td vs-table--td"><strong>{{ item.amount | formatNumber}}</strong></td>
                 <td class="td vs-table--td">{{ item.amount | formatNumber}}</td>
               </tr>
             </table>
@@ -215,6 +216,7 @@
         },
         delete_id:'',
         data_report: [],
+        total_summary:0
       }
     },
     created() {
@@ -273,6 +275,7 @@
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list;
+            this.total_summary = response.data.summary
             this.pagination.spage = response.data.paging.spage;
             this.pagination.ppage = response.data.paging.ppage;
             this.pagination.npage = response.data.paging.npage;
@@ -300,7 +303,7 @@
         const startDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
         const endDate = this.searchData.dateRange!='' && this.searchData.dateRange!= undefined && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
       
-        var url = `/api/lms/exports/report05/`;
+        var url = `/api/lms/exports/report06/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -327,14 +330,6 @@
         if (ids_owner){
           this.key += "owner_id,"
           this.value += ids_owner+","
-        }
-        if (ids_source){
-          this.key += "source_id,"
-          this.value += ids_source+","
-        }
-        if (ids_source_detail){
-          this.key += "source_detail_id,"
-          this.value += ids_source_detail+","
         }
         if (startDate){
           this.key += "start_date,"

@@ -393,7 +393,7 @@ class ExportsController extends Controller
                 $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%')";
             }
             if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                $cond .=  " AND u.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
             }
             if($key=='owner_id'){
                 $cond.= " AND  u.id IN (".str_replace("-",",", $arr_value[$k]).")" ;
@@ -469,6 +469,126 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo cuộc gọi chi tiết.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report06(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $cond = " 1 ";
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        foreach($arr_key AS $k=>$key){
+            if($key=='keyword'){
+                $keyword = $arr_value[$k];
+                $cond .= " AND (s.name LIKE '%$keyword%' OR s.lms_code LIKE '%$keyword%')";
+            }
+            if($key=='branch_id'){
+                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='owner_id'){
+                $cond.= " AND  p.ec_id IN (".str_replace("-",",", $arr_value[$k]).")" ;
+            }
+            if($key=='start_date'){
+                $cond .= " AND p.charge_date >= '".date('Y-m-d 00:00:00',strtotime($arr_value[$k]))."'";
+            }
+            if($key=='end_date'){
+                $cond .= " AND p.charge_date <= '".date('Y-m-d 23:59:59',strtotime($arr_value[$k]))."'";
+            }
+        }
+        
+        $list = u::query("SELECT DATE_FORMAT(p.created_at,'%Y-%m-%d') AS created_date,
+                        p.charge_date,c.count_recharge, s.name,s.lms_code,s.gud_name1,
+                        (SELECT name  FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
+                        (SELECT name FROM branches WHERE id=p.branch_id) AS branch_name,
+                        c.start_date, (SELECT hrm_id FROM users WHERE id=p.ec_id) AS ec_hrm,
+                        (SELECT `name` FROM  users WHERE id=p.ec_id) AS ec_name, c.init_tuition_fee_amount,
+                        p.note, c.total_discount,c.discount_code_amount,
+                        (SELECT `code` FROM  discount_codes WHERE id=c.discount_code_id) AS discount_code,
+                        p.must_charge,p.amount,p.debt, p.total
+                    FROM
+                        payments AS p 
+                        LEFT JOIN contracts AS c ON c.id=p.contract_id
+                        LEFT JOIN students AS s ON s.id=c.student_id
+                    WHERE
+                       $cond ORDER BY p.id DESC");
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Ngày hạch toán');
+        $sheet->setCellValue('C1', 'Ngày thu');
+        $sheet->setCellValue('D1', 'Phân loại');
+        $sheet->setCellValue('E1', 'Mã học sinh');
+        $sheet->setCellValue('F1', 'Tên học sinh');
+        $sheet->setCellValue('G1', 'Tên phụ huynh');
+        $sheet->setCellValue('H1', 'Tên gói phí');
+        $sheet->setCellValue('I1', 'Trung tâm');
+        $sheet->setCellValue('J1', 'Mã nhân viên');
+        $sheet->setCellValue('K1', 'Tên tư vấn viên');
+        $sheet->setCellValue('L1', 'GT khóa học');
+        $sheet->setCellValue('M1', 'Mã CK');
+        $sheet->setCellValue('N1', 'Giảm trừ theo mã CK');
+        $sheet->setCellValue('O1', 'Tiền giảm khác');
+        $sheet->setCellValue('P1', 'Tiền sau giảm trừ');
+        $sheet->setCellValue('Q1', 'Tổng đã nộp');
+        $sheet->setCellValue('R1', 'Số tiền còn lại phải thu');
+        $sheet->setCellValue('S1', 'Số tiền đóng');
+        $sheet->setCellValue('T1', 'Doanh số thực thu của trung tâm');
+
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        $sheet->getColumnDimension("J")->setWidth(30);
+        $sheet->getColumnDimension("K")->setWidth(30);
+        $sheet->getColumnDimension("L")->setWidth(30);
+        $sheet->getColumnDimension("M")->setWidth(30);
+        $sheet->getColumnDimension("N")->setWidth(30);
+        $sheet->getColumnDimension("O")->setWidth(30);
+        $sheet->getColumnDimension("P")->setWidth(30);
+        $sheet->getColumnDimension("Q")->setWidth(30);
+        $sheet->getColumnDimension("R")->setWidth(30);
+        $sheet->getColumnDimension("S")->setWidth(30);
+        $sheet->getColumnDimension("T")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $i+1);
+            $sheet->setCellValue('B' . $x, $list[$i]->created_date);
+            $sheet->setCellValue('C' . $x, $list[$i]->charge_date) ;
+            $sheet->setCellValue('D' . $x, $list[$i]->count_recharge ==0 ? 'Mới' : 'Tái tục' );
+            $sheet->setCellValue('E' . $x, $list[$i]->lms_code);
+            $sheet->setCellValue('F' . $x, $list[$i]->name);
+            $sheet->setCellValue('G' . $x, $list[$i]->gud_name1);
+            $sheet->setCellValue('H' . $x, $list[$i]->tuition_fee_name);
+            $sheet->setCellValue('I' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('J' . $x, $list[$i]->ec_hrm);
+            $sheet->setCellValue('K' . $x, $list[$i]->ec_name);
+            $sheet->setCellValue('L' . $x, $list[$i]->init_tuition_fee_amount);
+            $sheet->setCellValue('M' . $x, $list[$i]->discount_code);
+            $sheet->setCellValue('N' . $x, $list[$i]->discount_code_amount);
+            $sheet->setCellValue('O' . $x, $list[$i]->total_discount - $list[$i]->discount_code_amount);
+            $sheet->setCellValue('P' . $x, $list[$i]->must_charge);
+            $sheet->setCellValue('Q' . $x, $list[$i]->total);
+            $sheet->setCellValue('R' . $x, $list[$i]->debt);
+            $sheet->setCellValue('S' . $x, $list[$i]->amount);
+            $sheet->setCellValue('T' . $x, $list[$i]->amount);
+            $sheet->getRowDimension($x)->setRowHeight(23);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo doanh thu.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

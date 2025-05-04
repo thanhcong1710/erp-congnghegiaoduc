@@ -484,10 +484,10 @@ class ReportsController extends Controller
             $cond .= " AND (s.name LIKE '%$keyword%' OR s.lms_code LIKE '%$keyword%')";
         }
         if (!empty($request->branch_id)) {
-            $cond .= " AND  c.branch_id IN (".implode(",",$request->branch_id).")" ;
+            $cond .= " AND  p.branch_id IN (".implode(",",$request->branch_id).")" ;
         }
         if (!empty($request->owner_id)) {
-            $cond .= " AND  c.ec_id IN (".implode(",",$request->owner_id).")" ;
+            $cond .= " AND  p.ec_id IN (".implode(",",$request->owner_id).")" ;
         }
         if($request->start_date){
             $cond .= " AND p.charge_date >= '".date('Y-m-d',strtotime($request->start_date))."'";
@@ -497,7 +497,7 @@ class ReportsController extends Controller
         }
         
         $total = u::first("SELECT
-                        count(DISTINCT c.student_id) as total
+                        count(p.id) as total
                     FROM
                         payments AS p 
                         LEFT JOIN contracts AS c ON c.id=p.contract_id
@@ -519,8 +519,17 @@ class ReportsController extends Controller
                         LEFT JOIN students AS s ON s.id=c.student_id
                     WHERE
                        $cond ORDER BY p.id DESC $limitation");
+        $summary = u::first("SELECT
+            SUM(p.amount) as total
+        FROM
+            payments AS p 
+            LEFT JOIN contracts AS c ON c.id=p.contract_id
+            LEFT JOIN students AS s ON s.id=c.student_id
+        WHERE
+            $cond");
             
         $data = u::makingPagination($list, $total->total, $page, $limit);
+        $data->summary =  $summary->total;
         return response()->json($data);
     }
 }
