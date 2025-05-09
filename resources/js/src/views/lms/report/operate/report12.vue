@@ -58,7 +58,7 @@
                   <th colspan="1" rowspan="1">Ngày sinh</th>
                   <th colspan="1" rowspan="1">Tên phụ huynh</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình học</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Ca học</th>
                   <th colspan="1" rowspan="1">Trạng thái</th>
                   <th colspan="1" rowspan="1">Ngày đặt cọc</th>

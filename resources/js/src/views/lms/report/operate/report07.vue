@@ -54,7 +54,7 @@
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Trình độ</th>
                   <th colspan="1" rowspan="1">Mã lớp</th>
                   <th colspan="1" rowspan="1">Lịch học</th>

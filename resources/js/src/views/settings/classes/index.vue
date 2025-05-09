@@ -3,7 +3,7 @@
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
-        <div class="vx-col md:w-1/4 w-full item-first" style="border-right: 1px solid #ccc;">
+        <div class="vx-col md:w-4/12 w-full item-first" style="border-right: 1px solid #ccc;">
           <div class="vx-row">
             <div class="vx-col w-full mb-4">
               <label>Trung tâm <span class="text-danger"> (*)</span></label>
@@ -18,10 +18,10 @@
               ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
-              <label >Khóa học</label>
+              <label >Chương trình học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn khóa học"
+                    placeholder="Chọn chương trình học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
@@ -29,8 +29,57 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label >Lộ trình học</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn lộ trình học"
+                  :options="html.loTrinh.list"
+                  v-model="html.loTrinh.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveLoTrinh"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Option</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn option"
+                  :options="html.option.list"
+                  v-model="html.option.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveOption"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Số buổi trên tuần</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn số buổi trên tuần"
+                  :options="html.typeDayOfWeek.list"
+                  v-model="html.typeDayOfWeek.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveTypeDayOfWeek"
+              ></vue-select>
+            </div>
+            <div class="vx-col w-full mb-4">
+              <label >Loại gói phí</label>
+              <vue-select
+                  label="label"
+                  placeholder="Chọn loại gói phí"
+                  :options="html.typeFee.list"
+                  v-model="html.typeFee.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveTypeFee"
+              ></vue-select>
+            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
+              <label>Khóa học</label>
               <tree
                 :data="classes"
                 text-field-name="text"
@@ -41,7 +90,7 @@
             </div>
           </div>
         </div>
-        <div class="vx-col md:w-3/4 w-full item-last">
+        <div class="vx-col md:w-8/12 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin cấu hình lớp học</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -125,6 +174,15 @@
                 <option value="" disabled>Chọn loại hợp đồng</option>
                 <option value="0">Không hoạt động</option>
                 <option value="1">Hoạt động</option>
+              </select>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Loại gói phí</label>
+              <select class="vs-inputx vs-input--input normal" v-model="config.type_fee" >
+                <option value="" disabled>Chọn loại gói phí</option>
+                <option value="1">Gói phí Cooper</option>
+                <option value="2">Gói phí Silver</option>
+                <option value="3">Gói phí Gold</option>
               </select>
             </div>
             <div class="vx-col md:w-3/3 w-full mb-4">
@@ -267,6 +325,7 @@
                                   <th colspan="1" rowspan="1">Môn học</th> -->
                                   <th colspan="1" rowspan="1" class="text-center">Ngày học</th>
                                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                                 </tr>
                               </thead>
                               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_sessions" :key="index">
@@ -275,6 +334,9 @@
                                 <td class="td vs-table--td">{{item.subject_name}}</td> -->
                                 <td class="td vs-table--td text-center">{{item.class_date | formatDateViewDay}}</td>
                                 <td class="td vs-table--td text-center">{{item.status_label}}</td>
+                                <td class="td vs-table--td text-center">
+                                  <vs-button v-if="item.status_label=='Sắp học'" @click="showModalEditClassDate(item)" color="success" style="padding:5px 8px" class="small"><i class="fa fa-edit"></i></vs-button>
+                                </td>
                               </tr>
                             </table>
                           </div>
@@ -308,6 +370,24 @@
           <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="alert.body"></div>
           </vs-alert>
+          <vs-popup :class="'modal_'+ modal_session.color" :title="modal_session.title" :active.sync="modal_session.show">
+            <div class="vx-row" style="min-height: 200px;"> 
+              <div class="vx-col w-full" >
+                <label class="mb-2">Thay đổi ngày học từ <span>{{modal_session.class_date_curr}}</span> sang ngày</label>
+                <datepicker
+                  class=" w-full calendar"
+                  v-model="modal_session.class_date"
+                  placeholder="Chọn ngày học"
+                  :lang="datepickerOptions.lang"
+                  @change="selectDate"
+                />
+              </div>
+              <div class="vx-col w-full">
+                <vs-button color="dark" type="border" class="mr-3" @click="modal_student.show = false">Hủy</vs-button>
+                <vs-button color="success" @click="changeScheduleDate()">Lưu</vs-button>
+              </div>
+            </div>
+      </vs-popup>
         </div>
       </div>
       <div class="vx-row mt-5">
@@ -338,6 +418,22 @@
     },
     data() {
       return {
+        modal_session: {
+          title: "CẬP NHẬT NGÀY HỌC",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
+          class_date:'',
+          schedule_id:'',
+          class_date_curr:'',
+        },
         datepickerOptions: {
           closed: true,
           value: "",
@@ -394,7 +490,48 @@
           subjects:{
             item: '',
             list: []
-          }
+          },
+          loTrinh: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
+              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
+              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
+              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
+              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
+              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
+              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
+              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
+              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
+              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
+            ]
+          },
+          option: {
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Option 1'},
+              {'id': 2, 'label' : 'Option 2'},
+            ]
+          },
+          typeDayOfWeek: {
+            item: '',
+            list: [
+              {'id': 4, 'label' : 'Normal'},
+              {'id': 5, 'label' : 'FT5'},
+              {'id': 6, 'label' : 'FT6'},
+              {'id': 8, 'label' : 'FT8'},
+              {'id': 10, 'label' : 'FT10'},
+            ]
+          },
+          typeFee:{
+            item: '',
+            list: [
+              {'id': 1, 'label' : 'Gói phí Cooper'},
+              {'id': 2, 'label' : 'Gói phí Silver'},
+              {'id': 3, 'label' : 'Gói phí Gold'},
+            ]
+          },
         },
         config:{
           total_cycles:1,
@@ -423,6 +560,11 @@
           title:'',
           program_id:'',
           subjects:[],
+          type_day_of_week: '',
+          lo_trinh_id:'',
+          option_id:'',
+          search_type_fee:'',
+          type_fee:'',
         },
         alert:{
           active: false,
@@ -498,6 +640,42 @@
         }
         this.loadClasses();
       },
+      saveLoTrinh(data = null){
+        if (data && typeof data === 'object') {
+          const lo_trinh_id = data.id
+          this.config.lo_trinh_id = lo_trinh_id
+        }else{
+          this.config.lo_trinh_id = ""
+        }
+        this.loadClasses();
+      },
+      saveOption(data = null){
+        if (data && typeof data === 'object') {
+          const option_id = data.id
+          this.config.option_id = option_id
+        }else{
+          this.config.option_id = ""
+        }
+        this.loadClasses();
+      },
+      saveTypeFee(data = null){
+        if (data && typeof data === 'object') {
+          const type_fee = data.id
+          this.config.type_fee = type_fee
+        }else{
+          this.config.type_fee = ""
+        }
+        this.loadClasses();
+      },
+      saveTypeDayOfWeek(data = null){
+        if (data && typeof data === 'object') {
+          const type_day_of_week = data.id
+          this.config.type_day_of_week = type_day_of_week
+        }else{
+          this.config.type_day_of_week = ""
+        }
+        this.loadClasses();
+      },
       saveCM(data = null){
         if (data && typeof data === 'object') {
           const cm_id = data.id
@@ -543,7 +721,11 @@
           this.$vs.loading();
           axios.p(`/api/settings/classes/load-classes`, {
             branch_id: this.config.branch_id,
-            product_id: this.config.product_id
+            product_id: this.config.product_id,
+            lo_trinh_id: this.config.lo_trinh_id,
+            option_id: this.config.option_id,
+            type_day_of_week: this.config.type_day_of_week,
+            search_type_fee: this.config.search_type_fee,
           })
             .then(response => {
             this.$vs.loading.close();
@@ -656,11 +838,11 @@
           resp = false;
         }
         if (this.config.product_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.config.program_id == "") {
-          mess += " - Chương trình học không được để trống<br/>";
+          mess += " - Khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.config.title == "") {
@@ -687,8 +869,12 @@
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.session == "") {
-          mess += " - Số buổi học không được để trống<br/>";
+        // if (this.config.session == "") {
+        //   mess += " - Số buổi học không được để trống<br/>";
+        //   resp = false;
+        // }
+        if (this.config.type_fee == "") {
+          mess += " - Loại gói phí không được để trống<br/>";
           resp = false;
         }
         if (!resp) {
@@ -792,6 +978,36 @@
         this.pagination.limit = limit
         this.getDataSessions();
       },
+      selectDate(date) {
+        if (date) {
+          this.modal_session.class_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      showModalEditClassDate(item){
+        this.modal_session.show= true
+        this.modal_session.class_date=''
+        this.modal_session.class_date_curr = item.class_date
+        this.modal_session.schedule_id = item.id
+      },
+      changeScheduleDate(){
+        if(!this.modal_session.class_date){
+          return false;
+        }
+        this.$vs.loading()
+        axios.p('/api/settings/classes/update-schedule', {
+          id : this.modal_session.schedule_id,
+          class_date: this.modal_session.class_date
+        })
+          .then((response) => {
+            this.$vs.loading.close()
+            this.modal_session.show= false
+            this.getDataSessions();
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
+      }
     },
   }
 </script>

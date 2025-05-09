@@ -54,11 +54,14 @@ class ProgramsController extends Controller
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($request, 'status'),
+            'lo_trinh_id' => data_get($request, 'lo_trinh_id'),
+            'option_id' => data_get($request, 'option_id'),
+            'type' => data_get($request, 'type'),
         ), 'programs');
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới chương trình học thành công'
+            'message' => 'Thêm mới khóa học thành công'
         );
         return response()->json($result);
     }
@@ -70,7 +73,7 @@ class ProgramsController extends Controller
         u::query("DELETE FROM programs WHERE id=$program_id");
         $result = array(
             'status' => 1,
-            'message' => 'Xóa chương trình học thành công.'
+            'message' => 'Xóa khóa học thành công.'
         );
         return response()->json($result);
     } 
@@ -92,10 +95,13 @@ class ProgramsController extends Controller
             'status' =>  data_get($request, 'status'),
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
+            'lo_trinh_id' => data_get($request, 'lo_trinh_id'),
+            'option_id' => data_get($request, 'option_id'),
+            'type' => data_get($request, 'type'),
         ),array('id'=>data_get($request, 'id')), 'programs');
         $result = array(
             'status' => 1,
-            'message' => 'Cập nhật thông tin chương trình học thành công'
+            'message' => 'Cập nhật thông tin khóa học thành công'
         );
         return response()->json($result);
     }

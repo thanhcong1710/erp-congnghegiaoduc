@@ -39,6 +39,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('/provinces/{province_id}/districts', 'SystemController@getDistrictsByProvice');
             Route::get('branches-has-user', 'SystemController@getBranchesHasUser');
             Route::get('products', 'SystemController@getProducts');
+            Route::get('programs', 'SystemController@getPrograms');
             Route::get('subjects', 'SystemController@getSubjects');
             Route::get('shifts', 'SystemController@getShifts');
             Route::get('rooms/{branch_id}', 'SystemController@getRooms');
@@ -225,6 +226,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('save', 'ClassesController@save');
                 Route::get('info-config/{class_id}', 'ClassesController@infoConfig');
                 Route::post('sessions', 'ClassesController@listSessions');
+                Route::post('update-schedule', 'ClassesController@updateSchedule');
             });
             Route::prefix('tuition-fees')->group(function () {
                 Route::post('add', 'TuitionFeesController@add');

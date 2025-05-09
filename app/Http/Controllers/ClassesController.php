@@ -16,6 +16,24 @@ class ClassesController extends Controller
         $data = [];
         $branch_id = (int)$request->branch_id;
         $product_id = (int)$request->product_id;
+        $lo_trinh_id = (int)$request->lo_trinh_id;
+        $option_id = (int)$request->option_id;
+        $type_fee = (int)$request->type_fee;
+        $type_day_of_week = (int)$request->type_day_of_week;
+        $cond = " 1 ";
+        $cond1 = " AND 1 ";
+        if($lo_trinh_id){
+            $cond.= " AND p.lo_trinh_id = $lo_trinh_id";
+        }
+        if($option_id){
+            $cond.= " AND p.option_id = $option_id";
+        }
+        if($type_day_of_week){
+            $cond.= " AND p.type = $type_day_of_week";
+        }
+        if($type_fee){
+            $cond1.= " AND c.type_fee = $type_fee";
+        }
         $query = "SELECT id, 
             id AS item_id, 
             'program' AS item_type, 
@@ -23,8 +41,8 @@ class ClassesController extends Controller
             parent_id, 
             'fa fa-folder' AS icon, 
             0 AS status 
-        FROM programs 
-        WHERE id > 0 AND status = 1 AND product_id = $product_id
+        FROM programs AS p
+        WHERE p.id > 0 AND p.status = 1 AND p.product_id = $product_id AND $cond
         UNION ALL
         SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
@@ -37,7 +55,7 @@ class ClassesController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE() ORDER BY text ";
+        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND $cond $cond1 ORDER BY text ";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {
@@ -115,29 +133,30 @@ class ClassesController extends Controller
                     'cm_id'=> data_get($request,'cm_id'),
                 ),'schedules');
             }
-
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-           
-            for($i=1;$i<= data_get($request,'total_cycles');$i++){
-                $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
-                foreach($arr_subject AS $subject){
-                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-
-                }
-                $tmp_subject = 0;
-                $subject_stt = 0;
-                $class_stt = 0;
-                foreach($arr_schedule AS $row){
-                    if($tmp_subject != $row->subject_id){
-                        $tmp_subject = $row->subject_id;
-                        $subject_stt = 0;
+            
+            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+            if(count($arr_subject) > 1){
+                for($i=1;$i<= data_get($request,'total_cycles');$i++){
+                    foreach($arr_subject AS $subject){
+                        u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
+    
                     }
-                    $subject_stt++;
-                    $class_stt++;
-                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                    $tmp_subject = 0;
+                    $subject_stt = 0;
+                    $class_stt = 0;
+                    foreach($arr_schedule AS $row){
+                        if($tmp_subject != $row->subject_id){
+                            $tmp_subject = $row->subject_id;
+                            $subject_stt = 0;
+                        }
+                        $subject_stt++;
+                        $class_stt++;
+                        u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                    }
                 }
             }
-            
+
             u::updateSimpleRow(array(
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
@@ -155,6 +174,7 @@ class ClassesController extends Controller
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
                 'total_cycles'=> data_get($request,'total_cycles'),
+                'type_fee'=> data_get($request,'type_fee'),
             ), array('id'=>data_get($request,'class_id')), 'classes');
 
         }else{
@@ -175,6 +195,7 @@ class ClassesController extends Controller
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
                 'total_cycles'=> data_get($request,'total_cycles'),
+                'type_fee'=> data_get($request,'type_fee'),
             ),'classes');
             foreach($arr_day AS $session){
                 u::insertSimpleRow(array(
@@ -211,22 +232,24 @@ class ClassesController extends Controller
             }
 
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-            for($i=1;$i<= data_get($request,'total_cycles');$i++){
-                $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
-                foreach($arr_subject AS $subject){
-                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-                }
-                $tmp_subject = 0;
-                $subject_stt = 0;
-                $class_stt = 0;
-                foreach($arr_schedule AS $row){
-                    if($tmp_subject != $row->subject_id){
-                        $tmp_subject = $row->subject_id;
-                        $subject_stt = 0;
+            $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
+            if(count($arr_subject) > 1){
+                for($i=1;$i<= data_get($request,'total_cycles');$i++){
+                    foreach($arr_subject AS $subject){
+                        u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
                     }
-                    $subject_stt++;
-                    $class_stt++;
-                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                    $tmp_subject = 0;
+                    $subject_stt = 0;
+                    $class_stt = 0;
+                    foreach($arr_schedule AS $row){
+                        if($tmp_subject != $row->subject_id){
+                            $tmp_subject = $row->subject_id;
+                            $subject_stt = 0;
+                        }
+                        $subject_stt++;
+                        $class_stt++;
+                        u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
+                    }
                 }
             }
         }
@@ -270,7 +293,8 @@ class ClassesController extends Controller
                 'day_8' => in_array(8,$arr_day) ? true : false,
             ],
             'session' => $schedule_num->total,
-            'subjects' => $subjects
+            'subjects' => $subjects,
+            'type_fee'=> data_get($class_info,'type_fee'),
         ];
         return response()->json($data);
     }
@@ -290,12 +314,19 @@ class ClassesController extends Controller
 
         $total = u::first("SELECT count(s.id) AS total FROM schedules AS s WHERE $cond");
         
-        $list = u::query("SELECT s.class_date, sj.code AS subject_code, sj.name AS subject_name,
+        $list = u::query("SELECT s.class_date, sj.code AS subject_code, sj.name AS subject_name,  s.id,
                 IF(class_date < CURRENT_DATE, 'Đã học', 'Sắp học') AS status_label
             FROM schedules AS s 
                 LEFT JOIN subjects AS sj ON s.subject_id=sj.id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
+    }
+
+    public function updateSchedule(Request $request)
+    {
+        $id = isset($request->id) ? $request->id : 0;
+        u::updateSimpleRow(['class_date'=>data_get($request, 'class_date')],['id'=>$id], 'schedules');
+        return response()->json('ok');
     }
 }

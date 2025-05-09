@@ -72,6 +72,11 @@ class SystemController extends Controller
         return response()->json($data);
     }
 
+    public function getPrograms(){
+        $data = u::query("SELECT *, 0 AS selected FROM programs WHERE status=1");
+        return response()->json($data);
+    }
+
     public function getShifts(){
         $data = u::query("SELECT * FROM shifts WHERE status=1");
         return response()->json($data);

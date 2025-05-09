@@ -16,10 +16,10 @@
           ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Khóa học</label>
+          <label >Chương trình học</label>
           <vue-select
                 label="name"
-                placeholder="Chọn khóa học"
+                placeholder="Chọn chương trình học"
                 :options="html.products.list"
                 v-model="html.products.item"
                 :searchable="true"
@@ -28,10 +28,10 @@
             ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Chương trình học</label>
+          <label>Khóa học</label>
           <vue-select
                 label="name"
-                placeholder="Chọn khóa học"
+                placeholder="Chọn chương trình học"
                 :options="html.programs.list"
                 v-model="html.programs.item"
                 :searchable="true"

@@ -133,7 +133,7 @@
                 <td class="td vs-table--td"  style="width: 240px">
                   <p>{{ item.checkin_branch_name }}</p>
                   <p>Thời gian: {{ item.checkin_at }}</p>
-                  <p>Khóa học: {{ item.checkin_product_name }}</p>
+                  <p>Chương trình học: {{ item.checkin_product_name }}</p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 

@@ -63,14 +63,17 @@ class TuitionFeesController extends Controller
                 $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
             }
         }
+        $programInfo = u::getObject(['id'=>data_get($tuition_fee, 'program_id')],'programs');
         $tuition_fee_id = u::insertSimpleRow(array(
             'name' => data_get($tuition_fee, 'name'),
-            'product_id' => data_get($tuition_fee, 'product_id'), 
+            'product_id' => data_get($tuition_fee, 'product_id') ? data_get($tuition_fee, 'product_id') : data_get($programInfo, 'product_id'), 
+            'program_id' => data_get($tuition_fee, 'program_id'), 
             'session' => data_get($tuition_fee, 'session'),
             'price' => data_get($tuition_fee, 'price'),
             'receivable' => data_get($tuition_fee, 'price'),
             'number_of_months' => data_get($tuition_fee, 'number_of_months'),
             'type_contract' => data_get($tuition_fee, 'type_contract'),
+            'type_fee' => data_get($tuition_fee, 'type_fee'),
             'available_date' => data_get($tuition_fee, 'available_date'),
             'expired_date' => data_get($tuition_fee, 'expired_date'),
             'branch_id' => $branch_id,
@@ -141,14 +144,17 @@ class TuitionFeesController extends Controller
                 $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
             }
         }
+        $programInfo = u::getObject(['id'=>data_get($tuition_fee, 'program_id')],'programs');
         u::updateSimpleRow(array(
             'name' => data_get($tuition_fee, 'name'),
-            'product_id' => data_get($tuition_fee, 'product_id'), 
+            'product_id' => data_get($tuition_fee, 'product_id') ? data_get($tuition_fee, 'product_id') : data_get($programInfo, 'product_id'), 
+            'program_id' => data_get($tuition_fee, 'program_id'), 
             'session' => data_get($tuition_fee, 'session'),
             'price' => data_get($tuition_fee, 'price'),
             'receivable' => data_get($tuition_fee, 'price'),
             'number_of_months' => data_get($tuition_fee, 'number_of_months'),
             'type_contract' => data_get($tuition_fee, 'type_contract'),
+            'type_fee' => data_get($tuition_fee, 'type_fee'),
             'available_date' => data_get($tuition_fee, 'available_date'),
             'expired_date' => data_get($tuition_fee, 'expired_date'),
             'branch_id' => $branch_id,

@@ -87,7 +87,7 @@
                     <thead class="vs-table--thead">
                       <tr>
                         <!---->
-                        <th colspan="1" rowspan="1" class="text-center">Khóa học</th>
+                        <th colspan="1" rowspan="1" class="text-center">Chương trình học</th>
                         <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
                         <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>

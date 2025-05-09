@@ -8,16 +8,16 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Gói khóa học <span class="text-danger"> (*)</span></label>
+              <label>Khóa học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <vue-select
                       label="name"
                       placeholder="Chọn khóa học"
-                      :options="html.products.list"
-                      v-model="html.products.item"
+                      :options="html.programs.list"
+                      v-model="html.programs.item"
                       :searchable="true"
                       language="tv-VN"
-                      @input="saveProduct"
+                      @input="saveProgram"
                   ></vue-select>
               </div>
             </div>
@@ -81,6 +81,17 @@
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Loại gói phí <span class="text-danger"> (*)</span></label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_fee">
+                  <option value="">Chọn loại gói phí </option>
+                  <option value="1">Gói phí Cooper</option>
+                  <option value="2">Gói phí Silver</option>
+                  <option value="3">Gói phí Gold</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Trạng thái</label>
               <div class=w-full>
                 <vs-switch v-model="tuition_fee.status" color="success"/>
@@ -118,7 +129,7 @@
                       <thead class="vs-table--thead">
                         <tr>
                           <!---->
-                          <th colspan="1" rowspan="1">Khóa học</th>
+                          <th colspan="1" rowspan="1">Chương trình học</th>
                           <th colspan="1" rowspan="1">Gói phí</th>
                           <th colspan="1" rowspan="1">Thời gian</th>
                           <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -206,6 +217,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
           tuition_fees: {
             item: '',
             list: []
@@ -215,6 +230,7 @@
         tuition_fees_relation: [],
         tuition_fee:{
           product_id:'',
+          program_id:'',
           name: '',
           session: '',
           number_of_months:'',
@@ -224,6 +240,7 @@
           expired_date: '',
           type_contract: 1,
           status:1,
+          type_fee:''
         },
         price:'',
         receivable:'',
@@ -246,6 +263,10 @@
         .then(response => {
         this.html.products.list = response.data
       })
+      axios.g(`/api/system/programs`)
+        .then(response => {
+        this.html.programs.list = response.data
+      })
       axios.g(`/api/system/branches`)
       .then(response => {
         this.branches = response.data
@@ -266,7 +287,7 @@
             this.tuition_fee = response.data.tuition_fee
             this.branches = response.data.branches 
             this.tuition_fees_relation = response.data.tuition_fees_relation 
-            this.html.products.item = this.html.products.list.filter(item => item.id == response.data.tuition_fee.product_id)[0]
+            this.html.programs.item = this.html.programs.list.filter(item => item.id == response.data.tuition_fee.program_id)[0]
             this.price = this.tuition_fee.price
             this.receivable = this.tuition_fee.receivable
           }else{
@@ -290,6 +311,14 @@
           this.tuition_fee.product_id = product_id
         }else{
           this.tuition_fee.product_id = ""
+        }
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          const program_id = data.id
+          this.tuition_fee.program_id = program_id
+        }else{
+          this.tuition_fee.program_id = ""
         }
       },
       saveTuitionFeeRelation(data =null){
@@ -319,7 +348,7 @@
         let mess = "";
         let resp = true;
         if (this.tuition_fee.product_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
+          mess += " - Chương trình học không được để trống<br/>";
           resp = false;
         }
         if (this.tuition_fee.name == "") {
@@ -348,6 +377,10 @@
         }
         if (this.tuition_fee.expired_date == "") {
           mess += " - Ngày hết hiệu lực không được để trống<br/>";
+          resp = false;
+        }
+        if (this.tuition_fee.type_fee === "") {
+          mess += " - Loại gói phí không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

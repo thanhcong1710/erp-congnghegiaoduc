@@ -50,7 +50,7 @@
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Loại lớp</th>
                   <th colspan="1" rowspan="1">Loại sĩ số</th>
                   <th colspan="1" rowspan="1">Hình thức học</th>
