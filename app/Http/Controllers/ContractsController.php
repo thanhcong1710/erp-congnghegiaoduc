@@ -74,7 +74,7 @@ class ContractsController extends Controller
     {
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)data_get($request,'discount_value');
         $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." ORDER BY count_recharge DESC LIMIT 1");
         $contract_id = u::insertSimpleRow(array(
@@ -104,6 +104,7 @@ class ContractsController extends Controller
            'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
+           'discount_value' => data_get($request, 'discount_value'),
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'type') ==0 ? 0 : data_get($request, 'tuition_fee_session'),
            'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : (data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0),
@@ -240,7 +241,7 @@ class ContractsController extends Controller
         $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)data_get($request,'discount_value');
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
@@ -269,6 +270,7 @@ class ContractsController extends Controller
            'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
+           'discount_value' => data_get($request, 'discount_value'),
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'tuition_fee_session'),
            'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,

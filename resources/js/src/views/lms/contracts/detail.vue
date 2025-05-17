@@ -259,6 +259,16 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col w-full mb-4">
+                <label>Số tiền chiết khấu khác</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  v-value="discount_value | formatNumber"
+                  disabled="true"
+                />
+              </div>
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>

@@ -289,6 +289,15 @@
                   disabled="true"
                 />
               </div>
+              <div class="vx-col w-full mb-4">
+                <label>Số tiền chiết khấu khác</label>
+                <input
+                  class="vs-inputx vs-input--input normal"
+                  type="text"
+                  name="title"
+                  v-model="discount_value_show"
+                />
+              </div>
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>
@@ -437,16 +446,17 @@
           note:'',
           b2b_campaign_id:'',
           b2b_amount:'',
-          b2b_bonus_session:''
+          b2b_bonus_session:'',
+          discount_value:'',
         },
         student_info:{
-
         },
         alert:{
           active: false,
           body: '',
           color:'',
-        }
+        },
+        discount_value_show:''
       }
     },
     created() {
@@ -458,6 +468,14 @@
         .then(response => {
         this.html.products.list = response.data
       })
+    },
+    watch: {
+      discount_value_show: function (val) {
+        const value = u.fmc(val)
+        this.discount_value_show = value.s
+        this.contract.discount_value = value.n
+        this.caculatorSession()
+      }
     },
     methods: {
       searchSuggestStudent(keyword) {
@@ -623,7 +641,8 @@
         }
       },
       caculatorSession(){
-        this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
+        this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) - Number(this.contract.discount_value) > 0 ? 
+          Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) - Number(this.contract.discount_value) : 0;
         this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },
       save() {
