@@ -77,14 +77,14 @@ class SyncLMS extends Command
         // }
 
         //lấy dữ liệu Class từ LMS
-        // $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
-        // foreach ($listClass as $item) {
-        //     $cls_id = str_replace(':B', '', $item->id);
-        //     $lms->syncDataClassInfo($cls_id, $item->parent);
-        //     echo $cls_id."/";
-        // }
+        $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
+        foreach ($listClass as $item) {
+            $cls_id = str_replace(':B', '', $item->id);
+            $lms->syncDataClassInfo($cls_id, $item->parent);
+            echo $cls_id."/";
+        }
         //tạo Class trên ERP 
-        // $lms->erpCreateClass();
+        $lms->erpCreateClass();
         //tạo session trên ERP
         $listClass = u::query("SELECT * FROM classes");
         foreach ($listClass as $item) {
@@ -93,18 +93,18 @@ class SyncLMS extends Command
         }
 
         // $listClass = u::query("SELECT id FROM lms_programs WHERE id LIKE '%:B'");
-        // foreach ($listClass as $item) {
-        //     $cls_id = str_replace(':B', '', $item->id);
-        //     $lms->syncDataSchedules($cls_id);
-        //     echo $cls_id."/";
-        // }
+        foreach ($listClass as $item) {
+            $cls_id = str_replace(':B', '', $item->id);
+            $lms->syncDataSchedules($cls_id);
+            echo $cls_id."/";
+        }
 
         // $listClass = u::query("SELECT id FROM lms_programs WHERE id LIKE '%:B'");
-        // foreach ($listClass as $item) {
-        //     $cls_id = str_replace(':B', '', $item->id);
-        //     $lms->syncDataClassStudents($cls_id);
-        //     echo $cls_id."/";
-        // }
+        foreach ($listClass as $item) {
+            $cls_id = str_replace(':B', '', $item->id);
+            $lms->syncDataClassStudents($cls_id);
+            echo $cls_id."/";
+        }
 
         // $lms->syncDataClassStudents(267);
         return "ok";

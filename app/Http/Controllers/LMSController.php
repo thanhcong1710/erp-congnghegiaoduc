@@ -771,9 +771,9 @@ class LMSController extends Controller
             LEFT JOIN rooms AS rm ON rm.lms_id=r.room_id
             WHERE rm.id IS NULL");
         if ($listRooms) {
-            $query = "INSERT INTO rooms ( `name`, created_at, branch_id, lms_id) VALUES ";
+            $query = "INSERT INTO rooms ( `name`, created_at, branch_id, lms_id, `status`) VALUES ";
             foreach ($listRooms as $k => $row) {
-                $query .= "('$row->room_name', '$created_at', '$row->branch_id', '$row->room_id' ),";
+                $query .= "('$row->room_name', '$created_at', '$row->branch_id', '$row->room_id', 1 ),";
             }
             $query = substr($query, 0, -1);
             u::query($query);
