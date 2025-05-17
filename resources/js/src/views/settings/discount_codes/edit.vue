@@ -26,13 +26,13 @@
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Tỷ lệ chiết khấu % <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="number" v-model="discount_code.percent" class="vs-inputx vs-input--input normal" @change="caculatorDiscount()">
+            <input type="number" v-model="discount_code.percent" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Giá gốc gói phí <span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <input type="number" v-model="discount_code.price" class="vs-inputx vs-input--input normal" @change="caculatorDiscount()">
+            <input type="number" v-model="discount_code.price" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
