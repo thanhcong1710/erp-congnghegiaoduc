@@ -38,7 +38,7 @@
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Tiền chiết khấu</label>
           <div class=w-full>
-            <input type="text" :value="discount_code.discount | formatNumber" class="vs-inputx vs-input--input normal" disabled="true">
+            <input type="number" v-model="discount_code.discount" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-6 ">
@@ -267,6 +267,10 @@
         }
         if (this.discount_code.percent == "") {
           mess += " - Tỷ lệ chiết khấu không được để trống<br/>";
+          resp = false;
+        }
+        if (this.discount_code.discount == "") {
+          mess += " - Tiền chiết khấu không được để trống<br/>";
           resp = false;
         }
         if (this.discount_code.start_date == "") {
