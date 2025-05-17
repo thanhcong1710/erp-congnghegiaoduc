@@ -265,7 +265,7 @@
                   class="vs-inputx vs-input--input normal"
                   type="text"
                   name="title"
-                  v-value="discount_value | formatNumber"
+                  v-value="contract_info.discount_value | formatNumber"
                   disabled="true"
                 />
               </div>
