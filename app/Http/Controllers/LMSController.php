@@ -275,6 +275,7 @@ class LMSController extends Controller
             u::query($query);
         }
         u::query("UPDATE programs AS p LEFT JOIN programs AS p1 ON p.lms_parent_id = p1.lms_id SET p.parent_id = p1.id");
+        u::query("UPDATE programs SET parent_id = 0  WHERE parent_id IS NULL");
         return "ok";
     }
 

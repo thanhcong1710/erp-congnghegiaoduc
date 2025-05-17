@@ -43,6 +43,7 @@
               <option value="2">Tiktok Ads</option>
               <option value="3">Quà tặng</option>
               <option value="4">Voucher</option>
+              <option value="5">Khác</option>
             </select>
           </div>
         </div>
