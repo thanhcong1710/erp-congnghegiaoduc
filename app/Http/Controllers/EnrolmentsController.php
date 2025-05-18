@@ -203,6 +203,15 @@ class EnrolmentsController extends Controller
                 'updator_id' => Auth::user()->id
             ), array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
+        } elseif($contract_info->type == 0){
+            u::updateSimpleRow(array(
+                'status' => 7,
+                'type_withdraw' =>1,
+                'action' => 'Withdraw học sinh học thử',
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id
+            ), array('id'=>$contract_id),'contracts');
+            u::addLogContracts($contract_id);
         }
         $result = array(
             'status' => 1,

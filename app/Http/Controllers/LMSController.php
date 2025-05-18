@@ -343,7 +343,7 @@ class LMSController extends Controller
     public function erpCreateClass()
     {
         $created_at = date('Y-m-d H:i:s');
-        $listClass = u::query("SELECT cl.cls_id AS lms_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate, cl.capaNum AS max_students,
+        $listClass = u::query("SELECT DISTINCT cl.cls_id AS lms_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate, cl.capaNum AS max_students,
                 stf_id AS teacher_id, pg.id AS program_id, pg.product_id ,pg.branch_id
             FROM lms_classes AS cl LEFT JOIN lms_programs AS p ON cl.syl_id=p.id 
                 LEFT JOIN programs AS pg ON pg.lms_id=p.id 
