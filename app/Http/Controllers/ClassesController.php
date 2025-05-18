@@ -24,7 +24,7 @@ class ClassesController extends Controller
             'fa fa-folder' AS icon, 
             0 AS status 
         FROM programs 
-        WHERE id > 0 AND status = 1 AND product_id = $product_id AND branch_id = $branch_id
+        WHERE id > 0 AND status = 1 AND product_id = $product_id AND branch_id = $branch_id 
         UNION ALL
         SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
@@ -37,7 +37,7 @@ class ClassesController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE() ORDER BY text ";
+        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE() ORDER BY item_id ";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {
@@ -73,7 +73,8 @@ class ClassesController extends Controller
         }
         $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
         $start_date = data_get($request,'start_date');
-        $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
+        $end_date = data_get($request,'end_date');
+        $data_sessions = u::calculatorSessions($start_date, $end_date, $holidays, $arr_day);
         // $subjects = data_get($request,'subjects');
         $subjects = ["0"=> (object)['id'=>1,'session'=>data_get($request,'session'), 'stt'=>1]];
             
@@ -254,6 +255,7 @@ class ClassesController extends Controller
             'type' => data_get($class_info, 'type'),
             'status' => data_get($class_info, 'status'),
             'start_date' => data_get($class_info, 'cls_startdate'),
+            'end_date' => data_get($class_info, 'cls_enddate'),
             'cm_id' => data_get($class_info, 'cm_id'),
             'ta_id' => data_get($class_info, 'ta_id'),
             'teacher_id' => data_get($class_info, 'teacher_id'),
