@@ -83,7 +83,7 @@ class EnrolmentsController extends Controller
         // }
         // $class_info->shift_text = $shift_text;
         // $class_info->class_day_text = u::getClassDayText($class_info->class_day);
-        $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,
+        $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code, c.type AS contract_type,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
                 c.must_charge, c.total_charged, c.done_sessions,c.left_sessions, c.student_id, c.product_id,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name
