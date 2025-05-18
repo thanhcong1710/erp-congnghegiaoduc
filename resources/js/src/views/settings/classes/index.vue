@@ -149,13 +149,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Tổng số buổi học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="config.session"
-                disabled="true"
+              <label>Ngày kết thúc học</label>
+              <datepicker class="w-full"
+                v-model="config.end_date"
+                placeholder="Chọn ngày kết thúc học"
+                :lang="datepickerOptions.lang"
+                @change="selectEndDate"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -176,7 +175,7 @@
                 <option value="1">Chính thức</option>
               </select>
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số buổi học</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -188,7 +187,7 @@
                 :disabled="disabled_input"
                 @change="caculatorTotalSession"
               />
-            </div>
+            </div> -->
             <div class="vx-col w-full mb-4">
               <vs-tabs>
                 <!-- <vs-tab label="Danh sách môn học">
@@ -407,6 +406,7 @@
           type: 1,
           status: 1,
           start_date:'',
+          end_date:'',
           cm_id:'',
           teacher_id:'',
           shift_id:'',
@@ -474,6 +474,11 @@
       selectDate(date){
         if (date) {
           this.config.start_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      selectEndDate(date){
+        if (date) {
+          this.config.end_date = moment(date).format("YYYY-MM-DD");
         }
       },
       saveBranch(data = null){
@@ -687,10 +692,14 @@
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.session == "") {
-          mess += " - Số buổi học không được để trống<br/>";
+        if (this.config.start_date == "") {
+          mess += " - Ngày kết thúc học không được để trống<br/>";
           resp = false;
         }
+        // if (this.config.session == "") {
+        //   mess += " - Số buổi học không được để trống<br/>";
+        //   resp = false;
+        // }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
