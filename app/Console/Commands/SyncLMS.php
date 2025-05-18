@@ -107,6 +107,14 @@ class SyncLMS extends Command
         }
 
         // $lms->syncDataClassStudents(267);
+        
+        //Update  classes.teacher_name , classes.shift_name
+        u::query("UPDATE classes AS cl LEFT JOIN lms_classes AS lc ON cl.lms_id =lc.cls_id SET cl.teacher_name = lc.ins_name");
+        u::query("UPDATE classes AS cl SET cl.shift_name = (
+            SELECT GROUP_CONCAT( CONCAT(room_name, ': ',ctime_day_type, ' ' ,ctime_start_time_type, '-',ctime_end_time_type) SEPARATOR ', ') AS shif_name
+            FROM lms_sessions
+            WHERE cls_id = cl.lms_id
+        )");
         return "ok";
     }
     

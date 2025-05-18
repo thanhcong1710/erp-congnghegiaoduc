@@ -247,6 +247,9 @@ class ClassesController extends Controller
         $data = [
             'is_edit' => 1,
             'title'=> data_get($class_info, 'cls_name'),
+            'teacher_name'=> data_get($class_info, 'teacher_name'),
+            'shift_name'=> data_get($class_info, 'shift_name'),
+            'room_name'=> data_get($class_info, 'room_name'),
             'class_id' =>$class_id,
             'branch_id' => data_get($class_info, 'branch_id'),
             'product_id' => data_get($class_info, 'product_id'),
