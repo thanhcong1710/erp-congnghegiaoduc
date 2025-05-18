@@ -56,6 +56,26 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Giáo viên</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="config.teacher_name"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Ca học, phòng học</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="config.shift_name"
+                disabled="true"
+              />
+            </div>
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Giáo viên</label>
               <vue-select
                   label="label"
                   placeholder="Chọn giáo viên"
@@ -66,8 +86,8 @@
                   @input="saveTeacher"
                   :disabled="disabled_input"
                 ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            </div> -->
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ca học</label>
               <vue-select
                     label="name"
@@ -79,8 +99,8 @@
                     @input="saveShift"
                     :disabled="disabled_input"
                 ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            </div> -->
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Phòng học</label>
               <vue-select
                     label="label"
@@ -92,7 +112,7 @@
                     @input="saveRoom"
                     :disabled="disabled_input"
                 ></vue-select>
-            </div>
+            </div> -->
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>AF - Quản lý lớp học</label>
               <vue-select
@@ -645,6 +665,8 @@
         this.config.shift_id=''
         this.config.room_id=''
         this.config.title=''
+        this.config.teacher_name=''
+        this.config.shift_name=''
         this.html.rooms.item = ''
         this.html.teachers.item = ''
         this.html.cms.item = ''
@@ -672,18 +694,18 @@
           mess += " - Tên lớp không được để trống<br/>";
           resp = false;
         }
-        if (this.config.teacher_id == "") {
-          mess += " - Giáo viên không được để trống<br/>";
-          resp = false;
-        }
-        if (this.config.shift_id == "") {
-          mess += " - Ca học không được để trống<br/>";
-          resp = false;
-        }
-        if (this.config.room_id == "") {
-          mess += " - Phòng học không được để trống<br/>";
-          resp = false;
-        }
+        // if (this.config.teacher_id == "") {
+        //   mess += " - Giáo viên không được để trống<br/>";
+        //   resp = false;
+        // }
+        // if (this.config.shift_id == "") {
+        //   mess += " - Ca học không được để trống<br/>";
+        //   resp = false;
+        // }
+        // if (this.config.room_id == "") {
+        //   mess += " - Phòng học không được để trống<br/>";
+        //   resp = false;
+        // }
         if (this.config.cm_id == "") {
           mess += " - CM - Trợ giảng không được để trống<br/>";
           resp = false;
