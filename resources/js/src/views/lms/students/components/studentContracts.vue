@@ -28,7 +28,7 @@
                 <p>Mã: <strong>{{item.code}}</strong></p>
                 <p>Khóa học: {{item.product_name}}</p>
                 <p>Gói phí: {{item.tuition_fee_name}}</p>
-                <p>Số buổi: {{item.total_sessions}} ({{item.bonus_session}} học bổng)</p>
+                <p>Số buổi: {{item.total_sessions}} ({{item.bonus_session ? item.bonus_session : 0}} học bổng)</p>
               </td>
               <td class="td vs-table--td">
                 <p>Giá gốc: {{item.init_tuition_fee_amount | formatMoney}}</p>
