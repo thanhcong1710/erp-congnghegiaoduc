@@ -4,12 +4,22 @@
       <h5 class="w-full"><i class="fa-solid fa-user-graduate"></i> THÔNG TIN HỌC SINH</h5>
       <div class="vx-row w-full mt-3">
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Mã LMS</label>
+          <label>Mã Học sinh</label>
           <input
             class="vs-inputx vs-input--input normal"
             type="text"
             name="title"
             v-model="student_info.lms_code"
+            :disabled="true"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Mã LMS</label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="title"
+            v-model="student_info.lms_id"
             :disabled="true"
           />
         </div>

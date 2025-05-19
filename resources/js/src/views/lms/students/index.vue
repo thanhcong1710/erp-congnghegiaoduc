@@ -112,8 +112,9 @@
                 <td class="td vs-table--td">
                   <p><strong><router-link :to="`/lms/students/${item.id}/detail`"><a>{{item.name}}</a></router-link></strong></p>
                   <p>Mã: {{item.lms_code}}</p>
+                  <p>Mã LMS: {{item.lms_id}}</p>
                   <p>Giới tính: {{item.gender == 'F' ? 'Nữ' : 'Nam'}}</p>
-                  <p>Ngày sinh: {{item.date_of_birth | formatDateView}}</p>
+                  <p>Ngày sinh: <span v-if="item.date_of_birth">{{item.date_of_birth | formatDateView}}</span></p>
                 </td>
                 <td class="td vs-table--td">
                   <p><strong>{{item.gud_name1}}</strong></p>
