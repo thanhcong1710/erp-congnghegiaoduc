@@ -141,6 +141,7 @@ class ImportData extends Command
                             'status' => 2,
                             'count_recharge' => 0,
                         ), 'contracts');
+                        u::updateDoneSessions($contract_id);
                         u::updateSimpleRow(array('contract_id'=>$contract_id, 'status'=>1), array('id'=>data_get($row,'id')), 'tmp_import' );
                     }else{
                         $contract_id = u::insertSimpleRow(array(
@@ -167,11 +168,17 @@ class ImportData extends Command
                             'status' => 3,
                             'count_recharge' => 0,
                         ), 'contracts');
+                        u::updateDoneSessions($contract_id);
                         u::updateSimpleRow(array('contract_id'=>$contract_id, 'status'=>1), array('id'=>data_get($row,'id')), 'tmp_import' );
                     }
                 }
             }
             echo data_get($row,'id')."_contract/";
+        }
+        $list = u::query("SELECT * FROM tmp_import");
+        foreach($list AS $row){
+            u::updateDoneSessions(data_get($row,'contract_id'));
+            echo "updateDoneSessions_".data_get($row,'id')."/";
         }
         return "ok";
     }

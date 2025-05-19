@@ -182,6 +182,9 @@ class EnrolmentsController extends Controller
                 'updator_id' => Auth::user()->id
             ), array('student_id'=>$student_id), 'term_student_user');
             LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
+            $lmsController = new LMSController();
+            $lmsController->addOrUpdateStudent($student_id);
+            $lmsController->addStudentToClass($student_id);
         }
 
         $result = array(
@@ -195,6 +198,8 @@ class EnrolmentsController extends Controller
         $contract_id = data_get($request,'contract_id');
         $contract_info =  u::getObject(['id'=>$contract_id], 'contracts');
         if($contract_info->left_sessions == 0){
+            $lmsController = new LMSController();
+            $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
             u::updateSimpleRow(array(
                 'status' => 7,
                 'type_withdraw' =>1,
@@ -204,6 +209,8 @@ class EnrolmentsController extends Controller
             ), array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
         } elseif($contract_info->type == 0){
+            $lmsController = new LMSController();
+            $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
             u::updateSimpleRow(array(
                 'status' => 7,
                 'type_withdraw' =>1,

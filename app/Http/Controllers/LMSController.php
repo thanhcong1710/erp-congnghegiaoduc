@@ -541,163 +541,6 @@ class LMSController extends Controller
         }
     }
 
-    public function addOrUpdateStudent()
-    {
-        $url = sprintf('%s/data/setup.asmx/CounStudentSave', config('lms.url'));
-        $client = new Client();
-        $params = [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                "counn" => [
-                    "coun_std_type" => "N",
-                    "coun_std_id" => 0,  // 0: add new, > 0: update
-                    "coun_preferred_brch_id" => "327",
-                    "coun_std_name" => "testapi1",
-                    "coun_std_email" => "test1@gmail.com",
-                    "coun_std_home_phone" => "0389941903",
-                    "coun_std_school" => "test1api",
-                    "coun_std_nickname" => "testapi",
-                    "coun_std_birthdate" => "",
-                    "coun_std_gender" => "M",
-                    "coun_std_address" => "Ha noi",
-                    "coun_std_grade_type" => "toddler 3 age",
-                    "coun_std_login" => "",
-                    "coun_std_password" => "",
-                    "coun_std_photo" => "",
-                    "coun_std_guardian1" => "",
-                    "coun_std_guardian_email" => "test1@gmail.com",
-                    "coun_std_guardian1_tel" => "",
-                    "coun_std_guardian2" => "",
-                    "coun_std_guardian2_tel" => "",
-                    "coun_std_status" => "Active",
-                    "coun_std_trialstart" => "2025-04-18",
-                    "coun_std_trialend" => "2025-04-20",
-                    "coun_sales_stf_id" => 0,
-                    "coun_assigned_stf_id" => 0,
-                    "coun_std_note" => "",
-                    "coun_saddr_isvalid" => 0,
-                    "coun_std_istemporary" => 1
-                ],
-                "staff" => [
-                    "stf_id" => 8824
-                ]
-            ]
-        ];
-        $response = $client->request('POST', $url, $params);
-        $dataResponse = json_decode($response->getBody()->getContents(), true);
-        Log::info('LMS syncDataClassStudents Data', ['params' => $params, 'data' => $dataResponse]);
-        if (data_get($dataResponse, 'd.status') == 'ok') {
-            $student_id = data_get($dataResponse, 'd.message');
-        }
-        return "ok";
-    }
-
-    public function addStudentToClass()
-    {
-        $url = sprintf('%s/data/setup.asmx/CounStudentSearchSave', config('lms.url'));
-        $client = new Client();
-        $params = [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                "staff" => [
-                    "stf_id" => 8824
-                ],
-                "counn" => [
-                    "coun_std_type" => "add",
-                    "conn_cls_id" => "87",
-                    "conn_syl_id" => 0,
-                    "conn_old_cstd_id" => 0,
-                    "conn_cstf_teacher_fault" => 0,
-                    "conn_lecture_date" => ""
-                ],
-                "setupList" => [
-                    [
-                        "c_std_id" => 24,
-                        "c_registration_date" => "2025-01-03",
-                        "c_from_cstd_id" => 0
-                    ]
-                ]
-            ]
-        ];
-        $response = $client->request('POST', $url, $params);
-        $dataResponse = json_decode($response->getBody()->getContents(), true);
-        Log::info('LMS addStudentToClass Data', ['params' => $params, 'data' => $dataResponse]);
-        if (data_get($dataResponse, 'd.status') == 'ok') {
-            $student_id = data_get($dataResponse, 'd.message');
-        }
-        return "ok";
-    }
-
-    public function studentTransferClass()
-    {
-        $url = sprintf('%s/data/setup.asmx/CounStudentClassAddSubmit', config('lms.url'));
-        $client = new Client();
-        $params = [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                "counn" => [
-                    "coun_std_type" => "transfer",
-                    "conn_cls_id" => 149,
-                    "coun_std_id" => 24,
-                    "coun_registration_date" => "2024-12-24",
-                    "coun_payment_date" => "",
-                    "conn_from_cstd_id" => 0,
-                    "conn_syl_id" => 15,
-                    "conn_old_cstd_id" => 838,
-                    "conn_cstf_teacher_fault" => 0,
-                    "conn_lecture_date" => ""
-                ],
-                "staff" => [
-                    "stf_id" => 8824
-                ]
-            ]
-        ];
-        $response = $client->request('POST', $url, $params);
-        $dataResponse = json_decode($response->getBody()->getContents(), true);
-        Log::info('LMS studentTransferClass Data', ['params' => $params, 'data' => $dataResponse]);
-        if (data_get($dataResponse, 'd.status') == 'ok') {
-        }
-        return "ok";
-    }
-
-    public function studentWithdraw()
-    {
-        $url = sprintf('%s/data/setup.asmx/CounStudentWithdrawSave', config('lms.url'));
-        $client = new Client();
-        $params = [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                "counn" => [
-                    "coun_std_id" => "24",
-                    "coun_cstd_id" => "839",
-                    "coun_istd_type" => "Homework - Too much homework",
-                    "coun_Reservation" => 0,
-                    "coun_is_reserved_date" => "",
-                    "coun_work_type" => "S",
-                ],
-                "staff" => ["stf_id" => 8824],
-            ]
-        ];
-        $response = $client->request('POST', $url, $params);
-        $dataResponse = json_decode($response->getBody()->getContents(), true);
-        Log::info('LMS studentWithdraw Data', ['params' => $params, 'data' => $dataResponse]);
-        if (data_get($dataResponse, 'd.status') == 'ok') {
-        }
-        return "ok";
-    }
-
     public function syncDataRoom($brch_id = null)
     {
         $url = sprintf('%s/data/setup.asmx/AcadRoomSetupList', config('lms.url'));
@@ -868,5 +711,218 @@ class LMSController extends Controller
                 }
             }
         }
+    }
+
+
+    //Student Call LMS
+    public function addOrUpdateStudent($student_id = null)
+    {
+        $studentInfo = u::first("SELECT s.*,
+                (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
+                (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
+            FROM students AS s WHERE s.id = $student_id AND (s.lms_id IS NULL OR s.lms_id = 0)");
+        if(config('lms.is_test') && data_get($studentInfo, 'branch_id') !== 1){
+            $studentInfo = null;
+        };
+        if ($studentInfo) {
+            $semesterInfo = u::first("SELECT ls.brch_id FROM semesters AS s LEFT JOIN lms_semesters AS ls ON s.lms_id= ls.bsem_id 
+                WHERE s.product_id = ".data_get($studentInfo,'product_id')." AND s.branch_id = ".data_get($studentInfo,'branch_id').
+                    " AND s.status=1 AND ls.bsem_id IS NOT NULL");
+            $url = sprintf('%s/data/setup.asmx/CounStudentSave', config('lms.url'));
+            $method = 'POST';
+            $client = new Client();
+            $params = [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    "counn" => [
+                        "coun_std_type" => (int)data_get($studentInfo, 'lms_id') ? "U" : "N",
+                        "coun_std_id" => (int)data_get($studentInfo, 'lms_id'),  // 0: add new, > 0: update
+                        "coun_preferred_brch_id" => data_get($semesterInfo, 'brch_id'),
+                        "coun_std_name" => data_get($studentInfo, 'name'),
+                        "coun_std_email" => data_get($studentInfo, 'gud_email1') ? data_get($studentInfo, 'gud_email1') : 'hocsinh@antenglish.edu.vn',
+                        "coun_std_home_phone" => data_get($studentInfo, 'gud_mobile1'),
+                        "coun_std_school" => data_get($studentInfo, 'school') ?? '',
+                        "coun_std_nickname" => data_get($studentInfo, 'nick') ?? '',
+                        "coun_std_birthdate" => data_get($studentInfo, 'date_of_birth')??'',
+                        "coun_std_gender" => data_get($studentInfo, 'gender') ? data_get($studentInfo, 'gender') : 'M',
+                        "coun_std_address" => data_get($studentInfo, 'address') ?? '',
+                        "coun_std_grade_type" => data_get($studentInfo, 'school_grade') ? data_get($studentInfo, 'school_grade') : 'grade 1',
+                        "coun_std_login" => "",
+                        "coun_std_password" => "",
+                        "coun_std_photo" => "",
+                        "coun_std_guardian1" => data_get($studentInfo, 'gud_name1'),
+                        "coun_std_guardian_email" =>data_get($studentInfo, 'gud_email1') ? data_get($studentInfo, 'gud_email1') : 'hocsinh@antenglish.edu.vn',
+                        "coun_std_guardian1_tel" => data_get($studentInfo, 'gud_mobile1'),
+                        "coun_std_guardian2" => "",
+                        "coun_std_guardian2_tel" => "",
+                        "coun_std_status" => "Active",
+                        "coun_std_trialstart" => "",
+                        "coun_std_trialend" => "",
+                        "coun_sales_stf_id" => 0,
+                        "coun_assigned_stf_id" => 0,
+                        "coun_std_note" => "",
+                        "coun_saddr_isvalid" => 0,
+                        "coun_std_istemporary" => 1
+                    ],
+                    "staff" => [
+                        "stf_id" => 8824
+                    ]
+                ]
+            ];
+            $response = $client->request($method, $url, $params);
+            $dataResponse = json_decode($response->getBody()->getContents(), true);
+            u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+            if (data_get($dataResponse, 'd.status') == 'ok') {
+                $lms_student_id = data_get($dataResponse, 'd.message');
+                if($lms_student_id && !data_get($studentInfo, 'lms_id')){
+                    u::updateSimpleRow(array(
+                        'lms_id' => $lms_student_id,
+                    ), array('id' => $student_id), 'students');
+                }
+            }
+        }
+        
+        return "ok";
+    }
+
+    private function getListClassByStudent($lms_student_id){
+        $result = null;
+        $url = sprintf('%s/data/setup.asmx/CounStudentClassList', config('lms.url'));
+        $method = 'POST';
+        $client = new Client();
+        $params = [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                "counn" => [
+                    "coun_std_id"=> $lms_student_id
+                ]
+            ]
+        ];
+        $response = $client->request($method, $url, $params);
+        $dataResponse = json_decode($response->getBody()->getContents(), true);
+        u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+        if (data_get($dataResponse, 'd.result')) {
+            $result = data_get($dataResponse, 'd.result');
+            $result = json_decode($result, true);
+            $result = data_get($result, 'Table', []);
+        }
+        return $result;
+    }
+
+    public function addStudentToClass($student_id)
+    { 
+        $cond = "";
+        if(config('lms.is_test')){
+            $cond = " AND c.branch_id = 1";
+        };
+        $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
+                cl.lms_id AS lms_class_id, c.enrolment_last_date,
+                (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id 
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+            WHERE s.id = $student_id AND c.class_id IS NOT NULL AND c.status =6 $cond");
+        if($studentInfo){
+            $listClassLMS = self::getListClassByStudent(data_get($studentInfo, 'lms_id'));
+            $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
+            if (data_get($classLMSCurrent, 'cls_id') == data_get($studentInfo, 'lms_class_id')) {
+                return "ok";
+            } else {
+                if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
+                    $classLMSCurrent = null;
+                }
+                $url = sprintf('%s/data/setup.asmx/CounStudentClassAddSubmit', config('lms.url'));
+                $method = 'POST';
+                $client = new Client();
+                $params = [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        "staff" => [
+                            "stf_id" => 8824
+                        ],
+                        "counn" => [
+                            "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') ? "transfer" : "add",
+                            "conn_cls_id" => data_get($studentInfo, 'lms_class_id'),
+                            "coun_std_id" => data_get($studentInfo, 'lms_id'),
+                            "coun_registration_date" => data_get($studentInfo, 'enrolment_start_date'),
+                            "coun_payment_date" => "",
+                            "conn_from_cstd_id" => 0,
+                            "conn_syl_id" => data_get($studentInfo, 'syl_id'),
+                            "conn_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
+                            "conn_cstf_teacher_fault" => 0,
+                            "conn_lecture_date" => ""
+                        ]
+                    ]
+                ];
+                $response = $client->request($method, $url, $params);
+                $dataResponse = json_decode($response->getBody()->getContents(), true);
+                u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+                if (data_get($dataResponse, 'd.status') == 'ok') {
+                    return "ok";
+                } else {
+                    return "false";
+                }
+            }
+        } 
+        return "ok";
+    }
+
+    public function studentWithdraw($student_id)
+    {
+        $cond = "";
+        if(config('lms.is_test')){
+            $cond = " AND c.branch_id = 1";
+        };
+        $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
+                cl.lms_id AS lms_class_id, c.enrolment_last_date,
+                (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id 
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+            WHERE s.id = $student_id AND c.class_id IS NOT NULL AND c.status =6 $cond");
+        if($studentInfo){
+            $listClassLMS = self::getListClassByStudent(data_get($studentInfo, 'lms_id'));
+            $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
+            if (data_get($classLMSCurrent, 'is_transfer') == 'Y' || data_get($classLMSCurrent, 'is_transfer_cancel') == 'Y'){
+                $url = sprintf('%s/data/setup.asmx/CounStudentWithdrawSave', config('lms.url'));
+                $client = new Client();
+                $method = 'POST';
+                $params = [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        "counn" => [
+                            "coun_std_id" => data_get($studentInfo, 'lms_id'),
+                            "coun_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
+                            "coun_istd_type" => "Others - Withdraw due to other reasons",
+                            "coun_Reservation" => 0,
+                            "coun_is_reserved_date" => "",
+                            "coun_work_type" => "S",
+                        ],
+                        "staff" => ["stf_id" => 8824],
+                    ]
+                ];
+                $response = $client->request($method, $url, $params);
+                $dataResponse = json_decode($response->getBody()->getContents(), true);
+                u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+                if (data_get($dataResponse, 'd.status') == 'ok') {
+                    return "ok";
+                } else {
+                    return "false";
+                }
+            }
+        }
+        return "ok";
     }
 }

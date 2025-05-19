@@ -1092,4 +1092,15 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $weekday;
     }
+    public static function logRequest($url,$method,$header,$body,$response,$table){
+        self::insertSimpleRow(array(
+            'url'=>$url,
+            'method'=>$method,
+            'header'=>is_string($header) ? $header : json_encode($header),
+            'body'=>is_string($body) ? $body :json_encode($body),
+            'response'=>is_string($response) ? $response :json_encode($response),
+            'created_at'=>date('Y-m-d H:i:s')
+        ),$table);
+        return true;
+    }
 }

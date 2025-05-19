@@ -180,7 +180,8 @@ class ClassTransfersController extends Controller
                 'updator_id' => Auth::user()->id,
             ),array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
-
+            $lmsController = new LMSController();
+            $lmsController->addStudentToClass($student_id);
             LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
             u::updateSimpleRow(array(
                 'status'=> 2,
