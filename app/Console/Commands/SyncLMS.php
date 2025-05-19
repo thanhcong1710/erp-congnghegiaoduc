@@ -77,38 +77,38 @@ class SyncLMS extends Command
         // }
 
         //lấy dữ liệu Class từ LMS
-        $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
-        foreach ($listClass as $item) {
-            $cls_id = str_replace(':B', '', $item->id);
-            $lms->syncDataClassInfo($cls_id, $item->parent);
-            echo $cls_id."/";
-        }
+        // $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
+        // foreach ($listClass as $item) {
+        //     $cls_id = str_replace(':B', '', $item->id);
+        //     $lms->syncDataClassInfo($cls_id, $item->parent);
+        //     echo $cls_id."/";
+        // }
         //tạo Class trên ERP 
-        $lms->erpCreateClass();
+        // $lms->erpCreateClass();
         //tạo session trên ERP
-        $listClass = u::query("SELECT * FROM classes");
-        foreach ($listClass as $item) {
-            $lms->getDataRoomSessionInClass($item->id);
-            echo $item->id."/";
-        }
+        // $listClass = u::query("SELECT * FROM classes");
+        // foreach ($listClass as $item) {
+        //     $lms->getDataRoomSessionInClass($item->id);
+        //     echo $item->id."/";
+        // }
 
         // $listClass = u::query("SELECT id FROM lms_programs WHERE id LIKE '%:B'");
-        foreach ($listClass as $item) {
-            $cls_id = str_replace(':B', '', $item->id);
-            $lms->syncDataSchedules($cls_id);
-            echo $cls_id."/";
-        }
+        // foreach ($listClass as $item) {
+        //     $cls_id = str_replace(':B', '', $item->id);
+        //     $lms->syncDataSchedules($cls_id);
+        //     echo $cls_id."/";
+        // }
 
         // $listClass = u::query("SELECT id FROM lms_programs WHERE id LIKE '%:B'");
-        foreach ($listClass as $item) {
-            $cls_id = str_replace(':B', '', $item->id);
-            $lms->syncDataClassStudents($cls_id);
-            echo $cls_id."/";
-        }
+        // foreach ($listClass as $item) {
+        //     $cls_id = str_replace(':B', '', $item->id);
+        //     $lms->syncDataClassStudents($cls_id);
+        //     echo $cls_id."/";
+        // }
 
         // $lms->syncDataClassStudents(267);
         
-        //Update  classes.teacher_name , classes.shift_name
+        // Update  classes.teacher_name , classes.shift_name
         u::query("UPDATE classes AS cl LEFT JOIN lms_classes AS lc ON cl.lms_id =lc.cls_id SET cl.teacher_name = lc.ins_name");
         u::query("UPDATE classes AS cl SET cl.shift_name = (
             SELECT GROUP_CONCAT( CONCAT(room_name, ': ',ctime_day_type, ' ' ,ctime_start_time_type, '-',ctime_end_time_type) SEPARATOR ', ') AS shif_name
