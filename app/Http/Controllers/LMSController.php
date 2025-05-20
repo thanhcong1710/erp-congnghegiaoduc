@@ -720,11 +720,11 @@ class LMSController extends Controller
         $studentInfo = u::first("SELECT s.*,
                 (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
                 (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
-            FROM students AS s WHERE s.id = $student_id AND (s.lms_id IS NULL OR s.lms_id = 0)");
+            FROM students AS s WHERE s.id = $student_id ");
         if(config('lms.is_test') && data_get($studentInfo, 'branch_id') !== 1){
             $studentInfo = null;
         };
-        if ($studentInfo) {
+        if ($studentInfo && data_get($studentInfo,'branch_id') && data_get($studentInfo,'product_id')) {
             $semesterInfo = u::first("SELECT ls.brch_id FROM semesters AS s LEFT JOIN lms_semesters AS ls ON s.lms_id= ls.bsem_id 
                 WHERE s.product_id = ".data_get($studentInfo,'product_id')." AND s.branch_id = ".data_get($studentInfo,'branch_id').
                     " AND s.status=1 AND ls.bsem_id IS NOT NULL");

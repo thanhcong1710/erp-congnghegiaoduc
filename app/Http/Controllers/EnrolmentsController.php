@@ -183,7 +183,6 @@ class EnrolmentsController extends Controller
             ), array('student_id'=>$student_id), 'term_student_user');
             LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
             $lmsController = new LMSController();
-            $lmsController->addOrUpdateStudent($student_id);
             $lmsController->addStudentToClass($student_id);
         }
 

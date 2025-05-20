@@ -193,6 +193,7 @@ class StudentsController extends Controller
             'district_id' => $request->district_id,
             'address' => $request->address,
             'school' => $request->school,
+            'school_grade' => $request->school_grade,
             'gud_name1' => $request->gud_name1,
             'gud_email1' => $request->gud_email1,
             'gud_birth_day1' => $request->gud_birth_day1,
@@ -209,6 +210,8 @@ class StudentsController extends Controller
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
         LogStudents::logUpdateInfo($pre_student_info,$data_update,Auth::user()->id);
+        $lmsController = new LMSController();
+        $lmsController->addOrUpdateStudent($request->id);
         $result =(object)array(
             'status'=>1,
             'message'=>'Cập nhật học sinh thành công'

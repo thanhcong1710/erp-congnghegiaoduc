@@ -99,6 +99,30 @@
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>School Grade</label>
+          <select class="vs-inputx vs-input--input normal"  v-model="student_info.school_grade" :disabled="disabled_edit">
+            <option value="" class="ng-binding">Select School Grade</option>
+            <option value="toddler 3 age">toddler 3 age</option>
+            <option value="toddler 4 age">toddler 4 age</option>
+            <option value="toddler 5 age">toddler 5 age</option>
+            <option value="toddler 6 age">toddler 6 age</option>
+            <option value="toddler 7">toddler 7 age</option>
+            <option value="grade 1">grade 1</option>
+            <option value="grade 2">grade 2</option>
+            <option value="grade 3">grade 3</option>
+            <option value="grade 4">grade 4</option>
+            <option value="grade 5">grade 5</option>
+            <option value="grade 6">grade 6</option>
+            <option value="grade 7">grade 7</option>
+            <option value="grade 8">grade 8</option>
+            <option value="grade 9">grade 9</option>
+            <option value="grade 1">grade 10</option>
+            <option value="grade 11">grade 11</option>
+            <option value="grade 12">grade 12</option>
+            <option value="other">other</option>
+        </select>
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
           <label >Nguồn </label>
           <input
             class="vs-inputx vs-input--input normal"

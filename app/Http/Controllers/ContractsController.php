@@ -142,6 +142,8 @@ class ContractsController extends Controller
         u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
         u::addLogContracts($contract_id);
         LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
+        $lmsController = new LMSController();
+        $lmsController->addOrUpdateStudent(data_get($student_info, 'student_id'));
 
         $result = array(
             'status' => 1,

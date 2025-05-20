@@ -679,7 +679,7 @@
           }
         },
         check_list: [],
-        active_tab: 1,
+        active_tab: 3,
         alert:{
           active: false,
           body: '',
@@ -901,6 +901,7 @@
       this.loadDetail();
       this.loadCares();
       this.loadTickets();
+      this.loadStudents();
     },
     methods: {
       localeDataSourceDetail(data=null){
