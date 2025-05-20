@@ -489,6 +489,13 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function validClassdays($classdays = [])
     {
+        foreach($classdays AS $k => $row){
+            if($row==8){
+                $classdays[$k] = 0;
+            }else{
+                $classdays[$k] = $row-1;
+            }
+        }
         $resp = count($classdays) ? $classdays : [2, 5];
         if (count($resp)) {
             $resp = array_unique($resp);
