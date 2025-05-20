@@ -63,6 +63,11 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Mã LMS
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Tên Học sinh
                       <!---->
                     </div>
@@ -95,6 +100,7 @@
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.from_branch_name}}</td>
                 <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td">{{item.lms_id}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td">{{item.from_class_name}}</td>
                 <td class="td vs-table--td">{{item.to_class_name}}</td>

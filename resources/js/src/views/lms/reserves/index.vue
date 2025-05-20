@@ -109,6 +109,7 @@
                 <td class="td vs-table--td">
                   <p><strong>{{ item.name }}</strong></p>
                   <p>Mã: {{item.lms_code}}</p>
+                  <p>Mã LMS: {{item.lms_id}}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>Lớp: {{item.class_name}}</p>

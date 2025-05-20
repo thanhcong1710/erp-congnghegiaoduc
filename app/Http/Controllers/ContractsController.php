@@ -172,7 +172,7 @@ class ContractsController extends Controller
         }
         
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.lms_id LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
         }
 
         if ($end_date !== '') {
@@ -187,7 +187,7 @@ class ContractsController extends Controller
         $total = u::first("SELECT count(s.id) AS total 
             FROM contracts AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
-        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code,  s.lms_id, 
                 (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,

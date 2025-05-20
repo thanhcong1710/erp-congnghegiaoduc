@@ -32,7 +32,7 @@ class ReservesController extends Controller
             $cond .= " AND r.status IN (".implode(",",$status).")";
         }
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.lms_id LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
         
         $order_by = " ORDER BY r.id DESC ";
@@ -40,7 +40,7 @@ class ReservesController extends Controller
         $total = u::first("SELECT count(r.id) AS total 
             FROM reserves AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
         
-        $list = u::query("SELECT r.id, s.name, s.lms_code,
+        $list = u::query("SELECT r.id, s.name, s.lms_code, s.lms_id,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
                 r.session, r.start_date, r.end_date, r.is_reserved, r.status

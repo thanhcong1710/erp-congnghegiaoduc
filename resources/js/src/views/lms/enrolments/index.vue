@@ -151,6 +151,7 @@
                         <p><strong>{{item.contract_code}}</strong></p>
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
+                        <p>Mã LMS:{{item.lms_id}}</p>
                         <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
                         <p>Ngày kết thúc: {{item.enrolment_last_date}}</p>
                       </td>
