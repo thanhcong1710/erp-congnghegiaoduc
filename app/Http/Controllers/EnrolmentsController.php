@@ -117,8 +117,9 @@ class EnrolmentsController extends Controller
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
 
         $product_id = data_get($class_info, 'product_id');
+        $branch_id = data_get($class_info, 'branch_id'); 
         // $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
-        $cond = " c.status IN (3, 4, 5) ";
+        $cond = " c.status IN (3, 4, 5) AND c.branch_id= $branch_id ";
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
             AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
 
