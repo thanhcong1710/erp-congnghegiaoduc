@@ -43,7 +43,7 @@ class ImportData extends Command
         foreach($list AS $row){
             //insert crm_parents
             if(data_get($row,'parent_mobile')){
-                $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1 = '".data_get($row,'parent_mobile')."'");
+                $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1 LIKE '%".data_get($row,'parent_mobile')."'");
                 if($parent_info){
                     $crm_parent_id = data_get($parent_info, 'id');
                 } else{
@@ -52,7 +52,7 @@ class ImportData extends Command
                         'mobile_1' => substr(data_get($row,'parent_mobile'),0,1) == '0' ? data_get($row,'parent_mobile') : '0'.data_get($row,'parent_mobile'),
                         'created_at' => date('Y-m-d H:i:s'),
                         'branch_id' => data_get($row, 'branch_id'),
-                        'owner_id' => 17,
+                        'owner_id' => 1,
                     ), 'crm_parents');
                 }
                 $student_info = u::first("SELECT * FROM crm_students WHERE name = '".data_get($row,'student_name')."' AND parent_id = ".$crm_parent_id);
@@ -144,6 +144,8 @@ class ImportData extends Command
                         u::updateDoneSessions($contract_id);
                         u::updateSimpleRow(array('contract_id'=>$contract_id, 'status'=>1), array('id'=>data_get($row,'id')), 'tmp_import' );
                     }else{
+                        $real_sessions = (int)data_get($row, 'so_buoi_con_lai') -  (int)data_get($row, 'so_buoi_hoc_bong') > 0 ? (int)data_get($row, 'so_buoi_con_lai') -  (int)data_get($row, 'so_buoi_hoc_bong') : 0;
+                        $so_tien_con_lai =  data_get($row, 'so_buoi_tra_phi') ? (((int)data_get($row, 'total_charge') * (int)$real_sessions) / (int)data_get($row, 'so_buoi_tra_phi')) : 0;
                         $contract_id = u::insertSimpleRow(array(
                             'type' => 1,
                             'student_id' => data_get($row, 'student_id'), 
@@ -156,7 +158,7 @@ class ImportData extends Command
                             'init_tuition_fee_session' => data_get($tuitionFeeInfo, 'session'),
                             'init_total_charged'=>data_get($row, 'total_charge'),
                             'must_charge' => data_get($row, 'must_charge'),
-                            'total_charged'=>data_get($row, 'so_tien_con_lai'),
+                            'total_charged'=>$so_tien_con_lai,
                             'debt_amount' => 0,
                             'total_sessions' => (int)data_get($row, 'so_buoi_con_lai'),
                             'real_sessions' => (int)data_get($row, 'so_buoi_con_lai') -  (int)data_get($row, 'so_buoi_hoc_bong') > 0 ? (int)data_get($row, 'so_buoi_con_lai') -  (int)data_get($row, 'so_buoi_hoc_bong') : 0,
@@ -199,6 +201,12 @@ class ImportData extends Command
 
         } elseif(strtoupper($product_name) == strtoupper('i-garten')){
             switch ((int)$tuition_fee_name) {
+                case '3':
+                    return 37;
+                case '6':
+                    return 38;
+                case '12':
+                    return 39;
                 default:
                     return null;
             }
