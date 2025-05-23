@@ -39,6 +39,15 @@ class ImportData extends Command
      */
     public function handle(Request $request)
     {
+        u::query("UPDATE tmp_import AS t
+                JOIN (
+                    SELECT lms_id
+                    FROM tmp_import
+                    GROUP BY lms_id
+                    HAVING COUNT(id) > 1
+                ) AS dup ON dup.lms_id = t.lms_id
+                SET t.status = 2
+                WHERE t.so_buoi_con_lai = 0");
         $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (crm_parent_id = 0 OR crm_parent_id IS NULL)");
         foreach($list AS $row){
             //insert crm_parents
