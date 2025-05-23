@@ -303,4 +303,51 @@ class ClassesController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function syncLMS(){
+        $lms = new LMSController();
+        //lấy dữ liệu trung tâm từ LMS
+        $lms->syncDataBranch();
+        //tạo trung tâm trên ERP 
+        $lms->erpCreateBranch();
+
+        //lấy dữ liệu semester từ LMS
+        $lms->syncDataSemester();
+        //tạo semester trên ERP 
+        $lms->erpCreateSemester();
+
+        //lấy dữ liệu programs từ LMS
+        $listSemester = u::query("SELECT * FROM lms_semesters");
+        foreach ($listSemester as $item) {
+            $lms->syncDataPrograms($item->bsem_id);
+            echo $item->bsem_id."/";
+        }
+        //tạo programs trên ERP 
+        $lms->erpCreateProgram();
+
+        //lấy dữ liệu teachers từ LMS
+        $listBranch = u::query("SELECT * FROM lms_branches");
+        foreach ($listBranch as $item) {
+            $lms->syncDataTeacher($item->brch_id, $item->ug_type, $item->branch_id);
+            echo $item->brch_id."/";
+        }
+
+        //lấy dữ liệu Class từ LMS
+        $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
+        foreach ($listClass as $item) {
+            $cls_id = str_replace(':B', '', $item->id);
+            $lms->syncDataClassInfo($cls_id, $item->parent);
+            echo $cls_id."/";
+        }
+
+        //tạo Class trên ERP 
+        $lms->erpCreateClass();
+        //tạo session trên ERP
+        $listClass = u::query("SELECT * FROM classes");
+        foreach ($listClass as $item) {
+            $lms->getDataRoomSessionInClass($item->id);
+            echo $item->id."/";
+        }
+        return response()->json("ok");
+    }
 }
