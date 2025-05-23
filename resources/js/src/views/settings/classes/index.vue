@@ -2,6 +2,9 @@
 
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
+      <div style="text-align: right;">
+        <vs-button class="mb-2" color="primary" @click="syncLMS()">Đồng bộ dữ liệu LMS</vs-button>
+      </div>
       <div class="vx-row">
         <div class="vx-col md:w-1/4 w-full item-first" style="border-right: 1px solid #ccc;">
           <div class="vx-row">
@@ -824,8 +827,9 @@
         this.getDataSessions();
       },
       syncLMS(){
+        console.log('123');
         this.$vs.loading();
-        axios.g(`/api/classes/sync-lms`)
+        axios.p(`/api/settings/classes/sync-lms`)
           .then(response => {
           this.$vs.loading.close();
           location.reload();
