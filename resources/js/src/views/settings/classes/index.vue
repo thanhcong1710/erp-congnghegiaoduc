@@ -828,7 +828,7 @@
         axios.g(`/api/classes/sync-lms`)
           .then(response => {
           this.$vs.loading.close();
-          this.html.rooms.list = response.data
+          location.reload();
         })
       },
     },
