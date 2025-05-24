@@ -36,6 +36,7 @@
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button class="mr-3 mb-2" color="warning" @click="updateDataEnrol"><i class="fa fa-save"></i> Tính lại ngày học cuối</vs-button>
           </div>
         </div>
       </div>
@@ -250,6 +251,21 @@
           })
         })
       },
+      updateDataEnrol(){
+        this.$vs.loading();
+        axios.p(`/api/settings/holidays/update-enrolment-last-date`,{})
+        .then((response) => {
+          this.$vs.loading.close();
+          this.getData();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+        })
+      }
     },
     filters: {
     },

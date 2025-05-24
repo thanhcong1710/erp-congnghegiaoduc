@@ -275,6 +275,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('delete', 'HolidaysController@delete');
                 Route::get('show/{id}', 'HolidaysController@show');
                 Route::post('update', 'HolidaysController@update');
+                Route::post('update-enrolment-last-date', 'HolidaysController@updateEnrolmentLastDate');
             });
             Route::prefix('subjects')->group(function () {
                 Route::post('add', 'SubjectsController@add');

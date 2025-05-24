@@ -138,4 +138,12 @@ class HolidaysController extends Controller
         );
         return response()->json($result);
     }
+
+    public function updateEnrolmentLastDate(){
+        $list = u::query("SELECT id FROM contracts WHERE status=6");
+        foreach($list AS $row){
+            u::updateDoneSessions(data_get($row,'id'));
+        }
+        return response()->json("ok");
+    }
 }
