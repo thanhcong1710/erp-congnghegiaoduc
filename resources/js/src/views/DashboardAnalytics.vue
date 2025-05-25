@@ -142,8 +142,8 @@
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_12')">
         <vx-card class="text">
-          <h5 class="mb-4 text-center">Học sinh Renew theo AF</h5>
-          <vue-apex-charts type="bar" :options="lineChartRenewAF.chartOptions" :series="lineChartRenewAF.series"></vue-apex-charts>
+          <h5 class="mb-4 text-center">Học sinh Renew theo CM</h5>
+          <vue-apex-charts type="bar" :options="lineChartRenewCM.chartOptions" :series="lineChartRenewCM.series"></vue-apex-charts>
         </vx-card>
       </div>
       <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_13')">
@@ -313,7 +313,7 @@ export default {
           }
         },
       },
-      lineChartRenewAF:{
+      lineChartRenewCM:{
         series: [{
           name: 'Thành công',
           data: [44, 55, 41, 37, 22, 43, 21]
@@ -823,13 +823,13 @@ export default {
       })
       .then(response => {
         this.$vs.loading.close()
-        this.lineChartRenewAF = {
+        this.lineChartRenewCM = {
           series: [ {
             name: 'Thất bại',
-            data: response.data.lineChartRenewAF.dataFalseRenew
+            data: response.data.lineChartRenewCM.dataFalseRenew
           },{
             name: 'Thành công',
-            data: response.data.lineChartRenewAF.dataRenew
+            data: response.data.lineChartRenewCM.dataRenew
           }],
           chartOptions: {
             chart: {
@@ -857,7 +857,7 @@ export default {
               colors: ['#fff']
             },
             xaxis: {
-              categories: response.data.lineChartRenewAF.categories,
+              categories: response.data.lineChartRenewCM.categories,
               labels: {
                 formatter: function (val) {
                   return val

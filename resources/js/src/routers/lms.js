@@ -529,9 +529,9 @@ export default {
           breadcrumb: [
             { title: 'Home', url: '/' },
             { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - AF', active: true}
+            { title: 'Báo cáo tái phí - CM', active: true}
           ],
-          pageTitle: 'Báo cáo tái phí - AF',
+          pageTitle: 'Báo cáo tái phí - CM',
           rule: 'editor'
         }
       },
@@ -599,9 +599,9 @@ export default {
           breadcrumb: [
             { title: 'Home', url: '/' },
             { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tỷ lệ ACS của từng AF', active: true}
+            { title: 'Báo cáo tỷ lệ ACS của từng CM', active: true}
           ],
-          pageTitle: 'Báo cáo tỷ lệ ACS của từng AF',
+          pageTitle: 'Báo cáo tỷ lệ ACS của từng CM',
           rule: 'editor'
         }
       },

@@ -72,14 +72,14 @@ class ReportsController extends Controller
             if (count($list) > 5000) {
                 for($i = 0; $i < 5000; $i++) {
                     $item = $list[$i];
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
                 self::addItems(array_slice($list, 5000));
             } else {
                 foreach($list as $item) {
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);

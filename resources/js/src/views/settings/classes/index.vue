@@ -117,7 +117,7 @@
                 ></vue-select>
             </div> -->
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>AF - Quản lý lớp học</label>
+              <label>CM - Quản lý lớp học</label>
               <vue-select
                     label="label"
                     placeholder="Chọn quản lý lớp học"

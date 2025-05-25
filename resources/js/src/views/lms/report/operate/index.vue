@@ -26,7 +26,7 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-02c'"  v-if="checkPermission('lms_reports_operate_04')">
-                <p>04. BÁO CÁO THEO AF HỌC SINH TÁI PHÍ</p>
+                <p>04. BÁO CÁO THEO CM HỌC SINH TÁI PHÍ</p>
               </router-link>
             </div>
             <div class="mb-2">
@@ -51,7 +51,7 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-09'"  v-if="checkPermission('lms_reports_operate_09')">
-                <p>09. BÁO CÁO TỶ LỆ ACS CỦA TỪNG AF</p>
+                <p>09. BÁO CÁO TỶ LỆ ACS CỦA TỪNG CM</p>
               </router-link>
             </div>
             <div class="mb-2">

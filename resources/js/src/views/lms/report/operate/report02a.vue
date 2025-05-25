@@ -28,7 +28,7 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/3 w-full mb-4">
-            <label>AF - Quản lý lớp học</label>
+            <label>CM - Quản lý lớp học</label>
             <vue-select
                   label="label"
                   placeholder="Chọn quản lý lớp học"
@@ -36,7 +36,7 @@
                   v-model="cms_item"
                   :searchable="true"
                   language="tv-VN"
-                  @input="saveAF"
+                  @input="saveCM"
               ></vue-select>
           </div>
           <div class="vx-col sm:w-1/3 w-full mb-4">
@@ -87,7 +87,7 @@
                   <th colspan="1" rowspan="1">Kết quả</th>
                   <th colspan="1" rowspan="1">Gói tái phí</th>
                   <th colspan="1" rowspan="1">Số tiền tái phí</th>
-                  <th colspan="1" rowspan="1">AF</th>
+                  <th colspan="1" rowspan="1">CM</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
@@ -230,7 +230,7 @@
           this.class_item = ""
         })
       },
-      saveAF(data = null){
+      saveCM(data = null){
         if (data && typeof data === 'object') {
           const cm_id = data.id
           this.searchData.cm_id = cm_id

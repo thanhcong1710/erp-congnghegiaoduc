@@ -156,12 +156,12 @@ export default [
             slug: 'lms-waitcharges',
             permission:'lms_waitcharges',
           },
-          {
-            url: '/lms/waitcharge-approve',
-            name: 'Duyệt đóng phí',
-            slug: 'lms-waitcharge-approve',
-            permission:'lms_waitcharge_approve',
-          }
+          // {
+          //   url: '/lms/waitcharge-approve',
+          //   name: 'Duyệt đóng phí',
+          //   slug: 'lms-waitcharge-approve',
+          //   permission:'lms_waitcharge_approve',
+          // }
         ],
       },
       {

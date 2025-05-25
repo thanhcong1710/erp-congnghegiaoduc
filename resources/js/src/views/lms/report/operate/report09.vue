@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO TỶ LỆ ACS CỦA TỪNG AF</h5>
+      <h5>BÁO CÁO TỶ LỆ ACS CỦA TỪNG CM</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -54,7 +54,7 @@
                   <!---->
                   <th colspan="1" rowspan="3" class="text-center">STT</th>
                   <th colspan="1" rowspan="3">Trung tâm</th>
-                  <th colspan="1" rowspan="3">AF phụ trách</th>
+                  <th colspan="1" rowspan="3">CM phụ trách</th>
                   <th colspan="12" rowspan="1">Class type: Group class/ Mode of learning: Offline</th>
                   <th colspan="1" rowspan="3">ACS</th>
                 </tr>

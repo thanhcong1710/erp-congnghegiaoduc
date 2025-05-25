@@ -72,7 +72,7 @@
                   <th colspan="1" rowspan="1">Phòng học</th>
                   <th colspan="1" rowspan="1">Giờ dạy/buổi</th>
                   <th colspan="1" rowspan="1">Giáo viên</th>
-                  <th colspan="1" rowspan="1">AF phụ trách</th>
+                  <th colspan="1" rowspan="1">CM phụ trách</th>
                   <th colspan="1" rowspan="1">TA phụ trách</th>
                 </tr>
               </thead>

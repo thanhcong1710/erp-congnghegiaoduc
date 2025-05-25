@@ -49,26 +49,26 @@ class ChargesController extends Controller
         return response()->json($data);
     }
 
-    public function add(Request $request){
-        $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
-        u::insertSimpleRow(array(
-            'contract_id' => data_get($request, 'contract_id'),
-            'charge_amount' => data_get($request, 'amount'),
-            'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
-            'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-            'charge_date' => data_get($request, 'charge_date'),
-            'method' =>  data_get($request, 'method'),
-            'note' => data_get($request, 'note'),
-            'meta_data' => json_encode($request->input()),
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
-            'status' => 0), 'tmp_payments');
-        $result = array(
-            'status' => 1,
-            'message' => 'Thêm mới phiếu thu thành công.'
-        );
-        return response()->json($result);
-    }
+    // public function add(Request $request){
+    //     $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
+    //     u::insertSimpleRow(array(
+    //         'contract_id' => data_get($request, 'contract_id'),
+    //         'charge_amount' => data_get($request, 'amount'),
+    //         'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
+    //         'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+    //         'charge_date' => data_get($request, 'charge_date'),
+    //         'method' =>  data_get($request, 'method'),
+    //         'note' => data_get($request, 'note'),
+    //         'meta_data' => json_encode($request->input()),
+    //         'created_at' => date('Y-m-d H:i:s'),
+    //         'creator_id' => Auth::user()->id,
+    //         'status' => 0), 'tmp_payments');
+    //     $result = array(
+    //         'status' => 1,
+    //         'message' => 'Thêm mới phiếu thu thành công.'
+    //     );
+    //     return response()->json($result);
+    // }
 
     public function update(Request $request){
         $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
@@ -362,5 +362,59 @@ class ChargesController extends Controller
         return response()->json([
             'payment_info' => $data,
         ]);
+    }
+
+    public function add(Request $request){
+        $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
+        u::insertSimpleRow(array(
+            'contract_id' => data_get($contract_info, 'id'),
+            'student_id' => data_get($contract_info, 'student_id'), 
+            'branch_id' => data_get($contract_info, 'branch_id'), 
+            'cm_id' => data_get($contract_info, 'cm_id'), 
+            'ec_id' => data_get($contract_info, 'ec_id'), 
+            'method' => data_get($request, 'method'),
+            'must_charge' => data_get($contract_info, 'must_charge'),
+            'amount' => data_get($request, 'amount'),
+            'total' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+            'debt' => (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'charge_date' => data_get($request, 'charge_date'),
+            'note' => data_get($request, 'note'),
+            'created_at'=>date('Y-m-d H:i:s'),
+            'creator_id'=>Auth::user()->id,
+        ), 'payments');
+
+        $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount');
+        if($debt_amount == 0){
+            u::updateSimpleRow(array(
+                'status' => 3,
+                'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
+                'summary_sessions' => data_get($contract_info, 'total_sessions'), 
+                'left_sessions' => data_get($contract_info, 'total_sessions'), 
+                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'debt_amount' => 0,
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'updator_id'=>Auth::user()->id,
+            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
+            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+            self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
+        }else{
+            u::updateSimpleRow(array(
+                'status' => 2,
+                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+                'debt_amount' => $debt_amount,
+                'updated_at'=>date('Y-m-d H:i:s'),
+                'updator_id'=>Auth::user()->id,
+            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
+            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($request, 'amount')).' cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+        }
+        
+        u::addLogContracts(data_get($contract_info, 'id'));
+        $result = array(
+            'status' => 1,
+            'message' => 'Thêm mới phiếu thu thành công.'
+        );
+        return response()->json($result);
     }
 }

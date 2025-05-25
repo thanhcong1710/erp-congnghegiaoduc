@@ -1110,4 +1110,41 @@ class UtilityServiceProvider extends ServiceProvider
         ),$table);
         return true;
     }
+
+    public static function updateScheduleHasStudent($contract_id){
+        $contractInfo = self::getObject(array('id'=>$contract_id),'contracts');
+        if(data_get($contractInfo, 'status') ==6 && data_get($contractInfo, 'class_id')){
+            $enrolment_start_date = data_get($contractInfo, 'enrolment_start_date');
+            $currDate = date('Y-m-d');
+            if( $enrolment_start_date < $currDate){
+                $class_info = self::getObject(array('id'=>data_get($contractInfo,'class_id')), 'classes');
+                $arr_day = explode(',', $class_info->class_day);
+                $holidays = self::getPublicHolidays(data_get($contractInfo,'branch_id'), data_get($contractInfo,'product_id'));
+                $data_sessions = self::calculatorSessions($enrolment_start_date, $currDate, $holidays, $arr_day);
+                $student_id= data_get($contractInfo,'student_id');
+                if(!empty(data_get($data_sessions, 'dates'))){
+                    foreach(data_get($data_sessions, 'dates') AS $row){
+                        $checkExit = self::first("SELECT id FROM schedule_has_student WHERE student_id = $student_id AND class_date = '$row'");
+                        if(!$checkExit){
+                            self::insertSimpleRow(array(
+                                'student_id'=>$student_id,
+                                'branch_id'=>data_get($contractInfo, 'branch_id'),
+                                'class_id'=>data_get($contractInfo, 'class_id'),
+                                'contract_id'=>data_get($contractInfo, 'id'),
+                                'product_id'=>data_get($contractInfo, 'product_id'),
+                                'program_id'=>data_get($contractInfo, 'program_id'),
+                                'class_date'=>$row,
+                                'created_at'=>date('Y-m-d H:i:s'),
+                                'status'=>1
+                            ), 'schedule_has_student');
+                            self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
+                                AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=2 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
+                        }
+                    }
+                }
+
+                self::updateDoneSessions(data_get($contractInfo, 'id'));
+            }
+        }
+    }
 }
