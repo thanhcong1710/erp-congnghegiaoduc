@@ -186,6 +186,9 @@ class EnrolmentsController extends Controller
             LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
             $lmsController = new LMSController();
             $lmsController->addStudentToClass($student_id);
+            if($start_date < date('Y-m-d')){
+                u::updateScheduleHasStudent($contract_id);
+            }
         }
 
         $result = array(

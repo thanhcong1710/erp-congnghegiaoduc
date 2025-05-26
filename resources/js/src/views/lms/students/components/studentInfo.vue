@@ -278,23 +278,43 @@
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Nhân viên kinh doanh</label>
-          <input
+          <!-- <input
             class="vs-inputx vs-input--input normal"
             type="text"
             name="title"
             v-model="student_info.ec_name"
             disabled="true"
-          />
+          /> -->
+          <vue-select
+                label="label"
+                placeholder="Chọn EC"
+                :options="html.ecs.list"
+                v-model="html.ecs.item"
+                :searchable="true"
+                language="tv-VN"
+                @input="saveEC"
+                :disabled="disabled_edit"
+            ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Nhân viên vận hành lớp</label>
-          <input
+          <!-- <input
             class="vs-inputx vs-input--input normal"
             type="text"
             name="title"
             v-model="student_info.cm_name"
             disabled="true"
-          />
+          /> -->
+          <vue-select
+                label="label"
+                placeholder="Chọn CM"
+                :options="html.cms.list"
+                v-model="html.cms.item"
+                :searchable="true"
+                language="tv-VN"
+                @input="saveCM"
+                :disabled="disabled_edit"
+            ></vue-select>
         </div>
       </div>
       <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -372,6 +392,14 @@
             item: '',
             list: []
           },
+          ecs: {
+            item: '',
+            list: []
+          },
+          cms: {
+            item: '',
+            list: []
+          },
         },
         tmp_district_id:'',
       }
@@ -385,13 +413,43 @@
         .then(response => {
         this.html.jobs.list = response.data
       })
+      await axios.g(`/api/system/cms/${this.student_info.branch_id}`)
+        .then(response => {
+        this.html.cms.list = response.data
+      })
+      await axios.g(`/api/system/ecs/${this.student_info.branch_id}`)
+        .then(response => {
+        this.html.ecs.list = response.data
+      })
       this.html.jobs.item = this.html.jobs.list.filter(item => item.id == this.student_info.gud_job1)[0]
       this.html.jobs.item2 = this.html.jobs.list.filter(item => item.id == this.student_info.gud_job2)[0]
       this.html.province.item = this.html.province.list.filter(item => item.id == this.student_info.province_id)[0]
       this.tmp_district_id = this.student_info.district_id
       this.getDistrict(this.html.province.item);
+      this.html.ecs.item = this.html.ecs.list.filter(item => item.id == this.student_info.ec_id)[0]
+      this.html.cms.item = this.html.cms.list.filter(item => item.id == this.student_info.cm_id)[0]
     },
     methods: {
+      saveEC(data = null){
+        if (data && typeof data === 'object') {
+          const ec_id = data.id
+          this.html.ecs.item = data
+          this.student_info.ec_id = ec_id
+        }else{
+          this.html.ecs.item = ""
+          this.student_info.ec_id = ""
+        }
+      },
+      saveCM(data = null){
+        if (data && typeof data === 'object') {
+          const cm_id = data.id
+          this.html.cms.item = data
+          this.student_info.cm_id = cm_id
+        }else{
+          this.html.cms.item = ""
+          this.student_info.cm_id = ""
+        }
+      },
       selectDate(date) {
         if (date) {
           this.student_info.date_of_birth = moment(date).format("YYYY-MM-DD");

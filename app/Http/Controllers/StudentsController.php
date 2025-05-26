@@ -209,6 +209,18 @@ class StudentsController extends Controller
             'updator_id' => Auth::user()->id,
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
+        $ec_id =data_get($request, 'ec_id');
+        $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)$ec_id);
+        $cm_id =data_get($request, 'cm_id');
+        $cm_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)$cm_id);
+        u::updateSimpleRow([
+            'ec_id' => data_get($ec_info, 'id'),
+            'ec_leader_id' => data_get($ec_info, 'manager_id'),
+            'cm_id' => data_get($cm_info, 'id'),
+            'cm_leader_id' => data_get($cm_info, 'manager_id'),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ],array('student_id' => $request->id),'term_student_user');
         LogStudents::logUpdateInfo($pre_student_info,$data_update,Auth::user()->id);
         $lmsController = new LMSController();
         $lmsController->addOrUpdateStudent($request->id);
