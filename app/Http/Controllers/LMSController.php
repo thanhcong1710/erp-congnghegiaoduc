@@ -721,7 +721,7 @@ class LMSController extends Controller
                 (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
                 (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
             FROM students AS s WHERE s.id = $student_id ");
-        if(config('lms.is_test') && data_get($studentInfo, 'branch_id') !== 1){
+        if(config('lms.is_test') && data_get($studentInfo, 'branch_id') != 1){
             $studentInfo = null;
         };
         if ($studentInfo && data_get($studentInfo,'branch_id') && data_get($studentInfo,'product_id')) {

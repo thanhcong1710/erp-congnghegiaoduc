@@ -102,7 +102,7 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1300px">
+            <table class="vs-table vs-table--tbody-table">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
