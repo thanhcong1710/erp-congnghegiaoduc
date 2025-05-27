@@ -158,8 +158,8 @@ class ClassesController extends Controller
                 'total_cycles'=> data_get($request,'total_cycles'),
             ), array('id'=>data_get($request,'class_id')), 'classes');
 
-            // Cập nhật cm_id cho term_student_users
-            u::query("UPDATE term_student_users AS tsu 
+            // Cập nhật cm_id cho term_student_user
+            u::query("UPDATE term_student_user AS tsu 
                 LEFT JOIN contracts AS c ON tsu.student_id = c.student_id 
                 SET tsu.cm_id = ".(int)data_get($request,'cm_id')." WHERE c.class_id = $class_id AND c.status !=7 ");
         }else{
