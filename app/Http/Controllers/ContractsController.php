@@ -27,7 +27,7 @@ class ContractsController extends Controller
     public function loadDiscountCode(Request $request)
     {
         $tuition_fee_id = $request->tuition_fee_id;
-        $data = u::query("SELECT d.name, d.id, d.percent, d.discount
+        $data = u::query("SELECT d.name, d.id, d.percent, d.discount,d.bonus_sessions
             FROM discount_codes AS d 
             WHERE d.status=1 AND d.start_date <= CURRENT_DATE AND d.end_date >= CURRENT_DATE 
             AND ( d.fee_ids LIKE '$tuition_fee_id,%' OR d.fee_ids LIKE '%,$tuition_fee_id,%' OR d.fee_ids LIKE '%,$tuition_fee_id' OR d.fee_ids = '$tuition_fee_id' ) 
@@ -101,12 +101,13 @@ class ContractsController extends Controller
            'discount_code' => data_get($request, 'discount_code'),
            'discount_code_percent' => data_get($request, 'discount_code_percent'),
            'discount_code_amount' => data_get($request, 'discount_code_amount'),
+           'discount_code_session' => data_get($request, 'discount_code_session'),
            'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'type') ==0 ? 0 : data_get($request, 'tuition_fee_session'),
-           'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : (data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0),
+           'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : ((int)data_get($request, 'total_session') - (int)data_get($request, 'tuition_fee_session')),
            'summary_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : 0, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
            'start_date'=> data_get($request, 'start_date'),
@@ -268,12 +269,13 @@ class ContractsController extends Controller
            'discount_code' => data_get($request, 'discount_code'),
            'discount_code_percent' => data_get($request, 'discount_code_percent'),
            'discount_code_amount' => data_get($request, 'discount_code_amount'),
+           'discount_code_session' => data_get($request, 'discount_code_session'),
            'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
            'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
            'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'tuition_fee_session'),
-           'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
+           'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : ((int)data_get($request, 'total_session') - (int)data_get($request, 'tuition_fee_session')),
            'summary_sessions' => 0, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
            'start_date'=> data_get($request, 'start_date'),

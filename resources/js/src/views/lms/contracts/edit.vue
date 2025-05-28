@@ -216,6 +216,16 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi học bổng</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="contract.discount_code_session"
+                disabled="true"
+              />
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Mã voucher</label>
               <input
@@ -416,6 +426,7 @@
           discount_code:'',
           discount_code_amount:'',
           discount_code_percent:'',
+          discount_code_session:'',
           coupon_code_check:0,
           coupon_code:'',
           coupon_amount: '',
@@ -568,13 +579,15 @@
           this.contract.discount_code = data.code
           this.contract.discount_code_percent = data.percent
           this.contract.discount_code_amount = data.discount
-           this.caculatorSession()
+          this.contract.discount_code_session = data.bonus_sessions
         }else{
           this.contract.discount_code_id = ""
           this.contract.discount_code_percent = ""
           this.contract.discount_code = ""
           this.contract.discount_code_amount = ""
+          this.contract.discount_code_session = ""
         }
+        this.caculatorSession()
       },
       checkCoupon(){
         this.$vs.loading.close();
@@ -609,7 +622,7 @@
       caculatorSession(){
         console.log(this.contract);
         this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
-        this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
+        this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.discount_code_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },
       save() {
         let mess = "";

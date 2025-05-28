@@ -199,6 +199,16 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi học bổng</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="contract_info.discount_code_session"
+                disabled="true"
+              />
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Mã voucher</label>
               <input
