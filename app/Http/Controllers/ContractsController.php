@@ -327,4 +327,35 @@ class ContractsController extends Controller
         );
         return response()->json($result);
     }
+
+    public function print(Request $request,$contract_id)
+    {
+        $contract_info = u::first("SELECT s.name AS student_name, s.date_of_birth, s.gender, s.address, s.school,
+            s.gud_name1, s.gud_mobile1, s.gud_email1, c.note,c.total_charged, c.debt_amount, c.must_charge,
+            (SELECT name FROM users WHERE id=c.ec_id) AS ec_name,
+            (SELECT name FROM products WHERE id=c.product_id) AS product_name,
+            (SELECT number_of_months FROM tuition_fee WHERE id=c.tuition_fee_id) AS number_of_months
+
+        FROM contracts AS c 
+            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
+        $data = [
+            'student_name' => data_get($contract_info, 'student_name') ?? '',
+            'date_of_birth' => data_get($contract_info, 'date_of_birth') ? date('d/m/Y',strtotime(data_get($contract_info, 'date_of_birth'))): '',
+            'gender' => data_get($contract_info, 'gender') ? (data_get($contract_info, 'gender')=='M'? 'Nam' : 'Nữ') :'',
+            'address' => data_get($contract_info, 'address') ?? '',
+            'school' => data_get($contract_info, 'school') ?? '',
+            'gud_name1' => data_get($contract_info, 'gud_name1') ?? '',
+            'gud_mobile1' => data_get($contract_info, 'gud_mobile1') ?? '',
+            'gud_email1' => data_get($contract_info, 'gud_email1') ?? '',
+            'note' => data_get($contract_info, 'note') ?? '',
+            'ec_name' => data_get($contract_info, 'ec_name') ?? '',
+            'debt_amount' => number_format(data_get($contract_info, 'debt_amount') ?? 0),
+            'total_charged_text' => u::convert_number_to_words(data_get($contract_info, 'total_charged')),
+            'total_charged' => number_format(data_get($contract_info, 'total_charged') ?? 0),
+            'must_charge' => number_format(data_get($contract_info, 'must_charge') ?? 0),
+            'product_name' => data_get($contract_info, 'product_name') ?? '',
+            'number_of_months' => data_get($contract_info, 'number_of_months') ?? '',
+        ];
+        return response()->json($data);
+    }
 }

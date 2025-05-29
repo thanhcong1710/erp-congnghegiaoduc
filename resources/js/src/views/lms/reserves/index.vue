@@ -129,6 +129,9 @@
                     <router-link :to="`/lms/reserves/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
+                    <router-link :to="`/pages/print/reserve/${item.id}`" target="_blank"> 
+                      <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                    </router-link> 
                     <vs-button size="small" color="danger" v-if="item.status == 1" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>

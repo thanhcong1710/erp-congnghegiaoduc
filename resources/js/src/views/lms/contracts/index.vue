@@ -91,7 +91,9 @@
                     <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
-                    <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                    <router-link :to="`/pages/print/contract/${item.contract_id}`" target="_blank"> 
+                      <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                    </router-link> 
                     <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>

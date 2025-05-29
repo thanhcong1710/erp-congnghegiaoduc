@@ -74,6 +74,11 @@
                       <!---->
                     </div>
                   </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Thao tác
+                      <!---->
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in payments" :key="index">
@@ -100,6 +105,11 @@
                   <p>Người tạo: {{ item.creator_name }}</p>
                   <p>Ngày tạo: {{ item.created_at }}</p>
                 </td> 
+                <td class="td vs-table--td text-center list-action"> 
+                    <router-link :to="`/pages/print/receipt/${item.id}`" target="_blank"> 
+                      <vs-button style="background: rgb(19 128 213) !important" size="small"><i class="fa fa-print"></i></vs-button>
+                    </router-link> 
+                </td>
               </tr>
             </table>
             

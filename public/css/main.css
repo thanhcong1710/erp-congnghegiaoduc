@@ -9260,6 +9260,10 @@ body {
   padding-bottom: 50px !important;
 }
 
+[dir] .erp-printing-detail .vx-row{
+  margin: 0px;
+}
+
 .erp-printing-detail .print-box .ajax-load {
   height: 100%;
   top: 0;
@@ -9281,23 +9285,13 @@ body {
 
 .erp-printing-detail .print-box .print-body {
   font-family: 'Times New Roman';
-  font-size: 19px;
+  font-size: 14px;
   position: relative;
   color: #000;
 }
 
 [dir] .erp-printing-detail .print-box .print-body {
   background: #FFF;
-}
-
-.erp-printing-detail .print-box .print-body::after {
-  content: '';
-  display: block;
-  height: 20px;
-}
-
-[dir] .erp-printing-detail .print-box .print-body::after {
-  background: red;
 }
 
 [dir] .erp-printing-detail .print-box .inner {
@@ -9312,10 +9306,6 @@ body {
 
 [dir] .erp-printing-detail .print-box .inner::before, [dir] .erp-printing-detail .print-box .inner::after {
   clear: both;
-}
-
-[dir] .erp-printing-detail .print-box hr {
-  border: 2px solid red;
 }
 
 .erp-printing-detail .print-header {
@@ -9342,17 +9332,6 @@ body {
 
 [dir=rtl] .erp-printing-detail .print-header .h-right {
   padding-right: 12px;
-}
-
-.erp-printing-detail .print-header .h-right h4 {
-  font-size: 14px;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: red;
-}
-
-[dir] .erp-printing-detail .print-header .h-right h4 {
-  margin-bottom: 5px;
 }
 
 .erp-printing-detail .print-header .h-right p {
@@ -9400,18 +9379,18 @@ body {
 }
 
 .erp-printing-detail .print-content {
-  line-height: 30px;
+  line-height: 24px;
 }
 
 .erp-printing-detail .print-content h2.title {
-  font-size: 34px;
-  font-weight: 600;
-  line-height: 34px;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 24px;
 }
 
 [dir] .erp-printing-detail .print-content h2.title {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 [dir] .erp-printing-detail .print-content h2.title.sub {
@@ -9438,8 +9417,8 @@ body {
 }
 
 .erp-printing-detail .print-content h3 {
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 [dir] .erp-printing-detail .print-content h3 {
@@ -9502,11 +9481,6 @@ body {
 [dir] .erp-printing-detail .print-content .table.table-bordered th, [dir] .erp-printing-detail .print-content .table.table-bordered tr, [dir] .erp-printing-detail .print-content .table.table-bordered td {
   border-color: #000 !important;
   border-width: 2px !important;
-}
-
-.erp-printing-detail .print-content .table th,
-.erp-printing-detail .print-content .table td {
-  font-size: 19px;
 }
 
 .erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
@@ -9598,6 +9572,22 @@ body {
   letter-spacing: 2px;
   display: inline-block;
   line-height: 28px;
+}
+
+.erp-printing-detail table.erp-table , .erp-printing-detail table.erp-table td, .erp-printing-detail table.erp-table th {
+  border-collapse: collapse;
+}
+
+[dir] .erp-printing-detail table.erp-table, [dir] .erp-printing-detail table.erp-table td, [dir] .erp-printing-detail table.erp-table th {
+  border: 1px solid;
+  text-align: center;
+  padding: 5px;
+}
+
+.erp-printing-detail .print-content .table th,
+.erp-printing-detail .print-content .table td {
+  font-size: 14px;
+  line-height: 16px;
 }
 
 @media (min-width: 576px) {

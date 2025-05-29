@@ -88,6 +88,22 @@ const router = new Router({
             rule: 'editor'
           }
         },
+        {
+          path: '/pages/print/contract/:id',
+          name: 'print-contract',
+          component: () => import('@/views/pages/print/contract.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
+        {
+          path: '/pages/print/reserve/:id',
+          name: 'print-reserve',
+          component: () => import('@/views/pages/print/reserve.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
         // =============================================================================
         // PAGES
         // =============================================================================

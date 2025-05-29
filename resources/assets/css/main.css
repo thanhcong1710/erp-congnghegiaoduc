@@ -121,6 +121,9 @@ body {
     padding-bottom: 50px !important;
 }
 
+.erp-printing-detail .vx-row{
+    margin: 0px;
+}
 .erp-printing-detail .print-box .ajax-load {
     height: 100%;
     top: 0;
@@ -143,16 +146,9 @@ body {
 .erp-printing-detail .print-box .print-body {
     background: #FFF;
     font-family: 'Times New Roman';
-    font-size: 19px;
+    font-size: 14px;
     position: relative;
     color: #000;
-}
-
-.erp-printing-detail .print-box .print-body::after {
-    content: '';
-    display: block;
-    height: 20px;
-    background: red;
 }
 
 .erp-printing-detail .print-box .inner {
@@ -166,9 +162,6 @@ body {
     clear: both;
 }
 
-.erp-printing-detail .print-box hr {
-    border: 2px solid red;
-}
 
 .erp-printing-detail .print-header {
     padding-top: 20px;
@@ -183,14 +176,6 @@ body {
     padding-left: 12px;
     font-family: Arial;
     padding-top: 5px;
-}
-
-.erp-printing-detail .print-header .h-right h4 {
-    font-size: 14px;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: red;
 }
 
 .erp-printing-detail .print-header .h-right p {
@@ -224,15 +209,15 @@ body {
 }
 
 .erp-printing-detail .print-content {
-    line-height: 30px;
+    line-height: 24px;
 }
 
 .erp-printing-detail .print-content h2.title {
-    font-size: 34px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: bold;
     text-align: center;
-    margin-bottom: 40px;
-    line-height: 34px;
+    margin-bottom: 20px;
+    line-height: 24px;
 }
 
 .erp-printing-detail .print-content h2.title.sub {
@@ -256,8 +241,8 @@ body {
 }
 
 .erp-printing-detail .print-content h3 {
-    font-size: 26px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: bold;
     margin-bottom: 12px;
 }
 
@@ -306,10 +291,6 @@ body {
     border-width: 2px !important;
 }
 
-.erp-printing-detail .print-content .table th,
-.erp-printing-detail .print-content .table td {
-    font-size: 19px;
-}
 
 .erp-printing-detail .print-content input[type=checkbox]:checked+i::before {
     content: '\2713';
@@ -374,4 +355,15 @@ body {
     letter-spacing: 2px;
     display: inline-block;
     line-height: 28px;
+}
+.erp-printing-detail table.erp-table , .erp-printing-detail table.erp-table td, .erp-printing-detail table.erp-table th {
+  border: 1px solid;
+  border-collapse: collapse;
+  text-align: center;
+  padding: 5px;
+}
+.erp-printing-detail .print-content .table th,
+.erp-printing-detail .print-content .table td {
+    font-size: 14px;
+    line-height: 16px;
 }

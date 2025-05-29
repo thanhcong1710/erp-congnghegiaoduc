@@ -2,17 +2,17 @@
     <div class="erp-printing-detail">
         <div class="print-box">
             <div class="container">
-                <div class="print-body print-container">
+                <div class="print-body">
                     <div class="inner">
                         <!-- BEGIN FORM -->
                         <div class="print-header">
                             <div class="h-left" style="width: 30%">
                                 <span class="logo"><img src="/images/logo.png" /></span>
                             </div>
-                            <div class="h-right" style="border:none">
-                                <h4>CÔNG TY CỔ PHẦN GIÁO DỤC LOGIC LAB</h4>
+                            <div class="h-right" style="width: 45%;border:none">
+                                <!-- <h4>CÔNG TY CỔ PHẦN GIÁO DỤC LOGIC LAB</h4>
                                 <p><i class="fa fa-map-marker"></i> Lô B1.1, Số 2 đường Đặng Thai Mai , Phường Quảng An, Quận Tây Hồ, 
-                                    Thành phố Hà Nội, Việt Nam.</p>
+                                    Thành phố Hà Nội, Việt Nam.</p> -->
                             </div>
                             <div class="h-right" style="border:none; text-align:center;width: 35%">
                                 <p><b>Mẫu số 01 - TT</b></p>

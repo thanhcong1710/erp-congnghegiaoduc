@@ -128,6 +128,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/delete', 'ContractsController@delete');
             Route::get('contracts/show/{contract_id}', 'ContractsController@show');
             Route::post('contracts/update', 'ContractsController@update');
+            Route::get('contracts/print/{contract_id}', 'ContractsController@print');
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
@@ -151,6 +152,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('reserves/show/{reserve_id}', 'ReservesController@show');
             Route::post('reserves/approve', 'ReservesController@approve');
             Route::get('reserves/logs/{student_id}', 'ReservesController@getLogsByStudent');
+            Route::get('reserves/print/{id}', 'ReservesController@print');
 
             Route::post('class_transfers/list', 'ClassTransfersController@list');
             Route::post('class_transfers/search-student', 'ClassTransfersController@searchStudent');
