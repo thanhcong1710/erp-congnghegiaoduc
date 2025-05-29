@@ -120,7 +120,8 @@ class CheckinController extends Controller
             $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
                 LEFT JOIN roles AS r ON r.id = ru.role_id
                 LEFT JOIN users AS u ON u.id = ru.user_id
-                WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."'");
+                LEFT JOIN branch_has_user AS b ON b.user_id = u.id
+                WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."' AND b.branch_id=".data_get($crm_student_info, 'checkin_branch_id'));
             $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($crm_student_info, 'checkin_owner_id'));
             u::insertSimpleRow(array(
                 'student_id' => $lms_student_id,
