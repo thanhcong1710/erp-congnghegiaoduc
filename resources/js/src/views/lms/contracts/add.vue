@@ -564,13 +564,13 @@
           this.contract.discount_code = data.code
           this.contract.discount_code_percent = data.percent
           this.contract.discount_code_amount = data.discount
-          this.contract.discount_session = data.bonus_sessions
+          this.contract.discount_code_session = data.bonus_sessions
         }else{
           this.contract.discount_code_id = ""
           this.contract.discount_code_percent = ""
           this.contract.discount_code = ""
           this.contract.discount_code_amount = ""
-          this.contract.discount_session = ""
+          this.contract.discount_code_session = ""
         }
         this.caculatorSession()
       },
