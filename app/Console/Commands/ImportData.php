@@ -39,83 +39,83 @@ class ImportData extends Command
      */
     public function handle(Request $request)
     {
-        // u::query("UPDATE tmp_import AS t
-        //         JOIN (
-        //             SELECT lms_id
-        //             FROM tmp_import
-        //             GROUP BY lms_id
-        //             HAVING COUNT(id) > 1
-        //         ) AS dup ON dup.lms_id = t.lms_id
-        //         SET t.status = 2
-        //         WHERE t.so_buoi_con_lai = 0");
-        // $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (crm_parent_id = 0 OR crm_parent_id IS NULL)");
-        // foreach($list AS $row){
-        //     //insert crm_parents
-        //     if(data_get($row,'parent_mobile')){
-        //         $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1 LIKE '%".data_get($row,'parent_mobile')."'");
-        //         if($parent_info){
-        //             $crm_parent_id = data_get($parent_info, 'id');
-        //         } else{
-        //             $crm_parent_id = u::insertSimpleRow(array(
-        //                 'name'=>data_get($row,'parent_name'),
-        //                 'mobile_1' => substr(data_get($row,'parent_mobile'),0,1) == '0' ? data_get($row,'parent_mobile') : '0'.data_get($row,'parent_mobile'),
-        //                 'created_at' => date('Y-m-d H:i:s'),
-        //                 'branch_id' => data_get($row, 'branch_id'),
-        //                 'owner_id' => 1,
-        //             ), 'crm_parents');
-        //         }
-        //         $student_info = u::first("SELECT * FROM crm_students WHERE name = '".data_get($row,'student_name')."' AND parent_id = ".$crm_parent_id);
-        //         if($student_info){
-        //             $crm_student_id = data_get($student_info, 'id');
-        //         } else{
-        //             //insert crm_students
-        //             $crm_student_id = u::insertSimpleRow(array(
-        //                 'parent_id'=>$crm_parent_id,
-        //                 'name'=>data_get($row,'student_name'),
-        //                 'created_at' => date('Y-m-d H:i:s'),
-        //                 'status' => 3,
-        //             ), 'crm_students');
-        //         }
-        //         u::updateSimpleRow(array('crm_parent_id'=>$crm_parent_id, 'crm_student_id' => $crm_student_id), array('id'=>data_get($row,'id')) ,'tmp_import');
-        //     }
-        //     echo data_get($row,'id')."_crm_students/";
-        // }
+        u::query("UPDATE tmp_import AS t
+                JOIN (
+                    SELECT lms_id
+                    FROM tmp_import
+                    GROUP BY lms_id
+                    HAVING COUNT(id) > 1
+                ) AS dup ON dup.lms_id = t.lms_id
+                SET t.status = 2
+                WHERE t.so_buoi_con_lai = 0");
+        $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (crm_parent_id = 0 OR crm_parent_id IS NULL)");
+        foreach($list AS $row){
+            //insert crm_parents
+            if(data_get($row,'parent_mobile')){
+                $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1 LIKE '%".data_get($row,'parent_mobile')."'");
+                if($parent_info){
+                    $crm_parent_id = data_get($parent_info, 'id');
+                } else{
+                    $crm_parent_id = u::insertSimpleRow(array(
+                        'name'=>data_get($row,'parent_name'),
+                        'mobile_1' => substr(data_get($row,'parent_mobile'),0,1) == '0' ? data_get($row,'parent_mobile') : '0'.data_get($row,'parent_mobile'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'branch_id' => data_get($row, 'branch_id'),
+                        'owner_id' => 1,
+                    ), 'crm_parents');
+                }
+                $student_info = u::first("SELECT * FROM crm_students WHERE name = '".data_get($row,'student_name')."' AND parent_id = ".$crm_parent_id);
+                if($student_info){
+                    $crm_student_id = data_get($student_info, 'id');
+                } else{
+                    //insert crm_students
+                    $crm_student_id = u::insertSimpleRow(array(
+                        'parent_id'=>$crm_parent_id,
+                        'name'=>data_get($row,'student_name'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'status' => 3,
+                    ), 'crm_students');
+                }
+                u::updateSimpleRow(array('crm_parent_id'=>$crm_parent_id, 'crm_student_id' => $crm_student_id), array('id'=>data_get($row,'id')) ,'tmp_import');
+            }
+            echo data_get($row,'id')."_crm_students/";
+        }
 
-        // $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (student_id = 0 OR student_id IS NULL)");
-        // foreach($list AS $row){
-        //     $branchInfo = u::first("SELECT * FROM branches WHERE name = '".data_get($row, 'branch_name')."'");
-        //     if($branchInfo){
-        //         //insert students
-        //         $arr_name = u::explodeName(data_get($row, 'student_name'));
-        //         $lms_student_id = u::insertSimpleRow(array(
-        //             'lms_code' => '',
-        //             'name' => data_get($row, 'student_name'),
-        //             'firstname' => data_get($arr_name, 'firstname'),
-        //             'midname' => data_get($arr_name, 'midname'),
-        //             'lastname' => data_get($arr_name, 'lastname'),
-        //             'gud_mobile1' => substr(data_get($row,'parent_mobile'),0,1) == '0' ? data_get($row,'parent_mobile') : '0'.data_get($row,'parent_mobile'),
-        //             'gud_name1' => data_get($row,'parent_name'),
-        //             'created_at' => date('Y-m-d H:i:s'),
-        //             'branch_id' => data_get($branchInfo, 'id'),
-        //             'status' => 1,
-        //             'avatar_url' => '/images/common/avatar-boy.svg',
-        //             'lms_id' => data_get($row, 'lms_id'),
-        //         ), 'students');
-        //         u::insertSimpleRow(array(
-        //             'student_id' => $lms_student_id,
-        //             'branch_id' => data_get($branchInfo, 'id'),
-        //             'created_at' => date('Y-m-d H:i:s'),
-        //             'status' => 1
-        //         ), 'term_student_user');
+        $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (student_id = 0 OR student_id IS NULL)");
+        foreach($list AS $row){
+            $branchInfo = u::first("SELECT * FROM branches WHERE name = '".data_get($row, 'branch_name')."'");
+            if($branchInfo){
+                //insert students
+                $arr_name = u::explodeName(data_get($row, 'student_name'));
+                $lms_student_id = u::insertSimpleRow(array(
+                    'lms_code' => '',
+                    'name' => data_get($row, 'student_name'),
+                    'firstname' => data_get($arr_name, 'firstname'),
+                    'midname' => data_get($arr_name, 'midname'),
+                    'lastname' => data_get($arr_name, 'lastname'),
+                    'gud_mobile1' => substr(data_get($row,'parent_mobile'),0,1) == '0' ? data_get($row,'parent_mobile') : '0'.data_get($row,'parent_mobile'),
+                    'gud_name1' => data_get($row,'parent_name'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'branch_id' => data_get($branchInfo, 'id'),
+                    'status' => 1,
+                    'avatar_url' => '/images/common/avatar-boy.svg',
+                    'lms_id' => data_get($row, 'lms_id'),
+                ), 'students');
+                u::insertSimpleRow(array(
+                    'student_id' => $lms_student_id,
+                    'branch_id' => data_get($branchInfo, 'id'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'status' => 1
+                ), 'term_student_user');
 
-        //         u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($row, 'crm_student_id')), 'crm_students');
-        //         $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
-        //         $lms_code = config('app.prefix_student_code').$last_lms_code;
-        //         u::updateSimpleRow(array('lms_code'=>$lms_code), array('id'=>$lms_student_id), 'students');
-        //         u::updateSimpleRow(array('student_id'=>$lms_student_id), array('id'=>data_get($row,'id')), 'tmp_import');
-        //     }
-        //     echo data_get($row,'id')."_students/";
-        // }
+                u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($row, 'crm_student_id')), 'crm_students');
+                $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
+                $lms_code = config('app.prefix_student_code').$last_lms_code;
+                u::updateSimpleRow(array('lms_code'=>$lms_code), array('id'=>$lms_student_id), 'students');
+                u::updateSimpleRow(array('student_id'=>$lms_student_id), array('id'=>data_get($row,'id')), 'tmp_import');
+            }
+            echo data_get($row,'id')."_students/";
+        }
 
         $list = u::query("SELECT * FROM tmp_import WHERE status = 0 AND (contract_id = 0 OR contract_id IS NULL)");
         foreach($list AS $row){
