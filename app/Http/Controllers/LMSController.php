@@ -721,9 +721,6 @@ class LMSController extends Controller
                 (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
                 (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
             FROM students AS s WHERE s.id = $student_id ");
-        if(config('lms.is_test') && !in_array(data_get($studentInfo, 'branch_id'),[1,11,12,20,17,18,19])){
-            $studentInfo = null;
-        };
         if ($studentInfo && data_get($studentInfo,'branch_id') && data_get($studentInfo,'product_id')) {
             $semesterInfo = u::first("SELECT ls.brch_id FROM semesters AS s LEFT JOIN lms_semesters AS ls ON s.lms_id= ls.bsem_id 
                 WHERE s.product_id = ".data_get($studentInfo,'product_id')." AND s.branch_id = ".data_get($studentInfo,'branch_id').
@@ -818,9 +815,6 @@ class LMSController extends Controller
     public function addStudentToClass($student_id)
     { 
         $cond = "";
-        if(config('lms.is_test')){
-            $cond = " AND c.branch_id IN (1,11,12,20,17,18,19)";
-        };
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
                 (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
@@ -879,9 +873,6 @@ class LMSController extends Controller
     public function studentWithdraw($student_id)
     {
         $cond = "";
-        if(config('lms.is_test')){
-            $cond = " AND c.branch_id IN (1,11,12,20,17,18,19)";
-        };
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
                 (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
