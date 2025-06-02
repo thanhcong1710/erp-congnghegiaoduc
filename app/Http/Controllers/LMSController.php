@@ -721,7 +721,7 @@ class LMSController extends Controller
                 (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
                 (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
             FROM students AS s WHERE s.id = $student_id ");
-        if(config('lms.is_test') && !in_array(data_get($studentInfo, 'branch_id'),[1,11,12,20,17])){
+        if(config('lms.is_test') && !in_array(data_get($studentInfo, 'branch_id'),[1,11,12,20,17,18])){
             $studentInfo = null;
         };
         if ($studentInfo && data_get($studentInfo,'branch_id') && data_get($studentInfo,'product_id')) {
@@ -819,7 +819,7 @@ class LMSController extends Controller
     { 
         $cond = "";
         if(config('lms.is_test')){
-            $cond = " AND c.branch_id IN (1,11,12,20,17)";
+            $cond = " AND c.branch_id IN (1,11,12,20,17,18)";
         };
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
@@ -880,7 +880,7 @@ class LMSController extends Controller
     {
         $cond = "";
         if(config('lms.is_test')){
-            $cond = " AND c.branch_id IN (1,11,12,20,17)";
+            $cond = " AND c.branch_id IN (1,11,12,20,17,18)";
         };
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
