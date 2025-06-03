@@ -57,6 +57,8 @@ class UserController extends Controller
     public function list(Request $request)
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $role_id =  isset($request->role_id) ? $request->role_id : [];
+        $branch_id =  isset($request->branch_id) ? $request->branch_id : [];
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -65,6 +67,12 @@ class UserController extends Controller
         $cond = " 1=1 ";
         if ($keyword !== '') {
             $cond .= " AND (u.name LIKE '%$keyword%' OR u.hrm_id LIKE '%$keyword%')";
+        }
+        if (!empty($branch_id)){
+            $cond .= " AND (SELECT count(id) FROM branch_has_user WHERE user_id = u.id AND branch_id IN (".implode(",",$branch_id).")) > 0";
+        }
+        if (!empty($role_id)){
+            $cond .= " AND (SELECT count(id) FROM role_has_user WHERE user_id = u.id AND role_id IN (".implode(",",$role_id).")) > 0";
         }
         $total = u::first("SELECT count(u.id) AS total FROM users AS u WHERE $cond ");
         $list = u::query("SELECT u.*, IF(u.manager_id, (SELECT name FROM users WHERE id=u.manager_id), '') AS manager_name

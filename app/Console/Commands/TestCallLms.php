@@ -40,7 +40,7 @@ class TestCallLms extends Command
     public function handle(Request $request)
     {
         $lmsController = new \App\Http\Controllers\LmsController();
-        $lmsController->addOrUpdateStudent(607);
+        $lmsController->addOrUpdateStudent(721);
         // $lmsController->addStudentToClass(528);
         // $lmsController->studentWithdraw(528);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");

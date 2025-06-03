@@ -2,16 +2,60 @@
 
 <template>
 
-  <div id="page-users-list">
-    <div class="flex flex-wrap items-center">
-      <vs-button class="p-3" color="success" type="border" @click="addNewData"><i class="fa-solid fa-plus"></i> Thêm mới</vs-button>
-      <vs-button class="ml-3 p-3" color="danger" type="border" @click="confirmDelete(0)"><i class="fa-solid fa-right-from-bracket"></i> Xóa hết Token</vs-button>
-      <div class="con-input-search vs-table--search">
-        <input type="text" class="input-search vs-table--search-input" style="padding:14px 35px; font-size:14px;" placeholder="Mã, tên nhân viên" v-model="searchQuery.keyword" @input="getData()">
-        <i class="vs-icon notranslate icon-scale material-icons null" style="font-size:24px;">search</i>
-      </div>
-    </div>
+  <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
+      <div class="mb-5">
+        <div class="vx-row">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+            <multiselect
+              name="search_branch"
+              placeholder="Chọn trung tâm"
+              v-model="searchData.arr_branch"
+              :options="branch_list"
+              label="name"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              track-by="id"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Chức vụ</label>
+            <multiselect
+              name="search_role"
+              placeholder="Chọn chức vụ"
+              v-model="searchData.arr_role"
+              :options="role_list"
+              label="description"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              track-by="id"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Từ khóa</label>
+            <vs-input class="w-full" placeholder="Tên hặc mã nhân viên" v-model="searchData.keyword"></vs-input>
+          </div>
+        </div>
+        <div class="vx-row mt-3">
+          <div class="vx-col w-full">
+            <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
+            <vs-button color="dark" type="border" class="mr-3 mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button class=" mr-3" color="success"  @click="addNewData"><i class="fa-solid fa-plus"></i> Thêm mới</vs-button>
+            <vs-button class="mr-3" color="danger"  @click="confirmDelete(0)"><i class="fa-solid fa-right-from-bracket"></i> Xóa hết Token</vs-button>
+          </div>
+        </div>
+      </div>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -75,17 +119,24 @@
   import vSelect from 'vue-select'
   import axios from '../../../http/axios.js'
   import helper from '../../../until/helper.js'
-
+  import Multiselect from "vue-multiselect";
   export default {
     components: {
       vSelect,
-      helper
+      helper,
+      Multiselect,
     },
     data() {
       return {
+        branch_list: [],
+        role_list: [],
         context : { componentParent: this },
-        searchQuery: {
+        searchData: {
           keyword: '',
+          arr_branch: "",
+          branch_id:"",
+          arr_role: "",
+          role_id:"",
         },
 
         users: [],
@@ -151,9 +202,25 @@
         this.$router.push(`/settings/users/edit/${data.id}`)
       },
       getData() {
+        const ids_branch = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            ids_branch.push(item.id)
+          })
+        }
+        this.searchData.branch_id = ids_branch
+        const ids_role = []
+        if (this.searchData.arr_role && this.searchData.arr_role.length) {
+          this.searchData.arr_role.map(item => {
+            ids_role.push(item.id)
+          })
+        }
+        this.searchData.role_id = ids_role
         this.$vs.loading()
         axios.p('/api/users/list', {
-            keyword: this.searchQuery.keyword,
+            keyword: this.searchData.keyword,
+            branch_id: this.searchData.branch_id,
+            role_id:  this.searchData.role_id,
             pagination: this.pagination
           })
           .then((response) => {
@@ -179,8 +246,19 @@
         this.pagination.limit = limit
         this.getData();
       },
+      reset(){
+        location.reload();
+      }
     },
     created() {
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
+      })
+      axios.g(`/api/system/roles`)
+        .then(response => {
+        this.role_list = response.data
+      })
       this.getData();
     },
   }

@@ -367,3 +367,21 @@ body {
     font-size: 14px;
     line-height: 16px;
 }
+
+@media only screen and (min-width: 600px) {
+#page-roles-list .vs-table--search {
+    max-width: 360px;
+}
+#page-roles-list .vs-table--search-input{
+    width: 360px;
+}
+}
+th .sort-th, th .vs-table-text{
+display: contents;
+}
+.multiselect{
+z-index: 999;
+}
+.td.vs-table--td{
+vertical-align: top;
+}
