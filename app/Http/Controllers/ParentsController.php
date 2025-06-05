@@ -210,33 +210,53 @@ class ParentsController extends Controller
 
     public function add(Request $request)
     {
-        $id = u::insertSimpleRow(array(
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'mobile_1' => $request->mobile_1,
-            'mobile_2' => $request->mobile_2,
-            'address' => $request->address,
-            'province_id' => $request->province_id,
-            'district_id' => $request->district_id,
-            'gender' => $request->gender,
-            'birthday' => $request->birthday,
-            'job_id' => $request->job_id,
-            'source_id' => $request->source_id,
-            'source_detail_id' => $request->source_detail_id,
-            'note' => $request->note,
+        $parent = data_get($request, 'parent');
+        $parent_id = u::insertSimpleRow(array(
+            'name'=>data_get($parent, 'name'),
+            'email'=>data_get($parent, 'email'),
+            'mobile_1' => data_get($parent, 'mobile_1'),
+            'mobile_2' => data_get($parent, 'mobile_2'),
+            'address' => data_get($parent, 'address'),
+            'province_id' => data_get($parent, 'province_id'),
+            'district_id' => data_get($parent, 'district_id'),
+            'gender' => data_get($parent, 'gender'),
+            'birthday' => data_get($parent, 'birthday'),
+            'job_id' => data_get($parent, 'job_id'),
+            'source_id' => data_get($parent, 'source_id'),
+            'source_detail_id' => data_get($parent, 'emsource_detail_idail'),
+            'note' => data_get($parent, 'note'),
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
-            'owner_id'=>$request->owner_id,
-            'status'=>$request->status,
-            'c2c_mobile'=>$request->c2c_mobile,
+            'owner_id'=>data_get($parent, 'owner_id'),
+            'status'=>data_get($parent, 'status'),
+            'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
         ), 'crm_parents');
         u::updateBranchIDParents();
-        LogParents::logAdd($id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
+        LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
         $result =(object)array(
             'status'=>1,
             'message'=>'Thêm mới khách hàng thành công'
         );
+        $students  = data_get($request, 'students', []);
+        foreach($students AS $student){
+            if (data_get($student, 'name')){
+                $crm_student_id = u::insertSimpleRow(array(
+                    'parent_id'=>$parent_id,
+                    'name'=>data_get($student, 'name'),
+                    'gender' => data_get($student, 'gender'),
+                    'birthday' => data_get($student, 'birthday'),
+                    'school_level' => data_get($student, 'school_level'),
+                    'school' => data_get($student, 'school'),
+                    'note' => data_get($student, 'note'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                ), 'crm_students');
+                $content = "Thêm mới học sinh: ".data_get($student, 'name')." (ID: $crm_student_id)";
+                LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
+            }
+            
+        }
         return response()->json($result);
     }
 

@@ -94,7 +94,10 @@
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="dark" type="border" class="mr-3 mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <router-link class="btn btn-success" :to="'/lms/checkin/add'">
+              <vs-button color="success" class="mr-3 mb-2"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+            </router-link>
           </div>
         </div>
       </div>

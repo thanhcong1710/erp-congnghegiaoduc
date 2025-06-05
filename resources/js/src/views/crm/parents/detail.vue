@@ -878,7 +878,7 @@
         .then(response => {
         this.methods = response.data
       })
-      axios.g(`/api/system/branches`)
+      axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.branches = response.data
       })

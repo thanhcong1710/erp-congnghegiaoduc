@@ -174,8 +174,9 @@
       </div>
       <h5>THÔNG TIN HỌC SINH</h5>
       <div class="vx-row mt-2" v-for="(student, index) in students" :key="index"> 
-        <div class="vx-col md:w-1/2 w-full mb-4">
-          <label>Họ tên học sinh</label>
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label v-if="students.length > 1">Họ tên học sinh ({{ index+1 }})</label>
+          <label v-else>Họ tên học sinh</label>
           <input class="vs-inputx vs-input--input normal" type="text" v-model="student.name">
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
@@ -199,6 +200,38 @@
           <label>Trường học</label>
           <input class="vs-inputx vs-input--input normal" type="text" v-model="student.school">
         </div>
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label>Trung tâm checkin</label>
+          <select class="vs-inputx vs-input--input normal" v-model="student.checkin_branch_id">
+            <option value="">Chọn trung tâm</option>
+            <option :value="item.id" v-for="(item, index) in branches" :key="index">{{item.name}}</option>
+          </select>
+        </div>
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label>Ngày/Giờ Checkin</label>
+          <datepicker
+                    id="checkin-at"
+                    class="w-full"
+                    :value="student.checkin_at"
+                    v-model="student.checkin_at"
+                    placeholder="Chọn ngày giờ checkin"
+                    :lang="datepickerOptions.lang"
+                    type="datetime"
+                    format="YYYY-MM-DD HH:mm"
+            >
+            </datepicker>
+        </div>
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label>Khóa học</label>
+          <select class="vs-inputx vs-input--input normal" v-model="student.checkin_type_product">
+            <option value="">Chọn khóa học</option>
+              <option
+              :value="product.id"
+              v-for="(product, index) in products"
+              :key="index"
+            >{{product.name}}</option>
+          </select>
+        </div>
         <div class="vx-col md:w-1/4 w-full mb-4" >
           <vs-button v-if="students.length > 1" color="danger" type="flat" icon-pack="feather" icon="icon-trash-2" @click="removeStudent(index)">
             Xoá
@@ -207,7 +240,7 @@
             Thêm học sinh
           </vs-button>
         </div>
-      </div>  
+      </div> 
       <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
          <div v-html="alert.body"></div>
       </vs-alert>
@@ -338,12 +371,17 @@
         c2c_info:"",
         change_source: false,
         change_source_parent_id:"",
+        products:[],
+        branches:[],
         students:[
           {
             name: '',
             birthday: '',
             gender: '',
             school: '',
+            checkin_type_product: '',
+            checkin_at:'',
+            checkin_branch_id:'',
           }
         ],
       }
@@ -355,6 +393,9 @@
           birthday: '',
           gender: '',
           school: '',
+          checkin_type_product: '',
+          checkin_at:'',
+          checkin_branch_id:'',
         });
       },
       removeStudent(index) {
@@ -557,7 +598,7 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/crm/parents/add",{
+        axios.p("/api/lms/checkin/add",{
           'parent': this.parent,
           'students': this.students,
         })
@@ -570,7 +611,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/crm/parent')
+          this.$router.push('/lms/checkin')
         })
         .catch((e) => {
           console.log(e);
@@ -585,6 +626,14 @@
       }
     },
     created() {
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branches = response.data
+      })
+      axios.g(`/api/system/products`)
+        .then(response => {
+        this.products = response.data
+      })
       axios.g(`/api/users/get-data/users-manager`)
         .then(response => {
         this.users_manager = response.data

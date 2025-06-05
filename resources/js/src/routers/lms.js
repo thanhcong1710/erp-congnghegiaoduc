@@ -18,6 +18,20 @@ export default {
         }
       },
       {
+        path: '/lms/checkin/add',
+        name: 'lms-checkin-add',
+        component: () => import('@/views/lms/checkin/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách checkin', url: '/lms/checkin'},
+            { title: 'Thêm mới checkin', active: true}
+          ],
+          pageTitle: 'Thêm mới checkin',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/students',
         name: 'lms-students',
         component: () => import('@/views/lms/students/index.vue'),

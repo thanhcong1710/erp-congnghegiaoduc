@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SystemCode;
+use App\Models\LogParents;
 use App\Providers\UtilityServiceProvider as u;
 
 use Illuminate\Http\Request;
@@ -148,6 +149,119 @@ class CheckinController extends Controller
                 'lms_student_id' => $lms_student_id ?? 0
             ]
         );
+        return response()->json($result);
+    }
+
+    public function add(Request $request)
+    {
+        $parent = data_get($request, 'parent');
+        $parent_id = u::insertSimpleRow(array(
+            'name'=>data_get($parent, 'name'),
+            'email'=>data_get($parent, 'email'),
+            'mobile_1' => data_get($parent, 'mobile_1'),
+            'mobile_2' => data_get($parent, 'mobile_2'),
+            'address' => data_get($parent, 'address'),
+            'province_id' => data_get($parent, 'province_id'),
+            'district_id' => data_get($parent, 'district_id'),
+            'gender' => data_get($parent, 'gender'),
+            'birthday' => data_get($parent, 'birthday'),
+            'job_id' => data_get($parent, 'job_id'),
+            'source_id' => data_get($parent, 'source_id'),
+            'source_detail_id' => data_get($parent, 'emsource_detail_idail'),
+            'note' => data_get($parent, 'note'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'last_assign_date' => date('Y-m-d H:i:s'),
+            'owner_id'=>data_get($parent, 'owner_id'),
+            'status'=>data_get($parent, 'status'),
+            'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
+        ), 'crm_parents');
+        u::updateBranchIDParents();
+        LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Thêm mới khách hàng thành công'
+        );
+        $students  = data_get($request, 'students', []);
+        foreach($students AS $student){
+            if (data_get($student, 'name')){
+                $crm_student_id = u::insertSimpleRow(array(
+                    'parent_id'=>$parent_id,
+                    'name'=>data_get($student, 'name'),
+                    'gender' => data_get($student, 'gender'),
+                    'birthday' => data_get($student, 'birthday'),
+                    'school_level' => data_get($student, 'school_level'),
+                    'school' => data_get($student, 'school'),
+                    'note' => data_get($student, 'note'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                    'checkin_at'=> data_get($student, 'checkin_at'),
+                    'checkin_owner_id' => data_get($student, 'owner_id') ,
+                    'checkin_branch_id'=> data_get($student, 'checkin_branch_id'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                    'type_product'=>data_get($student, 'checkin_type_product'),
+                    'status' => 1,
+                ), 'crm_students');
+                $content = "Thêm mới học sinh từ checkin: ".data_get($student, 'name')." (ID: $crm_student_id)";
+                LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
+
+                if(data_get($student, 'checkin_branch_id')){
+                    $arr_name = u::explodeName(data_get($student, 'name'));
+                    $lms_student_id = u::insertSimpleRow(array(
+                        'lms_code' => '',
+                        'name' => data_get($student, 'name'),
+                        'firstname' => data_get($arr_name, 'firstname'),
+                        'midname' => data_get($arr_name, 'midname'),
+                        'lastname' => data_get($arr_name, 'lastname'),
+                        'gender' => data_get($student, 'gender'),
+                        'date_of_birth' => data_get($student, 'birthday'),
+                        'gud_mobile1' => data_get($parent, 'mobile_1'),
+                        'gud_name1' => data_get($parent, 'name'),
+                        'gud_email1' => data_get($parent, 'email'),
+                        'address' =>  data_get($parent, 'address'),
+                        'province_id' => data_get($parent, 'province_id'),
+                        'district_id' => data_get($parent, 'district_id'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'creator_id' => Auth::user()->id,
+                        'note' => data_get($student, 'note'),
+                        'branch_id' => data_get($student, 'checkin_branch_id'),
+                        'gud_birth_day1' => data_get($parent, 'birthday'),
+                        'gud_gender1' => data_get($parent, 'gender'),
+                        'gud_job1' => data_get($parent, 'job_id'),
+                        'status' => 1,
+                        'source_detail_id' => data_get($parent, 'source_detail_id'),
+                        'source_id' => data_get($parent, 'source_id'),
+                        'c2c_mobile' => data_get($parent, 'c2c_mobile'),
+                        'avatar_url' => data_get($parent, 'gender') =='F' ?'/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'
+                    ), 'students');
+    
+                    $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
+                        LEFT JOIN roles AS r ON r.id = ru.role_id
+                        LEFT JOIN users AS u ON u.id = ru.user_id
+                        LEFT JOIN branch_has_user AS b ON b.user_id = u.id
+                        WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."' AND b.branch_id=".data_get($student, 'checkin_branch_id'));
+                    $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($student, 'checkin_owner_id'));
+                    u::insertSimpleRow(array(
+                        'student_id' => $lms_student_id,
+                        'ec_id' => data_get($ec_info, 'id'),
+                        'branch_id' => data_get($student, 'checkin_branch_id'),
+                        'ceo_branch_id' => data_get($ceo_info, 'id'),
+                        'ec_leader_id' => data_get($ec_info, 'manager_id'),
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'creator_id' => Auth::user()->id,
+                        'status' => 1
+                    ), 'term_student_user');
+    
+                    u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_id, 'id')), 'crm_students');
+    
+                    $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
+                    $lms_code = config('app.prefix_student_code').$last_lms_code;
+                    u::updateSimpleRow(array('lms_code'=>$lms_code), array('id'=>$lms_student_id), 'students');
+                    LogStudents::logAdd($lms_student_id, 'Chuyển lên danh sách học sinh chính thức', Auth::user()->id);
+                }
+            }
+        }
         return response()->json($result);
     }
 }
