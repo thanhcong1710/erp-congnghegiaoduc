@@ -85,10 +85,14 @@ class User extends Authenticatable implements JWTSubject
         return empty($user_permission) ? false : true;
     }
 
-    public function getStaffHasUser()
+    public function getStaffHasUser($user_id=0)
     {
         $list_users = u::query("SELECT u.id,u.manager_id FROM users AS u WHERE u.status=1");
-        $staff_has_user = Auth::user()->id. ",".implode(",",self::data_tree($list_users, Auth::user()->id));
+        if($user_id){
+            $staff_has_user = $user_id. ",".implode(",",self::data_tree($list_users, $user_id));
+        } else {
+            $staff_has_user = Auth::user()->id. ",".implode(",",self::data_tree($list_users, Auth::user()->id));
+        }
         return trim($staff_has_user, ',');
     }
 

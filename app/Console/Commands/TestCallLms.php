@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
+use App\User;
 use Illuminate\Http\Request;
 
 class TestCallLms extends Command
@@ -39,8 +40,8 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $lmsController = new \App\Http\Controllers\LmsController();
-        $lmsController->addOrUpdateStudent(721);
+        // $lmsController = new \App\Http\Controllers\LmsController();
+        // $lmsController->addOrUpdateStudent(721);
         // $lmsController->addStudentToClass(528);
         // $lmsController->studentWithdraw(528);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");
@@ -48,6 +49,9 @@ class TestCallLms extends Command
         //     u::updateScheduleHasStudent($row->id);
         //     echo $row->id."/";
         // }
+        $user = new User();
+        $tmp=$user->getStaffHasUser(46);
+        var_dump($tmp);die();
         return "ok";
     }
 }

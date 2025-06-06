@@ -218,7 +218,7 @@
       </div>
     </vx-card>
     <vs-popup :class="'modal_'+ modal_assign.color" :title="modal_assign.title" :active.sync="modal_assign.show" >
-        <div class="vx-row" > 
+        <div class="vx-row" style="min-height: 300px;"> 
           <div class="vx-col w-full mb-4">
             <label>Chọn người phụ trách</label>
             <multiselect
