@@ -138,7 +138,7 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
                 (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
             FROM students AS s
-            LEFT JOIN contracts AS c ON c.student_id=s.id
+            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.status!=0
             WHERE (c.count_recharge = 
                     IF((SELECT count(id) FROM contracts WHERe student_id=s.id AND status!=7)>0,
                         (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
