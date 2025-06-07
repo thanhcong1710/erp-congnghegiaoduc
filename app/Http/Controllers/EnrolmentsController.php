@@ -17,6 +17,13 @@ class EnrolmentsController extends Controller
         $data = [];
         $branch_id = (int)$request->branch_id;
         $product_id = (int)$request->product_id;
+        $select_type = data_get($request, 'select_type');
+        $cond = "";
+        if($select_type == 1){
+            $cond = " AND DATE(c.cls_enddate) >= CURDATE()";
+        } elseif($select_type == 2){
+            $cond = " AND DATE(c.cls_enddate)< CURDATE()";
+        }
         $query = "SELECT id, 
             id AS item_id, 
             'program' AS item_type, 
@@ -38,7 +45,7 @@ class EnrolmentsController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE c.status = 1 AND p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND DATE(c.cls_enddate) >= CURDATE()";
+        WHERE c.status = 1 AND p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id $cond";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {

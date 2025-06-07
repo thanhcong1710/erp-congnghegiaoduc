@@ -29,6 +29,14 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label >Loại</label>
+              <select class="vs-inputx vs-input--input normal" @change="loadClasses" v-model="select_type" >
+                <option value="0">Tất cả các lớp</option>
+                <option value="1">Lớp đang học</option>
+                <option value="2">Lớp đã kết thúc</option>
+              </select>
+            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
               <tree
@@ -369,6 +377,7 @@
     },
     data() {
       return {
+        select_type:1,
         modal_enrol: {
           title: "THÊM HỌC SINH VÀO LỚP",
           show: false,
@@ -479,7 +488,8 @@
           this.$vs.loading();
           axios.p(`/api/lms/enrolments/load-classes`, {
             branch_id: this.enrol.branch_id,
-            product_id: this.enrol.product_id
+            product_id: this.enrol.product_id,
+            select_type: this.select_type
           })
             .then(response => {
             this.$vs.loading.close();
