@@ -4,31 +4,13 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO TỔNG HỢP THEO THỜI GIAN</h5>
+      <h5>KẾT QUẢ KINH DOANH NGÀY</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" style="width: 100%" range format="YYYY-MM-DD"
+            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
         </div>
@@ -44,24 +26,43 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table">
+            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
               <thead class="vs-table--thead">
                 <tr>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Số học sinh trial</th>
-                  <th colspan="1" rowspan="1">Số học sinh full fee mới</th>
-                  <th colspan="1" rowspan="1">Số học sinh cọc mới</th>
-                  <th colspan="1" rowspan="1">Doanh thu</th>
-                  <th colspan="1" rowspan="1">Doanh thu USD</th>
+                  <!---->
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Chi Nhánh</th>
+                  <th colspan="1" rowspan="1">KPI Tháng</th>
+                  <th colspan="1" rowspan="1">Số checkin</th>
+                  <th colspan="1" rowspan="1">Số học sinh New</th>
+                  <th colspan="1" rowspan="1">Số học sinh Renew</th>
+                  <th colspan="1" rowspan="1">DS HS New</th>
+                  <th colspan="1" rowspan="1">DS HS Renew</th>
+                  <th colspan="1" rowspan="1">DS Digital</th>
+                  <th colspan="1" rowspan="1">DS Thực thu</th>
+                  <th colspan="1" rowspan="1">Công nơ phát sinh ngày</th>
+                  <th colspan="1" rowspan="1">DS Thực thu + công nợ</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành thực thu</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành bao gồm cả công nợ</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
+                <!---->
+                
+                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.num_trial}}</td>
-                <td class="td vs-table--td">{{item.num_full_fee}}</td>
-                <td class="td vs-table--td">{{item.num_deposit}}</td>
-                <td class="td vs-table--td">{{ item.total_amount | formatNumber}}</td>
-                <td class="td vs-table--td">{{ Math.round(item.total_amount/25000) | formatNumber}}</td>
+                <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td">{{item.name}}</td>
+                <td class="td vs-table--td">{{item.gud_name1}}</td>
+                <td class="td vs-table--td">{{ item.cls_name}}</td>
+                <td class="td vs-table--td">{{ item.product_name}}</td>
+                <td class="td vs-table--td">{{ item.cm_name}}</td>
+                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
+                <td class="td vs-table--td">{{ item.type_fee}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.start_date}}</td>
+                <td class="td vs-table--td">{{ item.end_date}}</td> -->
               </tr>
             </table>
             
@@ -113,7 +114,7 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
-          dateRange: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
+          dateRange: "",
         },
         datepickerOptions: {
           closed: true,
@@ -150,7 +151,7 @@
           lpage: 1,
           cpage: 1,
           total: 0,
-          limit: 200,
+          limit: 20,
           pages: [],
           init: 0
         },
@@ -163,15 +164,18 @@
         this.branch_list = response.data
       })
       this.getData();
+      this.searchData.dateRange = new Date();
     },
     methods: {
       reset() {
-        location.reload();
+        this.searchData.keyword = ""
+        this.searchData.arr_branch= ""
+        this.searchData.branch_id= ""
+        this.searchData.pagination= this.pagination
+        this.searchData.dateRange= ""
+        this.getData();
       },
       getData() {
-        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-        
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -180,13 +184,14 @@
         }
         this.searchData.branch_id = ids_branch
         const data = {
-          branch_id: this.searchData.branch_id,
-          start_date: startDate,
-          end_date: endDate,
-          pagination:this.pagination,
-        }
+            keyword: this.searchData.keyword,
+            branch_id: this.searchData.branch_id,
+            start_date: u.getDateMonth(this.searchData.dateRange),
+            pagination:this.pagination,
+          }
+
         this.$vs.loading()
-        axios.p('/api/lms/reports/05', data)
+        axios.p('/api/lms/reports/01', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -211,9 +216,7 @@
         this.getData();
       },
       exportExcel() {
-        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-        var url = `/api/lms/exports/report05/`;
+        var url = `/api/lms/exports/report01/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -222,17 +225,18 @@
         }
         this.key ='';
         this.value = ''
+        if (this.searchData.keyword){
+          this.key += "keyword,"
+          this.value += this.searchData.keyword+","
+        }
         if (ids_branch){
           this.key += "branch_id,"
           this.value += ids_branch+","
         }
-        if (startDate){
+        if (this.searchData.dateRange){
           this.key += "start_date,"
-          this.value +=startDate+","
-        }
-        if (endDate){
-          this.key += "end_date,"
-          this.value +=endDate+","
+          this.value +=u.getDateMonth(this.searchData.dateRange)+","
+          console.log(u.getDateMonth(this.searchData.dateRange))
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"

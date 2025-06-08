@@ -31,10 +31,10 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-05'"  v-if="checkPermission('lms_reports_operate_05')">
-                <p>05. BÁO CÁO HỌC SINH PENDING</p>
+                <p>05. BÁO CÁO TỔNG HỢP THEO THỜI GIAN</p>
               </router-link>
             </div>
-            <div class="mb-2">
+            <!-- <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-06'"  v-if="checkPermission('lms_reports_operate_06')">
                 <p>06. BÁO CÁO HỌC SINH BẢO LƯU</p>
               </router-link>
@@ -68,7 +68,7 @@
               <router-link class="link-report" :to="'/lms/reports/operate/report-12'" v-if="checkPermission('lms_reports_operate_12')">
                 <p>12. BÁO CÁO HỌC VIÊN ĐẶT CỌC</p>
               </router-link>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

@@ -196,6 +196,7 @@ class CheckinController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                     'creator_id' => Auth::user()->id,
                     'checkin_at'=> data_get($student, 'checkin_at'),
+                    'checkined_at'=> data_get($student, 'checkin_at'),
                     'checkin_owner_id' => data_get($student, 'owner_id') ,
                     'checkin_branch_id'=> data_get($student, 'checkin_branch_id'),
                     'updated_at' => date('Y-m-d H:i:s'),

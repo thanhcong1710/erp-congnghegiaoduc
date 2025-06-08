@@ -9,28 +9,6 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã nhân viên, tên nhân viên" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
@@ -48,31 +26,24 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1600px">
+            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="2" class="text-center">STT</th>
-                  <th colspan="1" rowspan="2">Mã vùng</th>
-                  <th colspan="1" rowspan="2">Tên vùng</th>
-                  <th colspan="1" rowspan="2">Mã TT</th>
-                  <th colspan="1" rowspan="2">Tên TT</th>
-                  <th colspan="1" rowspan="2">Mã NV</th>
-                  <th colspan="1" rowspan="2">Tên NV</th>
-                  <th colspan="2" rowspan="1">Học viên mới</th>
-                  <th colspan="2" rowspan="1">Học viên tái ký</th>
-                  <th colspan="2" rowspan="1">Học viên chuyển phí</th>
-                  <th colspan="2" rowspan="1">TỔNG</th>
-                </tr>
-                <tr>
-                  <th colspan="1" rowspan="1">Số học viên</th>
-                  <th colspan="1" rowspan="1">Số tiền</th>
-                  <th colspan="1" rowspan="1">Số học viên</th>
-                  <th colspan="1" rowspan="1">Số tiền</th>
-                  <th colspan="1" rowspan="1">Số học viên</th>
-                  <th colspan="1" rowspan="1">Số tiền</th>
-                  <th colspan="1" rowspan="1">Số học viên</th>
-                  <th colspan="1" rowspan="1">Số tiền</th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Chi Nhánh</th>
+                  <th colspan="1" rowspan="1">KPI Tháng</th>
+                  <th colspan="1" rowspan="1">Số checkin</th>
+                  <th colspan="1" rowspan="1">Số học sinh New</th>
+                  <th colspan="1" rowspan="1">Số học sinh Renew</th>
+                  <th colspan="1" rowspan="1">DS HS New</th>
+                  <th colspan="1" rowspan="1">DS HS Renew</th>
+                  <th colspan="1" rowspan="1">DS Digital</th>
+                  <th colspan="1" rowspan="1">DS Thực thu</th>
+                  <th colspan="1" rowspan="1">Công nơ phát sinh ngày</th>
+                  <th colspan="1" rowspan="1">DS Thực thu + công nợ</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành thực thu</th>
+                  <th colspan="1" rowspan="1">% Hoàn thành bao gồm cả công nợ</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
@@ -294,10 +265,5 @@ th .sort-th, th .vs-table-text{
 }
 .td.vs-table--td{
   vertical-align: top;
-}
-[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    text-align: center;
 }
 </style>

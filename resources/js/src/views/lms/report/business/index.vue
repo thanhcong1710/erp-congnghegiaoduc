@@ -10,8 +10,23 @@
             <h4 class="w-full mb-4"><i class="fa-solid fa-file-contract mr-1"></i> DANH SÁCH BÁO CÁO KINH DOANH</h4>
             <hr class="mb-3" style="border: 0.5px solid #ccc;">
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/business/report-01'" v-if="checkPermission('lms_reports_business_01')">
-                <p>01. KẾT QUẢ KINH DOANH NGÀY</p>
+              <router-link class="link-report" :to="'/lms/reports/business/report-101'" v-if="checkPermission('lms_reports_business_01')">
+                <p>01. KẾT QUẢ KINH DOANH THEO TRUNG TÂM</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/business/report-102'" v-if="checkPermission('lms_reports_business_01')">
+                <p>02. KẾT QUẢ KINH DOANH THEO SALE</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/business/report-103'" v-if="checkPermission('lms_reports_business_01')">
+                <p>03. BÁO CÁO CHECKIN</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/business/report-104'" v-if="checkPermission('lms_reports_business_01')">
+                <p>04. BÁO CÁO HỌC THỬ</p>
               </router-link>
             </div>
           </div>

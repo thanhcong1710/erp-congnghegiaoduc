@@ -367,4 +367,75 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report05(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m-01');
+        $end_date = isset($request->end_date) ? $request->end_date : date('Y-m-d');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 200;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        if (!empty($branch_id)) {
+            $branch_query=implode(",",$branch_id);
+        }
+        
+        $order_by = " ORDER BY b.id ";
+        $total = u::first("SELECT COUNT(b.id) total
+                FROM branches AS b 
+            WHERE b.id IN ($branch_query) AND b.status=1");
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT count(id) FROM contracts WHERE type=0 AND class_id IS NOT NULL AND enrolment_start_date >='$start_date' AND enrolment_start_date <= '$end_date' AND branch_id=b.id) AS num_trial,
+                (SELECT count(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS num_full_fee,
+                (SELECT count(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt>0 AND (SELECT count(id) FROM payments WHERE contract_id=p.contract_id AND debt=0)=0 AND
+                    p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS num_deposit,
+                (SELECT SUM(amount) FROM payments AS p WHERE p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS total_amount
+            FROM branches AS b 
+            WHERE b.id IN ($branch_query) AND b.status=1 $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function report103(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m-01');
+        $end_date = isset($request->end_date) ? $request->end_date : date('Y-m-d');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        if (!empty($branch_id)) {
+            $branch_query=implode(",",$branch_id);
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND s.checkined_at >= '$start_date 00:00:00'";
+        }
+        if($end_date){
+            $cond.= " AND s.checkined_at <= '$end_date 23:59:59'";
+        }
+        
+        $order_by = " ORDER BY s.id DESC";
+        $total = u::first("SELECT COUNT(s.id) total
+                FROM crm_students AS s 
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond");
+        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
+            FROM crm_students AS s 
+                LEFT JOIN students AS ss ON ss.id=s.lms_id
+                LEFT JOIN users AS u ON u.id =s.checkin_owner_id
+                LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }

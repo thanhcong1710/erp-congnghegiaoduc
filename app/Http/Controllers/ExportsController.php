@@ -7,9 +7,14 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx as x;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 use Illuminate\Http\Request;
 use App\Models\ProcessExcel;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class ExportsController extends Controller
 {
@@ -352,7 +357,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('C1', 'Chức Danh');
         $sheet->setCellValue('D1', 'Số học sinh đến hạn tái tục');
         $sheet->setCellValue('E1', 'Học sinh đóng phí tái tục');
-        $sheet->setCellValue('F1', 'Tỷ lệ tái tục (%');
+        $sheet->setCellValue('F1', 'Tỷ lệ tái tục (%)');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(30);
@@ -374,6 +379,165 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo học sinh tái phí theo EC.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report05(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+
+        $order_by = " ORDER BY b.id DESC ";
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT count(id) FROM contracts WHERE type=0 AND class_id IS NOT NULL AND enrolment_start_date >='$start_date' AND enrolment_start_date <= '$end_date' AND branch_id=b.id) AS num_trial,
+                (SELECT count(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS num_full_fee,
+                (SELECT count(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt>0 AND (SELECT count(id) FROM payments WHERE contract_id=p.contract_id AND debt=0)=0 AND
+                    p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS num_deposit,
+                (SELECT SUM(amount) FROM payments AS p WHERE p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id ) AS total_amount
+            FROM branches AS b 
+            WHERE b.id IN ($branch_query) AND b.status=1 $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Số học sinh trial');
+        $sheet->setCellValue('C1', 'Số học sinh full fee mới');
+        $sheet->setCellValue('D1', 'Số học sinh cọc mới');
+        $sheet->setCellValue('E1', 'Doanh thu');
+        $sheet->setCellValue('F1', 'Doanh thu USD');
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => Color::COLOR_BLACK],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        
+        // Áp dụng cho dòng 1 từ A1 đến F1
+        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->num_trial);
+            $sheet->setCellValue('C' . $x, $list[$i]->num_full_fee);
+            $sheet->setCellValue('D' . $x, $list[$i]->num_deposit) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->total_amount );
+            $sheet->setCellValue('F' . $x, floor($list[$i]->total_amount / 25000));
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng theo thời gian.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report103(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND s.checkined_at >= '$start_date 00:00:00'";
+        }
+        if($end_date){
+            $cond.= " AND s.checkined_at <= '$end_date 23:59:59'";
+        }
+
+        $order_by = " ORDER BY s.id DESC ";
+        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
+            FROM crm_students AS s 
+                LEFT JOIN students AS ss ON ss.id=s.lms_id
+                LEFT JOIN users AS u ON u.id =s.checkin_owner_id
+                LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Ngày checkin');
+        $sheet->setCellValue('C1', 'Họ và tên');
+        $sheet->setCellValue('D1', 'Mã LMS');
+        $sheet->setCellValue('E1', 'Sale');
+        $sheet->setCellValue('F1', 'Trung tâm');
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => Color::COLOR_BLACK],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        
+        // Áp dụng cho dòng 1 từ A1 đến F1
+        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+
+        $sheet->getColumnDimension("A")->setWidth(5);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $i+1);
+            $sheet->setCellValue('B' . $x, $list[$i]->checkined_at);
+            $sheet->setCellValue('C' . $x, $list[$i]->name);
+            $sheet->setCellValue('D' . $x, $list[$i]->lms_id) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->ec_name );
+            $sheet->setCellValue('F' . $x, $list[$i]->branch_name);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo checkin.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {
