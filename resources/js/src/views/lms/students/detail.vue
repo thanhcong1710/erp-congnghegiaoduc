@@ -90,6 +90,11 @@
             <student-logs :student_info="student_info" />
           </div>
         </vs-tab>
+        <vs-tab label="Hồ sơ lưu trữ">
+          <div class="tab-text">
+            <student-files :student_info="student_info" />
+          </div>
+        </vs-tab>
       </vs-tabs>
     </vx-card>
 
@@ -110,6 +115,7 @@
   import studentSessions from './components/studentSessions.vue'
   import studentAssessments from './components/studentAssessments.vue'
   import studentOperating from './components/studentOperating.vue'
+  import studentFiles from './components/studentFiles.vue'
 
   export default {
     components: {
@@ -122,7 +128,8 @@
       studentContracts,
       studentSessions,
       studentAssessments,
-      studentOperating
+      studentOperating,
+      studentFiles
     },
     data() {
       return {

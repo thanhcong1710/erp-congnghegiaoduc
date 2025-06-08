@@ -396,4 +396,57 @@ class StudentsController extends Controller
             'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
         ]);
     }
+    public function getFile (Request $request){
+        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $data = u::query("SELECT *
+            FROM file_has_student
+            WHERE status=1 AND student_id = $student_id ORDER BY id DESC");
+        return response()->json($data);
+    }
+    public function uploadFile(Request $request){
+        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : '';
+        $note = isset($_POST['note']) ? $_POST['note'] : '';
+        if($_FILES['file']['name']){
+            $tmpFilePath = $_FILES['file']['tmp_name'];
+            if ($tmpFilePath != ""){
+                $dir = __DIR__.'/../../../public/static/upload/student_files/'. date('Y_m').'/';
+                if(!file_exists($dir)){
+                    mkdir($dir);
+                }
+                $newFilePath = $dir . $_FILES['file']['name'];
+                $newFilePath = u::update_file_name($newFilePath);
+                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                move_uploaded_file($tmpFilePath, $newFilePath);
+                u::insertSimpleRow(array(
+                    'student_id' => $student_id,
+                    'file_name' => $_FILES['file']['name'],
+                    'file_path' => $dir_file_insert,
+                    'note' => $note,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                    'status'=>1
+                ), 'file_has_student');
+                return response()->json([
+                    'status' => 1,
+                    'message' => 'Upload avatar thành công.',
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
+        ]);
+    }
+    public function deleteFile(Request $request){
+        u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'status'=>0
+        ),['id'=>$request->id], 'file_has_student');
+        return response()->json([
+            'status' => 1,
+            'message' => 'Xoá file thành công.',
+        ]);
+    }
 }

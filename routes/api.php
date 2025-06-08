@@ -119,6 +119,9 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('assessments', 'StudentsController@assessments');
                 Route::post('operating', 'StudentsController@operating');
                 Route::post('upload-avatar', 'StudentsController@uploadAvatar');
+                Route::post('upload-file', 'StudentsController@uploadFile');
+                Route::post('get-files', 'StudentsController@getFile');
+                Route::post('delete-file', 'StudentsController@deleteFile');
             });
            
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
