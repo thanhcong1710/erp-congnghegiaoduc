@@ -128,6 +128,9 @@
             },
           }).then((response) => {  
             this.getStudentFiles();
+            this.upload.file = "";
+            this.upload.fileName = "";
+            this.upload.note = "";
           })
         .catch((error)   => { console.log(error); this.$vs.loading.close(); })
       },
