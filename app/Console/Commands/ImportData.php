@@ -202,6 +202,8 @@ class ImportData extends Command
                     return 32;
                 case '6':
                     return 33;
+                case '9':
+                    return 80;
                 case '12':
                     return 34;
                 case '18':
@@ -216,6 +218,8 @@ class ImportData extends Command
                     return 37;
                 case '6':
                     return 38;
+                case '9':
+                    return 89;
                 case '12':
                     return 39;
                 case '18':

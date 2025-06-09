@@ -438,4 +438,43 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report104(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m-01');
+        $end_date = isset($request->end_date) ? $request->end_date : date('Y-m-d');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        if (!empty($branch_id)) {
+            $branch_query=implode(",",$branch_id);
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND c.enrolment_start_date >= '$start_date'";
+        }
+        if($end_date){
+            $cond.= " AND c.enrolment_last_date <= '$end_date'";
+        }
+        
+        $order_by = " ORDER BY c.id DESC";
+        $total = u::first("SELECT COUNT(s.id) total
+                FROM crm_students AS s 
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond");
+        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id
+                LEFT JOIN users AS u ON u.id = c.ec_id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+            WHERE s.branch_id IN ($branch_query) AND c.class $cond $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
