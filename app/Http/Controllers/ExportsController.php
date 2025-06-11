@@ -752,4 +752,120 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report203(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND p.charge_date >= '$start_date'";
+        }
+        if($end_date){
+            $cond.= " AND p.charge_date <= '$end_date'";
+        }
+        $order_by = " ORDER BY p.charge_date DESC ";
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+                p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
+                p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
+                (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
+                (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
+                c.note, p.method, b.name AS branch_name, pd.name AS product_name,
+                (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`,
+                DATE_FORMAT(p.charge_date, '%Y-%m') AS report_month, s.nick, s.gud_mobile1, s.gud_name1,
+                c.count_recharge, (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id=p.ec_id) AS ec_name 
+            FROM payments AS p 
+                LEFT JOIN contracts AS c ON c.id=p.contract_id 
+                LEFT JOIN students AS s ON s.id=p.student_id
+                LEFT JOIN branches AS b ON b.id=p.branch_id
+                LEFT JOIN products AS pd ON pd.id=c.product_id
+                LEFT JOIN tuition_fee AS t ON t.id =c.init_tuition_fee_id
+                LEFT JOIN programs AS pg ON pg.id= c.program_id
+            WHERE p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'STT');
+        $sheet->setCellValue('C1', 'Student ID (LMS)');
+        $sheet->setCellValue('D1', 'STUDENT NAME');
+        $sheet->setCellValue('E1', 'NickName');
+        $sheet->setCellValue('F1', 'Brand Khóa học');
+        $sheet->setCellValue('G1', 'Level trình độ');
+        $sheet->setCellValue('H1', 'Guardian Name Phụ huynh');
+        $sheet->setCellValue('I1', 'Home phone');
+        $sheet->setCellValue('J1', 'Sale in charge');
+        $sheet->setCellValue('K1', 'Status');
+        $sheet->setCellValue('L1', 'Register?');
+        $sheet->setCellValue('M1', 'Package Gói phí');
+        $sheet->setCellValue('N1', 'Ngày đóng phí');
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => Color::COLOR_BLACK],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        
+        // Áp dụng cho dòng 1 từ A1 đến F1
+        $sheet->getStyle('A1:N1')->applyFromArray($headerStyle);
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(5);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        $sheet->getColumnDimension("J")->setWidth(30);
+        $sheet->getColumnDimension("K")->setWidth(30);
+        $sheet->getColumnDimension("L")->setWidth(30);
+        $sheet->getColumnDimension("M")->setWidth(30);
+        $sheet->getColumnDimension("N")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $i+1);
+            $sheet->setCellValue('C' . $x, $list[$i]->std_id);
+            $sheet->setCellValue('D' . $x, $list[$i]->stu_name) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->nick );
+            $sheet->setCellValue('F' . $x, $list[$i]->product_name);
+            $sheet->setCellValue('G' . $x, $list[$i]->level);
+            $sheet->setCellValue('H' . $x, $list[$i]->gud_name1);
+            $sheet->setCellValue('I' . $x, $list[$i]->gud_mobile1);
+            $sheet->setCellValue('J' . $x, $list[$i]->ec_name );
+            $sheet->setCellValue('K' . $x, $list[$i]->count_recharge ==0 ? 'New' :'Renew');
+            $sheet->setCellValue('L' . $x, $list[$i]->remaining_amount > 0 ? 'Deposit' : ($list[$i]->payment_amount== $list[$i]->total_fee ? 'Full Fee' : 'Final Payment'));
+            $sheet->setCellValue('M' . $x, $list[$i]->number_of_months . ' tháng');
+            $sheet->setCellValue('N' . $x, $list[$i]->payment_date );
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo doanh số.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

@@ -531,4 +531,55 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report203(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m-01');
+        $end_date = isset($request->end_date) ? $request->end_date : date('Y-m-d');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        if (!empty($branch_id)) {
+            $branch_query=implode(",",$branch_id);
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND p.charge_date >= '$start_date'";
+        }
+        if($end_date){
+            $cond.= " AND p.charge_date <= '$end_date'";
+        }
+        
+        $order_by = " ORDER BY p.charge_date DESC";
+        $total = u::first("SELECT COUNT(s.id) total
+            FROM payments AS p 
+                LEFT JOIN contracts AS c ON c.id=p.contract_id 
+                LEFT JOIN students AS s ON s.id=p.student_id
+            WHERE  p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond");
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+                p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
+                p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
+                (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
+                (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
+                c.note, p.method, b.name AS branch_name, pd.name AS product_name,
+                (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`,
+                DATE_FORMAT(p.charge_date, '%Y-%m') AS report_month, s.nick, s.gud_mobile1, s.gud_name1,
+                c.count_recharge, (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id=p.ec_id) AS ec_name 
+            FROM payments AS p 
+                LEFT JOIN contracts AS c ON c.id=p.contract_id 
+                LEFT JOIN students AS s ON s.id=p.student_id
+                LEFT JOIN branches AS b ON b.id=p.branch_id
+                LEFT JOIN products AS pd ON pd.id=c.product_id
+                LEFT JOIN tuition_fee AS t ON t.id =c.init_tuition_fee_id
+                LEFT JOIN programs AS pg ON pg.id= c.program_id
+            WHERE p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
