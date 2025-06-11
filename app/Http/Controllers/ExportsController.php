@@ -496,7 +496,7 @@ class ExportsController extends Controller
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
                 LEFT JOIN users AS u ON u.id =s.checkin_owner_id
                 LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond $order_by");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond $order_by");
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'STT');
@@ -538,6 +538,101 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo checkin.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report104(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND c.enrolment_start_date >= '$start_date'";
+        }
+        if($end_date){
+            $cond.= " AND c.enrolment_start_date <= '$end_date'";
+        }
+        $order_by = " ORDER BY c.enrolment_start_date DESC ";
+        $list = u::query("SELECT s.name, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+                b.name AS branch_name, c.enrolment_start_date, c.enrolment_last_date,
+                (SELECT `name` FROM programs WHERE id=p.parent_id) AS `level`,
+                (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND `type`>0 AND `status`>0) AS num_contract
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id
+                LEFT JOIN users AS u ON u.id=c.ec_id
+                LEFT JOIN branches AS b ON b.id=c.branch_id
+                LEFT JOIN programs As p ON p.id=c.program_id
+            WHERE c.branch_id IN ($branch_query) AND c.type=0  AND c.class_id IS NOT NULL $cond $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Họ và tên');
+        $sheet->setCellValue('C1', 'Mã LMS');
+        $sheet->setCellValue('D1', 'Sale');
+        $sheet->setCellValue('E1', 'Trung tâm');
+        $sheet->setCellValue('F1', 'Ngày bắt đầu trial');
+        $sheet->setCellValue('G1', 'Ngày kết thúc trial');
+        $sheet->setCellValue('H1', 'Trình độ');
+        $sheet->setCellValue('I1', 'Ghi chú');
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => Color::COLOR_BLACK],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        
+        // Áp dụng cho dòng 1 từ A1 đến F1
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+
+        $sheet->getColumnDimension("A")->setWidth(5);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $i+1);
+            $sheet->setCellValue('B' . $x, $list[$i]->name);
+            $sheet->setCellValue('C' . $x, $list[$i]->lms_id);
+            $sheet->setCellValue('D' . $x, $list[$i]->ec_name) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->branch_name );
+            $sheet->setCellValue('F' . $x, $list[$i]->enrolment_start_date);
+            $sheet->setCellValue('G' . $x, $list[$i]->enrolment_last_date);
+            $sheet->setCellValue('H' . $x, $list[$i]->level);
+            $sheet->setCellValue('I' . $x, $list[$i]->num_contract>0 ?'Đã có gói chính thức' : '');
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo học thử.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

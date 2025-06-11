@@ -427,13 +427,13 @@ class ReportsController extends Controller
         $order_by = " ORDER BY s.id DESC";
         $total = u::first("SELECT COUNT(s.id) total
                 FROM crm_students AS s 
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond");
         $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
             FROM crm_students AS s 
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
                 LEFT JOIN users AS u ON u.id =s.checkin_owner_id
                 LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond $order_by $limitation ");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond $order_by $limitation ");
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -459,20 +459,24 @@ class ReportsController extends Controller
             $cond.= " AND c.enrolment_start_date >= '$start_date'";
         }
         if($end_date){
-            $cond.= " AND c.enrolment_last_date <= '$end_date'";
+            $cond.= " AND c.enrolment_start_date <= '$end_date'";
         }
         
-        $order_by = " ORDER BY c.id DESC";
-        $total = u::first("SELECT COUNT(s.id) total
-                FROM crm_students AS s 
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status IN (2,3) $cond");
-        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
+        $order_by = " ORDER BY c.enrolment_start_date DESC";
+        $total = u::first("SELECT COUNT(c.id) total
+                FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id
+            WHERE c.branch_id IN ($branch_query) AND c.type=0  AND c.class_id IS NOT NULL $cond");
+        $list = u::query("SELECT s.name, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+                b.name AS branch_name, c.enrolment_start_date, c.enrolment_last_date,
+                (SELECT `name` FROM programs WHERE id=p.parent_id) AS `level`,
+                (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND `type`>0 AND `status`>0) AS num_contract
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id = c.student_id
-                LEFT JOIN users AS u ON u.id = c.ec_id
-                LEFT JOIN branches AS b ON b.id = c.branch_id
-                LEFT JOIN classes AS cl ON cl.id = c.class_id
-            WHERE s.branch_id IN ($branch_query) AND c.class $cond $order_by $limitation ");
+                LEFT JOIN users AS u ON u.id=c.ec_id
+                LEFT JOIN branches AS b ON b.id=c.branch_id
+                LEFT JOIN programs As p ON p.id=c.program_id
+            WHERE c.branch_id IN ($branch_query) AND c.type=0  AND c.class_id IS NOT NULL $cond $order_by $limitation ");
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

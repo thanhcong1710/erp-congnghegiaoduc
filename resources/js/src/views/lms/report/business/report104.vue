@@ -55,15 +55,19 @@
                   <th colspan="1" rowspan="1">Ngày bắt đầu trial</th>
                   <th colspan="1" rowspan="1">Ngày kết thúc trial</th>
                   <th colspan="1" rowspan="1">Trình độ</th>
+                  <th colspan="1" rowspan="1">Ghi chú</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.checkined_at}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td">{{item.lms_id}}</td>
-                <td class="td vs-table--td">{{ item.ec_name}}</td>
+                <td class="td vs-table--td">{{item.ec_name}}</td>
                 <td class="td vs-table--td">{{ item.branch_name}}</td>
+                <td class="td vs-table--td">{{ item.enrolment_start_date}}</td>
+                <td class="td vs-table--td">{{ item.enrolment_last_date}}</td>
+                <td class="td vs-table--td">{{ item.level}}</td>
+                <td class="td vs-table--td">{{ item.num_contract>0 ? 'Đã có gói chính thức' : ''}}</td>
               </tr>
             </table>
             
