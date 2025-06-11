@@ -66,6 +66,7 @@ class PartnerController extends Controller
                         'total_fee'=> data_get($row,'total_fee'),
                         'payment_amount'=> data_get($row,'payment_amount'),
                         'payment_method'=> data_get($row,'method') ==1 ? 'BankTransfer' : 'Cash',
+                        'payment_type'=> data_get($row,'remaining_amount') > 0 ? 'Deposit' : (data_get($row,'payment_amount') == data_get($row,'total_fee') ? 'Full Fee' : 'Final Payment'),
                         'remaining_amount'=> data_get($row,'remaining_amount'),
                         'period_from'=> data_get($row,'period_from'),
                         'period_to'=> data_get($row,'period_to'),

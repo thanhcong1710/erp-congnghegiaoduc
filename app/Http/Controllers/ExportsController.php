@@ -639,4 +639,117 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report202(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query =  Auth::user()->getBranchesHasUser();
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
+        foreach($arr_key AS $k=>$key){
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
+            if($key=='branch_id' && $arr_value[$k]){
+                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            }
+        }
+        $cond ="";
+        if($start_date){
+            $cond.= " AND p.charge_date >= '$start_date'";
+        }
+        if($end_date){
+            $cond.= " AND p.charge_date <= '$end_date'";
+        }
+        $order_by = " ORDER BY p.charge_date DESC ";
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+                p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
+                p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
+                (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
+                (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
+                c.note, p.method, b.name AS branch_name, pd.name AS product_name,
+                (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`,
+                DATE_FORMAT(p.charge_date, '%Y-%m') AS report_month
+            FROM payments AS p 
+                LEFT JOIN contracts AS c ON c.id=p.contract_id 
+                LEFT JOIN students AS s ON s.id=p.student_id
+                LEFT JOIN branches AS b ON b.id=p.branch_id
+                LEFT JOIN products AS pd ON pd.id=c.product_id
+                LEFT JOIN tuition_fee AS t ON t.id =c.init_tuition_fee_id
+                LEFT JOIN programs AS pg ON pg.id= c.program_id
+            WHERE p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Ngày thanh toán');
+        $sheet->setCellValue('C1', 'Tên học sinh');
+        $sheet->setCellValue('D1', 'Mã LMS');
+        $sheet->setCellValue('E1', 'Trung tâm');
+        $sheet->setCellValue('F1', 'Khoá học');
+        $sheet->setCellValue('G1', 'Trình độ');
+        $sheet->setCellValue('H1', 'Tổng gói phí');
+        $sheet->setCellValue('I1', 'Đã trả');
+        $sheet->setCellValue('J1', 'Loại thanh toán');
+        $sheet->setCellValue('K1', 'Học phí còn lại');
+        $sheet->setCellValue('L1', 'Gói phí');
+        $sheet->setCellValue('M1', 'Thời điểm tính doanh số');
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => Color::COLOR_BLACK],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ]
+        ];
+        
+        // Áp dụng cho dòng 1 từ A1 đến F1
+        $sheet->getStyle('A1:M1')->applyFromArray($headerStyle);
+
+        $sheet->getColumnDimension("A")->setWidth(5);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        $sheet->getColumnDimension("J")->setWidth(30);
+        $sheet->getColumnDimension("K")->setWidth(30);
+        $sheet->getColumnDimension("L")->setWidth(30);
+        $sheet->getColumnDimension("M")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $i+1);
+            $sheet->setCellValue('B' . $x, $list[$i]->payment_date);
+            $sheet->setCellValue('C' . $x, $list[$i]->stu_name);
+            $sheet->setCellValue('D' . $x, $list[$i]->std_id) ;
+            $sheet->setCellValue('E' . $x, $list[$i]->branch_name );
+            $sheet->setCellValue('F' . $x, $list[$i]->product_name);
+            $sheet->setCellValue('G' . $x, $list[$i]->level);
+            $sheet->setCellValue('H' . $x, $list[$i]->total_fee);
+            $sheet->setCellValue('I' . $x, $list[$i]->payment_amount);
+            $sheet->setCellValue('J' . $x, $list[$i]->remaining_amount > 0 ? 'Deposit' : ($list[$i]->payment_amount== $list[$i]->total_fee ? 'Full Fee' : 'Final Payment'));
+            $sheet->setCellValue('K' . $x, $list[$i]->remaining_amount);
+            $sheet->setCellValue('L' . $x, $list[$i]->number_of_months." tháng");
+            $sheet->setCellValue('M' . $x, $list[$i]->report_month);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo đối soát Creverse.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
