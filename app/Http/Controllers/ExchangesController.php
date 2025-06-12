@@ -108,13 +108,14 @@ class ExchangesController extends Controller
                 if($to_product_id != $contracts[$k]->product_id){
                     $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id);
                     if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                        //Áp dụng quy đổi ngang số buổi
                         $to_contracts[$k] = $contracts[$k];
                         $to_contracts[$k]->tuition_fee_id = data_get($data_calc_transfer, 'receive_tuition_fee.id');
                         $to_contracts[$k]->tuition_fee_name = data_get($data_calc_transfer, 'receive_tuition_fee.name');
-                        $to_contracts[$k]->total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
-                        $to_contracts[$k]->real_sessions = data_get($data_calc_transfer, 'sessions', 0);
-                        $to_contracts[$k]->bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
-                        $to_contracts[$k]->summary_sessions = $to_contracts[$k]->real_sessions + $to_contracts[$k]->bonus_sessions;
+                        // $to_contracts[$k]->total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
+                        // $to_contracts[$k]->real_sessions = data_get($data_calc_transfer, 'sessions', 0);
+                        // $to_contracts[$k]->bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
+                        // $to_contracts[$k]->summary_sessions = $to_contracts[$k]->real_sessions + $to_contracts[$k]->bonus_sessions;
                         $to_contracts[$k]->product_name = data_get($data_calc_transfer, 'receive_tuition_fee.product_name');
                         $contract_exchange++;
                     }
