@@ -121,6 +121,7 @@
         formData.append('file', this.upload.file);
         formData.append('student_id', this.student_info.id);
         formData.append('note', this.upload.note);
+        this.$vs.loading()
         axios.p('/api/lms/students/upload-file', formData, 
           {
             headers: {
@@ -131,6 +132,7 @@
             this.upload.file = "";
             this.upload.fileName = "";
             this.upload.note = "";
+            this.$vs.loading.close();
           })
         .catch((error)   => { console.log(error); this.$vs.loading.close(); })
       },

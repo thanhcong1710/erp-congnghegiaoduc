@@ -403,39 +403,45 @@ class StudentsController extends Controller
             WHERE status=1 AND student_id = $student_id ORDER BY id DESC");
         return response()->json($data);
     }
-    public function uploadFile(Request $request){
-        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : '';
-        $note = isset($_POST['note']) ? $_POST['note'] : '';
-        if($_FILES['file']['name']){
-            $tmpFilePath = $_FILES['file']['tmp_name'];
-            if ($tmpFilePath != ""){
-                $dir = __DIR__.'/../../../public/static/upload/student_files/'. date('Y_m').'/';
-                if(!file_exists($dir)){
-                    mkdir($dir);
-                }
-                $newFilePath = $dir . $_FILES['file']['name'];
-                $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
-                move_uploaded_file($tmpFilePath, $newFilePath);
-                u::insertSimpleRow(array(
-                    'student_id' => $student_id,
-                    'file_name' => $_FILES['file']['name'],
-                    'file_path' => $dir_file_insert,
-                    'note' => $note,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'creator_id' => Auth::user()->id,
-                    'status'=>1
-                ), 'file_has_student');
-                return response()->json([
-                    'status' => 1,
-                    'message' => 'Upload avatar thành công.',
-                ]);
-            }
+    public function uploadFile(Request $request)
+    {
+        // $request->validate([
+        //     'file' => 'required|file|max:10240|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls',
+        //     'student_id' => 'required|integer',
+        //     'note' => 'nullable|string',
+        // ]);
+
+        $file = $request->file('file');
+        $student_id = $request->input('student_id');
+        $note = $request->input('note');
+
+        // Tạo thư mục lưu file
+        $dir = public_path('static/upload/student_files/' . date('Y_m'));
+        if (!file_exists($dir)) {
+            mkdir($dir, 0775, true);
         }
 
+        // Đặt tên file mới (tránh trùng tên)
+        $filename = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $file->getClientOriginalName());
+        $file->move($dir, $filename);
+
+        // Lưu đường dẫn tương đối (bỏ phần public)
+        $dir_file_insert = str_replace(public_path(), '', $dir . '/' . $filename);
+
+        // Lưu vào DB
+        u::insertSimpleRow([
+            'student_id' => $student_id,
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $dir_file_insert,
+            'note' => $note,
+            'created_at' => now(),
+            'creator_id' => Auth::id(),
+            'status' => 1
+        ], 'file_has_student');
+
         return response()->json([
-            'status' => 0,
-            'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
+            'status' => 1,
+            'message' => 'Upload file thành công.',
         ]);
     }
     public function deleteFile(Request $request){
