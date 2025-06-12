@@ -40,7 +40,7 @@ class PartnerController extends Controller
                         p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
                         (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
                         (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
-                        c.note, p.method,
+                        c.note, p.method, p.id AS payment_id,
                         (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`
                     FROM payments AS p 
                         LEFT JOIN contracts AS c ON c.id=p.contract_id 
@@ -64,6 +64,7 @@ class PartnerController extends Controller
                         'band'=> data_get($branch_lms_info,'ug_type'),
                         'level'=> data_get($row,'level'),
                         'total_fee'=> data_get($row,'total_fee'),
+                        'payment_id'=> data_get($row,'payment_id'),
                         'payment_amount'=> data_get($row,'payment_amount'),
                         'payment_method'=> data_get($row,'method') ==1 ? 'BankTransfer' : 'Cash',
                         'payment_type'=> data_get($row,'remaining_amount') > 0 ? 'Deposit' : (data_get($row,'payment_amount') == data_get($row,'total_fee') ? 'Full Fee' : 'Final Payment'),
