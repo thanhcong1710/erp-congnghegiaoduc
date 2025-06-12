@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã HS, Tên HS, số điện thoại" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã LMS, Tên HS, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>

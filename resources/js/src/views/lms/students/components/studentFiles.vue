@@ -171,7 +171,7 @@
         axios.p(`/api/lms/students/delete-file`,data)
         .then((response) => {
           this.$vs.loading.close();
-          this.getData();
+          this.getStudentFiles();
           this.$vs.notify({
             title: 'Thành Công',
             text: response.data.message,
