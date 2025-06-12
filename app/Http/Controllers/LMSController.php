@@ -883,7 +883,7 @@ class LMSController extends Controller
         if($studentInfo){
             $listClassLMS = self::getListClassByStudent(data_get($studentInfo, 'lms_id'));
             $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
-            if (data_get($classLMSCurrent, 'is_transfer') == 'Y' || data_get($classLMSCurrent, 'is_transfer_cancel') == 'Y'){
+            if (data_get($classLMSCurrent, 'chk') !== 'N'){
                 $url = sprintf('%s/data/setup.asmx/CounStudentWithdrawSave', config('lms.url'));
                 $client = new Client();
                 $method = 'POST';
