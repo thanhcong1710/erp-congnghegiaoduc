@@ -107,7 +107,7 @@ class TuitionTransfersController extends Controller
             $contract->left_real_sessions = $left_real_sessions;
             $contract->left_amount = $left_real_amount;
             $transferred_contracts[$k] = $contract;
-            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id);
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id, $left_real_sessions);
             if(!data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                 $result = array(
                     'status' => 0,
@@ -261,7 +261,7 @@ class TuitionTransfersController extends Controller
             $contract_id = 0;
             if($left_real_amount > 0){
                 $last_contract_to_student = u::first("SELECT count_recharge FROM contracts WHERE student_id=$to_student_id ORDER BY count_recharge DESC LIMIT 1");
-                $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, data_get($tuition_transfer_info, 'to_branch_id'), data_get($tuition_transfer_info, 'to_product_id'));
+                $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, data_get($tuition_transfer_info, 'to_branch_id'), data_get($tuition_transfer_info, 'to_product_id'), $left_real_sessions);
                 $term_student_user = u::first("SELECT * FROM term_student_user WHERE student_id = $to_student_id");
                 $contract_id = u::insertSimpleRow(array(
                     'type' => data_get($contract, 'type'),

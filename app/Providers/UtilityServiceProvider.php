@@ -826,7 +826,7 @@ class UtilityServiceProvider extends ServiceProvider
         return true;
     }
 
-    public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
+    public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id, $transfer_session)
     {
         $resp = (object)[];
         if ($from_tuition_fee_id) {
@@ -842,7 +842,9 @@ class UtilityServiceProvider extends ServiceProvider
                     WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
                         AND t.id IN ($available_ids)");
                 if($to_tuition_fee){
-                    $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
+                    // $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
+                    //Quy đổi ngang số buổi
+                    $resp->sessions = $transfer_session;
                     $resp->receive_tuition_fee = $to_tuition_fee;
                     $resp->transfer_amount = $transfer_amount;
                 }

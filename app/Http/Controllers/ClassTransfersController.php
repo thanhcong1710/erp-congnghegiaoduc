@@ -81,7 +81,7 @@ class ClassTransfersController extends Controller
         } else {
             $left_real_sessions = $contract_info->real_sessions > $contract_info->done_sessions ? $contract_info->real_sessions - $contract_info->done_sessions : 0;
             $left_real_amount = $contract_info->real_sessions ? ceil($left_real_sessions * ($contract_info->total_charged / $contract_info->real_sessions)) : 0; 
-            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id);
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id, $left_real_sessions);
             if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                 $tuition_fee_id = data_get($data_calc_transfer, 'receive_tuition_fee.id');
                 $total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
@@ -188,9 +188,10 @@ class ClassTransfersController extends Controller
                 'updated_at' => date('Y-m-d H:i:s')
             ), array('id'=>$class_transfer_id), 'class_transfer');
         } else {
+            $to_product_id = data_get($class_transfer_info, 'to_product_id');
             $left_real_sessions = $contract_info->real_sessions > $contract_info->done_sessions ? $contract_info->real_sessions - $contract_info->done_sessions : 0;
             $left_real_amount = $contract_info->real_sessions ? ceil($left_real_sessions * ($contract_info->total_charged / $contract_info->real_sessions)) : 0; 
-            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id);
+            $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract_info->tuition_fee_id, $left_real_amount, $contract_info->branch_id, $to_product_id, $left_real_sessions);
             if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                 $bonus_sessions = $contract_info->bonus_sessions > $contract_info->left_sessions ? $contract_info->left_sessions : $contract_info->bonus_sessions;
                 

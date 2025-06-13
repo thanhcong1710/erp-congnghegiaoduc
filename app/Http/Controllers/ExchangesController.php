@@ -106,16 +106,16 @@ class ExchangesController extends Controller
                 $contract_in_class++;
             } else {
                 if($to_product_id != $contracts[$k]->product_id){
-                    $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id);
+                    $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id, $left_real_sessions);
                     if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                         //Áp dụng quy đổi ngang số buổi
                         $to_contracts[$k] = $contracts[$k];
                         $to_contracts[$k]->tuition_fee_id = data_get($data_calc_transfer, 'receive_tuition_fee.id');
                         $to_contracts[$k]->tuition_fee_name = data_get($data_calc_transfer, 'receive_tuition_fee.name');
-                        // $to_contracts[$k]->total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
-                        // $to_contracts[$k]->real_sessions = data_get($data_calc_transfer, 'sessions', 0);
-                        // $to_contracts[$k]->bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
-                        // $to_contracts[$k]->summary_sessions = $to_contracts[$k]->real_sessions + $to_contracts[$k]->bonus_sessions;
+                        $to_contracts[$k]->total_charged = data_get($data_calc_transfer, 'transfer_amount', 0);
+                        $to_contracts[$k]->real_sessions = data_get($data_calc_transfer, 'sessions', 0);
+                        $to_contracts[$k]->bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
+                        $to_contracts[$k]->summary_sessions = $to_contracts[$k]->real_sessions + $to_contracts[$k]->bonus_sessions;
                         $to_contracts[$k]->product_name = data_get($data_calc_transfer, 'receive_tuition_fee.product_name');
                         $contract_exchange++;
                     }
@@ -143,7 +143,7 @@ class ExchangesController extends Controller
             if($to_product_id != $contract->product_id){
                 $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
                 $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
-                $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id);
+                $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id, $left_real_sessions);
                 if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
                     $bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
                     u::updateSimpleRow(array(
