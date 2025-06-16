@@ -717,6 +717,9 @@ class LMSController extends Controller
     //Student Call LMS
     public function addOrUpdateStudent($student_id = null)
     {
+        if(config('app.env') !== 'product'){
+            return "ok";
+        }
         $studentInfo = u::first("SELECT s.*,
                 (SELECT product_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS product_id,
                 (SELECT branch_id FROM contracts WHERE student_id = s.id AND status !=7 ORDER BY count_recharge DESC LIMIT 1) AS branch_id
@@ -814,6 +817,9 @@ class LMSController extends Controller
 
     public function addStudentToClass($student_id)
     { 
+        if(config('app.env') !== 'product'){
+            return "ok";
+        }
         $cond = "";
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
@@ -872,6 +878,9 @@ class LMSController extends Controller
 
     public function studentWithdraw($student_id)
     {
+        if(config('app.env') !== 'product'){
+            return "ok";
+        }
         $cond = "";
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
                 cl.lms_id AS lms_class_id, c.enrolment_last_date,
