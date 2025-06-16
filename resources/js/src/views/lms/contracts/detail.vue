@@ -313,7 +313,7 @@
           <router-link class="btn btn-danger" :to="`/lms/contracts`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`">
+          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`" v-if="contract_info.total_charge = 0">
             <vs-button class="mb-2" color="success" >Cập nhật hợp đồng</vs-button>
           </router-link>
         </div>
@@ -353,6 +353,9 @@
           .then(response => {
           this.$vs.loading.close();
           this.contract_info = response.data
+          this.contract_info.tuition_fee_amount = response.data.init_tuition_fee_amount
+          this.contract_info.tuition_fee_session = response.data.init_tuition_fee_session
+          this.contract_info.tuition_fee_receivable = response.data.init_tuition_fee_receivable
         })
       },
     },
