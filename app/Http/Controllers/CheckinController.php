@@ -88,7 +88,7 @@ class CheckinController extends Controller
     public function studentUpgrade(Request $request){
         $crm_student_info = u::first("SELECT * FROM crm_students WHERE id = $request->crm_student_id");
         $crm_parent_info = u::first("SELECT * FROM crm_parents WHERE id = ".(int)data_get($crm_student_info, 'parent_id'));
-        if($crm_student_info && $crm_parent_info){
+        if($crm_student_info && $crm_parent_info && !data_get($crm_student_info, 'lms_id')){
             $arr_name = u::explodeName(data_get($crm_student_info, 'name'));
             $lms_student_id = u::insertSimpleRow(array(
                 'lms_code' => '',
@@ -202,7 +202,7 @@ class CheckinController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                     'type_product'=>data_get($student, 'checkin_type_product'),
-                    'status' => 1,
+                    'status' => 3,
                 ), 'crm_students');
                 $content = "Thêm mới học sinh từ checkin: ".data_get($student, 'name')." (ID: $crm_student_id)";
                 LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
