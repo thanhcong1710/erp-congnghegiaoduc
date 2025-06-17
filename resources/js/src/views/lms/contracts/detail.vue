@@ -209,6 +209,17 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label> <input type="checkbox" v-model="contract_info.sibling"  disabled="true">
+                Giảm trừ anh chị em học cùng 5%</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                :value="contract_info.sibling_discount | formatNumber"
+                disabled="true"
+              />
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Mã voucher</label>
               <input
@@ -313,7 +324,7 @@
           <router-link class="btn btn-danger" :to="`/lms/contracts`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`" v-if="contract_info.total_charge = 0">
+          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`" v-if="contract_info.total_charged == 0">
             <vs-button class="mb-2" color="success" >Cập nhật hợp đồng</vs-button>
           </router-link>
         </div>
@@ -356,6 +367,7 @@
           this.contract_info.tuition_fee_amount = response.data.init_tuition_fee_amount
           this.contract_info.tuition_fee_session = response.data.init_tuition_fee_session
           this.contract_info.tuition_fee_receivable = response.data.init_tuition_fee_receivable
+          this.contract_info.sibling = response.data.sibling_discount > 0 ? true : false;
         })
       },
     },

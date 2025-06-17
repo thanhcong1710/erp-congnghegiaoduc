@@ -74,7 +74,8 @@ class ContractsController extends Controller
     {
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
+        $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND status > 0 ORDER BY count_recharge DESC LIMIT 1");
         $contract_id = u::insertSimpleRow(array(
@@ -119,6 +120,7 @@ class ContractsController extends Controller
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
+           'sibling_discount' => $sibling_discount,
         ), 'contracts');
 
         if(data_get($request,'coupon_code_check') == 1){
@@ -243,7 +245,8 @@ class ContractsController extends Controller
         $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
+        $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
@@ -286,6 +289,7 @@ class ContractsController extends Controller
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
+           'sibling_discount' => $sibling_discount,
         ), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
