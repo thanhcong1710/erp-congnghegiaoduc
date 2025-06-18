@@ -496,7 +496,7 @@ class ExportsController extends Controller
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
                 LEFT JOIN users AS u ON u.id =s.checkin_owner_id
                 LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond $order_by");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond $order_by");
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'STT');

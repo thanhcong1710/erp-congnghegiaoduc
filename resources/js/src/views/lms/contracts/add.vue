@@ -237,7 +237,7 @@
                 disabled="true"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="student_info.count_sibling > 0">
               <label> <input type="checkbox" v-model="contract.sibling" @change="caculatorSession">
                 Giảm trừ anh chị em học cùng 5%</label>
               <input

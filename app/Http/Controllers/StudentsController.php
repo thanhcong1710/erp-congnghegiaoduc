@@ -242,7 +242,8 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_leader_id) AS ec_leader_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ceo_branch_id) AS ceo_branch_name, 
-                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label
+                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label,
+                (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling
             FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
                 WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')");
         return response()->json($data);

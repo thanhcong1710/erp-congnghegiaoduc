@@ -427,13 +427,13 @@ class ReportsController extends Controller
         $order_by = " ORDER BY s.id DESC";
         $total = u::first("SELECT COUNT(s.id) total
                 FROM crm_students AS s 
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond");
         $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
             FROM crm_students AS s 
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
                 LEFT JOIN users AS u ON u.id =s.checkin_owner_id
                 LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status = 2 $cond $order_by $limitation ");
+            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond $order_by $limitation ");
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

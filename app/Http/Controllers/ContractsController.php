@@ -233,7 +233,8 @@ class ContractsController extends Controller
             (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
             (SELECT title FROM b2b_campaigns WHERE id= c.b2b_campaign_id) AS b2b_campaign_title,
-            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session
+            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session,
+            (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
         return response()->json($data);
