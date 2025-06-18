@@ -285,6 +285,10 @@ class EnrolmentsController extends Controller
                 WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
             $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
             $holidays = u::getPublicHolidays(data_get($class_info,'branch_id'), data_get($class_info,'product_id'));
+            $reserved_dates = u::getReservedDates_transfer($contract_id);
+            if (!empty($reserved_dates)) {
+                $holidays = array_merge($holidays, $reserved_dates);
+            }
             $arr_day = explode(",",data_get($class_info, 'class_day'));
             $join_date = date('Y-m-d', strtotime(data_get($contract_withdraw,'enrolment_last_date'))+24*3600);
             $data_sessions = u::calculatorSessionsByNumberOfSessions($join_date, data_get($contractJoinInfo,'summary_sessions'), $holidays, $arr_day);

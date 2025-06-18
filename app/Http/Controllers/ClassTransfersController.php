@@ -74,6 +74,10 @@ class ClassTransfersController extends Controller
             FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
         if(data_get($contract_info, 'product_id') == $to_product_id){
             $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
+            $reserved_dates = u::getReservedDates_transfer($contract_id);
+            if (!empty($reserved_dates)) {
+                $holidays = array_merge($holidays, $reserved_dates);
+            }
             $arr_day = explode(",",data_get($contract_info, 'class_day'));
             $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d',strtotime($transfer_date)-24*3600), $holidays, $arr_day);
             $left_sessions = (int)data_get($contract_info, 'summary_sessions') - (int)data_get($contract_info, 'done_sessions') - (int)data_get($data_sessions, 'total');

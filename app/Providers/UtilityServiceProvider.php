@@ -528,21 +528,16 @@ class UtilityServiceProvider extends ServiceProvider
     }
 
     public static function getSessionsByNumberOfSessions($startTime, $numberOfSessions, $classdays, $holidays, $onlyEndDate = false)
-    {
+    { 
+        $weekday = (int) date('N', $startTime);
+        if ($weekday === 7) {
+            $weekday = 0;
+        }
         $timeOfDay = 24 * 60 * 60;
         $maxLength = count($classdays) - 1;
         $days = [];
-        $weekday = (int) date('N', $startTime);
-        if ($weekday === 7) {
-            if(in_array(8,$classdays)){
-                --$numberOfSessions;
-                $days[] = date("Y-m-d", $startTime);
-            }
-            $weekday = 0;
-        }
         while ($numberOfSessions >= 0) {
             foreach ($classdays as $key => $classday) {
-                $classday = $classday -1;
                 if ($weekday > $classday) {
                     if ($key >= $maxLength) {
                         $startTime += (7 - $weekday) * $timeOfDay;
@@ -551,10 +546,10 @@ class UtilityServiceProvider extends ServiceProvider
                     continue;
                 }
                 $startTime += ($classday - $weekday) * $timeOfDay;
-                if ($numberOfSessions <= 0) {
-                    if ($onlyEndDate) {
+                if($numberOfSessions<=0){
+                    if($onlyEndDate){
                         $l = count($days);
-                        return $l > 0 ? $days[$l - 1] : null;
+                        return $l> 0 ? $days[$l - 1] : null;
                     }
                     return $days;
                 }
@@ -571,7 +566,7 @@ class UtilityServiceProvider extends ServiceProvider
         }
         if ($onlyEndDate) {
             $l = count($days);
-            return $l > 0 ? $days[$l - 1] : null;
+            return $l> 0 ? $days[$l - 1] : null;
         }
         return $days;
     }
@@ -745,6 +740,10 @@ class UtilityServiceProvider extends ServiceProvider
         if($contract_info){
             if ($contract_info->status == 6) {
                 $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
+                $reserved_dates = self::getReservedDates_transfer($contract_id);
+                if (!empty($reserved_dates)) {
+                    $holidays = array_merge($holidays, $reserved_dates);
+                }
                 $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
                 $arr_day = explode(",", data_get($class_info, 'class_day'));
                 $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
@@ -1114,5 +1113,37 @@ class UtilityServiceProvider extends ServiceProvider
                 self::updateDoneSessions(data_get($contractInfo, 'id'));
             }
         }
+    }
+
+    public static function updateEnrolmentLastDate($contract_id) {
+        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code FROM contracts WHERE id=$contract_id");
+        $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
+        $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
+        $arr_day = explode(",", data_get($class_info, 'class_day'));
+        $reserved_dates = self::getReservedDates_transfer($contract_id);
+        if (!empty($reserved_dates)) {
+            $holidays = array_merge($holidays, $reserved_dates);
+        };
+        $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $contract_info->summary_sessions, $holidays, $arr_day);
+        self::updateSimpleRow(array(
+            'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+        ), array('id' => $contract_id), 'contracts');
+    }
+
+    public static function getReservedDates_transfer($contract_id)
+    {
+        $res = [];
+        if ($contract_id) {
+            $query = "SELECT r.contract_id, r.start_date, r.end_date, r.session FROM `reserves` AS r WHERE r.status = 2 AND r.contract_id =$contract_id ";
+            $data = self::query($query);
+
+            if (!empty($data)) {
+                foreach ($data as $da) {
+                $res[] = (object)['start_date' => $da->start_date, 'end_date' => $da->end_date, 'sessions' => $da->session];
+                }
+            }
+        }
+
+        return $res;
     }
 }

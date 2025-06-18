@@ -93,6 +93,11 @@ class TuitionTransfersController extends Controller
             $contract = (object)$contract;
             if(data_get($contract, 'class_id')){
                 $holidays = u::getPublicHolidays(data_get($contract,'branch_id'), data_get($contract,'product_id'));
+                $contract_id = data_get($contract, 'contract_id') ?? data_get($contract, 'id');
+                $reserved_dates = u::getReservedDates_transfer($contract_id);
+                if (!empty($reserved_dates)) {
+                    $holidays = array_merge($holidays, $reserved_dates);
+                }
                 $arr_day = explode(",",data_get($contract, 'class_day'));
                 $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d',strtotime($transfer_date)-24*3600), $holidays, $arr_day);
                 $contract->done_sessions = $contract->done_sessions + (int)data_get($data_sessions, 'total', 0);

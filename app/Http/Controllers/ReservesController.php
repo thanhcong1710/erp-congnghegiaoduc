@@ -84,6 +84,10 @@ class ReservesController extends Controller
         }
 
         $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
+        $reserved_dates = u::getReservedDates_transfer($contract_id);
+        if (!empty($reserved_dates)) {
+            $holidays = array_merge($holidays, $reserved_dates);
+        }
         $arr_day = explode(",",data_get($class_info, 'class_day'));
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $reserve_session, $holidays, $arr_day);
         $end_date = data_get($data_sessions,'end_date');
