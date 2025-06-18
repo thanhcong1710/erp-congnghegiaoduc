@@ -123,6 +123,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('upload-file', 'StudentsController@uploadFile');
                 Route::post('get-files', 'StudentsController@getFile');
                 Route::post('delete-file', 'StudentsController@deleteFile');
+                Route::post('validate_lms', 'StudentsController@validateLMS');
             });
            
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');

@@ -20,7 +20,8 @@
             type="text"
             name="title"
             v-model="student_info.lms_id"
-            :disabled="true"
+            :disabled="disableLMS(disabled_edit, student_info.lms_id)"
+            @change="validateIdLMS"
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -565,6 +566,33 @@
           this.$vs.loading.close();
         });
       },
+      validateIdLMS(){
+        const data = {
+          student_id: this.student_info.id,
+          lms_id: this.student_info.lms_id,
+        };
+        this.$vs.loading()
+        axios.p(`/api/lms/students/validate_lms`,data).then(response => {
+          this.$vs.loading.close();
+          if(response.data.status==0){
+            this.$vs.notify({
+              title: 'Thông Báo',
+              text: response.data.message,
+              iconPack: 'feather',
+              icon: 'icon-alert-circle',
+              color: 'danger'
+            })
+            this.student_info.lms_id = 0
+          }
+        })
+      },
+      disableLMS(disabled_edit, lms_id) {
+        if (disabled_edit) {
+          return true;
+        } else {
+          return lms_id != 0;
+        }
+      }
     }
   }
 </script>

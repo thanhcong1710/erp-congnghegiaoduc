@@ -208,6 +208,9 @@ class StudentsController extends Controller
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         );
+        if (data_get($request, 'lms_id')) {
+            $data_update['lms_id'] = data_get($request, 'lms_id');
+        }
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
         $ec_id =data_get($request, 'ec_id');
         $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)$ec_id);
@@ -453,6 +456,23 @@ class StudentsController extends Controller
         return response()->json([
             'status' => 1,
             'message' => 'Xoá file thành công.',
+        ]);
+    }
+    public function validateLMS(Request $request){
+        $student_id = $request->student_id;
+        $lms_id = $request->lms_id;
+        if($student_id && $lms_id){
+            $check = u::first("SELECT id FROM students WHERE  lms_id='$lms_id' && id != $student_id");
+            if($check){
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Mã học sinh đã tồn tại trong hệ thống.'
+                ]);
+            }
+        }
+        return response()->json([
+            'status' => 1,
+            'message' => 'Mã học sinh hợp lệ.'
         ]);
     }
 }
