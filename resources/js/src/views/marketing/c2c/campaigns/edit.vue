@@ -244,12 +244,12 @@
       },
       selectDate(date){
         if (date) {
-          this.holiday.start_date = moment(date).format("YYYY-MM-DD");
+          this.campaign.start_date = moment(date).format("YYYY-MM-DD");
         }
       },
       selectEndDate(date){
         if (date) {
-          this.holiday.end_date = moment(date).format("YYYY-MM-DD");
+          this.campaign.end_date = moment(date).format("YYYY-MM-DD");
         }
       },
       save() {
