@@ -20,7 +20,7 @@
             type="text"
             name="title"
             v-model="student_info.lms_id"
-            :disabled="disableLMS(disabled_edit, student_info.lms_id)"
+            :disabled="disableLMS(disabled_edit, init_lms_id)"
             @change="validateIdLMS"
           />
         </div>
@@ -403,6 +403,7 @@
           },
         },
         tmp_district_id:'',
+        init_lms_id: 0,
       }
     },
     async created() {
@@ -429,6 +430,7 @@
       this.getDistrict(this.html.province.item);
       this.html.ecs.item = this.html.ecs.list.filter(item => item.id == this.student_info.ec_id)[0]
       this.html.cms.item = this.html.cms.list.filter(item => item.id == this.student_info.cm_id)[0]
+      this.init_lms_id = this.student_info.lms_id;
     },
     methods: {
       saveEC(data = null){
@@ -586,11 +588,11 @@
           }
         })
       },
-      disableLMS(disabled_edit, lms_id) {
+      disableLMS(disabled_edit, init_lms_id) {
         if (disabled_edit) {
           return true;
         } else {
-          return lms_id != 0;
+          return init_lms_id != 0;
         }
       }
     }
