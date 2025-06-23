@@ -55,6 +55,11 @@ class CampaignsController extends Controller
             'voucher_amount' => data_get($request, 'campaign.voucher_amount'),  
             'voucher_num' => data_get($request, 'campaign.voucher_num'),  
             'voucher_bonus_sessions' => data_get($request, 'campaign.voucher_bonus_sessions'), 
+            'voucher_percent' => data_get($request, 'campaign.voucher_percent'), 
+            'voucher_quota' => data_get($request, 'campaign.voucher_quota'),
+            'voucher_type' => data_get($request, 'campaign.voucher_type'), 
+            'voucher_code' => data_get($request, 'campaign.voucher_code'), 
+            'branch_id' => data_get($request, 'campaign.branch_id'), 
             'note' => data_get($request, 'campaign.note'),  
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
@@ -67,27 +72,61 @@ class CampaignsController extends Controller
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
         ), 'source_detail');
-        if (data_get($request, 'campaign.type') == 4 && data_get($request, 'campaign.voucher_num')){
-            for($i=0;$i<data_get($request, 'campaign.voucher_num');$i++){
-                $voucher_code = u::generateRandomAlphanumeric(6);
-                $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
-                while(!empty($check_exit)){
-                    $voucher_code = u::generateRandomAlphanumeric(6);
-                    $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
+        if (data_get($request, 'campaign.type') == 4){
+            $branches = data_get($request, 'branches');
+            $branch_id = "";
+            foreach($branches AS $row){
+                if(data_get($row, 'selected') == true){
+                    $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
                 }
-                u::insertSimpleRow(array(
-                    'code' => $voucher_code,
-                    'source_id' => 1,
-                    'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
-                    'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
-                    'start_date'=> data_get($request, 'campaign.start_date'),
-                    'end_date'=> data_get($request, 'campaign.end_date'),
-                    'status' => 1,
-                    'created_at'=>date('Y-m-d H:i:s'),
-                    'creator_id'=>Auth::user()->id,
-                    'campaign_id'=> $campaign_id
-                ), 'coupons');
             }
+            if(data_get($request, 'campaign.voucher_type') == 1){
+                if (data_get($request, 'campaign.voucher_num')){
+                    for($i=0;$i<data_get($request, 'campaign.voucher_num');$i++){
+                        $voucher_code = u::generateRandomAlphanumeric(6);
+                        $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
+                        while(!empty($check_exit)){
+                            $voucher_code = u::generateRandomAlphanumeric(6);
+                            $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
+                        }
+                        u::insertSimpleRow(array(
+                            'code' => $voucher_code,
+                            'source_id' => 1,
+                            'type' => data_get($request, 'campaign.voucher_type'),
+                            'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                            'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                            'coupon_percent'=> data_get($request, 'campaign.voucher_percent'),
+                            'start_date'=> data_get($request, 'campaign.start_date'),
+                            'end_date'=> data_get($request, 'campaign.end_date'),
+                            'status' => 1,
+                            'created_at'=>date('Y-m-d H:i:s'),
+                            'creator_id'=>Auth::user()->id,
+                            'campaign_id'=> $campaign_id,
+                            'branch_id' => $branch_id
+                        ), 'coupons');
+                    }
+                }
+            }elseif(data_get($request, 'campaign.voucher_type') == 2) {
+                if (data_get($request, 'campaign.voucher_code')){
+                    u::insertSimpleRow(array(
+                        'code' => data_get($request, 'campaign.voucher_code'),
+                        'source_id' => 1,
+                        'type' => data_get($request, 'campaign.voucher_type'),
+                        'quota' => data_get($request, 'campaign.voucher_quota'),
+                        'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                        'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                        'coupon_percent'=> data_get($request, 'campaign.coupon_percent'),
+                        'start_date'=> data_get($request, 'campaign.start_date'),
+                        'end_date'=> data_get($request, 'campaign.end_date'),
+                        'status' => 1,
+                        'created_at'=>date('Y-m-d H:i:s'),
+                        'creator_id'=>Auth::user()->id,
+                        'campaign_id'=> $campaign_id,
+                        'branch_id' => $branch_id
+                    ), 'coupons');
+                }
+            }
+            
         }
 
         $result = array(
@@ -100,9 +139,18 @@ class CampaignsController extends Controller
     public function show(Request $request,$id)
     {
         $campaign = u::first("SELECT * FROM campaigns WHERE id = $id");
+        $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
+        foreach($branches  AS $k => $row){
+            if(in_array($row->id, explode(',', data_get($campaign, 'branch_id')))){
+                $branches[$k]->selected = true;
+            }else{
+                $branches[$k]->selected = false;
+            }
+        }
         
         return response()->json([
             'campaign'=>$campaign,
+            'branches'=>$branches,
         ]);
     }
 
@@ -119,6 +167,11 @@ class CampaignsController extends Controller
             'voucher_amount' => data_get($request, 'campaign.voucher_amount'),  
             'voucher_num' => data_get($request, 'campaign.voucher_num'),  
             'voucher_bonus_sessions' => data_get($request, 'campaign.voucher_bonus_sessions'), 
+            'voucher_percent' => data_get($request, 'campaign.voucher_percent'), 
+            'voucher_quota' => data_get($request, 'campaign.voucher_quota'),
+            'voucher_type' => data_get($request, 'campaign.voucher_type'), 
+            'voucher_code' => data_get($request, 'campaign.voucher_code'), 
+            'branch_id' => data_get($request, 'campaign.branch_id'), 
             'note' => data_get($request, 'campaign.note'),  
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
@@ -130,50 +183,82 @@ class CampaignsController extends Controller
             'updator_id'=>Auth::user()->id,
         ), array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 1), 'source_detail');
 
-        if (data_get($request, 'campaign.type') == 4 && data_get($request, 'campaign.voucher_num')){
-            $curr_count = u::first("SELECT count(id) As total FROM coupons WHERE campaign_id = ".data_get($request, 'campaign.id'));
-            if($curr_count->total > data_get($request, 'campaign.voucher_num')){
-                $tmp = $curr_count->total - data_get($request, 'campaign.voucher_num');
-                u::query("DELETE FROM coupons WHERE campaign_id =  ".data_get($request, 'campaign.id')." ORDER BY id DESC LIMIT $tmp");
-                u:: updateSimpleRow( array(
-                    'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
-                    'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
-                    'start_date'=> data_get($request, 'campaign.start_date'),
-                    'end_date'=> data_get($request, 'campaign.end_date'),
-                    'updated_at'=>date('Y-m-d H:i:s'),
-                    'updator_id'=>Auth::user()->id,
-                ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'type' => 0), 'coupons');
-            }else {
-                if($curr_count->total > 0){
+        if (data_get($request, 'campaign.type') == 4){
+            $branches = data_get($request, 'branches');
+            $branch_id = "";
+            foreach($branches AS $row){
+                if(data_get($row, 'selected') == true){
+                    $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
+                }
+            }
+            if(data_get($request, 'campaign.voucher_type') == 1){
+                if(data_get($request, 'campaign.voucher_num')){
+                    $curr_count = u::first("SELECT count(id) As total FROM coupons WHERE campaign_id = ".data_get($request, 'campaign.id'));
+                    if($curr_count->total > data_get($request, 'campaign.voucher_num')){
+                        $tmp = $curr_count->total - data_get($request, 'campaign.voucher_num');
+                        u::query("DELETE FROM coupons WHERE campaign_id =  ".data_get($request, 'campaign.id')." ORDER BY id DESC LIMIT $tmp");
+                        u:: updateSimpleRow( array(
+                            'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                            'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                            'coupon_percent'=> data_get($request, 'campaign.voucher_percent'),
+                            'start_date'=> data_get($request, 'campaign.start_date'),
+                            'end_date'=> data_get($request, 'campaign.end_date'),
+                            'updated_at'=>date('Y-m-d H:i:s'),
+                            'updator_id'=>Auth::user()->id,
+                            'branch_id' => $branch_id
+                        ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'source_id' => 1), 'coupons');
+                    }else {
+                        if($curr_count->total > 0){
+                            u:: updateSimpleRow( array(
+                                'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                                'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                                'coupon_percent'=> data_get($request, 'campaign.voucher_percent'),
+                                'start_date'=> data_get($request, 'campaign.start_date'),
+                                'end_date'=> data_get($request, 'campaign.end_date'),
+                                'updated_at'=>date('Y-m-d H:i:s'),
+                                'updator_id'=>Auth::user()->id,
+                                'branch_id' => $branch_id
+                            ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 1), 'coupons');
+                        }
+                        for($i=0;$i < (data_get($request, 'campaign.voucher_num') - $curr_count->total);$i++){
+                            $voucher_code = u::generateRandomAlphanumeric(6);
+                            $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
+                            while(!empty($check_exit)){
+                                $voucher_code = u::generateRandomAlphanumeric(6);
+                                $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
+                            }
+                            u::insertSimpleRow(array(
+                                'code' => $voucher_code,
+                                'source_id' => 1,
+                                'type' => data_get($request, 'campaign.type'),
+                                'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                                'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                                'coupon_percent'=> data_get($request, 'campaign.voucher_percent'),
+                                'start_date'=> data_get($request, 'campaign.start_date'),
+                                'end_date'=> data_get($request, 'campaign.end_date'),
+                                'status' => 1,
+                                'created_at'=>date('Y-m-d H:i:s'),
+                                'creator_id'=>Auth::user()->id,
+                                'campaign_id'=> data_get($request, 'campaign.id'),
+                                'branch_id' => $branch_id
+                            ), 'coupons');
+                        }   
+                    }
+                }
+            } elseif(data_get($request, 'campaign.voucher_type') == 2) {
+                if (data_get($request, 'campaign.voucher_code')){
                     u:: updateSimpleRow( array(
                         'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
                         'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                        'coupon_percent'=> data_get($request, 'campaign.voucher_percent'),
+                        'quota' => data_get($request, 'campaign.voucher_quota'),
                         'start_date'=> data_get($request, 'campaign.start_date'),
                         'end_date'=> data_get($request, 'campaign.end_date'),
                         'updated_at'=>date('Y-m-d H:i:s'),
                         'updator_id'=>Auth::user()->id,
-                    ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'type'=> 0), 'coupons');
+                        'branch_id' => $branch_id
+                    ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 1), 'coupons');
                 }
-                for($i=0;$i < (data_get($request, 'campaign.voucher_num') - $curr_count->total);$i++){
-                    $voucher_code = u::generateRandomAlphanumeric(6);
-                    $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
-                    while(!empty($check_exit)){
-                        $voucher_code = u::generateRandomAlphanumeric(6);
-                        $check_exit = u::first("SELECT id FROM coupons WHERE code='$voucher_code'");
-                    }
-                    u::insertSimpleRow(array(
-                        'code' => $voucher_code,
-                        'source_id' => 1,
-                        'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
-                        'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
-                        'start_date'=> data_get($request, 'campaign.start_date'),
-                        'end_date'=> data_get($request, 'campaign.end_date'),
-                        'status' => 1,
-                        'created_at'=>date('Y-m-d H:i:s'),
-                        'creator_id'=>Auth::user()->id,
-                        'campaign_id'=> data_get($request, 'campaign.id')
-                    ), 'coupons');
-                }   
             }
         }
 

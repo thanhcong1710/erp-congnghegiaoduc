@@ -453,6 +453,7 @@
           coupon_code:'',
           coupon_amount: '',
           coupon_session: '',
+          coupon_percent: '',
           total_amount:'',
           total_session:'',
           start_date:'',
@@ -505,6 +506,25 @@
       selectStudent(student) {
         this.student_info = student
         this.contract.student_id = student.student_id
+        this.discount_code_id=''
+        this.discount_code=''
+        this.discount_code_amount=''
+        this.discount_code_percent=''
+        this.discount_code_session=''
+        this.coupon_code_check=0
+        this.coupon_code=''
+        this.coupon_amount= ''
+        this.coupon_session= ''
+        this.coupon_percent= ''
+        this.total_amount=''
+        this.total_session=''
+        this.start_date=''
+        this.note=''
+        this.b2b_campaign_id=''
+        this.b2b_amount=''
+        this.b2b_bonus_session=''
+        this.sibling_discount=''
+        this.sibling= false
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
@@ -616,7 +636,8 @@
           this.$vs.loading.close();
           this.contract.coupon_code_check = 0;
           axios.p(`/api/lms/contracts/check-coupon`,{
-            coupon_code: this.contract.coupon_code
+            coupon_code: this.contract.coupon_code,
+            student_id: this.contract.student_id,
           }).then((response) => {
             this.$vs.loading.close();
             if(response.data.status == 0){
@@ -629,17 +650,20 @@
               })
               this.contract.coupon_amount = 0
               this.contract.coupon_session = 0
+              this.contract.coupon_percent = 0,
               this.caculatorSession()
             }else{
               this.contract.coupon_code_check = 1;
               this.contract.coupon_amount = response.data.data.coupon_amount
               this.contract.coupon_session = response.data.data.coupon_session
+              this.contract.coupon_percent = response.data.data.coupon_percent
               this.caculatorSession()
             }
           }).catch(e => console.log(e))
         }else{
           this.contract.coupon_amount = 0
           this.contract.coupon_session = 0
+          this.contract.coupon_percent = 0,
           this.caculatorSession()
         }
       },
@@ -654,6 +678,9 @@
         } else {
           this.contract.sibling_discount = 0;
         }
+        if(this.contract.coupon_percent && this.contract.coupon_percent > 0){
+          this.contract.coupon_amount = ((Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount)) * this.contract.coupon_percent / 100).toFixed(0);
+        } 
         this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
         this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.discount_code_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },

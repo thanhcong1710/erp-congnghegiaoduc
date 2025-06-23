@@ -36,7 +36,7 @@
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Phương thức<span class="text-danger"> (*)</span></label>
           <div class=w-full>
-            <select class="vs-inputx vs-input--input normal" v-model="campaign.type">
+            <select class="vs-inputx vs-input--input normal" v-model="campaign.type" disabled="true">
               <option value="" disabled>Chọn loại</option>
               <option value="0">Google Ads</option>
               <option value="1">Facebook Ads</option>
@@ -65,22 +65,66 @@
             <textarea class="vs-inputx vs-input--input normal" v-model="campaign.note"></textarea>
           </div>
         </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full" v-if="campaign.type==4">
-          <label>Số lượng voucher</label>
-          <div class=w-full>
-            <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_num" type="number">
+      </div>
+      <div class="vx-row" v-if="campaign.type==4">
+        <div class="vx-col md:w-2/3 w-full">
+          <div class="vx-row">
+            <div class="mb-6 vx-col md:w-1/2 w-full" >
+              <label>Loại voucher</label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="campaign.voucher_type" disabled="true">
+                  <option value="" disabled>Chọn loại voucher</option>
+                  <option value="1">Voucher random</option>
+                  <option value="2">Voucher cố định</option>
+                </select> 
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="campaign.voucher_type==1">
+              <label>Số lượng voucher</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_num" type="number">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="campaign.voucher_type==2">
+              <label>Mã voucher</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_code" type="text">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="campaign.voucher_type==2">
+              <label>Số lượng áp dụng trên 1 học sinh</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_quota" type="number">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Giá trị voucher</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_amount" type="number">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Số buổi học bổng</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_bonus_sessions" type="number">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Giảm trừ %</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_percent" type="number">
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full" v-if="campaign.type==4">
-          <label>Giá trị voucher</label>
-          <div class=w-full>
-            <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_amount" type="number">
-          </div>
-        </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full" v-if="campaign.type==4">
-          <label>Số buổi học bổng</label>
-          <div class=w-full>
-            <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_bonus_sessions" type="number">
+        </div> 
+        <div class="vx-col md:w-1/3 w-full">
+          <div class="mb-6">
+            <label><strong>Trung tâm áp dụng</strong><br> <i>(Lưu ý: Không chọn tương ứng với áp dụng tất cả trung tâm)</i></label>
+            <div class=w-full>
+              <div v-for="(item, index) in branches" :key="index" class="w-full">
+                <vs-checkbox v-model="item.selected" class="mt-1">{{item.name}}</vs-checkbox>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -156,9 +200,14 @@
           voucher_num:'',
           voucher_amount:'',
         },
+        branches:[],
       }
     },
     created() {
+      axios.g(`/api/system/branches`)
+      .then(response => {
+        this.branches = response.data
+      })
       this.loadDetail();
     },
     methods: {
@@ -169,6 +218,7 @@
           this.$vs.loading.close();
           if(response.data.length !== 0){
             this.campaign = response.data.campaign
+            this.branches = response.data.branches
           }else{
             this.$router.push({ path: `/marketing/campaigns` });
           }
@@ -208,6 +258,7 @@
         this.$vs.loading()
         axios.p("/api/marketing/campaigns/update",{
           campaign:this.campaign,
+          branches: this.branches
           })
           .then((response) => {
             this.$vs.loading.close();
