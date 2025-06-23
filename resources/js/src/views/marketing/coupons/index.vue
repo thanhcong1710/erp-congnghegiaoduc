@@ -50,6 +50,7 @@
                   <th colspan="1" rowspan="1" class="text-center">Mã voucher</th>
                   <th colspan="1" rowspan="1" class="text-center">Giá trị voucher</th>
                   <th colspan="1" rowspan="1" class="text-center">Học bổng</th>
+                  <th colspan="1" rowspan="1" class="text-center">% giảm trừ</th>
                   <th colspan="1" rowspan="1" class="text-center">Ngày bắt đầu</th>
                   <th colspan="1" rowspan="1" class="text-center">Ngày kết thúc</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -62,6 +63,7 @@
                 <td class="td vs-table--td text-center" >{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.coupon_amount | formatMoney}}</td>
                 <td class="td vs-table--td text-center">{{item.coupon_session}}</td>
+                <td class="td vs-table--td text-center">{{item.coupon_percent ? item.coupon_percent+' %' : ''}}</td>
                 <td class="td vs-table--td text-center">{{item.start_date | formatDateView}}</td>
                 <td class="td vs-table--td text-center">{{item.end_date | formatDateView}}</td>
                 <td class="td vs-table--td text-center">

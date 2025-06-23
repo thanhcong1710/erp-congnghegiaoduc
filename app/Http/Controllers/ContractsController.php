@@ -37,7 +37,7 @@ class ContractsController extends Controller
 
     public function checkCoupon(Request $request){
         $coupon_code = $request->coupon_code;
-        $data = u::first("SELECT c.id, c.status, c.end_date, c.start_date, c.coupon_amount,c.coupon_session
+        $data = u::first("SELECT c.id, c.status, c.end_date, c.start_date, c.coupon_amount,c.coupon_session, c.type, c.quota, c.branch_id, c.coupon_percent
             FROM coupons AS c 
             WHERE c.code='$coupon_code' AND c.status!=0 ");
         if($data){
@@ -55,11 +55,38 @@ class ContractsController extends Controller
                     'message' => $message
                 );
             }else{
-                $result = array(
-                    'status' => 1,
-                    'message' => 'ok',
-                    'data'=>$data
-                );
+                if($data->type == 1){
+                    $result = array(
+                        'status' => 1,
+                        'message' => 'ok',
+                        'data'=>$data
+                    );
+                }elseif($data->type == 2) {
+                    $student_info = u::first("SELECT branch_id FROM term_student_user WHERE student_id=".data_get($request, 'student_id')." AND status = 1");
+                    if ($data->branch_id){
+                        $branch_ids = explode(',', $data->branch_id);
+                        if(!in_array($student_info->branch_id, $branch_ids)){
+                            $result = array(
+                                'status' => 0,
+                                'message' => 'Mã voucher không áp dụng cho trung tâm này'
+                            );
+                            return response()->json($result);
+                        }
+                    }
+                    $count_used = u::first("SELECT count(id) AS total FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND coupon_code='$coupon_code'");
+                    if($data->quota <= $count_used->total){
+                        $result = array(
+                            'status' => 0,
+                            'message' => "Mã voucher chỉ được sử dụng ".$data->quota." lần. Học sinh đã hết lượt sử dụng"
+                        );
+                        return response()->json($result);
+                    }
+                    $result = array(
+                        'status' => 1,
+                        'message' => 'ok',
+                        'data'=>$data
+                    );
+                }
             }
         }else{
             $result = array(
@@ -131,7 +158,7 @@ class ContractsController extends Controller
                     'checked_date'=>date('Y-m-d'),
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
-                ), array('id'=>$coupon_info->id), 'coupons');
+                ), array('id'=>$coupon_info->id,'type'=>1), 'coupons');
             }
             u::insertSimpleRow(array(
                 'contract_id' => $contract_id,
@@ -301,7 +328,7 @@ class ContractsController extends Controller
                 'checked_date'=>null,
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'updator_id'=>Auth::user()->id,
-            ), array('id'=>$pre_coupon->id), 'coupons');
+            ), array('id'=>$pre_coupon->id, 'type'=>1), 'coupons');
         }
         if((!data_get($pre_update_contract_info, 'coupon_code') || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))  
             && data_get($request,'coupon_code_check') == 1){
@@ -312,7 +339,7 @@ class ContractsController extends Controller
                     'checked_date'=>date('Y-m-d'),
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
-                ), array('id'=>$coupon_info->id), 'coupons');
+                ), array('id'=>$coupon_info->id, 'type'=>1), 'coupons');
             }
             u::insertSimpleRow(array(
                 'contract_id' => $contract_id,

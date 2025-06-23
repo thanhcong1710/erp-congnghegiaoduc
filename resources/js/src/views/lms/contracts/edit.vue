@@ -442,6 +442,7 @@
           coupon_code:'',
           coupon_amount: '',
           coupon_session: '',
+          coupon_percent: '',
           total_amount:'',
           total_session:'',
           start_date:'',
@@ -605,7 +606,8 @@
         this.$vs.loading.close();
         this.contract.coupon_code_check = 0;
          axios.p(`/api/lms/contracts/check-coupon`,{
-          coupon_code: this.contract.coupon_code
+          coupon_code: this.contract.coupon_code,
+          student_id: this.contract.student_id,
         }).then((response) => {
           this.$vs.loading.close();
           if(response.data.status == 0){
@@ -618,10 +620,12 @@
             })
             this.contract.coupon_amount = ''
             this.contract.coupon_session = ''
+            this.contract.coupon_percent
           }else{
             this.contract.coupon_code_check = 1;
             this.contract.coupon_amount = response.data.data.coupon_amount
             this.contract.coupon_session = response.data.data.coupon_session
+            this.contract.coupon_percent = response.data.data.coupon_percent
           }
           this.caculatorSession()
         }).catch(e => console.log(e))
@@ -637,6 +641,9 @@
         } else {
           this.contract.sibling_discount = 0;
         }
+        if(this.contract.coupon_percent && this.contract.coupon_percent > 0){
+          this.contract.coupon_amount = ((Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount)) * this.contract.coupon_percent / 100).toFixed(0);
+        } 
         this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
         this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.discount_code_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
       },
