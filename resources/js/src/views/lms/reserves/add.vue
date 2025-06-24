@@ -309,7 +309,9 @@
         this.student_info = student
         this.reserve.student_id = student.student_id
         this.reserve.contract_id = student.contract_id
-        if(!u.isGreaterThan(u.convertDateToString(this.temp.min_date), student.enrolment_start_date)){
+        if(u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')){
+          this.temp.min_date = new Date(student.enrolment_start_date)
+        }else if(!u.isGreaterThan(u.convertDateToString(this.temp.min_date), student.enrolment_start_date)){
           this.temp.min_date = new Date(student.enrolment_start_date)
         }
         if(!u.isGreaterThan(u.convertDateToString(this.temp.max_date), student.enrolment_last_date)){

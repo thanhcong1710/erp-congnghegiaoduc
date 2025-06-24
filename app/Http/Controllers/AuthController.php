@@ -118,6 +118,11 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token, $hrm_id)
     {
+        $role_has_name = u::query("SELECT code FROM role_has_user AS ru LEFT JOIN roles AS r ON r.id = ru.role_id WHERE ru.user_id = ".auth()->user()->id);
+        $arrPermissions = [];
+        foreach($role_has_name AS $role){
+            $arrPermissions[] = 'role_'.$role->code;
+        }
         return response()->json([
             'status' => 1,
             'accessToken' => $token,
@@ -135,7 +140,7 @@ class AuthController extends Controller
                 'note' => auth()->user()->note,
                 'gender' => auth()->user()->gender,
                 'roleName' => auth()->user()->role_name,
-                'permissions' => u::getPermissions(auth()->user()->id)
+                'permissions' => array_merge($arrPermissions, u::getPermissions(auth()->user()->id))
             ]
         ]);
     }
