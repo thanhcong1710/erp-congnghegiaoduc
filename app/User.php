@@ -118,4 +118,12 @@ class User extends Authenticatable implements JWTSubject
         }
         return $tmp ? $tmp : 0;
     }
+
+    public function checkRole($role)
+    {
+        $user_role = u::first("SELECT r.role_id FROM role_has_user AS r
+            WHERE r.user_id = ".Auth::user()->id." AND r.role_id = '$role'");
+        
+        return empty($user_role) ? false : true;
+    }
 }
