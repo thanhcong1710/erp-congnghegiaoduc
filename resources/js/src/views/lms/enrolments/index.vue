@@ -172,13 +172,13 @@
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
                         <p>Trạng thái: 
-                          <strong v-if="item.left_sessions" class="text-success">Đang học</strong>
+                          <strong v-if="item.left_sessions > 0" class="text-success">Đang học</strong>
                           <strong v-else class="text-danger">Hết số buổi học</strong>
                         </p>
-                        <div v-if="item.left_sessions==0 || item.contract_type==0">
+                        <div v-if="item.left_sessions <=0 || item.contract_type==0">
                           <vs-button class="mr-3" style="padding: 5px 10px;" size="sm" color="danger" @click="withdrawContract(item)"><i class="fa-solid fa-x"></i></vs-button>
                         </div>
-                        <div v-if="item.left_sessions==0">
+                        <div v-if="item.left_sessions <=0 ">
                           <vs-button class="mr-3"  style="padding: 5px 10px;" size="sm" color="success" @click="showJoinContract(item)"><i class="fa-solid fa-plus"></i></vs-button>
                         </div>
                       </td>
