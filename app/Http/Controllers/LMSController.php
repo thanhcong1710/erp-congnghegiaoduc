@@ -831,7 +831,7 @@ class LMSController extends Controller
         if($studentInfo){
             $listClassLMS = self::getListClassByStudent(data_get($studentInfo, 'lms_id'));
             $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
-            if (data_get($classLMSCurrent, 'cls_id') == data_get($studentInfo, 'lms_class_id')) {
+            if (data_get($classLMSCurrent, 'cls_id') == data_get($studentInfo, 'lms_class_id') && data_get($classLMSCurrent, 'cstd_status') == 'Active' ) {
                 return "ok";
             } else {
                 if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
