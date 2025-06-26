@@ -925,4 +925,41 @@ class LMSController extends Controller
         }
         return "ok";
     }
+
+    public function studentWithdrawByIdLMS($lms_id)
+    {
+        $listClassLMS = self::getListClassByStudent($lms_id);
+        $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
+        if (data_get($classLMSCurrent, 'chk') !== 'N'){
+            $url = sprintf('%s/data/setup.asmx/CounStudentWithdrawSave', config('lms.url'));
+            $client = new Client();
+            $method = 'POST';
+            $params = [
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    "counn" => [
+                        "coun_std_id" => $lms_id,
+                        "coun_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
+                        "coun_istd_type" => "Others - Withdraw due to other reasons",
+                        "coun_Reservation" => 0,
+                        "coun_is_reserved_date" => "",
+                        "coun_work_type" => "S",
+                    ],
+                    "staff" => ["stf_id" => 8824],
+                ]
+            ];
+            $response = $client->request($method, $url, $params);
+            $dataResponse = json_decode($response->getBody()->getContents(), true);
+            u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+            if (data_get($dataResponse, 'd.status') == 'ok') {
+                return "ok";
+            } else {
+                return "false";
+            }
+        }
+        return "ok";
+    }
 }
