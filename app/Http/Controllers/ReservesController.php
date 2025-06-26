@@ -265,21 +265,26 @@ class ReservesController extends Controller
 
     public static function processReserve($reserve_id){
         $reserve_info = u::getObject(array('id'=>$reserve_id), 'reserves');
-        $contract_info = u::first("SELECT id, reserved_sessions FROM contracts WHERE id = $reserve_info->contract_id");
+        $contract_info = u::first("SELECT id, reserved_sessions, student_id FROM contracts WHERE id = $reserve_info->contract_id");
         $reserve_session = data_get($reserve_info,'session');
         $start_date = data_get($reserve_info,'start_date'); 
         $end_date = data_get($reserve_info,'end_date');
         $lmsController = new LMSController();
         $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
         u::updateSimpleRow(array(
+            'status' => 4,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => data_get($reserve_info, 'approver_id'),
+        ),array('id'=>$reserve_id),'reserves');
+        u::updateSimpleRow(array(
             'class_id' => null,
             'status' => 4,
             'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
             'updated_at' => date('Y-m-d H:i:s'),
-            'updator_id' => Auth::user()->id,
+            'updator_id' => data_get($reserve_info, 'approver_id'),
         ),array('id'=>$contract_info->id),'contracts');
         u::addLogContracts(data_get($contract_info,'id'));
-        LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
+        LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", data_get($reserve_info, 'approver_id'));
         if($start_date < date('Y-m-d')){
             u::updateScheduleHasStudent(data_get($contract_info,'id'));
         }

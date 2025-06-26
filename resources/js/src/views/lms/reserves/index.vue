@@ -328,6 +328,9 @@
             case 3:
                 resp = 'Từ chối phê duyệt';
                 break;
+            case 4:
+                resp = 'Đã bảo lưu';
+                break;
             default:
                 resp = 'Chờ phê duyệt'
                 break

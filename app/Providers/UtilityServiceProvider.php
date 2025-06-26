@@ -1105,13 +1105,17 @@ class UtilityServiceProvider extends ServiceProvider
                                 'status'=>1
                             ), 'schedule_has_student');
                             self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
-                                AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=2 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
+                                AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
                         }
                     }
                 }
 
                 self::updateDoneSessions(data_get($contractInfo, 'id'));
             }
+        }elseif(data_get($contractInfo, 'status') !=7){
+            self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.contract_id = $contract_id AND
+                (SELECT count(id) FROM reserves WHERE start_date <= s.class_date AND end_date>=s.class_date AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id)>0");
+            self::updateDoneSessions(data_get($contractInfo, 'id'));
         }
     }
 
@@ -1134,7 +1138,7 @@ class UtilityServiceProvider extends ServiceProvider
     {
         $res = [];
         if ($contract_id) {
-            $query = "SELECT r.contract_id, r.start_date, r.end_date, r.session FROM `reserves` AS r WHERE r.status = 2 AND r.contract_id =$contract_id ";
+            $query = "SELECT r.contract_id, r.start_date, r.end_date, r.session FROM `reserves` AS r WHERE r.status = 4 AND r.contract_id =$contract_id ";
             $data = self::query($query);
 
             if (!empty($data)) {

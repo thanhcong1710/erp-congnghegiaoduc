@@ -43,7 +43,7 @@ class TestCallLms extends Command
         $lmsController = new \App\Http\Controllers\LmsController();
         // $lmsController->addOrUpdateStudent(721);
         // $lmsController->addStudentToClass(528);
-        $lmsController->studentWithdrawByIdLMS(1340);
+        // $lmsController->studentWithdrawByIdLMS(1340);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");
         // foreach($list AS $row){
         //     u::updateScheduleHasStudent($row->id);
@@ -53,6 +53,12 @@ class TestCallLms extends Command
         // $tmp=$user->getStaffHasUser(46);
         // var_dump($tmp);die();
         // u::updateEnrolmentLastDate(899);
+        //u::updateDoneSessions(564);
+        $arr = [10];
+        $reservesController = new \App\Http\Controllers\ReservesController();
+        foreach($arr AS $row){
+            $reservesController->processReserve($row);
+        }
         return "ok";
     }
 }
