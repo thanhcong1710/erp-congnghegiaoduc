@@ -276,6 +276,8 @@ class ContractsController extends Controller
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
+        $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
+        $total_amount = data_get($payment, 'total');
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -293,8 +295,8 @@ class ContractsController extends Controller
            'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
            'init_total_charged'=>0,
            'must_charge' => data_get($request, 'total_amount'),
-           'total_charged'=>0,
-           'debt_amount' => data_get($request, 'total_amount'),
+           'total_charged'=> $total_amount,
+           'debt_amount' => data_get($request, 'total_amount') - $total_amount > 0 ? data_get($request, 'total_amount') - $total_amount : 0,
            'total_discount'=> $total_discount, 
            'discount_code_id' => data_get($request, 'discount_code_id'),
            'discount_code' => data_get($request, 'discount_code'),
