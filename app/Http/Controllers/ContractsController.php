@@ -236,8 +236,7 @@ class ContractsController extends Controller
 
     public function delete(Request $request){
         $contract_info = u::first("SELECT student_id, code FROM contracts WHERE id=$request->contract_id");
-        u::updateSimpleRow(array('status' => 0), array('id'=>$request->contract_id), 'contracts');
-        u::addLogContracts($request->contract_id);
+        u::query("DELETE FROM contracts WHERE id =".$request->contract_id);
 
         LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Hủy hợp đồng nhập học - '.data_get($contract_info, 'code'), Auth::user()->id);
         $result = array(
