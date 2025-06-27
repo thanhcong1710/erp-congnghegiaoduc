@@ -92,9 +92,15 @@
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full" v-if="campaign.voucher_type==2">
+              <label>Số lượng tối đa (không nhập là không giới hạn)</label>
+              <div class=w-full>
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_quota" type="number">
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="campaign.voucher_type==2">
               <label>Số lượng áp dụng trên 1 học sinh</label>
               <div class=w-full>
-                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_quota" type="number" disabled="true">
+                <input class="vs-inputx vs-input--input normal" v-model="campaign.voucher_limit" type="number" disabled="true">
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">

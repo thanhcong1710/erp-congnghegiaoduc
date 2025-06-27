@@ -74,10 +74,18 @@ class ContractsController extends Controller
                         }
                     }
                     $count_used = u::first("SELECT count(id) AS total FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND coupon_code='$coupon_code'");
-                    if($data->quota <= $count_used->total){
+                    if($data->limit <= $count_used->total){
                         $result = array(
                             'status' => 0,
-                            'message' => "Mã voucher chỉ được sử dụng ".$data->quota." lần. Học sinh đã hết lượt sử dụng"
+                            'message' => "Mỗi học sinh chỉ được sử dụng ".$data->limit." lần. Học sinh này đã sử dụng hết vui lòng kiểm tra lại."
+                        );
+                        return response()->json($result);
+                    }
+                    $count_total_used = u::first("SELECT count(id) AS total FROM contracts WHERE coupon_code='$coupon_code'");
+                    if($data->quota <= $count_total_used->total){
+                        $result = array(
+                            'status' => 0,
+                            'message' => "Mã voucher chỉ được sử dụng tối đa ".$data->quota." lần. Mã voucher này đã được sử dụng hết."
                         );
                         return response()->json($result);
                     }

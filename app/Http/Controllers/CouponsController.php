@@ -24,7 +24,7 @@ class CouponsController extends Controller
         $cond = " 1 ";
         
         if ($keyword !== '') {
-            $cond .= " AND (b.code LIKE '%$keyword%')";
+            $cond .= " AND (b.code LIKE '%$keyword%' OR c.title LIKE '%$keyword%' OR cc.title LIKE '%$keyword%' OR bc.title LIKE '%$keyword%')";
         }
         if (!empty($status)) {
             $cond .= " AND b.status IN (".implode(",",$status).")";
@@ -33,11 +33,18 @@ class CouponsController extends Controller
         $order_by = " ORDER BY b.id DESC ";
 
         $total = u::first("SELECT count(b.id) AS total 
-            FROM coupons AS b WHERE $cond");
-        
-        $list = u::query("SELECT b.*, IF(b.source_id=1, (SELECT title FROM campaigns WHERE id=b.campaign_id), 
-                IF(b.source_id=3, (SELECT title FROM c2c_campaigns WHERE id=b.campaign_id),'')) AS title
             FROM coupons AS b 
+                LEFT JOIN c2c_campaigns AS cc ON cc.id= b.campaign_id AND b.source_id=3 
+                LEFT JOIN b2b_campaigns AS bc ON bc.id= b.campaign_id AND b.source_id=2 
+                LEFT JOIN campaigns AS c ON c.id= b.campaign_id AND b.source_id=1 
+            WHERE $cond");
+        
+        $list = u::query("SELECT b.*, 
+                IF(b.source_id=1, c.title, IF(b.source_id=2, bc.title, cc.title)) AS title
+            FROM coupons AS b
+                LEFT JOIN c2c_campaigns AS cc ON cc.id= b.campaign_id AND b.source_id=3 
+                LEFT JOIN b2b_campaigns AS bc ON bc.id= b.campaign_id AND b.source_id=2 
+                LEFT JOIN campaigns AS c ON c.id= b.campaign_id AND b.source_id=1 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
