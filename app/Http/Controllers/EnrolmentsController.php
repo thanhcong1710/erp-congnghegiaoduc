@@ -263,7 +263,7 @@ class EnrolmentsController extends Controller
         $contract_id = data_get($request,'contract_id');
         $class_id = data_get($request,'class_id');
         $contract_withdraw = u::first("SELECT c.* FROM contracts AS c WHERE c.student_id = $student_id 
-            AND c.status!=7 AND (c.class_id IS NOT NULL AND c.class_id!=0) AND c.left_sessions=0");
+            AND c.status!=7 AND (c.class_id IS NOT NULL AND c.class_id!=0) AND c.left_sessions <= 0");
         if($contract_withdraw){
             u::updateSimpleRow(array(
                 'status' => 7,
