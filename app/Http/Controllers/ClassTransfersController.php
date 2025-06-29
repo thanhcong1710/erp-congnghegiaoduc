@@ -165,7 +165,7 @@ class ClassTransfersController extends Controller
             WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".(int)$cm_id." LIMIT 1");
         $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
        
-        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions 
+        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions, c.total_charged, c.bonus_sessions 
             FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
         if(data_get($contract_info, 'product_id') == data_get($class_transfer_info, 'to_product_id')){
             u::updateSimpleRow(array(
