@@ -70,7 +70,7 @@ class ClassTransfersController extends Controller
         $transfer_date = data_get($request,'transfer_date');
         $contract_id = data_get($request,'contract_id');
         $to_product_id = data_get($request,'to_product_id');
-        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions, c.total_charged 
+        $contract_info = u::first("SELECT cl.class_day, c.branch_id, c.product_id, c.summary_sessions,c.done_sessions, c.real_sessions, c.product_id, c.tuition_fee_id, c.left_sessions, c.total_charged, c.bonus_sessions 
             FROM contracts AS c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERE c.id= $contract_id");
         if(data_get($contract_info, 'product_id') == $to_product_id){
             $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
