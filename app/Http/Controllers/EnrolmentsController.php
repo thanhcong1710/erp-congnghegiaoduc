@@ -126,7 +126,7 @@ class EnrolmentsController extends Controller
         $product_id = data_get($class_info, 'product_id');
         $branch_id = data_get($class_info, 'branch_id'); 
         // $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
-        $cond = " c.status IN (3, 4, 5) AND c.branch_id= $branch_id ";
+        $cond = " c.status IN (2, 3, 4, 5) AND c.branch_id= $branch_id ";
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
             AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
 
@@ -242,7 +242,7 @@ class EnrolmentsController extends Controller
         $student_id = data_get($request,'student_id');
         $product_id = data_get($request,'product_id');
         $contract_join = u::first("SELECT c.* ,(SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name  FROM contracts AS c WHERE c.student_id = $student_id 
-            AND c.status!=7 AND (c.class_id IS NULL OR c.class_id=0) AND c.product_id=$product_id");
+            AND c.status!=7 AND (c.class_id IS NULL OR c.class_id=0) AND c.left_sessions > 0 AND c.product_id=$product_id");
         if($contract_join){
             $result = array(
                 'status' => 1,

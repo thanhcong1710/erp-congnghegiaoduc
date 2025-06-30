@@ -399,11 +399,17 @@ class ChargesController extends Controller
             LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
             self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
         }else{
+            $availableSession = (int)data_get($contract_info, 'init_tuition_fee_session') && (int)data_get($contract_info, 'init_tuition_fee_amount') ? 
+                round(((int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount')) / ((int)data_get($contract_info, 'init_tuition_fee_amount')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
+            $availableSession = $availableSession - (int)data_get($contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($contract_info, 'last_done_sessions') : 0;
             u::updateSimpleRow(array(
                 'status' => 2,
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => $debt_amount,
+                'summary_sessions' => $availableSession, 
+                'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
+                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'updator_id'=>Auth::user()->id,
             ), array('id'=>data_get($contract_info, 'id')), 'contracts');
