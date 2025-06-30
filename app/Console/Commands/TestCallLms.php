@@ -54,11 +54,12 @@ class TestCallLms extends Command
         // var_dump($tmp);die();
         // u::updateEnrolmentLastDate(899);
         //u::updateDoneSessions(564);
-        $arr = [10];
-        $reservesController = new \App\Http\Controllers\ReservesController();
-        foreach($arr AS $row){
-            $reservesController->processReserve($row);
-        }
+        // $arr = [10];
+        // $reservesController = new \App\Http\Controllers\ReservesController();
+        // foreach($arr AS $row){
+        //     $reservesController->processReserve($row);
+        // }
+        u::updateScheduleHasStudent(890);
         return "ok";
     }
 }
