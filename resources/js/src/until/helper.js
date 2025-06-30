@@ -148,6 +148,30 @@ function getDateMonth(date) {
   }
   return "";
 }
+const statusOptionsCare = [
+  {id:0,label:'Khách hàng mới'},
+  {id:1,label:'Khách hàng không liên lạc được'},
+  {id:2,label:'Im lặng sau khi gửi thông tin'},
+  {id:3,label:'Hẹn gọi lại sau'},
+  {id:4,label:'Trùng lịch học/ Hiện tại đang không có nhu cầu/ Không sắp xếp được thời gian'},
+  {id:5,label:'Đang học ở bên khác'},
+  {id:6,label:'Đang cân nhắc nhưng không chia sẻ lý do'},
+  {id:7,label:'Không thuộc tệp khách hàng mục tiêu'},
+  {id:8,label:'Không có trình độ phù hợp'},
+  {id:9,label:'Từ chối không có lý do cụ thể'},
+  {id:10,label:'Tắt máy ngang'},
+  {id:11,label:'Đồng ý đến test'},
+  {id:12,label:'Hẹn lịch nhưng không đến'},
+  {id:13,label:'Danh sách đen'}
+]
+const levelOptionsParent = [
+  {id:1,label:'C3 rác'},
+  {id:2,label:'C3'},
+  {id:3,label:'L1'},
+  {id:4,label:'L2'},
+  {id:5,label:'L3'},
+  {id:6,label:'R'},
+]
 
 export default {
   dateToString,
@@ -157,5 +181,7 @@ export default {
   fmc,
   convertDateToString,
   isGreaterThan,
-  getDateMonth
+  getDateMonth,
+  levelOptionsParent,
+  statusOptionsCare
 }

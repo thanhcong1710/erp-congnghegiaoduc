@@ -34,7 +34,7 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trạng thái</label>
+            <label for="" class="vs-input--label">Level khách hàng</label>
             <multiselect
                 name="search_status"
                 placeholder="Chọn trạng thái"
@@ -298,22 +298,7 @@
           {id:'L4',label:'L4'},
           {id:'L5',label:'L5'},
         ],
-        statusOptions:[
-          {id:0,label:'KH mới'},
-          {id:10,label:'KH không liên lạc được'},
-          {id:20,label:'KH ở vùng CMS không có cơ sở'},
-          {id:30,label:'KH không nghe máy'},
-          {id:40,label:'KH hẹn gọi lại sau'},
-          {id:50,label:'KH không quan tâm'},
-          {id:60,label:'KH không tiềm năng'},
-          {id:71,label:'KH quan tâm, cần follow up date'},
-          {id:72,label:'KH tiềm năng nhưng không muốn làm phiền'},
-          {id:73,label:'KH đồng ý đặt lịch Checkin'},
-          {id:81,label:'KH đã đến checkin'},
-          {id:82,label:'KH đã mua gói phí'},
-          {id:83,label:'KH đến hạn tái tục'},
-          {id:90,label:'Danh sách đen'}
-        ],
+        statusOptions:this.levelOptionsParent,
         users_manager_list:[],
         source_list:[],
         source_detail_list:[],
@@ -553,56 +538,9 @@
     },
     filters: {
       getStatusName(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 0:
-                resp = 'KH mới';
-                break;
-            case 10:
-                resp = 'KH không liên lạc được';
-                break;
-            case 20:
-                resp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                resp = 'KH không nghe máy';
-                break;
-            case 40:
-                resp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                resp = 'KH không quan tâm';
-                break;
-            case 60:
-                resp = 'KH không tiềm năng';
-                break;
-            case 71:
-                resp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                resp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                resp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 82:
-                resp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                resp = 'Danh sách đen';
-                break;
-            default:
-                resp = 'KH mới'
-                break
-        }
-        return resp
-      },
+        const item = levelOptionsParent.find(option => option.id === Number(value));
+        return item ? item.label : 'Không xác định';
+      }
     },
   }
 </script>
