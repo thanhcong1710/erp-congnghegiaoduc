@@ -385,11 +385,12 @@ class ChargesController extends Controller
 
         $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount');
         if($debt_amount == 0){
+            $availableSession = data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') > 0 ? data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') : 0;
             u::updateSimpleRow(array(
-                'status' => 3,
+                'status' => data_get($contract_info, 'status') >3  ? data_get($contract_info, 'status') : 3,
                 'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
-                'summary_sessions' => data_get($contract_info, 'total_sessions'), 
-                'left_sessions' => data_get($contract_info, 'total_sessions'), 
+                'summary_sessions' => $availableSession, 
+                'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => 0,
@@ -403,7 +404,7 @@ class ChargesController extends Controller
                 round(((int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount')) / ((int)data_get($contract_info, 'init_tuition_fee_amount')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
             $availableSession = $availableSession - (int)data_get($contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($contract_info, 'last_done_sessions') : 0;
             u::updateSimpleRow(array(
-                'status' => 2,
+                'status' => data_get($contract_info, 'status') >2  ? data_get($contract_info, 'status') : 2,
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
                 'debt_amount' => $debt_amount,

@@ -231,7 +231,7 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type
+                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type, c.summary_sessions
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");

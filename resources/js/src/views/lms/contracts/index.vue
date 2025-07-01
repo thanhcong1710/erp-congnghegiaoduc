@@ -85,6 +85,7 @@
                   <p>Giá gốc: <strong>{{ item.init_tuition_fee_amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
                   <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
+                  <p v-if="item.debt_amount>0 && item.total_charged"><strong>Đặt cọc: {{ item.summary_sessions }} buổi</strong></p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
