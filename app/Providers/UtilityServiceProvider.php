@@ -760,11 +760,6 @@ class UtilityServiceProvider extends ServiceProvider
         return $arr;
     }
 
-    public static function updateBranchIDParents(){
-        self::query("UPDATE crm_parents AS p LEFT JOIN branch_has_user AS b ON b.user_id = p.owner_id SET p.branch_id=b.branch_id");
-        return true;
-    }
-
     public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id, $transfer_session)
     {
         $resp = (object)[];
@@ -1089,5 +1084,9 @@ class UtilityServiceProvider extends ServiceProvider
         }
 
         return $res;
+    }
+    public static function getBranchIdByUserID ($user_id){
+        $list_branches = self::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = ".$user_id);
+        return $list_branches;
     }
 }

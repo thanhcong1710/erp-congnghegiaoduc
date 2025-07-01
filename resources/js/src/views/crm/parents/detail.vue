@@ -828,8 +828,8 @@
           body: "Thêm mới lớp học thành công",
           action_exit: "exit",
         },
-        levelOptionsParent: this.levelOptionsParent,
-        statusOptionsCare: this.statusOptionsCare
+        levelOptionsParent: u.levelOptionsParent,
+        statusOptionsCare: u.statusOptionsCare
       };
     },
     async created() {

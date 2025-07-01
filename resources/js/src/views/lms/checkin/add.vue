@@ -376,7 +376,7 @@
             checkin_branch_id:'',
           }
         ],
-        levelOptionsParent: this.levelOptionsParent
+        levelOptionsParent: u.levelOptionsParent
       }
     },
     methods: {

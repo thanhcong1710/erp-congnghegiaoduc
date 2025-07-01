@@ -338,7 +338,7 @@
             school: '',
           }
         ],
-        levelOptionsParent: this.levelOptionsParent
+        levelOptionsParent: u.levelOptionsParent
       }
     },
     methods: {

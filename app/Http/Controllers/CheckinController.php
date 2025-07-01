@@ -172,11 +172,21 @@ class CheckinController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
-            'owner_id'=>data_get($parent, 'owner_id'),
+            // 'owner_id'=>data_get($parent, 'owner_id'),
             'status'=>data_get($parent, 'status'),
             'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
         ), 'crm_parents');
-        u::updateBranchIDParents();
+        $branchHasUser = Auth::user()->getBranchesHasUser();
+        $arrBranchHasUser = explode(',',$branchHasUser);
+        foreach ($arrBranchHasUser AS $branch_id){
+            u::insertSimpleRow(array(
+                'branch_id' => $branch_id,
+                'parent_id' => $parent_id,
+                'owner_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+            ),'crm_parent_branch');
+        }
         LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
         $result =(object)array(
             'status'=>1,

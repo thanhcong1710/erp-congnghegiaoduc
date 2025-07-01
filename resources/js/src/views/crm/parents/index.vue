@@ -7,6 +7,17 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label>Chọn trung tâm</label>
+            <vue-select
+              label="name"
+              :options="branch_list"
+              v-model="branch_item"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveBranch"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Tên khách hàng, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
@@ -14,24 +25,6 @@
             <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Level</label>
-            <multiselect
-                name="search_level"
-                placeholder="Chọn level"
-                v-model="searchData.arr_level"
-                :options="levelOptions"
-                label="label"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Level khách hàng</label>
@@ -287,18 +280,11 @@
           pagination: this.pagination,
           dateRange: "",
           type_search: 0,
+          branch_id:"",
         },
-        levelOptions:[
-          {id:'C1',label:'C1'},
-          {id:'C2',label:'C2'},
-          {id:'C3',label:'C3'},
-          {id:'L1',label:'L1'},
-          {id:'L2',label:'L2'},
-          {id:'L3',label:'L3'},
-          {id:'L4',label:'L4'},
-          {id:'L5',label:'L5'},
-        ],
-        statusOptions:this.levelOptionsParent,
+        branch_list:[],
+        branch_item:"",
+        statusOptions:u.levelOptionsParent,
         users_manager_list:[],
         source_list:[],
         source_detail_list:[],
@@ -448,7 +434,8 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_search:this.searchData.type_search
+            type_search:this.searchData.type_search,
+            branch_id: this.searchData.branch_id
           }
         localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 
@@ -515,8 +502,16 @@
             });
         }
       },
+      saveBranch(data = null){
+        if (data && typeof data === 'object') {
+          const branch_id = data.id
+          this.searchData.branch_id = branch_id
+        }else{
+          this.searchData.branch_id = ""
+        }
+      },
     },
-    created() {
+    async created() {
       axios.g(`/api/users/get-data/users-manager`)
         .then(response => {
         this.users_manager_list = response.data
@@ -529,16 +524,21 @@
         .then(response => {
         this.source_detail_list = response.data
       })
+      await axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
+        this.branch_item = this.branch_list[0]
+        this.searchData.branch_id = this.branch_list[0].id
+      })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
         this.activeItem = this.searchData.type_search
       }
-
       this.getData();
     },
     filters: {
       getStatusName(value) {
-        const item = levelOptionsParent.find(option => option.id === Number(value));
+        const item = u.levelOptionsParent.find(option => option.id === Number(value));
         return item ? item.label : 'Không xác định';
       }
     },

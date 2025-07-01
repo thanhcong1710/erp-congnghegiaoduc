@@ -8,13 +8,19 @@ use App\Providers\UtilityServiceProvider as u;
 class LogParents extends Model
 {
     protected $table = 'crm_parent_logs';
-    public static function logAssign($parent_id,$pre_owner_id,$owner_id,$creator_id,$overwrite = false){
-        $pre_owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = $pre_owner_id");
-        $owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = $owner_id");
+    public static function logAssign($parent_id,$pre_owner_id,$owner_id,$creator_id,$overwrite = false, $branch_id = 0){
+        $pre_owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = ".(int)$pre_owner_id);
+        $owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = ".(int)$owner_id);
+        $branch_info = null;
+        if($branch_id){
+            $branch_info = u::first("SELECT name FROM branches WHERE id = $branch_id");
+        }
+        $branch_name = data_get($branch_info, 'name')? data_get($branch_info, 'name').' - ' :'';
+
         if($overwrite){
-            $content = "Ghi đè người phụ trách: từ `$pre_owner_info->name ($pre_owner_info->hrm_id)` thành `$owner_info->name ($owner_info->hrm_id)`";
+            $content = $branch_name."Ghi đè người phụ trách: từ `".data_get($pre_owner_info, 'name')." (".data_get($pre_owner_info, 'hrm_id').")` thành `".data_get($owner_info, 'name')." (".data_get($owner_info, 'hrm_id').")`";
         }else{
-            $content = "Thay đổi người phụ trách: từ `$pre_owner_info->name ($pre_owner_info->hrm_id)` thành `$owner_info->name ($owner_info->hrm_id)`";
+            $content = $branch_name."Thay đổi người phụ trách: từ `".data_get($pre_owner_info, 'name')." (".data_get($pre_owner_info, 'hrm_id').")` thành `".data_get($owner_info, 'name')." (".data_get($owner_info, 'hrm_id').")`";
         }
         u::insertSimpleRow(array(
             'parent_id'=>$parent_id,
