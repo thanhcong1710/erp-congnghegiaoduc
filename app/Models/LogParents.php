@@ -16,7 +16,6 @@ class LogParents extends Model
             $branch_info = u::first("SELECT name FROM branches WHERE id = $branch_id");
         }
         $branch_name = data_get($branch_info, 'name')? data_get($branch_info, 'name').' - ' :'';
-
         if($overwrite){
             $content = $branch_name."Ghi đè người phụ trách: từ `".data_get($pre_owner_info, 'name')." (".data_get($pre_owner_info, 'hrm_id').")` thành `".data_get($owner_info, 'name')." (".data_get($owner_info, 'hrm_id').")`";
         }else{

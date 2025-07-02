@@ -267,10 +267,11 @@ class ParentsController extends Controller
 
     public function show(Request $request,$parent_id)
     {
-        $cond="";
+        $cond=" AND pb.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+            $cond .= " AND pb.owner_id IN (".Auth::user()->getStaffHasUser().")";
         }
+        
         $data = u::first("SELECT p.*,(SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
                 (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
                 (SELECT name FROM provinces WHERE id=p.province_id) AS province_name,
@@ -279,7 +280,7 @@ class ParentsController extends Controller
                 (SELECT title FROM jobs WHERE id=p.job_id) AS job_name,
                 (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1) AS num_care,
                 (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care
-            FROM crm_parents AS p WHERE id=$parent_id  $cond");
+            FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE p.id=$parent_id  $cond");
         return response()->json($data);
     }
 
@@ -370,7 +371,7 @@ class ParentsController extends Controller
                     'last_assign_date'=>date('Y-m-d H:i:s'),
                 ),'crm_parent_branch');
             }
-            LogParents::logAssign($request->parent_id,data_get($exit,'owner_id'),$request->owner_id,Auth::user()->id, $row->branch_id);
+            LogParents::logAssign($request->parent_id,data_get($exit,'owner_id'),$request->owner_id,Auth::user()->id, false, $row->branch_id);
         }
         $result =(object)array(
             'status'=>1,
@@ -408,7 +409,7 @@ class ParentsController extends Controller
                         'last_assign_date'=>date('Y-m-d H:i:s'),
                     ),'crm_parent_branch');
                 }
-                LogParents::logAssign($row->parent_id,data_get($exit,'owner_id'),$owner_id,Auth::user()->id, $brch->branch_id);
+                LogParents::logAssign($row->parent_id,data_get($exit,'owner_id'),$owner_id,Auth::user()->id,false, $brch->branch_id);
             }
         }
         $result =(object)array(

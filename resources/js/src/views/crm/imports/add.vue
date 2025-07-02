@@ -38,6 +38,18 @@
         <div class="mb-4">
           <p><a href="/static/template/import_khach_hang.xlsx" target="blank"><i class="fas fa-download"></i> Tải danh sách khách hàng mẫu</a></p>
         </div>
+        <div class="vx-col sm:w-1/4 w-full mb-4">
+          <label>Chọn trung tâm</label>
+          <v-select
+            label="name"
+            :options="branch_list"
+            v-model="branch_item"
+            :searchable="true"
+            language="tv-VN"
+            @input="saveBranch"
+            ></v-select>
+          <p style="color:red" v-html="error_message_upload"></p>
+        </div>
         <div style="overflow: hidden;">
            <input type="file" class="vs-inputx vs-input--input normal" id="fileUploadExcel" @change="fileChanged" style="width: calc(100% - 175px); float:left;">
           <vs-button class="mr-3 mb-2" color="success" @click="btnUpload" style=" float:left; margin-left: 10px;" ><i class="fas fa-upload"></i> Import</vs-button>
@@ -286,9 +298,25 @@
         },
         result_total_success:0,
         result_total_error:0,
+        branch_list:[],
+        branch_item:'',
+        branch_id:'',
+        error_message_upload:'',
       }
     },
     methods: {
+      saveBranch(data = null){
+        if (data && typeof data === 'object') {
+          const branch_id = data.id
+          this.branch_id = branch_id
+          axios.g(`/api/users/get-data/users-manager?branch_id=${this.branch_id}`)
+          .then(response => {
+            this.list_owner = response.data
+          })
+        }else{
+          this.branch_id = ""
+        }
+      },
       fileChanged(e) {
         const fileReader = new FileReader();
         const fileName = e.target.value.split("\\").pop();
@@ -299,11 +327,16 @@
         };
       },
       btnUpload() {
+        if (this.branch_id == "") {
+          this.error_message_upload= " Trung tâm không được để trống";
+          return false;
+        }
         if (this.attached_file) {
           this.$vs.loading()
           let dataUpload = {
             files: this.attached_file,
             file_name: this.file_name,
+            branch_id: this.branch_id
           }
           axios.p(`/api/crm/imports/upload`, dataUpload)
             .then(response => {
@@ -367,6 +400,7 @@
             ids.push(item.id)
           })
         }
+        this.data_assign.branch_id = this.branch_id
         this.data_assign.owners_id = ids
         let mess = "";
         let resp = true;
@@ -397,13 +431,17 @@
       }
     },
     created() {
-      axios.g(`/api/users/get-data/users-manager`)
-        .then(response => {
-        this.list_owner = response.data
-      })
+      // axios.g(`/api/users/get-data/users-manager`)
+      //   .then(response => {
+      //   this.list_owner = response.data
+      // })
       axios.g(`/api/system/sources`)
         .then(response => {
         this.list_source = response.data
+      })
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
       })
       // axios.g(`/api/system/source_detail`)
       //   .then(response => {

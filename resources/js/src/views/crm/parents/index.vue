@@ -11,7 +11,7 @@
             <vue-select
               label="name"
               :options="branch_list"
-              v-model="branch_item"
+              v-model="searchData.branch_item"
               :searchable="true"
               language="tv-VN"
               @input="saveBranch"
@@ -281,9 +281,9 @@
           dateRange: "",
           type_search: 0,
           branch_id:"",
+          branch_item:"",
         },
         branch_list:[],
-        branch_item:"",
         statusOptions:u.levelOptionsParent,
         users_manager_list:[],
         source_list:[],
@@ -506,16 +506,17 @@
         if (data && typeof data === 'object') {
           const branch_id = data.id
           this.searchData.branch_id = branch_id
+          axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
+            .then(response => {
+            this.users_manager_list = response.data
+          })
         }else{
           this.searchData.branch_id = ""
+          this.users_manager_list = []
         }
       },
     },
     async created() {
-      axios.g(`/api/users/get-data/users-manager`)
-        .then(response => {
-        this.users_manager_list = response.data
-      })
       axios.g(`/api/system/sources`)
         .then(response => {
         this.source_list = response.data
@@ -527,13 +528,17 @@
       await axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.branch_list = response.data
-        this.branch_item = this.branch_list[0]
+        this.searchData.branch_item = this.branch_list[0]
         this.searchData.branch_id = this.branch_list[0].id
       })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
         this.activeItem = this.searchData.type_search
       }
+      axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
+        .then(response => {
+        this.users_manager_list = response.data
+      })
       this.getData();
     },
     filters: {
