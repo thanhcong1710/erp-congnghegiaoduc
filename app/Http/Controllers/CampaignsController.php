@@ -44,6 +44,13 @@ class CampaignsController extends Controller
 
     public function add(Request $request)
     {
+        $branches = data_get($request, 'branches');
+        $branch_id = "";
+        foreach($branches AS $row){
+            if(data_get($row, 'selected') == true){
+                $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
+            }
+        }
         $campaign_id = u::insertSimpleRow(array(
             'title' => data_get($request, 'campaign.title'),
             'type' => data_get($request, 'campaign.type'),
@@ -60,7 +67,7 @@ class CampaignsController extends Controller
             'voucher_limit' => data_get($request, 'campaign.voucher_limit'),
             'voucher_type' => data_get($request, 'campaign.voucher_type'), 
             'voucher_code' => data_get($request, 'campaign.voucher_code'), 
-            'branch_id' => data_get($request, 'campaign.branch_id'), 
+            'branch_id' => $branch_id, 
             'note' => data_get($request, 'campaign.note'),  
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
@@ -74,13 +81,6 @@ class CampaignsController extends Controller
             'creator_id'=>Auth::user()->id,
         ), 'source_detail');
         if (data_get($request, 'campaign.type') == 4){
-            $branches = data_get($request, 'branches');
-            $branch_id = "";
-            foreach($branches AS $row){
-                if(data_get($row, 'selected') == true){
-                    $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
-                }
-            }
             if(data_get($request, 'campaign.voucher_type') == 1){
                 if (data_get($request, 'campaign.voucher_num')){
                     for($i=0;$i<data_get($request, 'campaign.voucher_num');$i++){
@@ -158,6 +158,13 @@ class CampaignsController extends Controller
 
     public function update(Request $request)
     {
+        $branches = data_get($request, 'branches');
+        $branch_id = "";
+        foreach($branches AS $row){
+            if(data_get($row, 'selected') == true){
+                $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
+            }
+        }
         u::updateSimpleRow(array(
             'title' => data_get($request, 'campaign.title'),
             'type' => data_get($request, 'campaign.type'),
@@ -174,7 +181,7 @@ class CampaignsController extends Controller
             'voucher_limit' => data_get($request, 'campaign.voucher_limit'),
             'voucher_type' => data_get($request, 'campaign.voucher_type'), 
             'voucher_code' => data_get($request, 'campaign.voucher_code'), 
-            'branch_id' => data_get($request, 'campaign.branch_id'), 
+            'branch_id' => $branch_id, 
             'note' => data_get($request, 'campaign.note'),  
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
@@ -187,13 +194,6 @@ class CampaignsController extends Controller
         ), array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 1), 'source_detail');
 
         if (data_get($request, 'campaign.type') == 4){
-            $branches = data_get($request, 'branches');
-            $branch_id = "";
-            foreach($branches AS $row){
-                if(data_get($row, 'selected') == true){
-                    $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
-                }
-            }
             if(data_get($request, 'campaign.voucher_type') == 1){
                 if(data_get($request, 'campaign.voucher_num')){
                     $curr_count = u::first("SELECT count(id) As total FROM coupons WHERE campaign_id = ".data_get($request, 'campaign.id'));
