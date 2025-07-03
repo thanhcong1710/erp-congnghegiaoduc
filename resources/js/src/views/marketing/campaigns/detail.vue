@@ -208,10 +208,10 @@
       }
     },
     created() {
-      axios.g(`/api/system/branches`)
-      .then(response => {
-        this.branches = response.data
-      })
+      // axios.g(`/api/system/branches`)
+      // .then(response => {
+      //   this.branches = response.data
+      // })
       this.loadDetail();
     },
     methods: {
