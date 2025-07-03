@@ -185,6 +185,7 @@ class CheckinController extends Controller
                 'owner_id' => Auth::user()->id,
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
+                'is_lock' => 1,
             ),'crm_parent_branch');
         }
         LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);

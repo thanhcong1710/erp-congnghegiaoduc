@@ -917,7 +917,7 @@
             next_care_date: document.getElementById('next_care_date').value
           };
           this.$vs.loading();;
-          u.p(`/api/parents/update_next_care_date`,data)
+          axios.p(`/api/parents/update_next_care_date`,data)
           .then((response) => {
             this.loadDetail();
           })

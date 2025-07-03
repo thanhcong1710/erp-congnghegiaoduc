@@ -66,7 +66,7 @@ class TestCallLms extends Command
             $parent_id = data_get($parent, 'id');
             $arrBranchOwner = u::getBranchIdByUserID($owner_id);
             foreach ($arrBranchOwner AS $row){
-                $exit = u::first("SELECT id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $parent_id AND branch_id = $row->branch_id");
+                $exit = u::first("SELECT parent_id,branch_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $parent_id AND branch_id = $row->branch_id");
                 if($exit){
                     if($owner_id != $exit->owner_id){
                         u::updateSimpleRow(array(
@@ -74,7 +74,8 @@ class TestCallLms extends Command
                             'updator_id' => 0,
                             'owner_id' => $owner_id,
                             'last_assign_date' => date('Y-m-d H:i:s'),
-                        ), array('id' => $exit->id), 'crm_parent_branch');
+                            'is_lock' => 1,
+                        ), array('parent_id' => $exit->parent_id,'branch_id' => $exit->branch_id), 'crm_parent_branch');
                     }
                 }else{
                     u::insertSimpleRow(array(
@@ -84,6 +85,7 @@ class TestCallLms extends Command
                         'created_at' => date('Y-m-d H:i:s'),
                         'creator_id' => 0,
                         'last_assign_date'=>date('Y-m-d H:i:s'),
+                        'is_lock' => 1,
                     ),'crm_parent_branch');
                 }
             }
