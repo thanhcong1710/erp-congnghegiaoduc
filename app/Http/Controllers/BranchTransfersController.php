@@ -230,13 +230,11 @@ class BranchTransfersController extends Controller
                     'cm_id'=> null,
                     'cm_leader_id'=>null,
                     'updated_at' => date('Y-m-d H:i:s'),
-                    'updator_id' => Auth::user()->id,
                 ), array('id'=>$contract->id),'contracts');
             }else{
                 u::updateSimpleRow(array(
                     'branch_id'=> data_get($branch_transfer_info, 'to_branch_id'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                    'updator_id' => Auth::user()->id,
+                    'updated_at' => date('Y-m-d H:i:s')
                 ), array('id'=>$contract->id),'contracts');
             }
             u::addLogContracts($contract->id);

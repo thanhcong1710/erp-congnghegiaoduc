@@ -293,7 +293,6 @@ class TuitionTransfersController extends Controller
                     'reservable_sessions' =>floor(data_get($data_calc_transfer, 'sessions')/config('app.num_session_of_reservable')),
                     'note'=> 'Nhận chuyển phí',
                     'created_at'=>date('Y-m-d H:i:s'),
-                    'creator_id'=>Auth::user()->id,
                     'status' => 5,
                     'count_recharge' => $last_contract_to_student ? $last_contract_to_student->count_recharge + 1 : 0,
                 ), 'contracts');

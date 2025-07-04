@@ -197,7 +197,7 @@
             <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
           </div>
           <vs-dropdown-menu>
-            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="pagination.limit=item" >
+            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)" >
               <span>{{item}}</span>
             </vs-dropdown-item>
           </vs-dropdown-menu>
@@ -461,6 +461,7 @@
         }
       },
       changePageLimit(limit) {
+        console.log(limit)
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getData();

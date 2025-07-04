@@ -82,7 +82,7 @@ class ContractsController extends Controller
                         return response()->json($result);
                     }
                     $count_total_used = u::first("SELECT count(id) AS total FROM contracts WHERE coupon_code='$coupon_code'");
-                    if($data->quota <= $count_total_used->total){
+                    if($data->quota && $data->quota <= $count_total_used->total){
                         $result = array(
                             'status' => 0,
                             'message' => "Mã voucher chỉ được sử dụng tối đa ".$data->quota." lần. Mã voucher này đã được sử dụng hết."
