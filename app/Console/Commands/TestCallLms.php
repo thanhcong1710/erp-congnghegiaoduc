@@ -60,36 +60,54 @@ class TestCallLms extends Command
         //     $reservesController->processReserve($row);
         // }
         // u::updateScheduleHasStudent(890);
-        $list_parent = u::query("SELECT id,owner_id FROM crm_parents");
-        foreach($list_parent AS $parent){
-            $owner_id = data_get($parent, 'owner_id');
-            $parent_id = data_get($parent, 'id');
-            $arrBranchOwner = u::getBranchIdByUserID($owner_id);
-            foreach ($arrBranchOwner AS $row){
-                $exit = u::first("SELECT parent_id,branch_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $parent_id AND branch_id = $row->branch_id");
-                if($exit){
-                    if($owner_id != $exit->owner_id){
-                        u::updateSimpleRow(array(
-                            'updated_at' => date('Y-m-d H:i:s'),
-                            'updator_id' => 0,
-                            'owner_id' => $owner_id,
-                            'last_assign_date' => date('Y-m-d H:i:s'),
-                            'is_lock' => 1,
-                        ), array('parent_id' => $exit->parent_id,'branch_id' => $exit->branch_id), 'crm_parent_branch');
-                    }
-                }else{
-                    u::insertSimpleRow(array(
-                        'branch_id' => $row->branch_id,
-                        'parent_id' => $parent_id,
-                        'owner_id' => $owner_id,
-                        'created_at' => date('Y-m-d H:i:s'),
-                        'creator_id' => 0,
-                        'last_assign_date'=>date('Y-m-d H:i:s'),
-                        'is_lock' => 1,
-                    ),'crm_parent_branch');
-                }
-            }
-            echo $parent_id."/";
+
+        // Convert dữ liệu sang bảng crm_parent_branch
+        // $list_parent = u::query("SELECT id,owner_id FROM crm_parents");
+        // foreach($list_parent AS $parent){
+        //     $owner_id = data_get($parent, 'owner_id');
+        //     $parent_id = data_get($parent, 'id');
+        //     $arrBranchOwner = u::getBranchIdByUserID($owner_id);
+        //     foreach ($arrBranchOwner AS $row){
+        //         $exit = u::first("SELECT parent_id,branch_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $parent_id AND branch_id = $row->branch_id");
+        //         if($exit){
+        //             if($owner_id != $exit->owner_id){
+        //                 u::updateSimpleRow(array(
+        //                     'updated_at' => date('Y-m-d H:i:s'),
+        //                     'updator_id' => 0,
+        //                     'owner_id' => $owner_id,
+        //                     'last_assign_date' => date('Y-m-d H:i:s'),
+        //                     'is_lock' => 1,
+        //                 ), array('parent_id' => $exit->parent_id,'branch_id' => $exit->branch_id), 'crm_parent_branch');
+        //             }
+        //         }else{
+        //             u::insertSimpleRow(array(
+        //                 'branch_id' => $row->branch_id,
+        //                 'parent_id' => $parent_id,
+        //                 'owner_id' => $owner_id,
+        //                 'created_at' => date('Y-m-d H:i:s'),
+        //                 'creator_id' => 0,
+        //                 'last_assign_date'=>date('Y-m-d H:i:s'),
+        //                 'is_lock' => 1,
+        //             ),'crm_parent_branch');
+        //         }
+        //     }
+        //     echo $parent_id."/";
+        // }
+
+        // Convert dữ liệu sang bảng crm_student_checkin
+        $list_students = u::query("SELECT * FROM crm_students WHERe checkin_branch_id IS NOT NULL");
+        foreach($list_students AS $student){
+            u::insertSimpleRow(array(
+                'crm_student_id' => $student->id,
+                'checkin_at' => $student->checkin_at,
+                'checkined_at' => $student->checkined_at,
+                'checkin_owner_id' => $student->checkin_owner_id,
+                'checkin_branch_id' => $student->checkin_branch_id,
+                'type_product' => $student->type_product,
+                'status'=>$student->status,
+                'checkined_note' => $student->checkined_note,
+            ),'crm_student_checkin');
+            echo $student->id."/";
         }
         
         return "ok";

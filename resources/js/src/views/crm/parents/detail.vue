@@ -349,14 +349,14 @@
           <vs-tab label="Học sinh"  @click="changeTab()">
             <div class="tab-text">
               <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
-               
-              <div class="vx-row">
+               <p><i>(Đối với các học sinh ở trạnh thái kết thúc, các trung tâm khác có thể tạo mới checkin để tiếp tục tư vấn)</i></p>
+              <div class="vx-row mt-3">
                 <div class="vx-col md:w-1/3 w-full item-first" v-for="(item, index) in students" :key="index">
                   <vx-card class="mb-base">
                     <div class="card-header list-action">
                       <strong>{{ item.name }}</strong>
                       <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)"> <i class="fa fa-edit"></i> </vs-button>
-                      <vs-button :disabled="disabled_action" color="danger" v-if="item.status==0" class="small" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
+                      <vs-button :disabled="disabled_action" color="danger" class="small" v-if="item.status==0 || item.status==4" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
                       <router-link :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
                         <vs-button v-if="item.status==3" class="small"> <i class="fa fa-eye"></i></vs-button>
                       </router-link>
@@ -1683,6 +1683,8 @@
           resp = 'Đã đến checkin'
         }else if(item==3){
           resp = 'Đã lên chính thức'
+        }else if(item==4){
+          resp = 'Đã kết thúc'
         }
         return resp
       },

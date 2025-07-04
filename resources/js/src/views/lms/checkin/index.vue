@@ -140,7 +140,7 @@
                 </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
-                    <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item.id)"><i class="fa-solid fa-clipboard-check"></i></vs-button>
+                    <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item)"><i class="fa-solid fa-clipboard-check"></i></vs-button>
                     <vs-button size="small" color="danger" v-if="item.status==2" @click="openConfirmUpStudent(item.id,item.name)"><i class="fa-solid fa-paper-plane"></i></vs-button>
                 </td>
                 <td class="td vs-table--td">{{item.checkined_note}}</td>
@@ -435,12 +435,13 @@
         })
       },
 
-      showModalCheckin(id){
+      showModalCheckin(item){
         this.modal_checkin.show = true
         this.modal_checkin.error_message=""
-        this.modal_checkin.student_id=id
+        this.modal_checkin.student_id=item.id
         this.modal_checkin.note=""
         this.modal_checkin.checkined_at=""
+        this.modal_checkin.crm_student_checkin_id = item.crm_student_checkin_id
       },
       updateCheckin(){
         let mess = "";
@@ -464,7 +465,8 @@
         axios.p(`/api/lms/checkin/student/checked`,{
           student_id: this.modal_checkin.student_id,
           note: this.modal_checkin.note,
-          checkined_at: this.modal_checkin.checkined_at
+          checkined_at: this.modal_checkin.checkined_at,
+          crm_student_checkin_id: this.modal_checkin.crm_student_checkin_id
         })
         .then((response) => {
           this.$vs.notify({

@@ -29,7 +29,11 @@ class ParentsController extends Controller
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " pb.branch_id = $branch_id ";
+        if($branch_id){
+            $cond = " pb.branch_id = $branch_id ";
+        }else{
+            $cond = " pb.branch_id IN (".Auth::user()->getBranchesHasUser().")";
+        }
         
         if(!Auth::user()->checkPermission('canViewAllParents')){
             $cond .= " AND pb.owner_id IN (".Auth::user()->getStaffHasUser().")";
@@ -81,7 +85,6 @@ class ParentsController extends Controller
         }
 
         $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $tmp_cond");
-        
         $list = u::query("SELECT p.name,p.id,p.mobile_1,p.status,p.next_care_date, (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
@@ -596,5 +599,21 @@ class ParentsController extends Controller
             LEFT JOIN crm_students AS s ON s.parent_id = p.id
             SET p.`status` = 8
             WHERE (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0) >0 ");
+    }
+
+    public static function processCrmStudent(){
+        u::query("UPDATE crm_students AS s 
+                    SET s.status = 4
+                WHERE
+                    DATEDIFF(CURRENT_DATE, s.checkined_at) > 10 
+                    AND ( 
+                        DATEDIFF(CURRENT_DATE, (SELECT IF(enrolment_last_date IS NOT NULL, enrolment_last_date, created_at) FROM contracts WHERE type=0 AND student_id=s.lms_id ORDER BY id DESC LIMIT 1))>10
+                        OR (SELECT count(id) FROM contracts WHERE student_id=s.lms_id)=0
+                    ) 
+                    AND  (
+                        DATEDIFF(CURRENT_DATE, (SELECT IF(status !=7, CURRENT_DATE, enrolment_last_date) FROM contracts WHERE type=1 AND student_id=s.lms_id ORDER BY id DESC LIMIT 1))>60
+                        OR (SELECT count(id) FROM contracts WHERE student_id=s.lms_id AND type=1)=0
+                    )
+        ");
     }
 }
