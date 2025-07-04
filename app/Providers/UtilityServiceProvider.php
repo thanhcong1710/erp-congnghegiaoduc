@@ -209,95 +209,40 @@ class UtilityServiceProvider extends ServiceProvider
     }
     public static function getStatusParent($status)
     {
-        $tmp = "";
-        switch ($status) {
-            case 0:
-                $tmp = 'KH mới';
-                break;
-            case 10:
-                $tmp = 'KH không liên lạc được';
-                break;
-            case 20:
-                $tmp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                $tmp = 'KH không nghe máy';
-                break;
-            case 40:
-                $tmp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                $tmp = 'KH không quan tâm';
-                break;
-            case 60:
-                $tmp = 'KH không tiềm năng';
-                break;
-            case 71:
-                $tmp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                $tmp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                $tmp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                $tmp = 'KH đã đến checkin';
-                break;
-            case 82:
-                $tmp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                $tmp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                $tmp = 'Danh sách đen';
-                break;
-            default:
-                $tmp = 'KH mới';
-        }
-        return $tmp;
+        $arr_status = array(
+            '1'=>'C3 rác',
+            '2'=>'C3',
+            '3'=>'L1',
+            '4'=>'L2',
+            '5'=>'L3',
+            '6'=>'L4',
+            '7'=>'L5',
+            '8'=>'L6',
+            '9'=>'L6 renew',
+            '10'=>'R',
+        );
+        return $arr_status['status'] ?? '';
     }
-
     public static function getTitleCallStatus($call_status, $call_status_sub)
     {
-        if ($call_status === 0) {
-            return 'Blank';
-        } elseif ($call_status == 1) {
-            return 'Thuê bao - Tắt máy - Sai số';
-        } elseif ($call_status == 2) {
-            return 'Location';
-        } elseif ($call_status == 3) {
-            return 'Máy bận - Không nghe máy';
-        } elseif ($call_status == 4) {
-            return 'KH hẹn gọi lại sau';
-        } elseif ($call_status == 5) {
-            if ($call_status_sub == 51) {
-                return 'KH đã từng sử dụng dịch vụ';
-            } elseif ($call_status_sub == 52) {
-                return 'KH không quan tâm';
-            } elseif ($call_status_sub == 53) {
-                return 'KH thực sự không muốn nói chuyện';
-            }
-        } elseif ($call_status == 6) {
-            if ($call_status_sub == 61) {
-                return 'Không có con';
-            } elseif ($call_status_sub == 62) {
-                return 'Lý do khác';
-            }
-        } elseif ($call_status == 7) {
-            if ($call_status_sub == 71) {
-                return 'KH đang cân nhắc';
-            } elseif ($call_status_sub == 72) {
-                return 'KH hẹn thời gian khác';
-            } elseif ($call_status_sub == 73) {
-                return 'KH ko muốn làm phiền';
-            } elseif ($call_status_sub == 74) {
-                return 'Confirm 1';
-            }
-        } elseif ($call_status == 9) {
-            return 'Blacklist';
-        }
+        $arr_status_care = array(
+            '0'=>'Khách hàng mới',
+            '1'=>'Khách hàng không liên lạc được',
+            '2'=>'Im lặng sau khi gửi thông tin',
+            '3'=>'Hẹn gọi lại sau',
+            '4'=>'Trùng lịch học/ Hiện tại đang không có nhu cầu/ Không sắp xếp được thời gian',
+            '5'=>'Đang học ở bên khác',
+            '6'=>'Đang cân nhắc nhưng không chia sẻ lý do',
+            '7'=>'Không thuộc tệp khách hàng mục tiêu',
+            '8'=>'Không có trình độ phù hợp',
+            '9'=>'Từ chối không có lý do cụ thể',
+            '10'=>'Tắt máy ngang',
+            '11'=>'Đồng ý đến test',
+            '12'=>'Hẹn lịch nhưng không đến',
+            '13'=>'Danh sách đen',
+            '14'=>'Khác',
+        );
+        return $arr_status_care['call_status'] ?? '';
     }
 
     public static function genStatusByCallStatus($call_status, $call_status_sub)
@@ -820,11 +765,6 @@ class UtilityServiceProvider extends ServiceProvider
         return $arr;
     }
 
-    public static function updateBranchIDParents(){
-        self::query("UPDATE crm_parents AS p LEFT JOIN branch_has_user AS b ON b.user_id = p.owner_id SET p.branch_id=b.branch_id");
-        return true;
-    }
-
     public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id, $transfer_session)
     {
         $resp = (object)[];
@@ -1149,5 +1089,9 @@ class UtilityServiceProvider extends ServiceProvider
         }
 
         return $res;
+    }
+    public static function getBranchIdByUserID ($user_id){
+        $list_branches = self::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = ".$user_id);
+        return $list_branches;
     }
 }

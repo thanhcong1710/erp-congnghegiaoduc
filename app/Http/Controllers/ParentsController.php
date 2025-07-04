@@ -22,30 +22,28 @@ class ParentsController extends Controller
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_search = isset($request->type_search) ? $request->type_search : 0;
+        $branch_id = isset($request->branch_id) ? $request->branch_id : 0;
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " p.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
-
+        if($branch_id){
+            $cond = " pb.branch_id = $branch_id ";
+        }else{
+            $cond = " pb.branch_id IN (".Auth::user()->getBranchesHasUser().")";
+        }
+        
         if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+            $cond .= " AND pb.owner_id IN (".Auth::user()->getStaffHasUser().")";
         }
         
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
         }
-        if (!empty($level)) {
-            $tmp_level ='';
-            foreach($level AS $l){
-                $tmp_level.= $tmp_level ? ", '".$l."'" : "'".$l."'";
-            }
-            $cond .= " AND p.level IN ($tmp_level)";
-        }
         if (!empty($owner_id)) {
-            $cond .= " AND p.owner_id IN (".implode(",",$owner_id).")" ;
+            $cond .= " AND pb.owner_id IN (".implode(",",$owner_id).")" ;
         }
         if (!empty($source_id)) {
             $cond .= " AND p.source_id IN (".implode(",",$source_id).")";
@@ -64,11 +62,11 @@ class ParentsController extends Controller
             $cond .= " AND p.next_care_date > '$start_date 00:00:00'";
         }
         //type_search=1
-        $cond_1 = " AND p.care_date IS NULL AND p.status <80 ";
+        $cond_1 = " AND p.care_date IS NULL ";
         //type_search=2
         $cond_2 = " AND DATE_FORMAT(next_care_date,'%Y-%m-%d') = '".date('Y-m-d')."'";
         $cond_3 = " AND next_care_date < '".date('Y-m-d')."' 
-            AND (p.care_date < p.next_care_date OR p.care_date IS NULL) AND p.status NOT IN (8,9,10,12)";
+            AND (p.care_date < p.next_care_date OR p.care_date IS NULL) ";
         $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5)>0 ";
 
         $order_by = " ORDER BY p.id DESC ";
@@ -86,23 +84,22 @@ class ParentsController extends Controller
             $order_by = " ORDER BY p.last_ticket_date DESC ";
         }
 
-        $total = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
-        
+        $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $tmp_cond");
         $list = u::query("SELECT p.name,p.id,p.mobile_1,p.status,p.next_care_date, (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
                 p.care_date AS last_time_care,
-                (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
+                (SELECT name FROM users WHERE id=pb.owner_id) AS owner_name ,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name
-            FROM crm_parents AS p WHERE $cond $tmp_cond $order_by $limitation");
+            FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $tmp_cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
 
-        $total_0 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond ");
-        $total_1 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_1 ");
-        $total_2 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
-        $total_3 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
-        $total_4 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
+        $total_0 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond ");
+        $total_1 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $cond_1 ");
+        $total_2 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $cond_2 ");
+        $total_3 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $cond_3 ");
+        $total_4 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE $cond $cond_4 ");
         $data->detail_total = (object)array(
             'total_0' => $total_0->total,
             'total_1' => $total_1->total,
@@ -122,10 +119,10 @@ class ParentsController extends Controller
             'dup_parent_id'=>'',
         );
         if($parent_id){
-            $duplicate_info = u::first("SELECT p.is_lock,u.name,u.hrm_id, u.branch_name,p.id AS parent_id,
-                    (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS care_date,
-                    (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1 ) AS total_care, p.last_assign_date
-                FROM crm_parents AS p LEFT JOIN users AS u ON u.id=p.owner_id  
+            $duplicate_info = u::first("SELECT pb.is_lock,u.name,u.hrm_id, u.branch_name,p.id AS parent_id, pb.last_assign_date, pb.last_care_date
+                FROM crm_parents AS p 
+                    LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id  
+                    LEFT JOIN users AS u ON u.id=pb.owner_id
                 WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') AND p.id!='$parent_id'");
             if($duplicate_info){
                 $result->status = 0;
@@ -133,10 +130,11 @@ class ParentsController extends Controller
                 $result->dup_parent_id = $duplicate_info->parent_id;
             }
         }else{
-            $duplicate_info = u::first("SELECT p.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,p.owner_id,
-                    (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND status=1 AND creator_id=p.owner_id ORDER BY care_date DESC LIMIT 1) AS care_date,
-                    (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1  AND creator_id=p.owner_id) AS total_care, p.last_assign_date
-                FROM crm_parents AS p LEFT JOIN users AS u ON u.id=p.owner_id  WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') ");
+            $duplicate_info = u::first("SELECT pb.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,pb.owner_id, pb.last_assign_date, pb.last_care_date
+                FROM crm_parents AS p 
+                    LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id  
+                    LEFT JOIN users AS u ON u.id=pb.owner_id 
+                WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') AND pb.branch_id IN(".Auth::user()->getBranchesHasUser().")");
             if($duplicate_info){
                 if($duplicate_info->is_lock==0){
                     $result->status = 2;
@@ -146,15 +144,12 @@ class ParentsController extends Controller
                     $result->status = 0;
                     $result->dup_parent_id = $duplicate_info->parent_id;
                     $text = "";
-                    if($duplicate_info->total_care>0 && (61 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24)))>0){
-                        $thoi_gian_con = 61 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24));
-                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    if((15 - floor((time() - strtotime($duplicate_info->last_care_date))/(3600*24)))>0){
+                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->last_care_date))/(3600*24));
+                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->last_care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
                     }else{
-                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
+                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
                         $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
-                    }
-                    if($duplicate_info->status > 80 || $duplicate_info->status==73){
-                        $text="<br> Khách hàng thuộc các trường hợp không được phép ghi đè - ".u::getStatusParent($duplicate_info->status);
                     }
                     $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name .".$text;
                 }
@@ -167,21 +162,40 @@ class ParentsController extends Controller
         $phone = isset($request->phone) ? $request->phone : '';
         $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1='$phone'");
         if($parent_info){
-            u::updateSimpleRow(array(
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updator_id' => Auth::user()->id,
-                'owner_id'=>Auth::user()->id,
-                'last_assign_date'=> date('Y-m-d H:i:s'),
-                'is_lock'=>1,
-            ), array('id' => $parent_info->id), 'crm_parents');
-            u::insertSimpleRow(array(
-                'parent_id'=>$parent_info->id,
-                'last_owner_id'=>$parent_info->owner_id,
-                'owner_id'=>Auth::user()->id,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>Auth::user()->id,
-            ), 'crm_parent_overwrite');
-            LogParents::logAssign($parent_info->id,$parent_info->owner_id,Auth::user()->id,Auth::user()->id,true);
+            $arrBranchOwner = u::getBranchIdByUserID(Auth::user()->id);
+            foreach ($arrBranchOwner AS $row){
+                $exit = u::first("SELECT branch_id,parent_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $parent_info->id AND branch_id = $row->branch_id");
+                if($exit){
+                    if($request->owner_id != $exit->owner_id){
+                        u::updateSimpleRow(array(
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'updator_id' => Auth::user()->id,
+                            'owner_id' => Auth::user()->id,
+                            'last_assign_date' => date('Y-m-d H:i:s'),
+                            'is_lock' => 1,
+                        ), array('parent_id' => $exit->parent_id, 'branch_id'=>$exit->branch_id), 'crm_parent_branch');
+                    }
+                }else{
+                    u::insertSimpleRow(array(
+                        'branch_id' => $row->branch_id,
+                        'parent_id' => $request->parent_id,
+                        'owner_id' => Auth::user()->id,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'creator_id' => Auth::user()->id,
+                        'last_assign_date'=>date('Y-m-d H:i:s'),
+                        'is_lock' => 1,
+                    ),'crm_parent_branch');
+                }
+                u::insertSimpleRow(array(
+                    'parent_id'=>$parent_info->id,
+                    'last_owner_id'=>$parent_info->owner_id,
+                    'owner_id'=>Auth::user()->id,
+                    'created_at'=>date('Y-m-d H:i:s'),
+                    'creator_id'=>Auth::user()->id,
+                    'branch_id'=>$row->branch_id
+                ), 'crm_parent_overwrite');
+                LogParents::logAssign($request->parent_id,data_get($exit,'owner_id'),$request->owner_id,Auth::user()->id, false, $row->branch_id);
+            }
         }
         $result =(object)array(
             'status'=>1,
@@ -228,11 +242,22 @@ class ParentsController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
-            'owner_id'=>data_get($parent, 'owner_id'),
+            // 'owner_id'=>data_get($parent, 'owner_id'),
             'status'=>data_get($parent, 'status'),
             'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
         ), 'crm_parents');
-        u::updateBranchIDParents();
+        $branchHasUser = Auth::user()->getBranchesHasUser();
+        $arrBranchHasUser = explode(',',$branchHasUser);
+        foreach ($arrBranchHasUser AS $branch_id){
+            u::insertSimpleRow(array(
+                'branch_id' => $branch_id,
+                'parent_id' => $parent_id,
+                'owner_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'last_assign_date'=>date('Y-m-d H:i:s'),
+            ),'crm_parent_branch');
+        }
         LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
         $result =(object)array(
             'status'=>1,
@@ -262,10 +287,11 @@ class ParentsController extends Controller
 
     public function show(Request $request,$parent_id)
     {
-        $cond="";
+        $cond=" AND pb.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+            $cond .= " AND pb.owner_id IN (".Auth::user()->getStaffHasUser().")";
         }
+        
         $data = u::first("SELECT p.*,(SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
                 (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
                 (SELECT name FROM provinces WHERE id=p.province_id) AS province_name,
@@ -274,7 +300,7 @@ class ParentsController extends Controller
                 (SELECT title FROM jobs WHERE id=p.job_id) AS job_name,
                 (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1) AS num_care,
                 (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care
-            FROM crm_parents AS p WHERE id=$parent_id  $cond");
+            FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE p.id=$parent_id  $cond");
         return response()->json($data);
     }
 
@@ -343,15 +369,32 @@ class ParentsController extends Controller
 
     public function assign(Request $request)
     {
-        $pre_parent_info = u::first("SELECT owner_id,last_assign_date FROM crm_parents WHERE id=$request->parent_id");
-        $data = u::updateSimpleRow(array(
-            'updated_at' => date('Y-m-d H:i:s'),
-            'updator_id' => Auth::user()->id,
-            'owner_id' => $request->owner_id,
-            'last_assign_date' => $request->owner_id != $pre_parent_info->owner_id ? date('Y-m-d H:i:s') : $pre_parent_info->last_assign_date,
-        ), array('id' => $request->parent_id), 'crm_parents');
-        u::updateBranchIDParents();
-        LogParents::logAssign($request->parent_id,$pre_parent_info->owner_id,$request->owner_id,Auth::user()->id);
+        $arrBranchOwner = u::getBranchIdByUserID($request->owner_id);
+        foreach ($arrBranchOwner AS $row){
+            $exit = u::first("SELECT branch_id,parent_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $request->parent_id AND branch_id = $row->branch_id");
+            if($exit){
+                if($request->owner_id != $exit->owner_id){
+                    u::updateSimpleRow(array(
+                        'updated_at' => date('Y-m-d H:i:s'),
+                        'updator_id' => Auth::user()->id,
+                        'owner_id' => $request->owner_id,
+                        'last_assign_date' => date('Y-m-d H:i:s'),
+                        'is_lock' => 1,
+                    ), array('parent_id' => $exit->parent_id, 'branch_id'=>$exit->branch_id), 'crm_parent_branch');
+                }
+            }else{
+                u::insertSimpleRow(array(
+                    'branch_id' => $row->branch_id,
+                    'parent_id' => $request->parent_id,
+                    'owner_id' => $request->owner_id,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                    'last_assign_date'=>date('Y-m-d H:i:s'),
+                    'is_lock' => 1,
+                ),'crm_parent_branch');
+            }
+            LogParents::logAssign($request->parent_id,data_get($exit,'owner_id'),$request->owner_id,Auth::user()->id, false, $row->branch_id);
+        }
         $result =(object)array(
             'status'=>1,
             'message'=>'Cập nhật người phụ trách thành công'
@@ -366,11 +409,33 @@ class ParentsController extends Controller
         $list_parent_info = u::query("SELECT p.id AS parent_id,p.owner_id,(SELECT CONCAT(name,' (',hrm_id,')') FROM users WHERE id= p.owner_id) AS pre_owner,p.last_assign_date FROM crm_parents AS p WHERE p.id IN ($cond)");
         foreach($list_parent_info AS $k=>$row){
             $owner_id =  $arr_owner[$k%count($arr_owner)];
-            $last_assign_date = $owner_id != $row->owner_id ? date('Y-m-d H:i:s') : $row->last_assign_date;
-            u::query("UPDATE crm_parents SET owner_id= $owner_id,last_assign_date='$last_assign_date' WHERE id =$row->parent_id");
-            LogParents::logAssign($row->parent_id,$row->owner_id,$owner_id,Auth::user()->id);
+            $arrBranchOwner = u::getBranchIdByUserID($owner_id);
+            foreach ($arrBranchOwner AS $brch){
+                $exit = u::first("SELECT branch_id,parent_id, owner_id, last_assign_date FROM crm_parent_branch WHERE parent_id = $row->parent_id AND branch_id = $brch->branch_id");
+                if($exit){
+                    if($owner_id != $exit->owner_id){
+                        u::updateSimpleRow(array(
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'updator_id' => Auth::user()->id,
+                            'owner_id' => $owner_id,
+                            'last_assign_date' => date('Y-m-d H:i:s'),
+                            'is_lock' => 1,
+                        ), array('parent_id' => $exit->parent_id, 'branch_id'=>$exit->branch_id), 'crm_parent_branch');
+                    }
+                }else{
+                    u::insertSimpleRow(array(
+                        'branch_id' => $brch->branch_id,
+                        'parent_id' => $row->parent_id,
+                        'owner_id' => $owner_id,
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'creator_id' => Auth::user()->id,
+                        'last_assign_date'=>date('Y-m-d H:i:s'),
+                        'is_lock' => 1,
+                    ),'crm_parent_branch');
+                }
+                LogParents::logAssign($row->parent_id,data_get($exit,'owner_id'),$owner_id,Auth::user()->id,false, $brch->branch_id);
+            }
         }
-        u::updateBranchIDParents();
         $result =(object)array(
             'status'=>1,
             'message'=>'Bàn giao thành công'
@@ -505,79 +570,50 @@ class ParentsController extends Controller
     }
 
     public function processParentLock(){
-        u::query("UPDATE cms_parents SET is_lock = 1");
-        u::query("UPDATE cms_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET p.tmp_branch_id = u.branch_id WHERE u.branch_id!=0 AND u.branch_id!= null");
-        u::query("UPDATE cms_parents AS p SET p.care_date=(SELECT  IF(care_date IS NULL, p.care_date,care_date) FROM cms_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
-        u::query("UPDATE cms_parents AS p SET p.last_care_date=(SELECT care_date FROM cms_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
-        u::query("UPDATE cms_parents SET is_lock = 0 
+        u::query("UPDATE crm_parent_branch SET is_lock = 1");
+        u::query("UPDATE crm_parent_branch AS p SET p.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.parent_id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
+        u::query("UPDATE crm_parent_branch SET is_lock = 0 
             WHERE
-                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status NOT IN( 9,10)) OR
-                (
-                    last_care_date IS NOT NULL  
-                    AND is_lock=1 AND status NOT IN( 9,10)
-                    AND ( 
-                        (DATEDIFF( CURRENT_DATE, last_care_date )> 15 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status IN (1,2,5))
-                        OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 30 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 30 AND status IN (3,4,6,7,11))
-                        OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 60 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 60 AND status IN (8))
-                    ) 
-                )");
+                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
+                (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) ");
         return "ok";
     }
 
     public static function processParentLockById($parent_id){
-        u::query("UPDATE cms_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET 
-                p.last_care_date=(SELECT care_date FROM cms_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1) ,
-                p.care_date=(SELECT IF(care_date IS NULL, p.care_date,care_date) FROM cms_customer_care WHERE parent_id=p.id AND `status`=1 ORDER BY id DESC LIMIT 1)
-            WHERE p.id=$parent_id ");
-        u::query("UPDATE cms_parents AS p LEFT JOIN users AS u ON u.id = p.owner_id SET p.tmp_branch_id = u.branch_id,p.is_lock = 1
-            WHERE p.id=$parent_id  AND u.branch_id!=0 AND u.branch_id!= null");
-        u::query("UPDATE cms_parents SET is_lock = 0 
+        u::query("UPDATE crm_parent_branch AS pb SET 
+                pb.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=pb.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1) ,
+            WHERE pb.parent_id=$parent_id ");
+        u::query("UPDATE crm_parent_branch AS pb SET pb.is_lock = 1
+            WHERE pb.parent_id=$parent_id ");
+        u::query("UPDATE crm_parent_branch SET is_lock = 0 
             WHERE
-                id=$parent_id AND (
-                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status NOT IN( 9,10)) OR
-                    (last_care_date IS NOT NULL  
-                        AND is_lock=1 AND status NOT IN( 9,10)
-                        AND ( 
-                            (DATEDIFF( CURRENT_DATE, last_care_date )> 15 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15 AND status IN (1,2,5))
-                            OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 30 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 30 AND status IN (3,4,6,7,11))
-                            OR  (DATEDIFF( CURRENT_DATE, last_care_date )> 60 AND DATEDIFF( CURRENT_DATE, last_assign_date )> 60 AND status IN (8))
-                        ))
+                parent_id=$parent_id AND (
+                    (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
+                    (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) 
                 ) ");
         return true;
     }
 
     public static function processGetStatus(){
-        // u::query("DELETE FROM tmp_cms_parents");
-        // $list_student =  u::queryCRM("SELECT DISTINCT
-        //         gud_mobile1 ,gud_mobile2,
-        //         checked,
-        //         ( SELECT count( id ) FROM contracts WHERE student_id = s.id AND type > 0) AS contract_total,
-        //         ( SELECT count( id ) FROM contracts WHERE student_id = s.id AND type > 0 AND status!=7) AS contract_active
-        //     FROM
-        //         students AS s 
-        //     WHERE
-        //         s.checked = 1 
-        //         OR ( SELECT count( id ) FROM contracts WHERE student_id = s.id AND type > 0 )>0"); 
-        // self::addItemsTmpCmsParents($list_student);
-        
-        // u::query(" UPDATE cms_parents AS p
-        //     LEFT JOIN tmp_cms_parents AS t ON t.gud_mobile2 = p.mobile_1 AND t.gud_mobile2!='' AND t.gud_mobile2 IS NOT NULL
-        // SET p.`status` = IF(
-        //     t.contract_active > 0, 9,
-        //         IF(t.contract_total>0, 10,
-        //             IF(t.checked>0,8, p.`status`)
-        //         )
-        //  )
-        // WHERE t.id IS NOT NULL ");
+        u::query(" UPDATE crm_parents AS p
+            LEFT JOIN crm_students AS s ON s.parent_id = p.id
+            SET p.`status` = 8
+            WHERE (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0) >0 ");
+    }
 
-        // u::query(" UPDATE cms_parents AS p
-        //     LEFT JOIN tmp_cms_parents AS t ON t.gud_mobile1 = p.mobile_1 AND t.gud_mobile1!='' AND t.gud_mobile1 IS NOT NULL
-        // SET p.`status` = IF(
-        //     t.contract_active > 0, 9,
-        //         IF(t.contract_total>0, 10,
-        //             IF(t.checked>0,8, p.`status`)
-        //         )
-        // )
-        // WHERE t.id IS NOT NULL  ");
+    public static function processCrmStudent(){
+        u::query("UPDATE crm_students AS s 
+                    SET s.status = 4
+                WHERE
+                    DATEDIFF(CURRENT_DATE, s.checkined_at) > 10 
+                    AND ( 
+                        DATEDIFF(CURRENT_DATE, (SELECT IF(enrolment_last_date IS NOT NULL, enrolment_last_date, created_at) FROM contracts WHERE type=0 AND student_id=s.lms_id ORDER BY id DESC LIMIT 1))>10
+                        OR (SELECT count(id) FROM contracts WHERE student_id=s.lms_id)=0
+                    ) 
+                    AND  (
+                        DATEDIFF(CURRENT_DATE, (SELECT IF(status !=7, CURRENT_DATE, enrolment_last_date) FROM contracts WHERE type=1 AND student_id=s.lms_id ORDER BY id DESC LIMIT 1))>60
+                        OR (SELECT count(id) FROM contracts WHERE student_id=s.lms_id AND type=1)=0
+                    )
+        ");
     }
 }

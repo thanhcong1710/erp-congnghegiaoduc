@@ -238,9 +238,12 @@ class UserController extends Controller
     public function getUsersManager(Request $request){
         $cond = "";
         if(!Auth::user()->checkPermission('canViewAllSale')){
-            $cond = " AND u.id IN (".Auth::user()->getStaffHasUser().")";
+            $cond .= " AND u.id IN (".Auth::user()->getStaffHasUser().")";
         } else {
-            $cond = " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER."))";
+            $cond .= " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER."))";
+        }
+        if($request->branch_id){
+            $cond .= " AND (SELECT count(branch_id) FROM branch_has_user WHERE u.id = user_id AND branch_id= $request->branch_id) > 0";
         }
         $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
             FROM users AS u WHERE status=1 $cond");

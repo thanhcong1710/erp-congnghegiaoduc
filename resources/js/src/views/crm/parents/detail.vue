@@ -32,36 +32,15 @@
             <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
-            <p>Level</p>
-            <p class="mb-1">
-              <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeLevel" v-model="tmp_level" >
-                <option value="C1">C1</option>
-                <option value="C2">C2</option>
-                <option value="C3">C3</option>
-                <option value="L1">L1</option>
-                <option value="L2">L2</option>
-                <option value="L3">L3</option>
-                <option value="L4">L4</option>
-                <option value="L5">L5</option>
-              </select>
-            </p> 
-            <p>Trạng thái</p>
+            <p>Level khách hàng</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
-                <option value="0" v-if="tmp_status<70">0. KH mới</option>
-                <option value="10" v-if="tmp_status<70">1. KH không liên lạc được</option>
-                <option value="20" v-if="tmp_status<70">2. KH ở vùng CMS không có cơ sở</option>
-                <option value="30" v-if="tmp_status<70">3. KH không nghe máy</option>
-                <option value="40" v-if="tmp_status<70">4. KH hẹn gọi lại sau</option>
-                <option value="50" v-if="tmp_status<70">5. KH không quan tâm</option>
-                <option value="60" v-if="tmp_status<70">6. KH không tiềm năng</option>
-                <option value="71">7.1. KH quan tâm, cần follow up date</option>
-                <option value="72">7.2. KH tiềm năng nhưng không muốn làm phiền</option>
-                <option value="73">7.3. KH đồng ý đặt lịch Checkin</option>
-                <option value="81">8.1. KH đã đến checkin</option>
-                <option value="82">8.2. KH đã mua gói phí</option>
-                <option value="83">8.3. KH đến hạn tái tục</option>
-                <option value="90">9. Danh sách đen</option>
+                <option 
+                    v-for="option in levelOptionsParent" 
+                    :key="option.id" 
+                    :value="option.id">
+                    {{ option.id }}. {{ option.label }}
+                  </option>
               </select>
             </p> 
             <p>Người phụ trách</p>
@@ -83,30 +62,12 @@
               <label for="nf-email">Trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status">
                 <option value="">Chọn trạng thái</option>
-                <!-- <option value="0">Blank</option> -->
-                <option value="1">Thuê bao - Tắt máy - Sai số</option>
-                <option value="2">Location</option>
-                <option value="3">Máy bận - Không nghe máy</option>
-                <option value="4">KH hẹn gọi lại sau</option>
-                <option value="5">KH Từ chối nói chuyện</option>
-                <option value="6">KH không phù hợp</option>
-                <option value="7">KH tiềm năng</option>
-                <option value="9">Blacklist</option>
-              </select>
-            </div>
-            <div v-if="['5','6','7'].indexOf(phone.select_note_status) > -1" class="mt-3">
-              <label >Chi tiết trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status_sub">
-                <option value="">Chọn chi tiết trạng thái</option>
-                <option value="51" v-if="phone.select_note_status==5">KH đã từng sử dụng dịch vụ</option>
-                <option value="52" v-if="phone.select_note_status==5">KH không quan tâm</option>
-                <option value="53" v-if="phone.select_note_status==5">KH thực sự không muốn nói chuyện</option>
-                <option value="61" v-if="phone.select_note_status==6">Không có con</option>
-                <option value="62" v-if="phone.select_note_status==6">Lý do khác</option>
-                <option value="71" v-if="phone.select_note_status==7">KH đang cân nhắc</option>
-                <option value="72" v-if="phone.select_note_status==7">KH hẹn thời gian khác</option>
-                <option value="73" v-if="phone.select_note_status==7">KH ko muốn làm phiền</option>
-                <option value="74" v-if="phone.select_note_status==7">Confirm 1</option>
+                <option 
+                  v-for="option in statusOptionsCare" 
+                  :key="option.id" 
+                  :value="option.id">
+                  {{ option.id }}. {{ option.label }}
+                </option>
               </select>
             </div>
             <div class="mt-3">
@@ -388,14 +349,14 @@
           <vs-tab label="Học sinh"  @click="changeTab()">
             <div class="tab-text">
               <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
-               
-              <div class="vx-row">
+               <p><i>(Đối với các học sinh ở trạnh thái kết thúc, các trung tâm khác có thể tạo mới checkin để tiếp tục tư vấn)</i></p>
+              <div class="vx-row mt-3">
                 <div class="vx-col md:w-1/3 w-full item-first" v-for="(item, index) in students" :key="index">
                   <vx-card class="mb-base">
                     <div class="card-header list-action">
                       <strong>{{ item.name }}</strong>
                       <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)"> <i class="fa fa-edit"></i> </vs-button>
-                      <vs-button :disabled="disabled_action" color="danger" v-if="item.status==0" class="small" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
+                      <vs-button :disabled="disabled_action" color="danger" class="small" v-if="item.status==0 || item.status==4" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
                       <router-link :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
                         <vs-button v-if="item.status==3" class="small"> <i class="fa fa-eye"></i></vs-button>
                       </router-link>
@@ -867,6 +828,8 @@
           body: "Thêm mới lớp học thành công",
           action_exit: "exit",
         },
+        levelOptionsParent: u.levelOptionsParent,
+        statusOptionsCare: u.statusOptionsCare
       };
     },
     async created() {
@@ -954,7 +917,7 @@
             next_care_date: document.getElementById('next_care_date').value
           };
           this.$vs.loading();;
-          u.p(`/api/parents/update_next_care_date`,data)
+          axios.p(`/api/parents/update_next_care_date`,data)
           .then((response) => {
             this.loadDetail();
           })
@@ -1501,10 +1464,6 @@
           mess += " - Trạng thái cuộc gọi không được để trống<br/>";
           resp = false;
         }
-        if (['5','6','7'].indexOf(this.phone.select_note_status) > -1 && this.phone.select_note_status_sub =='') {
-          mess += " - Chi tiết trạng thái cuộc gọi không được để trống<br/>";
-          resp = false;
-        }
         
         if (this.phone.note == "") {
           mess += " - Ghi chú cuộc gọi không được để trống<br/>";
@@ -1724,6 +1683,8 @@
           resp = 'Đã đến checkin'
         }else if(item==3){
           resp = 'Đã lên chính thức'
+        }else if(item==4){
+          resp = 'Đã kết thúc'
         }
         return resp
       },
