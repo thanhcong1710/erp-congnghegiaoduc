@@ -605,7 +605,7 @@ class ParentsController extends Controller
         u::query("UPDATE crm_students AS s 
                     SET s.status = 4
                 WHERE
-                    DATEDIFF(CURRENT_DATE, s.checkined_at) > 10 
+                    ((DATEDIFF(CURRENT_DATE, s.checkin_at) > 10 AND s.checkined_at IS NULL) OR DATEDIFF(CURRENT_DATE, s.checkined_at) > 10) 
                     AND ( 
                         DATEDIFF(CURRENT_DATE, (SELECT IF(enrolment_last_date IS NOT NULL, enrolment_last_date, created_at) FROM contracts WHERE type=0 AND student_id=s.lms_id ORDER BY id DESC LIMIT 1))>10
                         OR (SELECT count(id) FROM contracts WHERE student_id=s.lms_id)=0

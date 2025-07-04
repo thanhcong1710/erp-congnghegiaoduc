@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('scheduleHasStudent:add')->dailyAt('01:00')->withoutOverlapping();
         $schedule->command('updateEnrolmentLastDate:command')->dailyAt('01:00')->withoutOverlapping();
         $schedule->command('processdata:command')->dailyAt('2:00'); 
-        // $schedule->command('jobsProcessLockParent:command')->cron('0 0 * * *');
+        $schedule->command('jobsProcessLockParent:command')->cron('0 0 * * *');
     }
 
     /**
