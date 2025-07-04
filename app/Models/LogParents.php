@@ -47,7 +47,11 @@ class LogParents extends Model
             '3'=>'L1',
             '4'=>'L2',
             '5'=>'L3',
-            '6'=>'R',
+            '6'=>'L4',
+            '7'=>'L5',
+            '8'=>'L6',
+            '9'=>'L6 renew',
+            '10'=>'R',
         );
         $content = "Thay đổi trạng thái: từ `".($arr_status[$pre_status] ?? '')."` thành `".($arr_status[$status]??'')."`";
         u::insertSimpleRow(array(

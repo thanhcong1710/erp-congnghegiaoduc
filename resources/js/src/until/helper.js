@@ -170,7 +170,11 @@ const levelOptionsParent = [
   {id:3,label:'L1'},
   {id:4,label:'L2'},
   {id:5,label:'L3'},
-  {id:6,label:'R'},
+  {id:6,label:'L4'},
+  {id:7,label:'L5'},
+  {id:8,label:'L6'},
+  {id:9,label:'L6 renew'},
+  {id:10,label:'R'},
 ]
 
 export default {

@@ -215,7 +215,11 @@ class UtilityServiceProvider extends ServiceProvider
             '3'=>'L1',
             '4'=>'L2',
             '5'=>'L3',
-            '6'=>'R',
+            '6'=>'L4',
+            '7'=>'L5',
+            '8'=>'L6',
+            '9'=>'L6 renew',
+            '10'=>'R',
         );
         return $arr_status['status'] ?? '';
     }
@@ -236,6 +240,7 @@ class UtilityServiceProvider extends ServiceProvider
             '11'=>'Đồng ý đến test',
             '12'=>'Hẹn lịch nhưng không đến',
             '13'=>'Danh sách đen',
+            '14'=>'Khác',
         );
         return $arr_status_care['call_status'] ?? '';
     }
