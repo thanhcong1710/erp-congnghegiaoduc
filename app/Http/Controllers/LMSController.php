@@ -834,9 +834,9 @@ class LMSController extends Controller
             if (data_get($classLMSCurrent, 'cls_id') == data_get($studentInfo, 'lms_class_id') && data_get($classLMSCurrent, 'cstd_status') == 'Active' ) {
                 return "ok";
             } else {
-                if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
-                    $classLMSCurrent = null;
-                }
+                // if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
+                //     $classLMSCurrent = null;
+                // }
                 $url = sprintf('%s/data/setup.asmx/CounStudentClassAddSubmit', config('lms.url'));
                 $method = 'POST';
                 $client = new Client();
