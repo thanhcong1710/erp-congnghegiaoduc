@@ -8,7 +8,7 @@ use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Artisan;
 
 class ClassesController extends Controller
 {
@@ -311,8 +311,10 @@ class ClassesController extends Controller
 
     public function syncLMS(){
         ini_set('max_execution_time', 30000);
-        $process = new Process(['php', 'artisan', 'syncLMS:command', '--timeout=60000']);
-        $process->run();
+        Artisan::call('syncLMS:command');
+        
+        // Lấy kết quả output (nếu có)
+        $output = Artisan::output();
 
         // $lms = new LMSController();
         // //lấy dữ liệu trung tâm từ LMS
