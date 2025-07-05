@@ -311,7 +311,7 @@ class ClassesController extends Controller
 
     public function syncLMS(){
         ini_set('max_execution_time', 30000);
-        $process = new Process(['php', 'artisan', 'testCallLms:command', '--timeout=60000']);
+        $process = new Process(['php', 'artisan', 'syncLMS:command', '--timeout=60000']);
         $process->run();
 
         // $lms = new LMSController();
