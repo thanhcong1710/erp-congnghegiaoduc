@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\ClassesController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
 use App\User;
@@ -40,7 +41,7 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $lmsController = new \App\Http\Controllers\LmsController();
+        // $lmsController = new \App\Http\Controllers\LmsController();
         // $lmsController->addOrUpdateStudent(721);
         // $lmsController->addStudentToClass(528);
         // $lmsController->studentWithdrawByIdLMS(1340);
@@ -59,7 +60,9 @@ class TestCallLms extends Command
         // foreach($arr AS $row){
         //     $reservesController->processReserve($row);
         // }
-        u::updateScheduleHasStudent(890);
+        // u::updateScheduleHasStudent(890);
+        // $classController = new ClassesController();
+        // $classController->syncLMS();
         return "ok";
     }
 }
