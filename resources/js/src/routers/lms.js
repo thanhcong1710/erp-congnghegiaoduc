@@ -263,6 +263,20 @@ export default {
         }
       },
       {
+        path: '/lms/class_transfers/add-semester',
+        name: 'lms-class_transfers-add-semester',
+        component: () => import('@/views/lms/class_transfers/addSemester.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers' },
+            { title: 'Thêm mới chuyển kỳ', active: true }
+          ],
+          pageTitle: 'Thêm mới chuyển kỳ',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/class_transfers/:id/detail',
         name: 'lms-class_transfers-detail',
         component: () => import('@/views/lms/class_transfers/detail.vue'),

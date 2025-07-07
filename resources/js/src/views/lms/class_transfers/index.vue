@@ -34,6 +34,9 @@
             <router-link class="btn btn-success" :to="'/lms/class_transfers/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
+            <router-link class="btn btn-success" :to="'/lms/class_transfers/add-semester'">
+              <vs-button class="mr-3 mb-2" color="warning"><i class="fa fa-plus"></i> Thêm mới chuyển kỳ</vs-button>
+            </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
           </div>
