@@ -41,7 +41,7 @@ class ClassTransfersController extends Controller
                 (SELECT cls_name FROM classes WHERE id= t.from_class_id) AS from_class_name,
                 (SELECT cls_name FROM classes WHERE id= t.to_class_id) AS to_class_name,
                 (SELECT name FROM branches WHERE id= t.from_branch_id) AS from_branch_name,
-                t.transfer_date
+                t.transfer_date, t.is_trans_semester
             FROM class_transfer AS t 
                 LEFT JOIN students AS s ON s.id=t.student_id
             WHERE $cond $order_by $limitation");

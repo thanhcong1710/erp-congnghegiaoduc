@@ -90,6 +90,11 @@
                       <!---->
                     </div>
                   </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Loại
+                      <!---->
+                    </div>
+                  </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Thao tác
                       <!---->
@@ -108,6 +113,7 @@
                 <td class="td vs-table--td">{{item.from_class_name}}</td>
                 <td class="td vs-table--td">{{item.to_class_name}}</td>
                 <td class="td vs-table--td">{{item.transfer_date}}</td>
+                <td class="td vs-table--td">{{item.is_trans_semester ? 'Chuyển kỳ' : 'Chuyển lớp'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
