@@ -27,6 +27,14 @@
                 @input="saveProduct"
             ></vue-select>
         </div>
+        <div class="vx-col md:w-1/3 mb-4">
+              <label >Loại</label>
+              <select class="vs-inputx vs-input--input normal" @change="loadClasses" v-model="select_type" >
+                <option value="0">Tất cả các lớp</option>
+                <option value="1">Lớp đang học</option>
+                <option value="2">Lớp đã kết thúc</option>
+              </select>
+            </div>
       </div>
       <vs-divider/>
       <div class="vx-row">
@@ -203,7 +211,7 @@
             ]
           }
         },
-        select_type:1,
+        select_type:0,
         checked_list: [],
         alert:{
           active: false,
