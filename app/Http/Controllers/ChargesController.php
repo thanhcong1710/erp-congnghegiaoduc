@@ -400,8 +400,8 @@ class ChargesController extends Controller
             LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
             self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
         }else{
-            $availableSession = (int)data_get($contract_info, 'init_tuition_fee_session') && (int)data_get($contract_info, 'init_tuition_fee_amount') ? 
-                round(((int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount')) / ((int)data_get($contract_info, 'init_tuition_fee_amount')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
+            $availableSession = (int)data_get($contract_info, 'init_tuition_fee_session') && (int)data_get($contract_info, 'must_charge') ? 
+                round(((int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount')) / ((int)data_get($contract_info, 'must_charge')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
             $availableSession = $availableSession - (int)data_get($contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($contract_info, 'last_done_sessions') : 0;
             u::updateSimpleRow(array(
                 'status' => data_get($contract_info, 'status') >2  ? data_get($contract_info, 'status') : 2,
