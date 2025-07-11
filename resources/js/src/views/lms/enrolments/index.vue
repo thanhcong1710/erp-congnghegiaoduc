@@ -568,9 +568,13 @@
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
-            // if (moment(item.class_date).isSameOrAfter(student.start_date)) {
+            if(u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')){
               resp.push(item)
-            // }
+            } else {
+              if (moment(item.class_date).isSameOrAfter(student.start_date)) {
+                resp.push(item)
+              }
+            } 
             return item
           })
         }
