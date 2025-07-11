@@ -80,7 +80,6 @@ class CheckinController extends Controller
         ), array('id'=>$request->student_id), 'crm_students');
         u::updateSimpleRow(array(
            'checkined_at' => date('Y-m-d H:i:s', strtotime($request->checkined_at)),
-           'checkined_by' =>  Auth::user()->id,
            'checkined_note' => $request->note,
            'status' => 2,
            'updated_at' => date('Y-m-d H:i:s'),
