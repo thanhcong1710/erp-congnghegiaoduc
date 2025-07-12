@@ -301,7 +301,7 @@ class ParentsController extends Controller
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_parents');
         LogParents::logUpdateInfo($pre_parent_info,$data_update,Auth::user()->id);
-        $students = u::query("SELECT id FROM students AS s LEFT JOIN crm_students AS cs ON cs.lms_id=s.id WHERE cs.parent_id=$request->id");
+        $students = u::query("SELECT s.id FROM students AS s LEFT JOIN crm_students AS cs ON cs.lms_id=s.id WHERE cs.parent_id=$request->id");
         foreach($students AS $student){
             u::updateSimpleRow(array(
                 'gud_mobile1' => data_get($request, 'mobile_1'),
