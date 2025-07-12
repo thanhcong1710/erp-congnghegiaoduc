@@ -387,24 +387,26 @@
         }
       },
       validatePhone2(){
-        const data = {
-          phone: this.parent.mobile_2,
-        };
-        this.$vs.loading()
-        axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
-          this.$vs.loading.close();
-          if(response.data.status==0){
-            this.change_source_parent_id = response.data.dup_parent_id
-            this.parent.mobile_2 ="";
-            this.modal.color = "warning";
-            this.modal.body = response.data.message;
-            this.modal.show = true;
-          }else if(response.data.status==2){
-            this.modal_overwrite.show = true;
-            this.modal.color = "info";
-            this.modal_overwrite.message = response.data.message;
-          }
-        })
+        if(this.parent.mobile_2){
+          const data = {
+            phone: this.parent.mobile_2,
+          };
+          this.$vs.loading()
+          axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.change_source_parent_id = response.data.dup_parent_id
+              this.parent.mobile_2 ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+            }else if(response.data.status==2){
+              this.modal_overwrite.show = true;
+              this.modal.color = "info";
+              this.modal_overwrite.message = response.data.message;
+            }
+          })
+        }
       },
       getDistrict(data = null){
         if (data && typeof data === 'object') {
@@ -512,9 +514,9 @@
           this.$router.push('/crm/parent')
         })
       },
-      save() {
-        this.validatePhone();
-        this.validatePhone2();
+      async save() {
+        await this.validatePhone();
+        await this.validatePhone2();
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {
