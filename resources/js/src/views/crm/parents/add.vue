@@ -513,6 +513,8 @@
         })
       },
       save() {
+        this.validatePhone();
+        this.validatePhone2();
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {
