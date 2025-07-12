@@ -194,7 +194,7 @@ class EnrolmentsController extends Controller
             $lmsController = new LMSController();
             $lmsController->addStudentToClass($student_id);
             if($start_date < date('Y-m-d')){
-                u::updateScheduleHasStudent($contract_id);
+                u::updateScheduleHasStudent($contract_id, $start_date);
             }
         }
 

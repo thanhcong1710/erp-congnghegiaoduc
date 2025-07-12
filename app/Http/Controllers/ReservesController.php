@@ -156,7 +156,7 @@ class ReservesController extends Controller
             u::addLogContracts(data_get($contract_info,'id'));
             LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
             if($start_date < date('Y-m-d')){
-                u::updateScheduleHasStudent(data_get($contract_info,'id'));
+                u::updateScheduleHasStudent(data_get($contract_info,'id'),$start_date);
             }
             $result = array(
                 'status' => 1,
@@ -286,7 +286,7 @@ class ReservesController extends Controller
         u::addLogContracts(data_get($contract_info,'id'));
         LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", data_get($reserve_info, 'approver_id'));
         if($start_date < date('Y-m-d')){
-            u::updateScheduleHasStudent(data_get($contract_info,'id'));
+            u::updateScheduleHasStudent(data_get($contract_info,'id'),$start_date);
         }
         return true;
     }

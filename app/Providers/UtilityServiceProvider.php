@@ -1078,10 +1078,11 @@ class UtilityServiceProvider extends ServiceProvider
         return true;
     }
 
-    public static function updateScheduleHasStudent($contract_id){
+    public static function updateScheduleHasStudent($contract_id, $start_date){
         $contractInfo = self::getObject(array('id'=>$contract_id),'contracts');
         if(data_get($contractInfo, 'status') ==6 && data_get($contractInfo, 'class_id')){
             $enrolment_start_date = data_get($contractInfo, 'enrolment_start_date');
+            $enrolment_start_date =  $enrolment_start_date < $start_date ? $start_date : $enrolment_start_date;
             $currDate = date('Y-m-d');
             if( $enrolment_start_date < $currDate){
                 $class_info = self::getObject(array('id'=>data_get($contractInfo,'class_id')), 'classes');
