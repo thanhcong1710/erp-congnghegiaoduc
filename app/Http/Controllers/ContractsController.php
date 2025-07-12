@@ -37,7 +37,7 @@ class ContractsController extends Controller
 
     public function checkCoupon(Request $request){
         $coupon_code = $request->coupon_code;
-        $data = u::first("SELECT c.id, c.status, c.end_date, c.start_date, c.coupon_amount,c.coupon_session, c.type, c.quota, c.branch_id, c.coupon_percent
+        $data = u::first("SELECT c.id, c.status, c.end_date, c.start_date, c.coupon_amount,c.coupon_session, c.type, c.quota, c.branch_id, c.coupon_percent, c.limit
             FROM coupons AS c 
             WHERE c.code='$coupon_code' AND c.status!=0 ");
         if($data){

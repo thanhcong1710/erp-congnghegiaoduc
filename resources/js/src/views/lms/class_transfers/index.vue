@@ -34,6 +34,9 @@
             <router-link class="btn btn-success" :to="'/lms/class_transfers/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
+            <router-link class="btn btn-success" :to="'/lms/class_transfers/add-semester'">
+              <vs-button class="mr-3 mb-2" color="warning"><i class="fa fa-plus"></i> Thêm mới chuyển kỳ</vs-button>
+            </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
           </div>
@@ -87,6 +90,11 @@
                       <!---->
                     </div>
                   </th>
+                  <th colspan="1" rowspan="1">
+                    <div class="vs-table-text">Loại
+                      <!---->
+                    </div>
+                  </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Thao tác
                       <!---->
@@ -105,6 +113,7 @@
                 <td class="td vs-table--td">{{item.from_class_name}}</td>
                 <td class="td vs-table--td">{{item.to_class_name}}</td>
                 <td class="td vs-table--td">{{item.transfer_date}}</td>
+                <td class="td vs-table--td">{{item.is_trans_semester ? 'Chuyển kỳ' : 'Chuyển lớp'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/class_transfers/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>

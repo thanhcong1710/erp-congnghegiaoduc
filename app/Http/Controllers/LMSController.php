@@ -815,7 +815,7 @@ class LMSController extends Controller
         return $result;
     }
 
-    public function addStudentToClass($student_id)
+    public function addStudentToClass($student_id , $is_trans_semester=false)
     { 
         if(config('app.env') !== 'product'){
             return "ok";
@@ -834,9 +834,9 @@ class LMSController extends Controller
             if (data_get($classLMSCurrent, 'cls_id') == data_get($studentInfo, 'lms_class_id') && data_get($classLMSCurrent, 'cstd_status') == 'Active' ) {
                 return "ok";
             } else {
-                if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
-                    $classLMSCurrent = null;
-                }
+                // if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
+                //     $classLMSCurrent = null;
+                // }
                 $url = sprintf('%s/data/setup.asmx/CounStudentClassAddSubmit', config('lms.url'));
                 $method = 'POST';
                 $client = new Client();
@@ -850,7 +850,7 @@ class LMSController extends Controller
                             "stf_id" => 8824
                         ],
                         "counn" => [
-                            "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') ? "transfer" : "add",
+                            "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') && !$is_trans_semester ? "transfer" : "add",
                             "conn_cls_id" => data_get($studentInfo, 'lms_class_id'),
                             "coun_std_id" => data_get($studentInfo, 'lms_id'),
                             "coun_registration_date" => data_get($studentInfo, 'enrolment_start_date'),

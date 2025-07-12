@@ -41,7 +41,7 @@ class ClassTransfersController extends Controller
                 (SELECT cls_name FROM classes WHERE id= t.from_class_id) AS from_class_name,
                 (SELECT cls_name FROM classes WHERE id= t.to_class_id) AS to_class_name,
                 (SELECT name FROM branches WHERE id= t.from_branch_id) AS from_branch_name,
-                t.transfer_date
+                t.transfer_date, t.is_trans_semester
             FROM class_transfer AS t 
                 LEFT JOIN students AS s ON s.id=t.student_id
             WHERE $cond $order_by $limitation");
@@ -151,7 +151,7 @@ class ClassTransfersController extends Controller
         $class_transfer_info = u::first("SELECT ct.student_id, ct.contract_id, ct.from_class_id, ct.to_class_id, ct.creator_id,
                 ct.to_product_id, ct.to_program_id,
                 (SELECT cls_name FROM classes WHERE id = ct.from_class_id) AS from_class_name,
-                cl.cls_name AS to_class_name, cl.cm_id, cl.teacher_id
+                cl.cls_name AS to_class_name, cl.cm_id, cl.teacher_id, ct.is_trans_semester
             FROM class_transfer AS ct LEFT JOIN classes AS cl ON cl.id= ct.to_class_id WHERE ct.id = $class_transfer_id");
         $contract_id = data_get($class_transfer_info,'contract_id');
         $cm_id =data_get($class_transfer_info,'cm_id', null);
@@ -184,7 +184,7 @@ class ClassTransfersController extends Controller
             ),array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
             $lmsController = new LMSController();
-            $lmsController->addStudentToClass($student_id);
+            $lmsController->addStudentToClass($student_id, data_get($class_transfer_info, 'is_trans_semester'));
             LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
             u::updateSimpleRow(array(
                 'status'=> 2,
@@ -224,7 +224,8 @@ class ClassTransfersController extends Controller
                     'action' => 'contract_class_transfer'
                 ),array('id'=>$contract_id),'contracts');
                 u::addLogContracts($contract_id);
-    
+                $lmsController = new LMSController();
+                $lmsController->addStudentToClass($student_id, data_get($class_transfer_info, 'is_trans_semester'));
                 LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
                 u::updateSimpleRow(array(
                     'status'=> 2,
@@ -253,5 +254,57 @@ class ClassTransfersController extends Controller
             FROM class_transfer AS t 
             WHERE t.student_id = $student_id AND t.status>0 ORDER BY t.id DESC");
         return response()->json($data);
+    }
+
+    public function addSemester(Request $request){
+        $transfer_date =  data_get($request,'transfer_date'); 
+        $to_class_id = data_get($request,'to_class_id');
+        $to_class_info = u::first("SELECT id AS class_id, product_id, program_id, branch_id   
+            FROM classes WHERE id=$to_class_id");
+        $arr_contract = data_get($request,'arr_contract');
+        foreach($arr_contract AS $contract_id){
+            $contract_info = u::first("SELECT id, student_id, product_id, program_id, class_id, branch_id   
+            FROM contracts WHERE id=$contract_id");
+        
+            $class_transfer_id = u::insertSimpleRow(array(
+                'student_id' => data_get($contract_info,'student_id'),
+                'contract_id' => data_get($contract_info,'id'),
+                'from_class_id' => data_get($contract_info,'class_id'),
+                'from_branch_id'=>data_get($contract_info,'branch_id'),
+                'from_product_id'=>data_get($contract_info,'product_id'),
+                'from_program_id'=>data_get($contract_info,'program_id'),
+                'to_class_id' => data_get($to_class_info,'class_id'),
+                'to_branch_id' => data_get($to_class_info,'branch_id'),
+                'to_product_id' => data_get($to_class_info,'product_id'),
+                'to_program_id' => data_get($to_class_info,'program_id'),
+                'creator_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'status' => 1,  // 0:đã hủy, 1: đã duyệt (chuyển lớp ko cần duyệt), 2: đã xử lý
+                'note' => data_get($request,'class_transfer.note'),
+                'transfer_date' => $transfer_date,
+                'meta_data' => json_encode($request->input()),
+                'is_trans_semester' =>  1,
+            ), 'class_transfer');
+
+            if($transfer_date > date('Y-m-d')){
+                u::insertSimpleRow(array(
+                    'student_id'=>data_get($contract_info, 'student_id'),
+                    'data_id'=>$class_transfer_id,
+                    'type' => 2,
+                    'status' => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'processed_at' => $transfer_date
+                ),'student_waitting_process');
+            }else{
+                self::processClassTransfer($class_transfer_id);
+            }
+        }
+        
+        $result = array(
+            'status' => 1,
+            'message' => 'Thực hiện chuyển kỳ thành công'
+        );
+
+        return response()->json($result);
     }
 }

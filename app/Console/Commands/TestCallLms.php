@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\ClassesController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
 use App\User;
@@ -60,6 +61,7 @@ class TestCallLms extends Command
         //     $reservesController->processReserve($row);
         // }
         // u::updateScheduleHasStudent(890);
+
 
         // Convert dữ liệu sang bảng crm_parent_branch
         // $list_parent = u::query("SELECT id,owner_id FROM crm_parents");

@@ -166,6 +166,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('class_transfers/add', 'ClassTransfersController@add');
             Route::get('class_transfers/show/{class_transfer_id}', 'ClassTransfersController@show');
             Route::get('class_transfers/logs/{student_id}', 'ClassTransfersController@getLogsByStudent');
+            Route::post('class_transfers/add-semester', 'ClassTransfersController@addSemester');
 
             Route::post('branch_transfers/list', 'BranchTransfersController@list');
             Route::post('branch_transfers/search-student', 'BranchTransfersController@searchStudent');

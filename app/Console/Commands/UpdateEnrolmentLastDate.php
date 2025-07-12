@@ -45,6 +45,7 @@ class UpdateEnrolmentLastDate extends Command
             u::updateEnrolmentLastDate($row->id);
             echo $row->id . "/";
         }
+        u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('UpdateEnrolmentLastDate','".date('Y-m-d H:i:s')."')");
         return "ok";
     }
 }
