@@ -130,28 +130,31 @@ class ParentsController extends Controller
                 $result->dup_parent_id = $duplicate_info->parent_id;
             }
         }else{
-            $duplicate_info = u::first("SELECT pb.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,pb.owner_id, pb.last_assign_date, pb.last_care_date
+            $duplicate_info = u::first("SELECT p.status,p.id AS parent_id
                 FROM crm_parents AS p 
-                    LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id  
-                    LEFT JOIN users AS u ON u.id=pb.owner_id 
-                WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') AND pb.branch_id IN(".Auth::user()->getBranchesHasUser().")");
+                WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone')");
             if($duplicate_info){
-                if($duplicate_info->is_lock==0){
+                $duplicate_branch = u::first("SELECT pb.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,pb.owner_id, pb.last_assign_date, pb.last_care_date
+                    FROM crm_parents AS p 
+                        LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id  
+                        LEFT JOIN users AS u ON u.id=pb.owner_id 
+                    WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') AND pb.branch_id IN(".Auth::user()->getBranchesHasUser().")");
+                if( data_get($duplicate_branch, 'is_lock')==1){
+                    $result->status = 0;
+                    $result->dup_parent_id = $duplicate_branch->parent_id;
+                    $text = "";
+                    if((15 - floor((time() - strtotime($duplicate_branch->last_care_date))/(3600*24)))>0){
+                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_branch->last_care_date))/(3600*24));
+                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_branch->last_care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    }else{
+                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_branch->last_assign_date))/(3600*24));
+                        $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    }
+                    $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_branch->name - $duplicate_branch->hrm_id $duplicate_branch->branch_name .".$text;
+                }else{
                     $result->status = 2;
                     $result->message = "Khách hàng có SĐT: $phone đã tồn tại trên hệ thống, bạn có muốn chăm sóc?";
                     $result->dup_parent_id = $duplicate_info->parent_id;
-                }else{
-                    $result->status = 0;
-                    $result->dup_parent_id = $duplicate_info->parent_id;
-                    $text = "";
-                    if((15 - floor((time() - strtotime($duplicate_info->last_care_date))/(3600*24)))>0){
-                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->last_care_date))/(3600*24));
-                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->last_care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
-                    }else{
-                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
-                        $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
-                    }
-                    $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name .".$text;
                 }
             }
         }
@@ -178,7 +181,7 @@ class ParentsController extends Controller
                 }else{
                     u::insertSimpleRow(array(
                         'branch_id' => $row->branch_id,
-                        'parent_id' => $request->parent_id,
+                        'parent_id' => $parent_info->id,
                         'owner_id' => Auth::user()->id,
                         'created_at' => date('Y-m-d H:i:s'),
                         'creator_id' => Auth::user()->id,
