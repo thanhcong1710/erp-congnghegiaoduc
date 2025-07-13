@@ -263,9 +263,9 @@ class ImportsController extends Controller
             $sql_update = "INSERT INTO crm_import_parents (id,`status`,error_message,is_lock,parent_id) VALUES ";
             foreach($list AS $row){
                 if($row->is_lock==0){
-                    $sql_update.="($row->id,4,'SĐT đang thuộc quyền quản lý của nhân viên $row->name - $row->hrm_id $row->branch_name (có thể ghi đè)',$row->is_lock,$row->parent_id),";
+                    $sql_update.="($row->id,4,'SĐT đang thuộc quyền quản lý của nhân viên $row->name - $row->hrm_id $row->branch_name (có thể ghi đè)',".(int)$row->is_lock.",$row->parent_id),";
                 }else{
-                    $sql_update.="($row->id,4,'SĐT đang thuộc quyền quản lý của nhân viên $row->name - $row->hrm_id $row->branch_name',$row->is_lock,$row->parent_id),";
+                    $sql_update.="($row->id,4,'SĐT đang thuộc quyền quản lý của nhân viên $row->name - $row->hrm_id $row->branch_name',".(int)$row->is_lock.",$row->parent_id),";
                 }
             }
             $sql_update = substr($sql_update, 0, -1);
