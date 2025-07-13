@@ -359,7 +359,7 @@ class ImportsController extends Controller
     public function OverwirteItemDataParent($list,$arr_owner,$source_id,$creator_id,$source_detail_id, $branch_id) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $sql_update_owner = "INSERT INTO crm_parent_branch (branch_id,parent_id, updated_at,updator_id,owner_id,last_assign_date,is_lock) VALUES ";
+            $sql_update_owner = "INSERT INTO crm_parent_branch (parent_id,branch_id, updated_at,updator_id,owner_id,last_assign_date,is_lock) VALUES ";
             $sql_crm_parent_overwrite = "INSERT INTO crm_parent_overwrite (`parent_id`,last_owner_id,owner_id,`created_at`,creator_id, branch_id) VALUES ";
             $sql_crm_parent_logs = "INSERT INTO crm_parent_logs (`parent_id`,`content`,creator_id,created_at,`status`) VALUES ";
             $query_student = "INSERT INTO crm_students (`name`,`birthday`,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
