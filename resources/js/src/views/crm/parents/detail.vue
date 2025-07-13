@@ -1621,13 +1621,24 @@
         .then((response) => {
           this.modal_student.show = false
           this.$vs.loading.close();
-          this.$vs.notify({
-            title: 'Thành Công',
-            text: response.data.message,
-            color: 'success',
-            iconPack: 'feather',
-            icon: 'icon-check'
-          })
+          if(response.data.status){
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+          }else{
+            this.$vs.notify({
+              title: 'Thông báo',
+              text: response.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+          }
+          
           this.loadStudents();
         })
         .catch((e) => {
