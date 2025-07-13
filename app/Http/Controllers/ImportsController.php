@@ -370,9 +370,9 @@ class ImportsController extends Controller
                     $item = (object)$list[$i];
                     $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
                     $sql_update_owner.=" ($item->parent_id,$branch_id, '$created_at',$creator_id,$owner_id,'$created_at',1),";
-                    $sql_crm_parent_overwrite.=" ($item->parent_id,'$item->curr_owner_id',$owner_id,'$created_at',$creator_id, $branch_id),";
+                    $sql_crm_parent_overwrite.=" ($item->parent_id,'".data_get($item, 'curr_owner_id')."',$owner_id,'$created_at',$creator_id, $branch_id),";
                     
-                    $content = "Ghi đè người phụ trách khi import: từ $item->curr_owner_id thành $owner_id`";
+                    $content = "Ghi đè người phụ trách khi import: từ ".data_get($item, 'curr_owner_id')." thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',0),";
                     $check_student = 1;
                     if($item->student_name_1){
@@ -411,9 +411,9 @@ class ImportsController extends Controller
                     $item = (object)$list[$i];
                     $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
                     $sql_update_owner.=" ($item->parent_id,$branch_id, '$created_at',$creator_id,$owner_id,'$created_at',1),";
-                    $sql_crm_parent_overwrite.=" ($item->parent_id,'$item->curr_owner_id',$owner_id,'$created_at',$creator_id, $branch_id),";
+                    $sql_crm_parent_overwrite.=" ($item->parent_id,'".data_get($item, 'curr_owner_id')."',$owner_id,'$created_at',$creator_id, $branch_id),";
                     
-                    $content = "Ghi đè người phụ trách khi import: từ $item->curr_owner_id thành $owner_id`";
+                    $content = "Ghi đè người phụ trách khi import: từ ".data_get($item, 'curr_owner_id')." thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',1),";
                     $check_student = 1;
                     if($item->student_name_1){
