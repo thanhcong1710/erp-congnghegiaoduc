@@ -34,7 +34,7 @@ class StudentsController extends Controller
             );
             return response()->json($result);
         }else{
-            $exit = u::first("SELECT * FROM FROM crm_students WHERE parent_id= $request->parent_id AND name LIKE '%$request->name%'");
+            $exit = u::first("SELECT * FROM crm_students WHERE parent_id= $request->parent_id AND name LIKE '%$request->name%'");
             if($exit) {
                 $result =(object)array(
                     'status'=>0,
