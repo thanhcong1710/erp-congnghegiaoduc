@@ -320,7 +320,7 @@ class ClassesController extends Controller
         $total = u::first("SELECT count(s.id) AS total FROM schedules AS s WHERE $cond");
         
         $list = u::query("SELECT s.class_date, sj.code AS subject_code, sj.name AS subject_name,
-                IF(class_date < CURRENT_DATE, 'Đã học', 'Sắp học') AS status_label
+                IF(class_date < CURRENT_DATE, 'Đã học', 'Sắp học') AS status_label, s.id
             FROM schedules AS s 
                 LEFT JOIN subjects AS sj ON s.subject_id=sj.id
             WHERE $cond $order_by $limitation");
@@ -379,5 +379,12 @@ class ClassesController extends Controller
         //     echo $item->id."/";
         // }
         return response()->json("ok");
+    }
+
+    public function updateSchedule(Request $request)
+    {
+        $id = isset($request->id) ? $request->id : 0;
+        u::updateSimpleRow(['class_date'=>data_get($request, 'class_date')],['id'=>$id], 'schedules');
+        return response()->json('ok');
     }
 }

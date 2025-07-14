@@ -343,7 +343,7 @@
                   v-model="modal_session.class_date"
                   placeholder="Chọn ngày học"
                   :lang="datepickerOptions.lang"
-                  @change="selectDate"
+                  @change="selectDateChange"
                 />
               </div>
               <div class="vx-col w-full">
@@ -535,6 +535,11 @@
       selectDate(date){
         if (date) {
           this.config.start_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      selectDateChange(date){
+        if (date) {
+          this.modal_session.class_date = moment(date).format("YYYY-MM-DD");
         }
       },
       selectEndDate(date){

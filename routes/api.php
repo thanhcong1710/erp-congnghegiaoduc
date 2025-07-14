@@ -249,6 +249,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('info-config/{class_id}', 'ClassesController@infoConfig');
                 Route::post('sessions', 'ClassesController@listSessions');
                 Route::post('sync-lms', 'ClassesController@syncLMS');
+                Route::post('update-schedule', 'ClassesController@updateSchedule');
             });
             Route::prefix('tuition-fees')->group(function () {
                 Route::post('add', 'TuitionFeesController@add');
