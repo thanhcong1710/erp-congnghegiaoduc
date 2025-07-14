@@ -289,6 +289,7 @@
                                   <th colspan="1" rowspan="1">Môn học</th> -->
                                   <th colspan="1" rowspan="1" class="text-center">Ngày học</th>
                                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                                 </tr>
                               </thead>
                               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_sessions" :key="index">
@@ -297,6 +298,9 @@
                                 <td class="td vs-table--td">{{item.subject_name}}</td> -->
                                 <td class="td vs-table--td text-center">{{item.class_date | formatDateViewDay}}</td>
                                 <td class="td vs-table--td text-center">{{item.status_label}}</td>
+                                <td class="td vs-table--td text-center">
+                                  <vs-button @click="showModalEditClassDate(item)" color="success" style="padding:5px 8px" class="small"><i class="fa fa-edit"></i></vs-button>
+                                </td>
                               </tr>
                             </table>
                           </div>
@@ -330,6 +334,24 @@
           <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="alert.body"></div>
           </vs-alert>
+          <vs-popup :class="'modal_'+ modal_session.color" :title="modal_session.title" :active.sync="modal_session.show">
+            <div class="vx-row" style="min-height: 200px;"> 
+              <div class="vx-col w-full" >
+                <label class="mb-2">Thay đổi ngày học từ <span>{{modal_session.class_date_curr}}</span> sang ngày</label>
+                <datepicker
+                  class=" w-full calendar"
+                  v-model="modal_session.class_date"
+                  placeholder="Chọn ngày học"
+                  :lang="datepickerOptions.lang"
+                  @change="selectDate"
+                />
+              </div>
+              <div class="vx-col w-full">
+                <vs-button color="dark" type="border" class="mr-3" @click="modal_session.show = false">Hủy</vs-button>
+                <vs-button color="success" @click="changeScheduleDate()">Lưu</vs-button>
+              </div>
+            </div>
+          </vs-popup>
         </div>
       </div>
       <div class="vx-row mt-5">
@@ -360,6 +382,22 @@
     },
     data() {
       return {
+        modal_session: {
+          title: "CẬP NHẬT NGÀY HỌC",
+          show: false,
+          color: "info",
+          closeOnBackdrop: false,
+          size:"lg",
+          error_message:"",
+          alert:{
+            active: false,
+            body: '',
+            color:'',
+          },
+          class_date:'',
+          schedule_id:'',
+          class_date_curr:'',
+        },
         datepickerOptions: {
           closed: true,
           value: "",
@@ -835,6 +873,31 @@
           location.reload();
         })
       },
+      showModalEditClassDate(item){
+        this.modal_session.show= true
+        this.modal_session.class_date=''
+        this.modal_session.class_date_curr = item.class_date
+        this.modal_session.schedule_id = item.id
+      },
+      changeScheduleDate(){
+        if(!this.modal_session.class_date){
+          return false;
+        }
+        this.$vs.loading()
+        axios.p('/api/settings/classes/update-schedule', {
+          id : this.modal_session.schedule_id,
+          class_date: this.modal_session.class_date
+        })
+          .then((response) => {
+            this.$vs.loading.close()
+            this.modal_session.show= false
+            this.getDataSessions();
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
+      }
     },
   }
 </script>
