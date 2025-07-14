@@ -303,7 +303,7 @@ class ImportsController extends Controller
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
-                    $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
+                    $owner_id = $arr_owner[$i%count($arr_owner)];
                     $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
                     if($item->student_name_1){
                         $check_import_student =1;
@@ -330,7 +330,7 @@ class ImportsController extends Controller
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
-                    $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
+                    $owner_id = $arr_owner[$i%count($arr_owner)];
                     $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
                     if($item->student_name_1){
                         $check_import_student =1;
@@ -362,37 +362,20 @@ class ImportsController extends Controller
             $sql_update_owner = "INSERT INTO crm_parent_branch (parent_id,branch_id, updated_at,updator_id,owner_id,last_assign_date,is_lock) VALUES ";
             $sql_crm_parent_overwrite = "INSERT INTO crm_parent_overwrite (`parent_id`,last_owner_id,owner_id,`created_at`,creator_id, branch_id) VALUES ";
             $sql_crm_parent_logs = "INSERT INTO crm_parent_logs (`parent_id`,`content`,creator_id,created_at,`status`) VALUES ";
-            $query_student = "INSERT INTO crm_students (`name`,`birthday`,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
-            $check_import_student =0;
-            $check_student =0;
+            $check_parent =0;
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
-                    $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
+                    $owner_id = $arr_owner[$i%count($arr_owner)];
                     $sql_update_owner.=" ($item->parent_id,$branch_id, '$created_at',$creator_id,$owner_id,'$created_at',1),";
                     $sql_crm_parent_overwrite.=" ($item->parent_id,'".(int)data_get($item, 'curr_owner_id')."',$owner_id,'$created_at',$creator_id, $branch_id),";
                     
                     $content = "Ghi đè người phụ trách khi import: từ ".(int)data_get($item, 'curr_owner_id')." thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',0),";
-                    $check_student = 1;
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-
+                    $check_parent = 1;
                 }
                 
-                if($check_student){
+                if($check_parent){
                     $sql_update_owner = substr($sql_update_owner, 0, -1);
                     $sql_update_owner.= " ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `updated_at` = VALUES(`updated_at`), `updator_id` = VALUES(`updator_id`), `owner_id` = VALUES(`owner_id`), `last_assign_date` = VALUES(`last_assign_date`), `is_lock` = VALUES(`is_lock`), `source_id` = VALUES(`source_id`), `source_detail_id` = VALUES(`source_detail_id`), `name` = VALUES(`name`), `email` = VALUES(`email`), `address` = VALUES(`address`), `note` = VALUES(`note`)";
                     u::query($sql_update_owner);
@@ -401,37 +384,18 @@ class ImportsController extends Controller
                     $sql_crm_parent_logs = substr($sql_crm_parent_logs, 0, -1);
                     u::query($sql_crm_parent_logs);
                 }
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
-                }
                 $this->OverwirteItemDataParent(array_slice($list, 10000),$arr_owner,$source_id,$creator_id,$source_detail_id,$branch_id);
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$list[$i];
-                    $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
+                    $owner_id = $arr_owner[$i%count($arr_owner)];
                     $sql_update_owner.=" ($item->parent_id,$branch_id, '$created_at',$creator_id,$owner_id,'$created_at',1),";
                     $sql_crm_parent_overwrite.=" ($item->parent_id,'".(int)data_get($item, 'curr_owner_id')."',$owner_id,'$created_at',$creator_id, $branch_id),";
-                    
                     $content = "Ghi đè người phụ trách khi import: từ ".(int)data_get($item, 'curr_owner_id')." thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',1),";
-                    $check_student = 1;
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
+                    $check_parent = 1;
                 }
-                if($check_student){
+                if($check_parent){
                     $sql_update_owner = substr($sql_update_owner, 0, -1);
                     $sql_update_owner.= " ON DUPLICATE KEY UPDATE `parent_id` = VALUES(`parent_id`), `branch_id` = VALUES(`branch_id`), `updated_at` = VALUES(`updated_at`), `updator_id` = VALUES(`updator_id`), `owner_id` = VALUES(`owner_id`), `last_assign_date` = VALUES(`last_assign_date`), `is_lock` = VALUES(`is_lock`)";
                     u::query($sql_update_owner);
@@ -439,10 +403,6 @@ class ImportsController extends Controller
                     u::query($sql_crm_parent_overwrite);
                     $sql_crm_parent_logs = substr($sql_crm_parent_logs, 0, -1);
                     u::query($sql_crm_parent_logs);
-                }
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
                 }
             }
         }
@@ -455,11 +415,11 @@ class ImportsController extends Controller
     public function addItemDataParentBranch($list) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $query = "INSERT INTO crm_parent_branch (`branch_id`,parent_id,owner_id,`created_at`,creator_id,last_assign_date) VALUES ";
+            $query = "INSERT INTO crm_parent_branch (`branch_id`,parent_id,owner_id,`created_at`,creator_id,last_assign_date,is_lock) VALUES ";
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
-                    $query.= "('$item->tmp_branch_id','$item->id','$item->owner_id','$created_at','$item->creator_id','$created_at'),";
+                    $query.= "('$item->tmp_branch_id','$item->id','$item->owner_id','$created_at','$item->creator_id','$created_at',1),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -467,7 +427,7 @@ class ImportsController extends Controller
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
-                    $query.= "('$item->tmp_branch_id','$item->id','$item->owner_id','$created_at','$item->creator_id','$created_at'),";
+                    $query.= "('$item->tmp_branch_id','$item->id','$item->owner_id','$created_at','$item->creator_id','$created_at',1),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
