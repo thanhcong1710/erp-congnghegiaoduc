@@ -83,7 +83,8 @@ class ClassesController extends Controller
             $class_id = data_get($request,'class_id');
             u::query("DELETE FROM sessions WHERE class_id= $class_id");
             u::query("DELETE FROM subject_has_class WHERE class_id= $class_id");
-            u::query("DELETE FROM schedules WHERE class_id= $class_id");
+            // u::query("DELETE FROM schedules WHERE class_id= $class_id");
+            $exitSChedule =u::first("SELECT id FROM schedules WHERE class_id= $class_id");
             foreach($arr_day AS $session){
                 u::insertSimpleRow(array(
                     'class_id'=> $class_id,
@@ -106,16 +107,34 @@ class ClassesController extends Controller
                     'created_at'=> date('Y-m-d H:i:s')
                 ),'subject_has_class');
             }
-            foreach(data_get($data_sessions, 'dates') AS $row){
-                u::insertSimpleRow(array(
-                    'class_date'=> $row,
-                    'class_id'=> $class_id,
-                    'status'=> 1,
-                    'created_at'=> date('Y-m-d H:i:s'),
-                    'teacher_id'=> data_get($request,'teacher_id'),
-                    'branch_id'=> data_get($request,'branch_id'),
-                    'cm_id'=> data_get($request,'cm_id'),
-                ),'schedules');
+            if($exitSChedule){
+                $currentDate = date('Y-m-d');
+                u::query("DELETE FROM schedules WHERE class_id= $class_id AND class_date >= '$currentDate'");
+                foreach(data_get($data_sessions, 'dates') AS $row){
+                    if($row >= $currentDate){
+                        u::insertSimpleRow(array(
+                            'class_date'=> $row,
+                            'class_id'=> $class_id,
+                            'status'=> 1,
+                            'created_at'=> date('Y-m-d H:i:s'),
+                            'teacher_id'=> data_get($request,'teacher_id'),
+                            'branch_id'=> data_get($request,'branch_id'),
+                            'cm_id'=> data_get($request,'cm_id'),
+                        ),'schedules');
+                    }
+                }
+            } else{
+                foreach(data_get($data_sessions, 'dates') AS $row){
+                    u::insertSimpleRow(array(
+                        'class_date'=> $row,
+                        'class_id'=> $class_id,
+                        'status'=> 1,
+                        'created_at'=> date('Y-m-d H:i:s'),
+                        'teacher_id'=> data_get($request,'teacher_id'),
+                        'branch_id'=> data_get($request,'branch_id'),
+                        'cm_id'=> data_get($request,'cm_id'),
+                    ),'schedules');
+                }
             }
 
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
