@@ -197,7 +197,7 @@ class CheckinController extends Controller
                     'creator_id' => Auth::user()->id,
                     'checkin_at'=> data_get($student, 'checkin_at') ? data_get($student, 'checkin_at') : date('Y-m-d H:i:s'),
                     'checkined_at'=> data_get($student, 'checkin_at') ? data_get($student, 'checkin_at') : date('Y-m-d H:i:s'),
-                    'checkin_owner_id' => data_get($student, 'owner_id') ,
+                    'checkin_owner_id' => data_get($parent, 'owner_id') ,
                     'checkin_branch_id'=> data_get($student, 'checkin_branch_id'),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
@@ -242,7 +242,7 @@ class CheckinController extends Controller
                         LEFT JOIN users AS u ON u.id = ru.user_id
                         LEFT JOIN branch_has_user AS b ON b.user_id = u.id
                         WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."' AND b.branch_id=".data_get($student, 'checkin_branch_id'));
-                    $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($student, 'checkin_owner_id'));
+                    $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($parent, 'owner_id'));
                     u::insertSimpleRow(array(
                         'student_id' => $lms_student_id,
                         'ec_id' => data_get($ec_info, 'id'),
