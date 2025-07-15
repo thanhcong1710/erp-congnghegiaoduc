@@ -254,7 +254,7 @@ class CheckinController extends Controller
                         'status' => 1
                     ), 'term_student_user');
     
-                    u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_id, 'id')), 'crm_students');
+                    u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=>$crm_student_id), 'crm_students');
     
                     $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
                     $lms_code = config('app.prefix_student_code').$last_lms_code;
