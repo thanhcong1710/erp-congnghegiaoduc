@@ -981,7 +981,7 @@ class LMSController extends Controller
                     ],
                     'json' => [
                         "counn" => [
-                            "coun_std_id" => data_get($item, 'coun_std_id'),
+                            "coun_cstd_id" => data_get($item, 'coun_cstd_id'),
                         ],
                         "staff" => ["stf_id" => 8824],
                     ]
