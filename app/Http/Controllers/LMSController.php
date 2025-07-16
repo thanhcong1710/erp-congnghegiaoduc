@@ -962,4 +962,40 @@ class LMSController extends Controller
         }
         return "ok";
     }
+
+    public function deleteStudentByClass($std_id, $cls_id)
+    {
+        if(config('app.env') !== 'product'){
+            return "ok";
+        }
+        $listClassLMS = self::getListClassByStudent($std_id);
+        foreach ($listClassLMS as $item) {
+            if (data_get($item, 'cls_id') == $cls_id && data_get($item, 'coun_std_id')) {
+                $url = sprintf('%s/data/setup.asmx/CounStudentClassDelete', config('lms.url'));
+                $client = new Client();
+                $method = 'POST';
+                $params = [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        "counn" => [
+                            "coun_std_id" => data_get($item, 'coun_std_id'),
+                        ],
+                        "staff" => ["stf_id" => 8824],
+                    ]
+                ];
+                $response = $client->request($method, $url, $params);
+                $dataResponse = json_decode($response->getBody()->getContents(), true);
+                u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+                if (data_get($dataResponse, 'd.status') == 'ok') {
+                    return "ok";
+                } else {
+                    return "false";
+                }
+            }
+        }
+        return "ok";
+    }
 }
