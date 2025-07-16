@@ -34,23 +34,32 @@ class StudentsController extends Controller
             );
             return response()->json($result);
         }else{
-            $data = u::insertSimpleRow(array(
-                'parent_id'=>$request->parent_id,
-                'name'=>$request->name,
-                'gender' => $request->gender,
-                'birthday' => $request->birthday,
-                'school_level' => $request->school_level,
-                'school' => $request->school,
-                'note' => $request->note,
-                'created_at' => date('Y-m-d H:i:s'),
-                'creator_id' => Auth::user()->id,
-            ), 'crm_students');
-            $content = "Thêm mới học sinh: $request->name (ID: $data)";
-            LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
-            $result =(object)array(
-                'status'=>1,
-                'message'=>'Thêm mới học sinh thành công'
-            );
+            $exit = u::first("SELECT * FROM crm_students WHERE parent_id= $request->parent_id AND name LIKE '%$request->name%'");
+            if($exit) {
+                $result =(object)array(
+                    'status'=>0,
+                    'message'=>'Học sinh đã tồn tại'
+                );
+            }else{
+                $data = u::insertSimpleRow(array(
+                    'parent_id'=>$request->parent_id,
+                    'name'=>$request->name,
+                    'gender' => $request->gender,
+                    'birthday' => $request->birthday,
+                    'school_level' => $request->school_level,
+                    'school' => $request->school,
+                    'note' => $request->note,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                ), 'crm_students');
+                $content = "Thêm mới học sinh: $request->name (ID: $data)";
+                LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
+                $result =(object)array(
+                    'status'=>1,
+                    'message'=>'Thêm mới học sinh thành công'
+                );
+            }
+            
             return response()->json($result);
         }
     }
@@ -72,6 +81,16 @@ class StudentsController extends Controller
             'status' => 1, // 
         );
         u::updateSimpleRow($data_update,array('id'=>$request->student_id), 'crm_students');
+        u::insertSimpleRow(array(
+            'crm_student_id' => $request->student_id,
+            'checkin_at'=>$request->checkin_at,
+            'checkin_owner_id' => $request->owner_id,
+            'checkin_branch_id'=>$request->branch_id,
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'type_product'=>$request->type_product,
+            'status' => 1, // 
+        ), 'crm_student_checkin');
         $result =(object)array(
             'status'=>1,
             'message'=>'Lưu thông tin checkin thành công'

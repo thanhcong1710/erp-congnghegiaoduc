@@ -8,13 +8,18 @@ use App\Providers\UtilityServiceProvider as u;
 class LogParents extends Model
 {
     protected $table = 'crm_parent_logs';
-    public static function logAssign($parent_id,$pre_owner_id,$owner_id,$creator_id,$overwrite = false){
-        $pre_owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = $pre_owner_id");
-        $owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = $owner_id");
+    public static function logAssign($parent_id,$pre_owner_id,$owner_id,$creator_id,$overwrite = false, $branch_id = 0){
+        $pre_owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = ".(int)$pre_owner_id);
+        $owner_info = u::first("SELECT name,hrm_id FROM users WHERE id = ".(int)$owner_id);
+        $branch_info = null;
+        if($branch_id){
+            $branch_info = u::first("SELECT name FROM branches WHERE id = $branch_id");
+        }
+        $branch_name = data_get($branch_info, 'name')? data_get($branch_info, 'name').' - ' :'';
         if($overwrite){
-            $content = "Ghi đè người phụ trách: từ `$pre_owner_info->name ($pre_owner_info->hrm_id)` thành `$owner_info->name ($owner_info->hrm_id)`";
+            $content = $branch_name."Ghi đè người phụ trách: từ `".data_get($pre_owner_info, 'name')." (".data_get($pre_owner_info, 'hrm_id').")` thành `".data_get($owner_info, 'name')." (".data_get($owner_info, 'hrm_id').")`";
         }else{
-            $content = "Thay đổi người phụ trách: từ `$pre_owner_info->name ($pre_owner_info->hrm_id)` thành `$owner_info->name ($owner_info->hrm_id)`";
+            $content = $branch_name."Thay đổi người phụ trách: từ `".data_get($pre_owner_info, 'name')." (".data_get($pre_owner_info, 'hrm_id').")` thành `".data_get($owner_info, 'name')." (".data_get($owner_info, 'hrm_id').")`";
         }
         u::insertSimpleRow(array(
             'parent_id'=>$parent_id,
@@ -37,22 +42,18 @@ class LogParents extends Model
     }
     public static function logStatus($parent_id,$pre_status,$status,$creator_id){
         $arr_status = array(
-            '0'=>'KH mới',
-            '10'=>'KH không liên lạc được',
-            '20'=>'KH ở vùng CMS không có cơ sở',
-            '30'=>'KH không nghe máy',
-            '40'=>'KH hẹn gọi lại sau',
-            '50'=>'KH không quan tâm',
-            '60'=>'KH không tiềm năng',
-            '71'=>'KH quan tâm, cần follow up date',
-            '72'=>' KH tiềm năng nhưng không muốn làm phiền',
-            '73'=>'KH đồng ý đặt lịch Checkin',
-            '81'=>'KH đã đến checkin',
-            '82'=>'KH đã mua gói phí',
-            '83'=>'KH đến hạn tái tục',
-            '90'=>'Danh sách đen',
+            '1'=>'C3 rác',
+            '2'=>'C3',
+            '3'=>'L1',
+            '4'=>'L2',
+            '5'=>'L3',
+            '6'=>'L4',
+            '7'=>'L5',
+            '8'=>'L6',
+            '9'=>'L6 renew',
+            '10'=>'R',
         );
-        $content = "Thay đổi trạng thái: từ `".$arr_status[$pre_status]."` thành `".$arr_status[$status]."`";
+        $content = "Thay đổi trạng thái: từ `".($arr_status[$pre_status] ?? '')."` thành `".($arr_status[$status]??'')."`";
         u::insertSimpleRow(array(
             'parent_id'=>$parent_id,
             'content'=>$content,

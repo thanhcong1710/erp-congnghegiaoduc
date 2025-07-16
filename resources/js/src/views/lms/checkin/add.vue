@@ -152,20 +152,12 @@
               <div class="form-group col-sm-6">
                 <label >Trạng thái</label>
                 <select class="vs-inputx vs-input--input normal" v-model="parent.status">
-                  <option value="0">0. KH mới</option>
-                  <option value="10">1. KH không liên lạc được</option>
-                  <option value="20">2. KH ở vùng CMS không có cơ sở</option>
-                  <option value="30">3. KH không nghe máy</option>
-                  <option value="40">4. KH hẹn gọi lại sau</option>
-                  <option value="50">5. KH không quan tâm</option>
-                  <option value="60">6. KH không tiềm năng</option>
-                  <option value="71">7.1. KH quan tâm, cần follow up date</option>
-                  <option value="72">7.2. KH tiềm năng nhưng không muốn làm phiền</option>
-                  <option value="73">7.3. KH đồng ý đặt lịch Checkin</option>
-                  <option value="81">8.1. KH đã đến checkin</option>
-                  <option value="82">8.2. KH đã mua gói phí</option>
-                  <option value="83">8.3. KH đến hạn tái tục</option>
-                  <option value="90">9. Danh sách đen</option>
+                  <option 
+                    v-for="option in levelOptionsParent" 
+                    :key="option.id" 
+                    :value="option.id">
+                    {{ option.id }}. {{ option.label }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -384,6 +376,8 @@
             checkin_branch_id:'',
           }
         ],
+        levelOptionsParent: u.levelOptionsParent,
+        checkDuplicate:0,
       }
     },
     methods: {
@@ -546,9 +540,9 @@
         const data = {
           phone: this.parent.mobile_1,
         };
-        this.loading.processing = true
+        this.$vs.loading()
         this.modal_overwrite.show = false;
-        u.p(`/api/crm/parents/overwrite`,data).then(response => {
+        axios.p(`/api/crm/parents/overwrite`,data).then(response => {
           this.$vs.loading.close();
           this.$vs.notify({
             title: 'Thành Công',
@@ -560,7 +554,59 @@
           this.$router.push('/crm/parent')
         })
       },
-      save() {
+      async save() {
+        this.checkDuplicate = 0;
+        if(this.parent.mobile_1){
+          const data = {
+            phone: this.parent.mobile_1,
+          };
+          this.$vs.loading()
+          await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.change_source_parent_id = response.data.dup_parent_id
+              this.parent.mobile_1 ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+              this.checkDuplicate = 1
+            }else if(response.data.status==2){
+              this.modal_overwrite.show = true;
+              this.modal.color = "info";
+              this.modal_overwrite.message = response.data.message;
+              this.checkDuplicate = 1
+            }
+          })
+        }
+        if(this.checkDuplicate){
+          return false;
+        }
+        this.checkDuplicate = 0;
+        if(this.parent.mobile_2){
+          const data = {
+            phone: this.parent.mobile_2,
+          };
+          this.$vs.loading()
+          await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.change_source_parent_id = response.data.dup_parent_id
+              this.parent.mobile_2 ="";
+              this.modal.color = "warning";
+              this.modal.body = response.data.message;
+              this.modal.show = true;
+              this.checkDuplicate = 1
+            }else if(response.data.status==2){
+              this.modal_overwrite.show = true;
+              this.modal.color = "info";
+              this.modal_overwrite.message = response.data.message;
+              this.checkDuplicate = 1
+            }
+          })
+        }
+        if(this.checkDuplicate){
+          return false;
+        }
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {

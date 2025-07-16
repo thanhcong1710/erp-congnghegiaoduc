@@ -58,12 +58,13 @@ class CheckinController extends Controller
         
         $list = u::query("SELECT s.id, s.name, s.gender, s.birthday, p.name AS parent_name, p.mobile_1, p.address, 
                 (SELECT name FROM sources WHERE id = p.source_id) AS source_name,
-                (SELECT name FROM branches WHERE id = s.checkin_branch_id) AS checkin_branch_name,
-                (SELECT name FROM products WHERE id = s.type_product) AS checkin_product_name,
-                (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id= s.checkin_owner_id) AS checkin_owner_name,
-                s.checkin_at, s.status, s.checkined_note
+                (SELECT name FROM branches WHERE id = c.checkin_branch_id) AS checkin_branch_name,
+                (SELECT name FROM products WHERE id = c.type_product) AS checkin_product_name,
+                (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id= c.checkin_owner_id) AS checkin_owner_name,
+                c.checkin_at, c.status, c.checkined_note, c.id AS crm_student_checkin_id
             FROM crm_students AS s 
             LEFT JOIN crm_parents AS p ON p.id =s.parent_id
+            LEFT JOIN crm_student_checkin AS c ON c.crm_student_id=s.id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -77,6 +78,13 @@ class CheckinController extends Controller
             'checkined_note' => $request->note,
             'status' => 2
         ), array('id'=>$request->student_id), 'crm_students');
+        u::updateSimpleRow(array(
+           'checkined_at' => date('Y-m-d H:i:s', strtotime($request->checkined_at)),
+           'checkined_note' => $request->note,
+           'status' => 2,
+           'updated_at' => date('Y-m-d H:i:s'),
+           'updator_id' =>  Auth::user()->id,
+        ), array('id'=>$request->crm_student_checkin_id),'crm_student_checkin');
 
         $result =(object)array(
             'status'=>1,
@@ -141,6 +149,26 @@ class CheckinController extends Controller
             $lms_code = config('app.prefix_student_code').$last_lms_code;
             u::updateSimpleRow(array('lms_code'=>$lms_code), array('id'=>$lms_student_id), 'students');
             LogStudents::logAdd($lms_student_id, 'Chuyển lên danh sách học sinh chính thức', Auth::user()->id);
+        }else{
+            $lms_student_id = data_get($crm_student_info, 'lms_id');
+            $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
+                LEFT JOIN roles AS r ON r.id = ru.role_id
+                LEFT JOIN users AS u ON u.id = ru.user_id
+                LEFT JOIN branch_has_user AS b ON b.user_id = u.id
+                WHERE u.status=1 AND r.code ='".SystemCode::ROLE_CEO_BRANCH."' AND b.branch_id=".data_get($crm_student_info, 'checkin_branch_id'));
+            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)data_get($crm_student_info, 'checkin_owner_id'));
+            u::updateSimpleRow(array(
+                'ec_id' => data_get($ec_info, 'id'),
+                'branch_id' => data_get($crm_student_info, 'checkin_branch_id'),
+                'ceo_branch_id' => data_get($ceo_info, 'id'),
+                'ec_leader_id' => data_get($ec_info, 'manager_id'),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+                'status' => 1
+            ),array('student_id'=>$lms_student_id), 'term_student_user');
+
+            u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
+            LogStudents::logAdd($lms_student_id, 'Chuyển lên danh sách học sinh chính thức', Auth::user()->id);
         }
         $result =(object)array(
             'status'=>1,
@@ -172,11 +200,22 @@ class CheckinController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
-            'owner_id'=>data_get($parent, 'owner_id'),
+            // 'owner_id'=>data_get($parent, 'owner_id'),
             'status'=>data_get($parent, 'status'),
             'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
         ), 'crm_parents');
-        u::updateBranchIDParents();
+        $branchHasUser = Auth::user()->getBranchesHasUser();
+        $arrBranchHasUser = explode(',',$branchHasUser);
+        foreach ($arrBranchHasUser AS $branch_id){
+            u::insertSimpleRow(array(
+                'branch_id' => $branch_id,
+                'parent_id' => $parent_id,
+                'owner_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'is_lock' => 1,
+            ),'crm_parent_branch');
+        }
         LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
         $result =(object)array(
             'status'=>1,

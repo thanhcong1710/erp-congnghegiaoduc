@@ -7,6 +7,17 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label>Chọn trung tâm</label>
+            <vue-select
+              label="name"
+              :options="branch_list"
+              v-model="searchData.branch_item"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveBranch"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Tên khách hàng, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
@@ -16,25 +27,7 @@
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Level</label>
-            <multiselect
-                name="search_level"
-                placeholder="Chọn level"
-                v-model="searchData.arr_level"
-                :options="levelOptions"
-                label="label"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trạng thái</label>
+            <label for="" class="vs-input--label">Level khách hàng</label>
             <multiselect
                 name="search_status"
                 placeholder="Chọn trạng thái"
@@ -287,33 +280,11 @@
           pagination: this.pagination,
           dateRange: "",
           type_search: 0,
+          branch_id:"",
+          branch_item:"",
         },
-        levelOptions:[
-          {id:'C1',label:'C1'},
-          {id:'C2',label:'C2'},
-          {id:'C3',label:'C3'},
-          {id:'L1',label:'L1'},
-          {id:'L2',label:'L2'},
-          {id:'L3',label:'L3'},
-          {id:'L4',label:'L4'},
-          {id:'L5',label:'L5'},
-        ],
-        statusOptions:[
-          {id:0,label:'KH mới'},
-          {id:10,label:'KH không liên lạc được'},
-          {id:20,label:'KH ở vùng CMS không có cơ sở'},
-          {id:30,label:'KH không nghe máy'},
-          {id:40,label:'KH hẹn gọi lại sau'},
-          {id:50,label:'KH không quan tâm'},
-          {id:60,label:'KH không tiềm năng'},
-          {id:71,label:'KH quan tâm, cần follow up date'},
-          {id:72,label:'KH tiềm năng nhưng không muốn làm phiền'},
-          {id:73,label:'KH đồng ý đặt lịch Checkin'},
-          {id:81,label:'KH đã đến checkin'},
-          {id:82,label:'KH đã mua gói phí'},
-          {id:83,label:'KH đến hạn tái tục'},
-          {id:90,label:'Danh sách đen'}
-        ],
+        branch_list:[],
+        statusOptions:u.levelOptionsParent,
         users_manager_list:[],
         source_list:[],
         source_detail_list:[],
@@ -463,7 +434,8 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_search:this.searchData.type_search
+            type_search:this.searchData.type_search,
+            branch_id: this.searchData.branch_id
           }
         localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 
@@ -531,12 +503,21 @@
             });
         }
       },
+      saveBranch(data = null){
+        if (data && typeof data === 'object') {
+          const branch_id = data.id
+          this.searchData.branch_id = branch_id
+          axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
+            .then(response => {
+            this.users_manager_list = response.data
+          })
+        }else{
+          this.searchData.branch_id = ""
+          this.users_manager_list = []
+        }
+      },
     },
-    created() {
-      axios.g(`/api/users/get-data/users-manager`)
-        .then(response => {
-        this.users_manager_list = response.data
-      })
+    async created() {
       axios.g(`/api/system/sources`)
         .then(response => {
         this.source_list = response.data
@@ -545,65 +526,27 @@
         .then(response => {
         this.source_detail_list = response.data
       })
+      await axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
+        this.searchData.branch_item = this.branch_list[0]
+        this.searchData.branch_id = this.branch_list[0].id
+      })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
         this.activeItem = this.searchData.type_search
       }
-
+      axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
+        .then(response => {
+        this.users_manager_list = response.data
+      })
       this.getData();
     },
     filters: {
       getStatusName(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 0:
-                resp = 'KH mới';
-                break;
-            case 10:
-                resp = 'KH không liên lạc được';
-                break;
-            case 20:
-                resp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                resp = 'KH không nghe máy';
-                break;
-            case 40:
-                resp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                resp = 'KH không quan tâm';
-                break;
-            case 60:
-                resp = 'KH không tiềm năng';
-                break;
-            case 71:
-                resp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                resp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                resp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 82:
-                resp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                resp = 'Danh sách đen';
-                break;
-            default:
-                resp = 'KH mới'
-                break
-        }
-        return resp
-      },
+        const item = u.levelOptionsParent.find(option => option.id === Number(value));
+        return item ? item.label : 'Không xác định';
+      }
     },
   }
 </script>
