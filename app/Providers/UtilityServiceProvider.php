@@ -219,7 +219,7 @@ class UtilityServiceProvider extends ServiceProvider
             '7'=>'L5',
             '8'=>'L6',
             '9'=>'L6 renew',
-            '10'=>'R',
+            '10'=>'BL',
         );
         return $arr_status['status'] ?? '';
     }
