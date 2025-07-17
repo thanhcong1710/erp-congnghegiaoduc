@@ -304,7 +304,7 @@ class ImportsController extends Controller
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
                     $owner_id = $arr_owner[$i%count($arr_owner)];
-                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
+                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',1,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
                     if($item->student_name_1){
                         $check_import_student =1;
                         $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
@@ -331,7 +331,7 @@ class ImportsController extends Controller
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
                     $owner_id = $arr_owner[$i%count($arr_owner)];
-                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
+                    $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',1,'$source_id','$source_detail_id','$owner_id','$item->gud_mobile2','$created_at', '$branch_id', '$item->import_id'),";
                     if($item->student_name_1){
                         $check_import_student =1;
                         $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';

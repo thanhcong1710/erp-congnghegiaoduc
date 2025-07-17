@@ -201,7 +201,7 @@ class CheckinController extends Controller
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
             // 'owner_id'=>data_get($parent, 'owner_id'),
-            'status'=>data_get($parent, 'status'),
+            'status'=>data_get($parent, 'status') ? data_get($parent, 'status') : 1,
             'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
         ), 'crm_parents');
         $branchHasUser = Auth::user()->getBranchesHasUser();
