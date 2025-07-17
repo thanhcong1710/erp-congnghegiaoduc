@@ -259,6 +259,7 @@ class ParentsController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
                 'last_assign_date'=>date('Y-m-d H:i:s'),
+                'is_lock'=>1,
             ),'crm_parent_branch');
         }
         LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
@@ -302,7 +303,8 @@ class ParentsController extends Controller
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT title FROM jobs WHERE id=p.job_id) AS job_name,
                 (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1) AS num_care,
-                (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care
+                (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
+                pb.owner_id AS owner_id
             FROM crm_parents AS p LEFT JOIN crm_parent_branch AS pb ON pb.parent_id=p.id WHERE p.id=$parent_id  $cond");
         return response()->json($data);
     }
