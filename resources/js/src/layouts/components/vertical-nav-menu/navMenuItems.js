@@ -206,6 +206,7 @@ export default [
   {
     header: 'MARKETING',
     icon: 'PackageIcon',
+    permission:'Marketing',
     items: [
       {
         url: '/marketing/campaigns',
