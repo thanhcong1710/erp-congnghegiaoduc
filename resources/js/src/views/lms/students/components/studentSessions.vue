@@ -15,7 +15,7 @@
               <div class="label-box-schedule text-center">{{item.cls_name}}</div>
               <div class="text-date-box-schedule text-center">Buổi {{index+1}} - {{item.class_date | formatDateViewDay}}</div>
               <div class="text-center">
-                <span class="box-status">{{item.status ==2 ? 'Bảo lưu' : (item.attendance_status ==1 ? 'Đã học' : (item.attendance_status ==3 ? 'Đã học bù' : 'Chưa học'))}}</span>
+                <span class="box-status">{{item.status ==2 ? 'Bảo lưu' : (item.attendance_status ==1 ? 'Đã học' : (item.attendance_status ==3 ? 'Đã học bù' : 'Đã chạy phí'))}}</span>
               </div>
           </div>
         </div>
