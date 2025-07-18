@@ -284,7 +284,11 @@ class ContractsController extends Controller
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
-        $total_amount = data_get($payment, 'total');
+        $total_amount = data_get($payment, 'total', 0);
+        $availableSession = (int) data_get($request, 'tuition_fee_session') && (int)data_get($request, 'total_amount') ? 
+            round($total_amount / ((int)data_get($request, 'total_amount')/(int)data_get($request, 'tuition_fee_session'))) : 0; 
+        $availableSession = $availableSession - (int)data_get($pre_update_contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($pre_update_contract_info, 'last_done_sessions') : 0;
+            
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -300,7 +304,7 @@ class ContractsController extends Controller
            'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
            'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
            'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'init_total_charged'=>0,
+           'init_total_charged'=>$total_amount,
            'must_charge' => data_get($request, 'total_amount'),
            'total_charged'=> $total_amount,
            'debt_amount' => data_get($request, 'total_amount') - $total_amount > 0 ? data_get($request, 'total_amount') - $total_amount : 0,
@@ -316,12 +320,13 @@ class ContractsController extends Controller
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'tuition_fee_session'),
            'bonus_sessions' => data_get($request, 'type') ==0 ? data_get($request, 'total_session') : ((int)data_get($request, 'total_session') - (int)data_get($request, 'tuition_fee_session')),
-           'summary_sessions' => 0, // chưa đóng phí
+           'summary_sessions' => $availableSession, // chưa đóng phí
            'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
            'start_date'=> data_get($request, 'start_date'),
            'note'=> data_get($request, 'note'),
            'updated_at'=>date('Y-m-d H:i:s'),
            'updator_id'=>Auth::user()->id,
+           'left_sessions' => $availableSession - (int)data_get($pre_update_contract_info, 'done_sessions'), 
            'status' => 1,
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
