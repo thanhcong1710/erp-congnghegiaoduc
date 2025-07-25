@@ -96,20 +96,21 @@ class TestCallLms extends Command
         // }
 
         // Convert dữ liệu sang bảng crm_student_checkin
-        $list_students = u::query("SELECT * FROM crm_students WHERe checkin_branch_id IS NOT NULL");
-        foreach($list_students AS $student){
-            u::insertSimpleRow(array(
-                'crm_student_id' => $student->id,
-                'checkin_at' => $student->checkin_at,
-                'checkined_at' => $student->checkined_at,
-                'checkin_owner_id' => $student->checkin_owner_id,
-                'checkin_branch_id' => $student->checkin_branch_id,
-                'type_product' => $student->type_product,
-                'status'=>$student->status,
-                'checkined_note' => $student->checkined_note,
-            ),'crm_student_checkin');
-            echo $student->id."/";
-        }
+        // $list_students = u::query("SELECT * FROM crm_students WHERe checkin_branch_id IS NOT NULL");
+        // foreach($list_students AS $student){
+        //     u::insertSimpleRow(array(
+        //         'crm_student_id' => $student->id,
+        //         'checkin_at' => $student->checkin_at,
+        //         'checkined_at' => $student->checkined_at,
+        //         'checkin_owner_id' => $student->checkin_owner_id,
+        //         'checkin_branch_id' => $student->checkin_branch_id,
+        //         'type_product' => $student->type_product,
+        //         'status'=>$student->status,
+        //         'checkined_note' => $student->checkined_note,
+        //     ),'crm_student_checkin');
+        //     echo $student->id."/";
+        // }
+        u::updateEnrolmentLastDate(606);
         return "ok";
     }
 }
