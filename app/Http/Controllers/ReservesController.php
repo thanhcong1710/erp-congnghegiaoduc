@@ -294,7 +294,7 @@ class ReservesController extends Controller
     public function print(Request $request, $id){
         $reserveInfo = u::first("SELECT s.gud_name1, s.name AS student_name, s.lms_id, 
                 (SELECT name FROM products WHERE id=r.product_id) AS product_name,
-                (SELECT charge_date FROM payments WHERE contract_id=r.contract_id) AS charge_date,
+                (SELECT charge_date FROM payments WHERE contract_id=r.contract_id ORDER BY charge_date DESC LIMIT 1) AS charge_date,
                 c.must_charge, c.init_tuition_fee_session, c.done_sessions , c.last_done_sessions, c.left_sessions, c.total_charged,
                 r.start_date, r.end_date, r.note
             FROM reserves AS r 
