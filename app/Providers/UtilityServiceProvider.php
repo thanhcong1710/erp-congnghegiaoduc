@@ -692,7 +692,7 @@ class UtilityServiceProvider extends ServiceProvider
                 $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
                 $arr_day = explode(",", data_get($class_info, 'class_day'));
                 $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
-                $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $contract_info->summary_sessions, $holidays, $arr_day);
+                $data_sessions = self::calculatorSessionsByNumberOfSessions(date('Y-m-d'), $left_sessions, $holidays, $arr_day);
                 self::updateSimpleRow(array(
                     'enrolment_last_date' => data_get($data_sessions, 'end_date'),
                     'done_sessions' => $done_sessions->total,
@@ -1045,9 +1045,9 @@ class UtilityServiceProvider extends ServiceProvider
                                 'created_at'=>date('Y-m-d H:i:s'),
                                 'status'=>1
                             ), 'schedule_has_student');
-                            self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
-                                AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
                         }
+                        self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
+                                AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
                     }
                 }
 
@@ -1061,7 +1061,7 @@ class UtilityServiceProvider extends ServiceProvider
     }
 
     public static function updateEnrolmentLastDate($contract_id) {
-        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code FROM contracts WHERE id=$contract_id");
+        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code, left_sessions FROM contracts WHERE id=$contract_id");
         $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
         $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
         $arr_day = explode(",", data_get($class_info, 'class_day'));
@@ -1069,10 +1069,12 @@ class UtilityServiceProvider extends ServiceProvider
         if (!empty($reserved_dates)) {
             $holidays = array_merge($holidays, $reserved_dates);
         };
-        $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $contract_info->summary_sessions, $holidays, $arr_day);
-        self::updateSimpleRow(array(
-            'enrolment_last_date' => data_get($data_sessions, 'end_date'),
-        ), array('id' => $contract_id), 'contracts');
+        if($contract_info->left_sessions > 0){
+            $data_sessions = self::calculatorSessionsByNumberOfSessions(date('Y-m-d'), $contract_info->left_sessions, $holidays, $arr_day);
+            self::updateSimpleRow(array(
+                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+            ), array('id' => $contract_id), 'contracts');
+        }
     }
 
     public static function getReservedDates_transfer($contract_id)

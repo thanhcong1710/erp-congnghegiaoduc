@@ -113,7 +113,7 @@ class ReservesController extends Controller
                 'start_date' => $start_date,
                 'session'=> $reserve_session,
                 'end_date' => $end_date,
-                'status' => $required_approve ? 1 : 2,
+                'status' => 1,
                 'creator_id' => Auth::user()->id,
                 'created_at' => date('Y-m-d H:i:s'),
                 'is_reserved' => $is_reserved,
@@ -136,7 +136,7 @@ class ReservesController extends Controller
                 'start_date' => $start_date,
                 'session'=> $reserve_session,
                 'end_date' => $end_date,
-                'status' => $required_approve ? 1 : 2,
+                'status' => 4,
                 'creator_id' => Auth::user()->id,
                 'created_at' => date('Y-m-d H:i:s'),
                 'is_reserved' => $is_reserved,
@@ -221,6 +221,7 @@ class ReservesController extends Controller
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ),array('id'=>$contract_info->id),'contracts');
+                    u::updateDoneSessions(data_get($contract_info,'id'));
                 }else{
                     u::updateSimpleRow(array(
                         'status' => 2,
