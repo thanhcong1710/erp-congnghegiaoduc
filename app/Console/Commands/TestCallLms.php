@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\ClassesController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
 use App\User;
@@ -41,9 +42,9 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $lmsController = new \App\Http\Controllers\LmsController();
+        // $lmsController = new \App\Http\Controllers\LmsController();
         // $lmsController->addOrUpdateStudent(721);
-        $lmsController->addStudentToClass(845, true);
+        // $lmsController->addStudentToClass(845, true);
         // $lmsController->studentWithdrawByIdLMS(1340);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");
         // foreach($list AS $row){
@@ -111,6 +112,11 @@ class TestCallLms extends Command
         //     echo $student->id."/";
         // }
         // u::updateEnrolmentLastDate(606);
+        
+
+        $report = new ReportsController();
+        // $report->collectReportPending($request, '_');
+        $report->collectReportReserve($request, '_');
         return "ok";
     }
 }

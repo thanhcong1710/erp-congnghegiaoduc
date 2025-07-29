@@ -220,6 +220,8 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('02b', 'ReportsController@report02b');
                 Route::post('02c', 'ReportsController@report02c');
                 Route::post('05', 'ReportsController@report05');
+                Route::post('06', 'ReportsController@report06');
+                Route::post('07', 'ReportsController@report07');
 
                 Route::post('103', 'ReportsController@report103');
                 Route::post('104', 'ReportsController@report104');
@@ -233,6 +235,8 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('report02b/{key}/{value}', 'ExportsController@report02b');
                 Route::get('report02c/{key}/{value}', 'ExportsController@report02c');
                 Route::get('report05/{key}/{value}', 'ExportsController@report05');
+                Route::get('report06/{key}/{value}', 'ExportsController@report06');
+                Route::get('report07/{key}/{value}', 'ExportsController@report07');
 
                 Route::get('report103/{key}/{value}', 'ExportsController@report103');
                 Route::get('report104/{key}/{value}', 'ExportsController@report104');

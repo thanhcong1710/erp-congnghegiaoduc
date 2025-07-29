@@ -582,4 +582,200 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function addItemPending($list) {
+        if ($list) {
+            $created_at = date('Y-m-d H:i:s');
+            $query = "INSERT INTO report_pending (student_id, branch_id, product_id, cm_id, ec_id, contract_id,report_month,`sessions`,created_at ,tuition_fee_id,`start_date`) VALUES ";
+            if (count($list) > 5000) {
+                for($i = 0; $i < 5000; $i++) {
+                    $item = $list[$i];
+                    $start_date = $item->start_date ? $item->start_date : '2000-01-01';
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->product_id', '".(int)$item->cm_id."', '".(int)$item->ec_id."', '$item->contract_id', '$item->report_month', '$item->sessions', '$created_at' , '$item->tuition_fee_id', '$start_date'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                u::query("UPDATE report_pending SET start_date = null WHERE start_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+                self::addItemPending(array_slice($list, 5000));
+            } else {
+                foreach($list as $item) {
+                    $start_date = $item->start_date ? $item->start_date : '2000-01-01';
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->product_id', '".(int)$item->cm_id."', '".(int)$item->ec_id."', '$item->contract_id', '$item->report_month', '$item->sessions', '$created_at', '$item->tuition_fee_id', '$start_date'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                u::query("UPDATE report_pending SET start_date = null WHERE start_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+            }
+        }
+    }
+
+    public function collectReportPending(Request $request, $month)
+    {
+        if($month && $month!="_"){
+            $report_month = (int)$month > 9 ? date("Y").'-'.(int)$month : date("Y").'-0'.(int)$month;
+        }else{
+            $report_month = date('Y-m',time()-7*3600);
+        }
+        $date = date('Y-m-d',time()-7*3600);
+        $list = u::query("SELECT DISTINCT s.id AS student_id,c.branch_id,c.product_id,t.cm_id,t.ec_id,
+                c.tuition_fee_id,c.summary_sessions AS `sessions`,c.start_date, c.end_date,c.id AS contract_id,c.tuition_fee_id,
+                '$report_month' report_month
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id=c.student_id 
+                LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1
+            WHERE s.status>0 AND c.status=3 AND c.class_id IS NULL AND c.type>0 AND c.summary_sessions>0
+                AND c.id = (SELECT id FROM contracts WHERE student_id=s.id AND `status`!=7 ORDER BY count_recharge LIMIT 1) ");
+        u::query("DELETE FROM report_pending WHERE report_month = '$report_month'");
+        if (count($list)) {
+            self::addItemPending($list);
+        }
+        return response()->json('ok');
+    }
+
+    public function addItemReserve($list) {
+        if ($list) {
+            $created_at = date('Y-m-d H:i:s');
+            $query = "INSERT INTO report_reserve (student_id, branch_id, product_id, cm_id, ec_id, contract_id,report_month,`sessions`,created_at, is_reserved,tuition_fee_id, start_date, end_date) VALUES ";
+            if (count($list) > 5000) {
+                for($i = 0; $i < 5000; $i++) {
+                    $item = $list[$i];
+                    $start_date = $item->start_date ? $item->start_date : '2000-01-01';
+                    $end_date = $item->end_date ? $item->end_date : '2000-01-01';
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->product_id', '".(int)$item->cm_id."', '".(int)$item->ec_id."', '$item->contract_id', '$item->report_month', '$item->sessions', '$created_at','".(int)$item->is_reserved."','$item->tuition_fee_id', '$start_date', '$end_date'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                u::query("UPDATE report_reserve SET start_date = null WHERE start_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+                u::query("UPDATE report_reserve SET end_date = null WHERE end_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+                self::addItemReserve(array_slice($list, 5000));
+            } else {
+                foreach($list as $item) {
+                    $start_date = $item->start_date ? $item->start_date : '2000-01-01';
+                    $end_date = $item->end_date ? $item->end_date : '2000-01-01';
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->product_id', '".(int)$item->cm_id."', '".(int)$item->ec_id."', '$item->contract_id', '$item->report_month', '$item->sessions', '$created_at','".(int)$item->is_reserved."','$item->tuition_fee_id', '$start_date', '$end_date'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                u::query("UPDATE report_reserve SET start_date = null WHERE start_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+                u::query("UPDATE report_reserve SET end_date = null WHERE end_date = '2000-01-01'"); // Reset start_date to null if it was set to '0000-00-00'
+            }
+        }
+    }
+
+    public function collectReportReserve(Request $request, $month)
+    {
+        if($month && $month!="_"){
+            $report_month = (int)$month > 9 ? date("Y").'-'.(int)$month : date("Y").'-0'.(int)$month;
+        }else{
+            $report_month = date('Y-m',time()-7*3600);
+        }
+        $date = date('Y-m-d',time()-7*3600);
+        $list = u::query("SELECT DISTINCT s.id AS student_id,c.branch_id,c.product_id,t.cm_id,t.ec_id,
+                c.tuition_fee_id,c.summary_sessions AS `sessions`,c.start_date, c.end_date,c.id AS contract_id,c.tuition_fee_id,
+                (SELECT is_reserved FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS is_reserved,
+                (SELECT start_date FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS start_date,
+                (SELECT end_date FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS end_date,
+                '$report_month' report_month
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id=c.student_id 
+                LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1
+            WHERE s.status>0 AND c.status=4 AND c.class_id IS NULL AND c.type>0 AND c.summary_sessions>0
+                AND c.id = (SELECT id FROM contracts WHERE student_id=s.id AND `status`!=7 ORDER BY count_recharge LIMIT 1)");
+        u::query("DELETE FROM report_reserve WHERE report_month = '$report_month'");
+        if (count($list)) {
+            self::addItemReserve($list);
+        }
+        return response()->json('ok');
+    }
+
+    public function report06(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+        }
+        
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date !== '') {
+            $cond .= " AND r.report_month = '$start_date'";
+        }
+        
+        $order_by = " ORDER BY r.id DESC ";
+
+        $total = u::first("SELECT count(r.id) AS total 
+            FROM report_reserve AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
+        
+        $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+                CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
+                c.last_done_sessions, c.done_sessions, c.summary_sessions,r.start_date, r.end_date , r.is_reserved
+            FROM report_reserve AS r 
+                LEFT JOIN contracts AS c ON c.id = r.contract_id
+                LEFT JOIN students AS s ON s.id=r.student_id
+                LEFT JOIN branches AS b ON b.id = r.branch_id
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+                LEFT JOIN products AS p ON p.id = r.product_id
+                LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
+                LEFT JOIN users AS u ON u.id=r.cm_id
+            WHERE $cond $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function report07(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+        }
+        
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date !== '') {
+            $cond .= " AND r.report_month = '$start_date'";
+        }
+        
+        $order_by = " ORDER BY r.id DESC ";
+
+        $total = u::first("SELECT count(r.id) AS total 
+            FROM report_pending AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
+        
+        $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, p.name AS product_name,
+                t.name AS tuition_fee_name, c.summary_sessions,r.start_date
+            FROM report_pending AS r 
+                LEFT JOIN contracts AS c ON c.id = r.contract_id
+                LEFT JOIN students AS s ON s.id=r.student_id
+                LEFT JOIN branches AS b ON b.id = r.branch_id
+                LEFT JOIN products AS p ON p.id = r.product_id
+                LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
+            WHERE $cond $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }

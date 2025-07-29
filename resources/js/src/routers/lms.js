@@ -580,7 +580,7 @@ export default {
       {
         path: '/lms/reports/operate/report-06',
         name: 'lms-report-operate-06',
-        component: () => import('@/views/lms/report/operate/report05.vue'),
+        component: () => import('@/views/lms/report/operate/report06.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },

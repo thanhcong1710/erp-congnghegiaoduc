@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO LỚP HỌC</h5>
+      <h5>BÁO CÁO HỌC SINH PENDING</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -28,7 +28,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã lớp, tên lớp" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
@@ -54,45 +54,27 @@
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Trình độ</th>
-                  <th colspan="1" rowspan="1">Mã lớp</th>
-                  <th colspan="1" rowspan="1">Lịch học</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Giờ học</th>
-                  <th colspan="1" rowspan="1">Loại lớp</th>
-                  <th colspan="1" rowspan="1">Loại sĩ số</th>
-                  <th colspan="1" rowspan="1">Hình thức học</th>
-                  <th colspan="1" rowspan="1">Ngày khai giảng</th>
-                  <th colspan="1" rowspan="1">Ngày kết thúc</th>
-                  <th colspan="1" rowspan="1">Số HS đang học</th>
-                  <th colspan="1" rowspan="1">Số HS đặt cọc</th>
-                  <th colspan="1" rowspan="1">Số HS trial</th>
-                  <th colspan="1" rowspan="1">Tổng số HS</th>
-                  <th colspan="1" rowspan="1">Phòng học</th>
-                  <th colspan="1" rowspan="1">Giờ dạy/buổi</th>
-                  <th colspan="1" rowspan="1">Giáo viên</th>
-                  <th colspan="1" rowspan="1">CM phụ trách</th>
-                  <th colspan="1" rowspan="1">TA phụ trách</th>
+                  <th colspan="1" rowspan="1">Mã học sinh</th>
+                  <th colspan="1" rowspan="1">Học sinh</th>
+                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
+                  <th colspan="1" rowspan="1">Sản phẩm</th>
+                  <th colspan="1" rowspan="1">Gói phí</th>
+                  <th colspan="1" rowspan="1">Tổng số buổi</th>
+                  <th colspan="1" rowspan="1">Ngày dự kiến đi học</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.lms_code}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
                 <td class="td vs-table--td">{{ item.product_name}}</td>
-                <td class="td vs-table--td">{{ item.cm_name}}</td>
                 <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
+                <td class="td vs-table--td">{{ item.summary_sessions}}</td>
                 <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
               </tr>
             </table>
             
@@ -221,7 +203,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/07', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -246,7 +228,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report07/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {

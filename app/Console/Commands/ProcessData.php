@@ -52,6 +52,8 @@ class ProcessData extends Command
         $report->updateCompletedDate();
         $report->updateRenewedDates();
         $report->updateRenewReport();
+        //report_pending
+        $report->collectReportPending($request, '_');
 
         u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('ProcessData','".date('Y-m-d H:i:s')."')");
         return "ok";
