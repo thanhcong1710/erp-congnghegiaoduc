@@ -39,6 +39,8 @@
               </td>
               <td class="td vs-table--td">
                 <strong>{{item.label_status}}</strong>
+                <p v-if="item.enrolment_start_date">Ngày bắt đầu: {{item.enrolment_start_date}}</p>
+                <p v-if="item.enrolment_last_date">Ngày kết thúc: {{item.enrolment_last_date}}</p>
               </td>
             </tr>
           </table>

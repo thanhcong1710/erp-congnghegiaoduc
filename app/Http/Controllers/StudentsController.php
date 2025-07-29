@@ -301,7 +301,8 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
                 (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
-                (SELECT cls_name FROM classes WHERE id =c.class_id) AS class_name
+                (SELECT cls_name FROM classes WHERE id =c.class_id) AS class_name,
+                (SELECT class_date FROM schedules_has_student WHERE contract_id =c.id ORDER BY class_date LIMIT 1 ) AS enrolment_start_date, c.enrolment_last_date
             FROM contracts AS c
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach($list AS $k=> $row){

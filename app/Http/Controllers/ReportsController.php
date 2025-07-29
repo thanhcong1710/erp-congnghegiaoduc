@@ -200,7 +200,7 @@ class ReportsController extends Controller
                     LEFT JOIN term_student_user t ON t.student_id = c.student_id
                     LEFT JOIN contracts c1 ON c1.student_id=c.student_id 
                         AND c1.id = (SELECT id FROM contracts WHERE student_id=c.student_id AND count_recharge>c.count_recharge AND product_id !=4 AND completed_date IS NOT NULL ORDER BY count_recharge LIMIT 1) 
-                WHERE s.status>0 AND ((DATE_FORMAT(c.renewed_date, '%Y-%m') >= '$renewed_month' OR DATE_FORMAT(c.success_renewed_date, '%Y-%m') >= '$renewed_month'))
+                WHERE s.status>0 AND ((DATE_FORMAT(c.renewed_date, '%Y-%m') >= '$renewed_month' OR DATE_FORMAT(c.success_renewed_date, '%Y-%m') >= '$renewed_month')) AND c.type>0
                 $cond";
         $data = u::query($query);
         if ($data) {

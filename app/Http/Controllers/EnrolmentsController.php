@@ -190,7 +190,7 @@ class EnrolmentsController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id
             ), array('student_id'=>$student_id), 'term_student_user');
-            LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
+            LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name').' - ngày bắt đầu: '. $start_date, Auth::user()->id);
             $lmsController = new LMSController();
             $lmsController->addStudentToClass($student_id);
             if($start_date < date('Y-m-d')){
@@ -308,7 +308,7 @@ class EnrolmentsController extends Controller
                 u::processDataContractsPast($contract_id, data_get($data_sessions,'start_date'));
             }
             u::addLogContracts($contract_id);
-            LogStudents::logAdd($student_id, 'Nối phí cho học sinh trong lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
+            LogStudents::logAdd($student_id, 'Nối phí cho học sinh trong lớp '.data_get($class_info,'cls_name').' - ngày bắt đầu gói mới: '.data_get($data_sessions, 'start_date'), Auth::user()->id);
         }
 
         $result = array(

@@ -151,7 +151,7 @@ class ClassTransfersController extends Controller
         $class_transfer_info = u::first("SELECT ct.student_id, ct.contract_id, ct.from_class_id, ct.to_class_id, ct.creator_id,
                 ct.to_product_id, ct.to_program_id,
                 (SELECT cls_name FROM classes WHERE id = ct.from_class_id) AS from_class_name,
-                cl.cls_name AS to_class_name, cl.cm_id, cl.teacher_id, ct.is_trans_semester
+                cl.cls_name AS to_class_name, cl.cm_id, cl.teacher_id, ct.is_trans_semester, ct.transfer_date
             FROM class_transfer AS ct LEFT JOIN classes AS cl ON cl.id= ct.to_class_id WHERE ct.id = $class_transfer_id");
         $contract_id = data_get($class_transfer_info,'contract_id');
         $cm_id =data_get($class_transfer_info,'cm_id', null);
@@ -180,6 +180,7 @@ class ClassTransfersController extends Controller
                 'program_id' => data_get($class_transfer_info, 'to_program_id'),
                 'product_id' => data_get($class_transfer_info, 'to_product_id'),
                 'class_id' => data_get($class_transfer_info, 'to_class_id'),
+                'enrolment_start_date' => data_get($class_transfer_info, 'transfer_date'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ),array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
@@ -221,7 +222,8 @@ class ClassTransfersController extends Controller
                     'left_sessions' => data_get($data_calc_transfer, 'sessions', 0) + $bonus_sessions,
                     'last_done_sessions' => $contract_info->done_sessions,
                     'updated_at' => date('Y-m-d H:i:s'),
-                    'action' => 'contract_class_transfer'
+                    'action' => 'contract_class_transfer',
+                    'enrolment_start_date' => data_get($class_transfer_info, 'transfer_date'),
                 ),array('id'=>$contract_id),'contracts');
                 u::addLogContracts($contract_id);
                 $lmsController = new LMSController();
