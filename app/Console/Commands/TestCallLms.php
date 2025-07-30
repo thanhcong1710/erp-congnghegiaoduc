@@ -114,9 +114,21 @@ class TestCallLms extends Command
         // u::updateEnrolmentLastDate(606);
         
 
-        $report = new ReportsController();
-        // $report->collectReportPending($request, '_');
-        $report->collectReportReserve($request, '_');
+        $listContracts = u::query("SELECT DISTINCT student_id FROM contracts ");
+        foreach ($listContracts as $contract) {
+            $studentId = $contract->student_id;
+            $contracts = u::query("SELECT id, type FROM contracts WHERE student_id = $studentId ORDER BY id ASC");
+            $tmp_count_recharge = 0;
+            foreach($contracts as $contract) {
+                if ($contract->type == 0) { // Assuming type 1 is for active contracts
+                    u::updateSimpleRow(['count_recharge'=>-1], ['id' => $contract->id], 'contracts');
+                } else{
+                    u::updateSimpleRow(['count_recharge'=>$tmp_count_recharge], ['id' => $contract->id], 'contracts');
+                    $tmp_count_recharge++;
+                }
+            }
+            echo  $studentId . "/";
+        }
         return "ok";
     }
 }

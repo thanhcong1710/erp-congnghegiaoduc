@@ -3,6 +3,8 @@
 namespace App\Console;
 
 use App\Console\Commands\AddScheduleHasStudent;
+use App\Console\Commands\AutoWithdraw;
+use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
 use App\Console\Commands\SyncLMS;
@@ -23,6 +25,8 @@ class Kernel extends ConsoleKernel
         JobsSendEmail::class,
         SyncLMS::class,
         UpdateEnrolmentLastDate::class,
+        JobsProcessLockParent::class,
+        AutoWithdraw::class,
     ];
 
     /**
@@ -39,6 +43,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('updateEnrolmentLastDate:command')->dailyAt('01:00')->withoutOverlapping();
         $schedule->command('processdata:command')->dailyAt('2:00'); 
         $schedule->command('jobsProcessLockParent:command')->cron('0 0 * * *');
+        $schedule->command('autoWithdraw:command')->dailyAt('3:00'); 
     }
 
     /**

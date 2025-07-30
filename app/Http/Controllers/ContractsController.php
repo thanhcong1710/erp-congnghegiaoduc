@@ -151,7 +151,7 @@ class ContractsController extends Controller
            'created_at'=>date('Y-m-d H:i:s'),
            'creator_id'=>Auth::user()->id,
            'status' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? 3 : 1,
-           'count_recharge' => $last_contract ? $last_contract->count_recharge + 1 : 0,
+           'count_recharge' => data_get($request, 'type') ==0 ? -1 : ($last_contract ? $last_contract->count_recharge + 1 : 0),
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
@@ -327,7 +327,7 @@ class ContractsController extends Controller
            'updated_at'=>date('Y-m-d H:i:s'),
            'updator_id'=>Auth::user()->id,
            'left_sessions' => $availableSession - (int)data_get($pre_update_contract_info, 'done_sessions'), 
-           'status' => 1,
+           'status' => 1, 
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
@@ -339,7 +339,7 @@ class ContractsController extends Controller
             u::query("DELETE FROM coupon_logs WHERE contract_id = $contract_id AND coupon_id = ".data_get($pre_coupon, 'id'));
             u::updateSimpleRow(array(
                 'status'=> 1,
-                'checked_date'=>null,
+                'checked_date'=>null, 
                 'updated_at'=>date('Y-m-d H:i:s'),
                 'updator_id'=>Auth::user()->id,
             ), array('id'=>$pre_coupon->id, 'type'=>1), 'coupons');

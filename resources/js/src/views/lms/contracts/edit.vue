@@ -321,7 +321,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày dự kiến học</label>
+              <label>Ngày dự kiến học <span class="text-danger"> (*)</span></label>
               <datepicker class="w-full"
                 v-model="contract.start_date"
                 placeholder="Chọn ngày dự kiến học"
