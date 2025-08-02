@@ -37,11 +37,11 @@
               <!---->
               
               <td class="td vs-table--td">
-                <a :href="item.file_path" download>{{ item.file_name }}</a>
+                <a :href="item.file_path" target="_blank">{{ item.file_name }}</a>
               </td>
               <td class="td vs-table--td">{{item.note}}</td>
               <td class="td vs-table--td list-action">
-                <a :href="item.file_path" download><vs-button size="small"><i class="fas fa-download"></i></vs-button></a>
+                <a :href="item.file_path" target="_blank"><vs-button size="small"><i class="fa fa-eye"></i></vs-button></a>
                 <vs-button size="small" color="danger" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
               </td>
             </tr>
