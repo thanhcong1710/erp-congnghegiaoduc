@@ -55,7 +55,7 @@ class ProcessDataScheduleHasStudent extends Command
     
     private function processReserve($class_date){
         u::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$class_date' 
-            AND (SELECT count(id) FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
+            AND (SELECT count(id) FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
         return "ok";
     }
 
