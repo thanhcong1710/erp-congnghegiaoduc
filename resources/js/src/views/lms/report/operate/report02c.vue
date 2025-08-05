@@ -40,7 +40,7 @@
           </div>
         </div>
       </div>
-
+      <p v-if="showWarnigData" style="color: red;"><i>(Lưu ý: dữ liệu báo cáo được lấy tại thời điểm T-1)</i></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -160,6 +160,7 @@
           init: 0
         },
         delete_id:'',
+        showWarnigData: true
       }
     },
     created() {
@@ -193,7 +194,7 @@
             start_date: u.getDateMonth(this.searchData.dateRange),
             pagination:this.pagination,
           }
-
+        this.showWarnigData = u.getDateMonth(this.searchData.dateRange) == u.getDateMonth(new Date()) ? true : false
         this.$vs.loading()
         axios.p('/api/lms/reports/02c', data)
           .then((response) => {

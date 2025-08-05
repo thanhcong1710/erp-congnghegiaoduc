@@ -69,7 +69,7 @@
           </div>
         </div>
       </div>
-
+      <p style="color: red;"><i>(Lưu ý: dữ liệu báo cáo được lấy tại thời điểm T-1)</i></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">

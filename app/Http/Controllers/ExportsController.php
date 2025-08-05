@@ -89,34 +89,79 @@ class ExportsController extends Controller
     public function report01(Request $request , $key,$value) {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
         foreach($arr_key AS $k=>$key){
-            if($key=='keyword'){
-                $keyword = $arr_value[$k];
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
-            }
             if($key=='start_date'){
-                $cond .= " AND r.report_month = '$arr_value[$k]'";
-            }
-            if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                $report_month = $arr_value[$k];
             }
         }
-        
-        $order_by = " ORDER BY r.id DESC ";
-        $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+        if ($report_month == date('Y-m')){
+            $cond = " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND c.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            $end_date = date('Y-m-d');
+            $order_by = " ORDER BY r.id DESC ";
+            $list = u::query("SELECT DISTINCT c.id, b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cls.cls_name, p.name AS product_name,
                 CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
-                IF(r.type=0, 'NEW', 'RENEW') AS type_fee, r.last_done_sessions, r.done_sessions,r.summary_sessions,r.start_date, r.end_date
-            FROM report_full_fee_active AS r 
-                LEFT JOIN students AS s ON s.id=r.student_id
-                LEFT JOIN branches AS b ON b.id = r.branch_id
-                LEFT JOIN classes AS cl ON cl.id = r.class_id
-                LEFT JOIN products AS p ON p.id = r.product_id
-                LEFT JOIN tuition_fee AS t ON t.id = r.init_tuition_fee_id
-                LEFT JOIN users AS u ON u.id=r.cm_id
-            WHERE $cond $order_by");
+                IF(c.count_recharge=0, 'NEW', 'RENEW') AS type_fee, c.last_done_sessions, c.done_sessions,c.summary_sessions,c.enrolment_last_date AS end_date,
+                (SELECT class_date FROM schedule_has_student WHERE contract_id=c.id ORDER BY class_date ASC LIMIT 1) AS start_date
+            FROM
+                contracts c
+                LEFT JOIN students s ON c.student_id = s.id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN classes cls ON c.class_id = cls.id
+                LEFT JOIN products AS p ON p.id = c.product_id
+                LEFT JOIN tuition_fee AS t ON t.id = c.init_tuition_fee_id
+                LEFT JOIN term_student_user AS tsu ON tsu.student_id = c.student_id
+                LEFT JOIN users u ON tsu.cm_id = u.id
+            WHERE
+                c.type > 0
+                AND c.`status` < 7
+                AND (
+                    c.class_id IS NOT NULL
+                    AND c.enrolment_start_date <= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date >= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
+                    AND c.enrolment_last_date >= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date <= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
+                )
+                AND (SELECT count(id) FROM reserves WHERE contract_id=c.id AND is_reserved=1 AND `start_date` <= '$end_date' AND `end_date`>='$end_date' AND `status`=4) =0
+                AND s.status > 0
+            $cond $order_by");
+        }else {
+            $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='start_date'){
+                    $cond .= " AND r.report_month = '$arr_value[$k]'";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+                    CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
+                    IF(r.type=0, 'NEW', 'RENEW') AS type_fee, r.last_done_sessions, r.done_sessions,r.summary_sessions,r.start_date, r.end_date
+                FROM report_full_fee_active AS r 
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN classes AS cl ON cl.id = r.class_id
+                    LEFT JOIN products AS p ON p.id = r.product_id
+                    LEFT JOIN tuition_fee AS t ON t.id = r.init_tuition_fee_id
+                    LEFT JOIN users AS u ON u.id=r.cm_id
+                WHERE $cond $order_by");
+        }
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -872,35 +917,74 @@ class ExportsController extends Controller
     public function report06(Request $request , $key,$value) {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
         foreach($arr_key AS $k=>$key){
-            if($key=='keyword'){
-                $keyword = $arr_value[$k];
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
-            }
             if($key=='start_date'){
-                $cond .= " AND r.report_month = '$arr_value[$k]'";
-            }
-            if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                $report_month = $arr_value[$k];
             }
         }
-        
-        $order_by = " ORDER BY r.id DESC ";
-        $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
-                CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
-                c.last_done_sessions, c.done_sessions, c.summary_sessions,r.start_date, r.end_date , r.is_reserved
-            FROM report_reserve AS r 
-                LEFT JOIN contracts AS c ON c.id = r.contract_id
-                LEFT JOIN students AS s ON s.id=r.student_id
-                LEFT JOIN branches AS b ON b.id = r.branch_id
-                LEFT JOIN classes AS cl ON cl.id = c.class_id
-                LEFT JOIN products AS p ON p.id = r.product_id
-                LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
-                LEFT JOIN users AS u ON u.id=r.cm_id
-            WHERE $cond $order_by");
+        if ($report_month == date('Y-m')){
+            $date = date('Y-m-d',time()-7*3600);
+            $cond = " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND c.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            
+            $order_by = " ORDER BY c.id DESC ";
+            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+                    CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
+                    c.last_done_sessions, c.done_sessions, c.summary_sessions,
+                    (SELECT is_reserved FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS is_reserved,
+                    (SELECT start_date FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS start_date,
+                    (SELECT end_date FROM reserves WHERE contract_id=c.id AND student_id=s.id AND end_date>= '$date' AND `start_date`<='$date' AND `status`=4 LIMIT 1) AS end_date
+                FROM contracts AS c 
+                    LEFT JOIN students AS s ON s.id=c.student_id 
+                    LEFT JOIN branches AS b ON b.id = c.branch_id
+                    LEFT JOIN classes AS cl ON cl.id = c.class_id
+                    LEFT JOIN products AS p ON p.id = c.product_id
+                    LEFT JOIN tuition_fee AS t ON t.id = c.tuition_fee_id
+                    LEFT JOIN term_student_user AS tsu ON tsu.student_id=s.id AND tsu.status=1
+                    LEFT JOIN users AS u ON u.id= tsu.cm_id
+                WHERE s.status>0 AND c.status=4 AND c.class_id IS NULL AND c.type>0 AND c.summary_sessions>0
+                    AND c.id = (SELECT id FROM contracts WHERE student_id=s.id AND `status`!=7 ORDER BY count_recharge LIMIT 1)
+                $cond $order_by");
+
+        } else {
+            $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='start_date'){
+                    $cond .= " AND r.report_month = '$arr_value[$k]'";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+                    CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
+                    c.last_done_sessions, c.done_sessions, c.summary_sessions,r.start_date, r.end_date , r.is_reserved
+                FROM report_reserve AS r 
+                    LEFT JOIN contracts AS c ON c.id = r.contract_id
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN classes AS cl ON cl.id = c.class_id
+                    LEFT JOIN products AS p ON p.id = r.product_id
+                    LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
+                    LEFT JOIN users AS u ON u.id=r.cm_id
+                WHERE $cond $order_by");
+        }  
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -964,32 +1048,63 @@ class ExportsController extends Controller
     public function report07(Request $request , $key,$value) {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
+
         foreach($arr_key AS $k=>$key){
-            if($key=='keyword'){
-                $keyword = $arr_value[$k];
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
-            }
             if($key=='start_date'){
-                $cond .= " AND r.report_month = '$arr_value[$k]'";
-            }
-            if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                $report_month = $arr_value[$k];
             }
         }
-        
-        $order_by = " ORDER BY r.id DESC ";
-        $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, p.name AS product_name,
-                t.name AS tuition_fee_name, c.summary_sessions,r.start_date
-            FROM report_pending AS r 
-                LEFT JOIN contracts AS c ON c.id = r.contract_id
-                LEFT JOIN students AS s ON s.id=r.student_id
-                LEFT JOIN branches AS b ON b.id = r.branch_id
-                LEFT JOIN products AS p ON p.id = r.product_id
-                LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
-            WHERE $cond $order_by");
+        if ($report_month == date('Y-m')){
+            $cond = " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND c.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, p.name AS product_name,
+                    t.name AS tuition_fee_name, c.summary_sessions,c.start_date, c.id
+                FROM contracts AS c 
+                    LEFT JOIN students AS s ON s.id=c.student_id 
+                    LEFT JOIN branches AS b ON b.id = c.branch_id
+                    LEFT JOIN products AS p ON p.id = c.product_id
+                    LEFT JOIN tuition_fee AS t ON t.id = c.tuition_fee_id
+                WHERE s.status>0 AND c.status=3 AND c.class_id IS NULL AND c.type>0 AND c.summary_sessions>0
+                    AND c.id = (SELECT id FROM contracts WHERE student_id=s.id AND `status`!=7 ORDER BY count_recharge LIMIT 1) 
+                    $cond $order_by");
+        } else {
+            $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            foreach($arr_key AS $k=>$key){
+                if($key=='keyword'){
+                    $keyword = $arr_value[$k];
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')";
+                }
+                if($key=='start_date'){
+                    $cond .= " AND r.report_month = '$arr_value[$k]'";
+                }
+                if($key=='branch_id'){
+                    $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+                }
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, p.name AS product_name,
+                    t.name AS tuition_fee_name, c.summary_sessions,r.start_date
+                FROM report_pending AS r 
+                    LEFT JOIN contracts AS c ON c.id = r.contract_id
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN products AS p ON p.id = r.product_id
+                    LEFT JOIN tuition_fee AS t ON t.id = r.tuition_fee_id
+                WHERE $cond $order_by");
+        }
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
