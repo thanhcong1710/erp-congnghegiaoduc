@@ -368,6 +368,10 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('10', 'DashboardController@dashboard10');
             Route::post('11', 'DashboardController@dashboard11');
             Route::post('12', 'DashboardController@dashboard12');
+            Route::post('13', 'DashboardController@dashboard13');
+            Route::post('14', 'DashboardController@dashboard14');
+            Route::post('15', 'DashboardController@dashboard15');
+            Route::post('16', 'DashboardController@dashboard16');
         });
     });
 });
