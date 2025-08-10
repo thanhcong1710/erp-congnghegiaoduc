@@ -345,7 +345,7 @@ class ChargesController extends Controller
 
     public function printWaitcharge(Request $request, $id){
         $data = u::first("SELECT '' AS text_1,c.code AS contract_code, c.debt_amount, p.amount AS charge_amount,p.method,
-            s.gud_name1,s.address, s.name,
+            s.gud_name1,s.address, s.name,p.charge_date,
             (SELECT number_of_months FROM tuition_fee WHERE id = c.tuition_fee_id) AS number_of_months,
             (SELECT name FROM products WHERe id=c.product_id) AS product_name, p.note,
             '' AS text_2, '' AS text_amount, '' AS text_amount_words,'' AS text_3,'' AS text_debt_amount
@@ -353,7 +353,7 @@ class ChargesController extends Controller
             LEFT JOIN contracts AS c ON p.contract_id=c.id
             LEFT JOIN students AS s ON c.student_id = s.id
           WHERE p.id = $id");
-        $data->text_1 = "Ngày ".date('d').  " tháng ". date('m'). " năm ". date('Y');
+        $data->text_1 = "Ngày ".date('d', strtotime(data_get($data, 'charge_date'))).  " tháng ". date('m', strtotime(data_get($data, 'charge_date'))). " năm ". date('Y', strtotime(data_get($data, 'charge_date')));
         $data->text_2 = "Thanh toán học phí khóa học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name;
         $data->text_debt_amount = number_format($data->debt_amount, 0, '', '.');
         $data->text_amount = number_format($data->charge_amount, 0, '', '.');
