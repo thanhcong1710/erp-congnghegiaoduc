@@ -72,7 +72,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('K' . $x, $parents[$i]->student_birthday_2 ? "'".$parents[$i]->student_birthday_2 : $parents[$i]->student_birthday_2);
             $sheet->setCellValue('L' . $x, $arr_status[$parents[$i]->status]);
             $sheet->setCellValue('M' . $x, $parents[$i]->error_message);
-            $sheet->getRowDimension($x)->setRowHeight(23);
 
         }
         $writer = new Xlsx($spreadsheet);
@@ -207,8 +206,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('K' . $x, $list[$i]->summary_sessions - $list[$i]->done_sessions);
             $sheet->setCellValue('L' . $x, $list[$i]->start_date);
             $sheet->setCellValue('M' . $x, $list[$i]->end_date);
-            
-            $sheet->getRowDimension($x)->setRowHeight(23);
 
         }
         $writer = new Xlsx($spreadsheet);
@@ -301,7 +298,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('H' . $x, $list[$i]->status==1 ? $list[$i]->tuition_fee_name : '');
             $sheet->setCellValue('I' . $x, $list[$i]->status==1 ? $$list[$i]->renew_amount : '');
             $sheet->setCellValue('J' . $x, $list[$i]->cm_name);
-            $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
         try {
@@ -355,7 +351,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('B' . $x, $list[$i]->total_item) ;
             $sheet->setCellValue('C' . $x, $list[$i]->success_item );
             $sheet->setCellValue('D' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
-            $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
         try {
@@ -418,7 +413,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('D' . $x, $list[$i]->total_item) ;
             $sheet->setCellValue('E' . $x, $list[$i]->success_item );
             $sheet->setCellValue('F' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
-            $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
         try {
@@ -1030,9 +1024,6 @@ class ExportsController extends Controller
             $sheet->setCellValue('K' . $x, $list[$i]->is_reserved == 1 ? "Giữ chỗ" : "Không giữ chỗ");
             $sheet->setCellValue('L' . $x, $list[$i]->start_date);
             $sheet->setCellValue('M' . $x, $list[$i]->end_date);
-            
-            $sheet->getRowDimension($x)->setRowHeight(23);
-
         }
         $writer = new Xlsx($spreadsheet);
         try {
@@ -1135,14 +1126,167 @@ class ExportsController extends Controller
             $sheet->setCellValue('F' . $x, $list[$i]->tuition_fee_name);
             $sheet->setCellValue('G' . $x, $list[$i]->summary_sessions);
             $sheet->setCellValue('H' . $x, $list[$i]->start_date);
-            
-            $sheet->getRowDimension($x)->setRowHeight(23);
-
         }
         $writer = new Xlsx($spreadsheet);
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo pending.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report102(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m');
+        $cond = " AND bu.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='keyword'){
+                $keyword = $arr_value[$k];
+                $cond .= " AND (u.hrm_id LIKE '%$keyword%' OR u.name LIKE '$keyword')";
+            }
+            if($key=='branch_id'){
+                $cond .=  " AND bu.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+        }
+        
+        $order_by = " ORDER BY u.id DESC ";
+        $list = u::query("SELECT u.name, u.hrm_id,
+                (SELECT COUNT(id) FROM crm_students WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE ec_id = u.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.ec_id=u.id) AS total_deposit
+            FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+            WHERE ru.role_id IN (68,69) AND u.status =1 $cond $order_by");
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Mã nhân viên');
+        $sheet->setCellValue('B1', 'Họ tên');
+        $sheet->setCellValue('C1', 'Số checkin');
+        $sheet->setCellValue('D1', 'Số học thử');
+        $sheet->setCellValue('E1', 'Số học sinh cọc');
+        $sheet->setCellValue('F1', 'Số học sinh fullfee');
+        $sheet->setCellValue('G1', 'Số học sinh renew');
+        $sheet->setCellValue('H1', 'DS New');
+        $sheet->setCellValue('I1', 'DS Renew');
+        $sheet->setCellValue('J1', 'Công nợ');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(20);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->name);
+            $sheet->setCellValue('B' . $x, $list[$i]->hrm_id) ;
+            $sheet->setCellValue('C' . $x, $list[$i]->count_checkin );
+            $sheet->setCellValue('D' . $x, $list[$i]->count_trial);
+            $sheet->setCellValue('E' . $x, $list[$i]->count_deposit);
+            $sheet->setCellValue('F' . $x, $list[$i]->count_full_fee);
+            $sheet->setCellValue('G' . $x, $list[$i]->count_renew);
+            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_new);
+            $sheet->setCellValue('I' . $x, (int)$list[$i]->sales_renew);
+            $sheet->setCellValue('J' . $x, (int)$list[$i]->total_deposit);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Kết quả kinh doanh theo sale.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report101(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $start_date = date('Y-m');
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $start_date = $arr_value[$k];
+            }
+        }
+        
+        $order_by = " ORDER BY b.id DESC ";
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT COUNT(id) FROM crm_students WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.branch_id=b.id) AS total_deposit
+            FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10 $order_by");
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Số checkin');
+        $sheet->setCellValue('C1', 'Số học thử');
+        $sheet->setCellValue('D1', 'Số học sinh cọc');
+        $sheet->setCellValue('E1', 'Số học sinh fullfee');
+        $sheet->setCellValue('F1', 'Số học sinh renew');
+        $sheet->setCellValue('G1', 'DS New');
+        $sheet->setCellValue('H1', 'DS Renew');
+        $sheet->setCellValue('I1', 'Công nợ');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(20);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(20);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->count_checkin );
+            $sheet->setCellValue('C' . $x, $list[$i]->count_trial);
+            $sheet->setCellValue('D' . $x, $list[$i]->count_deposit);
+            $sheet->setCellValue('E' . $x, $list[$i]->count_full_fee);
+            $sheet->setCellValue('F' . $x, $list[$i]->count_renew);
+            $sheet->setCellValue('G' . $x, (int)$list[$i]->sales_new);
+            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_renew);
+            $sheet->setCellValue('I' . $x, (int)$list[$i]->total_deposit);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Kết quả kinh doanh theo trung tâm.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

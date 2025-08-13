@@ -4,10 +4,32 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>KẾT QUẢ KINH DOANH NGÀY</h5>
+      <h5>KẾT QUẢ KINH DOANH THEO SALE</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+            <multiselect
+                name="search_branch"
+                placeholder="Chọn trung tâm"
+                v-model="searchData.arr_branch"
+                :options="branch_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Từ khóa</label>
+            <vs-input class="w-full" placeholder="Mã, tên nhân viên" v-model="searchData.keyword"></vs-input>
+          </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
@@ -26,43 +48,35 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
+            <table class="vs-table vs-table--tbody-table">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Chi Nhánh</th>
-                  <th colspan="1" rowspan="1">KPI Tháng</th>
+                  <th colspan="1" rowspan="1">Mã nhân viên</th>
+                  <th colspan="1" rowspan="1">Họ tên</th>
                   <th colspan="1" rowspan="1">Số checkin</th>
-                  <th colspan="1" rowspan="1">Số học sinh New</th>
-                  <th colspan="1" rowspan="1">Số học sinh Renew</th>
-                  <th colspan="1" rowspan="1">DS HS New</th>
-                  <th colspan="1" rowspan="1">DS HS Renew</th>
-                  <th colspan="1" rowspan="1">DS Digital</th>
-                  <th colspan="1" rowspan="1">DS Thực thu</th>
-                  <th colspan="1" rowspan="1">Công nơ phát sinh ngày</th>
-                  <th colspan="1" rowspan="1">DS Thực thu + công nợ</th>
-                  <th colspan="1" rowspan="1">% Hoàn thành thực thu</th>
-                  <th colspan="1" rowspan="1">% Hoàn thành bao gồm cả công nợ</th>
+                  <th colspan="1" rowspan="1">Số học thử</th>
+                  <th colspan="1" rowspan="1">Số học sinh cọc</th>
+                  <th colspan="1" rowspan="1">Số học sinh fullfee</th>
+                  <th colspan="1" rowspan="1">Số học sinh renew</th>
+                  <th colspan="1" rowspan="1">DS New</th>
+                  <th colspan="1" rowspan="1">DS Renew</th>
+                  <th colspan="1" rowspan="1">Công nợ</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
-                <!---->
-                
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
-                <td class="td vs-table--td">{{ item.product_name}}</td>
-                <td class="td vs-table--td">{{ item.cm_name}}</td>
-                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{ item.name}}</td>
+                <td class="td vs-table--td">{{ item.hrm_id}}</td>
+                <td class="td vs-table--td">{{ item.count_checkin}}</td>
+                <td class="td vs-table--td">{{ item.count_trial}}</td>
+                <td class="td vs-table--td">{{ item.count_deposit}}</td>
+                <td class="td vs-table--td">{{ item.count_full_fee}}</td>
+                <td class="td vs-table--td">{{ item.count_renew}}</td>
+                <td class="td vs-table--td">{{ item.sales_new | formatNumber}}</td>
+                <td class="td vs-table--td">{{ item.sales_renew | formatNumber}}</td>
+                <td class="td vs-table--td">{{ item.total_deposit | formatNumber}}</td>
               </tr>
             </table>
             
@@ -191,7 +205,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/102', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -216,7 +230,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report102/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {

@@ -915,4 +915,83 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report102(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        $cond = " AND bu.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND bu.branch_id IN (".implode(",",$branch_id).")";
+        }
+        if ($keyword){
+            $cond .= " AND (u.hrm_id LIKE '%$keyword%' OR u.name LIKE '$keyword')";
+        }
+        
+        $order_by = " ORDER BY u.id ";
+        $total = u::first("SELECT COUNT(u.id) total
+                FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+            WHERE ru.role_id IN (68,69) AND u.status =1 $cond ");
+        $list = u::query("SELECT u.name, u.hrm_id,
+                (SELECT COUNT(id) FROM crm_students WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE ec_id = u.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.ec_id=u.id) AS total_deposit
+            FROM users AS u 
+                LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
+                LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
+            WHERE ru.role_id IN (68,69) AND u.status =1 $cond $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+    public function report101(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND b.id IN (".implode(",",$branch_id).")";
+        }
+        
+        $order_by = " ORDER BY b.id ";
+        $total = u::first("SELECT COUNT(b.id) total
+                FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10");
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT COUNT(id) FROM crm_students WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.branch_id=b.id) AS total_deposit
+            FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10 $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
