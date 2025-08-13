@@ -95,7 +95,7 @@
           </div>
         </div>
       </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_03')||1==1">
+      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_03')">
         <div class="vx-card overflow-hidden"><!---->
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
@@ -120,7 +120,7 @@
           </div>
         </div>
       </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')||1==1">
+      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
         <div class="vx-card overflow-hidden"><!---->
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
@@ -143,43 +143,43 @@
           </div>
         </div>
       </div>
-      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_05')||1==1">
+      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_05')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Trạng thái học viên</h5>
           <vue-apex-charts type="pie"  :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_07')||1==1">
+      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_07')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Trạng thái đóng phí</h5>
           <vue-apex-charts type="pie"  :options="pieChartFee.chartOptions" :series="pieChartFee.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full md:w-1/3 mb-base" v-if="checkPermission('dashboard_06')||1==1">
+      <div class="vx-col w-full md:w-1/3 mb-base" v-if="checkPermission('dashboard_06')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Đăng ký khóa học</h5>
           <vue-apex-charts type="pie"  :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_08')||1==1">
+      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_08')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Doanh thu theo trung tâm</h5>
           <vue-apex-charts type="line" height="480" :options="lineChartRevenue.chartOptions" :series="lineChartRevenue.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_09')||1==1">
+      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_09')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Doanh thu RENEW theo trung tâm</h5>
           <vue-apex-charts type="line" height="480" :options="lineChartRevenueRenew.chartOptions" :series="lineChartRevenueRenew.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_10')||1==1">
+      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_10')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Tỷ lệ RENEW theo trung tâm</h5>
           <vue-apex-charts type="line" height="480" :options="lineChartRenew.chartOptions" :series="lineChartRenew.series"></vue-apex-charts>
         </vx-card>
       </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_11')||1==1">
+      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_11')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Doanh thu theo EC</h5>
           <vue-apex-charts type="line" height="480" :options="lineChartRevenueEC.chartOptions" :series="lineChartRevenueEC.series"></vue-apex-charts>
