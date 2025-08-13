@@ -383,7 +383,7 @@
       },
       loadClasses(){
         this.$vs.loading()
-        axios.p("/api/system/get-class-active-by-branch-product",{
+        axios.p("/api/system/get-class-active-by-branch-product?not_end_date=1",{
           branch_id: this.class_transfer.branch_id,
           product_id: this.class_transfer.product_id
         })
