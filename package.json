@@ -66,7 +66,7 @@
         "vue-jstree": "^2.1.6",
         "moment": "^2.22.2",
         "vuepress": "0.14.11",
-        "vuesax": "jd-0001/vuesax",
+        "vuesax": "^4.0.1",
         "vuex": "^3.1.1",
         "xlsx": "^0.15.0"
     },
