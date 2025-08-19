@@ -565,6 +565,14 @@
       },
       filterStartDate(student, class_dates) {
         let start_dates = class_dates
+        const today = new Date();
+        // Lấy năm - tháng - ngày
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // getMonth() trả 0-11
+        const day = String(today.getDate()).padStart(2, '0');
+        // Format Y-m-d
+        const currDate = `${year}-${month}-${day}`;
+
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
@@ -572,7 +580,11 @@
               resp.push(item)
             } else {
               if (moment(item.class_date).isSameOrAfter(student.start_date)) {
-                resp.push(item)
+                if (item.contract_type==0 && moment(item.class_date).isSameOrAfter(student.currDate)){
+                  resp.push(item)
+                }else{
+                  resp.push(item)
+                }
               }
             } 
             return item

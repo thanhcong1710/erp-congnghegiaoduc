@@ -141,7 +141,7 @@ class EnrolmentsController extends Controller
         
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
-                (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
+                (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date, c.type AS contract_type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
