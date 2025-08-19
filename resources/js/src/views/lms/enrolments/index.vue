@@ -573,6 +573,15 @@
         // Format Y-m-d
         const currDate = `${year}-${month}-${day}`;
 
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        // Format Y-m-d
+        const yearLastMonth = lastMonth.getFullYear();
+        const monthLastMonth = String(lastMonth.getMonth() + 1).padStart(2, '0'); // getMonth() trả 0-11
+        const dayLastMonth = String(lastMonth.getDate()).padStart(2, '0');
+
+        const lastMonthDate = `${yearLastMonth}-${monthLastMonth}-${dayLastMonth}`;
+
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
@@ -580,10 +589,14 @@
               resp.push(item)
             } else {
               if (moment(item.class_date).isSameOrAfter(student.start_date)) {
-                if (item.contract_type==0 && moment(item.class_date).isSameOrAfter(student.currDate)){
-                  resp.push(item)
+                if (item.contract_type==0){
+                  if(moment(item.class_date).isSameOrAfter(currDate)){
+                    resp.push(item)
+                  }
                 }else{
-                  resp.push(item)
+                  if(moment(item.class_date).isSameOrAfter(lastMonthDate)){
+                    resp.push(item)
+                  }
                 }
               }
             } 
