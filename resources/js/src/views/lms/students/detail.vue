@@ -40,7 +40,9 @@
                 <!--begin::Number-->
                 <div class="fw-semibold fs-6 text-gray-400">Số buổi còn lại</div>
                 <div class="flex align-items-center">
-                  <div class="fs-2 fw-bold counted"><span class="text-success">{{student_info.left_sessions}}</span> 
+                  <div class="fs-2 fw-bold counted">
+                    <span class="text-success" v-if="student_info.left_sessions > 5">{{student_info.left_sessions}}</span> 
+                    <span class="text-danger" v-else>{{student_info.left_sessions}}</span>
                     <span style="font-size: 16px;">/ {{student_info.summary_sessions}}</span>
                   </div>
                 </div>
