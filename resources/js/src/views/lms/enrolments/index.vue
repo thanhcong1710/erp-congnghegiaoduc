@@ -589,7 +589,7 @@
               resp.push(item)
             } else {
               if (moment(item.class_date).isSameOrAfter(student.start_date)) {
-                if (item.contract_type==0){
+                if (student.contract_type==0){
                   if(moment(item.class_date).isSameOrAfter(currDate)){
                     resp.push(item)
                   }
