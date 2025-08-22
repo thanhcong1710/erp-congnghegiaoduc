@@ -108,7 +108,7 @@ class ExportsController extends Controller
                 }
             }
             $end_date = date('Y-m-d');
-            $order_by = " ORDER BY r.id DESC ";
+            $order_by = " ORDER BY c.id DESC ";
             $list = u::query("SELECT DISTINCT c.id, b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cls.cls_name, p.name AS product_name,
                 CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
                 IF(c.count_recharge=0, 'NEW', 'RENEW') AS type_fee, c.last_done_sessions, c.done_sessions,c.summary_sessions,c.enrolment_last_date AS end_date,
