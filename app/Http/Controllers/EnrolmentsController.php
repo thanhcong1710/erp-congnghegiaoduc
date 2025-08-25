@@ -126,9 +126,9 @@ class EnrolmentsController extends Controller
         $product_id = data_get($class_info, 'product_id');
         $branch_id = data_get($class_info, 'branch_id'); 
         // $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
-        $cond = " c.status IN (2, 3, 4, 5) AND c.branch_id= $branch_id ";
+        $cond = " c.status IN ( 3, 4, 5) AND c.branch_id= $branch_id ";
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
-            AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (2,3,4,5))";
+            AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
@@ -141,7 +141,7 @@ class EnrolmentsController extends Controller
         
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
-                (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
+                (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date, c.type AS contract_type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");

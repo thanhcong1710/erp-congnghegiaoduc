@@ -68,7 +68,7 @@ class ReservesController extends Controller
                 c.reserved_sessions , c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date  
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
                 WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
-                AND c.status=6 $cond ");
+                AND c.status=6 AND c.type>0 $cond ");
         return response()->json($data);
     }  
 
