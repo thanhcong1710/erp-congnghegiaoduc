@@ -97,6 +97,21 @@ class CheckinController extends Controller
         $crm_student_info = u::first("SELECT * FROM crm_students WHERE id = $request->crm_student_id");
         $crm_parent_info = u::first("SELECT * FROM crm_parents WHERE id = ".(int)data_get($crm_student_info, 'parent_id'));
         if($crm_student_info && $crm_parent_info && !data_get($crm_student_info, 'lms_id')){
+            if(data_get($crm_student_info,'status') != 2){
+                u::updateSimpleRow(array(
+                    'checkined_at' => date('Y-m-d H:i:s'),
+                    'checkined_by' =>  Auth::user()->id,
+                    // 'checkined_note' => $request->note,
+                    'status' => 2
+                ), array('id'=>$request->student_id), 'crm_students');
+                u::updateSimpleRow(array(
+                   'checkined_at' => date('Y-m-d H:i:s'),
+                //    'checkined_note' => $request->note,
+                   'status' => 2,
+                   'updated_at' => date('Y-m-d H:i:s'),
+                   'updator_id' =>  Auth::user()->id,
+                ), array('id'=>$request->crm_student_checkin_id),'crm_student_checkin');
+            }
             $arr_name = u::explodeName(data_get($crm_student_info, 'name'));
             $lms_student_id = u::insertSimpleRow(array(
                 'lms_code' => '',

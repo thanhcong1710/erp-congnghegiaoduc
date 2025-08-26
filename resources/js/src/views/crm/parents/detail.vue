@@ -534,7 +534,8 @@
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>Ngày/Giờ Checkin</label>
-            <datepicker
+            <input class="vs-inputx vs-input--input normal" type="text" v-model="modal_checkin.checkin_at" disabled>
+            <!-- <datepicker
                       id="checkin-at"
                       class="form-control calendar"
                       :value="modal_checkin.checkin_at"
@@ -543,8 +544,9 @@
                       :lang="datepickerOptions.lang"
                       type="datetime"
                       format="YYYY-MM-DD HH:mm"
+                      :disabled="true"
               >
-              </datepicker>
+              </datepicker> -->
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>Khóa học</label>
@@ -1537,7 +1539,7 @@
         this.modal_checkin.show =true
         this.modal_checkin.student_id = item.id
         this.modal_checkin.branch_id = this.parent.branch_id
-        this.modal_checkin.checkin_at = ""
+        this.modal_checkin.checkin_at = moment().format('YYYY-MM-DD HH:mm');
         this.modal_checkin.error_message=""
         this.modal_checkin.type_product=""
       },
@@ -1590,7 +1592,7 @@
         this.modal_checkin.show =true
         this.modal_checkin.student_id = item.id
         this.modal_checkin.branch_id = item.checkin_branch_id
-        this.modal_checkin.checkin_at = item.checkin_at
+        this.modal_checkin.checkin_at =item.checkin_at;
         this.modal_checkin.type_product = item.type_product
         this.modal_checkin.error_message=""
       },

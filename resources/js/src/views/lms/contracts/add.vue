@@ -135,7 +135,7 @@
               <label>Loại hợp đồng <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="contract.type" @change="loadTuitionFee();">
                 <option value="" disabled>Chọn loại hợp đồng</option>
-                <option value="0">Học thử</option>
+                <option value="0" v-if="disabled_trial==0">Học thử</option>
                 <option value="1">Chính thức</option>
               </select>
             </div>
@@ -338,6 +338,7 @@
                 placeholder="Chọn ngày dự kiến học"
                 :lang="datepickerOptions.lang"
                 @change="selectDate"
+                :not-before="temp_min_date"
               />
             </div>
             <div class="vx-col w-full mb-4">
@@ -471,7 +472,9 @@
           active: false,
           body: '',
           color:'',
-        }
+        },
+        disabled_trial : 0,
+        temp_min_date:'',
       }
     },
     created() {
@@ -504,6 +507,7 @@
         }
       },
       selectStudent(student) {
+        this.disabled_trial = student.disabled_trial;
         this.student_info = student
         this.contract.student_id = student.student_id
         this.discount_code_id=''
@@ -525,6 +529,8 @@
         this.b2b_bonus_session=''
         this.sibling_discount=''
         this.sibling= false
+        this.contract.type =''
+        this.temp_min_date = new Date(student.last_start_date)
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
