@@ -486,10 +486,12 @@ class ReportsController extends Controller
         
         $order_by = " ORDER BY s.id DESC";
         $total = u::first("SELECT COUNT(s.id) total
-                FROM crm_students AS s 
+            FROM crm_student_checkin AS csc 
+                LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id 
             WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond");
         $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
-            FROM crm_students AS s 
+            FROM crm_student_checkin AS csc 
+                LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id     
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
                 LEFT JOIN users AS u ON u.id =s.checkin_owner_id
                 LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
@@ -943,7 +945,7 @@ class ReportsController extends Controller
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
             WHERE ru.role_id IN (68,69) AND u.status =1 $cond ");
         $list = u::query("SELECT u.name, u.hrm_id,
-                (SELECT COUNT(id) FROM crm_students WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
                 (SELECT COUNT(id) FROM contracts WHERE ec_id = u.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_deposit,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_full_fee,
@@ -980,7 +982,7 @@ class ReportsController extends Controller
                 FROM branches AS b 
             WHERE b.status =1 $cond AND b.id > 10");
         $list = u::query("SELECT b.name AS branch_name,
-                (SELECT COUNT(id) FROM crm_students WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
                 (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_deposit,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_full_fee,
