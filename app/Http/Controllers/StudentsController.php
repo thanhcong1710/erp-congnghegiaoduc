@@ -81,16 +81,29 @@ class StudentsController extends Controller
             'status' => 1, // 
         );
         u::updateSimpleRow($data_update,array('id'=>$request->student_id), 'crm_students');
-        u::insertSimpleRow(array(
-            'crm_student_id' => $request->student_id,
-            'checkin_at'=>$request->checkin_at,
-            'checkin_owner_id' => $request->owner_id,
-            'checkin_branch_id'=>$request->branch_id,
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
-            'type_product'=>$request->type_product,
-            'status' => 1, // 
-        ), 'crm_student_checkin');
+        $is_update = isset($request->is_update) ? (int)$request->is_update : 0;
+        if ($is_update) {
+            $lastCheckin =u::first("SELECT id FROM crm_student_checkin WHERE crm_student_id = $request->student_id ORDER BY id DESC");
+            u::updateSimpleRow(array(
+                'checkin_at'=>$request->checkin_at,
+                'checkin_owner_id' => $request->owner_id,
+                'checkin_branch_id'=>$request->branch_id,
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+                'type_product'=>$request->type_product,
+            ),array('id'=> data_get($lastCheckin,'id')), 'crm_student_checkin');
+        } else {
+            u::insertSimpleRow(array(
+                'crm_student_id' => $request->student_id,
+                'checkin_at'=>$request->checkin_at,
+                'checkin_owner_id' => $request->owner_id,
+                'checkin_branch_id'=>$request->branch_id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'type_product'=>$request->type_product,
+                'status' => 1, // 
+            ), 'crm_student_checkin');
+        }
         $result =(object)array(
             'status'=>1,
             'message'=>'Lưu thông tin checkin thành công'
