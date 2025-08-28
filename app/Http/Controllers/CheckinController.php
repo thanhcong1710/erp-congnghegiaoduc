@@ -242,7 +242,7 @@ class CheckinController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                     'type_product'=>data_get($student, 'checkin_type_product'),
-                    'status' => 3,
+                    'status' => 1,
                 ), 'crm_students');
                 u::insertSimpleRow(array(
                     'crm_student_id' => $crm_student_id,
@@ -305,6 +305,7 @@ class CheckinController extends Controller
                     ), 'term_student_user');
     
                     u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=>$crm_student_id), 'crm_students');
+                    u::updateSimpleRow(array('status'=>3), array('crm_student_id'=>$crm_student_id), 'crm_student_checkin');
     
                     $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
                     $lms_code = config('app.prefix_student_code').$last_lms_code;
