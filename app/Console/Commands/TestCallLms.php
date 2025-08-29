@@ -114,20 +114,35 @@ class TestCallLms extends Command
         // u::updateEnrolmentLastDate(606);
         
 
-        $listContracts = u::query("SELECT DISTINCT student_id FROM contracts ");
-        foreach ($listContracts as $contract) {
-            $studentId = $contract->student_id;
-            $contracts = u::query("SELECT id, type FROM contracts WHERE student_id = $studentId ORDER BY id ASC");
-            $tmp_count_recharge = 0;
-            foreach($contracts as $contract) {
-                if ($contract->type == 0) { // Assuming type 1 is for active contracts
-                    u::updateSimpleRow(['count_recharge'=>-1], ['id' => $contract->id], 'contracts');
-                } else{
-                    u::updateSimpleRow(['count_recharge'=>$tmp_count_recharge], ['id' => $contract->id], 'contracts');
-                    $tmp_count_recharge++;
-                }
+        // $listContracts = u::query("SELECT DISTINCT student_id FROM contracts ");
+        // foreach ($listContracts as $contract) {
+        //     $studentId = $contract->student_id;
+        //     $contracts = u::query("SELECT id, type FROM contracts WHERE student_id = $studentId ORDER BY id ASC");
+        //     $tmp_count_recharge = 0;
+        //     foreach($contracts as $contract) {
+        //         if ($contract->type == 0) { // Assuming type 1 is for active contracts
+        //             u::updateSimpleRow(['count_recharge'=>-1], ['id' => $contract->id], 'contracts');
+        //         } else{
+        //             u::updateSimpleRow(['count_recharge'=>$tmp_count_recharge], ['id' => $contract->id], 'contracts');
+        //             $tmp_count_recharge++;
+        //         }
+        //     }
+        //     echo  $studentId . "/";
+        // }
+        $list = u::query("SELECT c.* FROM crm_students AS c LEFT JOIN crm_student_checkin AS cc ON cc.crm_student_id=c.id WHERE cc.id is NULL AND c.status=3");
+        foreach($list AS $student){
+            if(data_get($student, 'checkin_branch_id')){
+                u::insertSimpleRow(array(
+                    'crm_student_id' => $student->id,
+                    'checkin_at'=> data_get($student, 'checkin_at'),
+                    'checkin_owner_id' => data_get($student, 'checkin_owner_id') ,
+                    'checkin_branch_id'=> data_get($student, 'checkin_branch_id'),
+                    'created_at' =>  data_get($student, 'created_at') ,
+                    'creator_id' =>  data_get($student, 'creator_id') ,
+                    'type_product'=> data_get($student, 'type_product'),
+                    'status' => 1, // 
+                ), 'crm_student_checkin');
             }
-            echo  $studentId . "/";
         }
         return "ok";
     }

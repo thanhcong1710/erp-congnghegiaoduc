@@ -723,6 +723,7 @@
           error_message:"",
           disabled:false,
           type_product:"",
+          is_update:false,
           alert:{
             active: false,
             body: '',
@@ -1569,7 +1570,8 @@
           student_id: this.modal_checkin.student_id,
           branch_id: this.modal_checkin.branch_id,
           checkin_at: moment(this.modal_checkin.checkin_at).format('YYYY-MM-DD HH:mm'),
-          type_product: this.modal_checkin.type_product
+          type_product: this.modal_checkin.type_product,
+          is_update: this.modal_checkin.is_update ? 1 : 0,
         };
         this.$vs.loading();
         axios.p(`/api/crm/students/checkin`,data)
@@ -1590,6 +1592,7 @@
       },
       showModalUpdateCheckin(item){
         this.modal_checkin.show =true
+        this.modal_checkin.is_update =true
         this.modal_checkin.student_id = item.id
         this.modal_checkin.branch_id = item.checkin_branch_id
         this.modal_checkin.checkin_at =item.checkin_at;
