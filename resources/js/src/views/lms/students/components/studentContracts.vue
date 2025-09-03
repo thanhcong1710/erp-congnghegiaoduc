@@ -30,6 +30,7 @@
                 <p>Khóa học: {{item.product_name}}</p>
                 <p>Gói phí: {{item.tuition_fee_name}}</p>
                 <p>Số buổi: {{item.total_sessions}} ({{item.bonus_sessions ? item.bonus_sessions : 0}} học bổng)</p>
+                <p>Số buổi bảo lưu: {{ item.reserved_sessions + '/' +item.reservable_sessions }} buổi</p>
               </td>
               <td class="td vs-table--td">
                 <p>Giá gốc: {{item.init_tuition_fee_amount | formatMoney}}</p>

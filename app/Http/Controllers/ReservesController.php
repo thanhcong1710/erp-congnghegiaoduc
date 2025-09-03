@@ -43,7 +43,7 @@ class ReservesController extends Controller
         $list = u::query("SELECT r.id, s.name, s.lms_code, s.lms_id,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
-                r.session, r.start_date, r.end_date, r.is_reserved, r.status
+                r.session, r.start_date, r.end_date, r.is_reserved, r.status, r.type
             FROM reserves AS r 
                 LEFT JOIN students AS s ON s.id=r.student_id
             WHERE $cond $order_by $limitation");

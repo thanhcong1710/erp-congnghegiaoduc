@@ -117,7 +117,8 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Số buổi: <strong>{{item.session}}</strong></p>
-                  <p>Loại:{{item.is_reserved ? ' Bảo lưu giữ chỗ' : ' Bảo lưu không giữ chỗ'}}</p>
+                  <p>Loại:{{item.type == 1 ? ' Bảo lưu thường' : ' Bảo lưu đặc biệt'}}</p>
+                  <p>Phương thức:{{item.is_reserved ? ' giữ chỗ' : ' không giữ chỗ'}}</p>
                 </td>
                  <td class="td vs-table--td">
                   <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>
