@@ -475,6 +475,7 @@
         },
         disabled_trial : 0,
         temp_min_date:'',
+        temp_last_start_date:'',
       }
     },
     created() {
@@ -531,6 +532,7 @@
         this.sibling= false
         this.contract.type =''
         this.temp_min_date = new Date(student.last_start_date)
+        this.temp_last_start_date = student.last_start_date
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
@@ -575,6 +577,11 @@
         }
       },
       loadTuitionFee(){
+        if (this.contract.type == 0){
+          this.temp_min_date = new Date()
+        } else {
+          this.temp_min_date = new Date(this.temp_last_start_date)
+        }
         if(this.contract.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/contracts/load-tuition-fee`,{

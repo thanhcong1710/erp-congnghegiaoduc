@@ -314,7 +314,7 @@ class StudentsController extends Controller
     public function contracts(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
-        $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
+        $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, c.id AS contract_id, 
                 c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type, c.total_charged, c.summary_sessions,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
