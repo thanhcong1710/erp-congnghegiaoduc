@@ -184,6 +184,7 @@ class CheckinController extends Controller
             ),array('student_id'=>$lms_student_id), 'term_student_user');
 
             u::updateSimpleRow(array('status'=>3, 'lms_id' =>$lms_student_id), array('id'=> data_get($crm_student_info, 'id')), 'crm_students');
+            u::updateSimpleRow(array('status'=>3), array('crm_student_id'=> data_get($crm_student_info, 'id')), 'crm_student_checkin');
             LogStudents::logAdd($lms_student_id, 'Chuyển lên danh sách học sinh chính thức', Auth::user()->id);
         }
         $result =(object)array(
