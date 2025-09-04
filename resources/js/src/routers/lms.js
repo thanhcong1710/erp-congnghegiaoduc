@@ -222,6 +222,20 @@ export default {
         }
       },
       {
+        path: '/lms/reserves/multi-add',
+        name: 'lms-reserves-multi-add',
+        component: () => import('@/views/lms/reserves/multiAdd.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
+            { title: 'Bảo lưu cả lớp', active: true }
+          ],
+          pageTitle: 'Bảo lưu cả lớp',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/reserves/:id/detail',
         name: 'lms-reserves-detail',
         component: () => import('@/views/lms/reserves/detail.vue'),
