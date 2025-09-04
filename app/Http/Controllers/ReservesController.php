@@ -43,7 +43,7 @@ class ReservesController extends Controller
         $list = u::query("SELECT r.id, s.name, s.lms_code, s.lms_id,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
-                r.session, r.start_date, r.end_date, r.is_reserved, r.status
+                r.session, r.start_date, r.end_date, r.is_reserved, r.status, r.type
             FROM reserves AS r 
                 LEFT JOIN students AS s ON s.id=r.student_id
             WHERE $cond $order_by $limitation");
@@ -96,7 +96,7 @@ class ReservesController extends Controller
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $reserve_session, $holidays, $arr_day);
         $end_date = data_get($data_sessions,'end_date');
 
-        $reverse_exit = u::first("SELECT id FROM reserves WHERE contract_id=$contract_id AND status IN (1,2) AND
+        $reverse_exit = u::first("SELECT id FROM reserves WHERE contract_id=$contract_id AND status IN (1,2,4) AND
             ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date'))");
         if($reverse_exit){
             $result = array(

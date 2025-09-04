@@ -178,8 +178,8 @@
             <router-link class="btn btn-danger" :to="`/lms/reserves`">
               <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
             </router-link>
-            <vs-button class="mb-2  mr-3" color="success" @click="save(2)" v-if="status==1">Phê duyệt</vs-button>
-            <vs-button class="mb-2" color="danger" @click="save(3)" v-if="status==1">Từ chối phê duyệt</vs-button>
+            <vs-button class="mb-2  mr-3" color="success" @click="save(2)" v-if="status==1 && checkPermission('approve_reverse')">Phê duyệt</vs-button>
+            <vs-button class="mb-2" color="danger" @click="save(3)" v-if="status==1 && checkPermission('approve_reverse')">Từ chối phê duyệt</vs-button>
           </div>
         </div>
       </div>
@@ -291,6 +291,9 @@
       this.loadDetail(this.$route.params.id);
     },
     methods: {
+      checkPermission(text){
+        return u.checkPermission(this.$store.state.AppActiveUser, text)
+      },
       getLogs(student_id){
         this.$vs.loading();
         axios.g(`/api/lms/reserves/logs/${student_id}`)

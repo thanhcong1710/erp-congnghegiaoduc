@@ -30,12 +30,15 @@
                 <p>Khóa học: {{item.product_name}}</p>
                 <p>Gói phí: {{item.tuition_fee_name}}</p>
                 <p>Số buổi: {{item.total_sessions}} ({{item.bonus_sessions ? item.bonus_sessions : 0}} học bổng)</p>
+                <p>Số buổi bảo lưu: {{ item.reserved_sessions + '/' +item.reservable_sessions }} buổi</p>
               </td>
               <td class="td vs-table--td">
                 <p>Giá gốc: {{item.init_tuition_fee_amount | formatMoney}}</p>
                 <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                 <p>Công nợ: {{item.debt_amount | formatMoney}}</p>
+                <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
                 <p v-if="item.debt_amount>0 && item.total_charged"><strong>Đặt cọc: {{ item.summary_sessions }} buổi</strong></p>
+                <vs-button v-if="item.debt_amount>0 && item.total_charged" class="mr-3 mb-2" @click="exitDepost(item.contract_id)">Quy đổi cọc</vs-button>
               </td>
               <td class="td vs-table--td">
                 <strong>{{item.label_status}}</strong>
@@ -107,6 +110,32 @@
             this.$vs.loading.close();
           })
       },
+      confirmExitDepost () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn quy đổi gói phí cọc trên? không thể hủy sau khi đã quy đổi`,
+          accept: this.exitDepost,
+          acceptText: 'Quy đổi cọc',
+          cancelText: 'Hủy'
+        })
+      },
+      exitDepost(contract_id){
+        const data = {
+          contract_id: contract_id,
+        }
+        this.$vs.loading()
+        axios.p('/api/lms/contracts/exit-depost', data)
+          .then((response) => {
+            this.$vs.loading.close()
+            this.getContracts();
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
+      }
     }
   }
 </script>

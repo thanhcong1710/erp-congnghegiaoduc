@@ -140,8 +140,8 @@
                 </td>
                 <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
                 <td class="text-center list-action"> 
-                    <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item)"><i class="fa-solid fa-clipboard-check"></i></vs-button>
-                    <vs-button size="small" color="danger" v-if="item.status==2" @click="openConfirmUpStudent(item.id,item.name)"><i class="fa-solid fa-paper-plane"></i></vs-button>
+                    <!-- <vs-button size="small" color="success" v-if="item.status==1" @click="showModalCheckin(item)"><i class="fa-solid fa-clipboard-check"></i></vs-button> -->
+                    <vs-button size="small" color="danger" v-if="item.status==2 || item.status==1" @click="openConfirmUpStudent(item.id,item.name)"><i class="fa-solid fa-paper-plane"></i></vs-button>
                 </td>
                 <td class="td vs-table--td">{{item.checkined_note}}</td>
               </tr>

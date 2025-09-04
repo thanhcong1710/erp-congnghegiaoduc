@@ -132,6 +132,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/add', 'ContractsController@add');
             Route::post('contracts/list', 'ContractsController@list');
             Route::post('contracts/delete', 'ContractsController@delete');
+            Route::post('contracts/exit-depost', 'ContractsController@exitDepost');
             Route::get('contracts/show/{contract_id}', 'ContractsController@show');
             Route::post('contracts/update', 'ContractsController@update');
             Route::get('contracts/print/{contract_id}', 'ContractsController@print');

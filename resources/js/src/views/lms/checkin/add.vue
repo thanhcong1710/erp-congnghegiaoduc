@@ -201,7 +201,8 @@
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Ngày/Giờ Checkin</label>
-          <datepicker
+          <input class="vs-inputx vs-input--input normal" type="text" v-model="student.checkin_at" disabled>
+          <!-- <datepicker
                     id="checkin-at"
                     class="w-full"
                     :value="student.checkin_at"
@@ -211,7 +212,7 @@
                     type="datetime"
                     format="YYYY-MM-DD HH:mm"
             >
-            </datepicker>
+            </datepicker> -->
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Khóa học</label>
@@ -372,7 +373,7 @@
             gender: '',
             school: '',
             checkin_type_product: '',
-            checkin_at:'',
+            checkin_at: moment().format('YYYY-MM-DD HH:mm'),
             checkin_branch_id:'',
           }
         ],
@@ -388,7 +389,7 @@
           gender: '',
           school: '',
           checkin_type_product: '',
-          checkin_at:'',
+          checkin_at: moment().format('YYYY-MM-DD HH:mm'),
           checkin_branch_id:'',
         });
       },

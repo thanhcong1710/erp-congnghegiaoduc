@@ -388,7 +388,7 @@ class ChargesController extends Controller
             $availableSession = data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') > 0 ? data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') : 0;
             u::updateSimpleRow(array(
                 'status' => data_get($contract_info, 'status') >3  ? data_get($contract_info, 'status') : 3,
-                'reservable_sessions' => floor(data_get($contract_info, 'tuition_fee_session')/config('app.num_session_of_reservable')),
+                'reservable_sessions' => floor(data_get($contract_info, 'init_tuition_fee_session')/config('app.num_session_of_reservable')),
                 'summary_sessions' => $availableSession, 
                 'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
                 'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
