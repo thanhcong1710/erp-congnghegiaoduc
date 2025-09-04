@@ -284,6 +284,8 @@ class StudentsController extends Controller
         foreach($data AS $k=> $row){
             if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d')))) ) {
                 $data[$k]->disabled_trial = 1;
+            } elseif ($data[$k]->trial_enrolment_start_date && (strtotime($data[$k]->trial_enrolment_start_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d'))))) {
+                $data[$k]->disabled_trial = 1;
             }
         }
         return response()->json($data);
