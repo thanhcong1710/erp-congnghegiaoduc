@@ -96,6 +96,12 @@ export default [
             permission:'lms_reserves',
           },
           {
+            url: '/lms/reserves-multi',
+            name: 'Bảo lưu cả lớp',
+            slug: 'lms-reserves-multi',
+            permission:'lms_reserves',
+          },
+          {
             url: '/lms/class_transfers',
             name: 'Chuyển lớp',
             slug: 'lms-class_transfers',

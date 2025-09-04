@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Nhập tên hoặc mã học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Nhập tên lớp" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -49,8 +49,8 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/reserves/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+            <router-link class="btn btn-success" :to="'/lms/reserves/multi-add'">
+              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Bảo lưu cả lớp</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
@@ -71,17 +71,12 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Lớp học
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Thông tin bảo lưu
+                    <div class="vs-table-text">Số buổi
                       <!---->
                     </div>
                   </th>
@@ -106,20 +101,8 @@
                 <!---->
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.name }}</strong></p>
-                  <p>Mã: {{item.lms_code}}</p>
-                  <p>Mã LMS: {{item.lms_id}}</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p>Lớp: {{item.class_name}}</p>
-                  <p>{{item.branch_name}}</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p>Số buổi: <strong>{{item.session}}</strong></p>
-                  <p>Loại:{{item.type == 1 ? ' Bảo lưu thường' : ' Bảo lưu đặc biệt'}}</p>
-                  <p>Phương thức:{{item.is_reserved ? ' giữ chỗ' : ' không giữ chỗ'}}</p>
-                </td>
+                <td class="td vs-table--td">Lớp: {{item.class_name}}</td>
+                <td class="td vs-table--td">{{item.session}}</td>
                  <td class="td vs-table--td">
                   <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>
                 </td>

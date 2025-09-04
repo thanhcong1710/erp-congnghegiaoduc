@@ -136,6 +136,15 @@
                 </div>
               </div>
             </div>
+            <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+              <div v-html="alert.body"></div>
+            </vs-alert>
+            <div class="vx-col w-full text-right">
+              <router-link class="btn btn-danger" :to="`/lms/reserves`">
+                <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
+              </router-link>
+              <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
+            </div>
           </div>
         </div>
       </div>
@@ -247,17 +256,10 @@
         },
         search_student : false,
         checked_list: [],
-        next_schedules:[],
-        pre_schedules:[],
-        withdraw_id: '',
-        modal_join: {
-          title: "NỐI PHÍ CHO HỌC SINH",
-          show: false,
-          color: "info",
-          closeOnBackdrop: true,
-          error_message:"",
-          join_contract:{},
-          student_id:""
+        alert:{
+          active: false,
+          body: '',
+          color:'',
         },
       }
     },
@@ -378,6 +380,59 @@
           this.pre_schedules = response.data.pre_schedules
         })
       },
+      save() {
+        let mess = "";
+        let resp = true;
+        if (!this.checked_list.length) {
+          mess += " - Học sinh không được để trống<br/>";
+          resp = false;
+        }
+        if (this.reserve.session == "") {
+          mess += " - Số buổi bảo lưu không được để trống<br/>";
+          resp = false;
+        }
+        if (this.reserve.start_date == "") {
+          mess += " - Ngày bắt đầu bảo lưu không được để trống<br/>";
+          resp = false;
+        }
+        if (!resp) {
+          this.alert.color = 'danger'
+          this.alert.body = mess;
+          this.alert.active = true;
+          return false;
+        }
+        this.$vs.loading()
+        axios.p("/api/lms/reserves/add-multi",{
+          reserve: this.reserve,
+          checked_list: this.checked_list,
+          students: this.students
+        })
+        .then((response) => {
+          this.$vs.loading.close();
+          if(response.data.status ==1){
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+            this.$router.push('/lms/reserves')
+          }else{
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: response.data.message,
+              iconPack: 'feather',
+              icon: 'icon-alert-circle',
+              color: 'warning'
+            })
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+      }
     },
   }
 </script>

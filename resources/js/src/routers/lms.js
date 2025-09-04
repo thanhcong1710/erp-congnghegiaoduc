@@ -208,6 +208,19 @@ export default {
         }
       },
       {
+        path: '/lms/reserves-multi',
+        name: 'lms-reserves-multi',
+        component: () => import('@/views/lms/reserves/multiIndex.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu cả lớp', active: true}
+          ],
+          pageTitle: 'Danh sách bảo lưu cả lớp',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/reserves/add',
         name: 'lms-reserves-add',
         component: () => import('@/views/lms/reserves/add.vue'),
