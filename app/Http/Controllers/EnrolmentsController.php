@@ -177,7 +177,7 @@ class EnrolmentsController extends Controller
                 'class_id' => data_get($class_info,'id', null),
                 'class_id' => data_get($class_info,'id', null),
                 'enrolment_start_date' => $start_date,
-                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+                'enrolment_last_date' => data_get($data_sessions, 'end_date') ? data_get($data_sessions, 'end_date') : $start_date,
                 'status' => 6,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
