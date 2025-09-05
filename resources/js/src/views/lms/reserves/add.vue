@@ -136,14 +136,21 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Loại bảo lưu</label>
+              <select class="vs-inputx vs-input--input normal" v-model="reserve.type" disabled="true">
+                <option value="0">Bảo lưu thường</option>
+                <option value="1">Bảo lưu đặc biệt</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin bảo lưu</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại bảo lưu <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="reserve.is_reserved" :disabled="input_disabled">
+              <label>Phương thức <span class="text-danger"> (*)</span></label>
+              <select class="vs-inputx vs-input--input normal" v-model="reserve.is_reserved" :disabled="input_disabled" @change="getType">
                 <option value="0">Bảo lưu không giữ chỗ</option>
                 <option value="1">Bảo lưu giữ chỗ</option>
               </select>
@@ -265,6 +272,7 @@
           end_date:'',
           session:'',
           is_reserved: 1,
+          type:0
         },
         student_info:{
         },
@@ -284,6 +292,10 @@
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.html.branches.list = response.data
+        if(this.html.branches.list.length == 1){
+          this.html.branches.item = this.html.branches.list[0]
+          this.saveBranch(this.html.branches.item)
+        }
       })
     },
     methods: {
@@ -336,6 +348,7 @@
         }
       },
       getEndDate(){
+        this.getType()
         if(this.reserve.start_date && this.reserve.session){
           this.$vs.loading()
           axios.p("/api/system/get-enddate-in-class",{
@@ -353,6 +366,13 @@
           });
         }else{
           this.reserve.end_date = ''
+        }
+      },
+      getType(){
+        if(this.reserve.is_reserved == 1 && this.reserve.session <= this.student_info.reservable_sessions - this.student_info.reserved_sessions){
+          this.reserve.type = 0
+        }else{
+          this.reserve.type = 1
         }
       },
       save() {

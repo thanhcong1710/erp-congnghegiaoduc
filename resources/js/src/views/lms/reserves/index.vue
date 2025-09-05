@@ -117,7 +117,7 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Số buổi: <strong>{{item.session}}</strong></p>
-                  <p>Loại:{{item.type == 1 ? ' Bảo lưu thường' : ' Bảo lưu đặc biệt'}}</p>
+                  <p>Loại:{{item.type == 0 ? ' Bảo lưu thường' : ' Bảo lưu đặc biệt'}}</p>
                   <p>Phương thức:{{item.is_reserved ? ' giữ chỗ' : ' không giữ chỗ'}}</p>
                 </td>
                  <td class="td vs-table--td">

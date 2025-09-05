@@ -321,7 +321,7 @@
       <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
         <div v-html="alert.body"></div>
       </vs-alert>
-      <div class="mt-5">
+      <div class="mt-5" style="margin-bottom: 100px;">
          <vs-button class="mb-2" @click="disabled_edit=false" v-if="disabled_edit== true">Cập nhật thông tin</vs-button>
         <vs-button color="dark" class="mb-2 mr-3" @click="reloadPage" v-if="disabled_edit== false">Hủy</vs-button>
         <vs-button class="mb-2" color="success" @click="saveInfo" v-if="disabled_edit== false">Lưu</vs-button>

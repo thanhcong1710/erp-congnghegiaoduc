@@ -36,6 +36,7 @@
                 <p>Giá gốc: {{item.init_tuition_fee_amount | formatMoney}}</p>
                 <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                 <p>Công nợ: {{item.debt_amount | formatMoney}}</p>
+                <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
                 <p v-if="item.debt_amount>0 && item.total_charged"><strong>Đặt cọc: {{ item.summary_sessions }} buổi</strong></p>
                 <vs-button v-if="item.debt_amount>0 && item.total_charged" class="mr-3 mb-2" @click="exitDepost(item.contract_id)">Quy đổi cọc</vs-button>
               </td>

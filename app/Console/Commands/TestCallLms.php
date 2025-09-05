@@ -129,21 +129,6 @@ class TestCallLms extends Command
         //     }
         //     echo  $studentId . "/";
         // }
-        // $list = u::query("SELECT c.* FROM crm_students AS c LEFT JOIN crm_student_checkin AS cc ON cc.crm_student_id=c.id WHERE cc.id is NULL AND c.status=3");
-        // foreach($list AS $student){
-        //     if(data_get($student, 'checkin_branch_id')){
-        //         u::insertSimpleRow(array(
-        //             'crm_student_id' => $student->id,
-        //             'checkin_at'=> data_get($student, 'checkin_at'),
-        //             'checkin_owner_id' => data_get($student, 'checkin_owner_id') ,
-        //             'checkin_branch_id'=> data_get($student, 'checkin_branch_id'),
-        //             'created_at' =>  data_get($student, 'created_at') ,
-        //             'creator_id' =>  data_get($student, 'creator_id') ,
-        //             'type_product'=> data_get($student, 'type_product'),
-        //             'status' => 1, // 
-        //         ), 'crm_student_checkin');
-        //     }
-        // }
         return "ok";
     }
 }

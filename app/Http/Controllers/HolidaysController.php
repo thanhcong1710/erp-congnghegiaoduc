@@ -146,4 +146,34 @@ class HolidaysController extends Controller
         }
         return response()->json("ok");
     }
+
+    public function processHolidaysClass($start_date=null, $class_id=null){ 
+        $start_date  = $start_date ? $start_date : date('Y-m-d');
+        $cond="";
+        if($class_id){
+            $cond = " AND id=$class_id";
+        }
+        $list_class_date = u::query("SELECT * FROM classes WHERE status=1 AND cls_enddate >= CURRENT_DATE $cond AND branch_id IN(18,20,22)");
+        foreach($list_class_date AS $class){
+            $holidays = u::getPublicHolidays(data_get($class,'branch_id'), data_get($class,'product_id'));
+            $end_date = data_get($class,'cls_enddate');
+            $arr_day = explode(",", data_get($class, 'class_day'));
+            $data_sessions = u::calculatorSessions($start_date, $end_date, $holidays, $arr_day);
+            if(!empty(data_get($data_sessions, 'dates'))){
+                u::query("DELETE FROM schedules WHERE class_id=".data_get($class,'id')." AND class_date >= '$start_date'");
+                foreach(data_get($data_sessions, 'dates') AS $session){
+                    u::insertSimpleRow(array(
+                        'class_date'=> $session,
+                        'class_id'=> data_get($class,'id'),
+                        'status'=> 1,
+                        'created_at'=> date('Y-m-d H:i:s'),
+                        'teacher_id'=> data_get($class,'teacher_id'),
+                        'branch_id'=> data_get($class,'branch_id'),
+                        'cm_id'=> data_get($class,'cm_id'),
+                    ),'schedules');
+                }
+            }
+        }
+        return "ok";
+    }
 }

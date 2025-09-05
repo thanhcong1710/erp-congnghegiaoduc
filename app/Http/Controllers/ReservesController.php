@@ -96,7 +96,7 @@ class ReservesController extends Controller
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $reserve_session, $holidays, $arr_day);
         $end_date = data_get($data_sessions,'end_date');
 
-        $reverse_exit = u::first("SELECT id FROM reserves WHERE contract_id=$contract_id AND status IN (1,2) AND
+        $reverse_exit = u::first("SELECT id FROM reserves WHERE contract_id=$contract_id AND status IN (1,2,4) AND
             ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date'))");
         if($reverse_exit){
             $result = array(
