@@ -136,15 +136,15 @@
                 </div>
               </div>
             </div>
-            <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
-              <div v-html="alert.body"></div>
-            </vs-alert>
-            <div class="vx-col w-full text-right">
-              <router-link class="btn btn-danger" :to="`/lms/reserves`">
-                <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
-              </router-link>
-              <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
-            </div>
+          </div>
+          <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+            <div v-html="alert.body"></div>
+          </vs-alert>
+          <div class="vx-col w-full text-right mt-3">
+            <router-link class="btn btn-danger" :to="`/lms/reserves`">
+              <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
+            </router-link>
+            <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
           </div>
         </div>
       </div>
@@ -205,6 +205,8 @@
           start_date:'',
           end_date:'',
           session:'',
+          branch_id:'',
+          class_id:'',
         },
         classes: [],
         html:{
@@ -384,7 +386,7 @@
         let mess = "";
         let resp = true;
         if (!this.checked_list.length) {
-          mess += " - Học sinh không được để trống<br/>";
+          mess += " - Chưa chọn học sinh được bảo lưu<br/>";
           resp = false;
         }
         if (this.reserve.session == "") {
@@ -401,6 +403,8 @@
           this.alert.active = true;
           return false;
         }
+        this.reserve.branch_id = this.enrol.branch_id
+        this.reserve.class_id = this.class_info.class_id
         this.$vs.loading()
         axios.p("/api/lms/reserves/add-multi",{
           reserve: this.reserve,
@@ -409,24 +413,14 @@
         })
         .then((response) => {
           this.$vs.loading.close();
-          if(response.data.status ==1){
-            this.$vs.notify({
+          this.$vs.notify({
               title: 'Thành Công',
               text: response.data.message,
               color: 'success',
               iconPack: 'feather',
               icon: 'icon-check'
             })
-            this.$router.push('/lms/reserves')
-          }else{
-            this.$vs.notify({
-              title: 'Lỗi',
-              text: response.data.message,
-              iconPack: 'feather',
-              icon: 'icon-alert-circle',
-              color: 'warning'
-            })
-          }
+            this.$router.push('/lms/reserves-multi')
         })
         .catch((e) => {
           console.log(e);

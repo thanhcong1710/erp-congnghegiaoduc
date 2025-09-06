@@ -126,7 +126,10 @@
                 <td class="td vs-table--td text-center">
                   <p>{{item.status | getStatusName}}</p>
                 </td>
-               <td class="td vs-table--td text-center list-action"> 
+                <td class="td vs-table--td text-center" v-if="item.reserve_multi_id > 0">
+                  <p>Bảo lưu cả lớp</p>
+                </td>
+               <td class="td vs-table--td text-center list-action" v-else> 
                     <router-link :to="`/lms/reserves/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 

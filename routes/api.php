@@ -156,8 +156,13 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('reserves/search-student', 'ReservesController@searchStudent');
             Route::post('reserves/add', 'ReservesController@add');
             Route::post('reserves/delete', 'ReservesController@delete');
+            Route::post('reserves/list-multi', 'ReservesController@listMulti');
+            Route::post('reserves/delete-multi', 'ReservesController@deleteMulti');
+            Route::post('reserves/add-multi', 'ReservesController@addMulti');
             Route::get('reserves/show/{reserve_id}', 'ReservesController@show');
+            Route::get('reserves-multi/show/{reserve_id}', 'ReservesController@showMulti');
             Route::post('reserves/approve', 'ReservesController@approve');
+            Route::post('reserves/approve-multi', 'ReservesController@approveMulti');
             Route::get('reserves/logs/{student_id}', 'ReservesController@getLogsByStudent');
             Route::get('reserves/print/{id}', 'ReservesController@print');
 

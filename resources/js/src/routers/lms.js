@@ -241,7 +241,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
+            { title: 'Danh sách bảo lưu cả lớp', url: '/lms/reserves-multi' },
             { title: 'Bảo lưu cả lớp', active: true }
           ],
           pageTitle: 'Bảo lưu cả lớp',
@@ -259,6 +259,20 @@ export default {
             { title: 'Thông tin bảo lưu', active: true}
           ],
           pageTitle: 'Thông tin bảo lưu',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reserves/:id/detail-multi',
+        name: 'lms-reserves-detail-multi',
+        component: () => import('@/views/lms/reserves/multiDetail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách bảo lưu cả lớp', url: '/lms/reserves-multi'},
+            { title: 'Thông tin bảo lưu cả lớp', active: true}
+          ],
+          pageTitle: 'Thông tin bảo lưu cả lớp',
           rule: 'editor'
         }
       },

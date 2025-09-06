@@ -42,10 +42,10 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $lmsController = new \App\Http\Controllers\LmsController();
+        // $lmsController = new \App\Http\Controllers\LmsController();
         // $lmsController->addOrUpdateStudent(721);
         // $lmsController->addStudentToClass(845, true);
-        $lmsController->studentWithdrawByIdLMS(1328);
+        // $lmsController->studentWithdrawByIdLMS(1328);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");
         // foreach($list AS $row){
         //     u::updateScheduleHasStudent($row->id);
@@ -129,6 +129,7 @@ class TestCallLms extends Command
         //     }
         //     echo  $studentId . "/";
         // }
+        u::updateScheduleHasStudent(928,'2025-06-26');
         return "ok";
     }
 }

@@ -43,7 +43,7 @@ class ReservesController extends Controller
         $list = u::query("SELECT r.id, s.name, s.lms_code, s.lms_id,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
-                r.session, r.start_date, r.end_date, r.is_reserved, r.status, r.type
+                r.session, r.start_date, r.end_date, r.is_reserved, r.status, r.type, r.reserve_multi_id
             FROM reserves AS r 
                 LEFT JOIN students AS s ON s.id=r.student_id
             WHERE $cond $order_by $limitation");
@@ -319,5 +319,154 @@ class ReservesController extends Controller
         ]; 
         $data['left_amount'] = number_format($data['left_amount']);
         return response()->json($data);
+    }
+
+    public function listMulti(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $status = isset($request->status) ? $request->status : [];
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $cond = " r.status > 0 ";
+        $cond .= " AND r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+        }
+        if (!empty($status)) {
+            $cond .= " AND r.status IN (".implode(",",$status).")";
+        }
+        if ($keyword !== '') {
+            $cond .= " AND (cl.cls_name LIKE '%$keyword%') ";
+        }
+        
+        $order_by = " ORDER BY r.id DESC ";
+
+        $total = u::first("SELECT count(r.id) AS total 
+            FROM reserve_multis AS r LEFT JOIN classes AS cl ON cl.id=r.class_id WHERE $cond");
+        
+        $list = u::query("SELECT r.*,cl.cls_name AS class_name,
+                (SELECT name FROM users WHERE r.creator_id=id) AS creator_name,
+                (SELECT name FROM users WHERE r.approver_id=id) AS approver_name
+            FROM reserve_multis AS r 
+                LEFT JOIN classes AS cl ON cl.id=r.class_id
+            WHERE $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function addMulti(Request $request){
+        u::insertSimpleRow(array(
+            'branch_id' => data_get($request,'reserve.branch_id'),
+            'class_id'=> data_get($request,'reserve.class_id'),
+            'start_date' => data_get($request,'reserve.start_date'),
+            'end_date' => data_get($request,'reserve.end_date'),
+            'session'=> data_get($request,'reserve.session'),
+            'note'=> data_get($request,'reserve.note'),
+            'list_student'=>implode(",", data_get($request, 'checked_list')),
+            'status' => 1,
+            'creator_id' => Auth::user()->id,
+            'created_at' => date('Y-m-d H:i:s'),
+            'meta_data' => json_encode($request->input())
+        ), 'reserve_multis');
+
+        return response()->json("ok");
+    }  
+    public function deleteMulti(Request $request){
+        u::updateSimpleRow(array('status' => 0), array('id'=>$request->id), 'reserve_multis');
+        $result = array(
+            'status' => 1,
+            'message' => 'Hủy bản ghi bảo lưu thành công.'
+        );
+        return response()->json($result);
+    }
+
+    public function showMulti(Request $request,$reserve_id)
+    {
+        $data = u::first("SELECT r.* , (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name ,(SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name 
+            FROM reserve_multis AS r WHERE r.id=$reserve_id");
+        $data->meta_data = $data->meta_data ? json_decode($data->meta_data,true) : '';
+        if(!empty($data->meta_data['students'])){
+            foreach ($data->meta_data['students'] AS $k=> $row){
+                if(in_array(data_get($row, 'student_id'), $data->meta_data['checked_list'])){
+                    $data->meta_data['students'][$k]['checked'] =true;
+                } else {
+                    $data->meta_data['students'][$k]['checked'] =false;
+                }
+            }
+        }
+        return response()->json($data);
+    }
+
+    public function approveMulti(Request $request){
+        $reserve_id = data_get($request,'reserve_id');
+        $status = data_get($request,'status');
+        $reserve_info = u::getObject(array('id'=>$reserve_id), 'reserve_multis');
+        $result=[];
+        if($reserve_info){
+            if($status == 3){
+                u::updateSimpleRow(array(
+                    'status' => 3,
+                    'approver_id' => Auth::user()->id,
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'comment' => data_get($request,'comment'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                ),array('id'=>$reserve_id),'reserve_multis');
+                $result = array(
+                    'status' => 1,
+                    'message' => 'Từ chối phê duyệt bảo lưu thành công.'
+                );
+            }else{ 
+                $meta_data = $reserve_info->meta_data ? json_decode($reserve_info->meta_data,true) : '';
+                $students = data_get($meta_data, 'students');
+                foreach($students AS $row) {
+                    if(in_array(data_get($row, 'student_id'), data_get($meta_data, 'checked_list'))){
+                        $contract_info = u::first("SELECT * FROM contracts WHERE id = ".data_get($row, 'contract_id'));
+                        u::insertSimpleRow(array(
+                            'student_id' => data_get($row, 'student_id'),
+                            'type'=> 0 ,
+                            'start_date' => data_get($reserve_info,'start_date'),
+                            'session'=> data_get($reserve_info,'session'),
+                            'end_date' => data_get($reserve_info,'end_date'),
+                            'status' => 4,
+                            'creator_id' => Auth::user()->id,
+                            'created_at' => date('Y-m-d H:i:s'),
+                            'is_reserved' => 1,
+                            'contract_id' => data_get($contract_info,'id'),
+                            'branch_id' => data_get($contract_info,'branch_id'),
+                            'product_id' => data_get($contract_info,'product_id'),
+                            'program_id' => data_get($contract_info,'program_id'),
+                            'class_id' => data_get($contract_info,'class_id'),
+                            'note' => data_get($reserve_info,'note'),
+                            'meta_data' => json_encode($request->input()),
+                            'reserve_multi_id'=>$reserve_id
+                        ), 'reserves');
+                        
+                        if(data_get($reserve_info,'start_date') < date('Y-m-d')){
+                            u::updateScheduleHasStudent(data_get($contract_info,'id'),data_get($reserve_info,'start_date'));
+                        }
+                    }
+                }
+                u::updateSimpleRow(array(
+                    'status' => 4,
+                    'approver_id' => Auth::user()->id,
+                    'approved_at' => date('Y-m-d H:i:s'),
+                    'comment' => data_get($request,'comment'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                ),array('id'=>$reserve_id),'reserve_multis');
+                $result = array(
+                    'status' => 1,
+                    'message' => 'Phê duyệt bảo lưu thành công.'
+                );
+            }
+        }
+        return response()->json($result);
     }
 }

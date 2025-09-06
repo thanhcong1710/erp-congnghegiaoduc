@@ -91,6 +91,16 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Người tạo
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Người duyệt
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Thao tác
                       <!---->
                     </div>
@@ -107,14 +117,17 @@
                   <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>
                 </td>
                 <td class="td vs-table--td text-center">
+                  <p>{{item.creator_name}}</p>
+                </td>
+                <td class="td vs-table--td text-center">
+                  <p>{{item.approver_name}}</p>
+                </td>
+                <td class="td vs-table--td text-center">
                   <p>{{item.status | getStatusName}}</p>
                 </td>
                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/reserves/${item.id}/detail`" >
+                    <router-link :to="`/lms/reserves/${item.id}/detail-multi`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                    </router-link> 
-                    <router-link :to="`/pages/print/reserve/${item.id}`" target="_blank"> 
-                      <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
                     </router-link> 
                     <vs-button size="small" color="danger" v-if="item.status == 1" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
@@ -244,7 +257,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reserves/list', data)
+        axios.p('/api/lms/reserves/list-multi', data)
           .then((response) => {
             this.$vs.loading.close()
             this.reserves = response.data.list
@@ -274,7 +287,7 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn hủy bảo lưu của học sinh "${item.name} - ${item.lms_code}"`,
+          text: `Bạn chắc chắn hủy bảo lưu cả lớp: "${item.class_name}"`,
           accept: this.deleteContract,
           acceptText: 'Xóa',
           cancelText: 'Hủy'
@@ -285,7 +298,7 @@
           id: this.delete_id,
         };
         this.$vs.loading();
-        axios.p(`/api/lms/reserves/delete`,data)
+        axios.p(`/api/lms/reserves/delete-multi`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.getData();
