@@ -365,7 +365,8 @@ class ReservesController extends Controller
         $end_date =  data_get($request,'reserve.end_date');
         $class_id =  data_get($request,'reserve.class_id');
         $reverse_exit = u::first("SELECT id FROM reserve_multis WHERE class_id=$class_id AND status IN (1,2,4) AND
-            ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date'))");
+            ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date')
+            OR (start_date <= '$start_date' AND end_date>= '$end_date'))");
         if($reverse_exit){
             $result = array(
                 'status' => 0,
