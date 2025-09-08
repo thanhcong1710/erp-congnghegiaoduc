@@ -413,7 +413,8 @@
         })
         .then((response) => {
           this.$vs.loading.close();
-          this.$vs.notify({
+          if(response.data.status ==1){
+            this.$vs.notify({
               title: 'Thành Công',
               text: response.data.message,
               color: 'success',
@@ -421,6 +422,15 @@
               icon: 'icon-check'
             })
             this.$router.push('/lms/reserves-multi')
+          }else{
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: response.data.message,
+              iconPack: 'feather',
+              icon: 'icon-alert-circle',
+              color: 'warning'
+            })
+          }
         })
         .catch((e) => {
           console.log(e);

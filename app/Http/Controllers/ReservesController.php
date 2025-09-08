@@ -361,21 +361,37 @@ class ReservesController extends Controller
     }
 
     public function addMulti(Request $request){
-        u::insertSimpleRow(array(
-            'branch_id' => data_get($request,'reserve.branch_id'),
-            'class_id'=> data_get($request,'reserve.class_id'),
-            'start_date' => data_get($request,'reserve.start_date'),
-            'end_date' => data_get($request,'reserve.end_date'),
-            'session'=> data_get($request,'reserve.session'),
-            'note'=> data_get($request,'reserve.note'),
-            'list_student'=>implode(",", data_get($request, 'checked_list')),
-            'status' => 1,
-            'creator_id' => Auth::user()->id,
-            'created_at' => date('Y-m-d H:i:s'),
-            'meta_data' => json_encode($request->input())
-        ), 'reserve_multis');
-
-        return response()->json("ok");
+        $start_date =  data_get($request,'reserve.start_date');
+        $end_date =  data_get($request,'reserve.end_date');
+        $class_id =  data_get($request,'reserve.class_id');
+        $reverse_exit = u::first("SELECT id FROM reserve_multis WHERE class_id=$class_id AND status IN (1,2,4) AND
+            ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date'))");
+        if($reverse_exit){
+            $result = array(
+                'status' => 0,
+                'message' => 'Đã tồn tại bản ghi bảo lưu cả lớp trong khoảng thời gian đã chọn'
+            );
+            return response()->json($result);
+        }else {
+            u::insertSimpleRow(array(
+                'branch_id' => data_get($request,'reserve.branch_id'),
+                'class_id'=> data_get($request,'reserve.class_id'),
+                'start_date' => data_get($request,'reserve.start_date'),
+                'end_date' => data_get($request,'reserve.end_date'),
+                'session'=> data_get($request,'reserve.session'),
+                'note'=> data_get($request,'reserve.note'),
+                'list_student'=>implode(",", data_get($request, 'checked_list')),
+                'status' => 1,
+                'creator_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'meta_data' => json_encode($request->input())
+            ), 'reserve_multis');
+            $result = array(
+                'status' => 1,
+                'message' => 'Thêm mới bảo lưu cả lớp thành công'
+            );
+            return response()->json("ok");
+        }
     }  
     public function deleteMulti(Request $request){
         u::updateSimpleRow(array('status' => 0), array('id'=>$request->id), 'reserve_multis');
@@ -450,6 +466,8 @@ class ReservesController extends Controller
                         
                         if(data_get($reserve_info,'start_date') < date('Y-m-d')){
                             u::updateScheduleHasStudent(data_get($contract_info,'id'),data_get($reserve_info,'start_date'));
+                        } else {
+                            u::updateDoneSessions(data_get($contract_info,'id'));
                         }
                     }
                 }
