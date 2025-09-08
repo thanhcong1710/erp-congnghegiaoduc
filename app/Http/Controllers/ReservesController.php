@@ -391,7 +391,7 @@ class ReservesController extends Controller
                 'status' => 1,
                 'message' => 'Thêm mới bảo lưu cả lớp thành công'
             );
-            return response()->json("ok");
+            return response()->json($result);
         }
     }  
     public function deleteMulti(Request $request){
