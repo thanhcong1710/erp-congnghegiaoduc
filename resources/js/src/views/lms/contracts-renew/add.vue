@@ -496,7 +496,7 @@
             axios.p(`/api/lms/students/search-contract`,{
               branch_id: this.contract.branch_id,
               keyword: keyword,
-              is_renew:0
+              is_renew:1
             }).then((response) => {
                 const resp = response.data.length ? response.data : [{
                     label: 'Không tìm thấy',
@@ -589,7 +589,7 @@
             branch_id: this.contract.branch_id,
             product_id: this.contract.product_id,
             type_contract: this.contract.type,
-            is_renew: 0
+            is_renew: 1
           }).then((response) => {
             this.$vs.loading.close();
             this.html.tuition_fee.list = response.data
@@ -743,7 +743,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/contracts')
+          this.$router.push('/lms/contracts-renew')
         })
         .catch((e) => {
           console.log(e);

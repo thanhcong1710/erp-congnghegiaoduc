@@ -16,10 +16,17 @@ class ContractsController extends Controller
         $product_id = $request->product_id;
         $branch_id = $request->branch_id;
         $type_contract = $request->type_contract;
+        $is_renew = $request->is_renew;
+        if ($is_renew) {
+            $cond = " AND t.type IN(0,2)";
+        } else {
+            $cond = " AND t.type IN(0,1)";
+        }
         $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session,t.number_of_months
             FROM tuition_fee AS t 
             WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE AND type_contract = $type_contract
-            AND t.product_id = $product_id AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' ) 
+            AND t.product_id = $product_id AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' )
+            $cond 
             ORDER BY t.number_of_months DESC");
         return response()->json($data);
     }
@@ -113,6 +120,7 @@ class ContractsController extends Controller
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND status > 0 ORDER BY count_recharge DESC LIMIT 1");
+        $count_recharge = data_get($request, 'type') ==0 ? -1 : ($last_contract ? $last_contract->count_recharge + 1 : 0);
         $contract_id = u::insertSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -151,7 +159,7 @@ class ContractsController extends Controller
            'created_at'=>date('Y-m-d H:i:s'),
            'creator_id'=>Auth::user()->id,
            'status' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? 3 : 1,
-           'count_recharge' => data_get($request, 'type') ==0 ? -1 : ($last_contract ? $last_contract->count_recharge + 1 : 0),
+           'count_recharge' => $count_recharge,
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
@@ -179,13 +187,14 @@ class ContractsController extends Controller
         $contract_code = config('app.prefix_contract_code').$contract_code;
         u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
         u::addLogContracts($contract_id);
-        LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
+        $text_mess = $count_recharge > 0 ? 'tái phí' : 'nhập học';
+        LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng '.$text_mess.' - '.$contract_code, Auth::user()->id);
         $lmsController = new LMSController();
         $lmsController->addOrUpdateStudent(data_get($student_info, 'student_id'));
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới nhập học thành công'
+            'message' => 'Thêm mới '.$text_mess.' thành công'
         );
         return response()->json($result);
     }
@@ -196,6 +205,7 @@ class ContractsController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
+        $type_contract = isset($request->type_contract) ? $request->type_contract : 0;
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -218,6 +228,11 @@ class ContractsController extends Controller
         }
         if ($start_date !== '') {
             $cond .= " AND c.created_at > '$start_date 00:00:00'";
+        }
+        if ($type_contract == 1) {
+            $cond .= " AND c.count_recharge <= 0 ";
+        } elseif ($type_contract == 2) {
+            $cond .= " AND c.count_recharge > 0 ";
         }
         
         $order_by = " ORDER BY c.id DESC ";
@@ -366,10 +381,11 @@ class ContractsController extends Controller
         $contract_code = config('app.prefix_contract_code').$contract_code;
         u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
         u::addLogContracts($contract_id);
+        $text_mess = data_get($pre_update_contract_info, 'count_recharge') > 0 ? 'tái phí' : 'nhập học';
         
         $result = array(
             'status' => 1,
-            'message' => 'Cập nhật thông tin nhập học thành công'
+            'message' => 'Cập nhật thông tin '.$text_mess.' thành công'
         );
         return response()->json($result);
     }

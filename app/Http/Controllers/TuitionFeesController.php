@@ -77,6 +77,7 @@ class TuitionFeesController extends Controller
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($tuition_fee, 'status'),
+            'type' => data_get($tuition_fee, 'type'),
         ), 'tuition_fee');
 
         $tuition_fees_relation = data_get($request, 'tuition_fees_relation');
@@ -155,6 +156,7 @@ class TuitionFeesController extends Controller
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
             'status' =>  data_get($tuition_fee, 'status'),
+            'type' => data_get($tuition_fee, 'type'),
         ),array('id'=>data_get($tuition_fee, 'id')), 'tuition_fee');
 
         u::updateSimpleRow(array('status'=>0),array('tuition_fee_id'=>data_get($tuition_fee, 'id')), 'tuition_fee_relation');
