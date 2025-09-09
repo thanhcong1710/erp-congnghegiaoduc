@@ -82,8 +82,8 @@ class StudentsController extends Controller
         );
         u::updateSimpleRow($data_update,array('id'=>$request->student_id), 'crm_students');
         $is_update = isset($request->is_update) ? (int)$request->is_update : 0;
-        if ($is_update) {
-            $lastCheckin =u::first("SELECT id FROM crm_student_checkin WHERE crm_student_id = $request->student_id ORDER BY id DESC");
+        $lastCheckin =u::first("SELECT id FROM crm_student_checkin WHERE crm_student_id = $request->student_id ORDER BY id DESC");
+        if ($is_update && $lastCheckin) {
             u::updateSimpleRow(array(
                 'checkin_at'=>$request->checkin_at,
                 'checkin_owner_id' => $request->owner_id,
