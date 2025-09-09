@@ -8,23 +8,13 @@
           <div class="vx-row">
             <div class="vx-col w-full mb-4">
               <label>Chọn trung tâm <span class="text-danger"> (*)</span></label>
-              <vue-select
-                    label="name"
-                    placeholder="Chọn trung tâm để giới hạn phạm vi tìm kiếm"
-                    :options="html.branches.list"
-                    v-model="html.branches.item"
-                    :searchable="true"
-                    language="tv-VN"
-                     @input="saveBranch"
-                ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4" v-if="contract.branch_id">
-              <label> Chọn học sinh <span class="text-danger"> (*)</span></label>
-              <search
-                  :endpoint="filter.search.link"
-                  :suggestStudents="filter.search.find"
-                  :onSelectStudent="filter.search.action">
-              </search>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="contract.branch_name"
+                disabled="true"
+              />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Họ tên</label>
@@ -32,7 +22,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.name"
+                v-model="contract.name"
                 disabled="true"
               />
             </div>
@@ -42,7 +32,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.lms_code"
+                v-model="contract.lms_code"
                 disabled="true"
               />
             </div>
@@ -52,7 +42,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.gud_name1"
+                v-model="contract.gud_name1"
                 disabled="true"
               />
             </div>
@@ -62,7 +52,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.gud_mobile1"
+                v-model="contract.gud_mobile1"
                 disabled="true"
               />
             </div>
@@ -72,7 +62,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.gud_email1"
+                v-model="contract.gud_email1"
                 disabled="true"
               />
             </div>
@@ -82,7 +72,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.address"
+                v-model="contract.address"
                 disabled="true"
               />
             </div>
@@ -92,7 +82,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.student_branch_name"
+                v-model="contract.branch_name"
                 disabled="true"
               />
             </div>
@@ -102,7 +92,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.ec_name"
+                v-model="contract.ec_name"
                 disabled="true"
               />
             </div>
@@ -112,7 +102,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.ec_leader_name"
+                v-model="contract.ec_leader_name"
                 disabled="true"
               />
             </div>
@@ -122,7 +112,7 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.ceo_branch_name"
+                v-model="contract.ceo_branch_name"
                 disabled="true"
               />
             </div>
@@ -135,7 +125,7 @@
               <label>Loại hợp đồng <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="contract.type" @change="loadTuitionFee();">
                 <option value="" disabled>Chọn loại hợp đồng</option>
-                <option value="0" v-if="disabled_trial==0">Học thử</option>
+                <option value="0">Học thử</option>
                 <option value="1">Chính thức</option>
               </select>
             </div>
@@ -149,7 +139,6 @@
                     :searchable="true"
                     language="tv-VN"
                     @input="saveProduct"
-                    :disabled="!(contract.student_id && contract.type!=='')"
                 ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
@@ -237,7 +226,7 @@
                 disabled="true"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="student_info.count_sibling > 0">
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="contract.count_sibling > 0">
               <label> <input type="checkbox" v-model="contract.sibling" @change="caculatorSession">
                 Giảm trừ anh chị em học cùng 5%</label>
               <input
@@ -278,7 +267,7 @@
                 disabled="true"
               />
             </div>
-              <div class="vx-col w-full mb-4">
+            <div class="vx-col w-full mb-4">
                 <label >Chính sách B2B</label>
                 <vue-select
                       label="title"
@@ -338,7 +327,6 @@
                 placeholder="Chọn ngày dự kiến học"
                 :lang="datepickerOptions.lang"
                 @change="selectDate"
-                :not-before="temp_min_date"
               />
             </div>
             <div class="vx-col w-full mb-4">
@@ -355,10 +343,10 @@
 
       <div class="vx-row mt-5">
         <div class="vx-col w-full text-right">
-          <router-link class="btn btn-danger" :to="`/lms/contracts`">
+          <router-link class="btn btn-danger" :to="`/lms/contracts/${contract.id}/detail`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
-          <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
+          <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
         </div>
       </div>
     </vx-card>
@@ -473,78 +461,70 @@
           body: '',
           color:'',
         },
-        disabled_trial : 0,
-        temp_min_date:'',
-        temp_last_start_date:'',
+        tmp_tuition_fee_id:'',
+        tmp_discount_code_id:'',
       }
     },
-    created() {
+    async created() {
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.html.branches.list = response.data
       })
-      axios.g(`/api/system/products`)
+      await axios.g(`/api/system/products`)
         .then(response => {
         this.html.products.list = response.data
       })
+      this.loadDetail();
     },
     methods: {
-      searchSuggestStudent(keyword) {
-        if (keyword && keyword.length >= 3 && this.calling === false) {
-          this.calling = true
-          return new Promise((resolve, reject) => {
-            axios.p(`/api/lms/students/search-contract`,{
-              branch_id: this.contract.branch_id,
-              keyword: keyword,
-              is_renew:0
-            }).then((response) => {
-                const resp = response.data.length ? response.data : [{
-                    label: 'Không tìm thấy',
-                    branch_name: 'Không có kết quả nào phù hợp'
-                }]
-                this.calling = false
-                resolve(resp)
-            }).catch(e => console.log(e))
-          })
-        }
-      },
-      selectStudent(student) {
-        this.disabled_trial = student.disabled_trial;
-        this.student_info = student
-        this.contract.student_id = student.student_id
-        this.discount_code_id=''
-        this.discount_code=''
-        this.discount_code_amount=''
-        this.discount_code_percent=''
-        this.discount_code_session=''
-        this.coupon_code_check=0
-        this.coupon_code=''
-        this.coupon_amount= ''
-        this.coupon_session= ''
-        this.coupon_percent= ''
-        this.total_amount=''
-        this.total_session=''
-        this.start_date=''
-        this.note=''
-        this.b2b_campaign_id=''
-        this.b2b_amount=''
-        this.b2b_bonus_session=''
-        this.sibling_discount=''
-        this.sibling= false
-        this.contract.type =''
-        this.temp_min_date = new Date(student.last_start_date)
-        this.temp_last_start_date = student.last_start_date
-      },
-      saveBranch(data = null){
+      saveDiscountB2B(data = null){
+        console.log(data);
         if (data && typeof data === 'object') {
-          const branch_id = data.id
-          this.contract.branch_id = branch_id
+          const b2b_campaign_id = data.id
+          this.contract.b2b_campaign_id = b2b_campaign_id
+          this.contract.b2b_amount = data.amount
+          this.contract.b2b_bonus_session = data.bonus_session
         }else{
-          this.contract.branch_id = ""
+          this.contract.b2b_campaign_id = ""
+          this.contract.b2b_amount = ""
+          this.contract.b2b_bonus_session = ""
         }
-        this.student_info = {}
-        this.contract.student_id=""
+        this.caculatorSession()
       },
+      loadB2BCampaign(){
+        this.$vs.loading();
+        axios.p(`/api/marketing/b2b/campaigns/load-b2b-campaign`,{
+          tuition_fee_id: this.contract.tuition_fee_id,
+          student_id: this.contract.student_id
+        }).then((response) => {
+          this.$vs.loading.close();
+          this.html.b2b_campaign.list = response.data
+          this.html.b2b_campaign.item = this.html.b2b_campaign.list.filter(item => item.id == this.contract.b2b_campaign_id)[0]
+        }).catch(e => console.log(e))
+      },
+      loadDetail(){
+        this.$vs.loading();
+        axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
+          .then(response => {
+          this.$vs.loading.close();
+          this.contract = response.data
+          this.contract.total_amount = response.data.must_charge
+          this.contract.total_session = response.data.total_sessions
+          this.contract.tuition_fee_amount = response.data.init_tuition_fee_amount
+          this.contract.tuition_fee_session = response.data.init_tuition_fee_session
+          this.contract.tuition_fee_receivable = response.data.init_tuition_fee_receivable
+          this.contract.sibling = response.data.sibling_discount > 0 ? true : false;
+          if(this.contract.coupon_code){
+            this.contract.coupon_code_check=1
+          }
+          this.tmp_tuition_fee_id = response.data.tuition_fee_id
+          this.tmp_discount_code_id = response.data.discount_code_id
+          this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
+          this.loadTuitionFee();
+          this.loadB2BCampaign();
+        })
+      },
+      
       saveProduct(data = null){
         if (data && typeof data === 'object') {
           const product_id = data.id
@@ -571,28 +551,26 @@
           this.contract.tuition_fee_receivable = data.receivable
           this.contract.tuition_fee_session = data.session
           this.loadDiscountCode();
-          this.caculatorSession();
-          this.loadB2BCampaign();
+          this.caculatorSession()
         }else{
           this.contract.tuition_fee_id = ""
         }
       },
       loadTuitionFee(){
-        if (this.contract.type == 0){
-          this.temp_min_date = new Date()
-        } else {
-          this.temp_min_date = new Date(this.temp_last_start_date)
-        }
         if(this.contract.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/contracts/load-tuition-fee`,{
             branch_id: this.contract.branch_id,
             product_id: this.contract.product_id,
             type_contract: this.contract.type,
-            is_renew: 0
+            is_renew: 1
           }).then((response) => {
             this.$vs.loading.close();
             this.html.tuition_fee.list = response.data
+            if(this.tmp_tuition_fee_id){
+              this.html.tuition_fee.item = this.html.tuition_fee.list.filter(item => item.id == this.tmp_tuition_fee_id)[0]
+              this.loadDiscountCode()
+            }
           }).catch(e => console.log(e))
         }
       },
@@ -603,6 +581,9 @@
         }).then((response) => {
           this.$vs.loading.close();
           this.html.discount_codes.list = response.data
+          if(this.tmp_discount_code_id){
+            this.html.discount_codes.item = this.html.discount_codes.list.filter(item => item.id == this.tmp_discount_code_id)[0]
+          }
         }).catch(e => console.log(e))
       },
       saveDiscountCode(data = null){
@@ -622,65 +603,33 @@
         }
         this.caculatorSession()
       },
-      saveDiscountB2B(data = null){
-        console.log(data);
-        if (data && typeof data === 'object') {
-          const b2b_campaign_id = data.id
-          this.contract.b2b_campaign_id = b2b_campaign_id
-          this.contract.b2b_amount = data.amount
-          this.contract.b2b_bonus_session = data.bonus_session
-        }else{
-          this.contract.b2b_campaign_id = ""
-          this.contract.b2b_amount = ""
-          this.contract.b2b_bonus_session = ""
-        }
-        this.caculatorSession()
-      },
-      loadB2BCampaign(){
-        this.$vs.loading();
-        axios.p(`/api/marketing/b2b/campaigns/load-b2b-campaign`,{
-          tuition_fee_id: this.contract.tuition_fee_id,
-          student_id: this.contract.student_id
+      checkCoupon(){
+        this.$vs.loading.close();
+        this.contract.coupon_code_check = 0;
+         axios.p(`/api/lms/contracts/check-coupon`,{
+          coupon_code: this.contract.coupon_code,
+          student_id: this.contract.student_id,
         }).then((response) => {
           this.$vs.loading.close();
-          this.html.b2b_campaign.list = response.data
-        }).catch(e => console.log(e))
-      },
-      checkCoupon(){
-        if(this.contract.coupon_code){
-          this.$vs.loading.close();
-          this.contract.coupon_code_check = 0;
-          axios.p(`/api/lms/contracts/check-coupon`,{
-            coupon_code: this.contract.coupon_code,
-            student_id: this.contract.student_id,
-          }).then((response) => {
-            this.$vs.loading.close();
-            if(response.data.status == 0){
-              this.$vs.notify({
-                title: 'Lỗi',
-                text: response.data.message,
-                iconPack: 'feather',
-                icon: 'icon-alert-circle',
-                color: 'warning'
-              })
-              this.contract.coupon_amount = 0
-              this.contract.coupon_session = 0
-              this.contract.coupon_percent = 0,
-              this.caculatorSession()
-            }else{
-              this.contract.coupon_code_check = 1;
-              this.contract.coupon_amount = response.data.data.coupon_amount
-              this.contract.coupon_session = response.data.data.coupon_session
-              this.contract.coupon_percent = response.data.data.coupon_percent
-              this.caculatorSession()
-            }
-          }).catch(e => console.log(e))
-        }else{
-          this.contract.coupon_amount = 0
-          this.contract.coupon_session = 0
-          this.contract.coupon_percent = 0,
+          if(response.data.status == 0){
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: response.data.message,
+              iconPack: 'feather',
+              icon: 'icon-alert-circle',
+              color: 'warning'
+            })
+            this.contract.coupon_amount = ''
+            this.contract.coupon_session = ''
+            this.contract.coupon_percent
+          }else{
+            this.contract.coupon_code_check = 1;
+            this.contract.coupon_amount = response.data.data.coupon_amount
+            this.contract.coupon_session = response.data.data.coupon_session
+            this.contract.coupon_percent = response.data.data.coupon_percent
+          }
           this.caculatorSession()
-        }
+        }).catch(e => console.log(e))
       },
       selectDate(date){
         if (date) {
@@ -702,14 +651,6 @@
       save() {
         let mess = "";
         let resp = true;
-        if (this.contract.branch_id == "") {
-          mess += " - Trung tâm không được để trống<br/>";
-          resp = false;
-        }
-        if (this.contract.student_id == "") {
-          mess += " - Học sinh không được để trống<br/>";
-          resp = false;
-        }
         if (this.contract.type == "") {
           mess += " - Loại hợp đồng không được để trống<br/>";
           resp = false;
@@ -733,7 +674,7 @@
           return false;
         }
         this.$vs.loading()
-        axios.p("/api/lms/contracts/add",this.contract)
+        axios.p("/api/lms/contracts/update",this.contract)
         .then((response) => {
           this.$vs.loading.close();
           this.$vs.notify({
@@ -743,7 +684,7 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/contracts')
+          this.$router.push(`/lms/contracts-renew/${this.contract.id}/detail`)
         })
         .catch((e) => {
           console.log(e);

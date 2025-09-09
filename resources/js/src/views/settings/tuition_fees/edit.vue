@@ -74,9 +74,19 @@
             <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Loại gói phí</label>
               <div class=w-full>
-                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_contract">
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_contract"  @change="changeNewRenew()">
                   <option value="0">Học thử</option>
                   <option value="1">Chính thức</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="tuition_fee.type_contract==1">
+              <label>New/Renew</label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type">
+                  <option value="0">Tất cả</option>
+                  <option value="1">New</option>
+                  <option value="2">Renew</option>
                 </select>
               </div>
             </div>
@@ -224,6 +234,7 @@
           expired_date: '',
           type_contract: 1,
           status:1,
+          type:0,
         },
         price:'',
         receivable:'',
@@ -257,6 +268,9 @@
       this.loadDetail();
     },
     methods: {
+      changeNewRenew(){
+        this.tuition_fee.type=0;
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/settings/tuition-fees/show/${this.$route.params.id}`)
