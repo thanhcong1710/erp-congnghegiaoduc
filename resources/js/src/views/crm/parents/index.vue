@@ -541,7 +541,7 @@
         this.users_manager_list = response.data
       })
       this.getData();
-      if (this.$route.params.reset ==1){
+      if (this.$route.query.reset ==1){
         this.reset();
       }
     },
