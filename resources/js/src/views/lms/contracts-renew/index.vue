@@ -36,7 +36,7 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/contracts/add'">
+            <router-link class="btn btn-success" :to="'/lms/contracts-renew/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -225,7 +225,7 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_contract:1
+            type_contract:2
           }
 
         this.$vs.loading()

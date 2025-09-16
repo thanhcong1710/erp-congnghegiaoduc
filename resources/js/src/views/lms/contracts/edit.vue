@@ -563,6 +563,7 @@
             branch_id: this.contract.branch_id,
             product_id: this.contract.product_id,
             type_contract: this.contract.type,
+            is_renew: 0
           }).then((response) => {
             this.$vs.loading.close();
             this.html.tuition_fee.list = response.data

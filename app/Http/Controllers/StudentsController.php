@@ -269,6 +269,12 @@ class StudentsController extends Controller
     public function searchContract(Request $request){
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
+        $is_renew = $request->is_renew;
+        if ($is_renew) {
+            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0 ) > 0";
+        } else{
+            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0) = 0";
+        }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
                 (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
@@ -281,7 +287,7 @@ class StudentsController extends Controller
                 (SELECT enrolment_last_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_last_date,
                 (SELECT enrolment_start_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_start_date
             FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')");
+                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') $cond");
         foreach($data AS $k=> $row){
             if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d')))) ) {
                 $data[$k]->disabled_trial = 1;

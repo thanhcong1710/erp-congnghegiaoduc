@@ -115,6 +115,61 @@ export default {
         }
       },
       {
+        path: '/lms/contracts-renew',
+        name: 'lms-contracts-renew',
+        component: () => import('@/views/lms/contracts-renew/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách tái phí', active: true }
+          ],
+          pageTitle: 'Danh sách tái phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/contracts-renew/add',
+        name: 'lms-contracts-renew-add',
+        component: () => import('@/views/lms/contracts-renew/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách tái phí', url: '/lms/contracts-renew' },
+            { title: 'Thêm mới tái phí', active: true }
+          ],
+          pageTitle: 'Thêm mới tái phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/contracts-renew/:id/detail',
+        name: 'lms-contracts-renew-detail',
+        component: () => import('@/views/lms/contracts-renew/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách tái phí', url: '/lms/contracts-renew'},
+            { title: 'Thông tin tái phí', active: true}
+          ],
+          pageTitle: 'Thông tin tái phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/contracts-renew/:id/edit',
+        name: 'lms-contracts-renew-edit',
+        component: () => import('@/views/lms/contracts-renew/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách tái phí', url: '/lms/contracts-renew'},
+            { title: 'Cập nhật tái phí', active: true}
+          ],
+          pageTitle: 'Cập nhật tái phí',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/charges',
         name: 'lms-charges',
         component: () => import('@/views/lms/accounting/charges.vue'),
