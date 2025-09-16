@@ -271,9 +271,9 @@ class StudentsController extends Controller
         $branch_id = $request->branch_id;
         $is_renew = $request->is_renew;
         if ($is_renew) {
-            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0) > 0";
+            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0 ) > 0";
         } else{
-            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0) = 0";
+            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0) = 0";
         }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
                 (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,
