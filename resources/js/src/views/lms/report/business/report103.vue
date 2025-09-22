@@ -51,6 +51,9 @@
                   <th colspan="1" rowspan="1">Ngày checkin</th>
                   <th colspan="1" rowspan="1">Họ và tên</th>
                   <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Ngày sinh</th>
+                  <th colspan="1" rowspan="1">Phụ huynh</th>
+                  <th colspan="1" rowspan="1">SĐT</th>
                   <th colspan="1" rowspan="1">Sale</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
                 </tr>
@@ -60,6 +63,9 @@
                 <td class="td vs-table--td">{{item.checkined_at}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td">{{item.lms_id}}</td>
+                <td class="td vs-table--td">{{item.birthday}}</td>
+                <td class="td vs-table--td">{{item.parent_name}}</td>
+                <td class="td vs-table--td">{{item.parent_mobile}}</td>
                 <td class="td vs-table--td">{{ item.ec_name}}</td>
                 <td class="td vs-table--td">{{ item.branch_name}}</td>
               </tr>

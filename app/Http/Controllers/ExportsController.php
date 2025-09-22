@@ -523,27 +523,34 @@ class ExportsController extends Controller
         }
         $cond ="";
         if($start_date){
-            $cond.= " AND s.checkined_at >= '$start_date 00:00:00'";
+            $cond.= " AND csc.checkined_at >= '$start_date 00:00:00'";
         }
         if($end_date){
-            $cond.= " AND s.checkined_at <= '$end_date 23:59:59'";
+            $cond.= " AND csc.checkined_at <= '$end_date 23:59:59'";
         }
 
         $order_by = " ORDER BY s.id DESC ";
-        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
-            FROM crm_students AS s 
+        $list = u::query("SELECT s.name, ss.lms_id, csc.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+                b.name AS branch_name, p.name AS parent_name, p.mobile_1 AS parent_mobile,
+                IF(ss.id IS NOT NULL, ss.date_of_birth, s.birthday) AS birthday
+            FROM crm_student_checkin AS csc 
+                LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id   
+                LEFT JOIN crm_parents AS p ON p.id = s.parent_id  
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
-                LEFT JOIN users AS u ON u.id =s.checkin_owner_id
-                LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond $order_by");
+                LEFT JOIN users AS u ON u.id =csc.checkin_owner_id
+                LEFT JOIN branches AS b ON b.id =csc.checkin_branch_id
+            WHERE csc.checkin_branch_id IN ($branch_query) AND csc.status >= 2 $cond $order_by");
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'STT');
         $sheet->setCellValue('B1', 'Ngày checkin');
         $sheet->setCellValue('C1', 'Họ và tên');
         $sheet->setCellValue('D1', 'Mã LMS');
-        $sheet->setCellValue('E1', 'Sale');
-        $sheet->setCellValue('F1', 'Trung tâm');
+        $sheet->setCellValue('E1', 'Ngày sinh');
+        $sheet->setCellValue('F1', 'Phụ huynh');
+        $sheet->setCellValue('G1', 'SĐT');
+        $sheet->setCellValue('H1', 'Sale');
+        $sheet->setCellValue('I1', 'Trung tâm');
         $headerStyle = [
             'font' => [
                 'bold' => true,
@@ -556,22 +563,28 @@ class ExportsController extends Controller
         ];
         
         // Áp dụng cho dòng 1 từ A1 đến F1
-        $sheet->getStyle('A1:F1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
 
         $sheet->getColumnDimension("A")->setWidth(5);
-        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(20);
         $sheet->getColumnDimension("C")->setWidth(30);
-        $sheet->getColumnDimension("D")->setWidth(30);
-        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
         $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(30);
+        $sheet->getColumnDimension("I")->setWidth(30);
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $i+1);
             $sheet->setCellValue('B' . $x, $list[$i]->checkined_at);
             $sheet->setCellValue('C' . $x, $list[$i]->name);
             $sheet->setCellValue('D' . $x, $list[$i]->lms_id) ;
-            $sheet->setCellValue('E' . $x, $list[$i]->ec_name );
-            $sheet->setCellValue('F' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('E' . $x, $list[$i]->birthday);
+            $sheet->setCellValue('F' . $x, $list[$i]->parent_name);
+            $sheet->setCellValue('G' . $x, $list[$i]->parent_mobile);
+            $sheet->setCellValue('H' . $x, $list[$i]->ec_name );
+            $sheet->setCellValue('I' . $x, $list[$i]->branch_name);
         }
         $writer = new Xlsx($spreadsheet);
         try {

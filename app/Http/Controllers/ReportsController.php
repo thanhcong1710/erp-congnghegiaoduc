@@ -478,24 +478,27 @@ class ReportsController extends Controller
         }
         $cond ="";
         if($start_date){
-            $cond.= " AND s.checkined_at >= '$start_date 00:00:00'";
+            $cond.= " AND csc.checkined_at >= '$start_date 00:00:00'";
         }
         if($end_date){
-            $cond.= " AND s.checkined_at <= '$end_date 23:59:59'";
+            $cond.= " AND csc.checkined_at <= '$end_date 23:59:59'";
         }
         
         $order_by = " ORDER BY s.id DESC";
-        $total = u::first("SELECT COUNT(s.id) total
+        $total = u::first("SELECT COUNT(csc.id) total
             FROM crm_student_checkin AS csc 
                 LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id 
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond");
-        $list = u::query("SELECT s.name, ss.lms_id, s.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, b.name AS branch_name
+            WHERE csc.checkin_branch_id IN ($branch_query) AND csc.status >= 1 $cond");
+        $list = u::query("SELECT s.name, ss.lms_id, csc.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+                b.name AS branch_name, p.name AS parent_name, p.mobile_1 AS parent_mobile,
+                IF(ss.id IS NOT NULL, ss.date_of_birth, s.birthday) AS birthday
             FROM crm_student_checkin AS csc 
-                LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id     
+                LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id   
+                LEFT JOIN crm_parents AS p ON p.id = s.parent_id  
                 LEFT JOIN students AS ss ON ss.id=s.lms_id
-                LEFT JOIN users AS u ON u.id =s.checkin_owner_id
-                LEFT JOIN branches AS b ON b.id =s.checkin_branch_id
-            WHERE s.checkin_branch_id IN ($branch_query) AND s.status >= 2 $cond $order_by $limitation ");
+                LEFT JOIN users AS u ON u.id =csc.checkin_owner_id
+                LEFT JOIN branches AS b ON b.id =csc.checkin_branch_id
+            WHERE csc.checkin_branch_id IN ($branch_query) AND csc.status >= 1 $cond $order_by $limitation ");
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

@@ -97,7 +97,7 @@ class CheckinController extends Controller
         $crm_student_info = u::first("SELECT * FROM crm_students WHERE id = $request->crm_student_id");
         $crm_parent_info = u::first("SELECT * FROM crm_parents WHERE id = ".(int)data_get($crm_student_info, 'parent_id'));
         if($crm_student_info && $crm_parent_info && !data_get($crm_student_info, 'lms_id')){
-            if(data_get($crm_student_info,'status') != 2){
+            if(data_get($crm_student_info,'status') != 2 || data_get($crm_student_info,'checkined_at') == null){
                 u::updateSimpleRow(array(
                     'checkined_at' => date('Y-m-d H:i:s'),
                     'checkined_by' =>  Auth::user()->id,
