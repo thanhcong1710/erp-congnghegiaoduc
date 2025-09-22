@@ -1306,4 +1306,128 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report08(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
+        $class_id = "";
+        $cm_id = "";
+        $keyword = "";
+        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $report_month = $arr_value[$k];
+            }
+            if($key=='keyword'){
+                $keyword = $arr_value[$k];
+            }
+            if($key=='cm_id'){
+                $cm_id = $arr_value[$k];
+            }
+            if($key=='class_id'){
+                $class_id = $arr_value[$k];
+            }
+        }
+        
+        if ($report_month == date('Y-m')){
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+            if ($class_id) {
+                $cond .= " AND c.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND c.cm_id = '$cm_id'";
+            }
+            $order_by = " ORDER BY c.id DESC ";
+            $list = u::query("SELECT c.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+            FROM
+                contracts c
+                LEFT JOIN students s ON c.student_id = s.id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN classes AS cls ON c.class_id = cls.id
+                LEFT JOIN programs AS p ON p.id = cls.program_id
+                LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                LEFT JOIN users AS u ON u.id= c.cm_id
+            WHERE
+                c.`status` = 6 $cond $order_by ");
+        }else {
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+    
+            if ($report_month !== '') {
+                $cond .= " AND r.report_month = '$report_month'";
+            }
+            if ($class_id) {
+                $cond .= " AND r.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND r.cm_id = '$cm_id'";
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            
+            $list = u::query("SELECT r.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                    s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+                FROM report_student_in_class AS r 
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN classes AS cls ON cls.id = r.class_id
+                    LEFT JOIN programs AS p ON p.id = cls.program_id
+                    LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                    LEFT JOIN users AS u ON u.id= r.cm_id
+                WHERE $cond $order_by");
+        }
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Kỳ học');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Lớp');
+        $sheet->setCellValue('D1', 'Tên học sinh');
+        $sheet->setCellValue('E1', 'Mã LMS');
+        $sheet->setCellValue('F1', 'Ngày sinh');
+        $sheet->setCellValue('G1', 'Tên phụ huynh');
+        $sheet->setCellValue('H1', 'SDT');
+        $sheet->setCellValue('I1', 'CM');
+
+        $sheet->getColumnDimension("A")->setWidth(20);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->semester_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->branch_name );
+            $sheet->setCellValue('C' . $x, $list[$i]->class_name);
+            $sheet->setCellValue('D' . $x, $list[$i]->name);
+            $sheet->setCellValue('E' . $x, $list[$i]->lms_code);
+            $sheet->setCellValue('F' . $x, $list[$i]->date_of_birth);
+            $sheet->setCellValue('G' . $x, $list[$i]->gud_name1);
+            $sheet->setCellValue('H' . $x, $list[$i]->gud_mobile1);
+            $sheet->setCellValue('I' . $x, $list[$i]->cm_name);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo chi tiết học sinh theo lớp.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

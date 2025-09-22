@@ -999,4 +999,135 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report08(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $class_id = isset($request->class_id) ? $request->class_id : '';
+        $cm_id = isset($request->cm_id) ? $request->cm_id : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        if ($start_date == date('Y-m')) {
+            $cond = " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            if (!empty($branch_id)) {
+                $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+            if ($class_id) {
+                $cond .= " AND c.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND c.cm_id = '$cm_id'";
+            }
+            $order_by = " ORDER BY c.id DESC ";
+            $total = u::first("SELECT count(c.id) AS total 
+                FROM
+                    contracts c
+                    LEFT JOIN students s ON c.student_id = s.id
+                    LEFT JOIN branches AS b ON b.id = c.branch_id
+                    LEFT JOIN classes cls ON c.class_id = cls.id
+            WHERE
+                c.`status` = 6 $cond");
+               
+            $list = u::query("SELECT c.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+            FROM
+                contracts c
+                LEFT JOIN students s ON c.student_id = s.id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN classes AS cls ON c.class_id = cls.id
+                LEFT JOIN programs AS p ON p.id = cls.program_id
+                LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                LEFT JOIN users AS u ON u.id= c.cm_id
+            WHERE
+                c.`status` = 6 $cond $order_by $limitation");
+        } else {
+            $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+            if (!empty($branch_id)) {
+                $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+    
+            if ($start_date !== '') {
+                $cond .= " AND r.report_month = '$start_date'";
+            }
+            if ($class_id) {
+                $cond .= " AND r.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND r.cm_id = '$cm_id'";
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+    
+            $total = u::first("SELECT count(r.id) AS total 
+                FROM report_student_in_class AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
+            
+            $list = u::query("SELECT r.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                    s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+                FROM report_student_in_class AS r 
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN classes AS cls ON cls.id = r.class_id
+                    LEFT JOIN programs AS p ON p.id = cls.program_id
+                    LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                    LEFT JOIN users AS u ON u.id= r.cm_id
+                WHERE $cond $order_by $limitation");
+        }
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function updateReportStudentInClass()
+    {
+        $report_month =  date('Y-m', time() - 7 * 3600);
+        $data = u::query("SELECT c.student_id, c.class_id, c.branch_id, c.product_id, c.id AS contract_id, 
+            cls.teacher_id, c.type AS contract_type, c.cm_id, '$report_month' AS report_month
+        FROM
+            contracts c
+            LEFT JOIN classes AS cls ON c.class_id = cls.id
+        WHERE
+            c.`status` = 6");
+        if ($data) {
+            u::query("DELETE FROM report_student_in_class WHERE report_month >= '$report_month' ");
+            self::addItemsReportStudentInClass($data);
+        }
+        return "ok";
+    }
+    public function addItemsReportStudentInClass($list)
+    {
+        if ($list) {
+            $created_at = date('Y-m-d H:i:s');
+            $query = "INSERT INTO report_student_in_class (student_id, class_id, branch_id, product_id, teacher_id, cm_id, report_month, contract_id, contract_type, created_at) VALUES ";
+            if (count($list) > 5000) {
+                for ($i = 0; $i < 5000; $i++) {
+                    $item = $list[$i];
+                    $query .= "('".(int)$item->student_id."', '".(int)$item->class_id."', '".(int)$item->branch_id."', '".(int)$item->product_id."', '".(int)$item->teacher_id."', '".(int)$item->cm_id."', '".$item->report_month."', '".(int)$item->contract_id."','".(int)$item->contract_type."', '$created_at' ),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                self::addItems(array_slice($list, 5000));
+            } else {
+                foreach ($list as $item) {
+                    $query .= "('".(int)$item->student_id."', '".(int)$item->class_id."', '".(int)$item->branch_id."', '".(int)$item->product_id."', '".(int)$item->teacher_id."', '".(int)$item->cm_id."', '".$item->report_month."', '".(int)$item->contract_id."','".(int)$item->contract_type."', '$created_at' ),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+            }
+        }
+    }
 }
