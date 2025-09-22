@@ -10,7 +10,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
+            <date-picker name="item-date" v-model="searchData.dateRange" style="width: 100%" range format="YYYY-MM-DD"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
         </div>
@@ -36,6 +36,7 @@
                   <th colspan="1" rowspan="1">Số học thử</th>
                   <th colspan="1" rowspan="1">Số học sinh cọc</th>
                   <th colspan="1" rowspan="1">Số học sinh fullfee</th>
+                  <th colspan="1" rowspan="1">Số học sinh new</th>
                   <th colspan="1" rowspan="1">Số học sinh renew</th>
                   <th colspan="1" rowspan="1">DS New</th>
                   <th colspan="1" rowspan="1">DS Renew</th>
@@ -49,6 +50,7 @@
                 <td class="td vs-table--td">{{ item.count_trial}}</td>
                 <td class="td vs-table--td">{{ item.count_deposit}}</td>
                 <td class="td vs-table--td">{{ item.count_full_fee}}</td>
+                <td class="td vs-table--td">{{ item.count_new}}</td>
                 <td class="td vs-table--td">{{ item.count_renew}}</td>
                 <td class="td vs-table--td">{{ item.sales_new | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.sales_renew | formatNumber}}</td>
@@ -104,7 +106,7 @@
           arr_branch: "",
           branch_id:"",
           keyword: "",
-          dateRange: "",
+          dateRange: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
         },
         datepickerOptions: {
           closed: true,
@@ -154,7 +156,6 @@
         this.branch_list = response.data
       })
       this.getData();
-      this.searchData.dateRange = new Date();
     },
     methods: {
       reset() {
@@ -162,10 +163,12 @@
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
-        this.searchData.dateRange= ""
+        this.searchData.dateRange= [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()]
         this.getData();
       },
       getData() {
+        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
+        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
         const ids_branch = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -176,7 +179,8 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
-            start_date: u.getDateMonth(this.searchData.dateRange),
+            start_date: startDate,
+            end_date: endDate,
             pagination:this.pagination,
           }
 
@@ -223,10 +227,15 @@
           this.key += "branch_id,"
           this.value += ids_branch+","
         }
-        if (this.searchData.dateRange){
+        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
+        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
+        if (startDate){
           this.key += "start_date,"
-          this.value +=u.getDateMonth(this.searchData.dateRange)+","
-          console.log(u.getDateMonth(this.searchData.dateRange))
+          this.value +=startDate+","
+        }
+        if (endDate){
+          this.key += "end_date,"
+          this.value +=endDate+","
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"

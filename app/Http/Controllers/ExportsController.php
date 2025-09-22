@@ -1238,7 +1238,8 @@ class ExportsController extends Controller
         ini_set('memory_limit', '-1');
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
-        $start_date = date('Y-m');
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
         $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
         foreach($arr_key AS $k=>$key){
             if($key=='branch_id'){
@@ -1247,18 +1248,22 @@ class ExportsController extends Controller
             if($key=='start_date'){
                 $start_date = $arr_value[$k];
             }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
         }
         
         $order_by = " ORDER BY b.id DESC ";
         $list = u::query("SELECT b.name AS branch_name,
-                (SELECT COUNT(id) FROM crm_students WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
-                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_deposit,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_full_fee,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_renew,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_new,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_renew,
-                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.branch_id=b.id) AS total_deposit
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkined_at >= '$start_date 00:00:00' AND checkined_at <= '$end_date 23:59:59') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND enrolment_start_date >= '$start_date' AND enrolment_start_date <= '$end_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND p.charge_date>= '$start_date' AND p.charge_date <= '$end_date'  AND p.branch_id=b.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_new,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND c.created_at >= '$start_date 00:00:00' AND c.created_at <= '$end_date 00:00:00' AND c.branch_id=b.id) AS total_deposit
             FROM branches AS b 
             WHERE b.status =1 $cond AND b.id > 10 $order_by");
 
@@ -1269,10 +1274,11 @@ class ExportsController extends Controller
         $sheet->setCellValue('C1', 'Số học thử');
         $sheet->setCellValue('D1', 'Số học sinh cọc');
         $sheet->setCellValue('E1', 'Số học sinh fullfee');
-        $sheet->setCellValue('F1', 'Số học sinh renew');
-        $sheet->setCellValue('G1', 'DS New');
-        $sheet->setCellValue('H1', 'DS Renew');
-        $sheet->setCellValue('I1', 'Công nợ');
+        $sheet->setCellValue('F1', 'Số học sinh new');
+        $sheet->setCellValue('G1', 'Số học sinh renew');
+        $sheet->setCellValue('H1', 'DS New');
+        $sheet->setCellValue('I1', 'DS Renew');
+        $sheet->setCellValue('J1', 'Công nợ');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(20);
@@ -1283,6 +1289,7 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("G")->setWidth(20);
         $sheet->getColumnDimension("H")->setWidth(20);
         $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
@@ -1290,10 +1297,11 @@ class ExportsController extends Controller
             $sheet->setCellValue('C' . $x, $list[$i]->count_trial);
             $sheet->setCellValue('D' . $x, $list[$i]->count_deposit);
             $sheet->setCellValue('E' . $x, $list[$i]->count_full_fee);
-            $sheet->setCellValue('F' . $x, $list[$i]->count_renew);
-            $sheet->setCellValue('G' . $x, (int)$list[$i]->sales_new);
-            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_renew);
-            $sheet->setCellValue('I' . $x, (int)$list[$i]->total_deposit);
+            $sheet->setCellValue('F' . $x, $list[$i]->count_new);
+            $sheet->setCellValue('G' . $x, $list[$i]->count_renew);
+            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_new);
+            $sheet->setCellValue('I' . $x, (int)$list[$i]->sales_renew);
+            $sheet->setCellValue('J' . $x, (int)$list[$i]->total_deposit);
 
         }
         $writer = new Xlsx($spreadsheet);
