@@ -33,9 +33,8 @@ class ClassesController extends Controller
             c.cls_name AS `text`, 
             c.program_id AS parent_id, 
             IF(c.cm_id > 0, 
-                IF(c.status = 0, 
-                    'fa-regular fa-rectangle-xmark fa-fw', 
-                    IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
+                IF(c.status = 0, 'fa-regular fa-rectangle-xmark fa-fw', 'fa-solid fa-file-lines fa-fw'),
+                    'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
         WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id  ORDER BY item_id ";
