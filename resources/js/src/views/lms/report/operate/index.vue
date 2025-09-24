@@ -44,11 +44,12 @@
                 <p>07. BÁO CÁO HỌC SINH PENDING</p>
               </router-link>
             </div>
-            <!-- <div class="mb-2">
+            <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-08'"  v-if="checkPermission('lms_reports_operate_08')">
-                <p>08. CHỈ SỐ VẬN HÀNH ACS</p>
+                <p>08. BÁO CÁO CHI TIẾT HỌC SINH THEO LỚP</p>
               </router-link>
             </div>
+            <!-- 
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-09'"  v-if="checkPermission('lms_reports_operate_09')">
                 <p>09. BÁO CÁO TỶ LỆ ACS CỦA TỪNG CM</p>

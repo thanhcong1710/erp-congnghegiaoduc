@@ -1238,7 +1238,8 @@ class ExportsController extends Controller
         ini_set('memory_limit', '-1');
         $arr_key =explode(',',$key);
         $arr_value =explode(',',$value);
-        $start_date = date('Y-m');
+        $start_date = date('Y-m-01');
+        $end_date = date('Y-m-d');
         $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
         foreach($arr_key AS $k=>$key){
             if($key=='branch_id'){
@@ -1247,18 +1248,22 @@ class ExportsController extends Controller
             if($key=='start_date'){
                 $start_date = $arr_value[$k];
             }
+            if($key=='end_date'){
+                $end_date = $arr_value[$k];
+            }
         }
         
         $order_by = " ORDER BY b.id DESC ";
         $list = u::query("SELECT b.name AS branch_name,
-                (SELECT COUNT(id) FROM crm_students WHERE checkin_branch_id = b.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
-                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_deposit,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_full_fee,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS count_renew,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_new,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.branch_id=b.id) AS sales_renew,
-                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND DATE_FORMAT(c.created_at, '%Y-%m')= '$start_date' AND c.branch_id=b.id) AS total_deposit
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkined_at >= '$start_date 00:00:00' AND checkined_at <= '$end_date 23:59:59') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND enrolment_start_date >= '$start_date' AND enrolment_start_date <= '$end_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND p.charge_date>= '$start_date' AND p.charge_date <= '$end_date'  AND p.branch_id=b.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_new,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND c.created_at >= '$start_date 00:00:00' AND c.created_at <= '$end_date 00:00:00' AND c.branch_id=b.id) AS total_deposit
             FROM branches AS b 
             WHERE b.status =1 $cond AND b.id > 10 $order_by");
 
@@ -1269,10 +1274,11 @@ class ExportsController extends Controller
         $sheet->setCellValue('C1', 'Số học thử');
         $sheet->setCellValue('D1', 'Số học sinh cọc');
         $sheet->setCellValue('E1', 'Số học sinh fullfee');
-        $sheet->setCellValue('F1', 'Số học sinh renew');
-        $sheet->setCellValue('G1', 'DS New');
-        $sheet->setCellValue('H1', 'DS Renew');
-        $sheet->setCellValue('I1', 'Công nợ');
+        $sheet->setCellValue('F1', 'Số học sinh new');
+        $sheet->setCellValue('G1', 'Số học sinh renew');
+        $sheet->setCellValue('H1', 'DS New');
+        $sheet->setCellValue('I1', 'DS Renew');
+        $sheet->setCellValue('J1', 'Công nợ');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(20);
@@ -1283,6 +1289,7 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("G")->setWidth(20);
         $sheet->getColumnDimension("H")->setWidth(20);
         $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
@@ -1290,16 +1297,141 @@ class ExportsController extends Controller
             $sheet->setCellValue('C' . $x, $list[$i]->count_trial);
             $sheet->setCellValue('D' . $x, $list[$i]->count_deposit);
             $sheet->setCellValue('E' . $x, $list[$i]->count_full_fee);
-            $sheet->setCellValue('F' . $x, $list[$i]->count_renew);
-            $sheet->setCellValue('G' . $x, (int)$list[$i]->sales_new);
-            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_renew);
-            $sheet->setCellValue('I' . $x, (int)$list[$i]->total_deposit);
+            $sheet->setCellValue('F' . $x, $list[$i]->count_new);
+            $sheet->setCellValue('G' . $x, $list[$i]->count_renew);
+            $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_new);
+            $sheet->setCellValue('I' . $x, (int)$list[$i]->sales_renew);
+            $sheet->setCellValue('J' . $x, (int)$list[$i]->total_deposit);
 
         }
         $writer = new Xlsx($spreadsheet);
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Kết quả kinh doanh theo trung tâm.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report08(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
+        $class_id = "";
+        $cm_id = "";
+        $keyword = "";
+        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $report_month = $arr_value[$k];
+            }
+            if($key=='keyword'){
+                $keyword = $arr_value[$k];
+            }
+            if($key=='cm_id'){
+                $cm_id = $arr_value[$k];
+            }
+            if($key=='class_id'){
+                $class_id = $arr_value[$k];
+            }
+        }
+        
+        if ($report_month == date('Y-m')){
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+            if ($class_id) {
+                $cond .= " AND c.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND c.cm_id = '$cm_id'";
+            }
+            $order_by = " ORDER BY c.id DESC ";
+            $list = u::query("SELECT c.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+            FROM
+                contracts c
+                LEFT JOIN students s ON c.student_id = s.id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN classes AS cls ON c.class_id = cls.id
+                LEFT JOIN programs AS p ON p.id = cls.program_id
+                LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                LEFT JOIN users AS u ON u.id= c.cm_id
+            WHERE
+                c.`status` = 6 $cond $order_by ");
+        }else {
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+    
+            if ($report_month !== '') {
+                $cond .= " AND r.report_month = '$report_month'";
+            }
+            if ($class_id) {
+                $cond .= " AND r.class_id = '$class_id'";
+            }
+            if ($cm_id) {
+                $cond .= " AND r.cm_id = '$cm_id'";
+            }
+            
+            $order_by = " ORDER BY r.id DESC ";
+            
+            $list = u::query("SELECT r.id, sem.name AS semester_name, b.name AS branch_name, cls.cls_name AS class_name, 
+                    s.date_of_birth, s.lms_code, s.name, s.gud_name1, s.gud_mobile1, CONCAT (u.hrm_id, ' - ', u.name) AS cm_name
+                FROM report_student_in_class AS r 
+                    LEFT JOIN students AS s ON s.id=r.student_id
+                    LEFT JOIN branches AS b ON b.id = r.branch_id
+                    LEFT JOIN classes AS cls ON cls.id = r.class_id
+                    LEFT JOIN programs AS p ON p.id = cls.program_id
+                    LEFT JOIN semesters AS sem ON sem.id = p.semester_id
+                    LEFT JOIN users AS u ON u.id= r.cm_id
+                WHERE $cond $order_by");
+        }
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Kỳ học');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Lớp');
+        $sheet->setCellValue('D1', 'Tên học sinh');
+        $sheet->setCellValue('E1', 'Mã LMS');
+        $sheet->setCellValue('F1', 'Ngày sinh');
+        $sheet->setCellValue('G1', 'Tên phụ huynh');
+        $sheet->setCellValue('H1', 'SDT');
+        $sheet->setCellValue('I1', 'CM');
+
+        $sheet->getColumnDimension("A")->setWidth(20);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(30);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(30);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->semester_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->branch_name );
+            $sheet->setCellValue('C' . $x, $list[$i]->class_name);
+            $sheet->setCellValue('D' . $x, $list[$i]->name);
+            $sheet->setCellValue('E' . $x, $list[$i]->lms_code);
+            $sheet->setCellValue('F' . $x, $list[$i]->date_of_birth);
+            $sheet->setCellValue('G' . $x, $list[$i]->gud_name1);
+            $sheet->setCellValue('H' . $x, $list[$i]->gud_mobile1);
+            $sheet->setCellValue('I' . $x, $list[$i]->cm_name);
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo chi tiết học sinh theo lớp.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

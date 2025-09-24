@@ -4,11 +4,11 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>CHỈ SỐ VẬN HÀNH ACS</h5>
+      <h5>BÁO CÁO CHI TIẾT HỌC SINH THEO LỚP</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Trung tâm</label>
             <multiselect
                 name="search_branch"
@@ -22,11 +22,40 @@
                 :searchable="true"
                 track-by="id"
                 selectedLabel="" selectLabel="" deselectLabel=""
+                 @input="slectBranch"
               >
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label>CM - Quản lý lớp học</label>
+            <vue-select
+                  label="label"
+                  placeholder="Chọn quản lý lớp học"
+                  :options="cms_list"
+                  v-model="cms_item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveCM"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label>Lớp học</label>
+            <vue-select
+                  label="cls_name"
+                  placeholder="Chọn lớp học"
+                  :options="class_list"
+                  v-model="class_item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveClass"
+              ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label for="" class="vs-input--label">Từ khóa</label>
+            <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
@@ -49,36 +78,28 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Kỳ học</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình</th>
-                  <th colspan="1" rowspan="1">Loại lớp</th>
-                  <th colspan="1" rowspan="1">Loại sĩ số</th>
-                  <th colspan="1" rowspan="1">Hình thức học</th>
-                  <th colspan="1" rowspan="1">Số lượng lớp</th>
-                  <th colspan="1" rowspan="1">Số HV đang học</th>
-                  <th colspan="1" rowspan="1">Số HV đặt cọc</th>
-                  <th colspan="1" rowspan="1">Số HV Trial</th>
-                  <th colspan="1" rowspan="1">Tổng số HV</th>
-                  <th colspan="1" rowspan="1">ACS</th>
+                  <th colspan="1" rowspan="1">Lớp</th>
+                  <th colspan="1" rowspan="1">Tên học sinh</th>
+                  <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Ngày sinh</th>
+                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
+                  <th colspan="1" rowspan="1">SĐT</th>
+                  <th colspan="1" rowspan="1">CM</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
-                <!---->
-                
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{item.semester_name}}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
+                <td class="td vs-table--td">{{item.class_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
-                <td class="td vs-table--td">{{ item.product_name}}</td>
+                <td class="td vs-table--td">{{ item.lms_code}}</td>
+                <td class="td vs-table--td">{{ item.date_of_birth}}</td>
+                <td class="td vs-table--td">{{ item.gud_name1}}</td>
+                <td class="td vs-table--td">{{ item.gud_mobile1}}</td>
                 <td class="td vs-table--td">{{ item.cm_name}}</td>
-                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
               </tr>
             </table>
             
@@ -121,16 +142,23 @@
     components: { 
       vSelect,
       Multiselect,
-      DatePicker
+      DatePicker,
+      "vue-select": vSelect,
     },
     data() {
       return {
         branch_list: [],
+        cms_list: [],
+        cms_item:"",
+        class_list: [],
+        class_item:"",
         searchData: {
           arr_branch: "",
           branch_id:"",
           keyword: "",
           dateRange: "",
+          cm_id:"",
+          class_id:"",
         },
         datepickerOptions: {
           closed: true,
@@ -183,6 +211,46 @@
       this.searchData.dateRange = new Date();
     },
     methods: {
+      slectBranch(){
+        var branch_id = 0
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            branch_id = item.id
+          })
+        }
+        axios.g(`/api/system/cms/${branch_id}`)
+        .then(response => {
+          this.cms_list = response.data
+          this.cms_item=""
+          this.searchData.cm_id = ''
+          this.class_list = ""
+          this.class_item = ""
+        })
+      },
+      saveCM(data = null){
+        if (data && typeof data === 'object') {
+          const cm_id = data.id
+          this.searchData.cm_id = cm_id
+          axios.g(`/api/system/get-class-by-cm/${cm_id}`)
+            .then(response => {
+              this.class_list = response.data
+              this.searchData.class_id = ''
+              this.class_item = ""
+            })
+        }else{
+          this.searchData.cm_id=""
+          this.searchData.class_id = ""
+          this.class_item = ""
+        }
+      },
+      saveClass(data = null){
+        if (data && typeof data === 'object') {
+          const class_id = data.id
+          this.searchData.class_id = class_id
+        }else{
+          this.searchData.class_id = ""
+        }
+      },
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
@@ -202,12 +270,14 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            cm_id: this.searchData.cm_id,
+            class_id: this.searchData.class_id, 
             start_date: u.getDateMonth(this.searchData.dateRange),
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/08', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -232,7 +302,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report08/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -253,6 +323,14 @@
           this.key += "start_date,"
           this.value +=u.getDateMonth(this.searchData.dateRange)+","
           console.log(u.getDateMonth(this.searchData.dateRange))
+        }
+        if (this.searchData.cm_id){
+          this.key += "cm_id,"
+          this.value +=this.searchData.cm_id+","
+        }
+        if (this.searchData.class_id){
+          this.key += "class_id,"
+          this.value +=this.searchData.class_id+","
         }
         this.key = this.key? this.key.substring(0, this.key.length - 1):'_'
         this.value = this.value? this.value.substring(0, this.value.length - 1) : "_"
