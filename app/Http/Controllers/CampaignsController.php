@@ -249,7 +249,8 @@ class CampaignsController extends Controller
                     }
                 }
             } elseif(data_get($request, 'campaign.voucher_type') == 2) {
-                if (data_get($request, 'campaign.voucher_code')){
+                $check_exit = u::first("SELECT id FROM coupons WHERE campaign_id = ".data_get($request, 'campaign.id')." AND code= '".data_get($request, 'campaign.voucher_code')."'");
+                if ( $check_exit && data_get($request, 'campaign.voucher_code')){
                     u:: updateSimpleRow( array(
                         'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
                         'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
@@ -262,6 +263,24 @@ class CampaignsController extends Controller
                         'updator_id'=>Auth::user()->id,
                         'branch_id' => $branch_id
                     ) ,array('campaign_id' => data_get($request, 'campaign.id'), 'source_id'=> 1), 'coupons');
+                } else {
+                    u::insertSimpleRow(array(
+                        'code' => data_get($request, 'campaign.voucher_code'),
+                        'source_id' => 1,
+                        'type' => data_get($request, 'campaign.voucher_type'),
+                        'quota' => data_get($request, 'campaign.voucher_quota'),
+                        'limit' => data_get($request, 'campaign.voucher_limit'),
+                        'coupon_amount'=> data_get($request, 'campaign.voucher_amount'),
+                        'coupon_session'=> data_get($request, 'campaign.voucher_bonus_sessions'),
+                        'coupon_percent'=> data_get($request, 'campaign.coupon_percent'),
+                        'start_date'=> data_get($request, 'campaign.start_date'),
+                        'end_date'=> data_get($request, 'campaign.end_date'),
+                        'status' => 1,
+                        'created_at'=>date('Y-m-d H:i:s'),
+                        'creator_id'=>Auth::user()->id,
+                        'campaign_id'=> data_get($request, 'campaign.id'),
+                        'branch_id' => $branch_id
+                    ), 'coupons');
                 }
             }
         }
