@@ -213,7 +213,7 @@ class ClassTransfersController extends Controller
                     'product_id' => data_get($class_transfer_info, 'to_product_id'),
                     'class_id' => data_get($class_transfer_info, 'to_class_id'),
                     'updated_at' => date('Y-m-d H:i:s'),
-                    'updator_id' => Auth::user()->id,
+                    // 'updator_id' => Auth::user()->id,
                     'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                     'total_charged' => data_get($data_calc_transfer, 'transfer_amount', 0),
                     'real_sessions' => data_get($data_calc_transfer, 'sessions', 0),

@@ -42,24 +42,24 @@ class ProcessData extends Command
      */
     public function handle(Request $request)
     {
-        // $jobs = new JobsController();
-        // $jobs->processWaittingStudent();
-        // $jobs->processAutoWithdrawStudent();
+        $jobs = new JobsController();
+        $jobs->processWaittingStudent();
+        $jobs->processAutoWithdrawStudent();
         $report = new ReportsController();
         //report_student_in_class
         $report->updateReportStudentInClass();
-        // // report_full_fee_active
-        // $report->collectFullFeeActive( $request,'_','_');
-        // //report_renews
-        // $report->updateCompletedDate();
-        // $report->updateRenewedDates();
-        // $report->updateRenewReport();
-        // //report_pending
-        // $report->collectReportPending($request, '_');
-        // //report_reserve
-        // $report->collectReportReserve($request, '_');
+        // report_full_fee_active
+        $report->collectFullFeeActive( $request,'_','_');
+        //report_renews
+        $report->updateCompletedDate();
+        $report->updateRenewedDates();
+        $report->updateRenewReport();
+        //report_pending
+        $report->collectReportPending($request, '_');
+        //report_reserve
+        $report->collectReportReserve($request, '_');
 
-        // u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('ProcessData','".date('Y-m-d H:i:s')."')");
+        u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('ProcessData','".date('Y-m-d H:i:s')."')");
         return "ok";
     }
     
