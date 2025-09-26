@@ -554,58 +554,58 @@
         })
       },
       async save() {
-        this.checkDuplicate = 0;
-        if(this.parent.mobile_1){
-          const data = {
-            phone: this.parent.mobile_1,
-          };
-          this.$vs.loading()
-          await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
-            this.$vs.loading.close();
-            if(response.data.status==0){
-              this.change_source_parent_id = response.data.dup_parent_id
-              this.parent.mobile_1 ="";
-              this.modal.color = "warning";
-              this.modal.body = response.data.message;
-              this.modal.show = true;
-              this.checkDuplicate = 1
-            }else if(response.data.status==2){
-              this.modal_overwrite.show = true;
-              this.modal.color = "info";
-              this.modal_overwrite.message = response.data.message;
-              this.checkDuplicate = 1
-            }
-          })
-        }
-        if(this.checkDuplicate){
-          return false;
-        }
-        this.checkDuplicate = 0;
-        if(this.parent.mobile_2){
-          const data = {
-            phone: this.parent.mobile_2,
-          };
-          this.$vs.loading()
-          await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
-            this.$vs.loading.close();
-            if(response.data.status==0){
-              this.change_source_parent_id = response.data.dup_parent_id
-              this.parent.mobile_2 ="";
-              this.modal.color = "warning";
-              this.modal.body = response.data.message;
-              this.modal.show = true;
-              this.checkDuplicate = 1
-            }else if(response.data.status==2){
-              this.modal_overwrite.show = true;
-              this.modal.color = "info";
-              this.modal_overwrite.message = response.data.message;
-              this.checkDuplicate = 1
-            }
-          })
-        }
-        if(this.checkDuplicate){
-          return false;
-        }
+        // this.checkDuplicate = 0;
+        // if(this.parent.mobile_1){
+        //   const data = {
+        //     phone: this.parent.mobile_1,
+        //   };
+        //   this.$vs.loading()
+        //   await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+        //     this.$vs.loading.close();
+        //     if(response.data.status==0){
+        //       this.change_source_parent_id = response.data.dup_parent_id
+        //       this.parent.mobile_1 ="";
+        //       this.modal.color = "warning";
+        //       this.modal.body = response.data.message;
+        //       this.modal.show = true;
+        //       this.checkDuplicate = 1
+        //     }else if(response.data.status==2){
+        //       this.modal_overwrite.show = true;
+        //       this.modal.color = "info";
+        //       this.modal_overwrite.message = response.data.message;
+        //       this.checkDuplicate = 1
+        //     }
+        //   })
+        // }
+        // if(this.checkDuplicate){
+        //   return false;
+        // }
+        // this.checkDuplicate = 0;
+        // if(this.parent.mobile_2){
+        //   const data = {
+        //     phone: this.parent.mobile_2,
+        //   };
+        //   this.$vs.loading()
+        //   await axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+        //     this.$vs.loading.close();
+        //     if(response.data.status==0){
+        //       this.change_source_parent_id = response.data.dup_parent_id
+        //       this.parent.mobile_2 ="";
+        //       this.modal.color = "warning";
+        //       this.modal.body = response.data.message;
+        //       this.modal.show = true;
+        //       this.checkDuplicate = 1
+        //     }else if(response.data.status==2){
+        //       this.modal_overwrite.show = true;
+        //       this.modal.color = "info";
+        //       this.modal_overwrite.message = response.data.message;
+        //       this.checkDuplicate = 1
+        //     }
+        //   })
+        // }
+        // if(this.checkDuplicate){
+        //   return false;
+        // }
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {
