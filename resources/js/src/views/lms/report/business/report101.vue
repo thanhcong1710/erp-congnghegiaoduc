@@ -40,6 +40,7 @@
                   <th colspan="1" rowspan="1">Số học sinh renew</th>
                   <th colspan="1" rowspan="1">DS New</th>
                   <th colspan="1" rowspan="1">DS Renew</th>
+                  <th colspan="1" rowspan="1">Tổng DS</th>
                   <th colspan="1" rowspan="1">Công nợ</th>
                 </tr>
               </thead>
@@ -54,6 +55,7 @@
                 <td class="td vs-table--td">{{ item.count_renew}}</td>
                 <td class="td vs-table--td">{{ item.sales_new | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.sales_renew | formatNumber}}</td>
+                <td class="td vs-table--td">{{ item.sales_renew + item.sales_new | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.total_deposit | formatNumber}}</td>
               </tr>
             </table>

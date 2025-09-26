@@ -1278,7 +1278,8 @@ class ExportsController extends Controller
         $sheet->setCellValue('G1', 'Số học sinh renew');
         $sheet->setCellValue('H1', 'DS New');
         $sheet->setCellValue('I1', 'DS Renew');
-        $sheet->setCellValue('J1', 'Công nợ');
+        $sheet->setCellValue('J1', 'Tổng DS');
+        $sheet->setCellValue('K1', 'Công nợ');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(20);
@@ -1290,6 +1291,7 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("H")->setWidth(20);
         $sheet->getColumnDimension("I")->setWidth(20);
         $sheet->getColumnDimension("J")->setWidth(20);
+        $sheet->getColumnDimension("K")->setWidth(20);
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
@@ -1301,8 +1303,8 @@ class ExportsController extends Controller
             $sheet->setCellValue('G' . $x, $list[$i]->count_renew);
             $sheet->setCellValue('H' . $x, (int)$list[$i]->sales_new);
             $sheet->setCellValue('I' . $x, (int)$list[$i]->sales_renew);
-            $sheet->setCellValue('J' . $x, (int)$list[$i]->total_deposit);
-
+            $sheet->setCellValue('J' . $x, (int)$list[$i]->sales_new + (int)$list[$i]->sales_renew);
+            $sheet->setCellValue('K' . $x, (int)$list[$i]->total_deposit);
         }
         $writer = new Xlsx($spreadsheet);
         try {
