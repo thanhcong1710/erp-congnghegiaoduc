@@ -238,10 +238,6 @@ class CheckinController extends Controller
                 ),'crm_parent_branch');
             }
             LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
-            $result =(object)array(
-                'status'=>1,
-                'message'=>'Thêm mới khách hàng thành công'
-            );
         }
         $students  = data_get($request, 'students', []);
         foreach($students AS $student){
@@ -335,6 +331,10 @@ class CheckinController extends Controller
                 }
             }
         }
+        $result =(object)array(
+            'status'=>1,
+            'message'=>'Thêm mới checkin thành công'
+        );
         return response()->json($result);
     }
 }
