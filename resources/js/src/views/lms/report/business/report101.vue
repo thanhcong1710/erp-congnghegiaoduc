@@ -55,7 +55,7 @@
                 <td class="td vs-table--td">{{ item.count_renew}}</td>
                 <td class="td vs-table--td">{{ item.sales_new | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.sales_renew | formatNumber}}</td>
-                <td class="td vs-table--td">{{ item.sales_renew + item.sales_new | formatNumber}}</td>
+                <td class="td vs-table--td">{{ Number(item.sales_renew) + Number(item.sales_new) | formatNumber}}</td>
                 <td class="td vs-table--td">{{ item.total_deposit | formatNumber}}</td>
               </tr>
             </table>
