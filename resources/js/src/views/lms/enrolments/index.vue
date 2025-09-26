@@ -124,7 +124,8 @@
             </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
-            <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
+            <span v-if="!class_info.cm_name"><i style="color: red;">(Vui lòng cập nhật CM trước khi xếp lớp)</i></span>
+            <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students || !class_info.cm_name"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
             <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
