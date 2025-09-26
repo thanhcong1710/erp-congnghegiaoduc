@@ -1324,7 +1324,7 @@ class ExportsController extends Controller
         $class_id = "";
         $cm_id = "";
         $keyword = "";
-        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
         foreach($arr_key AS $k=>$key){
             if($key=='branch_id'){
                 $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
@@ -1349,8 +1349,7 @@ class ExportsController extends Controller
             }
             if ($class_id) {
                 $cond .= " AND c.class_id = '$class_id'";
-            }
-            if ($cm_id) {
+            } elseif ($cm_id) {
                 $cond .= " AND c.cm_id = '$cm_id'";
             }
             $order_by = " ORDER BY c.id DESC ";
