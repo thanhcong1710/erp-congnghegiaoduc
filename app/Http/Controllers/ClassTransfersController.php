@@ -261,41 +261,41 @@ class ClassTransfersController extends Controller
 
     public function addSemester(Request $request){
         $transfer_date =  data_get($request,'transfer_date'); 
-        $from_class_id = data_get($request,'from_class_id');
-        $fromClassInfo = u::first("SELECT id, lms_id FROM classes WHERE id=$from_class_id");
-        if (data_get( $fromClassInfo, 'lms_id')) {
-            $url = sprintf('%s/data/setup.asmx/CounClassInfo', config('lms.url'));
-            $client = new Client();
-            $params = [
-                'headers' => [
-                    'Accept' => 'application/json',
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'counn' => [
-                        'conn_cls_id' => data_get( $fromClassInfo, 'lms_id'),
-                    ],
-                ]
-            ];
-            $response = $client->request('POST', $url, $params);
-            $dataResponse = json_decode($response->getBody()->getContents(), true);
-            if (data_get($dataResponse, 'd.result')) {
-                $result = data_get($dataResponse, 'd.result');
-                $result = json_decode($result, true);
-                $classInfo = data_get($result, 'Table', []);
-                if (!empty($classInfo)) {
-                    $classInfo = $classInfo[0];
-                    $cls_startdate = data_get($classInfo, 'cls_enddate');
-                    if(date('Y-m-d', strtotime($cls_startdate)) >= date('Y-m-d', strtotime($transfer_date))){
-                        $result = array(
-                            'status' => 0,
-                            'message' => 'Ngày chuyển kỳ phải sau ngày kết thúc lớp hiện tại ('.$cls_startdate.')'
-                        );
-                        return response()->json($result);
-                    }
-                }
-            }
-        }
+        // $from_class_id = data_get($request,'from_class_id');
+        // $fromClassInfo = u::first("SELECT id, lms_id FROM classes WHERE id=$from_class_id");
+        // if (data_get( $fromClassInfo, 'lms_id')) {
+        //     $url = sprintf('%s/data/setup.asmx/CounClassInfo', config('lms.url'));
+        //     $client = new Client();
+        //     $params = [
+        //         'headers' => [
+        //             'Accept' => 'application/json',
+        //             'Content-Type' => 'application/json',
+        //         ],
+        //         'json' => [
+        //             'counn' => [
+        //                 'conn_cls_id' => data_get( $fromClassInfo, 'lms_id'),
+        //             ],
+        //         ]
+        //     ];
+        //     $response = $client->request('POST', $url, $params);
+        //     $dataResponse = json_decode($response->getBody()->getContents(), true);
+        //     if (data_get($dataResponse, 'd.result')) {
+        //         $result = data_get($dataResponse, 'd.result');
+        //         $result = json_decode($result, true);
+        //         $classInfo = data_get($result, 'Table', []);
+        //         if (!empty($classInfo)) {
+        //             $classInfo = $classInfo[0];
+        //             $cls_startdate = data_get($classInfo, 'cls_enddate');
+        //             if(date('Y-m-d', strtotime($cls_startdate)) >= date('Y-m-d', strtotime($transfer_date))){
+        //                 $result = array(
+        //                     'status' => 0,
+        //                     'message' => 'Ngày chuyển kỳ phải sau ngày kết thúc lớp hiện tại ('.$cls_startdate.')'
+        //                 );
+        //                 return response()->json($result);
+        //             }
+        //         }
+        //     }
+        // }
         $to_class_id = data_get($request,'to_class_id');
         $to_class_info = u::first("SELECT id AS class_id, product_id, program_id, branch_id   
             FROM classes WHERE id=$to_class_id");
