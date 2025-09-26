@@ -200,44 +200,49 @@ class CheckinController extends Controller
     public function add(Request $request)
     {
         $parent = data_get($request, 'parent');
-        $parent_id = u::insertSimpleRow(array(
-            'name'=>data_get($parent, 'name'),
-            'email'=>data_get($parent, 'email'),
-            'mobile_1' => data_get($parent, 'mobile_1'),
-            'mobile_2' => data_get($parent, 'mobile_2'),
-            'address' => data_get($parent, 'address'),
-            'province_id' => data_get($parent, 'province_id'),
-            'district_id' => data_get($parent, 'district_id'),
-            'gender' => data_get($parent, 'gender'),
-            'birthday' => data_get($parent, 'birthday'),
-            'job_id' => data_get($parent, 'job_id'),
-            'source_id' => data_get($parent, 'source_id'),
-            'source_detail_id' => data_get($parent, 'emsource_detail_idail'),
-            'note' => data_get($parent, 'note'),
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
-            'last_assign_date' => date('Y-m-d H:i:s'),
-            // 'owner_id'=>data_get($parent, 'owner_id'),
-            'status'=>data_get($parent, 'status') ? data_get($parent, 'status') : 1,
-            'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
-        ), 'crm_parents');
-        $branchHasUser = Auth::user()->getBranchesHasUser();
-        $arrBranchHasUser = explode(',',$branchHasUser);
-        foreach ($arrBranchHasUser AS $branch_id){
-            u::insertSimpleRow(array(
-                'branch_id' => $branch_id,
-                'parent_id' => $parent_id,
-                'owner_id' => Auth::user()->id,
+        $parentInfo = u::getObject(array('mobile_1'=>data_get($parent, 'mobile_1')), 'crm_parents');
+        if($parentInfo){
+            $parent_id = data_get($parentInfo, 'id');
+        }else {
+            $parent_id = u::insertSimpleRow(array(
+                'name'=>data_get($parent, 'name'),
+                'email'=>data_get($parent, 'email'),
+                'mobile_1' => data_get($parent, 'mobile_1'),
+                'mobile_2' => data_get($parent, 'mobile_2'),
+                'address' => data_get($parent, 'address'),
+                'province_id' => data_get($parent, 'province_id'),
+                'district_id' => data_get($parent, 'district_id'),
+                'gender' => data_get($parent, 'gender'),
+                'birthday' => data_get($parent, 'birthday'),
+                'job_id' => data_get($parent, 'job_id'),
+                'source_id' => data_get($parent, 'source_id'),
+                'source_detail_id' => data_get($parent, 'emsource_detail_idail'),
+                'note' => data_get($parent, 'note'),
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
-                'is_lock' => 1,
-            ),'crm_parent_branch');
+                'last_assign_date' => date('Y-m-d H:i:s'),
+                // 'owner_id'=>data_get($parent, 'owner_id'),
+                'status'=>data_get($parent, 'status') ? data_get($parent, 'status') : 1,
+                'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
+            ), 'crm_parents');
+            $branchHasUser = Auth::user()->getBranchesHasUser();
+            $arrBranchHasUser = explode(',',$branchHasUser);
+            foreach ($arrBranchHasUser AS $branch_id){
+                u::insertSimpleRow(array(
+                    'branch_id' => $branch_id,
+                    'parent_id' => $parent_id,
+                    'owner_id' => Auth::user()->id,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                    'is_lock' => 1,
+                ),'crm_parent_branch');
+            }
+            LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
+            $result =(object)array(
+                'status'=>1,
+                'message'=>'Thêm mới khách hàng thành công'
+            );
         }
-        LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Thêm mới khách hàng thành công'
-        );
         $students  = data_get($request, 'students', []);
         foreach($students AS $student){
             if (data_get($student, 'name')){

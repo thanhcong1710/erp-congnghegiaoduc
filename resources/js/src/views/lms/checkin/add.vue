@@ -29,7 +29,6 @@
                 type="text"
                 name="title"
                 v-model="parent.mobile_1"
-                @change="validatePhone"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -39,7 +38,6 @@
                 type="text"
                 name="title"
                 v-model="parent.mobile_2"
-                @change="validatePhone2"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
