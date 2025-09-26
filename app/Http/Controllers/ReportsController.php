@@ -1027,8 +1027,7 @@ class ReportsController extends Controller
             }
             if ($class_id) {
                 $cond .= " AND c.class_id = '$class_id'";
-            }
-            if ($cm_id) {
+            }elseif ($cm_id) {
                 $cond .= " AND c.cm_id = '$cm_id'";
             }
             $order_by = " ORDER BY c.id DESC ";
