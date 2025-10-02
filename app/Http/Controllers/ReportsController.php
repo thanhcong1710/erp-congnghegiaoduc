@@ -1131,4 +1131,139 @@ class ReportsController extends Controller
             }
         }
     }
+
+    public function report09(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $report_month = isset($request->start_date) ? $request->start_date : date('Y-m');
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND b.id IN (".implode(",",$branch_id).")";
+        }
+        $order_by = " ORDER BY b.id DESC ";
+        $total = u::first("SELECT count(b.id) AS total 
+            FROM branches AS b 
+        WHERE
+            b.status=1 $cond");
+
+        $list = u::query("SELECT b.name AS branch_name,
+            (SELECT COUNT(id) FROM report_pending WHERE branch_id = b.id AND report_month = '$report_month') AS count_pending,
+            (SELECT COUNT(id) FROM report_reserve WHERE branch_id = b.id AND report_month = '$report_month') AS count_reserve,
+            (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month') AS count_full_fee_active,
+            (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE)) AS count_class,
+            (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month' AND product_id=1) AS count_full_fee_active_april,
+            (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE) AND product_id=1) AS count_class_april,
+            (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month' AND product_id=2) AS count_full_fee_active_igarten,
+            (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE) AND product_id=2) AS count_class_igarten,
+            (SELECT COUNT(id) FROM report_users WHERE branch_id = b.id AND role_id IN (55,56)) AS count_cm
+        FROM
+            branches AS b 
+        WHERE
+            b.status=1 $cond $order_by $limitation");
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function collectReportUser(Request $request, $month, $branch)
+    {
+        if($month && $month!="_"){
+            $report_month = (int)$month > 9 ? date("Y").'-'.(int)$month : date("Y").'-0'.(int)$month;
+        }else{
+            $report_month = date('Y-m',time()-7*3600);
+        }
+        $where = "";
+        $where_del = "";
+        if (count(explode(',', $branch)) > 0 && $branch != '_') {
+            $where = " AND bhu.branch_id IN ($branch)";
+            $where_del = " AND branch_id IN ($branch)";
+        }
+        u::query("DELETE FROM report_users WHERE report_month = '$report_month' $where_del ");
+        $list = u::query("SELECT DISTINCT bhu.user_id, bhu.branch_id, rhu.role_id, '$report_month' AS report_month
+        FROM
+            users AS u
+            LEFT JOIN branch_has_user bhu ON bhu.user_id = u.id
+            LEFT JOIN role_has_user rhu ON rhu.user_id = u.id
+        WHERE
+            u.status= 1 AND rhu.role_id IN (55,56,68,69,686868) $where ");
+        if (count($list)) {
+            self::addItemsReportUser($list);
+        }
+        return true;
+    }
+
+    public function addItemsReportUser($list) {
+        if ($list) {
+            $created_at = date('Y-m-d H:i:s');
+            $query = "INSERT INTO report_users (user_id,branch_id, role_id, report_month, created_at) VALUES ";
+            if (count($list) > 5000) {
+                for($i = 0; $i < 5000; $i++) {
+                    $item = $list[$i];
+                    $query.= "('$item->user_id', '$item->branch_id', '$item->role_id', '$item->report_month', '$created_at'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                self::addItemsReportUser(array_slice($list, 5000));
+            } else {
+                foreach($list as $item) {
+                    $query.= "('$item->user_id', '$item->branch_id', '$item->role_id', '$item->report_month', '$created_at'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+            }
+        }
+    }
+
+    public function collectReportClasses(Request $request, $month, $branch)
+    {
+        if($month && $month!="_"){
+            $report_month = (int)$month > 9 ? date("Y").'-'.(int)$month : date("Y").'-0'.(int)$month;
+        }else{
+            $report_month = date('Y-m',time()-7*3600);
+        }
+        $where = "";
+        $where_del = "";
+        if (count(explode(',', $branch)) > 0 && $branch != '_') {
+            $where = " AND cl.branch_id IN ($branch)";
+            $where_del = " AND branch_id IN ($branch)";
+        }
+        u::query("DELETE FROM report_classes WHERE report_month = '$report_month' $where_del ");
+        $list = u::query("SELECT cl.* , '$report_month' AS report_month
+        FROM
+            classes AS cl
+        WHERE
+            cl.status= 1 AND cl.cls_enddate >= CURRENT_DATE AND cl.cls_startdate <= CURRENT_DATE $where ");
+        if (count($list)) {
+            self::addItemsReportClasses($list);
+        }
+        return true;
+    }
+
+    public function addItemsReportClasses($list) {
+        if ($list) {
+            $created_at = date('Y-m-d H:i:s');
+            $query = "INSERT INTO report_classes (branch_id, class_id, product_id, cm_id, cls_startdate, cls_enddate, program_id, `status`, report_month, created_at) VALUES ";
+            if (count($list) > 5000) {
+                for($i = 0; $i < 5000; $i++) {
+                    $item = $list[$i];
+                    $query.= "('$item->branch_id', '$item->id', '$item->product_id', '".(int)$item->cm_id."', '$item->cls_startdate', '$item->cls_enddate', '$item->program_id', '$item->status', '$item->report_month', '$created_at'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+                self::addItemsReportClasses(array_slice($list, 5000));
+            } else {
+                foreach($list as $item) {
+                    $query.= "('$item->branch_id', '$item->id', '$item->product_id', '".(int)$item->cm_id."', '$item->cls_startdate', '$item->cls_enddate', '$item->program_id', '$item->status', '$item->report_month', '$created_at'),";
+                }
+                $query = substr($query, 0, -1);
+                u::query($query);
+            }
+        }
+    }
 }

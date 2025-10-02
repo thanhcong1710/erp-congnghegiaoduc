@@ -1393,7 +1393,7 @@ class ExportsController extends Controller
                     LEFT JOIN programs AS p ON p.id = cls.program_id
                     LEFT JOIN semesters AS sem ON sem.id = p.semester_id
                     LEFT JOIN users AS u ON u.id= r.cm_id
-                WHERE $cond $order_by");
+                WHERE 1 $cond $order_by");
         }
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -1433,6 +1433,100 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Báo cáo chi tiết học sinh theo lớp.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report09(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $report_month = $arr_value[$k];
+            }
+        }
+        
+        $order_by = " ORDER BY b.id DESC ";
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT COUNT(id) FROM report_pending WHERE branch_id = b.id AND report_month = '$report_month') AS count_pending,
+                (SELECT COUNT(id) FROM report_reserve WHERE branch_id = b.id AND report_month = '$report_month') AS count_reserve,
+                (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month') AS count_full_fee_active,
+                (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE)) AS count_class,
+                (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month' AND product_id=1) AS count_full_fee_active_april,
+                (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE) AND product_id=1) AS count_class_april,
+                (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month' AND product_id=2) AS count_full_fee_active_igarten,
+                (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND (cls_enddate IS NULL OR cls_enddate >= CURRENT_DATE) AND product_id=2) AS count_class_igarten,
+                (SELECT COUNT(id) FROM report_users WHERE branch_id = b.id AND role_id IN (55,56)) AS count_cm
+            FROM
+                branches AS b 
+            WHERE
+                b.status=1 $cond $order_by ");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Tổng số học sinh');
+        $sheet->setCellValue('C1', 'Tổng học sinh bảo lưu');
+        $sheet->setCellValue('D1', 'Tổng học sinh pending');
+        $sheet->setCellValue('E1', 'Tổng số học sinh Active');
+        $sheet->setCellValue('F1', 'Tổng số lớp');
+        $sheet->setCellValue('G1', 'Tỷ lệ ACS');
+        $sheet->setCellValue('H1', 'Tổng học sinh Sunny');
+        $sheet->setCellValue('I1', 'Tổng số lớp Sunny');
+        $sheet->setCellValue('J1', 'Tỷ lệ ACS Sunny');
+        $sheet->setCellValue('K1', 'Tổng học sinh I-Kinder');
+        $sheet->setCellValue('L1', 'Tổng số lớp I-Kinder');
+        $sheet->setCellValue('M1', 'Tỷ lệ ACS I-Kinder');
+        $sheet->setCellValue('N1', 'Số lượng OM+CM');
+        $sheet->setCellValue('O1', 'Hiệu suất OM+CM');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(20);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
+        $sheet->getColumnDimension("K")->setWidth(20);
+        $sheet->getColumnDimension("L")->setWidth(20);
+        $sheet->getColumnDimension("M")->setWidth(20);
+        $sheet->getColumnDimension("N")->setWidth(20);
+        $sheet->getColumnDimension("O")->setWidth(20);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 2;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->count_pending + $list[$i]->count_reserve + $list[$i]->count_full_fee_active);
+            $sheet->setCellValue('C' . $x, $list[$i]->count_reserve);
+            $sheet->setCellValue('D' . $x, $list[$i]->count_pending);
+            $sheet->setCellValue('E' . $x, $list[$i]->count_full_fee_active);
+            $sheet->setCellValue('F' . $x, $list[$i]->count_class);
+            $sheet->setCellValue('G' . $x, $list[$i]->count_class ? round($list[$i]->count_full_fee_active / $list[$i]->count_class, 2) : "--");
+            $sheet->setCellValue('H' . $x, $list[$i]->count_full_fee_active_april);
+            $sheet->setCellValue('I' . $x, $list[$i]->count_class_april);
+            $sheet->setCellValue('J' . $x, $list[$i]->count_class_april ? round($list[$i]->count_full_fee_active_april / $list[$i]->count_class_april, 2) : "--");
+            $sheet->setCellValue('K' . $x, $list[$i]->count_full_fee_active_igarten);
+            $sheet->setCellValue('L' . $x, $list[$i]->count_class_igarten);
+            $sheet->setCellValue('M' . $x, $list[$i]->count_class_igarten ? round($list[$i]->count_full_fee_active_igarten / $list[$i]->count_class_igarten, 2) : "--");
+            $sheet->setCellValue('N' . $x, $list[$i]->count_cm);
+            $sheet->setCellValue('O' . $x, $list[$i]->count_cm ? round($list[$i]->count_full_fee_active / $list[$i]->count_cm, 2) : "--");
+
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng hợp.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

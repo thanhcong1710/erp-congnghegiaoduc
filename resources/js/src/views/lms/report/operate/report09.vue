@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO TỶ LỆ ACS CỦA TỪNG CM</h5>
+      <h5>BÁO CÁO TỔNG HỢP</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -27,10 +27,6 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã tên nhân viên, tên nhân viên" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
@@ -45,6 +41,7 @@
         </div>
       </div>
 
+      <p><i>(Lưu ý: dữ liệu được tổng hợp tại thời điểm T-1)</i></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -52,48 +49,43 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="3" class="text-center">STT</th>
-                  <th colspan="1" rowspan="3">Trung tâm</th>
-                  <th colspan="1" rowspan="3">CM phụ trách</th>
-                  <th colspan="12" rowspan="1">Class type: Group class/ Mode of learning: Offline</th>
-                  <th colspan="1" rowspan="3">ACS</th>
-                </tr>
-                <tr>
-                  <th colspan="5" rowspan="1">HỌC VIÊN</th>
-                  <th colspan="1" rowspan="2">Tổng</th>
-                  <th colspan="5" rowspan="1">LỚP</th>
-                  <th colspan="1" rowspan="2">Tổng</th>
-                </tr>
-                <tr>
-                  <th colspan="1" rowspan="1">Kindy</th>
-                  <th colspan="1" rowspan="1">Kids</th>
-                  <th colspan="1" rowspan="1">Aca</th>
-                  <th colspan="1" rowspan="1">Start-Up</th>
-                  <th colspan="1" rowspan="1">IELTS</th>
-                  <th colspan="1" rowspan="1">Kindy</th>
-                  <th colspan="1" rowspan="1">Kids</th>
-                  <th colspan="1" rowspan="1">Aca</th>
-                  <th colspan="1" rowspan="1">Start-Up</th>
-                  <th colspan="1" rowspan="1">IELTS</th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng số học sinh</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng học sinh bảo lưu</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng học sinh pending</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng số học sinh Active</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng số lớp</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tỷ lệ ACS</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng học sinh Sunny</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng số lớp Sunny</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tỷ lệ ACS Sunny</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng học sinh I-Kinder</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tổng số lớp I-Kinder</th>
+                  <th colspan="1" rowspan="1" class="text-center">Tỷ lệ ACS I-Kinder</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số lượng OM+CM</th>
+                  <th colspan="1" rowspan="1" class="text-center">Hiệu suất OM+CM</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
-                <td class="td vs-table--td">{{ item.product_name}}</td>
-                <td class="td vs-table--td">{{ item.cm_name}}</td>
-                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
+                <td class="td vs-table--td text-center">{{item.count_pending + item.count_reserve + item.count_full_fee_active }}</td>
+                <td class="td vs-table--td text-center">{{item.count_reserve}}</td>
+                <td class="td vs-table--td text-center">{{item.count_pending}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_full_fee_active}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class ?  (Math.round(item.count_full_fee_active *100 / item.count_class)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_full_fee_active_april}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_april}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_april ? (Math.round(item.count_full_fee_active_april *100 / item.count_class)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_full_fee_active_igarten}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_igarten}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_igarten ? (Math.round(item.count_full_fee_active_april *100 / item.count_class_igarten)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_cm}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_cm ? (Math.round(item.count_full_fee_active_april *100 / item.count_cm)/100).toFixed(2) : '--' }}</td>
               </tr>
             </table>
             
@@ -222,7 +214,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/09', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -247,7 +239,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report09/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -299,7 +291,6 @@ th .sort-th, th .vs-table-text{
 }
 [dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
     padding: 10px 15px;
-    border: 1px solid #ccc;
     text-align: center;
 }
 </style>

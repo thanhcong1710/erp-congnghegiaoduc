@@ -49,12 +49,12 @@
                 <p>08. BÁO CÁO CHI TIẾT HỌC SINH THEO LỚP</p>
               </router-link>
             </div>
-            <!-- 
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-09'"  v-if="checkPermission('lms_reports_operate_09')">
-                <p>09. BÁO CÁO TỶ LỆ ACS CỦA TỪNG CM</p>
+                <p>09. BÁO CÁO TỔNG HỢP</p>
               </router-link>
             </div>
+            <!-- 
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-10'"  v-if="checkPermission('lms_reports_operate_10')">
                 <p>10. BÁO CÁO TỶ LỆ ACS CỦA TỪNG TRUNG TÂM</p>

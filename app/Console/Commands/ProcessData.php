@@ -58,6 +58,10 @@ class ProcessData extends Command
         $report->collectReportPending($request, '_');
         //report_reserve
         $report->collectReportReserve($request, '_');
+        //report_users
+        $report->collectReportUser($request, '_', '_');
+        //report_classes
+        $report->collectReportClasses($request, '_', '_');
 
         u::query("INSERT INTO log_jobs (`action`, created_at) VALUES ('ProcessData','".date('Y-m-d H:i:s')."')");
         return "ok";
