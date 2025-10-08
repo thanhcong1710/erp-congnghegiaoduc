@@ -127,8 +127,10 @@ class ExportsController extends Controller
                 AND c.`status` < 7
                 AND (
                     c.class_id IS NOT NULL
-                    AND c.enrolment_start_date <= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date >= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
-                    AND c.enrolment_last_date >= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date <= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
+                    AND ( ( c.enrolment_start_date <= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date >= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
+                        AND c.enrolment_last_date >= ( SELECT class_date FROM schedules WHERE class_id = c.class_id AND class_date <= '$end_date' AND `status`=1 ORDER BY class_date ASC LIMIT 1 )
+                        ) OR (SELECT count(id) FROM class_transfer WHERE student_id=s.id AND `status` = 2 AND transfer_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)) > 0
+                    )
                 )
                 AND (SELECT count(id) FROM reserves WHERE contract_id=c.id AND is_reserved=1 AND `start_date` <= '$end_date' AND `end_date`>='$end_date' AND `status`=4) =0
                 AND s.status > 0
