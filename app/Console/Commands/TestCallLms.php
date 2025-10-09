@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\ClassesController;
+use App\Http\Controllers\JobsController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
@@ -129,7 +130,8 @@ class TestCallLms extends Command
         //     }
         //     echo  $studentId . "/";
         // }
-        u::updateScheduleHasStudent(928,'2025-06-26');
+        $jobs = new JobsController();
+        $jobs->processWaittingStudent();
         return "ok";
     }
 }

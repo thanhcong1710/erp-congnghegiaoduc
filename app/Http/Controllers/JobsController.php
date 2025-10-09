@@ -13,7 +13,8 @@ class JobsController extends Controller
 {
     public function processWaittingStudent()
     {
-        $list = u::query("SELECT * FROM student_waitting_process WHERE status=1 AND DATE_FORMAT(processed_at,'%Y-%m-%d') = '".date('Y-m-d')."'");
+        $date = date('Y-m-d');
+        $list = u::query("SELECT * FROM student_waitting_process WHERE status=1 AND DATE_FORMAT(processed_at,'%Y-%m-%d') = '".$date."'");
         foreach ($list AS $row) {
             if ($row->type == 2) {
                 $classTransfer = new ClassTransfersController();

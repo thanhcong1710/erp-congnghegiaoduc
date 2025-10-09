@@ -281,7 +281,7 @@ class TuitionTransfersController extends Controller
                     'product_id' => data_get($data_calc_transfer, 'receive_tuition_fee.product_id'),
                     'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                     'init_tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
-                    'init_total_charge' => $left_real_amount,
+                    'init_total_charged' => $left_real_amount,
                     'must_charge' => $left_real_amount,
                     'total_charged'=> $left_real_amount,
                     'debt_amount' => 0,
@@ -303,7 +303,7 @@ class TuitionTransfersController extends Controller
             }
 
             $lmsController = new LMSController();
-            $lmsController->studentWithdraw(data_get($from_student_id, 'student_id'));
+            $lmsController->studentWithdraw($from_student_id);
             u::updateSimpleRow(array(
                 'transfer_to_contract_id' => $contract_id,
                 'status' => 7,
