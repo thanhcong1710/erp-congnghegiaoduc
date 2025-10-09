@@ -313,6 +313,10 @@ class TuitionTransfersController extends Controller
         }
         LogStudents::logAdd($from_student_id, "Chuyển phí cho học sinh '".data_get($tuition_transfer_info,'to_student_name')."'", $tuition_transfer_info->creator_id);
         LogStudents::logAdd($from_student_id, "Nhận chuyển phí từ học sinh '".data_get($tuition_transfer_info,'from_student_name')."'", $tuition_transfer_info->creator_id);
+        u::updateSimpleRow(array(
+            'status'=> 6,
+            'updated_at' => date('Y-m-d H:i:s')
+        ), array('id'=>$tuition_transfer_id), 'tuition_transfer');
         return true;
     }
 }
