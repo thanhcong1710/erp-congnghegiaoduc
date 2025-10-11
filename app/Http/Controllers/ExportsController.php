@@ -1535,4 +1535,93 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report11(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $report_month = $arr_value[$k];
+            }
+            if ($key=='keyword'){
+                $cond .= " AND (u.name LIKE '%".$arr_value[$k]."%' OR u.hrm_id LIKE '".$arr_value[$k]."') ";
+            }
+        }
+        
+        $order_by = " ORDER BY ru.branch_id, u.id ";
+        $list = u::query("SELECT DISTINCT ru.branch_id, u.id, b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id ) AS cm_name,
+                (SELECT count(id) FROM report_full_fee_active WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=1 AND branch_id =ru.branch_id) AS countStudentApril,
+                (SELECT count(id) FROM report_full_fee_active WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=2 AND branch_id =ru.branch_id) AS countStudentIgarten,
+                (SELECT count(id) FROM report_classes WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=1 AND status=1 AND branch_id =ru.branch_id) AS countClassApril,
+                (SELECT count(id) FROM report_classes WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=2 AND status=1 AND branch_id =ru.branch_id) AS countClassIgarten
+            FROM report_users AS ru 
+            LEFT JOIN users AS u ON u.id =ru.user_id
+            LEFT JOIN branches AS b ON b.id=ru.branch_id
+            WHERE ru.role_id IN(55,56) $cond $order_by");
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        $sheet->setCellValue('B1', 'Tên CM');
+        $sheet->setCellValue('C1', 'I-Kinder');
+        $sheet->setCellValue('F1', 'Sunny');
+        $sheet->setCellValue('I1', 'Tổng');
+        
+        $sheet->setCellValue('C2', 'HS Full fee active');
+        $sheet->setCellValue('D2', 'Số lớp');
+        $sheet->setCellValue('E2', 'ACS');
+        $sheet->setCellValue('F2', 'HS Full fee active');
+        $sheet->setCellValue('G2', 'Số lớp');
+        $sheet->setCellValue('H2', 'ACS');
+        $sheet->setCellValue('I2', 'HS Full fee active');
+        $sheet->setCellValue('J2', 'Số lớp');
+        $sheet->setCellValue('K2', 'ACS');
+        $sheet->mergeCells('A1:A2');
+        $sheet->mergeCells('B1:B2');
+        $sheet->mergeCells('C1:E1');
+        $sheet->mergeCells('F1:H1');
+        $sheet->mergeCells('I1:K1');
+
+        $sheet->getColumnDimension("A")->setWidth(30);
+        $sheet->getColumnDimension("B")->setWidth(20);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
+        $sheet->getColumnDimension("K")->setWidth(20);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 3;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            $sheet->setCellValue('B' . $x, $list[$i]->cm_name);
+            $sheet->setCellValue('C' . $x, $list[$i]->countStudentIgarten);
+            $sheet->setCellValue('D' . $x, $list[$i]->countClassIgarten);
+            $sheet->setCellValue('E' . $x, $list[$i]->countClassIgarten ? round($list[$i]->countStudentIgarten / $list[$i]->countClassIgarten, 2) : "--");
+            $sheet->setCellValue('F' . $x, $list[$i]->countStudentApril);
+            $sheet->setCellValue('G' . $x, $list[$i]->countClassApril);
+            $sheet->setCellValue('H' . $x, $list[$i]->countClassApril ? round($list[$i]->countStudentApril / $list[$i]->countClassApril, 2) : "--");
+            $sheet->setCellValue('I' . $x, $list[$i]->countStudentIgarten + $list[$i]->countStudentApril);
+            $sheet->setCellValue('J' . $x, $list[$i]->countClassApril + $list[$i]->countClassIgarten);
+            $sheet->setCellValue('K' . $x, $list[$i]->countClassApril + $list[$i]->countClassIgarten ? round(($list[$i]->countStudentIgarten + $list[$i]->countStudentApril) / ($list[$i]->countClassApril + $list[$i]->countClassIgarten), 2) : "--");
+            
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng hợp.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

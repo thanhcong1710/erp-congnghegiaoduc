@@ -54,17 +54,18 @@
                 <p>09. BÁO CÁO TỔNG HỢP</p>
               </router-link>
             </div>
-            <!-- 
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-10'"  v-if="checkPermission('lms_reports_operate_10')">
-                <p>10. BÁO CÁO TỶ LỆ ACS CỦA TỪNG TRUNG TÂM</p>
+                <p>10. BÁO CÁO ACS CHI TIẾT THEO CHƯƠNG TRÌNH CON</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-11'"  v-if="checkPermission('lms_reports_operate_11')">
-                <p>11. BÁO CÁO HỌC VIÊN TRIAL</p>
+                <p>11. BÁO CÁO ACS CHI TIẾT THEO CM</p>
               </router-link>
             </div>
+            <!-- 
+           
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-12'" v-if="checkPermission('lms_reports_operate_12')">
                 <p>12. BÁO CÁO HỌC VIÊN ĐẶT CỌC</p>
