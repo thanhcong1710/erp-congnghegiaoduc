@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO TỶ LỆ ACS CỦA TỪNG TRUNG TÂM</h5>
+      <h5>BÁO CÁO TỔNG HỢP</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -31,6 +31,13 @@
             <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Khóa học</label>
+            <select v-model="searchData.product_id" class="vs-inputx vs-input--input normal">
+              <option value="1">Sunny</option>
+              <option value="2">I-Kinder</option>
+            </select>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -41,6 +48,7 @@
         </div>
       </div>
 
+      <p><i>(Lưu ý: dữ liệu được tổng hợp tại thời điểm T-1)</i></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -48,47 +56,24 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="3" class="text-center">STT</th>
-                  <th colspan="1" rowspan="3">Trung tâm</th>
-                  <th colspan="12" rowspan="1">Class type: Group class/ Mode of learning: Offline</th>
-                  <th colspan="1" rowspan="3">ACS</th>
+                  <th colspan="1" rowspan="2" class="text-center">STT</th>
+                  <th colspan="1" rowspan="2">Trung tâm</th>
+                  <th colspan="3" rowspan="1" class="text-center"  v-for="program in program_list" :key="program.id || program.name">
+                    {{ program.name }}
+                  </th>
                 </tr>
                 <tr>
-                  <th colspan="5" rowspan="1">HỌC VIÊN</th>
-                  <th colspan="1" rowspan="2">Tổng</th>
-                  <th colspan="5" rowspan="1">LỚP</th>
-                  <th colspan="1" rowspan="2">Tổng</th>
-                </tr>
-                <tr>
-                  <th colspan="1" rowspan="1">Kindy</th>
-                  <th colspan="1" rowspan="1">Kids</th>
-                  <th colspan="1" rowspan="1">Aca</th>
-                  <th colspan="1" rowspan="1">Start-Up</th>
-                  <th colspan="1" rowspan="1">IELTS</th>
-                  <th colspan="1" rowspan="1">Kindy</th>
-                  <th colspan="1" rowspan="1">Kids</th>
-                  <th colspan="1" rowspan="1">Aca</th>
-                  <th colspan="1" rowspan="1">Start-Up</th>
-                  <th colspan="1" rowspan="1">IELTS</th>
+                  <template v-for="program in program_list">
+                    <th class="text-center" :key="program.id + '-total'">Tổng số học sinh</th>
+                    <th class="text-center" :key="program.id + '-reserve'">Học sinh Reserve</th>
+                    <th class="text-center" :key="program.id + '-pending'">Học sinh Pending</th>
+                  </template>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
-                <td class="td vs-table--td">{{ item.product_name}}</td>
-                <td class="td vs-table--td">{{ item.cm_name}}</td>
-                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
+                
               </tr>
             </table>
             
@@ -136,11 +121,13 @@
     data() {
       return {
         branch_list: [],
+        program_list: [],
         searchData: {
           arr_branch: "",
           branch_id:"",
           keyword: "",
           dateRange: "",
+          product_id: 1,
         },
         datepickerOptions: {
           closed: true,
@@ -199,6 +186,7 @@
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
+        this.searchData.product_id= 1
         this.getData();
       },
       getData() {
@@ -212,12 +200,13 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            product_id: this.searchData.product_id,
             start_date: u.getDateMonth(this.searchData.dateRange),
             pagination:this.pagination,
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/10', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -242,7 +231,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report10/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -294,7 +283,6 @@ th .sort-th, th .vs-table-text{
 }
 [dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
     padding: 10px 15px;
-    border: 1px solid #ccc;
     text-align: center;
 }
 </style>

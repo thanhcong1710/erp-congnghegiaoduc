@@ -4,7 +4,7 @@
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO HỌC VIÊN TRIAL</h5>
+      <h5>BÁO CÁO ACS CHI TIẾT THEO CM</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -28,7 +28,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã tên học sinh, mã học sinh" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã, tên nhân viên" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
@@ -45,6 +45,7 @@
         </div>
       </div>
 
+      <p><i>(Lưu ý: dữ liệu được tổng hợp tại thời điểm T-1)</i></p>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -52,38 +53,40 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã HS</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Ngày sinh</th>
-                  <th colspan="1" rowspan="1">Tên phụ huynh</th>
-                  <th colspan="1" rowspan="1">SĐT phụ huynh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Chương trình học</th>
-                  <th colspan="1" rowspan="1">Lớp học</th>
-                  <th colspan="1" rowspan="1">Ca học</th>
-                  <th colspan="1" rowspan="1">Ngày bắt đầu</th>
-                  <th colspan="1" rowspan="1">Ngày kết thúc</th>
-                  <th colspan="1" rowspan="1">TVTS</th>
+                  <th colspan="1" rowspan="2" class="text-center">STT</th>
+                  <th colspan="1" rowspan="2">Trung tâm</th>
+                  <th colspan="1" rowspan="2">Tên CM</th>
+                  <th colspan="3" rowspan="1" class="text-center">I-Kinder</th>
+                  <th colspan="3" rowspan="1" class="text-center">Sunny</th>
+                  <th colspan="3" rowspan="1" class="text-center">Tổng</th>
+                </tr>
+                <tr>
+                  <th colspan="1" rowspan="1" class="text-center">HS Full fee active</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số lớp</th>
+                  <th colspan="1" rowspan="1" class="text-center">ACS</th>
+                  <th colspan="1" rowspan="1" class="text-center">HS Full fee active</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số lớp</th>
+                  <th colspan="1" rowspan="1" class="text-center">ACS</th>
+                  <th colspan="1" rowspan="1" class="text-center">HS Full fee active</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số lớp</th>
+                  <th colspan="1" rowspan="1" class="text-center">ACS</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <!---->
                 
-                <!-- <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.gud_name1}}</td>
-                <td class="td vs-table--td">{{ item.cls_name}}</td>
-                <td class="td vs-table--td">{{ item.product_name}}</td>
-                <td class="td vs-table--td">{{ item.cm_name}}</td>
-                <td class="td vs-table--td">{{ item.tuition_fee_name}}</td>
-                <td class="td vs-table--td">{{ item.type_fee}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions + item.last_done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.summary_sessions - item.done_sessions}}</td>
-                <td class="td vs-table--td">{{ item.start_date}}</td>
-                <td class="td vs-table--td">{{ item.end_date}}</td> -->
+                <td class="td vs-table--td text-center">{{item.cm_name }}</td>
+                <td class="td vs-table--td text-center">{{item.countStudentIgarten}}</td>
+                <td class="td vs-table--td text-center">{{item.countClassIgarten}}</td>
+                <td class="td vs-table--td text-center">{{ item.countClassIgarten ?  (Math.round(item.countStudentIgarten *100 / item.countClassIgarten)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{item.countStudentApril}}</td>
+                <td class="td vs-table--td text-center">{{item.countClassApril}}</td>
+                <td class="td vs-table--td text-center">{{ item.countClassApril ?  (Math.round(item.countStudentApril *100 / item.countClassApril)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{item.countStudentIgarten + item.countStudentApril}}</td>
+                <td class="td vs-table--td text-center">{{item.countClassIgarten + item.countClassApril}}</td>
+                <td class="td vs-table--td text-center">{{ item.countClassIgarten + item.countClassApril ?  (Math.round((item.countStudentIgarten+ item.countStudentApril) *100 / (item.countClassIgarten +item.countClassApril))/100).toFixed(2) : '--'}}</td>
               </tr>
             </table>
             
@@ -212,7 +215,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/reports/01', data)
+        axios.p('/api/lms/reports/11', data)
           .then((response) => {
             this.$vs.loading.close()
             this.datas = response.data.list
@@ -237,7 +240,7 @@
         this.getData();
       },
       exportExcel() {
-        var url = `/api/lms/exports/report01/`;
+        var url = `/api/lms/exports/report11/`;
         var ids_branch = "";
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.map(item => {
@@ -286,5 +289,10 @@ th .sort-th, th .vs-table-text{
 }
 .td.vs-table--td{
   vertical-align: top;
+}
+[dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
+    padding: 10px 15px;
+    text-align: center;
+    border: 1px solid #ccc;
 }
 </style>

@@ -1272,4 +1272,99 @@ class ReportsController extends Controller
             }
         }
     }
+
+    public function report10(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
+        $product_id = isset($request->product_id) ? $request->product_id : 1;
+
+        $allPrograms = u::query("SELECT id, parent_id, name FROM programs WHERE product_id = $product_id AND status=1");
+        $programParent = u::query("SELECT id FROM programs WHERE product_id = $product_id AND parent_id=0 AND status=1");
+        $listProgramId = [];
+        foreach($programParent AS $parent) {
+            $listProgramId = array_merge($listProgramId, $this->getFirstLevelChildren($allPrograms, $parent->id));
+        }
+        $listPrograms =u::query("SELECT id, name FROM programs WHERE product_id = $product_id AND id IN (".implode(",",$listProgramId).") AND status=1");
+
+        var_dump($listPrograms); die;
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND b.id IN (".implode(",",$branch_id).")";
+        }
+        
+        $order_by = " ORDER BY b.id ";
+        $total = u::first("SELECT COUNT(b.id) total
+                FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10");
+        $list = u::query("SELECT b.name AS branch_name,
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkined_at >= '$start_date 00:00:00' AND checkined_at <= '$end_date 23:59:59') AS count_checkin,
+                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND enrolment_start_date >= '$start_date' AND enrolment_start_date <= '$end_date') AS count_trial,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND p.charge_date>= '$start_date' AND p.charge_date <= '$end_date'  AND p.branch_id=b.id) AS count_deposit,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_full_fee,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_new,
+                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_renew,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_new,
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_renew,
+                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND c.created_at >= '$start_date 00:00:00' AND c.created_at <= '$end_date 00:00:00' AND c.branch_id=b.id) AS total_deposit
+            FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10 $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    private function getFirstLevelChildren(array $items, int $parentId): array {
+        $children = [];
+        foreach ($items as $item) {
+            if (data_get($item, 'parent_id') === $parentId) {
+                $children[] = data_get($item, 'id');
+            }
+        }
+        return $children;
+    }
+
+    public function report11(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $report_month = isset($request->start_date) ? $request->start_date : date('Y-m');
+        $keyword = isset($request->keyword) ? $request->keyword : 1;
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page-1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+
+        $cond = " AND ru.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND ru.branch_id IN (".implode(",",$branch_id).")";
+        }
+        if (!$keyword){
+            $cond .= " AND (u.name LIKE '%$keyword%' OR u.hrm_id LIKE '%$keyword%') ";
+        }
+        
+        $order_by = " ORDER BY ru.branch_id, u.id ";
+        $total = u::first("SELECT COUNT( DISTINCT u.id, ru.branch_id) total
+                FROM report_users AS ru 
+                LEFT JOIN users AS u ON u.id =ru.user_id
+            WHERE ru.role_id IN(55,56) $cond ");
+        $list = u::query("SELECT DISTINCT ru.branch_id, u.id, b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id ) AS cm_name,
+                (SELECT count(id) FROM report_full_fee_active WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=1 AND branch_id =ru.branch_id) AS countStudentApril,
+                (SELECT count(id) FROM report_full_fee_active WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=2 AND branch_id =ru.branch_id) AS countStudentIgarten,
+                (SELECT count(id) FROM report_classes WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=1 AND status=1 AND branch_id =ru.branch_id) AS countClassApril,
+                (SELECT count(id) FROM report_classes WHERE cm_id=ru.user_id AND report_month = '$report_month' AND product_id=2 AND status=1 AND branch_id =ru.branch_id) AS countClassIgarten
+            FROM report_users AS ru 
+            LEFT JOIN users AS u ON u.id =ru.user_id
+            LEFT JOIN branches AS b ON b.id=ru.branch_id
+            WHERE ru.role_id IN(55,56) $cond $order_by $limitation");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }
