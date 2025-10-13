@@ -420,10 +420,12 @@ class ReportsController extends Controller
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
             WHERE ru.role_id IN (55,56) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE cm_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0))");
         $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $renewSqlAmount = "SELECT SUM(r.renew_amount) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
         $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS cm_name, u.id AS cm_id, b.id AS branch_id,
             (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
             ($renewSql AND r.status >0) total_item,
-            ($renewSql AND r.status=1) success_item
+            ($renewSql AND r.status=1) success_item,
+            ($renewSqlAmount AND r.status=1) renew_amount
             FROM users AS u 
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id

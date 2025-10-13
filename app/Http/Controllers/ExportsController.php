@@ -382,11 +382,13 @@ class ExportsController extends Controller
         }
 
         $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
+        $renewSqlAmount = "SELECT SUM(r.renew_amount) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND r.cm_id = ru.user_id AND r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id IN ($branch_query)";
         $order_by = " ORDER BY b.id DESC ";
         $list = u::query("SELECT b.name AS branch_name, CONCAT(u.name, ' - ', u.hrm_id )AS cm_name, u.id AS cm_id, b.id AS branch_id,
             (SELECT ro.`name` FROM roles AS ro WHERE ru.role_id = ro.id LIMIT 1 ) role_name,
             ($renewSql AND r.status >0) total_item,
-            ($renewSql AND r.status=1) success_item
+            ($renewSql AND r.status=1) success_item,
+            ($renewSqlAmount AND r.status=1) renew_amount
             FROM users AS u 
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
@@ -400,6 +402,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('D1', 'Số học sinh đến hạn tái tục');
         $sheet->setCellValue('E1', 'Học sinh đóng phí tái tục');
         $sheet->setCellValue('F1', 'Tỷ lệ tái tục (%)');
+        $sheet->setCellValue('G1', 'Doanh thu Renew');
 
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(30);
@@ -407,6 +410,7 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("D")->setWidth(30);
         $sheet->getColumnDimension("E")->setWidth(30);
         $sheet->getColumnDimension("F")->setWidth(30);
+        $sheet->getColumnDimension("G")->setWidth(30);
         for ($i = 0; $i < count($list) ; $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
@@ -415,6 +419,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('D' . $x, $list[$i]->total_item) ;
             $sheet->setCellValue('E' . $x, $list[$i]->success_item );
             $sheet->setCellValue('F' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
+            $sheet->setCellValue('G' . $x, $list[$i]->renew_amount );
         }
         $writer = new Xlsx($spreadsheet);
         try {
