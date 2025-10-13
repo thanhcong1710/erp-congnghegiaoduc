@@ -424,7 +424,7 @@ class ExportsController extends Controller
         $writer = new Xlsx($spreadsheet);
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="Báo cáo học sinh tái phí theo EC.xlsx"');
+            header('Content-Disposition: attachment;filename="Báo cáo học sinh tái phí theo CM.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {
