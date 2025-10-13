@@ -55,6 +55,7 @@
                   <th colspan="1" rowspan="1">Số học sinh đến hạn tái tục</th>
                   <th colspan="1" rowspan="1">Học sinh đóng phí tái tục</th>
                   <th colspan="1" rowspan="1">Tỷ lệ tái tục (%)</th>
+                  <th colspan="1" rowspan="1">Doanh số renew</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
@@ -67,6 +68,7 @@
                 <td class="td vs-table--td">{{item.total_item}}</td>
                 <td class="td vs-table--td">{{item.success_item}}</td>
                 <td class="td vs-table--td">{{ item.total_item > 0 ? (item.success_item/item.total_item * 100).toFixed(2) : '--' }}</td>
+                <td class="td vs-table--td">{{item.renew_amount | formatNumber}}</td>
               </tr>
             </table>
             
