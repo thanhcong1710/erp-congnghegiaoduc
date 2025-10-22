@@ -45,6 +45,20 @@
             <input type="text" v-model="program.name" class="vs-inputx vs-input--input normal">
           </div>
         </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Chương trình con</label>
+          <div class=w-full>
+            <vue-select
+                  label="name"
+                  placeholder="Chọn chương trình con"
+                  :options="html.program_subs.list"
+                  v-model="html.program_subs.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveProgramSub"
+              ></vue-select>
+          </div>
+        </div>
         <div class="mb-6 md:w-2/3 vx-col w-full">
           <label>Mô tả</label>
           <div class=w-full>
@@ -122,6 +136,10 @@
             item: '',
             list: []
           },
+          program_subs: {
+            item: '',
+            list: []
+          },
         },
         alert:{
           active: false,
@@ -134,6 +152,7 @@
           name: '',
           description: '',
           status:1,
+          program_sub_id:'',
         },
       }
     },
@@ -154,12 +173,29 @@
           }
         })
       },
+      loadProgramSub(program_sub_id=0){
+        axios.g(`/api/system/program-subs/${this.program.product_id}`)
+          .then(response => {
+          this.html.program_subs.list = response.data
+          if(program_sub_id > 0){
+            this.html.program_subs.item = this.html.programs.list.filter(item => item.id == program_id)[0]
+          }
+        })
+      },
       saveProgram(data = null){
         if (data && typeof data === 'object') {
           const parent_id = data.id
           this.program.parent_id = parent_id
         }else{
           this.program.parent_id = ""
+        }
+      },
+      saveProgramSub(data = null){
+        if (data && typeof data === 'object') {
+          const program_sub_id = data.id
+          this.program.program_sub_id = program_sub_id
+        }else{
+          this.program.program_sub_id = ""
         }
       },
       loadDetail(){
@@ -171,6 +207,7 @@
             this.program = response.data
             this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
             this.loadProgram(this.program.parent_id)
+            this.loadProgramSub(this.program.program_sub_id)
           }else{
             this.$router.push({ path: `/settings/programs` });
           }
@@ -189,6 +226,7 @@
           this.program.product_id = ""
         }
         this.loadProgram();
+        this.loadProgramSub();
       },
       save() {
         let mess = "";

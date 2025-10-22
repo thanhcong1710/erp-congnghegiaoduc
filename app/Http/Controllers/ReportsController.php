@@ -39,7 +39,7 @@ class ReportsController extends Controller
             t.cm_id,
             c.product_id,
             '$report_month' report_month,
-            c.enrolment_last_date,
+            c.enrolment_last_date, cls.program_id,
             c.summary_sessions, c.done_sessions, c.last_done_sessions,
             IF(c.count_recharge =0 , 0, 1) AS type_fee,
             (SELECT class_date FROM schedule_has_student WHERE contract_id=c.id ORDER BY class_date ASC LIMIT 1) AS enrolment_start_date
@@ -71,13 +71,13 @@ class ReportsController extends Controller
     public function addItems($list) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $query = "INSERT INTO report_full_fee_active (student_id,contract_id, class_id, product_id, cm_id, report_month, branch_id, created_at, creator_id,end_date,`start_date`,done_sessions,summary_sessions,last_done_sessions, `type`, tuition_fee_id, init_tuition_fee_id) VALUES ";
+            $query = "INSERT INTO report_full_fee_active (student_id,contract_id, class_id, product_id, cm_id, report_month, branch_id, created_at, creator_id,end_date,`start_date`,done_sessions,summary_sessions,last_done_sessions, `type`, tuition_fee_id, init_tuition_fee_id, program_id) VALUES ";
             if (count($list) > 5000) {
                 for($i = 0; $i < 5000; $i++) {
                     $item = $list[$i];
                     $enrolment_last_date = $item->enrolment_last_date ? $item->enrolment_last_date : '2000-01-01';
                     $enrolment_start_date = $item->enrolment_start_date ? $item->enrolment_start_date : '2000-01-01';
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$enrolment_last_date','$enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$enrolment_last_date','$enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id', '$item->program_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -86,7 +86,7 @@ class ReportsController extends Controller
                 foreach($list as $item) {
                     $enrolment_last_date = $item->enrolment_last_date ? $item->enrolment_last_date : '2000-01-01';
                     $enrolment_start_date = $item->enrolment_start_date ? $item->enrolment_start_date : '2000-01-01';
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$enrolment_last_date','$enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '".(int)$item->cm_id."', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$enrolment_last_date','$enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id', '$item->program_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -1284,16 +1284,8 @@ class ReportsController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
         $product_id = isset($request->product_id) ? $request->product_id : 1;
-
-        $allPrograms = u::query("SELECT id, parent_id, name FROM programs WHERE product_id = $product_id AND status=1");
-        $programParent = u::query("SELECT id FROM programs WHERE product_id = $product_id AND parent_id=0 AND status=1");
-        $listProgramId = [];
-        foreach($programParent AS $parent) {
-            $listProgramId = array_merge($listProgramId, $this->getFirstLevelChildren($allPrograms, $parent->id));
-        }
-        $listPrograms =u::query("SELECT id, name FROM programs WHERE product_id = $product_id AND id IN (".implode(",",$listProgramId).") AND status=1");
-
-        var_dump($listPrograms); die;
+        $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -1309,31 +1301,28 @@ class ReportsController extends Controller
         $total = u::first("SELECT COUNT(b.id) total
                 FROM branches AS b 
             WHERE b.status =1 $cond AND b.id > 10");
-        $list = u::query("SELECT b.name AS branch_name,
-                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkined_at >= '$start_date 00:00:00' AND checkined_at <= '$end_date 23:59:59') AS count_checkin,
-                (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND enrolment_start_date >= '$start_date' AND enrolment_start_date <= '$end_date') AS count_trial,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND p.charge_date>= '$start_date' AND p.charge_date <= '$end_date'  AND p.branch_id=b.id) AS count_deposit,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_full_fee,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_new,
-                (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_renew,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_new,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.count_recharge>0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS sales_renew,
-                (SELECT SUM(c.debt_amount) FROM contracts AS c WHERE c.debt_amount > 0 AND c.created_at >= '$start_date 00:00:00' AND c.created_at <= '$end_date 00:00:00' AND c.branch_id=b.id) AS total_deposit
+        $list = u::query("SELECT b.name AS branch_name, b.id
             FROM branches AS b 
             WHERE b.status =1 $cond AND b.id > 10 $order_by $limitation");
-
-        $data = u::makingPagination($list, $total->total, $page, $limit);
-        return response()->json($data);
-    }
-
-    private function getFirstLevelChildren(array $items, int $parentId): array {
-        $children = [];
-        foreach ($items as $item) {
-            if (data_get($item, 'parent_id') === $parentId) {
-                $children[] = data_get($item, 'id');
+        foreach ($list as $branch) {
+            foreach ($listProgramSubs as $programSub) {
+                $countStudent = u::first("SELECT COUNT(r.id) AS total FROM report_full_fee_active AS r
+                        LEFT JOIN programs AS p ON p.id = r.program_id
+                    WHERE r.branch_id = $branch->id AND r.report_month = '$start_date' AND r.product_id=$product_id AND p.program_sub_id = $programSub->id ");
+                $countClass = u::first("SELECT COUNT(r.id) AS total FROM report_classes AS r
+                        LEFT JOIN programs AS p ON p.id = r.program_id
+                    WHERE r.branch_id = $branch->id AND r.report_month = '$start_date' AND r.product_id=$product_id AND r.status = 1 AND p.program_sub_id = $programSub->id ");
+                $branch->{$programSub->id} = (object)[
+                    'countStudent' => $countStudent->total,
+                    'countClass' => $countClass->total
+                ];
             }
         }
-        return $children;
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json([   
+                'program_subs' => $listProgramSubs,
+                'data' => $data]);
     }
 
     public function report11(Request $request)

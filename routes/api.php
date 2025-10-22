@@ -49,6 +49,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('get-enddate-in-class', 'SystemController@getEndDateInClass');
             Route::post('get-class-active-by-branch-product', 'SystemController@getClassesActiveByBranchProduct');
             Route::get('programs/{product_id}', 'SystemController@getProgramsByProduct');
+            Route::get('program-subs/{product_id}', 'SystemController@getProgramSubsByProduct');
             Route::get('tuition-fees', 'SystemController@getTuitionFees');
             Route::get('b2b/sources', 'SystemController@getB2BSources');
             Route::get('ta/{branch_id}', 'SystemController@getTAs');
@@ -300,6 +301,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('delete', 'ProgramsController@delete');
                 Route::get('show/{id}', 'ProgramsController@show');
                 Route::post('update', 'ProgramsController@update');
+                Route::post('sync', 'ProgramsController@sync');
             });
             Route::prefix('rooms')->group(function () {
                 Route::post('add', 'RoomsController@add');

@@ -1629,4 +1629,83 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report10(Request $request , $key,$value) {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $arr_key =explode(',',$key);
+        $arr_value =explode(',',$value);
+        $report_month = date('Y-m');
+        $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        $product_id = 1;
+        foreach($arr_key AS $k=>$key){
+            if($key=='branch_id'){
+                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            }
+            if($key=='start_date'){
+                $report_month = $arr_value[$k];
+            }
+            if($key=='product_id'){
+                $product_id = $arr_value[$k];
+            }
+        }
+        $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        $order_by = " ORDER BY b.id ";
+        $list = u::query("SELECT b.name AS branch_name, b.id
+            FROM branches AS b 
+            WHERE b.status =1 $cond AND b.id > 10 $order_by");
+        foreach ($list as $branch) {
+            foreach ($listProgramSubs as $programSub) {
+                $countStudent = u::first("SELECT COUNT(r.id) AS total FROM report_full_fee_active AS r
+                        LEFT JOIN programs AS p ON p.id = r.program_id
+                    WHERE r.branch_id = $branch->id AND r.report_month = '$report_month' AND r.product_id=$product_id AND p.program_sub_id = $programSub->id ");
+                $countClass = u::first("SELECT COUNT(r.id) AS total FROM report_classes AS r
+                        LEFT JOIN programs AS p ON p.id = r.program_id
+                    WHERE r.branch_id = $branch->id AND r.report_month = '$report_month' AND r.product_id=$product_id AND r.status = 1 AND p.program_sub_id = $programSub->id ");
+                $branch->{$programSub->id} = (object)[
+                    'countStudent' => $countStudent->total,
+                    'countClass' => $countClass->total
+                ];
+            }
+        }
+        $arrKey = ['B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U', 'V','W','X','Y','Z',
+            'AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT','AU','AV','AW','AX','AY','AZ'];
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Trung tâm');
+        foreach ($listProgramSubs as $index => $programSub) {
+            $colIndex = $arrKey[$index * 3];
+            $sheet->setCellValue($colIndex . '1', $programSub->name);
+            $sheet->setCellValue($colIndex . '2', 'HS Full fee active');
+            $sheet->setCellValue($arrKey[$index * 3 + 1] . '2', 'Số lớp');
+            $sheet->setCellValue($arrKey[$index * 3 + 2] . '2', 'ACS');
+            $sheet->mergeCells($colIndex . '1:' . $arrKey[$index * 3 + 2] . '1');
+            $sheet->getColumnDimension($arrKey[$index * 3])->setWidth(15);
+            $sheet->getColumnDimension($arrKey[$index * 3 + 1])->setWidth(15);
+            $sheet->getColumnDimension($arrKey[$index * 3 + 2])->setWidth(15);
+        }
+        $sheet->mergeCells('A1:A2');
+        $sheet->getColumnDimension('A')->setWidth(30);
+        for ($i = 0; $i < count($list) ; $i++) {
+            $x = $i + 3;
+            $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
+            foreach ($listProgramSubs as $index => $programSub) {
+                $colIndex = $arrKey[$index * 3];
+                $countStudent = $list[$i]->{$programSub->id}->countStudent;
+                $countClass = $list[$i]->{$programSub->id}->countClass;
+                $sheet->setCellValue($colIndex . $x, $countStudent);
+                $sheet->setCellValue($arrKey[$index * 3 + 1] . $x, $countClass);
+                $sheet->setCellValue($arrKey[$index * 3 + 2] . $x, $countClass ? round($countStudent / $countClass, 2) : "--");
+            }
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo ACS chi tiết theo chương trình con.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

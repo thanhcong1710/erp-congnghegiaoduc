@@ -52,7 +52,7 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 1800px">
+            <table class="vs-table vs-table--tbody-table" style="width: 2800px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
@@ -64,16 +64,20 @@
                 </tr>
                 <tr>
                   <template v-for="program in program_list">
-                    <th class="text-center" :key="program.id + '-total'">Tổng số học sinh</th>
-                    <th class="text-center" :key="program.id + '-reserve'">Học sinh Reserve</th>
-                    <th class="text-center" :key="program.id + '-pending'">Học sinh Pending</th>
+                    <th class="text-center" >Full fee active</th>
+                    <th class="text-center" >Số lớp</th>
+                    <th class="text-center" >ACS</th>
                   </template>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
-                <!---->
-                
-                
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{item.branch_name}}</td>
+                <template v-for="program in program_list">
+                  <th class="text-center" >{{item[program.id].countStudent}}</th>
+                  <th class="text-center" >{{item[program.id].countClass}}</th>
+                  <th class="text-center" >{{item[program.id].countClass ? (Math.round(item[program.id].countStudent *100 / item[program.id].countClass)/100).toFixed(2) : '--'}}</th>
+                </template>
               </tr>
             </table>
             
@@ -209,8 +213,9 @@
         axios.p('/api/lms/reports/10', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.datas = response.data.list
-            this.pagination = response.data.paging;
+            this.datas = response.data.data.list
+            this.pagination = response.data.data.paging;
+            this.program_list = response.data.program_subs;
             setTimeout(() => {
               this.pagination.init = 1;
             }, 500)
@@ -243,6 +248,10 @@
         if (this.searchData.keyword){
           this.key += "keyword,"
           this.value += this.searchData.keyword+","
+        }
+        if (this.searchData.product_id){
+          this.key += "product_id,"
+          this.value += this.searchData.product_id+","
         }
         if (ids_branch){
           this.key += "branch_id,"
@@ -284,5 +293,6 @@ th .sort-th, th .vs-table-text{
 [dir] .vs-con-table .vs-con-tbody .vs-table--tbody-table .vs-table--thead th {
     padding: 10px 15px;
     text-align: center;
+    border: 1px solid #e8e8e8;
 }
 </style>

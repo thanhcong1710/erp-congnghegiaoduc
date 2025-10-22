@@ -186,4 +186,9 @@ class SystemController extends Controller
             WHERE cl.status=1 AND cl.cm_id=$cm_id");
         return response()->json($data);
     }
+
+    public function getProgramSubsByProduct(Request $request, $product_id){
+        $data= u::query("SELECT name, id FROM program_subs WHERE status=1 AND product_id=$product_id ");
+        return response()->json($data);
+    }
 }

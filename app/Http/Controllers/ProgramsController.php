@@ -36,7 +36,8 @@ class ProgramsController extends Controller
             FROM programs AS b WHERE $cond");
         
         $list = u::query("SELECT b.*, (SELECT count(id) FROM contracts WHERE program_id=b.id) AS disabled_delete,
-                (SELECT name FROM products WHERE id=b.product_id) AS product_name
+                (SELECT name FROM products WHERE id=b.product_id) AS product_name,
+                (SELECT name FROM program_subs WHERE id=b.program_sub_id) AS sub_program
             FROM programs AS b 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
@@ -54,6 +55,7 @@ class ProgramsController extends Controller
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($request, 'status'),
+            'program_sub_id' => (int)data_get($request, 'program_sub_id'),
         ), 'programs');
 
         $result = array(
@@ -90,12 +92,31 @@ class ProgramsController extends Controller
             'code' => data_get($request, 'code'), 
             'description' => data_get($request, 'description'),
             'status' =>  data_get($request, 'status'),
+            'program_sub_id' => (int)data_get($request, 'program_sub_id'),
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
         ),array('id'=>data_get($request, 'id')), 'programs');
         $result = array(
             'status' => 1,
             'message' => 'Cập nhật thông tin chương trình học thành công'
+        );
+        return response()->json($result);
+    }
+
+    public function sync(Request $request)
+    {
+        $list =u::query("SELECT * FROM program_subs WHERe status=1");
+        foreach ($list as $program_sub) {
+            u::query("UPDATE programs SET program_sub_id=".data_get($program_sub,'id')." 
+                WHERE product_id=".data_get($program_sub,'product_id')." AND name LIKE '".data_get($program_sub,'name')."'");
+        }
+        u::query("UPDATE programs AS p LEFT JOIN programs AS parent ON p.parent_id=parent.id 
+                SET p.program_sub_id=parent.program_sub_id
+            WHERE parent.program_sub_id IS NOT NULL AND p.program_sub_id IS NULL");
+
+        $result = array(
+            'status' => 1,
+            'message' => 'Đồng bộ chương trình học thành công'
         );
         return response()->json($result);
     }

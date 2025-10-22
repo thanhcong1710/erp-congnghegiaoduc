@@ -35,7 +35,8 @@
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="dark" type="border" class="mb-2 mr-3" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="warning" @click="syncData"><i class="fa fa-search"></i> Cập nhật chương trinh con</vs-button>
           </div>
         </div>
       </div>
@@ -50,6 +51,7 @@
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Chương trình học</th>
+                  <th colspan="1" rowspan="1">Chương trình con</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
@@ -61,6 +63,7 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.product_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
+                <td class="td vs-table--td">{{item.sub_program}}</td>
                 <td class="td vs-table--td text-center">{{item.code}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
@@ -170,6 +173,18 @@
       this.getData();
     },
     methods: {
+      syncData() {
+        this.$vs.loading()
+        axios.p('/api/settings/programs/sync', {})
+          .then((response) => {
+            this.$vs.loading.close()
+            this.getData();
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
+      },
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
