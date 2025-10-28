@@ -1180,7 +1180,7 @@ class ExportsController extends Controller
         
         $order_by = " ORDER BY u.id DESC ";
         $list = u::query("SELECT u.name, u.hrm_id,
-                (SELECT COUNT(id) FROM crm_students WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkined_at, '%Y-%m')= '$start_date') AS count_checkin,
+                (SELECT COUNT(id) FROM crm_students WHERE checkin_owner_id = u.id AND status >= 2 AND DATE_FORMAT(checkin_at, '%Y-%m')= '$start_date') AS count_checkin,
                 (SELECT COUNT(id) FROM contracts WHERE ec_id = u.id AND type=0 AND DATE_FORMAT(enrolment_start_date, '%Y-%m')= '$start_date') AS count_trial,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_deposit,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_full_fee,
@@ -1262,7 +1262,7 @@ class ExportsController extends Controller
         
         $order_by = " ORDER BY b.id DESC ";
         $list = u::query("SELECT b.name AS branch_name,
-                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkined_at >= '$start_date 00:00:00' AND checkined_at <= '$end_date 23:59:59') AS count_checkin,
+                (SELECT COUNT(id) FROM crm_student_checkin WHERE checkin_branch_id = b.id AND status >= 2 AND checkin_at >= '$start_date 00:00:00' AND checkin_at <= '$end_date 23:59:59') AS count_checkin,
                 (SELECT COUNT(id) FROM contracts WHERE branch_id = b.id AND type=0 AND enrolment_start_date >= '$start_date' AND enrolment_start_date <= '$end_date') AS count_trial,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE c.debt_amount>0 AND p.charge_date>= '$start_date' AND p.charge_date <= '$end_date'  AND p.branch_id=b.id) AS count_deposit,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND p.charge_date >= '$start_date' AND p.charge_date <= '$end_date' AND p.branch_id=b.id) AS count_full_fee,
