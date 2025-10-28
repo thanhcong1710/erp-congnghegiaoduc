@@ -530,14 +530,14 @@ class ExportsController extends Controller
         }
         $cond ="";
         if($start_date){
-            $cond.= " AND csc.checkined_at >= '$start_date 00:00:00'";
+            $cond.= " AND csc.checkin_at >= '$start_date 00:00:00'";
         }
         if($end_date){
-            $cond.= " AND csc.checkined_at <= '$end_date 23:59:59'";
+            $cond.= " AND csc.checkin_at <= '$end_date 23:59:59'";
         }
 
         $order_by = " ORDER BY s.id DESC ";
-        $list = u::query("SELECT s.name, ss.lms_id, csc.checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+        $list = u::query("SELECT s.name, ss.lms_id, csc.checkin_at AS checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, p.name AS parent_name, p.mobile_1 AS parent_mobile,
                 IF(ss.id IS NOT NULL, ss.date_of_birth, s.birthday) AS birthday
             FROM crm_student_checkin AS csc 
