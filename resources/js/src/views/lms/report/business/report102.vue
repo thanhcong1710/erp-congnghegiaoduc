@@ -53,30 +53,18 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Mã nhân viên</th>
-                  <th colspan="1" rowspan="1">Họ tên</th>
-                  <th colspan="1" rowspan="1">Số checkin</th>
-                  <th colspan="1" rowspan="1">Số học thử</th>
-                  <th colspan="1" rowspan="1">Số học sinh cọc</th>
-                  <th colspan="1" rowspan="1">Số học sinh fullfee</th>
-                  <th colspan="1" rowspan="1">Số học sinh renew</th>
-                  <th colspan="1" rowspan="1">DS New</th>
-                  <th colspan="1" rowspan="1">DS Renew</th>
-                  <th colspan="1" rowspan="1">Công nợ</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
+                  <th colspan="1" rowspan="1">Tên HOEC/EC</th>
+                  <th colspan="1" rowspan="1">Số case thu phí</th>
+                  <th colspan="1" rowspan="1">Doanh thu</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{ item.name}}</td>
-                <td class="td vs-table--td">{{ item.hrm_id}}</td>
-                <td class="td vs-table--td">{{ item.count_checkin}}</td>
-                <td class="td vs-table--td">{{ item.count_trial}}</td>
-                <td class="td vs-table--td">{{ item.count_deposit}}</td>
+                <td class="td vs-table--td">{{ item.branch_name}}</td>
+                <td class="td vs-table--td">{{ item.name}} - {{ item.hrm_id}}</td>
                 <td class="td vs-table--td">{{ item.count_full_fee}}</td>
-                <td class="td vs-table--td">{{ item.count_renew}}</td>
-                <td class="td vs-table--td">{{ item.sales_new | formatNumber}}</td>
-                <td class="td vs-table--td">{{ item.sales_renew | formatNumber}}</td>
-                <td class="td vs-table--td">{{ item.total_deposit | formatNumber}}</td>
+                <td class="td vs-table--td">{{ item.total_amount | formatNumber}}</td>
               </tr>
             </table>
             
