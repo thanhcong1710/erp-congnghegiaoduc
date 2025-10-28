@@ -1181,7 +1181,7 @@ class ExportsController extends Controller
         $order_by = " ORDER BY u.id DESC ";
         $list = u::query("SELECT u.name, u.hrm_id, b.name AS branch_name,
                 (SELECT COUNT(DISTINCT p.contract_id) FROM payments AS p WHERE p.debt=0 AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS count_full_fee,
-                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE AND DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS total_amount
+                (SELECT SUM(p.amount) FROM payments AS p LEFT JOIN contracts AS c ON c.id=p.contract_id WHERE DATE_FORMAT(p.charge_date, '%Y-%m')= '$start_date' AND p.ec_id=u.id) AS total_amount
             FROM users AS u 
                 LEFT JOIN role_has_user AS ru ON u.id=ru.user_id
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
