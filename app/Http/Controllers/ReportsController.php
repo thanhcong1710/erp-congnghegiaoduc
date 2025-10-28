@@ -1174,7 +1174,7 @@ class ReportsController extends Controller
             (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND report_month = '$report_month' AND product_id=1) AS count_class_april,
             (SELECT COUNT(id) FROM report_full_fee_active WHERE branch_id = b.id AND report_month = '$report_month' AND product_id=2) AS count_full_fee_active_igarten,
             (SELECT COUNT(id) FROM report_classes WHERE branch_id = b.id AND status=1 AND report_month = '$report_month' AND product_id=2) AS count_class_igarten,
-            (SELECT COUNT(id) FROM report_users WHERE branch_id = b.id AND role_id IN (55,56)) AS count_cm
+            (SELECT COUNT(id) FROM report_users WHERE branch_id = b.id AND role_id IN (55,56) AND report_month = '$report_month') AS count_cm
         FROM
             branches AS b 
         WHERE
