@@ -15,6 +15,7 @@ class ProgramsController extends Controller
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $status = isset($request->status) ? $request->status : [];
+        $branch_id = isset($request->branch_id) ? $request->branch_id : '';
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
