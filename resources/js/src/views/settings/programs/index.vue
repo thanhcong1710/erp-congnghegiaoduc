@@ -235,7 +235,7 @@
           })
         }
         this.searchData.status = ids_status
-
+        this.searchData.branch_id = ids_branch
         const data = {
             branch_id: this.searchData.branch_id,
             keyword: this.searchData.keyword,
