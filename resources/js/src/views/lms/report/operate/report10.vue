@@ -34,6 +34,7 @@
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Khóa học</label>
             <select v-model="searchData.product_id" class="vs-inputx vs-input--input normal">
+              <option value="0">Tất cả</option>
               <option value="1">Sunny</option>
               <option value="2">I-Kinder</option>
             </select>
@@ -131,7 +132,7 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
-          product_id: 1,
+          product_id: 0,
         },
         datepickerOptions: {
           closed: true,

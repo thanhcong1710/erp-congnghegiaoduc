@@ -7,6 +7,24 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+            <multiselect
+                name="search_branch"
+                placeholder="Chọn trung tâm"
+                v-model="searchData.arr_branch"
+                :options="branch_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Tên chương trình học" v-model="searchData.keyword"></vs-input>
           </div>
@@ -119,6 +137,8 @@
     data() {
       return {
         searchData: {
+          arr_branch: "",
+          branch_id:"",
           keyword: "",
           status: "",
           arr_status:"",
@@ -170,6 +190,10 @@
       }
     },
     created() {
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.branch_list = response.data
+      })
       this.getData();
     },
     methods: {
@@ -186,6 +210,8 @@
           })
       },
       reset() {
+        this.searchData.arr_branch= ""
+        this.searchData.branch_id= ""
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
         this.searchData.status= ""
@@ -193,6 +219,12 @@
         this.getData();
       },
       getData() {
+        const ids_branch = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            ids_branch.push(item.id)
+          })
+        }
         const ids_status = []
         if (this.searchData.arr_status && this.searchData.arr_status.length) {
           this.searchData.arr_status.map(item => {
@@ -202,6 +234,7 @@
         this.searchData.status = ids_status
 
         const data = {
+            branch_id: this.searchData.branch_id,
             keyword: this.searchData.keyword,
             status:this.searchData.status,
             pagination:this.pagination,

@@ -9,6 +9,24 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+            <multiselect
+                name="search_branch"
+                placeholder="Chọn trung tâm"
+                v-model="searchData.arr_branch"
+                :options="branch_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian</label>
             <date-picker name="item-date" v-model="searchData.dateRange" style="width: 100%" range format="YYYY-MM-DD"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>

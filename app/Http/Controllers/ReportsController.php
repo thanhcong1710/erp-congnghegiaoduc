@@ -1279,7 +1279,11 @@ class ReportsController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
         $product_id = isset($request->product_id) ? $request->product_id : 1;
-        $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        if ($product_id == 0) {
+            $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id IN (1,2) AND status=1");
+        } else {
+            $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        }
         
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;

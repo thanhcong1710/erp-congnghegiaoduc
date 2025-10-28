@@ -21,24 +21,28 @@ class ProgramsController extends Controller
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " 1 ";
+        $cond = " p.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        if (!empty($branch_id)) {
+            $cond .= " AND p.branch_id IN (".implode(",",$branch_id).")";
+        }
         
         if ($keyword !== '') {
-            $cond .= " AND (b.name LIKE '%$keyword%' OR b.code LIKE '%$keyword%')";
+            $cond .= " AND (p.name LIKE '%$keyword%' OR b.code LIKE '%$keyword%')";
         }
         if (!empty($status)) {
-            $cond .= " AND b.status IN (".implode(",",$status).")";
+            $cond .= " AND p.status IN (".implode(",",$status).")";
         }
         
-        $order_by = " ORDER BY b.id DESC ";
+        $order_by = " ORDER BY p.id DESC ";
 
-        $total = u::first("SELECT count(b.id) AS total 
-            FROM programs AS b WHERE $cond");
+        $total = u::first("SELECT count(p.id) AS total 
+            FROM programs AS p WHERE $cond");
         
-        $list = u::query("SELECT b.*, (SELECT count(id) FROM contracts WHERE program_id=b.id) AS disabled_delete,
-                (SELECT name FROM products WHERE id=b.product_id) AS product_name,
-                (SELECT name FROM program_subs WHERE id=b.program_sub_id) AS sub_program
-            FROM programs AS b 
+        $list = u::query("SELECT p.*, (SELECT count(id) FROM contracts WHERE program_id=p.id) AS disabled_delete,
+                (SELECT name FROM products WHERE id=p.product_id) AS product_name,
+                (SELECT name FROM branches WHERE id=p.branch_id) AS branch_name,
+                (SELECT name FROM program_subs WHERE id=p.program_sub_id) AS sub_program
+            FROM programs AS p 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

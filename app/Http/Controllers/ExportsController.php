@@ -1614,7 +1614,7 @@ class ExportsController extends Controller
         $arr_value =explode(',',$value);
         $report_month = date('Y-m');
         $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
-        $product_id = 1;
+        $product_id = 0;
         foreach($arr_key AS $k=>$key){
             if($key=='branch_id'){
                 $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
@@ -1626,7 +1626,11 @@ class ExportsController extends Controller
                 $product_id = $arr_value[$k];
             }
         }
-        $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        if ($product_id = 0) {
+            $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id IN (1,2) AND status=1");
+        }else{
+            $listProgramSubs = u::query("SELECT * FROM program_subs WHERE product_id=$product_id AND status=1");
+        }
         $order_by = " ORDER BY b.id ";
         $list = u::query("SELECT b.name AS branch_name, b.id
             FROM branches AS b 
