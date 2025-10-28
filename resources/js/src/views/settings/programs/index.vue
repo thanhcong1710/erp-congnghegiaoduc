@@ -67,6 +67,7 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Chương trình học</th>
                   <th colspan="1" rowspan="1">Chương trình con</th>
@@ -79,6 +80,7 @@
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.product_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td">{{item.sub_program}}</td>
@@ -136,6 +138,7 @@
     },
     data() {
       return {
+        branch_list:[],
         searchData: {
           arr_branch: "",
           branch_id:"",
