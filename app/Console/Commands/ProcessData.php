@@ -44,7 +44,7 @@ class ProcessData extends Command
     {
         $jobs = new JobsController();
         $jobs->processWaittingStudent();
-        $jobs->processAutoWithdrawStudent();
+        
         $report = new ReportsController();
         //report_student_in_class
         $report->updateReportStudentInClass();
