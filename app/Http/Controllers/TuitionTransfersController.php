@@ -253,7 +253,7 @@ class TuitionTransfersController extends Controller
 
     public static function processTuitionTransfer($tuition_transfer_id){
         $tuition_transfer_info = u::first("SELECT t.from_student_id, t.from_branch_id, t.to_branch_id, t.creator_id,
-                t.to_student_id, t.to_branch_id, t.to_product_id, 
+                t.to_student_id, t.to_branch_id, t.to_product_id, t.transfer_date,
                 (SELECT CONCAT(name, ' - ', lms_code) FROM students WHERE id= t.from_student_id) AS from_student_name,
                 (SELECT CONCAT(name, ' - ', lms_code) FROM students WHERE id= t.to_student_id) AS to_student_name
             FROM tuition_transfer AS t  WHERE t.id = $tuition_transfer_id");
@@ -295,6 +295,7 @@ class TuitionTransfersController extends Controller
                     'created_at'=>date('Y-m-d H:i:s'),
                     'status' => 5,
                     'count_recharge' => $last_contract_to_student ? $last_contract_to_student->count_recharge + 1 : 0,
+                    'start_date' => data_get( $tuition_transfer_info, 'transfer_date'),
                 ), 'contracts');
                 $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code').$contract_code;
