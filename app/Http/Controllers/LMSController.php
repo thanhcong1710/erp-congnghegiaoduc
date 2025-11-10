@@ -998,4 +998,55 @@ class LMSController extends Controller
         }
         return "ok";
     }
+
+    public function studentWithdrawContract($contract_id)
+    {
+        if(config('app.env') !== 'product'){
+            return "ok";
+        }
+        $cond = "";
+        $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
+                cl.lms_id AS lms_class_id, c.enrolment_last_date,
+                (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
+            FROM contracts AS c 
+                LEFT JOIN students AS s ON s.id = c.student_id 
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+            WHERE c.id = $contract_id ");
+        if($studentInfo){
+            $listClassLMS = self::getListClassByStudent(data_get($studentInfo, 'lms_id'));
+            $classLMSCurrent = isset($listClassLMS[0]) ? $listClassLMS[0] : null;
+            if (data_get($classLMSCurrent, 'chk') !== 'N'){
+                $url = sprintf('%s/data/setup.asmx/CounStudentWithdrawSave', config('lms.url'));
+                $client = new Client();
+                $method = 'POST';
+                $params = [
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => [
+                        "counn" => [
+                            "coun_std_id" => data_get($studentInfo, 'lms_id'),
+                            "coun_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
+                            "coun_istd_type" => "Others - Withdraw due to other reasons",
+                            "coun_Reservation" => 0,
+                            "coun_is_reserved_date" => "",
+                            "coun_work_type" => "S",
+                        ],
+                        "staff" => ["stf_id" => 8824],
+                    ]
+                ];
+                $response = $client->request($method, $url, $params);
+                $dataResponse = json_decode($response->getBody()->getContents(), true);
+                u::logRequest($url, $method, [], $params, $dataResponse, 'log_request_outbound');
+                if (data_get($dataResponse, 'd.status') == 'ok') {
+                    return "ok";
+                } else {
+                    return "false";
+                }
+            }
+        }
+        return "ok";
+    }
+
 }

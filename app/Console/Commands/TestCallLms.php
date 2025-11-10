@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\JobsController;
+use App\Http\Controllers\LMSController;
 use App\Http\Controllers\ReportsController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
@@ -62,7 +63,7 @@ class TestCallLms extends Command
         // foreach($arr AS $row){
         //     $reservesController->processReserve($row);
         // }
-        // u::updateScheduleHasStudent(890);
+        // u::updateScheduleHasStudent(1404, '2025-08-20');
 
         // Convert dữ liệu sang bảng crm_parent_branch
         // $list_parent = u::query("SELECT id,owner_id FROM crm_parents");
@@ -130,8 +131,22 @@ class TestCallLms extends Command
         //     }
         //     echo  $studentId . "/";
         // }
-        $jobs = new JobsController();
-        $jobs->processWaittingStudent();
+        // $jobs = new JobsController();
+        // $jobs->processWaittingStudent();
+        $list =u::query("SELECT
+            l.* 
+        FROM
+            log_contracts AS l
+        WHERE
+            l.action = 'Withdraw học sinh do quá hạn số buổi học' 
+            AND DATE_FORMAT(l.updated_at, '%H') = 2 
+            AND l.updated_at > '2025-09-01'
+            AND (SELECT count(id) FROM contracts WHERE student_id=l.student_id AND status=6)=0");
+        foreach($list AS $row){
+            $lmsController = new LMSController();
+            $lmsController->studentWithdrawContract(data_get($row, 'contract_id'));
+            echo data_get($row, 'contract_id')."/";
+        };
         return "ok";
     }
 }

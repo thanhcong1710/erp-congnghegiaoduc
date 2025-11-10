@@ -97,6 +97,14 @@ const router = new Router({
           }
         },
         {
+          path: '/pages/print/tuition_transfer/:id',
+          name: 'print-tuition-transfer',
+          component: () => import('@/views/pages/print/tuition_transfer.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
+        {
           path: '/pages/print/reserve/:id',
           name: 'print-reserve',
           component: () => import('@/views/pages/print/reserve.vue'),

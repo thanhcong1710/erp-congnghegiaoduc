@@ -320,4 +320,32 @@ class TuitionTransfersController extends Controller
         ), array('id'=>$tuition_transfer_id), 'tuition_transfer');
         return true;
     }
+
+    public function print(Request $request,$tuition_transfer_id)
+    {
+        $contract_info = u::first("SELECT fs.gud_name1 AS from_gud_name1, fs.gud_mobile1 AS from_gud_mobile1, fs.name AS from_student_name, fs.lms_id AS from_lms_id,
+            ts.gud_name1 AS to_gud_name1, ts.gud_mobile1 AS to_gud_mobile1, ts.name AS to_student_name, ts.lms_id AS to_lms_id,
+            t.meta_data, t.note
+        FROM tuition_transfer AS t 
+            LEFT JOIN students AS fs ON fs.id=t.from_student_id 
+            LEFT JOIN students AS ts ON ts.id=t.to_student_id 
+        WHERE t.id=$tuition_transfer_id");
+        $meta_data =json_decode($contract_info->meta_data,true);
+        $contract_info = (array)$contract_info;
+        $contract_info['left_real_sessions'] = 0;
+        $contract_info['left_bonus_sessions'] = 0;
+        $contract_info['left_amount'] = 0;
+        foreach(data_get($meta_data, 'transferred_contracts') AS $transfer_contract){
+            $contract_info['left_real_sessions'] = $contract_info['left_real_sessions'] + data_get($transfer_contract, 'left_real_sessions');
+            $contract_info['left_bonus_sessions'] = $contract_info['left_bonus_sessions'] + data_get($transfer_contract, 'left_bonus_sessions');
+            $contract_info['left_amount'] = $contract_info['left_amount'] + data_get($transfer_contract, 'left_amount');
+        }
+        $contract_info['to_real_sessions'] = 0;
+        $contract_info['to_bonus_sessions'] = 0;
+        foreach(data_get($meta_data, 'transferred_contracts') AS $transfer_contract){
+            $contract_info['to_real_sessions'] = $contract_info['to_real_sessions'] + data_get($transfer_contract, 'real_sessions');
+            $contract_info['to_bonus_sessions'] = $contract_info['to_bonus_sessions'] + data_get($transfer_contract, 'bonus_sessions');
+        }
+        return response()->json($contract_info);
+    }
 }

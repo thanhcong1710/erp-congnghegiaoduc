@@ -129,6 +129,9 @@
                     <router-link :to="`/lms/tuition_transfers/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
+                    <router-link :to="`/pages/print/tuition_transfer/${item.id}`" target="_blank"> 
+                      <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                    </router-link> 
                 </td>
               </tr>
             </table>

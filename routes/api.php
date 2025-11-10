@@ -137,6 +137,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('contracts/show/{contract_id}', 'ContractsController@show');
             Route::post('contracts/update', 'ContractsController@update');
             Route::get('contracts/print/{contract_id}', 'ContractsController@print');
+            Route::get('tuition_transfer/print/{contract_id}', 'TuitionTransfersController@print');
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
