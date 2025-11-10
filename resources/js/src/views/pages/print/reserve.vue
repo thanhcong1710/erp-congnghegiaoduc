@@ -18,91 +18,82 @@
                             </div>
                             <h2 class="title mt-2">ĐƠN BẢO LƯU HỌC PHÍ</h2>
                             <div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Họ và tên phụ huynh:</span>
-                                        {{reserve.gud_name1}}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Họ và tên học sinh:</span>
-                                        {{reserve.student_name}}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Mã LMS:</span>
-                                        {{reserve.lms_id}}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Khóa học:</span>
-                                        {{reserve.product_name}}
-                                    </div>
-                                </div>
                                 <div class="vx-row">
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Ngày nộp học phí:</span>
-                                            {{reserve.charge_date}}
+                                            <span class="label">Họ và tên phụ huynh:</span>
+                                            {{reserve.gud_name1}}
                                         </div>
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Số giao dịch: </span>
-                                           
+                                            <span class="label">Số điện thoại: </span>
+                                            {{reserve.gud_mobile1}}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="vx-row">
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Số phí:</span>
-                                            {{reserve.must_charge}}
+                                            <span class="label">Họ và tên học sinh:</span>
+                                            {{reserve.student_name}}
                                         </div>
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Tổng số buổi học theo gói phí: </span>
-                                            {{reserve.init_tuition_fee_session}}
+                                            <span class="label">Mã LMS:</span>
+                                            {{reserve.lms_id}}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="vx-row">
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Số buổi đã học:</span>
-                                            {{reserve.total_done_sessions}}
+                                            <span class="label">Trình độ:</span>
+                                            {{reserve.product_name}}
                                         </div>
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Số buổi chưa học xin bảo lưu: </span>
-                                            {{reserve.left_sessions}}
+                                            <span class="label">Lịch học:</span>
+                                            {{reserve.lich_hoc}}
                                         </div>
                                     </div>
                                 </div>
                                 <div >
                                     <div class="input-line">
-                                        <span class="label">Số tiền chưa sử dụng xin bảo lưu:</span>
-                                        {{reserve.left_amount}}
+                                        <span class="label">Số buổi học còn lại:</span>
+                                        {{reserve.real_sessions}}
+                                        <span class="label">&nbsp;(buổi chính thức) và </span>
+                                        {{reserve.bonus_sessions}}
+                                        <span class="label">&nbsp;(buổi học bổng)</span>
                                     </div>
                                 </div>
                                 <div>
                                     <div class="input-line">
-                                        <span class="label">Thời gian bảo lưu dự kiến: {{reserve.start_date}} đến {{reserve.end_date}}</span>
+                                        <span class="label">Số buổi học xin bảo lưu:</span>
+                                        {{reserve.session}}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="input-line">
+                                        <span class="label">Thời gian bảo: {{reserve.start_date}} đến {{reserve.end_date}}</span>
                                     </div>
                                 </div>
                                 <div>
                                     <div>
-                                        <span class="label">Lý do xin bảo lưu: {{reserve.note}}</span>
+                                        <span class="label">Lý do xin bảo lưu chi tiết: {{reserve.note}}</span>
                                     </div>
                                 </div>
                                 <div>
                                     <div>
-                                        <span class="label">Nếu học sinh bảo lưu không giữ chỗ, sau khi học sinh quay lại sẽ phải làm bài kiểm tra lại đầu vào và không được giữ chỗ lớp học, ca học hiện tại. Tôi cam đoan sẽ không khiếu nại gì sau này</span>
+                                        <span class="label">Kèm theo:</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                       <p><b>Đề nghị và cam kết của phụ huynh:</b> Đề nghị Ant English cho con của tôi được bảo lưu học phí theo thời gian trên. Tôi xin cam kết nếu con tôi không quay lại học theo đúng thời gian này, số buổi học sẽ tiếp tục được tính phí trên hệ thống kể từ ngày kết thúc bảo lưu.</p>
+                                       <p>Nếu học sinh bảo lưu không giữ chỗ, sau khi học sinh quay lại sẽ phải làm bài kiểm tra lại đầu vào và không được giữ chỗ lớp học, ca học hiện tại. Tôi cam đoan sẽ không khiếu nại gì sau này.</p>
                                     </div>
                                 </div>
                             </div>
@@ -128,6 +119,17 @@
                                     <p class="center" style="margin-top: 76px;"><i>Ngày…/…/…</i></p>
                                 </div>
                             </div>
+                            <div>
+                                <div>
+                                    <div>
+                                        <p><b><i>Lưu ý:</i></b></p>
+                                        <p><i>Đơn bảo lưu sẽ được xét duyệt và trả lời trong 3 ngày làm việc</i></p>
+                                        <p><i>Phụ huynh thông báo 03 ngày trước khi quay lại học</i></p>
+                                        <p><i>Phòng CSKH scan và lưu trữ theo quy định</i></p>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                         
                         

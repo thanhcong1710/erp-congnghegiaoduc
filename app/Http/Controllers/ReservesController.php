@@ -293,31 +293,27 @@ class ReservesController extends Controller
     }
 
     public function print(Request $request, $id){
-        $reserveInfo = u::first("SELECT s.gud_name1, s.name AS student_name, s.lms_id, 
+        $reserveInfo = u::first("SELECT s.gud_name1,s.gud_mobile1, s.name AS student_name, s.lms_id, 
                 (SELECT name FROM products WHERE id=r.product_id) AS product_name,
-                (SELECT charge_date FROM payments WHERE contract_id=r.contract_id ORDER BY charge_date DESC LIMIT 1) AS charge_date,
-                c.must_charge, c.init_tuition_fee_session, c.done_sessions , c.last_done_sessions, c.left_sessions, c.total_charged,
-                r.start_date, r.end_date, r.note
+                (SELECT SUBSTRING(cls_name, LOCATE('/', cls_name) + 1) FROM classes WHERE id =r.class_id) AS lich_hoc,
+                r.start_date, r.end_date, r.note, r.meta_data,r.session
             FROM reserves AS r 
             LEFT JOIN students AS s ON s.id=r.student_id
-            LEFT JOIN contracts AS c ON c.id=r.contract_id
             WHERE r.id = $id");
+        $meta_data =json_decode(data_get($reserveInfo,'meta_data'));
         $data = [
             'gud_name1' => data_get($reserveInfo, 'gud_name1'),
+            'gud_mobile1' => data_get($reserveInfo, 'gud_mobile1'),
             'student_name' => data_get($reserveInfo, 'student_name'),
             'lms_id' => data_get($reserveInfo, 'lms_id'),
             'product_name' => data_get($reserveInfo, 'product_name'),
-            'charge_date' => data_get($reserveInfo, 'charge_date') ? date('d/m/Y',strtotime(data_get($reserveInfo, 'charge_date'))): '',
-            'must_charge' => number_format((int)data_get($reserveInfo, 'must_charge')),
-            'init_tuition_fee_session' => data_get($reserveInfo,'init_tuition_fee_session'),
-            'total_done_sessions' => (int)data_get($reserveInfo,'last_done_sessions') + (int)data_get($reserveInfo,'done_sessions'),
-            'left_sessions' => data_get($reserveInfo, 'left_sessions'),
-            'left_amount' => $reserveInfo->left_sessions ? round($reserveInfo->total_charged * ($reserveInfo->left_sessions -  $reserveInfo->done_sessions) / $reserveInfo->left_sessions) : 0,
             'start_date' => data_get($reserveInfo, 'start_date') ? date('d/m/Y',strtotime(data_get($reserveInfo, 'start_date'))): '',
             'end_date' => data_get($reserveInfo, 'end_date') ? date('d/m/Y',strtotime(data_get($reserveInfo, 'end_date'))): '',
             'note' => data_get($reserveInfo, 'note'),
+            'bonus_sessions'=> data_get($meta_data, 'student_info.bonus_sessions'),
+            'real_sessions'=> data_get($meta_data, 'student_info.real_sessions'),
+            'session' => data_get($reserveInfo, 'session'),
         ]; 
-        $data['left_amount'] = number_format($data['left_amount']);
         return response()->json($data);
     }
 
