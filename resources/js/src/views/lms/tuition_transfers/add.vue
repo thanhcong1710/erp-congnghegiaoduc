@@ -618,7 +618,8 @@
             from_contracts: this.from_contracts,
             transfer_date: this.tuition_transfer.transfer_date,
             to_product_id: this.tuition_transfer.to_product_id,
-            to_branch_id: this.tuition_transfer.to_branch_id
+            to_branch_id: this.tuition_transfer.to_branch_id,
+            to_student_id: this.tuition_transfer.to_student_id
           })
           .then((response) => {  
             this.$vs.loading.close();
