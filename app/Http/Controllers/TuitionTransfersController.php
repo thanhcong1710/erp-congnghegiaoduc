@@ -90,6 +90,7 @@ class TuitionTransfersController extends Controller
         $transferred_contracts = [];
         $received_contracts = [];
         $total_amount_transfer = 0;
+        $total_real_session_transfer = 0;
 
         $contractToStudentActive = u::first("SELECT id FROM contracts where student_id=".(int)$to_student_id." AND type>0 AND status!=7");
         foreach($from_contracts AS $k=> $contract){
@@ -129,22 +130,25 @@ class TuitionTransfersController extends Controller
                 );
                 return response()->json($result);
             }
+            $left_bonus_sessions = data_get($contractToStudentActive, 'id') ? $left_bonus_sessions : 0;
             $received_contracts[$k] = array(
                 'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                 'tuition_fee_name' => data_get($data_calc_transfer, 'receive_tuition_fee.name'),
                 'total_charged' => data_get($data_calc_transfer, 'transfer_amount'),
                 'real_sessions' => data_get($data_calc_transfer, 'sessions'),
-                'bonus_sessions' => data_get($contractToStudentActive, 'id') ? $left_bonus_sessions : 0,
+                'bonus_sessions' => $left_bonus_sessions,
                 'product_name' => data_get($data_calc_transfer, 'receive_tuition_fee.product_name'),
             );
             $total_amount_transfer = $total_amount_transfer + $left_real_amount;
+            $total_real_session_transfer = data_get($data_calc_transfer, 'sessions');
         }
         $data = [
             'status' => 1,
             'message' => 'ok',
             'transferred_contracts' => $transferred_contracts,
             'received_contracts' => $received_contracts,
-            'total_amount_transfer' => $total_amount_transfer
+            'total_amount_transfer' => $total_amount_transfer,
+            'total_real_session_transfer' => $total_real_session_transfer
         ];
         return response()->json($data);
     }
