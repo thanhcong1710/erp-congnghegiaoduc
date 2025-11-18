@@ -44,8 +44,8 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        // $lmsController = new \App\Http\Controllers\LmsController();
-        // $lmsController->addOrUpdateStudent(721);
+        $lmsController = new \App\Http\Controllers\LmsController();
+        $lmsController->addOrUpdateStudent(1552);
         // $lmsController->addStudentToClass(845, true);
         // $lmsController->studentWithdrawByIdLMS(1328);
         // $list =u::query("SELECT id FROM contracts WHERE status=6");
@@ -133,20 +133,20 @@ class TestCallLms extends Command
         // }
         // $jobs = new JobsController();
         // $jobs->processWaittingStudent();
-        $list =u::query("SELECT
-            l.* 
-        FROM
-            log_contracts AS l
-        WHERE
-            l.action = 'Withdraw học sinh do quá hạn số buổi học' 
-            AND DATE_FORMAT(l.updated_at, '%H') = 2 
-            AND l.updated_at > '2025-09-01'
-            AND (SELECT count(id) FROM contracts WHERE student_id=l.student_id AND status=6)=0");
-        foreach($list AS $row){
-            $lmsController = new LMSController();
-            $lmsController->studentWithdrawContract(data_get($row, 'contract_id'));
-            echo data_get($row, 'contract_id')."/";
-        };
+        // $list =u::query("SELECT
+        //     l.* 
+        // FROM
+        //     log_contracts AS l
+        // WHERE
+        //     l.action = 'Withdraw học sinh do quá hạn số buổi học' 
+        //     AND DATE_FORMAT(l.updated_at, '%H') = 2 
+        //     AND l.updated_at > '2025-09-01'
+        //     AND (SELECT count(id) FROM contracts WHERE student_id=l.student_id AND status=6)=0");
+        // foreach($list AS $row){
+        //     $lmsController = new LMSController();
+        //     $lmsController->studentWithdrawContract(data_get($row, 'contract_id'));
+        //     echo data_get($row, 'contract_id')."/";
+        // };
         return "ok";
     }
 }

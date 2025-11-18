@@ -393,11 +393,14 @@ class ContractsController extends Controller
     public function print(Request $request,$contract_id)
     {
         $contract_info = u::first("SELECT s.name AS student_name, s.date_of_birth, s.gender, s.address, s.school,
-            s.gud_name1, s.gud_mobile1, s.gud_email1, c.note,c.total_charged, c.debt_amount, c.must_charge,
+            s.gud_name1, s.gud_mobile1, s.gud_email1, c.note,c.total_charged, c.debt_amount, c.must_charge, c.start_date,
             (SELECT name FROM users WHERE id=c.ec_id) AS ec_name,
             (SELECT name FROM products WHERE id=c.product_id) AS product_name,
-            (SELECT number_of_months FROM tuition_fee WHERE id=c.tuition_fee_id) AS number_of_months
-
+            (SELECT number_of_months FROM tuition_fee WHERE id=c.tuition_fee_id) AS number_of_months, s.nick,s.lms_id, s.lms_code,
+            (SELECT cl.cls_name FROM contracts AS ct LEFT JOIN classes AS cl ON cl.id=ct.class_id WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS cls_name,
+            (SELECT u.name FROM contracts AS ct LEFT JOIN classes AS cl ON cl.id=ct.class_id LEFT JOIN users AS u ON u.id=cl.cm_id WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS cm_name,
+            (SELECT price FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_price,
+            (SELECT enrolment_last_date FROM contracts AS ct WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS enrolment_last_date
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
         $data = [
@@ -411,12 +414,21 @@ class ContractsController extends Controller
             'gud_email1' => data_get($contract_info, 'gud_email1') ?? '',
             'note' => data_get($contract_info, 'note') ?? '',
             'ec_name' => data_get($contract_info, 'ec_name') ?? '',
-            'debt_amount' => number_format(data_get($contract_info, 'debt_amount') ?? 0),
+            'debt_amount' => data_get($contract_info, 'debt_amount') ?? 0,
             'total_charged_text' => u::convert_number_to_words(data_get($contract_info, 'total_charged')),
-            'total_charged' => number_format(data_get($contract_info, 'total_charged') ?? 0),
-            'must_charge' => number_format(data_get($contract_info, 'must_charge') ?? 0),
+            'total_charged' => data_get($contract_info, 'total_charged') ?? 0,
+            'must_charge' => data_get($contract_info, 'must_charge') ?? 0,
             'product_name' => data_get($contract_info, 'product_name') ?? '',
             'number_of_months' => data_get($contract_info, 'number_of_months') ?? '',
+            'nick' => data_get($contract_info, 'nick') ?? '',
+            'lms_id' => data_get($contract_info, 'lms_id') ?? '',
+            'lms_code' => data_get($contract_info, 'lms_code') ?? '',
+            'cls_name' => data_get($contract_info, 'cls_name') ?? '',
+            'cm_name' => data_get($contract_info, 'cm_name') ?? '',
+            'tuition_fee_price' => data_get($contract_info, 'tuition_fee_price') ?? '',
+            'enrolment_last_date' => data_get($contract_info, 'enrolment_last_date') ? date('d/m/Y',strtotime(data_get($contract_info, 'enrolment_last_date'))): '',
+            'start_date' => data_get($contract_info, 'start_date') ? date('d/m/Y',strtotime(data_get($contract_info, 'start_date'))): '',
+            'end_date' => data_get($contract_info, 'start_date') ? date('d/m/Y',strtotime("+".data_get($contract_info, 'number_of_months')." months", strtotime(data_get($contract_info, 'start_date')))) : '',    
         ];
         return response()->json($data);
     }

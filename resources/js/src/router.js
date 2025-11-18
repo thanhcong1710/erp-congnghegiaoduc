@@ -97,6 +97,14 @@ const router = new Router({
           }
         },
         {
+          path: '/pages/print/contract-renew/:id',
+          name: 'print-contract',
+          component: () => import('@/views/pages/print/contract_renew.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
+        {
           path: '/pages/print/tuition_transfer/:id',
           name: 'print-tuition-transfer',
           component: () => import('@/views/pages/print/tuition_transfer.vue'),
