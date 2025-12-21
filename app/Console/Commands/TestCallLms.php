@@ -44,8 +44,8 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $ClassTransfersController = new \App\Http\Controllers\ClassTransfersController;
-        $ClassTransfersController->processClassTransfer(403);
+        $lms = new LMSController();
+        $lms->addOrUpdateStudent(1562);
         return "ok";
     }
 }

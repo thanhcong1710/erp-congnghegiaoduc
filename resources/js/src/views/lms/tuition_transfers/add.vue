@@ -672,7 +672,7 @@
           mess += " - Ngày bắt đầu chuyển phí không được để trống<br/>";
           resp = false;
         }
-        if (this.tuition_transfer.transferred_amount <= 0) {
+        if (this.tuition_transfer.transferred_amount <= 0 && !u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')) {
           mess += " - Tổng số tiền nhận phải lớn hơn 0<br/>";
           resp = false;
         }
