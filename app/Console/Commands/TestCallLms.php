@@ -6,6 +6,7 @@ use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\JobsController;
 use App\Http\Controllers\LMSController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\TuitionTransfersController;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
 use App\User;
@@ -44,8 +45,10 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $lms = new LMSController();
-        $lms->addOrUpdateStudent(1562);
+        // $lms = new LMSController();
+        // $lms->addOrUpdateStudent(1562);
+        $tuitionTransfer = new TuitionTransfersController();
+        $tuitionTransfer->processTuitionTransfer(12);
         return "ok";
     }
 }
