@@ -40,7 +40,9 @@ class AutoWithdraw extends Command
      */
     public function handle(Request $request)
     {
-        $listContracts = u::query("SELECT * FROM contracts WHERE status=6 AND class_id IS NOT NULL AND left_sessions <= 0 AND enrolment_last_date < CURRENT_DATE");
+        $dateWithdraw = date('Y-m-d', strtotime('-2 days'));
+        $listContracts = u::query("SELECT c.* FROM contracts AS c WHERE c.status=6 AND c.class_id IS NOT NULL AND c.left_sessions <= 0 AND c.enrolment_last_date <= '$dateWithdraw'
+            AND (SELECT count(id) FROM contracts WHERE student_id=c.id AND c.status!=7 AND count_recharge > c.count_recharge AND (debt_amount=0 OR total_charged>0))=0 ");
         foreach ($listContracts AS $row){
             $lmsController = new LMSController();
             $lmsController->studentWithdraw(data_get($row, 'student_id'));
