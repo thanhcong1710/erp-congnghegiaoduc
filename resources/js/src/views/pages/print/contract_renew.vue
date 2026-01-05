@@ -11,64 +11,48 @@
                             </div>
                         </div>
                         <div class="print-content">
-                            <h2 class="title">ĐƠN NHẬP HỌC ANT ENGLISH</h2>
+                            <h2 class="title">ĐƠN TÁI PHÍ ANT ENGLISH</h2>
                             
                             <h3 class="title">THÔNG TIN HỌC VIÊN</h3>
                             <div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Họ và tên:</span>
-                                        {{contract.student_name}}
+                                <div class="vx-row">
+                                    <div class="w-1/2">
+                                        <div class="input-line">
+                                            <span class="label">Họ và tên học sinh:</span>
+                                            {{contract.student_name}}
+                                        </div>
+                                    </div>
+                                    <div class="w-1/2">
+                                        <div class="input-line">
+                                            <span class="label">Nickname:</span>
+                                            {{contract.nick}}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="vx-row">
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Ngày sinh:</span>
-                                            {{contract.date_of_birth}}
+                                            <span class="label">Mã LMS:</span>
+                                            {{contract.lms_id}}
                                         </div>
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Giới tính:</span>
-                                            {{contract.gender}}
+                                            <span class="label">Mã CRM:</span>
+                                            {{contract.lms_code}}
                                         </div>
                                     </div>
                                 </div>
                                 <div >
                                     <div class="input-line">
-                                        <span class="label">Địa chỉ nhà:</span>
-                                        {{contract.address}}
+                                        <span class="label">Lớp học hiện tại:</span>
+                                        {{contract.cls_name}}
                                     </div>
                                 </div>
                                 <div>
                                     <div class="input-line">
-                                        <span class="label">Trường học hiện tại:</span>
-                                        {{contract.school}}
-                                    </div>
-                                </div>
-                                <div class="vx-row">
-                                    <div class="w-1/2">
-                                        <div class="input-line">
-                                            <span class="label">Đã từng học tiếng Anh tại:</span>
-                                        </div>
-                                    </div>
-                                    <div class="w-1/2">
-                                        <div class="input-line">
-                                            <span class="label">trong thời gian:</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label">Nguồn biết thông tin: </span>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="input-line">
-                                        <span class="label">Họ và tên bố/mẹ: </span>
+                                        <span class="label">Họ và tên Phụ huynh:</span>
                                         {{contract.gud_name1}}
-                                        <!-- <i class="doted"></i> -->
                                     </div>
                                 </div>
                                 <div class="vx-row">
@@ -87,26 +71,8 @@
                                 </div>
                                 <div>
                                     <div class="input-line">
-                                        <span class="label">Facebook: </span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div>
-                                        <span class="label">Một vài lưu ý về học sinh (tính cách, điểm mạnh/yếu):</span>
-                                        {{contract.note}}
-                                    </div>
-                                </div>
-                                <div class="vx-row">
-                                    <div class="w-1/2">
-                                        <div class="input-line">
-                                            <span class="label">Tư vấn viên:</span>
-                                            {{contract.ec_name}}
-                                        </div>
-                                    </div>
-                                    <div class="w-1/2">
-                                        <div class="input-line">
-                                            <span class="label">Nhóm:</span>
-                                        </div>
+                                        <span class="label">Chủ nhiệm lớp: </span>
+                                        {{contract.cm_name}}
                                     </div>
                                 </div>
                             </div>
@@ -114,45 +80,28 @@
                             <table class="table table-responsive-sm table-striped erp-table mb-2">
                                 <thead>
                                     <tr>
-                                        <th width="15%">KHÓA HỌC</th>
-                                        <th  width="15%">THỜI GIAN HỌC<br>
-                                        (Ca học)
-                                        </th>
-                                        <th width="15%">GÓI HỌC PHÍ<br>
-                                        (Tháng)
-                                        </th>
-                                        <th width="15%">TỔNG MỨC HỌC PHÍ<br>
-                                        (Sau chiết khấu)
+                                        <th width="15%">CẤP ĐỘ</th>
+                                        <th  width="15%">THỜI GIAN HẾT PHÍ</th>
+                                        <th width="15%">THỜI GIAN BẮT ĐẦU – KẾT THÚC DỰ KIẾN</th>
+                                        <th width="15%">NGUYÊN GIÁ<br>
+                                            ( Giá gốc )
                                         </th>
                                         <th width="15%">CHƯƠNG TRÌNH KHUYẾN MẠI</th>
-                                        <th width="15%">TỔNG MỨC HỌC PHÍ THỰC ĐÓNG (VNĐ)</th>
+                                        <th width="15%">TỔNG MỨC HỌC PHÍ THỰC ĐÓNG<br>
+                                            ( Giá sau chiết khấu )</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>{{ contract.product_name }}</td>
-                                        <td></td>
-                                        <td>{{ contract.number_of_months }}</td>
+                                        <td>{{ contract.enrolment_last_date }}</td>
+                                        <td>{{contract.start_date }} - {{ contract.end_date }}</td>
                                         <td>{{contract.tuition_fee_price | formatMoney}}</td>
                                         <td>{{contract.tuition_fee_price - contract.must_charge | formatMoney}}</td>
-                                        <td> {{contract.must_charge | formatMoney}}</td>
+                                        <td>{{contract.must_charge | formatMoney}}</td>
                                     </tr>
                                 </tbody>
                             </table>
-                            <div>
-                                <div>
-                                    <div>
-                                        <span class="label"><b>Số tiền đặt cọc: {{contract.total_charged | formatNumber}} VNĐ ({{contract.total_charged_text}})</b></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <div>
-                                    <div class="input-line">
-                                        <span class="label"><b>Số học phí còn phải hoàn thành: {{contract.debt_amount}} VNĐ</b></span>
-                                    </div>
-                                </div>
-                            </div>
                             <div>
                                 <div>
                                     <div>
@@ -173,7 +122,19 @@
                                 </div>
                                 <div class="h-right" style="width: 40%">
                                     <span class="dot-line">.......</span><span>, ngày</span><span class="dot-line">.......</span><span>tháng </span><span class="dot-line">.......</span><span>năm</span><span class="dot-line">.......</span>
+                                </div>
+                            </div>
+                            <div style="display: flex">
+                                <div class="h-left" style="width: 30%">
+                                    <div class="center"><b>Chủ nhiệm lớp</b></div>
+                                    <p class="center"><i>(Ký và ghi rõ họ tên)</i></p>
+                                </div>
+                                <div class="h-left" style="width: 40%">
                                     <div class="center"><b>Phụ Huynh Học Sinh</b></div>
+                                    <p class="center"><i>(Ký và ghi rõ họ tên)</i></p>
+                                </div>
+                                <div class="h-right" style="width: 30%">
+                                    <div class="center"><b>Giám đốc Trung tâm</b></div>
                                     <p class="center"><i>(Ký và ghi rõ họ tên)</i></p>
                                 </div>
                             </div>
