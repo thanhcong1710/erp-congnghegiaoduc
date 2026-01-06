@@ -77,15 +77,15 @@
                 <td class="td vs-table--td text-center">{{item.count_pending}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_full_fee_active}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_class}}</td>
-                <td class="td vs-table--td text-center">{{ item.count_class ?  (Math.round(item.count_full_fee_active *100 / item.count_class)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class ? Number((item.count_full_fee_active / item.count_class).toFixed(2)) : '--'}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_full_fee_active_april}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_class_april}}</td>
-                <td class="td vs-table--td text-center">{{ item.count_class_april ? (Math.round(item.count_full_fee_active_april *100 / item.count_class)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_april ? Number((item.count_full_fee_active_april / item.count_class_april).toFixed(2)) : '--'}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_full_fee_active_igarten}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_class_igarten}}</td>
-                <td class="td vs-table--td text-center">{{ item.count_class_igarten ? (Math.round(item.count_full_fee_active_april *100 / item.count_class_igarten)/100).toFixed(2) : '--'}}</td>
+                <td class="td vs-table--td text-center">{{ item.count_class_igarten ?  Number((item.count_full_fee_active_igarten / item.count_class_igarten).toFixed(2)) : '--'}}</td>
                 <td class="td vs-table--td text-center">{{ item.count_cm}}</td>
-                <td class="td vs-table--td text-center">{{ item.count_cm ? (Math.round(item.count_full_fee_active_april *100 / item.count_cm)/100).toFixed(2) : '--' }}</td>
+                <td class="td vs-table--td text-center">{{ item.count_cm ?  Number((item.count_full_fee_active / item.count_cm).toFixed(2)) : '--' }}</td>
               </tr>
             </table>
             
