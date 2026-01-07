@@ -33,7 +33,8 @@
           <router-link tag="div" class="vx-logo cursor-pointer flex items-center" to="/">
             <!-- <logo class="w-10 mr-4 fill-current text-primary" />
             <span class="vx-logo-text text-primary" v-show="isMouseEnter || !reduce" v-if="title">{{ title }}</span> -->
-            <img src="@assets/images/logo/logo.png" alt="Logo" style="height: 56px;">
+            <img src="@assets/images/logo/logo.png" alt="Logo" style="height: 56px; margin-right: 10px;">
+            <h2 class="brand-text" style="color: #014CCC; font-family: serif; font-weight: normal; letter-spacing: 0.01rem; font-size: 36px;"> LAPO </h2>
           </router-link>
           <!-- /Logo -->
 
