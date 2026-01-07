@@ -15,7 +15,7 @@
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <!-- <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Level</label>
             <multiselect
                 name="search_level"
@@ -32,7 +32,7 @@
               >
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
-          </div>
+          </div> -->
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
@@ -133,7 +133,7 @@
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="width: 2000px">
+            <table class="vs-table vs-table--tbody-table" style="width: 1500px">
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
@@ -152,7 +152,6 @@
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1" >Tên khách hàng</th>
                   <th colspan="1" rowspan="1" class="text-center">Số điện thoại</th>
-                  <th colspan="1" rowspan="1" >Học sinh</th>
                   <th colspan="1" rowspan="1" >Nguồn</th>
                   <th colspan="1" rowspan="1">Nguồn chi tiết</th>
                   <th colspan="1" rowspan="1">Người phụ trách</th>
@@ -178,7 +177,6 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
                 <td class="td vs-table--td text-center"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
-                <td class="td vs-table--td">{{ item.hs1_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
                 <td class="td vs-table--td">{{ item.source_detail_name }}</td>
                 <td class="td vs-table--td">{{ item.owner_name }}</td>
@@ -218,9 +216,9 @@
       </div>
     </vx-card>
     <vs-popup :class="'modal_'+ modal_assign.color" :title="modal_assign.title" :active.sync="modal_assign.show" >
-        <div class="vx-row" > 
-          <div class="vx-col w-full mb-4">
-            <label>Chọn người phụ trách</label>
+        <div class="vx-row" style="min-height: 200px;" > 
+          <div class="vx-col w-full mt-4">
+            <label >Chọn người phụ trách</label>
             <multiselect
               placeholder="Chọn người phụ trách"
               v-model="owners"
@@ -232,12 +230,13 @@
               :searchable="true"
               track-by="id"
               selectedLabel="" selectLabel="" deselectLabel=""
+              class="mb-4"
             >
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>
           </div>
           
-          <div class="vx-col w-full">
+          <div class="vx-col w-full text-right">
             <vs-button color="dark" type="border" class="mr-3" @click="modal_assign.show = false">Hủy</vs-button>
             <vs-button color="success" @click="assignCustomer">Lưu</vs-button>
           </div>

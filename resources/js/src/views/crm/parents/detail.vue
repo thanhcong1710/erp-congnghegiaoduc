@@ -32,7 +32,7 @@
             <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
-            <p>Level</p>
+            <!-- <p>Level</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeLevel" v-model="tmp_level" >
                 <option value="C1">C1</option>
@@ -44,7 +44,7 @@
                 <option value="L4">L4</option>
                 <option value="L5">L5</option>
               </select>
-            </p> 
+            </p>  -->
             <p>Trạng thái</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
@@ -385,7 +385,7 @@
               </div>
             </div>
           </vs-tab>
-          <vs-tab label="Học sinh"  @click="changeTab()">
+          <!-- <vs-tab label="Học sinh"  @click="changeTab()">
             <div class="tab-text">
               <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
                
@@ -418,7 +418,7 @@
                 </div>
               </div>
             </div>
-          </vs-tab>
+          </vs-tab> -->
           <vs-tab label="Lịch sử cập nhật"  @click="changeTab()">
             <div class="tab-text">
               <div class="vs-component vs-con-table stripe vs-table-primary">
@@ -457,7 +457,7 @@
               </div>
             </div>
           </vs-tab>
-          <vs-tab label="Vouchers"  @click="changeTab()">
+          <!-- <vs-tab label="Vouchers"  @click="changeTab()">
             <div class="tab-text">
               <div class="vs-component vs-con-table stripe vs-table-primary">
                 <div class="con-tablex vs-table--content">
@@ -465,7 +465,6 @@
                     <table class="vs-table vs-table--tbody-table">
                       <thead class="vs-table--thead">
                         <tr>
-                          <!---->
                           <th colspan="1" rowspan="1" class="text-center">Mã voucher</th>
                           <th colspan="1" rowspan="1" class="text-center">Số tiền giảm trừ</th>
                           <th colspan="1" rowspan="1" class="text-center">Số buổi học bổng</th>
@@ -486,7 +485,7 @@
                 </div>
               </div>
             </div>
-          </vs-tab>
+          </vs-tab> -->
         </vs-tabs>
       </vx-card>
       <vs-popup :class="'modal_'+ modal_care.color" :title="modal_care.title" :active.sync="modal_care.show">
@@ -679,7 +678,7 @@
           }
         },
         check_list: [],
-        active_tab: 1,
+        active_tab: 2,
         alert:{
           active: false,
           body: '',
@@ -1026,9 +1025,7 @@
         }
       },
       selectDateParent(){
-        if (date) {
-          this.parent.birthday = moment(date).format("YYYY-MM-DD");
-        }
+        this.parent.birthday = moment(this.parent.birthday).format("YYYY-MM-DD");
       },
       selectDate(date) {
         if (date) {
