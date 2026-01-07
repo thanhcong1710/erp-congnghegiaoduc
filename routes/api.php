@@ -25,6 +25,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::prefix('export')->group(function () {
         Route::get('import/{import_id}', 'ExportsController@import');
     });
+    Route::get('test-auto/{student_id}', 'JobsController@testAuto');
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
         Route::get('menu', 'MenuController@index');
