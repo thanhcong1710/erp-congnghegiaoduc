@@ -45,10 +45,8 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        // $lms = new LMSController();
-        // $lms->addOrUpdateStudent(1562);
-        $tuitionTransfer = new TuitionTransfersController();
-        $tuitionTransfer->processTuitionTransfer(12);
+        $lms = new LMSController();
+        $lms->studentWithdrawByIdLMS(1913);
         return "ok";
     }
 }
