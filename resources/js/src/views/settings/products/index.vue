@@ -8,7 +8,7 @@
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên chương trình học" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên khóa học" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -48,8 +48,9 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Chương trình học</th>
+                  <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
+                  <th colspan="1" rowspan="1" class="text-center">Số buổi</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -60,6 +61,7 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td text-center">{{item.code}}</td>
+                <td class="td vs-table--td text-center">{{item.num_sessions}}</td>
                 <td class="td vs-table--td text-center">{{item.status == 1 ? 'Kích hoạt' : 'Không kích hoạt'}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/settings/products/edit/${item.id}`">

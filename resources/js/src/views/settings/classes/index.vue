@@ -18,10 +18,10 @@
               ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
-              <label >Chương trình học</label>
+              <label >Khóa học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn chương trình học"
+                    placeholder="Chọn khóa học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
@@ -29,57 +29,9 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
-            <div class="vx-col w-full mb-4">
-              <label >Lộ trình học</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn lộ trình học"
-                  :options="html.loTrinh.list"
-                  v-model="html.loTrinh.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveLoTrinh"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Option</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn option"
-                  :options="html.option.list"
-                  v-model="html.option.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveOption"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Số buổi trên tuần</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn số buổi trên tuần"
-                  :options="html.typeDayOfWeek.list"
-                  v-model="html.typeDayOfWeek.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveTypeDayOfWeek"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Loại gói phí</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn loại gói phí"
-                  :options="html.typeFee.list"
-                  v-model="html.typeFee.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveTypeFee"
-              ></vue-select>
-            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
-              <label>Khóa học</label>
+              <label>Lớp học</label>
               <tree
                 :data="classes"
                 text-field-name="text"
@@ -143,7 +95,7 @@
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>AF - Quản lý lớp học</label>
+              <label>Quản lý lớp học</label>
               <vue-select
                     label="label"
                     placeholder="Chọn quản lý lớp học"
@@ -156,7 +108,7 @@
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>TA - Trợ giảng</label>
+              <label>Trợ giảng</label>
               <vue-select
                     label="label"
                     placeholder="Chọn trợ giảng"
@@ -174,15 +126,6 @@
                 <option value="" disabled>Chọn loại hợp đồng</option>
                 <option value="0">Không hoạt động</option>
                 <option value="1">Hoạt động</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại gói phí</label>
-              <select class="vs-inputx vs-input--input normal" v-model="config.type_fee" >
-                <option value="" disabled>Chọn loại gói phí</option>
-                <option value="1">Gói phí Cooper</option>
-                <option value="2">Gói phí Silver</option>
-                <option value="3">Gói phí Gold</option>
               </select>
             </div>
             <div class="vx-col md:w-3/3 w-full mb-4">
@@ -213,7 +156,6 @@
                 type="text"
                 name="title"
                 v-model="config.session"
-                disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -234,7 +176,7 @@
                 <option value="1">Chính thức</option>
               </select>
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số buổi học</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -246,70 +188,9 @@
                 :disabled="disabled_input"
                 @change="caculatorTotalSession"
               />
-            </div>
+            </div> -->
             <div class="vx-col w-full mb-4">
               <vs-tabs>
-                <!-- <vs-tab label="Danh sách môn học">
-                  <div class="tab-text">
-                    <div class=w-full>
-                      <div class="vx-col  md:w-1/2 w-full mb-4">
-                        <vue-select
-                              label="name"
-                              placeholder="Chọn môn học"
-                              :options="html.subjects.list"
-                              v-model="html.subjects.item"
-                              :searchable="true"
-                              language="tv-VN"
-                              :disabled="disabled_input"
-                              @input="addSubject"
-                          ></vue-select>
-                      </div>
-                      <div class="vs-component vs-con-table stripe vs-table-primary">
-                        <div class="con-tablex vs-table--content">
-                          <div class="vs-con-tbody vs-table--tbody ">
-                            <table class="vs-table vs-table--tbody-table">
-                              <thead class="vs-table--thead">
-                                <tr>
-                                  <th colspan="1" rowspan="1" class="text-center">Mã</th>
-                                  <th colspan="1" rowspan="1">Môn học</th>
-                                  <th colspan="1" rowspan="1" class="text-center">Thứ tự</th>
-                                  <th colspan="1" rowspan="1" class="text-center">Số buổi</th>
-                                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
-                                </tr>
-                              </thead>
-                              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in config.subjects" :key="index">
-                                <td class="td vs-table--td text-center">{{item.code}}</td>
-                                <td class="td vs-table--td">{{item.name}}</td>
-                                <td class="td vs-table--td text-center">
-                                  <input
-                                    class="vs-inputx vs-input--input normal"
-                                    type="number"
-                                    name="title"
-                                    style="width: 70px"
-                                    v-model="item.stt"
-                                  />
-                                </td>
-                                <td class="td vs-table--td text-center">
-                                  <input
-                                    class="vs-inputx vs-input--input normal"
-                                    type="number"
-                                    name="title"
-                                    style="width: 70px"
-                                    v-model="item.session"
-                                    @change="caculatorTotalSession"
-                                  />
-                                </td>
-                                <td class="td vs-table--td text-center list-action"> 
-                                  <vs-button size="small" color="danger" @click="deleteSubject(item)"><i class="fa-solid fa-trash"></i></vs-button>
-                                </td>
-                              </tr>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </vs-tab> -->
                 <vs-tab label="Danh sách buổi học">
                   <div class="tab-text">
                     <div class=w-full>
@@ -321,8 +202,6 @@
                                 <tr>
                                   <!---->
                                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                                  <!-- <th colspan="1" rowspan="1" class="text-center">Mã môn học</th>
-                                  <th colspan="1" rowspan="1">Môn học</th> -->
                                   <th colspan="1" rowspan="1" class="text-center">Ngày học</th>
                                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
@@ -330,8 +209,6 @@
                               </thead>
                               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in list_sessions" :key="index">
                                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                                <!-- <td class="td vs-table--td text-center">{{item.subject_code}}</td>
-                                <td class="td vs-table--td">{{item.subject_name}}</td> -->
                                 <td class="td vs-table--td text-center">{{item.class_date | formatDateViewDay}}</td>
                                 <td class="td vs-table--td text-center">{{item.status_label}}</td>
                                 <td class="td vs-table--td text-center">
@@ -487,51 +364,6 @@
             item: '',
             list: []
           },
-          subjects:{
-            item: '',
-            list: []
-          },
-          loTrinh: {
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
-              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
-              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
-              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
-              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
-              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
-              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
-              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
-              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
-              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
-              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
-            ]
-          },
-          option: {
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Option 1'},
-              {'id': 2, 'label' : 'Option 2'},
-            ]
-          },
-          typeDayOfWeek: {
-            item: '',
-            list: [
-              {'id': 4, 'label' : 'Normal'},
-              {'id': 5, 'label' : 'FT5'},
-              {'id': 6, 'label' : 'FT6'},
-              {'id': 8, 'label' : 'FT8'},
-              {'id': 10, 'label' : 'FT10'},
-            ]
-          },
-          typeFee:{
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Gói phí Cooper'},
-              {'id': 2, 'label' : 'Gói phí Silver'},
-              {'id': 3, 'label' : 'Gói phí Gold'},
-            ]
-          },
         },
         config:{
           total_cycles:1,
@@ -558,13 +390,6 @@
             day_8: false,
           },
           title:'',
-          program_id:'',
-          subjects:[],
-          type_day_of_week: '',
-          lo_trinh_id:'',
-          option_id:'',
-          search_type_fee:'',
-          type_fee:'',
         },
         alert:{
           active: false,
@@ -604,10 +429,6 @@
         .then(response => {
         this.html.shifts.list = response.data
       })
-      axios.g(`/api/system/subjects`)
-        .then(response => {
-        this.html.subjects.list = response.data
-      })
     },
     methods: {
       reload(){
@@ -635,44 +456,11 @@
         if (data && typeof data === 'object') {
           const product_id = data.id
           this.config.product_id = product_id
+          this.disabled_input = false
+          this.config.session =  data.num_sessions
         }else{
           this.config.product_id = ""
-        }
-        this.loadClasses();
-      },
-      saveLoTrinh(data = null){
-        if (data && typeof data === 'object') {
-          const lo_trinh_id = data.id
-          this.config.lo_trinh_id = lo_trinh_id
-        }else{
-          this.config.lo_trinh_id = ""
-        }
-        this.loadClasses();
-      },
-      saveOption(data = null){
-        if (data && typeof data === 'object') {
-          const option_id = data.id
-          this.config.option_id = option_id
-        }else{
-          this.config.option_id = ""
-        }
-        this.loadClasses();
-      },
-      saveTypeFee(data = null){
-        if (data && typeof data === 'object') {
-          const type_fee = data.id
-          this.config.type_fee = type_fee
-        }else{
-          this.config.type_fee = ""
-        }
-        this.loadClasses();
-      },
-      saveTypeDayOfWeek(data = null){
-        if (data && typeof data === 'object') {
-          const type_day_of_week = data.id
-          this.config.type_day_of_week = type_day_of_week
-        }else{
-          this.config.type_day_of_week = ""
+          this.disabled_input = true
         }
         this.loadClasses();
       },
@@ -722,10 +510,6 @@
           axios.p(`/api/settings/classes/load-classes`, {
             branch_id: this.config.branch_id,
             product_id: this.config.product_id,
-            lo_trinh_id: this.config.lo_trinh_id,
-            option_id: this.config.option_id,
-            type_day_of_week: this.config.type_day_of_week,
-            search_type_fee: this.config.search_type_fee,
           })
             .then(response => {
             this.$vs.loading.close();
@@ -784,7 +568,6 @@
         }
       },
       selectClass(selected_class) {
-        this.disabled_input = false
         if (selected_class.model.item_type === 'class') {
           this.config.is_edit=1
           this.$vs.loading();
@@ -826,7 +609,6 @@
         this.html.teachers.item = ''
         this.html.cms.item = ''
         this.html.shifts.item = ''
-        this.config.subjects=[]
         this.list_sessions=[]
         this.config.total_cycles = 1
       },
@@ -838,10 +620,6 @@
           resp = false;
         }
         if (this.config.product_id == "") {
-          mess += " - Chương trình học không được để trống<br/>";
-          resp = false;
-        }
-        if (this.config.program_id == "") {
           mess += " - Khóa học không được để trống<br/>";
           resp = false;
         }
@@ -862,19 +640,15 @@
           resp = false;
         }
         if (this.config.cm_id == "") {
-          mess += " - CM - Trợ giảng không được để trống<br/>";
+          mess += " - Quản lý lớp học không được để trống<br/>";
           resp = false;
         }
         if (this.config.start_date == "") {
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        // if (this.config.session == "") {
-        //   mess += " - Số buổi học không được để trống<br/>";
-        //   resp = false;
-        // }
-        if (this.config.type_fee == "") {
-          mess += " - Loại gói phí không được để trống<br/>";
+        if (this.config.session == "") {
+          mess += " - Số buổi học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {
@@ -903,31 +677,7 @@
           this.$vs.loading.close();
         });
       },
-      addSubject(data =null){
-        if (data && typeof data === 'object') {
-          this.check_exit = 0;
-          this.config.subjects.map(item => {
-            if(item.id==data.id){
-              this.check_exit = 1;
-            }
-          })
-          if(!this.check_exit){
-            this.config.subjects.push(data)
-          }
-          this.html.subjects.item=''
-          this.caculatorTotalSession();
-        }
-      },
-      deleteSubject(data){
-        const ids_subject = []
-        this.config.subjects.map(item => {
-          if(data.id != item.id){
-            ids_subject.push(item)
-          }
-        })
-        this.config.subjects = ids_subject
-        this.caculatorTotalSession();
-      },
+      
       caculatorTotalSession(){
         if(this.config.total_cycles<1 || this.config.total_cycles>200){
           this.$vs.notify({
@@ -940,11 +690,6 @@
           this.config.total_cycles = 1
         }
 
-        // this.config.session = 0
-        // this.config.subjects.map(item => {
-        //   this.config.session = Number(this.config.session) + Number(item.session)
-        // })
-        // this.config.session = this.config.session *  Number(this.config.total_cycles)
         this.config.session = Number(this.config.total_cycles)
       },
       getDataSessions() {

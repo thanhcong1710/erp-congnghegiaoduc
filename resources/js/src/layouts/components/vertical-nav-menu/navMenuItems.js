@@ -57,20 +57,8 @@ export default [
         url: null,
         name: 'Học sinh',
         icon: 'UserIcon',
-        submenu: [
-          {
-            url: '/lms/students',
-            name: 'Danh sách',
-            slug: 'lms-students',
-            permission:'lms_students',
-          },
-          {
-            url: '/lms/checkin',
-            name: 'Checkin',
-            slug: 'lms-checkin',
-            permission:'lms_checkin',
-          }
-        ],
+        url: '/lms/students',
+        permission:'lms_students',
       },
       {
         url: null,
@@ -164,92 +152,92 @@ export default [
           }
         ],
       },
-      {
-        url: '/lms/reports',
-        name: 'Báo cáo',
-        icon: 'TrendingUpIcon',
-        submenu: [
-          {
-            url: '/lms/reports/business',
-            name: 'Kinh doanh',
-            slug: 'lms-reports-business',
-            permission:'lms_reports_business',
-          },
-          {
-            url: '/lms/reports/finance',
-            name: 'Tài chính kế toán',
-            slug: 'lms-reports-finance',
-            permission:'lms_reports_finance',
-          },
-          {
-            url: '/lms/reports/operate',
-            name: 'Vận hành',
-            slug: 'lms-reports-operate',
-            permission:'lms_reports_operate',
-          },
-          {
-            url: '/lms/reports/academic',
-            name: 'Học thuật',
-            slug: 'lms-reports-academic',
-            permission:'lms_reports_academic',
-          },
-          {
-            url: '/lms/reports/teacher',
-            name: 'Giáo viên',
-            slug: 'lms-reports-teacher',
-            permission:'lms_reports_teacher',
-          }
-        ],
-      },
+      // {
+      //   url: '/lms/reports',
+      //   name: 'Báo cáo',
+      //   icon: 'TrendingUpIcon',
+      //   submenu: [
+      //     {
+      //       url: '/lms/reports/business',
+      //       name: 'Kinh doanh',
+      //       slug: 'lms-reports-business',
+      //       permission:'lms_reports_business',
+      //     },
+      //     {
+      //       url: '/lms/reports/finance',
+      //       name: 'Tài chính kế toán',
+      //       slug: 'lms-reports-finance',
+      //       permission:'lms_reports_finance',
+      //     },
+      //     {
+      //       url: '/lms/reports/operate',
+      //       name: 'Vận hành',
+      //       slug: 'lms-reports-operate',
+      //       permission:'lms_reports_operate',
+      //     },
+      //     {
+      //       url: '/lms/reports/academic',
+      //       name: 'Học thuật',
+      //       slug: 'lms-reports-academic',
+      //       permission:'lms_reports_academic',
+      //     },
+      //     {
+      //       url: '/lms/reports/teacher',
+      //       name: 'Giáo viên',
+      //       slug: 'lms-reports-teacher',
+      //       permission:'lms_reports_teacher',
+      //     }
+      //   ],
+      // },
     ]
   },
-  {
-    header: 'MARKETING',
-    icon: 'PackageIcon',
-    items: [
-      {
-        url: '/marketing/campaigns',
-        name: 'Chiến dịch',
-        icon: 'Volume2Icon',
-        slug: 'marketing-campaigns',
-        permission:'marketing_campaigns',
-      },
-      {
-        url: '/marketing/b2b',
-        name: 'B2B',
-        icon: 'CommandIcon',
-        slug: 'marketing-b2b',
-        submenu: [
-          {
-            url: '/marketing/b2b/sources',
-            name: 'Nguồn đối tác',
-            slug: 'marketing-b2b-sources',
-            permission:'marketing_b2b_sources',
-          },
-          {
-            url: '/marketing/b2b/campaigns',
-            name: 'Chính sách B2B',
-            slug: 'marketing-b2b-campaigns',
-            permission:'marketing_b2b_campaigns',
-          }
-        ],
-      },
-      {
-        url: '/marketing/c2c/campaigns',
-        name: 'C2C',
-        icon: 'UsersIcon',
-        slug: 'marketing-c2c',
-        permission:'marketing_c2c_campaigns',
-      },
-      {
-        url: '/marketing/coupons',
-        name: 'Voucher',
-        icon: 'GiftIcon',
-        slug: 'marketing-coupons',
-        permission:'marketing_coupons',
-      },
-    ]
-  },
+  // {
+  //   header: 'MARKETING',
+  //   icon: 'PackageIcon',
+  //   items: [
+  //     {
+  //       url: '/marketing/campaigns',
+  //       name: 'Chiến dịch',
+  //       icon: 'Volume2Icon',
+  //       slug: 'marketing-campaigns',
+  //       permission:'marketing_campaigns',
+  //     },
+  //     {
+  //       url: '/marketing/b2b',
+  //       name: 'B2B',
+  //       icon: 'CommandIcon',
+  //       slug: 'marketing-b2b',
+  //       submenu: [
+  //         {
+  //           url: '/marketing/b2b/sources',
+  //           name: 'Nguồn đối tác',
+  //           slug: 'marketing-b2b-sources',
+  //           permission:'marketing_b2b_sources',
+  //         },
+  //         {
+  //           url: '/marketing/b2b/campaigns',
+  //           name: 'Chính sách B2B',
+  //           slug: 'marketing-b2b-campaigns',
+  //           permission:'marketing_b2b_campaigns',
+  //         }
+  //       ],
+  //     },
+  //     {
+  //       url: '/marketing/c2c/campaigns',
+  //       name: 'C2C',
+  //       icon: 'UsersIcon',
+  //       slug: 'marketing-c2c',
+  //       permission:'marketing_c2c_campaigns',
+  //     },
+  //     {
+  //       url: '/marketing/coupons',
+  //       name: 'Voucher',
+  //       icon: 'GiftIcon',
+  //       slug: 'marketing-coupons',
+  //       permission:'marketing_coupons',
+  //     },
+  //   ]
+  // },
   {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
@@ -264,18 +252,18 @@ export default [
       },
       {
         url: '/settings/products',
-        name: 'Chương trình học',
+        name: 'Khóa học',
         icon: 'LayersIcon',
         slug: 'settings-products',
         permission:'settings_products',
       },
-      {
-        url: '/settings/programs',
-        name: 'Khóa học',
-        icon: 'ServerIcon',
-        slug: 'settings-programs',
-        permission:'settings_programs',
-      },
+      // {
+      //   url: '/settings/programs',
+      //   name: 'Khóa học',
+      //   icon: 'ServerIcon',
+      //   slug: 'settings-programs',
+      //   permission:'settings_programs',
+      // },
       // {
       //   url: '/settings/subjects',
       //   name: 'Môn học',

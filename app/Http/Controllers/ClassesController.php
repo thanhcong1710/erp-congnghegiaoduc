@@ -16,46 +16,18 @@ class ClassesController extends Controller
         $data = [];
         $branch_id = (int)$request->branch_id;
         $product_id = (int)$request->product_id;
-        $lo_trinh_id = (int)$request->lo_trinh_id;
-        $option_id = (int)$request->option_id;
-        $type_fee = (int)$request->type_fee;
-        $type_day_of_week = (int)$request->type_day_of_week;
-        $cond = " 1 ";
-        $cond1 = " AND 1 ";
-        if($lo_trinh_id){
-            $cond.= " AND p.lo_trinh_id = $lo_trinh_id";
-        }
-        if($option_id){
-            $cond.= " AND p.option_id = $option_id";
-        }
-        if($type_day_of_week){
-            $cond.= " AND p.type = $type_day_of_week";
-        }
-        if($type_fee){
-            $cond1.= " AND c.type_fee = $type_fee";
-        }
-        $query = "SELECT id, 
-            id AS item_id, 
-            'program' AS item_type, 
-            `name` AS `text`, 
-            parent_id, 
-            'fa fa-folder' AS icon, 
-            0 AS status 
-        FROM programs AS p
-        WHERE p.id > 0 AND p.status = 1 AND p.product_id = $product_id AND $cond
-        UNION ALL
-        SELECT CONCAT(999, c.id) AS id, 
+        $query = "SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
             'class' AS item_type, 
             c.cls_name AS `text`, 
-            c.program_id AS parent_id, 
+            0 AS parent_id, 
             IF(c.cm_id > 0, 
                 IF(c.status = 0, 
                     'fa-regular fa-rectangle-xmark fa-fw', 
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
-        FROM classes AS c INNER JOIN programs AS p ON c.program_id = p.id
-        WHERE p.status = 1 AND c.branch_id =$branch_id AND p.product_id = $product_id AND $cond $cond1 ORDER BY text ";
+        FROM classes AS c 
+        WHERE c.branch_id =$branch_id AND c.product_id = $product_id ORDER BY text ";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {

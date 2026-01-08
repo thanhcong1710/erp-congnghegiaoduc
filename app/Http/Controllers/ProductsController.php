@@ -51,11 +51,12 @@ class ProductsController extends Controller
             'created_at'=>date('Y-m-d H:i:s'),
             'creator_id'=>Auth::user()->id,
             'status' =>  data_get($request, 'status'),
+            'num_sessions' => data_get($request, 'num_sessions'),
         ), 'products');
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới chương trình học thành công'
+            'message' => 'Thêm mới khóa học thành công'
         );
         return response()->json($result);
     }
@@ -67,7 +68,7 @@ class ProductsController extends Controller
         u::query("DELETE FROM products WHERE id=$product_id");
         $result = array(
             'status' => 1,
-            'message' => 'Xóa chương trình học thành công.'
+            'message' => 'Xóa khóa học thành công.'
         );
         return response()->json($result);
     } 
@@ -87,10 +88,11 @@ class ProductsController extends Controller
             'status' =>  data_get($request, 'status'),
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
+            'num_sessions' => data_get($request, 'num_sessions'),
         ),array('id'=>data_get($request, 'id')), 'products');
         $result = array(
             'status' => 1,
-            'message' => 'Cập nhật thông tin chương trình học thành công'
+            'message' => 'Cập nhật thông tin khóa học thành công'
         );
         return response()->json($result);
     }

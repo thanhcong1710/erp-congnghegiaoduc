@@ -6,18 +6,23 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Mã khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="product.code" class="vs-inputx vs-input--input normal">
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Tên chương trình học <span class="text-danger"> (*)</span></label>
+          <label>Tên khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="product.name" class="vs-inputx vs-input--input normal">
           </div>
         </div>
-        
+        <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Số buổi học</label>
+          <div class=w-full>
+            <input type="number" v-model="product.num_sessions" class="vs-inputx vs-input--input normal">
+          </div>
+        </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Trạng thái</label>
           <div class=w-full>
@@ -95,6 +100,7 @@
           name: '',
           description: '',
           status:1,
+          num_sessions:''
         },
       }
     },
@@ -110,11 +116,11 @@
         let mess = "";
         let resp = true;
         if (this.product.code == "") {
-          mess += " - Mã chương trình học không được để trống<br/>";
+          mess += " - Mã khóa học không được để trống<br/>";
           resp = false;
         }
         if (this.product.name == "") {
-          mess += " - Tên chương trình học không được để trống<br/>";
+          mess += " - Tên khóa học không được để trống<br/>";
           resp = false;
         }
         if (!resp) {
