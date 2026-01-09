@@ -167,7 +167,7 @@ class LMSController extends Controller
             $query = "INSERT INTO semesters (lms_id, `name`, branch_id, product_id,  created_at) VALUES ";
             foreach ($listSemesters as $k => $row) {
                 $product_id = $this->getProductIdByCode($row->ug_type);
-                $query .= "('$row->bsem_id', '$row->bsem_name', '$row->branch_id', '$product_id',  '$created_at' ),";
+                $query .= "('$row->bsem_id', '$row->bsem_name', '".(int)$row->branch_id."', '$product_id',  '$created_at' ),";
             }
             $query = substr($query, 0, -1);
             $query .= " ON DUPLICATE KEY UPDATE `lms_id` = VALUES(`lms_id`)";
@@ -852,9 +852,8 @@ class LMSController extends Controller
                         "counn" => [
                             "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') && !$is_trans_semester ? "transfer" : "add",
                             "conn_cls_id" => data_get($studentInfo, 'lms_class_id'),
-                            "coun_std_id" => data_get($studentInfo, 'lms_id'),
+                            "coun_std_id" => (string)data_get($studentInfo, 'lms_id'),
                             "coun_registration_date" => data_get($studentInfo, 'enrolment_start_date'),
-                            "coun_payment_date" => "",
                             "conn_from_cstd_id" => 0,
                             "conn_syl_id" => data_get($studentInfo, 'syl_id'),
                             "conn_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
