@@ -8,49 +8,53 @@
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
             <div class="mb-6 vx-col w-full">
-              <label>Khóa học <span class="text-danger"> (*)</span></label>
-              <div class=w-full>
-                <vue-select
-                      label="name"
-                      placeholder="Chọn khóa học"
-                      :options="html.programs.list"
-                      v-model="html.programs.item"
-                      :searchable="true"
-                      language="tv-VN"
-                      @input="saveProgram"
-                  ></vue-select>
-              </div>
-            </div>
-            <div class="mb-6 vx-col w-full">
               <label>Tên gói phí <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <input type="text" v-model="tuition_fee.name" class="vs-inputx vs-input--input normal">
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Loại gói phí <span class="text-danger"> (*)</span></label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_fee">
+                  <option value="">Chọn loại gói phí </option>
+                  <option value="1">Gói lẻ</option>
+                  <option value="2">Gói combo</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="tuition_fee.type_fee==1">
+              <label>Khóa học <span class="text-danger"> (*)</span></label>
+              <div class=w-full>
+                <vue-select
+                      label="name"
+                      placeholder="Chọn khóa học"
+                      :options="html.products.list"
+                      v-model="html.products.item"
+                      :searchable="true"
+                      language="tv-VN"
+                      @input="saveProduct"
+                  ></vue-select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full" v-if="tuition_fee.type_fee==1">
               <label>Số buổi học <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <input type="text" v-model="tuition_fee.session" class="vs-inputx vs-input--input normal">
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
-              <label>Số tháng học <span class="text-danger"> (*)</span></label>
+              <label>Số đơn sau tách <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <input type="text" v-model="tuition_fee.number_of_months" class="vs-inputx vs-input--input normal">
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
-              <label>Giá niêm yết <span class="text-danger"> (*)</span></label>
+              <label>Giá bán <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <input type="text" v-model="price" class="vs-inputx vs-input--input normal">
               </div>
             </div>
-            <!-- <div class="mb-6 vx-col md:w-1/2 w-full">
-              <label>Giá thực thu <span class="text-danger"> (*)</span></label>
-              <div class=w-full>
-                <input type="text" v-model="receivable" class="vs-inputx vs-input--input normal">
-              </div>
-            </div> -->
             <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Ngày hiệu lực <span class="text-danger"> (*)</span></label>
               <div class=w-full>
@@ -72,26 +76,6 @@
                 />
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
-              <label>Loại</label>
-              <div class=w-full>
-                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_contract">
-                  <option value="0">Học thử</option>
-                  <option value="1">Chính thức</option>
-                </select>
-              </div>
-            </div>
-            <div class="mb-6 vx-col md:w-1/2 w-full">
-              <label>Loại gói phí <span class="text-danger"> (*)</span></label>
-              <div class=w-full>
-                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_fee">
-                  <option value="">Chọn loại gói phí </option>
-                  <option value="1">Gói phí Cooper</option>
-                  <option value="2">Gói phí Silver</option>
-                  <option value="3">Gói phí Gold</option>
-                </select>
-              </div>
-            </div>
-            <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Trạng thái</label>
               <div class=w-full>
                 <vs-switch v-model="tuition_fee.status" color="success"/>
@@ -108,13 +92,13 @@
               </div>
             </div>
           </div>
-          <div class="mb-6">
-            <label><strong>Gói phí quy đổi </strong></label>
+          <div class="mb-6" v-if="tuition_fee.type_fee==2">
+            <label><strong>Gói phí lẻ tương ứng </strong></label>
             <div class=w-full>
               <div class="vx-col w-full mb-4">
                 <vue-select
                       label="name"
-                      placeholder="Chọn gói phí quy đổi"
+                      placeholder="Chọn gói phí lẻ"
                       :options="html.tuition_fees.list"
                       v-model="html.tuition_fees.item"
                       :searchable="true"
@@ -129,18 +113,18 @@
                       <thead class="vs-table--thead">
                         <tr>
                           <!---->
-                          <th colspan="1" rowspan="1">Chương trình học</th>
                           <th colspan="1" rowspan="1">Gói phí</th>
-                          <th colspan="1" rowspan="1">Thời gian</th>
-                          <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                          <th colspan="1" rowspan="1">Giá gốc</th>
+                          <th colspan="1" rowspan="1">Giá mua combo</th>
                           <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                         </tr>
                       </thead>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_fees_relation" :key="index">
-                        <td class="td vs-table--td">{{item.product_name}}</td>
                         <td class="td vs-table--td">{{item.name}}</td>
-                        <td class="td vs-table--td">{{item.available_date | formatDateView}} - {{item.expired_date | formatDateView}}</td>
-                        <td class="td vs-table--td text-center">{{ item.status == 1 ? 'kích hoạt': 'Không kích hoạt'}}</td>
+                        <td class="td vs-table--td">{{item.price | formatNumber}}</td>
+                        <td class="td vs-table--td">
+                          <input type="text" :value="item.price_combo_display"  @input="formatPriceCombo(item, $event.target.value)" class="vs-inputx vs-input--input normal">
+                        </td>
                         <td class="td vs-table--td text-center list-action"> 
                           <vs-button size="small" color="danger" @click="deleteTuitionFeeRelation(item)"><i class="fa-solid fa-trash"></i></vs-button>
                         </td>
@@ -217,10 +201,6 @@
             item: '',
             list: []
           },
-          programs: {
-            item: '',
-            list: []
-          },
           tuition_fees: {
             item: '',
             list: []
@@ -230,7 +210,6 @@
         tuition_fees_relation: [],
         tuition_fee:{
           product_id:'',
-          program_id:'',
           name: '',
           session: '',
           number_of_months:'',
@@ -238,7 +217,6 @@
           receivable:'',
           available_date:'',
           expired_date: '',
-          type_contract: 1,
           status:1,
           type_fee:''
         },
@@ -263,20 +241,22 @@
         .then(response => {
         this.html.products.list = response.data
       })
-       axios.g(`/api/system/programs`)
-        .then(response => {
-        this.html.programs.list = response.data
-      })
+       
       axios.g(`/api/system/branches`)
       .then(response => {
         this.branches = response.data
       })
-      axios.g(`/api/system/tuition-fees?status=1`)
+      axios.g(`/api/system/tuition-fees?status=1&type_fee=1`)
       .then(response => {
         this.html.tuition_fees.list = response.data
       })
     },
     methods: {
+      formatPriceCombo(item, val) {
+        const value = u.fmc(val)
+        item.price_combo_display = value.s   // hiển thị
+        item.price_combo = value.n            // lưu number
+      },
       selectDate(date){
         if (date) {
           this.tuition_fee.available_date = moment(date).format("YYYY-MM-DD");
@@ -295,26 +275,23 @@
           this.tuition_fee.product_id = ""
         }
       },
-      saveProgram(data = null){
+      saveTuitionFeeRelation(data = null){
         if (data && typeof data === 'object') {
-          const program_id = data.id
-          this.tuition_fee.program_id = program_id
-        }else{
-          this.tuition_fee.program_id = ""
-        }
-      },
-      saveTuitionFeeRelation(data =null){
-        if (data && typeof data === 'object') {
-          const check_exit = 0;
-          this.tuition_fees_relation.map(item => {
-            if(item.id==data.id){
-              check_exit = 1;
+          let check_exit = false;
+          this.tuition_fees_relation.forEach(item => {
+            if(item.id === data.id){
+              check_exit = true;
             }
-          })
+          });
+
           if(!check_exit){
-            this.tuition_fees_relation.push(data)
+            this.tuition_fees_relation.push({
+              ...data,
+              price_combo: '',
+              price_combo_display: ''
+            })
           }
-          this.html.tuition_fees.item=''
+          this.html.tuition_fees.item = ''
         }
       },
       deleteTuitionFeeRelation(data){
@@ -329,30 +306,26 @@
       save() {
         let mess = "";
         let resp = true;
-        if (this.tuition_fee.program_id == "") {
-          mess += " - Khóa học không được để trống<br/>";
-          resp = false;
-        }
         if (this.tuition_fee.name == "") {
           mess += " - Tên gói phí không được để trống<br/>";
           resp = false;
         }
-        if (this.tuition_fee.session == "") {
+        if (this.tuition_fee.product_id == "" && this.tuition_fee.type_fee==1) {
+          mess += " - Khóa học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.tuition_fee.session == "" && this.tuition_fee.type_fee==1) {
           mess += " - Số buổi học không được để trống<br/>";
           resp = false;
         }
          if (this.tuition_fee.number_of_months == "") {
-          mess += " - Số tháng học không được để trống<br/>";
+          mess += " - Số đơn sau tách không được để trống<br/>";
           resp = false;
         }
          if (this.tuition_fee.price === "") {
-          mess += " - Giá niêm yết không được để trống<br/>";
+          mess += " - Giá bán không được để trống<br/>";
           resp = false;
         }
-        //  if (this.tuition_fee.receivable == "") {
-        //   mess += " - Giá thực thu không được để trống<br/>";
-        //   resp = false;
-        // }
          if (this.tuition_fee.available_date == "") {
           mess += " - Ngày hiệu lực không được để trống<br/>";
           resp = false;

@@ -306,13 +306,13 @@ export default [
         slug: 'settings-tuition-fee',
         permission:'settings_tuition_fees',
       },
-      {
-        url: '/settings/discount-codes',
-        name: 'Mã chiết khấu',
-        icon: 'DivideSquareIcon',
-        slug: 'settings-discount-codes',
-        permission:'settings_discount_codes',
-      },
+      // {
+      //   url: '/settings/discount-codes',
+      //   name: 'Mã chiết khấu',
+      //   icon: 'DivideSquareIcon',
+      //   slug: 'settings-discount-codes',
+      //   permission:'settings_discount_codes',
+      // },
       {
         url: '/settings/users',
         name: 'Người dùng',

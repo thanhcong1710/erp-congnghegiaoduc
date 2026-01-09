@@ -141,8 +141,12 @@ class SystemController extends Controller
 
     public function getTuitionFees(Request $request){
         $status = data_get($request, 'status', null);
+        $type_fee = data_get($request, 'type_fee', null);
         $cond = $status!==null ? '1' : " status = $status";
-        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status,
+        if ($type_fee){
+            $cond.= " AND t.type_fee = ".$type_fee;
+        }
+        $data= u::query("SELECT t.name, t.id, t.available_date, t.expired_date, t.status, t.price, '' AS price_combo,
                 (SELECT name FROM products WHERE id=t.product_id) AS product_name    
             FROM tuition_fee AS t WHERE $cond ORDER BY t.id DESC ");
         return response()->json($data);

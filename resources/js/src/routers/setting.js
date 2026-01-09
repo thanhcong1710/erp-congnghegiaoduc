@@ -118,7 +118,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách gói phí', url: '/settings/tuition-fee' },
+            { title: 'Danh sách gói phí', url: '/settings/tuition-fees' },
             { title: 'Cập nhật', active: true }
           ],
           pageTitle: 'Cập nhật gói phí',

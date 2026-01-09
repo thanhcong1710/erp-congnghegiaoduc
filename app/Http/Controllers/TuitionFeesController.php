@@ -63,16 +63,13 @@ class TuitionFeesController extends Controller
                 $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
             }
         }
-        $programInfo = u::getObject(['id'=>data_get($tuition_fee, 'program_id')],'programs');
         $tuition_fee_id = u::insertSimpleRow(array(
             'name' => data_get($tuition_fee, 'name'),
-            'product_id' => data_get($tuition_fee, 'product_id') ? data_get($tuition_fee, 'product_id') : data_get($programInfo, 'product_id'), 
-            'program_id' => data_get($tuition_fee, 'program_id'), 
+            'product_id' => data_get($tuition_fee, 'product_id'), 
             'session' => data_get($tuition_fee, 'session'),
             'price' => data_get($tuition_fee, 'price'),
             'receivable' => data_get($tuition_fee, 'price'),
             'number_of_months' => data_get($tuition_fee, 'number_of_months'),
-            'type_contract' => data_get($tuition_fee, 'type_contract'),
             'type_fee' => data_get($tuition_fee, 'type_fee'),
             'available_date' => data_get($tuition_fee, 'available_date'),
             'expired_date' => data_get($tuition_fee, 'expired_date'),
@@ -89,6 +86,7 @@ class TuitionFeesController extends Controller
                 'exchange_tuition_fee_id' => data_get($row, 'id'), 
                 'tuition_fee_name' => data_get($tuition_fee, 'name'),
                 'exchange_tuition_fee_name' => data_get($row, 'name'),
+                'price_combo' => data_get($row, 'price_combo'),
                 'status' =>  1,
             ), 'tuition_fee_relation');
         }
@@ -115,7 +113,7 @@ class TuitionFeesController extends Controller
     public function show(Request $request,$id)
     {
         $tuition_fee = u::first("SELECT * FROM tuition_fee WHERE id = $id");
-        $tuition_fees_relation = u::query("SELECT t.*, (SELECT name FROM products WHERE id=t.product_id) AS product_name
+        $tuition_fees_relation = u::query("SELECT t.*, (SELECT name FROM products WHERE id=t.product_id) AS product_name, r.price_combo
             FROM tuition_fee_relation AS r LEFT JOIN tuition_fee AS t ON t.id=r.exchange_tuition_fee_id 
             WHERE r.tuition_fee_id=$id AND r.status=1");
         $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
@@ -144,16 +142,13 @@ class TuitionFeesController extends Controller
                 $branch_id.= $branch_id ? ",".data_get($row,'id') : data_get($row,'id');
             }
         }
-        $programInfo = u::getObject(['id'=>data_get($tuition_fee, 'program_id')],'programs');
         u::updateSimpleRow(array(
             'name' => data_get($tuition_fee, 'name'),
-            'product_id' => data_get($tuition_fee, 'product_id') ? data_get($tuition_fee, 'product_id') : data_get($programInfo, 'product_id'), 
-            'program_id' => data_get($tuition_fee, 'program_id'), 
+            'product_id' => data_get($tuition_fee, 'product_id'), 
             'session' => data_get($tuition_fee, 'session'),
             'price' => data_get($tuition_fee, 'price'),
             'receivable' => data_get($tuition_fee, 'price'),
             'number_of_months' => data_get($tuition_fee, 'number_of_months'),
-            'type_contract' => data_get($tuition_fee, 'type_contract'),
             'type_fee' => data_get($tuition_fee, 'type_fee'),
             'available_date' => data_get($tuition_fee, 'available_date'),
             'expired_date' => data_get($tuition_fee, 'expired_date'),
@@ -170,7 +165,8 @@ class TuitionFeesController extends Controller
                 AND exchange_tuition_fee_id=".data_get($row, 'id'));
             if($ttr_info){
                 u::updateSimpleRow(array(
-                    'status' =>  1
+                    'status' =>  1,
+                    'price_combo' => data_get($row, 'price_combo'),
                 ), array('id'=>data_get($ttr_info, 'id')), 'tuition_fee_relation');
             }else{
                 u::insertSimpleRow(array(
@@ -178,6 +174,7 @@ class TuitionFeesController extends Controller
                     'exchange_tuition_fee_id' => data_get($row, 'id'), 
                     'tuition_fee_name' => data_get($tuition_fee, 'name'),
                     'exchange_tuition_fee_name' => data_get($row, 'name'),
+                    'price_combo' => data_get($row, 'price_combo'),
                     'status' =>  1,
                 ), 'tuition_fee_relation');
             }
