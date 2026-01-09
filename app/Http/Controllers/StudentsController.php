@@ -218,15 +218,10 @@ class StudentsController extends Controller
 
     public function searchContract(Request $request){
         $keyword = $request->keyword;
-        $branch_id = $request->branch_id;
-        $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
-                (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,
-                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
-                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_leader_id) AS ec_leader_name,
-                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ceo_branch_id) AS ceo_branch_name, 
-                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label
-            FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')");
+        $data = u::query("SELECT p.name, p.mobile_1 AS gud_mobile1, p.email AS gud_email1, p.address, 
+                p.id AS parent_id, CONCAT(p.name, ' - ', p.mobile_1) AS label
+            FROM crm_parents AS p 
+                WHERE p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%'");
         return response()->json($data);
     } 
 

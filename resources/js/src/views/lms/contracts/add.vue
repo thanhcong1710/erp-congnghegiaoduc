@@ -7,6 +7,14 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Thông tin học sinh</h5>
           <div class="vx-row">
             <div class="vx-col w-full mb-4">
+              <label> Chọn học sinh <span class="text-danger"> (*)</span></label>
+              <search
+                  :endpoint="filter.search.link"
+                  :suggestStudents="filter.search.find"
+                  :onSelectStudent="filter.search.action">
+              </search>
+            </div>
+            <div class="vx-col w-full mb-4">
               <label>Chọn trung tâm <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="name"
@@ -18,14 +26,7 @@
                      @input="saveBranch"
                 ></vue-select>
             </div>
-            <div class="vx-col w-full mb-4" v-if="contract.branch_id">
-              <label> Chọn học sinh <span class="text-danger"> (*)</span></label>
-              <search
-                  :endpoint="filter.search.link"
-                  :suggestStudents="filter.search.find"
-                  :onSelectStudent="filter.search.action">
-              </search>
-            </div>
+            
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Họ tên</label>
               <input
@@ -43,16 +44,6 @@
                 type="text"
                 name="title"
                 v-model="student_info.lms_code"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Phụ huynh</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.gud_name1"
                 disabled="true"
               />
             </div>
@@ -489,8 +480,6 @@
         }else{
           this.contract.branch_id = ""
         }
-        this.student_info = {}
-        this.contract.student_id=""
       },
       saveProduct(data = null){
         if (data && typeof data === 'object') {
