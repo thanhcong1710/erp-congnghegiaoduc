@@ -46,7 +46,7 @@ class TestCallLms extends Command
     public function handle(Request $request)
     {
         $lms = new LMSController();
-        $lms->studentWithdrawByIdLMS(1913);
+        $lms->addStudentToClass(1462);
         return "ok";
     }
 }
