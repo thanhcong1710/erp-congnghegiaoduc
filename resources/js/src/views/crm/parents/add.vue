@@ -5,13 +5,6 @@
       <div class="vx-row">
         <div class="vx-col md:w-1/2 w-full item-first">
           <div class="vx-row">
-            <div class="vx-col md:w-1/3 w-full mb-4">
-              <label>Danh xưng <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="parent.gender">
-                <option value="M">Ông</option>
-                <option value="F">Bà</option>
-              </select>
-            </div>
             <div class="vx-col md:w-2/3 w-full mb-4">
               <label>Họ tên <span class="text-danger"> (*)</span></label>
               <input
@@ -21,6 +14,13 @@
                 v-model="parent.name"
               />
             </div>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Giới tính <span class="text-danger"> (*)</span></label>
+              <select class="vs-inputx vs-input--input normal" v-model="parent.gender">
+                <option value="M">Nam</option>
+                <option value="F">Nữ</option>
+              </select>
+            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label  >Điện thoại <span class="text-danger"> (*)</span></label>
               <input
@@ -29,16 +29,6 @@
                 name="title"
                 v-model="parent.mobile_1"
                 @change="validatePhone"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label  >Điện thoại 2</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.mobile_2"
-                @change="validatePhone2"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -59,17 +49,14 @@
                 @change="selectDate"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Nghề nghiệp</label>
-              <vue-select
-                    label="title"
-                    placeholder="Chọn nghề nghiệp"
-                    :options="html.jobs.list"
-                    v-model="parent.job"
-                    :searchable="true"
-                    language="tv-VN"
-                     @input="saveJob"
-                ></vue-select>
+            <div class="vx-col w-full mb-4">
+              <label>Link Facebook</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="parent.link_facebook"
+              />
             </div>
             <div class="vx-col w-full mb-4">
               <label >Ghi chú</label>
@@ -462,7 +449,7 @@
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {
-          mess += " - Danh xưng không được để trống<br/>";
+          mess += " - Giới tính không được để trống<br/>";
           resp = false;
         }
         if (this.parent.name == "") {
@@ -475,10 +462,6 @@
         }
         if (this.parent.mobile_1 != "" && !u.vld.phone(this.parent.mobile_1)) {
           mess += " - Số điện thoại không đúng định dạng<br/>";
-          resp = false;
-        }
-        if (this.parent.mobile_2 != "" && !u.vld.phone(this.parent.mobile_2)) {
-          mess += " - Số điện thoại 2 không đúng định dạng<br/>";
           resp = false;
         }
         if (this.parent.owner_id == "") {

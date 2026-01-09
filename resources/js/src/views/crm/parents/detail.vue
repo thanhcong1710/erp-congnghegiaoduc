@@ -142,13 +142,6 @@
               <div class="vx-row">
                 <div class="vx-col md:w-1/2 w-full item-first">
                   <div class="vx-row">
-                    <div class="vx-col md:w-1/3 w-full mb-4">
-                      <label>Danh xưng <span class="text-danger"> (*)</span></label>
-                      <select class="vs-inputx vs-input--input normal" v-model="parent.gender" :disabled="disabled_edit">
-                        <option value="M">Ông</option>
-                        <option value="F">Bà</option>
-                      </select>
-                    </div>
                     <div class="vx-col md:w-2/3 w-full mb-4">
                       <label>Họ tên <span class="text-danger"> (*)</span></label>
                       <input
@@ -159,6 +152,14 @@
                         :disabled="disabled_edit"
                       />
                     </div>
+                    <div class="vx-col md:w-1/3 w-full mb-4">
+                      <label>Giới tính <span class="text-danger"> (*)</span></label>
+                      <select class="vs-inputx vs-input--input normal" v-model="parent.gender" :disabled="disabled_edit">
+                        <option value="M">Nam</option>
+                        <option value="F">Nữ</option>
+                      </select>
+                    </div>
+                    
                     <div class="vx-col md:w-1/2 w-full mb-4">
                       <label  >Điện thoại <span class="text-danger"> (*)</span></label>
                       <input
@@ -167,17 +168,6 @@
                         name="title"
                         v-model="parent.mobile_1"
                         @change="validatePhone"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label  >Điện thoại 2</label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.mobile_2"
-                        @change="validatePhone2"
                         :disabled="disabled_edit"
                       />
                     </div>
@@ -201,18 +191,15 @@
                         :disabled="disabled_edit"
                       />
                     </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Nghề nghiệp</label>
-                      <vue-select
-                            label="title"
-                            placeholder="Chọn nghề nghiệp"
-                            :options="html.jobs.list"
-                            v-model="parent_input.job"
-                            :searchable="true"
-                            language="tv-VN"
-                            @input="saveJob"
-                            :disabled="disabled_edit"
-                        ></vue-select>
+                    <div class="vx-col w-full mb-4">
+                      <label  >Link Facebook</label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.link_facebook"
+                        :disabled="disabled_edit"
+                      />
                     </div>
                     <div class="vx-col w-full mb-4">
                       <label >Ghi chú</label>
@@ -983,27 +970,6 @@
           })
         }
       },
-      validatePhone2(){
-        if(this.parent.mobile_2){
-          const data = {
-            phone: this.parent.mobile_2,
-            parent_id: this.parent.id,
-          };
-          this.$vs.loading();
-          axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
-            this.$vs.loading.close();
-            if(response.data.status==0){
-              this.parent.mobile_2 ="";
-              this.modal.color = "warning";
-              this.modal.body = response.data.message;
-              this.modal.show = true;
-            }else if(response.data.status==2){
-              this.modal_overwrite.show = true;
-              this.modal_overwrite.message = response.data.message;
-            }
-          })
-        }
-      },
       validatePhoneC2C(){
         this.c2c_info=""
         if(this.parent.c2c_mobile){
@@ -1093,7 +1059,7 @@
         let mess = "";
         let resp = true;
         if (this.parent.gender == "") {
-          mess += " - Danh xưng không được để trống<br/>";
+          mess += " - Giới tính không được để trống<br/>";
           resp = false;
         }
         if (this.parent.name == "") {
@@ -1106,10 +1072,6 @@
         }
         if (this.parent.mobile_1 != "" && !u.vld.phone(this.parent.mobile_1)) {
           mess += " - Số điện thoại không đúng định dạng<br/>";
-          resp = false;
-        }
-        if (this.parent.mobile_2 != null && this.parent.mobile_2 != "" && !u.vld.phone(this.parent.mobile_2)) {
-          mess += " - Số điện thoại 2 không đúng định dạng<br/>";
           resp = false;
         }
         if (this.parent.source_id == "") {
