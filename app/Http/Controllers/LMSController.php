@@ -290,7 +290,7 @@ class LMSController extends Controller
             ],
             'json' => [
                 'counn' => [
-                    'conn_cls_id' => $cls_id,
+                    'coun_cls_id' => $cls_id,
                 ],
             ]
         ];
@@ -419,7 +419,7 @@ class LMSController extends Controller
             ],
             'json' => [
                 'counn' => [
-                    'conn_cls_id' => $cls_id,
+                    'coun_cls_id' => $cls_id,
                 ],
             ]
         ];
@@ -851,14 +851,14 @@ class LMSController extends Controller
                         ],
                         "counn" => [
                             "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') && !$is_trans_semester ? "transfer" : "add",
-                            "conn_cls_id" => data_get($studentInfo, 'lms_class_id'),
+                            "coun_cls_id" => data_get($studentInfo, 'lms_class_id'),
                             "coun_std_id" => (string)data_get($studentInfo, 'lms_id'),
                             "coun_registration_date" => data_get($studentInfo, 'enrolment_start_date'),
-                            "conn_from_cstd_id" => 0,
-                            "conn_syl_id" => data_get($studentInfo, 'syl_id'),
-                            "conn_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
-                            "conn_cstf_teacher_fault" => 0,
-                            "conn_lecture_date" => ""
+                            "coun_from_cstd_id" => 0,
+                            "coun_syl_id" => data_get($studentInfo, 'syl_id'),
+                            "coun_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
+                            "coun_cstf_teacher_fault" => 0,
+                            "coun_lecture_date" => ""
                         ]
                     ]
                 ];
