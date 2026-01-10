@@ -13,14 +13,17 @@ class ContractsController extends Controller
 {
     public function loadTuitionFee(Request $request)
     {
-        $product_id = $request->product_id;
         $branch_id = $request->branch_id;
-        $type_contract = $request->type_contract;
-        $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session
+        $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session, t.type_fee , '' AS label, '' AS tuition_fee_relation
             FROM tuition_fee AS t 
-            WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE AND type_contract = $type_contract
-            AND t.product_id = $product_id AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' ) 
-            ORDER BY t.name DESC");
+            WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE 
+            AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' ) 
+            ORDER BY t.type_fee, t.price  ");
+        foreach ($data AS $k=> $row){
+            $data[$k]->label = data_get($row,'name'). " (".number_format( data_get($row, 'price'))."đ)";
+            $data[$k]->tuition_fee_relation = u::query("SELECT r.price_combo, t.price, t.name, t.session FROM tuition_fee_relation AS r 
+                LEFT JOIN tuition_fee AS t ON r.exchange_tuition_fee_id=t.id WHERE r.tuition_fee_id = ".data_get($row, 'id'));
+        }
         return response()->json($data);
     }
     
