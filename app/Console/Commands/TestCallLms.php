@@ -45,8 +45,13 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
+        $list= u:: query("SELECT * FROM contracts WHERE branch_id = 28");
         $lms = new LMSController();
-        $lms->addStudentToClass(1462);
+        foreach($list AS $row){
+            $lms->addOrUpdateStudent(data_get($row, 'student_id'));
+            $lms->addStudentToClass(data_get($row, 'student_id'));
+            echo data_get($row, 'student_id')."/";
+        }
         return "ok";
     }
 }

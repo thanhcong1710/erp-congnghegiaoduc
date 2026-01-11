@@ -455,6 +455,7 @@
           transfer_date:'',
           received_amount:'',
           transferred_amount:'',
+          transferred_real_session: 0,
         },
         from_student_info:{},
         to_student_info:{},
@@ -618,7 +619,8 @@
             from_contracts: this.from_contracts,
             transfer_date: this.tuition_transfer.transfer_date,
             to_product_id: this.tuition_transfer.to_product_id,
-            to_branch_id: this.tuition_transfer.to_branch_id
+            to_branch_id: this.tuition_transfer.to_branch_id,
+            to_student_id: this.tuition_transfer.to_student_id
           })
           .then((response) => {  
             this.$vs.loading.close();
@@ -627,6 +629,7 @@
               this.transferred_contracts = response.data.transferred_contracts
               this.tuition_transfer.received_amount = response.data.total_amount_transfer
               this.tuition_transfer.transferred_amount =  response.data.total_amount_transfer
+              this.tuition_transfer.transferred_real_session = response.data.total_real_session_transfer
             }else{
               this.$vs.notify({
                 title: 'Lỗi',
@@ -671,6 +674,9 @@
         if (this.tuition_transfer.transfer_date == "") {
           mess += " - Ngày bắt đầu chuyển phí không được để trống<br/>";
           resp = false;
+        }
+        if (this.tuition_transfer.transferred_real_session < 24) {
+          mess += " - Học sinh chỉ được chuyển phí khi con tối thiếu 24 buổi học chính thức<br/>";
         }
         if (this.tuition_transfer.transferred_amount <= 0 && !u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')) {
           mess += " - Tổng số tiền nhận phải lớn hơn 0<br/>";

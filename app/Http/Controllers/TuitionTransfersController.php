@@ -86,9 +86,13 @@ class TuitionTransfersController extends Controller
         $to_branch_id = data_get($request, 'to_branch_id');
         $transfer_date = data_get($request, 'transfer_date');
         $from_contracts = data_get($request, 'from_contracts');
+        $to_student_id = data_get($request, 'to_student_id', 0);
         $transferred_contracts = [];
         $received_contracts = [];
         $total_amount_transfer = 0;
+        $total_real_session_transfer = 0;
+
+        $contractToStudentActive = u::first("SELECT id FROM contracts where student_id=".(int)$to_student_id." AND type>0 AND status!=7");
         foreach($from_contracts AS $k=> $contract){
             $contract = (object)$contract;
             if(data_get($contract, 'class_id')){
@@ -105,12 +109,18 @@ class TuitionTransfersController extends Controller
                 $contract->left_sessions = $contract->left_sessions > 0 ? $contract->left_sessions : 0;
                 $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
                 $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0;
+                $done_bonus_sessions =  $contract->done_sessions > $contract->real_sessions ? ( $contract->done_sessions - $contract->real_sessions > $contract->bonus_sessions ? $contract->bonus_sessions :  $contract->done_sessions - $contract->real_sessions) : 0;
+                $left_bonus_sessions = $contract->bonus_sessions - $done_bonus_sessions;
             }else{
                 $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
                 $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
+                $done_bonus_sessions =  $contract->done_sessions > $contract->real_sessions ? ( $contract->done_sessions - $contract->real_sessions > $contract->bonus_sessions ? $contract->bonus_sessions :  $contract->done_sessions - $contract->real_sessions) : 0;
+                $left_bonus_sessions = $contract->bonus_sessions - $done_bonus_sessions;
             }
+        
             $contract->left_real_sessions = $left_real_sessions;
             $contract->left_amount = $left_real_amount;
+            $contract->left_bonus_sessions = $left_bonus_sessions;
             $transferred_contracts[$k] = $contract;
             $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $to_branch_id, $to_product_id, $left_real_sessions);
             if(!data_get($data_calc_transfer, 'receive_tuition_fee.id')){
@@ -120,22 +130,25 @@ class TuitionTransfersController extends Controller
                 );
                 return response()->json($result);
             }
+            $left_bonus_sessions = data_get($contractToStudentActive, 'id') ? $left_bonus_sessions : 0;
             $received_contracts[$k] = array(
                 'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                 'tuition_fee_name' => data_get($data_calc_transfer, 'receive_tuition_fee.name'),
                 'total_charged' => data_get($data_calc_transfer, 'transfer_amount'),
                 'real_sessions' => data_get($data_calc_transfer, 'sessions'),
-                'bonus_sessions' => 0,
+                'bonus_sessions' => $left_bonus_sessions,
                 'product_name' => data_get($data_calc_transfer, 'receive_tuition_fee.product_name'),
             );
             $total_amount_transfer = $total_amount_transfer + $left_real_amount;
+            $total_real_session_transfer = data_get($data_calc_transfer, 'sessions');
         }
         $data = [
             'status' => 1,
             'message' => 'ok',
             'transferred_contracts' => $transferred_contracts,
             'received_contracts' => $received_contracts,
-            'total_amount_transfer' => $total_amount_transfer
+            'total_amount_transfer' => $total_amount_transfer,
+            'total_real_session_transfer' => $total_real_session_transfer
         ];
         return response()->json($data);
     }
@@ -260,9 +273,13 @@ class TuitionTransfersController extends Controller
         $from_student_id = data_get($tuition_transfer_info, 'from_student_id');
         $to_student_id = data_get($tuition_transfer_info, 'to_student_id');
         $list_contract_active = u::query("SELECT * FROM contracts WHERE student_id = $from_student_id AND status!=7");
+        $contractToStudentActive = u::first("SELECT id FROM contracts where student_id=".(int)$to_student_id." AND type>0 AND status!=7");
         foreach($list_contract_active AS $contract){
             $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
             $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
+            $done_bonus_sessions =  $contract->done_sessions > $contract->real_sessions ? ( $contract->done_sessions - $contract->real_sessions > $contract->bonus_sessions ? $contract->bonus_sessions :  $contract->done_sessions - $contract->real_sessions) : 0;
+            $left_bonus_sessions = $contract->bonus_sessions - $done_bonus_sessions;
+            $left_bonus_sessions = data_get($contractToStudentActive, 'id') ?  $left_bonus_sessions : 0;
             $contract_id = 0;
             if($left_real_amount > 0 || $left_real_sessions >0){
                 $last_contract_to_student = u::first("SELECT count_recharge FROM contracts WHERE student_id=$to_student_id ORDER BY count_recharge DESC LIMIT 1");
@@ -287,9 +304,9 @@ class TuitionTransfersController extends Controller
                     'debt_amount' => 0,
                     'total_sessions' => data_get($data_calc_transfer, 'sessions'),
                     'real_sessions' => data_get($data_calc_transfer, 'sessions'),
-                    'bonus_sessions' => 0,
-                    'summary_sessions' => data_get($data_calc_transfer, 'sessions'),
-                    'left_sessions' => data_get($data_calc_transfer, 'sessions'),
+                    'bonus_sessions' => $left_bonus_sessions,
+                    'summary_sessions' => data_get($data_calc_transfer, 'sessions') + $left_bonus_sessions,
+                    'left_sessions' => data_get($data_calc_transfer, 'sessions') + $left_bonus_sessions,
                     'reservable_sessions' =>floor(data_get($data_calc_transfer, 'sessions')/config('app.num_session_of_reservable')),
                     'note'=> 'Nhận chuyển phí',
                     'created_at'=>date('Y-m-d H:i:s'),
@@ -342,9 +359,9 @@ class TuitionTransfersController extends Controller
         }
         $contract_info['to_real_sessions'] = 0;
         $contract_info['to_bonus_sessions'] = 0;
-        foreach(data_get($meta_data, 'transferred_contracts') AS $transfer_contract){
-            $contract_info['to_real_sessions'] = $contract_info['to_real_sessions'] + data_get($transfer_contract, 'real_sessions');
-            $contract_info['to_bonus_sessions'] = $contract_info['to_bonus_sessions'] + data_get($transfer_contract, 'bonus_sessions');
+        foreach(data_get($meta_data, 'received_contracts') AS $received_contracts){
+            $contract_info['to_real_sessions'] = $contract_info['to_real_sessions'] + data_get($received_contracts, 'real_sessions');
+            $contract_info['to_bonus_sessions'] = $contract_info['to_bonus_sessions'] + data_get($received_contracts, 'bonus_sessions');
         }
         return response()->json($contract_info);
     }
