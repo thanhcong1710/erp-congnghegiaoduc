@@ -112,7 +112,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('list', 'StudentsController@list');
                 Route::get('show/{student_id}', 'StudentsController@show');
                 Route::post('update', 'StudentsController@update');
-                Route::post('search-contract', 'StudentsController@searchContract');
+                Route::post('search-agreement', 'StudentsController@searchContract');
                 Route::post('logs', 'StudentsController@logs');
                 Route::post('contracts', 'StudentsController@contracts');
                 Route::post('sessions', 'StudentsController@sessions');
@@ -121,14 +121,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('upload-avatar', 'StudentsController@uploadAvatar');
             });
            
-            Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
-            Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
-            Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
-            Route::post('contracts/add', 'ContractsController@add');
-            Route::post('contracts/list', 'ContractsController@list');
-            Route::post('contracts/delete', 'ContractsController@delete');
-            Route::get('contracts/show/{contract_id}', 'ContractsController@show');
-            Route::post('contracts/update', 'ContractsController@update');
+            Route::post('agreements/load-tuition-fee', 'ContractsController@loadTuitionFee');
+            Route::post('agreements/load-discount-code', 'ContractsController@loadDiscountCode');
+            Route::post('agreements/check-coupon', 'ContractsController@checkCoupon');
+            Route::post('agreements/add', 'ContractsController@add');
+            Route::post('agreements/list', 'ContractsController@list');
+            Route::post('agreements/delete', 'ContractsController@delete');
+            Route::get('agreements/show/{contract_id}', 'ContractsController@show');
+            Route::post('agreements/update', 'ContractsController@update');
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');

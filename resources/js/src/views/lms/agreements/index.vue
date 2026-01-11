@@ -36,7 +36,7 @@
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/contracts/add'">
+            <router-link class="btn btn-success" :to="'/lms/agreements/add'">
               <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -61,7 +61,7 @@
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
+              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreements" :key="index">
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
@@ -74,7 +74,7 @@
                   <p>EC: {{ item.ec_name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Mã:  <router-link :to="`/lms/contracts/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
+                  <p>Mã:  <router-link :to="`/lms/agreements/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
                 </td>
                 <td class="td vs-table--td">
@@ -83,10 +83,10 @@
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/contracts/${item.agreement_id}/detail`" >
+                    <router-link :to="`/lms/agreements/${item.agreement_id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
-                    <router-link :to="`/lms/contracts/${item.agreement_id}/edit`">
+                    <router-link :to="`/lms/agreements/${item.agreement_id}/edit`">
                       <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
                     </router-link>
                     <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
@@ -167,7 +167,7 @@
             ]
           }
         },
-        contracts: [],
+        agreements: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -223,10 +223,10 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/contracts/list', data)
+        axios.p('/api/lms/agreements/list', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contracts = response.data.list
+            this.agreements = response.data.list
             this.pagination = response.data.paging;
             setTimeout(() => {
               this.pagination.init = 1;
@@ -264,7 +264,7 @@
           agreement_id: this.delete_id,
         };
         this.$vs.loading();
-        axios.p(`/api/lms/contracts/delete`,data)
+        axios.p(`/api/lms/agreements/delete`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.getData();

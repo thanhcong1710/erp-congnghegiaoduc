@@ -66,10 +66,10 @@ export default [
         icon: 'AirplayIcon',
         submenu: [
           {
-            url: '/lms/contracts',
+            url: '/lms/agreements',
             name: 'Nhập học',
-            slug: 'lms-contracts',
-            permission:'lms_contracts',
+            slug: 'lms-agreements',
+            permission:'lms_agreements',
           },
           {
             url: '/lms/enrolments',

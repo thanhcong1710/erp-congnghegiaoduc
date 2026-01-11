@@ -46,9 +46,9 @@ export default {
       },
 
       {
-        path: '/lms/contracts',
-        name: 'lms-contracts',
-        component: () => import('@/views/lms/contracts/index.vue'),
+        path: '/lms/agreements',
+        name: 'lms-agreements',
+        component: () => import('@/views/lms/agreements/index.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
@@ -59,13 +59,13 @@ export default {
         }
       },
       {
-        path: '/lms/contracts/add',
-        name: 'lms-contracts-add',
-        component: () => import('@/views/lms/contracts/add.vue'),
+        path: '/lms/agreements/add',
+        name: 'lms-agreements-add',
+        component: () => import('@/views/lms/agreements/add.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/contracts' },
+            { title: 'Danh sách nhập học', url: '/lms/agreements' },
             { title: 'Thêm mới nhập học', active: true }
           ],
           pageTitle: 'Thêm mới nhập học',
@@ -73,13 +73,13 @@ export default {
         }
       },
       {
-        path: '/lms/contracts/:id/detail',
-        name: 'lms-contracts-detail',
-        component: () => import('@/views/lms/contracts/detail.vue'),
+        path: '/lms/agreements/:id/detail',
+        name: 'lms-agreements-detail',
+        component: () => import('@/views/lms/agreements/detail.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/contracts'},
+            { title: 'Danh sách nhập học', url: '/lms/agreements'},
             { title: 'Thông tin nhập học', active: true}
           ],
           pageTitle: 'Thông tin nhập học',
@@ -87,13 +87,13 @@ export default {
         }
       },
       {
-        path: '/lms/contracts/:id/edit',
-        name: 'lms-contracts-edit',
-        component: () => import('@/views/lms/contracts/edit.vue'),
+        path: '/lms/agreements/:id/edit',
+        name: 'lms-agreements-edit',
+        component: () => import('@/views/lms/agreements/edit.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/contracts'},
+            { title: 'Danh sách nhập học', url: '/lms/agreements'},
             { title: 'Cập nhật nhập học', active: true}
           ],
           pageTitle: 'Cập nhật nhập học',

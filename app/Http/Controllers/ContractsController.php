@@ -307,9 +307,13 @@ class ContractsController extends Controller
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+            '' AS contracts
         FROM agreements AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
+        foreach($data AS $k => $row){
+            $data[$k]->contracts = u:: query("SELECT * FROM contracts WHERE") ;
+        }
         return response()->json($data);
     }
 
