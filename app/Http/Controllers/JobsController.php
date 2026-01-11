@@ -74,7 +74,7 @@ class JobsController extends Controller
         foreach ($listContracts AS $contract_withdraw){
             if($contract_withdraw){
                 $class_id = data_get($contract_withdraw, 'class_id');
-                $student_id = data_get($contract_withdraw, 'class_id');
+                $student_id = data_get($contract_withdraw, 'student_id');
                 $contractJoin = u::first("SELECT id FROM contracts WHERE student_id=$student_id AND status!=7 AND status!=6 AND count_recharge > ".data_get($contract_withdraw, 'count_recharge')." AND debt_amount=0 LIMIT 1");
                 if ($contractJoin){
                     $contract_id = data_get($contractJoin,'id');
