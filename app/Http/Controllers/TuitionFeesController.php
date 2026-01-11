@@ -88,6 +88,7 @@ class TuitionFeesController extends Controller
                 'exchange_tuition_fee_name' => data_get($row, 'name'),
                 'price_combo' => data_get($row, 'price_combo'),
                 'status' =>  1,
+                'stt' => data_get($row, 'stt'),
             ), 'tuition_fee_relation');
         }
 
@@ -113,7 +114,7 @@ class TuitionFeesController extends Controller
     public function show(Request $request,$id)
     {
         $tuition_fee = u::first("SELECT * FROM tuition_fee WHERE id = $id");
-        $tuition_fees_relation = u::query("SELECT t.*, (SELECT name FROM products WHERE id=t.product_id) AS product_name, r.price_combo
+        $tuition_fees_relation = u::query("SELECT t.*, (SELECT name FROM products WHERE id=t.product_id) AS product_name, r.price_combo,r.stt
             FROM tuition_fee_relation AS r LEFT JOIN tuition_fee AS t ON t.id=r.exchange_tuition_fee_id 
             WHERE r.tuition_fee_id=$id AND r.status=1");
         $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
@@ -167,6 +168,7 @@ class TuitionFeesController extends Controller
                 u::updateSimpleRow(array(
                     'status' =>  1,
                     'price_combo' => data_get($row, 'price_combo'),
+                    'stt' => data_get($row, 'stt'),
                 ), array('id'=>data_get($ttr_info, 'id')), 'tuition_fee_relation');
             }else{
                 u::insertSimpleRow(array(
@@ -176,6 +178,7 @@ class TuitionFeesController extends Controller
                     'exchange_tuition_fee_name' => data_get($row, 'name'),
                     'price_combo' => data_get($row, 'price_combo'),
                     'status' =>  1,
+                    'stt' => data_get($row, 'stt'),
                 ), 'tuition_fee_relation');
             }
         }

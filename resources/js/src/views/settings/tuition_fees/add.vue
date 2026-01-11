@@ -116,6 +116,7 @@
                           <th colspan="1" rowspan="1">Gói phí</th>
                           <th colspan="1" rowspan="1">Giá gốc</th>
                           <th colspan="1" rowspan="1">Giá mua combo</th>
+                          <th colspan="1" rowspan="1">Thứ tự học</th>
                           <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                         </tr>
                       </thead>
@@ -124,6 +125,9 @@
                         <td class="td vs-table--td">{{item.price | formatNumber}}</td>
                         <td class="td vs-table--td">
                           <input type="text" :value="item.price_combo_display"  @input="formatPriceCombo(item, $event.target.value)" class="vs-inputx vs-input--input normal">
+                        </td>
+                        <td class="td vs-table--td">
+                          <input type="number" v-model="item.stt" class="vs-inputx vs-input--input normal">
                         </td>
                         <td class="td vs-table--td text-center list-action"> 
                           <vs-button size="small" color="danger" @click="deleteTuitionFeeRelation(item)"><i class="fa-solid fa-trash"></i></vs-button>

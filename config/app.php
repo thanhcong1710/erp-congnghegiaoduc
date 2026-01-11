@@ -233,7 +233,8 @@ return [
 
     ],
 
-    'prefix_student_code' => env('APP_PREFIX_STUDENT_CODE', 'LMS'),
+    'prefix_student_code' => env('APP_PREFIX_STUDENT_CODE', 'LAPO'),
     'prefix_contract_code' => env('APP_PREFIX_CONTRACT_CODE', 'C'),
+    'prefix_contract_code' => env('prefix_agreement_code', ''),
     'num_session_of_reservable' => env('APP_NUM_SESSION_OF_RESERVABLE', '24'),
 ];

@@ -1014,4 +1014,13 @@ class UtilityServiceProvider extends ServiceProvider
 
         return $string;
     }
+
+    public static function addLogAgreements($agreement_id)
+    {
+        $agreement_info = (array)self::getObject(['id' => $agreement_id], 'agreements');
+        $agreement_info['agreement_id'] = data_get($agreement_info, 'id');
+        unset($agreement_info['id']);
+        $log_agreement_id = self::insertSimpleRow($agreement_info, 'log_agreements');
+        return $log_agreement_id;
+    }
 }

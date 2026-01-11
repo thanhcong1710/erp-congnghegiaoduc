@@ -89,24 +89,24 @@ export default [
             slug: 'lms-class_transfers',
             permission:'lms_class_transfers',
           },
-          {
-            url: '/lms/branch_transfers',
-            name: 'Chuyển trung tâm',
-            slug: 'lms-branch_transfers',
-            permission:'lms_branch_transfers',
-          },
-          {
-            url: '/lms/tuition_transfers',
-            name: 'Chuyển phí',
-            slug: 'lms-tuition_transfers',
-            permission:'lms_tuition_transfers',
-          },
-          {
-            url: '/lms/exchange',
-            name: 'Quy đổi',
-            slug: 'lms-exchange',
-            permission:'lms_exchange',
-          },
+          // {
+          //   url: '/lms/branch_transfers',
+          //   name: 'Chuyển trung tâm',
+          //   slug: 'lms-branch_transfers',
+          //   permission:'lms_branch_transfers',
+          // },
+          // {
+          //   url: '/lms/tuition_transfers',
+          //   name: 'Chuyển phí',
+          //   slug: 'lms-tuition_transfers',
+          //   permission:'lms_tuition_transfers',
+          // },
+          // {
+          //   url: '/lms/exchange',
+          //   name: 'Quy đổi',
+          //   slug: 'lms-exchange',
+          //   permission:'lms_exchange',
+          // },
           {
             url: '/lms/attendances',
             name: 'Điểm danh',

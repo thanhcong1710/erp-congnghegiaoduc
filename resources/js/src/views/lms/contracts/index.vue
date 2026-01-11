@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã tên học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã tên sdt học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian tạo</label>
@@ -72,26 +72,25 @@
                 <td class="td vs-table--td">
                   <p><strong>{{ item.branch_name }}</strong></p>
                   <p>EC: {{ item.ec_name }}</p>
-                  <p>AF: {{ item.cm_name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-                  <p>Chương trình học: {{ item.product_name }}</p>
+                  <p>Mã:  <router-link :to="`/lms/contracts/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
-                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} buổi học bổng)</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.init_tuition_fee_amount | formatMoney }}</strong></p>
-                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
+                  <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
                   <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
+                    <router-link :to="`/lms/contracts/${item.agreement_id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
+                    <router-link :to="`/lms/contracts/${item.agreement_id}/edit`">
+                      <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
+                    </router-link>
                     <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
-                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                    <vs-button size="small" color="danger" v-if="item.total_charged == 0" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -249,7 +248,7 @@
         this.getData();
       },
       confirmDelete (item) {
-        this.delete_id = item.contract_id
+        this.delete_id = item.agreement_id
         this.$vs.dialog({
           type: 'confirm',
           color: 'danger',
@@ -262,7 +261,7 @@
       },
       deleteContract(){
         const data = {
-          contract_id: this.delete_id,
+          agreement_id: this.delete_id,
         };
         this.$vs.loading();
         axios.p(`/api/lms/contracts/delete`,data)

@@ -290,7 +290,7 @@
         },
         contract:{
           branch_id:'',
-          student_id: '',
+          parent_id: '',
           product_id: '',
           type:'',
           tuition_fee_id:'', 
@@ -356,7 +356,7 @@
       },
       selectStudent(student) {
         this.student_info = student
-        this.contract.student_id = student.student_id
+        this.contract.parent_id = student.parent_id
         if (student.branch_id){
           this.disabled_branch = true
           this.html.branches.item = this.html.branches.list.filter(item => item.id == student.branch_id)[0]
@@ -508,7 +508,7 @@
           mess += " - Trung tâm không được để trống<br/>";
           resp = false;
         }
-        if (this.contract.student_id == "") {
+        if (this.contract.parent_id == "") {
           mess += " - Học sinh không được để trống<br/>";
           resp = false;
         }
