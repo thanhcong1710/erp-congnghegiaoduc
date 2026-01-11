@@ -161,16 +161,6 @@
                 disabled="true"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.tuition_fee_type==1">
-              <label>Tổng số buổi học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="agreement.total_session"
-                disabled="true"
-              />
-            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
               <datepicker class="w-full"
@@ -183,6 +173,17 @@
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"></textarea>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label style="font-weight: bold; color: red;">Số tiền đã đóng</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                :value="agreement.total_charged | formatNumber"
+                disabled="true"
+                style="font-weight: bold; "
+              />
             </div>
           </div>
 
@@ -221,12 +222,16 @@
                         <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                       </tr>
                     </thead>
-                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreement.agreements" :key="index">
+                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreement.contracts" :key="index">
                       <!---->
-                      <td class="td vs-table--td">{{item.name}}</td>
-                      <td class="td vs-table--td text-center">{{item.session}}</td>
-                      <td class="td vs-table--td text-center">{{item.price | formatMoney}}</td>
-                      <td class="td vs-table--td text-center">{{item.price_combo | formatMoney}}</td>
+                      <td class="td vs-table--td">{{item.code}}</td>
+                      <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
+                      <td class="td vs-table--td text-center">{{item.must_charge | formatMoney}}</td>
+                      <td class="td vs-table--td text-center">{{item.total_charged | formatMoney}}</td>
+                      <td class="td vs-table--td text-center">{{item.left_amount | formatMoney}}</td>
+                      <td class="td vs-table--td text-center">{{item.real_sessions }}</td>
+                      <td class="td vs-table--td text-center">{{item.done_sessions}}</td>
+                      <td class="td vs-table--td text-center">{{item.label_status}}</td>
                     </tr>
                   </table>
                   
@@ -372,7 +377,7 @@
           this.agreement.tuition_fee_amount = response.data.init_tuition_fee_amount
           this.agreement.tuition_fee_session = response.data.init_tuition_fee_session
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
-          this.agreement.agreements = response.data.agreements
+          this.agreement.contracts = response.data.contracts
           this.loadTuitionFee(response.data.tuition_fee_id);
         })
       },
@@ -421,11 +426,15 @@
       },
       caculatorSession(){
         console.log(this.agreement);
-        this.agreement.total_amount = Number(this.agreement.tuition_fee_amount) - Number(this.agreement.discount_code_amount) - Number(this.agreement.coupon_amount) - Number(this.agreement.b2b_amount) > 0 ? Number(this.agreement.tuition_fee_amount) - Number(this.agreement.discount_code_amount) - Number(this.agreement.coupon_amount) - Number(this.agreement.b2b_amount): 0;
+        this.agreement.total_amount = Number(this.agreement.tuition_fee_amount)  > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
       },
       save() {
         let mess = "";
         let resp = true;
+        if (this.agreement.total_charged > this.agreement.total_amount) {
+          mess += " - Số tiền phải đóng phải lớn hơn số tiền đã đóng<br/>";
+          resp = false;
+        }
         if (this.agreement.tuition_fee_id == "") {
           mess += " - Gói học phí không được để trống<br/>";
           resp = false;

@@ -1023,4 +1023,35 @@ class UtilityServiceProvider extends ServiceProvider
         $log_agreement_id = self::insertSimpleRow($agreement_info, 'log_agreements');
         return $log_agreement_id;
     }
+
+    public static function geLabelStatusContract($status)
+    {
+        $text = "";
+        switch ($status) {
+            case 1:
+                $text = "Chưa đóng phí";
+                break;
+            case 2:
+                $text = "Đặt cọc";
+                break;
+            case 3:
+            case 4:
+            case 5:
+                $text = "Chờ xếp lớp";
+                break;
+            case 6:
+                $text = "Đang học";
+                break;
+            case 7:
+                $text = "Hết phí";
+                break;
+            case 8:
+                $text = "Hủy";
+                break;
+            default:
+                $text = "";
+        }
+        return $text;
+    }
+
 }

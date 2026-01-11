@@ -173,16 +173,6 @@
                 disabled="true"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.tuition_fee_type==1">
-              <label>Tổng số buổi học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="agreement.total_session"
-                disabled="true"
-              />
-            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
               <datepicker class="w-full"

@@ -176,7 +176,8 @@ class ContractsController extends Controller
                     'created_at'=>date('Y-m-d H:i:s'),
                     'creator_id'=>Auth::user()->id,
                     'status' => 1,
-                    'count_recharge'=> 1
+                    'count_recharge'=> 1,
+                    'agreement_id'=>$agreement_id
                 ), 'contracts');
                 $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code').$contract_code;
@@ -214,6 +215,7 @@ class ContractsController extends Controller
                     'creator_id'=>Auth::user()->id,
                     'status' => 1,
                     'count_recharge'=>data_get($tuition_fee_info, 'stt'),
+                    'agreement_id'=>$agreement_id
                 ), 'contracts');
                 $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code').$contract_code;
@@ -299,26 +301,34 @@ class ContractsController extends Controller
         return response()->json($result);
     } 
 
-    public function show(Request $request,$contract_id)
+    public function show(Request $request,$agreement_id)
     {
-        $data = u::first("SELECT c.*,c.id AS contract_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1,
+        $data = u::first("SELECT c.*,c.id AS agreement_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1,
             (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
-            '' AS contracts
+            '' AS contracts, c.total_charged
         FROM agreements AS c 
-            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
-        foreach($data AS $k => $row){
-            $data[$k]->contracts = u:: query("SELECT * FROM contracts WHERE") ;
-        }
+            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$agreement_id");
+            $dataContracts = u:: query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,
+                    (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
+                FROM contracts AS c 
+                WHERE c.agreement_id= $agreement_id AND c.status>0 
+                ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'),  c.count_recharge ASC") ;
+            foreach ($dataContracts AS $k=> $contract){
+                $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status, 1);
+                $dataContracts[$k]->left_amount = $contract->total_charged > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : 0;
+            }
+            $data->contracts = $dataContracts;
         return response()->json($data);
     }
 
     public function update(Request $request)
     {
+        die();
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
