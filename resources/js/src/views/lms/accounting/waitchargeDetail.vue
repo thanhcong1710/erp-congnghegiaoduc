@@ -10,7 +10,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.name"
+              v-model="agreement_info.name"
               disabled="true"
             />
           </div>
@@ -20,7 +20,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.lms_code"
+              v-model="agreement_info.lms_code"
               disabled="true"
             />
           </div>
@@ -30,7 +30,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.gud_name1"
+              v-model="agreement_info.gud_name1"
               disabled="true"
             />
           </div>
@@ -40,7 +40,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.gud_mobile1"
+              v-model="agreement_info.gud_mobile1"
               disabled="true"
             />
           </div>
@@ -50,7 +50,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.gud_email1"
+              v-model="agreement_info.gud_email1"
               disabled="true"
             />
           </div>
@@ -60,7 +60,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.address"
+              v-model="agreement_info.address"
               disabled="true"
             />
           </div>
@@ -70,7 +70,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.branch_name"
+              v-model="agreement_info.branch_name"
               disabled="true"
             />
           </div>
@@ -80,7 +80,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.ec_name"
+              v-model="agreement_info.ec_name"
               disabled="true"
             />
           </div>
@@ -90,7 +90,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.ec_leader_name"
+              v-model="agreement_info.ec_leader_name"
               disabled="true"
             />
           </div>
@@ -100,7 +100,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.creator_name"
+              v-model="agreement_info.creator_name"
               disabled="true"
             />
           </div>
@@ -110,7 +110,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.created_at"
+              v-model="agreement_info.created_at"
               disabled="true"
             />
           </div>
@@ -120,7 +120,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="contract_info.total_discount | formatNumber"
+              :value="agreement_info.total_discount | formatNumber"
               disabled="true"
             />
           </div>
@@ -130,7 +130,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.product_name"
+              v-model="agreement_info.product_name"
               disabled="true"
             />
           </div>
@@ -140,7 +140,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="contract_info.tuition_fee_name"
+              v-model="agreement_info.tuition_fee_name"
               disabled="true"
             />
           </div>
@@ -155,7 +155,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="contract_info.must_charge | formatNumber"
+              :value="agreement_info.must_charge | formatNumber"
               disabled="true"
             />
           </div>
@@ -165,7 +165,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="contract_info.total_charged | formatNumber"
+              :value="agreement_info.total_charged | formatNumber"
               disabled="true"
             />
           </div>
@@ -184,7 +184,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="contract_info.debt_amount | formatNumber"
+              :value="agreement_info.debt_amount | formatNumber"
               disabled="true"
             />
           </div>
@@ -270,7 +270,7 @@
           body: '',
           color:'',
         },
-        contract_info:{},
+        agreement_info:{},
         payment:{
           method:1,
           note:'',
@@ -285,15 +285,15 @@
     },
     watch: {
       amount: function (val) {
-        if (this.contract_info.must_charge) {
+        if (this.agreement_info.must_charge) {
           const value = u.fmc(val)
-          const suma = value.n + parseInt(this.contract_info.total_charged)
-          const debt = parseInt(this.contract_info.must_charge) - parseInt(suma)
-          if (suma > parseInt(this.contract_info.must_charge)) {
-            this.amount = parseInt(this.contract_info.must_charge, 10) - parseInt(this.contract_info.total_charged, 10)
+          const suma = value.n + parseInt(this.agreement_info.total_charged)
+          const debt = parseInt(this.agreement_info.must_charge) - parseInt(suma)
+          if (suma > parseInt(this.agreement_info.must_charge)) {
+            this.amount = parseInt(this.agreement_info.must_charge, 10) - parseInt(this.agreement_info.total_charged, 10)
             this.amount = this.amount > 1000 && this.amount % 1000 > 0 ? ((this.amount / 1000) + 1) * 1000 : this.amount
           } else {
-            this.contract_info.debt_amount = debt
+            this.agreement_info.debt_amount = debt
             this.amount = value.s
           }
           this.payment.amount = value.n
@@ -308,10 +308,10 @@
       },
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
+        axios.g(`/api/lms/agreements/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.contract_info = response.data
+          this.agreement_info = response.data
         })
       },
       save() {
@@ -346,7 +346,7 @@
       },
       processSave(){
         const data = {
-          contract_id: this.contract_info.id,
+          agreement_id: this.agreement_info.id,
           note: this.payment.note,
           charge_date: this.payment.charge_date,
           amount: this.payment.amount,

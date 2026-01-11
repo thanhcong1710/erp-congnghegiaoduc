@@ -35,14 +35,13 @@ class ChargesController extends Controller
         $order_by = " ORDER BY c.id DESC ";
 
         $total = u::first("SELECT count(c.id) AS total 
-            FROM contracts AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+            FROM agreements AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
-        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+        $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
-                (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 c.must_charge, c.debt_amount, c.status
-            FROM contracts AS c 
+            FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
@@ -50,12 +49,12 @@ class ChargesController extends Controller
     }
 
     public function add(Request $request){
-        $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
+        $agreement_info = u::getObject(array('id'=>$request->agreement_id), 'agreements');
         u::insertSimpleRow(array(
-            'contract_id' => data_get($request, 'contract_id'),
+            'agreement_id' => data_get($request, 'agreement_id'),
             'charge_amount' => data_get($request, 'amount'),
-            'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
-            'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+            'debt_amount' =>(int)data_get($agreement_info, 'must_charge') - (int)data_get($agreement_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'total_charged' => (int)data_get($agreement_info, 'total_charged') + (int)data_get($request, 'amount'),
             'charge_date' => data_get($request, 'charge_date'),
             'method' =>  data_get($request, 'method'),
             'note' => data_get($request, 'note'),
@@ -71,12 +70,12 @@ class ChargesController extends Controller
     }
 
     public function update(Request $request){
-        $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
+        $agreement_info = u::getObject(array('id'=>$request->agreement_id), 'agreements');
         u::updateSimpleRow(array(
-            'contract_id' => data_get($request, 'contract_id'),
+            'agreement_id' => data_get($request, 'agreement_id'),
             'charge_amount' => data_get($request, 'amount'),
-            'debt_amount' =>(int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
-            'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
+            'debt_amount' =>(int)data_get($agreement_info, 'must_charge') - (int)data_get($agreement_info, 'total_charged') - (int)data_get($request, 'amount'),
+            'total_charged' => (int)data_get($agreement_info, 'total_charged') + (int)data_get($request, 'amount'),
             'charge_date' => data_get($request, 'charge_date'),
             'method' =>  data_get($request, 'method'),
             'note' => data_get($request, 'note'),
@@ -304,17 +303,16 @@ class ChargesController extends Controller
 
         $total = u::first("SELECT count(c.id) AS total 
             FROM tmp_payments AS tp 
-                LEFT JOIN contracts AS c ON c.id = tp.contract_id
+                LEFT JOIN agreements AS c ON c.id = tp.agreement_id
                 LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
-        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+        $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
-                (SELECT name FROM products WHERE id =c.product_id) AS product_name,
-                c.code, (SELECT name FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
+                c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 tp.*
             FROM tmp_payments AS tp 
-                 LEFT JOIN contracts AS c ON c.id = tp.contract_id
+                 LEFT JOIN agreements AS c ON c.id = tp.agreement_id
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);

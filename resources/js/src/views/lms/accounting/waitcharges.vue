@@ -49,7 +49,7 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1">
+                  <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text text-center" >Mã học sinh
                       <!---->
                     </div>
@@ -64,22 +64,17 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Chương trình học
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" >
                     <div class="vs-table-text">Gói phí
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" >
                     <div class="vs-table-text">EC
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" class="text-right">
                     <div class="vs-table-text">Số tiền còn phải đóng
                       <!---->
                     </div>
@@ -94,19 +89,16 @@
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
                 <!---->
                 
-                <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td text-center">
                   <p>{{ item.lms_code }}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>{{ item.name }}</p>
                 </td>
-                <td class="td vs-table--td">
-                  <p> <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >{{ item.code }}</router-link></p>
+                <td class="td vs-table--td text-center">
+                  <p> <router-link :to="`/lms/waitcharge/${item.agreement_id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
-                <td class="td vs-table--td">
-                  <p>{{ item.product_name }}</p>
-                </td> 
                 <td class="td vs-table--td">
                   <p>{{ item.tuition_fee_name }}</p>
                 </td>                
@@ -117,7 +109,7 @@
                   <p>{{ item.debt_amount | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/waitcharge/${item.contract_id}/detail`" >
+                    <router-link :to="`/lms/waitcharge/${item.agreement_id}/detail`" >
                       <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
                     </router-link> 
                 </td>
