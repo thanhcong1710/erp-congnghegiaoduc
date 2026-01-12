@@ -64,10 +64,6 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Chương trình học
-                      <!---->
-                    </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Gói phí
@@ -114,9 +110,6 @@
                 <td class="td vs-table--td">
                   <p> <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
-                <td class="td vs-table--td">
-                  <p>{{ item.product_name }}</p>
-                </td> 
                 <td class="td vs-table--td">
                   <p>{{ item.tuition_fee_name }}</p>
                 </td>    
