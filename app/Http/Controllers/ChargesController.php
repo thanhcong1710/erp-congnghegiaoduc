@@ -118,7 +118,7 @@ class ChargesController extends Controller
                     'debt_amount' => 0,
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
-                ), array('id'=>data_get($agreement_info, 'id')), 'contracts');
+                ), array('id'=>data_get($agreement_info, 'id')), 'agreements');
                 LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($agreement_info, 'code'), Auth::user()->id);
             }else{
                 u::updateSimpleRow(array(
@@ -127,7 +127,7 @@ class ChargesController extends Controller
                     'debt_amount' => $debt_amount,
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
-                ), array('id'=>data_get($agreement_info, 'id')), 'contracts');
+                ), array('id'=>data_get($agreement_info, 'id')), 'agreements');
                 LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($tmp_payment, 'charge_amount')).' cho hợp đồng - '.data_get($agreement_info, 'code'), Auth::user()->id);
             }
             
@@ -157,27 +157,31 @@ class ChargesController extends Controller
         return response()->json($result);
     }
 
-    public function processContractsByAgreement($agreement_id){
+    private function processContractsByAgreement($agreement_id){
         $agreementInfo = u::getObject(array('id'=>$agreement_id), 'agreements');
         $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0");
         $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
-        foreach ($dataResult AS $row){
-            $total_sessions = data_get($row, 'contract_data.total_sessions');
-            // $real_sessions = floor();
-            u::updateSimpleRow([
-                'status' => data_get($row, 'is_fully_paid') ? 3 : 2,
-                'real_sessions' => $real_sessions,
-                'summary_sessions' => data_get($contract_info, 'total_sessions'), 
-                'left_sessions' => data_get($contract_info, 'total_sessions') - data_get($contract_info, 'total_sessions'), 
-                'total_charged' => (int)data_get($row, 'total_charged'),
-                'init_total_charged' => (int)data_get($row, 'total_charged'),
-                'debt_amount' => 0,
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ],array('id'=>data_get($row, 'contract_id')), 'contracts');
-            u::addLogContracts(data_get($row, 'contract_id'));
+        $packages = data_get($dataResult, 'packages');
+        if(!empty($packages)){
+            foreach ($packages AS $row){
+                $availableSession = (int)data_get($row, 'contract_data.init_tuition_fee_session') && (int)data_get($row, 'contract_data.must_charge') ? 
+                    round((int)data_get($row, 'total_charged') / ((int)data_get($row, 'contract_data.must_charge')/(int)data_get($row, 'contract_data.init_tuition_fee_session'))) : 0; 
+                u::updateSimpleRow([
+                    'status' => data_get($row, 'is_fully_paid') ? 3 : 2,
+                    'real_sessions' => $availableSession,
+                    'summary_sessions' => $availableSession, 
+                    'left_sessions' => $availableSession - data_get($row, 'done_sessions'), 
+                    'total_charged' => (int)data_get($row, 'total_charged'),
+                    'init_total_charged' => (int)data_get($row, 'total_charged'),
+                    'debt_amount' => (int)data_get($row, 'contract_data.must_charge') - (int)data_get($row, 'total_charged'),
+                    'updated_at'=>date('Y-m-d H:i:s'),
+                    'updator_id'=>Auth::user()->id,
+                ],array('id'=>data_get($row, 'contract_id')), 'contracts');
+                u::addLogContracts(data_get($row, 'contract_id'));
+            }
         }
-        var_dump($data);die();
+        
+        return true;
     } 
     private function splitChargedAmount(float $totalCharged, array $packages): array
     {
@@ -248,16 +252,15 @@ class ChargesController extends Controller
 
         $total = u::first("SELECT count(p.id) AS total 
                 FROM payments AS p
-                    LEFT JOIN contracts AS c ON c.id=p.contract_id 
+                    LEFT JOIN agreements AS c ON c.id=p.agreement_id 
                     LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
         $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
-                (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
             FROM payments AS p
-                LEFT JOIN contracts AS c ON c.id=p.contract_id
+                LEFT JOIN agreements AS c ON c.id=p.agreement_id
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);

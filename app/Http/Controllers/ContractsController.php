@@ -313,7 +313,7 @@ class ContractsController extends Controller
             '' AS contracts, c.total_charged
         FROM agreements AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$agreement_id");
-            $dataContracts = u:: query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,
+        $dataContracts = u:: query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 

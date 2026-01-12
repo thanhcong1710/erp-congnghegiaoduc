@@ -25,16 +25,6 @@
             />
           </div>
           <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Phụ huynh</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.gud_name1"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
             <label>Số điện thoại</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -121,16 +111,6 @@
               type="text"
               name="title"
               :value="agreement_info.total_discount | formatNumber"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Chương trình học</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.product_name"
               disabled="true"
             />
           </div>

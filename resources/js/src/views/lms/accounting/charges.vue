@@ -86,7 +86,6 @@
                 </td>
                 <td class="td vs-table--td">
                   <p><strong>{{ item.code }}</strong></p>
-                  <p>Chương trình học: {{item.product_name}}</p>
                   <p>Gói phí: {{item.tuition_fee_name}}</p>
                 </td>
                 <td class="td vs-table--td">
