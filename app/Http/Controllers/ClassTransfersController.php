@@ -177,7 +177,7 @@ class ClassTransfersController extends Controller
                 'product_id' => data_get($class_transfer_info, 'to_product_id'),
                 'class_id' => data_get($class_transfer_info, 'to_class_id'),
                 'updated_at' => date('Y-m-d H:i:s'),
-                'updator_id' => Auth::user()->id,
+                'updator_id' => Auth::user()->id ?? 0,
             ),array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
 
@@ -215,7 +215,7 @@ class ClassTransfersController extends Controller
                     'done_sessions' => 0,
                     'left_sessions' => data_get($data_calc_transfer, 'sessions', 0) + $bonus_sessions,
                     'last_done_sessions' => $contract_info->done_sessions,
-                    'updator_id' => Auth::user()->id,
+                    'updator_id' => Auth::user()->id ?? 0,
                     'updated_at' => date('Y-m-d H:i:s'),
                     'action' => 'contract_class_transfer'
                 ),array('id'=>$contract_id),'contracts');

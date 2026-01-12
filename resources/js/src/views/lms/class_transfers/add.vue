@@ -47,22 +47,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.product_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.program_name"
+                v-model="student_info.product_name"
                 disabled="true"
               />
             </div>
@@ -107,16 +97,6 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi học bổng</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.bonus_sessions"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số buổi đã học </label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -141,7 +121,7 @@
         <div class="vx-col md:w-1/2 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin lớp chuyển đến</h5>
           <div class="vx-row">
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Chọn chương trình học <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="name"
@@ -153,7 +133,7 @@
                     @input="saveProduct"
                     :disabled="input_disabled"
                 ></vue-select>
-            </div>
+            </div> -->
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Lớp chuyển đến <span class="text-danger"> (*)</span></label>
               <vue-select
@@ -337,6 +317,9 @@
           this.temp.max_date = new Date(student.enrolment_last_date)
         }
         this.input_disabled = false
+        this.class_transfer.product_id = student.product_id
+        this.class_transfer.class_id = ""
+        this.loadClasses();
       },
       resetInputClassTransfer(){
         this.input_disabled = true
@@ -433,10 +416,10 @@
           mess += " - Học sinh không được để trống<br/>";
           resp = false;
         }
-        if (this.class_transfer.product_id == "") {
-          mess += " - chương trình học không được để trống<br/>";
-          resp = false;
-        }
+        // if (this.class_transfer.product_id == "") {
+        //   mess += " - chương trình học không được để trống<br/>";
+        //   resp = false;
+        // }
         if (this.class_transfer.class_id == "") {
           mess += " - Lớp học không được để trống<br/>";
           resp = false;
