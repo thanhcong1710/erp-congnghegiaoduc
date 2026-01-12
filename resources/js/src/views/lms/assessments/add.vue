@@ -47,22 +47,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.product_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.program_name"
+                v-model="student_info.product_name"
                 disabled="true"
               />
             </div>
@@ -73,16 +63,6 @@
                 type="text"
                 name="title"
                 v-model="student_info.class_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Gói phí</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.tuition_fee_name"
                 disabled="true"
               />
             </div>

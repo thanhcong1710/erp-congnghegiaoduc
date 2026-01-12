@@ -224,11 +224,11 @@
                       ></vue-select>
                     </div>
                     <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Quận huyện</label>
+                      <label >Xã/Phường</label>
                       <vue-select
                             naem="input_district"
                             label="name"
-                            placeholder="Chọn Quận/Huyện/Thị Xã"
+                            placeholder="Chọn Xã/Phường"
                             :options="html.district.list"
                             v-model="parent_input.district"
                             :searchable="true"

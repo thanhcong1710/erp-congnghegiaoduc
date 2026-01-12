@@ -75,11 +75,6 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Phụ huynh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
                     <div class="vs-table-text">Trạng thái
                       <!---->
                     </div>
@@ -114,9 +109,6 @@
                   <p>Mã: {{item.lms_code}}</p>
                   <p>Giới tính: {{item.gender == 'F' ? 'Nữ' : 'Nam'}}</p>
                   <p>Ngày sinh: {{item.date_of_birth | formatDateView}}</p>
-                </td>
-                <td class="td vs-table--td">
-                  <p><strong>{{item.gud_name1}}</strong></p>
                   <p>SĐT: {{item.gud_mobile1}}</p>
                   <p>Nguồn: {{item.source_name}}</p>
                 </td>

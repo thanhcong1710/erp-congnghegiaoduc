@@ -24,6 +24,26 @@
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Số điện thoại  <span class="text-danger"> (*)</span></label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="title"
+            v-model="student_info.gud_mobile1"
+            disabled="true"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Email </label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="title"
+            v-model="student_info.gud_email1"
+            :disabled="disabled_edit"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Ngày sinh <span class="text-danger"> (*)</span></label>
           <datepicker class="w-full"
             v-model="student_info.date_of_birth"
@@ -41,7 +61,7 @@
           </select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Tỉnh Thành Phố</label>
+          <label >Tỉnh/Thành Phố</label>
           <vue-select
             naem="input_province"
             label="name"
@@ -55,11 +75,11 @@
           ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Quận huyện</label>
+          <label >Xã/Phường</label>
           <vue-select
                 naem="input_district"
                 label="name"
-                placeholder="Chọn Quận/Huyện/Thị Xã"
+                placeholder="Chọn Xã/Phường"
                 :options="html.district.list"
                 v-model="html.district.item"
                 :searchable="true"
@@ -113,122 +133,7 @@
           <textarea class="vs-inputx vs-input--input normal" v-model="student_info.note"  :disabled="disabled_edit"></textarea>
         </div>
       </div>
-      <vs-divider/>
-      <h5 class="w-full"><i class="fa-solid fa-person-breastfeeding"></i> THÔNG TIN PHỤ HUYNH</h5>
-      <div class="vx-row w-full mt-3">
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Họ tên phụ huynh 1 <span class="text-danger"> (*)</span></label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_name1"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Số điện thoại  <span class="text-danger"> (*)</span></label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_mobile1"
-            disabled="true"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Email </label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_email1"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Ngày sinh</label>
-          <datepicker class="w-full"
-            v-model="student_info.gud_birth_day1"
-            placeholder="Chọn ngày sinh nhật"
-            :lang="datepickerOptions.lang"
-            @change="selectDateGudBirthDay1"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Nghề nghiệp</label>
-          <vue-select
-                label="title"
-                placeholder="Chọn nghề nghiệp"
-                :options="html.jobs.list"
-                v-model="html.jobs.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveJob"
-                :disabled="disabled_edit"
-            ></vue-select>
-        </div>
-      </div>
-      <div class="vx-row w-full mt-3">
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Họ tên phụ huynh 2</label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_name2"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Số điện thoại</label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_mobile2"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Email </label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.gud_email2"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Ngày sinh</label>
-          <datepicker class="w-full"
-            v-model="student_info.gud_birth_day2"
-            placeholder="Chọn ngày sinh nhật"
-            :lang="datepickerOptions.lang"
-            @change="selectDateGudBirthDay2"
-            :disabled="disabled_edit"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Nghề nghiệp</label>
-          <vue-select
-                label="title"
-                placeholder="Chọn nghề nghiệp"
-                :options="html.jobs.list"
-                v-model="html.jobs.item2"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveJob2"
-                :disabled="disabled_edit"
-            ></vue-select>
-        </div>
-        <div class="vx-col md:w-2/3 w-full mb-4">
-          <label>Nguyện vọng của phụ huynh</label>
-          <textarea class="vs-inputx vs-input--input normal" v-model="student_info.aspiration"  :disabled="disabled_edit"></textarea>
-        </div>
-      </div>
+      
       <vs-divider/>
       <h5 class="w-full"><i class="fa-solid fa-school"></i> THÔNG TIN TRUNG TÂM</h5>
       <div class="vx-row w-full mt-3">
@@ -439,14 +344,6 @@
         }
         if (this.student_info.name == "") {
           mess += " - Họ tên không được để trống<br/>";
-          resp = false;
-        }
-        if (this.student_info.gud_name1 == "") {
-          mess += " - Họ tên phụ huynh 1 không được để trống<br/>";
-          resp = false;
-        }
-        if (this.student_info.gud_mobile2 != null && this.student_info.gud_mobile2 != "" && !u.vld.phone(this.student_info.gud_mobile2)) {
-          mess += " - Số điện thoại 2 không đúng định dạng<br/>";
           resp = false;
         }
         if (!resp) {

@@ -79,10 +79,10 @@
               ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Quận huyện</label>
+              <label >Xã/Phường</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn Quận/Huyện/Thị Xã"
+                    placeholder="Chọn Xã/Phường"
                     :options="html.district.list"
                     v-model="parent.district"
                     :searchable="true"

@@ -40,7 +40,7 @@ class LogStudents extends Model
                     $district_info = u::first("SELECT name FROM districts WHERE id =".(int)$row);
                     $text_pre = isset($pre_district_info->name) ? $pre_district_info->name :'';
                     $text_curr = isset($district_info->name) ? $district_info->name :'';
-                    $content.= "Quận huyện từ `".$text_pre."` thành `".$text_curr."`, ";
+                    $content.= "Xã Phường từ `".$text_pre."` thành `".$text_curr."`, ";
                 }elseif($key=='address'){
                     $content.= "Địa chỉ từ `".$pre_student_info->$key."` thành `".$row."`, ";
                 }elseif($key=='school'){

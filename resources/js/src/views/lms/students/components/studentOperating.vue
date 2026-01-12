@@ -27,7 +27,7 @@
       </div>
     </div>
     <vs-divider/>
-    <h4 class="mt-3 mb-3">Thông tin chuyển trung tâm</h4>
+    <h4 class="mt-3 mb-3">Thông tin bảo lưu</h4>
     <div class="vs-component vs-con-table stripe vs-table-primary">
       <div class="con-tablex vs-table--content">
         <div class="vs-con-tbody vs-table--tbody ">
@@ -49,35 +49,6 @@
               <td class="td vs-table--td text-center">{{item.transfer_date | formatDateView}}</td>
               <td class="td vs-table--td">
                 <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusName}}</vs-chip>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-    </div>
-    <vs-divider/>
-    <h4 class="mt-3 mb-3">Thông tin chuyển phí</h4>
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1">Học sinh chuyển</th>
-                <th colspan="1" rowspan="1">Học sinh nhận</th>
-                <th colspan="1" rowspan="1">Số tiền chuyển</th>
-                <th colspan="1" rowspan="1" class="text-center">Ngày chuyển</th>
-                <th colspan="1" rowspan="1" >Trạng thái</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_transfer" :key="index">
-              <td class="td vs-table--td">{{item.from_student_name}} - {{item.from_student_lms_code}}</td>
-              <td class="td vs-table--td">{{item.to_student_name}} - {{item.to_student_lms_code}}</td>
-              <td class="td vs-table--td">{{item.transferred_amount | formatMoney}}</td>
-              <td class="td vs-table--td text-center">{{item.transfer_date | formatDateView}}</td>
-              <td class="td vs-table--td">
-                <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusNameTuitionTrasfer}}</vs-chip>
               </td>
             </tr>
           </table>
