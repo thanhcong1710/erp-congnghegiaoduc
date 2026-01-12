@@ -94,7 +94,9 @@ class ClassesController extends Controller
                     'created_at'=> date('Y-m-d H:i:s')
                 ),'subject_has_class');
             }
+            $i=0;
             foreach(data_get($data_sessions, 'dates') AS $row){
+                $i++;
                 u::insertSimpleRow(array(
                     'class_date'=> $row,
                     'class_id'=> $class_id,
@@ -103,6 +105,7 @@ class ClassesController extends Controller
                     'teacher_id'=> data_get($request,'teacher_id'),
                     'branch_id'=> data_get($request,'branch_id'),
                     'cm_id'=> data_get($request,'cm_id'),
+                    'subject_stt' =>$i
                 ),'schedules');
             }
             $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
@@ -191,7 +194,9 @@ class ClassesController extends Controller
                     'created_at'=> date('Y-m-d H:i:s')
                 ),'subject_has_class');
             }
+            $i=0;
             foreach(data_get($data_sessions, 'dates') AS $row){
+                $i++;
                 u::insertSimpleRow(array(
                     'class_date'=> $row,
                     'class_id'=> $class_id,
@@ -200,6 +205,7 @@ class ClassesController extends Controller
                     'teacher_id'=> data_get($request,'teacher_id'),
                     'branch_id'=> data_get($request,'branch_id'),
                     'cm_id'=> data_get($request,'cm_id'),
+                    'subject_stt' =>$i
                 ),'schedules');
             }
 

@@ -9600,6 +9600,13 @@ body {
   line-height: 28px;
 }
 
+.invoice-total-item{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+}
+
 @media (min-width: 576px) {
   .sm\:container {
     width: 100%;

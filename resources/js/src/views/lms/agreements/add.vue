@@ -117,26 +117,6 @@
                     :disabled="!agreement.branch_id"
                 ></vue-select>
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Giá bán</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                :value="agreement.tuition_fee_amount | formatNumber"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.tuition_fee_type==1">
-              <label>Số buổi</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="agreement.tuition_fee_session"
-                disabled="true"
-              />
-            </div>
             <div class="vx-col w-full mb-4 vs-con-table stripe vs-table-primary" v-if="agreement.tuition_fee_type==2">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
@@ -162,14 +142,23 @@
                 </div>
               </div>
             </div>
-            <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền phải đóng</label>
+              <label>Giá bán</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                :value="agreement.total_amount | formatNumber"
+                :value="agreement.tuition_fee_amount | formatNumber"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.tuition_fee_type==1">
+              <label>Số buổi</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="agreement.tuition_fee_session"
                 disabled="true"
               />
             </div>
@@ -185,6 +174,17 @@
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"></textarea>
+            </div>
+            <vs-divider/>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+            </div>
+            <div class="vx-col md:w-2/3 w-full mb-4">
+              <div  class="invoice-total-wrapper">
+                  <div  class="invoice-total-item" style="font-weight: bold;">
+                      <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
+                      <p  class="invoice-total-amount"> {{ agreement.total_amount | formatMoney}} </p>
+                  </div>
+              </div>
             </div>
           </div>
 

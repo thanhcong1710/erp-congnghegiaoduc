@@ -18,64 +18,16 @@
               ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
-              <label >Chương trình học</label>
+              <label >Khóa học</label>
               <vue-select
                     label="name"
-                    placeholder="Chọn chương trình học"
+                    placeholder="Chọn khóa học"
                     :options="html.products.list"
                     v-model="html.products.item"
                     :searchable="true"
                     language="tv-VN"
                     @input="saveProduct"
                 ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Lộ trình học</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn lộ trình học"
-                  :options="html.loTrinh.list"
-                  v-model="html.loTrinh.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveLoTrinh"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Option</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn option"
-                  :options="html.option.list"
-                  v-model="html.option.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveOption"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Số buổi trên tuần</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn số buổi trên tuần"
-                  :options="html.typeDayOfWeek.list"
-                  v-model="html.typeDayOfWeek.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveTypeDayOfWeek"
-              ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Loại gói phí</label>
-              <vue-select
-                  label="label"
-                  placeholder="Chọn loại gói phí"
-                  :options="html.typeFee.list"
-                  v-model="html.typeFee.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveTypeFee"
-              ></vue-select>
             </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
@@ -135,7 +87,7 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>AF - Quản lý lớp học:</span>
+                  <span>Quản lý lớp học:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
                   <span>{{class_info.cm_name}}</span>
@@ -143,7 +95,7 @@
             </div>
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
-                  <span>TA - Trợ giảng:</span>
+                  <span>Trợ giảng:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
                   <span>{{class_info.ta_name}}</span>
@@ -152,12 +104,12 @@
             <div >
               <div class="flex flex-wrap mt-5">
                 <div class="box-item-student active border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in pre_schedules" :key="'P'+index">
-                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="label-box-schedule text-center">Buổi {{item.subject_stt}}</div>
                     <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
                     <div class="text-center"><span class="box-status">Đã học</span></div>
                 </div>
                 <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1" v-for="(item, index) in next_schedules" :key="'N'+index">
-                    <div class="label-box-schedule text-center">{{item.code}} - Buổi {{item.subject_stt}}</div>
+                    <div class="label-box-schedule text-center">Buổi {{item.subject_stt}}</div>
                     <div class="text-date-box-schedule text-center">{{item.class_date | formatDateViewDay}}</div>
                     <div class="text-center"><span class="box-status">Sắp học</span></div>
                 </div>
@@ -172,34 +124,21 @@
                   <table class="vs-table vs-table--tbody-table">
                     <thead class="vs-table--thead">
                       <tr>
-                        <th colspan="1" rowspan="1" class="text-center">
-                          <div class="vs-table-text text-center">STT
-                            <!---->
-                          </div>
-                        </th>
-                        <th colspan="1" rowspan="1" class="text-center">
-                          <div class="vs-table-text">Hợp đồng
-                            <!---->
-                          </div>
-                        </th>
-                        <th colspan="1" rowspan="1" class="text-center">
-                          <div class="vs-table-text">Gói phí
-                            <!---->
-                          </div>
-                        </th>
-                        <th colspan="1" rowspan="1" class="text-center">
-                          <div class="vs-table-text">Buổi học
-                            <!---->
-                          </div>
-                        </th>
+                        <th colspan="1" rowspan="1" class="text-center">STT</th>
+                        <th colspan="1" rowspan="1">Học sinh</th>
+                        <th colspan="1" rowspan="1">Hợp đồng</th>
+                        <th colspan="1" rowspan="1">Gói phí</th>
+                        <th colspan="1" rowspan="1">Buổi học</th>
                       </tr>
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td> 
                       <td class="td vs-table--td">
-                        <p><strong>{{item.contract_code}}</strong></p>
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
+                      </td> 
+                      <td class="td vs-table--td">
+                        <p>Mã: <strong>{{item.contract_code}}</strong></p>
                         <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
                         <p>Ngày kết thúc: {{item.enrolment_last_date}}</p>
                       </td>
@@ -247,46 +186,14 @@
                        <th colspan="1" rowspan="1" class="text-center">
                         #
                       </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text text-center">STT
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Tên học sinh
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Mã học sinh
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Ngày học dự kiến
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Ngày bắt đầu học
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Gói phí
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">Số buổi còn lại
-                          <!---->
-                        </div>
-                      </th>
-                      <th colspan="1" rowspan="1" class="text-center">
-                        <div class="vs-table-text">EC
-                          <!---->
-                        </div>
-                      </th>
+                      <th colspan="1" rowspan="1" class="text-center">STT</th>
+                      <th colspan="1" rowspan="1">Tên học sinh</th>
+                      <th colspan="1" rowspan="1" class="text-center">Mã học sinh</th>
+                      <th colspan="1" rowspan="1" class="text-center">Ngày học dự kiến</th>
+                      <th colspan="1" rowspan="1" class="text-center">Ngày bắt đầu học</th>
+                      <th colspan="1" rowspan="1">Gói phí</th>
+                      <th colspan="1" rowspan="1" class="text-center">Số buổi còn lại</th>
+                      <th colspan="1" rowspan="1" >EC</th>
                     </tr>
                   </thead>
                   <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in studentSearch" :key="index">
@@ -300,18 +207,18 @@
                         </span>
                       </div>
                     </td>
-                    <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                    <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                     <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.lms_code}}</td>
-                    <td class="td vs-table--td">{{item.start_date}}</td>
-                    <td class="td vs-table--td">
+                    <td class="td vs-table--td text-center">{{item.lms_code}}</td>
+                    <td class="td vs-table--td text-center">{{item.start_date}}</td>
+                    <td class="td vs-table--td text-center">
                       <select v-model="item.class_date" class="vs-inputx vs-input--input normal" style="width: 154px; padding: 5px !important;">
                         <option value="">Chọn ngày bắt đầu</option>
                         <option :value="`${class_date.class_date}`" v-for="(class_date, ind) in filterStartDate(item, class_dates)" :key="ind">{{class_date.class_date}}</option>
                       </select>
                     </td>
                     <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
-                    <td class="td vs-table--td">{{item.left_session}}</td>
+                    <td class="td vs-table--td text-center">{{item.left_session}}</td>
                     <td class="td vs-table--td">{{item.ec_name}}</td>
                   </tr>
                 </table>
@@ -383,64 +290,10 @@
             item: '',
             list: []
           },
-          tuition_fee:{
-            item: '',
-            list: []
-          },
-          discount_codes:{
-            item: '',
-            list: []
-          },
-          loTrinh: {
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Lộ trình 0 - 5.5'},
-              {'id': 2, 'label' : 'Lộ trình 3.0 - 5.5'},
-              {'id': 5, 'label' : 'Lộ trình 3.0 - 6.0'},
-              {'id': 3, 'label' : 'Lộ trình 4.0 - 5.5'},
-              {'id': 6, 'label' : 'Lộ trình 4.0 - 6.0'},
-              {'id': 8, 'label' : 'Lộ trình 5.0 - 6.5'},
-              {'id': 4, 'label' : 'Lộ trình 5.5 - 6.5'},
-              {'id': 7, 'label' : 'Lộ trình 6.0 - 7.0'},
-              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.0'},
-              {'id': 8, 'label' : 'Lộ trình 6.5 - 7.5'},
-              {'id': 8, 'label' : 'Lộ trình 7.0 - 7.5'},
-            ]
-          },
-          option: {
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Option 1'},
-              {'id': 2, 'label' : 'Option 2'},
-            ]
-          },
-          typeDayOfWeek: {
-            item: '',
-            list: [
-              {'id': 4, 'label' : 'Normal'},
-              {'id': 5, 'label' : 'FT5'},
-              {'id': 6, 'label' : 'FT6'},
-              {'id': 8, 'label' : 'FT8'},
-              {'id': 10, 'label' : 'FT10'},
-            ]
-          },
-          typeFee:{
-            item: '',
-            list: [
-              {'id': 1, 'label' : 'Gói phí Cooper'},
-              {'id': 2, 'label' : 'Gói phí Silver'},
-              {'id': 3, 'label' : 'Gói phí Gold'},
-            ]
-          },
         },
         enrol:{
           branch_id:'',
           product_id:'',
-          type_day_of_week: '',
-          lo_trinh_id:'',
-          option_id:'',
-          search_type_fee:'',
-          type_fee:'',
         },
         class_info:{
           class_id:'',
@@ -502,52 +355,12 @@
         }
         this.loadClasses();
       },
-      saveLoTrinh(data = null){
-        if (data && typeof data === 'object') {
-          const lo_trinh_id = data.id
-          this.enrol.lo_trinh_id = lo_trinh_id
-        }else{
-          this.enrol.lo_trinh_id = ""
-        }
-        this.loadClasses();
-      },
-      saveOption(data = null){
-        if (data && typeof data === 'object') {
-          const option_id = data.id
-          this.enrol.option_id = option_id
-        }else{
-          this.enrol.option_id = ""
-        }
-        this.loadClasses();
-      },
-      saveTypeFee(data = null){
-        if (data && typeof data === 'object') {
-          const type_fee = data.id
-          this.enrol.search_type_fee = type_fee
-        }else{
-          this.enrol.search_type_fee = ""
-        }
-        this.loadClasses();
-      },
-      saveTypeDayOfWeek(data = null){
-        if (data && typeof data === 'object') {
-          const type_day_of_week = data.id
-          this.enrol.type_day_of_week = type_day_of_week
-        }else{
-          this.enrol.type_day_of_week = ""
-        }
-        this.loadClasses();
-      },
       loadClasses(){
         if(this.enrol.branch_id && this.enrol.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/enrolments/load-classes`, {
             branch_id: this.enrol.branch_id,
             product_id: this.enrol.product_id,
-            lo_trinh_id: this.enrol.lo_trinh_id,
-            option_id: this.enrol.option_id,
-            type_day_of_week: this.enrol.type_day_of_week,
-            search_type_fee: this.enrol.search_type_fee,
           })
             .then(response => {
             this.$vs.loading.close();

@@ -310,19 +310,22 @@ class ContractsController extends Controller
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
-            '' AS contracts, c.total_charged
+            '' AS contracts, c.total_charged, 0 AS total_left_amount
         FROM agreements AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$agreement_id");
+        $total_left_amount = 0;
         $dataContracts = u:: query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'),  c.count_recharge ASC") ;
-            foreach ($dataContracts AS $k=> $contract){
-                $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status, 1);
-                $dataContracts[$k]->left_amount = $contract->total_charged > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : 0;
-            }
-            $data->contracts = $dataContracts;
+        foreach ($dataContracts AS $k=> $contract){
+            $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status, 1);
+            $dataContracts[$k]->left_amount = $contract->total_charged > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : 0;
+            $total_left_amount = $total_left_amount + $dataContracts[$k]->left_amount;
+        }
+        $data->contracts = $dataContracts;
+        $data->total_left_amount = $total_left_amount;
         return response()->json($data);
     }
 
