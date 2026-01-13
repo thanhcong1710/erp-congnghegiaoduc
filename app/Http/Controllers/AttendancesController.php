@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Auth;
 class AttendancesController extends Controller
 {
     public function loadClasses(Request $request){
-        $program_id = data_get($request, 'program_id');
+        $product_id = data_get($request, 'product_id');
         $branch_id = data_get($request, 'branch_id');
-        $data= u::query("SELECT id, cls_name FROM classes WHERE status=1 AND program_id=$program_id AND branch_id = $branch_id ");
+        $data= u::query("SELECT id, cls_name FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id ");
         return response()->json($data);
     }
 
@@ -93,7 +93,7 @@ class AttendancesController extends Controller
             FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id 
             WHERE s.status=1 AND s.class_id=$class_id AND s.class_date >= CURRENT_DATE ORDER BY s.class_date LIMIT 8 ");
         foreach ($data AS $k=> $row){
-            $data[$k]->session_label = $row->subject_code ." - buổi ". $row->subject_stt ." (".u::formatDateView($row->class_date).")";
+            $data[$k]->session_label = " Buổi ". $row->subject_stt ." (".u::formatDateView($row->class_date).")";
         }
         return response()->json($data);
     }

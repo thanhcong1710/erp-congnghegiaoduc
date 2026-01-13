@@ -16,27 +16,15 @@
           ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Chương trình học</label>
+          <label >Khóa học</label>
           <vue-select
                 label="name"
-                placeholder="Chọn chương trình học"
+                placeholder="Chọn khóa học"
                 :options="html.products.list"
                 v-model="html.products.item"
                 :searchable="true"
                 language="tv-VN"
                 @input="saveProduct"
-            ></vue-select>
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Khóa học</label>
-          <vue-select
-                label="name"
-                placeholder="Chọn chương trình học"
-                :options="html.programs.list"
-                v-model="html.programs.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveProgram"
             ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -126,7 +114,7 @@
                     </tr>
                     <tr>
                       <th colspan="1" rowspan="1" class="text-center" v-for="(item, index) in shedules" :key="index">
-                        <p style="font-weight: normal">{{item.code}} - buổi {{item.subject_stt}}</p>
+                        <p style="font-weight: normal">Buổi {{item.subject_stt}}</p>
                         <p style="font-weight: normal; font-size: 11px">{{item.class_date | formatDateViewDay}}</p>
                       </th>
                     </tr>
@@ -361,19 +349,9 @@
         if (data && typeof data === 'object') {
           const product_id = data.id
           this.att.product_id = product_id
-          this.loadPrograms();
-        }else{
-          this.att.product_id = ""
-          this.html.programs.list =[]
-        }
-      },
-      saveProgram(data = null){
-        if (data && typeof data === 'object') {
-          const program_id = data.id
-          this.att.program_id = program_id
           this.loadClasses();
         }else{
-          this.att.program_id = ""
+          this.att.product_id = ""
         }
       },
       saveClass(data = null){
@@ -385,22 +363,12 @@
           this.att.class_id = ""
         }
       },
-      loadPrograms(){
-        if(this.att.product_id){
-          axios.g(`/api/system/programs/${this.att.product_id}`)
-            .then(response => {
-            this.html.programs.list = response.data
-          })
-        }else{
-          this.html.programs.list =[]
-        }
-      },
       loadClasses(){
-        if(this.att.branch_id && this.att.program_id){
+        if(this.att.branch_id && this.att.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/attendances/load-classes`, {
             branch_id: this.att.branch_id,
-            program_id: this.att.program_id
+            product_id: this.att.product_id
           })
             .then(response => {
             this.$vs.loading.close();
