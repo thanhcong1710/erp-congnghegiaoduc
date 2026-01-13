@@ -15,14 +15,14 @@ class ContractsController extends Controller
     public function loadTuitionFee(Request $request)
     {
         $branch_id = $request->branch_id;
-        $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session, t.type_fee , '' AS label, '' AS tuition_fee_relation
+        $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session, t.type_fee, t.product_id , '' AS label, '' AS tuition_fee_relation
             FROM tuition_fee AS t 
             WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE 
             AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' ) 
             ORDER BY t.type_fee, t.price  ");
         foreach ($data AS $k=> $row){
             $data[$k]->label = data_get($row,'name'). " (".number_format( data_get($row, 'price'))."đ)";
-            $data[$k]->tuition_fee_relation = u::query("SELECT r.price_combo, t.price, t.name, t.session FROM tuition_fee_relation AS r 
+            $data[$k]->tuition_fee_relation = u::query("SELECT r.price_combo, t.price, t.name, t.session, t.product_id FROM tuition_fee_relation AS r 
                 LEFT JOIN tuition_fee AS t ON r.exchange_tuition_fee_id=t.id WHERE r.tuition_fee_id = ".data_get($row, 'id'));
         }
         return response()->json($data);
@@ -315,7 +315,7 @@ class ContractsController extends Controller
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$agreement_id");
         $total_left_amount = 0;
         $dataContracts = u:: query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions,
-                    (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
+                    (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'),  c.count_recharge ASC") ;
@@ -331,87 +331,176 @@ class ContractsController extends Controller
 
     public function update(Request $request)
     {
-        die();
-        $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
-        $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
-        $contract_id = data_get($request, 'id');
-        $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount');
-        $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
-        u::updateSimpleRow(array(
-            'type' => data_get($request, 'type'),
-           'student_id' => data_get($request, 'student_id'), 
-           'branch_id' => data_get($student_info, 'branch_id'),
-           'ceo_branch_id' => data_get($student_info, 'ceo_branch_id'),
-           'ec_id' => data_get($student_info, 'ec_id'),
-           'ec_leader_id' => data_get($student_info, 'ec_leader_id'),
-           'cm_id' => data_get($student_info, 'cm_id'),
-           'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
-           'product_id' => data_get($request, 'product_id'),
-           'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-           'init_tuition_fee_amount' => data_get($request, 'tuition_fee_amount'),
-           'init_tuition_fee_receivable' => data_get($request, 'tuition_fee_receivable'),
-           'init_tuition_fee_session' => data_get($request, 'tuition_fee_session'),
-           'init_total_charged'=>0,
-           'must_charge' => data_get($request, 'total_amount'),
-           'total_charged'=>0,
-           'debt_amount' => data_get($request, 'total_amount'),
-           'total_discount'=> $total_discount, 
-           'discount_code_id' => data_get($request, 'discount_code_id'),
-           'discount_code' => data_get($request, 'discount_code'),
-           'discount_code_percent' => data_get($request, 'discount_code_percent'),
-           'discount_code_amount' => data_get($request, 'discount_code_amount'),
-           'coupon_code' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_code') : '',
-           'coupon_amount' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0,
-           'coupon_session' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
-           'total_sessions' => data_get($request, 'total_session'),
-           'real_sessions' => data_get($request, 'tuition_fee_session'),
-           'bonus_sessions' => data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_session') : 0,
-           'summary_sessions' => 0, // chưa đóng phí
-           'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
-           'start_date'=> data_get($request, 'start_date'),
-           'note'=> data_get($request, 'note'),
-           'updated_at'=>date('Y-m-d H:i:s'),
-           'updator_id'=>Auth::user()->id,
-           'status' => 1,
-           'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
-           'b2b_amount' => data_get($request,'b2b_amount'),
-           'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
-        ), ['id'=>$contract_id],'contracts');
-
-        if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
-            $pre_coupon = u::getObject(['code'=>data_get($pre_update_contract_info, 'coupon_code')], 'coupons');
-            u::query("DELETE FROM coupon_logs WHERE contract_id = $contract_id AND coupon_id = ".data_get($pre_coupon, 'id'));
-            u::updateSimpleRow(array(
-                'status'=> 1,
-                'checked_date'=>null,
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ), array('id'=>$pre_coupon->id), 'coupons');
-        }
-        if((!data_get($pre_update_contract_info, 'coupon_code') || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))  
-            && data_get($request,'coupon_code_check') == 1){
-            $coupon_info = u::getObject(['code'=>data_get($request, 'coupon_code')], 'coupons');
-            if($coupon_info->quota == 1){
+        $agreement_id = data_get($request, 'id');
+        $agreementInfo = u::getObject(['id'=>data_get($request, 'id')],'agreements');
+        if ($agreementInfo){
+            if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')){
                 u::updateSimpleRow(array(
-                    'status'=> 2,
-                    'checked_date'=>date('Y-m-d'),
-                    'updated_at'=>date('Y-m-d H:i:s'),
-                    'updator_id'=>Auth::user()->id,
-                ), array('id'=>$coupon_info->id), 'coupons');
+                    'type_fee' => data_get($request, 'tuition_fee_type'),
+                    'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
+                    'must_charge' => data_get($request, 'tuition_fee_amount'),
+                    'debt_amount' => data_get($request, 'debt_amount'),
+                    'total_charged' => data_get($request, 'total_left_amount'),
+                    'start_date' => data_get($request, 'start_date'),
+                    'note' => data_get($request, 'note'),
+                    'status' => data_get($request, 'total_left_amount') == 0 ? 1 : (data_get($request, 'debt_amount')>0 ? 3 : 2),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                ), array('id'=>data_get($request, 'id')), 'agreements');
+                u::addLogAgreements($agreement_id);
+                // Lấy contracts hiện tại
+                $oldContracts = u::query("SELECT * FROM contracts WHERE agreement_id = $agreement_id AND status != 8 AND status > 0");
+
+                // ====== XỬ LÝ GÓI LẺ ======
+                if (data_get($request, 'tuition_fee_type') == 1) {
+
+                    $tuition_fee_info = u::getObject(
+                        ['id' => data_get($request, 'tuition_fee_id')],
+                        'tuition_fee'
+                    );
+
+                    if ($tuition_fee_info) {
+                        $newProductIds[] = $tuition_fee_info->product_id;
+
+                        // kiểm tra contract đã tồn tại chưa
+                        $existContract = u::first("SELECT * FROM contracts
+                            WHERE agreement_id = $agreement_id AND product_id = {$tuition_fee_info->product_id} AND status NOT IN (0, 8) LIMIT 1");
+
+                        if ($existContract) {
+                            // UPDATE
+                            u::updateSimpleRow([
+                                'tuition_fee_id' => $tuition_fee_info->id,
+                                'must_charge' => $tuition_fee_info->price,
+                                'updated_at' => date('Y-m-d H:i:s'),
+                                'updator_id' => Auth::user()->id,
+                                'status' => 1
+                            ], ['id' => $existContract->id], 'contracts');
+
+                            u::addLogContracts($existContract->id);
+
+                        } else {
+                            // INSERT MỚI
+                            $contract_id = u::insertSimpleRow([
+                                'type' => 1,
+                                'student_id' => data_get($agreementInfo, 'student_id'),
+                                'branch_id' => data_get($request, 'branch_id'),
+                                'ec_id' => data_get($agreementInfo, 'ec_id'),
+                                'ec_leader_id' => data_get($agreementInfo, 'ec_leader_id'),
+                                'product_id' => $tuition_fee_info->product_id,
+                                'tuition_fee_id' => $tuition_fee_info->id,
+                                'init_tuition_fee_id' => $tuition_fee_info->id,
+                                'init_tuition_fee_amount' => $tuition_fee_info->price,
+                                'init_tuition_fee_session' => $tuition_fee_info->session,
+                                'must_charge' => $tuition_fee_info->price,
+                                'total_charged' => 0,
+                                'debt_amount' => $tuition_fee_info->price,
+                                'total_sessions' => $tuition_fee_info->session,
+                                'real_sessions' => $tuition_fee_info->session,
+                                'start_date' => data_get($request, 'start_date'),
+                                'note' => data_get($request, 'note'),
+                                'created_at' => now(),
+                                'creator_id' => Auth::user()->id,
+                                'status' => 1,
+                                'count_recharge' => 1,
+                                'agreement_id' => $agreement_id
+                            ], 'contracts');
+
+                            u::updateSimpleRow(
+                                ['code' => config('app.prefix_contract_code') . str_pad($contract_id, 6, '0', STR_PAD_LEFT)],
+                                ['id' => $contract_id],
+                                'contracts'
+                            );
+
+                            u::addLogContracts($contract_id);
+                        }
+                    }
+                } elseif (data_get($request, 'tuition_fee_type') == 2) {
+                    $relationFees = u::query("SELECT t.*, r.price_combo, r.stt 
+                        FROM tuition_fee_relation r
+                            LEFT JOIN tuition_fee t ON r.exchange_tuition_fee_id = t.id
+                        WHERE r.status = 1 AND r.tuition_fee_id = " . data_get($request, 'tuition_fee_id')
+                    );
+
+                    foreach ($relationFees as $fee) {
+
+                        $newProductIds[] = $fee->product_id;
+
+                        $existContract = u::first("SELECT * FROM contracts
+                            WHERE agreement_id = $agreement_id AND product_id = {$fee->product_id} AND status NOT IN (0, 8) LIMIT 1");
+
+                        if ($existContract) {
+                            // UPDATE
+                            u::updateSimpleRow([
+                                'tuition_fee_id' => $fee->id,
+                                'must_charge' => $fee->price_combo,
+                                'updated_at' => now(),
+                                'updator_id' => Auth::user()->id,
+                                'status' => 1
+                            ], ['id' => $existContract->id], 'contracts');
+
+                            u::addLogContracts($existContract->id);
+
+                        } else {
+                            // INSERT
+                            $contract_id = u::insertSimpleRow([
+                                'type' => 1,
+                                'student_id' => data_get($agreementInfo, 'student_id'),
+                                'branch_id' => data_get($agreementInfo, 'branch_id'),
+                                'ec_id' => data_get($agreementInfo, 'ec_id'),
+                                'ec_leader_id' => data_get($agreementInfo, 'ec_leader_id'),
+                                'product_id' => $fee->product_id,
+                                'tuition_fee_id' => $fee->id,
+                                'init_tuition_fee_amount' => $fee->price_combo,
+                                'must_charge' => $fee->price_combo,
+                                'debt_amount' => $fee->price_combo,
+                                'total_sessions' => $fee->session,
+                                'real_sessions' => $fee->session,
+                                'created_at' => now(),
+                                'creator_id' => Auth::user()->id,
+                                'status' => 1,
+                                'count_recharge' => $fee->stt,
+                                'agreement_id' => $agreement_id
+                            ], 'contracts');
+
+                            u::updateSimpleRow([
+                                'code' => config('app.prefix_contract_code') . str_pad($contract_id, 6, '0', STR_PAD_LEFT)
+                            ], ['id' => $contract_id], 'contracts');
+
+                            u::addLogContracts($contract_id);
+                        }
+                    }
+                    foreach ($oldContracts as $contract) {
+                        if (!in_array($contract->product_id, $newProductIds)) {
+                    
+                            // xác định status theo số buổi đã học
+                            $newStatus = (int)($contract->done_sessions ?? 0) > 0 ? 8 : 0;
+                    
+                            u::updateSimpleRow([
+                                'status' => $newStatus,
+                                'updated_at' => date('Y-m-d H:i:s'),
+                                'updator_id' => Auth::user()->id
+                            ], [
+                                'id' => $contract->id
+                            ], 'contracts');
+                    
+                            u::addLogContracts($contract->id);
+                        }
+                    }
+                }
+                $chargesController = new ChargesController();
+                $chargesController->processContractsByAgreement($agreement_id);
+                
+            }else {
+                u::updateSimpleRow(array(
+                    'start_date' => data_get($request, 'start_date'),
+                    'note' => data_get($request, 'note'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                ), array('id'=>data_get($request, 'id')), 'agreements');
+                u::addLogAgreements($agreement_id);
             }
-            u::insertSimpleRow(array(
-                'contract_id' => $contract_id,
-                'coupon_id' => $coupon_info->id,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>Auth::user()->id,
-            ), 'coupon_logs');
+            
         }
-        $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
-        $contract_code = config('app.prefix_contract_code').$contract_code;
-        u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
-        u::addLogContracts($contract_id);
         
         $result = array(
             'status' => 1,

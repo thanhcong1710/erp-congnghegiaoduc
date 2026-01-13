@@ -157,9 +157,9 @@ class ChargesController extends Controller
         return response()->json($result);
     }
 
-    private function processContractsByAgreement($agreement_id){
+    public static function processContractsByAgreement($agreement_id){
         $agreementInfo = u::getObject(array('id'=>$agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0");
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status=8");
         $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if(!empty($packages)){
@@ -183,7 +183,7 @@ class ChargesController extends Controller
         
         return true;
     } 
-    private function splitChargedAmount(float $totalCharged, array $packages): array
+    public static function splitChargedAmount(float $totalCharged, array $packages): array
     {
         // Sắp xếp theo ưu tiên (count_recharge nhỏ -> ưu tiên cao)
         usort($packages, function ($a, $b) {

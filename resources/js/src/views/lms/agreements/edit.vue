@@ -186,6 +186,96 @@
                   </div>
               </div>
             </div>
+            <!-- ================== ĐỐI SOÁT GÓI PHÍ ================== -->
+            <vx-card class="mt-5" title="📦 Đối soát gói học phí khi thay đổi" v-if="agreement.tuition_fee_id != tmp_tuition_fee_id">
+              
+              <!-- SUMMARY -->
+              <div class="vx-row mb-4">
+                <div class="vx-col md:w-1/3 w-full">
+                  <p><strong>💰 Tổng tiền gói mới</strong></p>
+                  <h4 class="text-primary">
+                    {{ agreement.tuition_fee_amount | formatMoney }}
+                  </h4>
+                </div>
+
+                <div class="vx-col md:w-1/3 w-full">
+                  <p><strong>➖ Được trừ từ gói cũ</strong></p>
+                  <h4 class="text-success">
+                    {{ totalTransferAmount | formatMoney }}
+                  </h4>
+                </div>
+
+                <div class="vx-col md:w-1/3 w-full">
+                  <p><strong>🔴 Cần đóng thêm</strong></p>
+                  <h4 class="text-danger">
+                    {{ needPayMore | formatMoney }}
+                  </h4>
+                </div>
+              </div>
+
+              <!-- TABLE -->
+              <div
+                class="vx-col w-full mb-4 vs-con-table stripe vs-table-primary"
+                v-if="comparePackages && comparePackages.length"
+              >
+                <div class="con-tablex vs-table--content">
+                  <div class="vs-con-tbody vs-table--tbody">
+                    <table class="vs-table vs-table--tbody-table">
+                      <thead class="vs-table--thead">
+                        <tr>
+                          <th>Gói học</th>
+                          <th>Trạng thái</th>
+                          <th class="text-right">Đã đóng</th>
+                          <th class="text-right">Còn lại</th>
+                          <th class="text-right">Áp dụng</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr
+                          class="tr-values vs-table--tr"
+                          v-for="(item, index) in comparePackages"
+                          :key="index"
+                        >
+                          <td class="td vs-table--td">
+                            {{ item.name }}
+                          </td>
+
+                          <td class="td vs-table--td">
+                            <vs-chip :color="item.statusColor" transparent>
+                              {{ item.statusText }}
+                            </vs-chip>
+                          </td>
+
+                          <td class="td vs-table--td text-right">
+                            {{ item.total_charged | formatMoney }}
+                          </td>
+
+                          <td class="td vs-table--td text-right">
+                            {{ item.left_amount | formatMoney }}
+                          </td>
+
+                          <td
+                            class="td vs-table--td text-right font-bold"
+                            :class="item.statusColor === 'danger' ? 'text-danger' : 'text-success'"
+                          >
+                            {{ item.apply_amount | formatMoney }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- NOTE -->
+              <vs-alert color="warning" class="mt-4">
+                <strong>Lưu ý:</strong><br/>
+                • Các gói thuộc gói học phí mới sẽ được <b>tính luôn sang gói mới</b><br/>
+                • Các gói <b>bị loại</b> sẽ chỉ được tính phần phí còn lại sang gói mới
+              </vs-alert>
+
+            </vx-card>
           </div>
 
           <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -366,6 +456,77 @@
       })
       this.loadDetail();
     },
+    computed: {
+      // =============================
+      // product_id thuộc gói phí mới
+      // =============================
+      productIdsOfNewFee() {
+        // Chưa chọn gói học phí
+        if (!this.html.tuition_fee.item) return []
+
+        // Gói combo
+        if (
+          this.html.tuition_fee.item.type_fee == 2 &&
+          this.html.tuition_fee.item.tuition_fee_relation
+        ) {
+          return this.html.tuition_fee.item.tuition_fee_relation.map(
+            i => i.product_id
+          )
+        }
+
+        // Gói thường
+        if (this.html.tuition_fee.item.product_id) {
+          return [this.html.tuition_fee.item.product_id]
+        }
+
+        return []
+      },
+
+      // =============================
+      // BẢNG ĐỐI SOÁT GÓI PHÍ
+      // =============================
+      comparePackages() {
+        if (!this.agreement.contracts || !this.agreement.contracts.length) {
+          return []
+        }
+
+        return this.agreement.contracts.map(contract => {
+          const isInNewFee = this.productIdsOfNewFee.includes(contract.product_id)
+
+          return {
+            name: contract.tuition_fee_name,
+            statusText: isInNewFee ? 'Giữ / Chuyển tiếp' : 'Bị loại',
+            statusColor: isInNewFee ? 'primary' : 'danger',
+            total_charged: Number(contract.total_charged || 0),
+            left_amount: Number(contract.left_amount || 0),
+            apply_amount: isInNewFee
+              ? Number(contract.total_charged || 0)
+              : Number(contract.left_amount || 0)
+          }
+        })
+      },
+
+      // =============================
+      // TỔNG TIỀN ĐƯỢC TRỪ
+      // =============================
+      totalTransferAmount() {
+        return this.comparePackages.reduce(
+          (sum, item) => sum + item.apply_amount,
+          0
+        )
+      },
+
+      // =============================
+      // SỐ TIỀN CẦN ĐÓNG THÊM
+      // =============================
+      needPayMore() {
+        const total = Number(this.agreement.tuition_fee_amount || 0)
+        return total > this.totalTransferAmount
+          ? total - this.totalTransferAmount
+          : 0
+      }
+    },
+
     methods: {
       loadDetail(){
         this.$vs.loading();
@@ -398,10 +559,49 @@
           this.agreement.tuition_fee_session = data.session
           this.agreement.tuition_fee_type = data.type_fee
           this.agreement.tuition_fee_relation = data.tuition_fee_relation
-          this.caculatorSession();
+          this.agreement.total_amount = data.price
+          this.calculatorLeftAmountWhenChangeTuitionFee();
         }else{
           this.agreement.tuition_fee_id = ""
         }
+      },
+      calculatorLeftAmountWhenChangeTuitionFee() {
+        let total = 0
+
+        if (!this.agreement.contracts || !this.agreement.contracts.length) {
+          this.agreement.total_left_amount = 0
+          return
+        }
+
+        // 👉 Danh sách product_id thuộc gói phí mới
+        let productIdsOfNewFee = []
+
+        // Gói combo
+        if (
+          this.agreement.tuition_fee_type == 2 &&
+          this.agreement.tuition_fee_relation &&
+          this.agreement.tuition_fee_relation.length
+        ) {
+          productIdsOfNewFee = this.agreement.tuition_fee_relation.map(
+            item => item.product_id
+          )
+        } 
+        // Gói thường
+        else if (this.agreement.product_id) {
+          productIdsOfNewFee = [this.agreement.product_id]
+        }
+
+        // 👉 Tính tiền
+        this.agreement.contracts.forEach(contract => {
+          if (productIdsOfNewFee.includes(contract.product_id)) {
+            total += Number(contract.total_charged || 0)
+          } else {
+            total += Number(contract.left_amount || 0)
+          }
+        })
+
+        this.agreement.total_left_amount = total
+        this.agreement.debt_amount = this.agreement.total_amount - this.agreement.total_left_amount
       },
       loadTuitionFee(tuition_fee_id=0){
         if(this.agreement.branch_id){
@@ -429,6 +629,17 @@
         console.log(this.agreement);
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount)  > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
       },
+      confirmSave () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn muốn thay gói phí?`,
+          accept: this.processSave,
+          acceptText: 'Thay đổi',
+          cancelText: 'Hủy'
+        })
+      },
       save() {
         let mess = "";
         let resp = true;
@@ -450,6 +661,13 @@
           this.alert.active = true;
           return false;
         }
+        if(this.tmp_tuition_fee_id != this.agreement.tuition_fee_id){
+          this.confirmSave ()
+        } else{
+          this.processSave()
+        }
+      },
+      processSave(){
         this.$vs.loading()
         axios.p("/api/lms/agreements/update",this.agreement)
         .then((response) => {
