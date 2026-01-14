@@ -262,7 +262,7 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
-                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name
+                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.id
             FROM contracts AS c
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach($list AS $k=> $row){
@@ -274,12 +274,19 @@ class StudentsController extends Controller
     public function sessions(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
-        $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
-            FROM contracts AS c 
-            WHERE c.count_recharge = 
-                IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
-                    (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
-                    (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
+        $contract_id = isset($request->contract_id) ? $request->contract_id : 0;
+        if ($contract_id){
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+            FROM contracts AS c WHERE id=$contract_id");
+        } else{
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+                FROM contracts AS c 
+                WHERE c.count_recharge = 
+                    IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
+                        (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
+                        (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");     
+        }
+        
         if($contract_active){
             $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
                 WHERE s.contract_id = $contract_active->id");
@@ -379,6 +386,31 @@ class StudentsController extends Controller
         return response()->json([
             'status' => 0,
             'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
+        ]);
+    }
+
+    public function payments(Request $request){
+        $student_id =data_get($request, 'student_id');
+        $payments = u::query("SELECT p.*, (SELECT name FROM tuition_fee WHERE id=a.tuition_fee_id) AS tuition_fee_name
+            FROM payments AS p 
+                LEFT JOIN agreements AS a ON a.id=p.agreement_id
+            WHERE p.student_id=$student_id ORDER BY p.id DESC");
+        $agreements = u::query("SELECT c.id AS agreement_id,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                    c.must_charge, c.debt_amount, c.status, c.created_at
+                FROM agreements AS c 
+                WHERE c.student_id =$student_id AND c.status > 0  AND c.must_charge > 0 AND c.debt_amount > 0 ");
+        $reserves = u::query("SELECT c.id AS reserve_id,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+                    c.must_charge, c.debt_amount, c.status, c.created_at
+                FROM reserves AS c 
+                WHERE c.student_id =$student_id AND c.status > 0  AND c.must_charge > 0 AND c.debt_amount > 0");
+
+        return response()->json([
+            'payments' => $payments,
+            'agreements' => $agreements,
+            'reserves' => $reserves
         ]);
     }
 }

@@ -65,12 +65,12 @@
              <student-info :student_info="student_info" />
           </div>
         </vs-tab>
-        <vs-tab label="Gói phí">
+        <vs-tab label="Thu phí">
           <div class="tab-text">
-            <student-contracts :student_info="student_info" />
+            <student-payment :student_info="student_info" />
           </div>
         </vs-tab>
-        <vs-tab label="Buổi học">
+        <vs-tab label="Khóa học">
           <div class="tab-text">
             <student-sessions :student_info="student_info" />
           </div>
@@ -106,7 +106,7 @@
   import select from 'vue-select'
   import studentInfo from './components/studentInfo.vue'
   import studentLogs from './components/studentLogs.vue'
-  import studentContracts from './components/studentContracts.vue'
+  import studentPayment from './components/studentPayment.vue'
   import studentSessions from './components/studentSessions.vue'
   import studentAssessments from './components/studentAssessments.vue'
   import studentOperating from './components/studentOperating.vue'
@@ -119,7 +119,7 @@
       datepicker,
       studentInfo,
       studentLogs,
-      studentContracts,
+      studentPayment,
       studentSessions,
       studentAssessments,
       studentOperating
