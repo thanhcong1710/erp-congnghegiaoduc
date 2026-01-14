@@ -110,7 +110,7 @@
             color="warning"
             type="area" />
       </div>
-      <div class="vx-col w-full md:w-1/2 mb-base"  v-if="checkPermission('dashboard_05')">
+      <!-- <div class="vx-col w-full md:w-1/2 mb-base"  v-if="checkPermission('dashboard_05')">
         <vx-card class="text">
           <h5 class="mb-4 text-center">Tình hình học viên</h5>
           <vue-apex-charts type="pie" :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
@@ -151,7 +151,7 @@
           <h5 class="mb-4 text-center">Học sinh Renew theo tháng</h5>
           <vue-apex-charts type="bar" :options="lineChartRenewLog.chartOptions" :series="lineChartRenewLog.series"></vue-apex-charts>
         </vx-card>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -901,30 +901,30 @@ export default {
       if(this.checkPermission('dashboard_04')){
         this.loadDataDashboard04();
       }
-      if(this.checkPermission('dashboard_05')){
-        this.loadDataDashboard05();
-      }
-      if(this.checkPermission('dashboard_06')){
-        this.loadDataDashboard06();
-      }
-      if(this.checkPermission('dashboard_07')){
-        this.loadDataDashboard07();
-      }
-      if(this.checkPermission('dashboard_08')){
-        this.loadDataDashboard08();
-      }
+      // if(this.checkPermission('dashboard_05')){
+      //   this.loadDataDashboard05();
+      // }
+      // if(this.checkPermission('dashboard_06')){
+      //   this.loadDataDashboard06();
+      // }
+      // if(this.checkPermission('dashboard_07')){
+      //   this.loadDataDashboard07();
+      // }
+      // if(this.checkPermission('dashboard_08')){
+      //   this.loadDataDashboard08();
+      // }
       if(this.checkPermission('dashboard_09')){
         this.loadDataDashboard09();
       }
       if(this.checkPermission('dashboard_10')){
         this.loadDataDashboard10();
       }
-      if(this.checkPermission('dashboard_11')){
-        this.loadDataDashboard11();
-      }
-      if(this.checkPermission('dashboard_12')){
-        this.loadDataDashboard12();
-      }
+      // if(this.checkPermission('dashboard_11')){
+      //   this.loadDataDashboard11();
+      // }
+      // if(this.checkPermission('dashboard_12')){
+      //   this.loadDataDashboard12();
+      // }
     }
   },
 }
