@@ -45,7 +45,7 @@
                     <img src="@assets/images/elements/decore-right.png" class="decore-right" alt="Decore Right" width="175">
           <feather-icon icon="AwardIcon" class="p-6 mb-8 bg-primary inline-flex rounded-full text-white shadow" svgClasses="h-8 w-8"></feather-icon>
           <h1 class="mb-6 text-white">Xin chào {{ $store.state.AppActiveUser.displayName }},</h1>
-          <p class="xl:w-3/4 lg:w-4/5 md:w-2/3 w-4/5 mx-auto text-white">You have done <b>57.6%</b> more sales today. Check your new badge in your profile.</p>
+          <p class="xl:w-3/4 lg:w-4/5 md:w-2/3 w-4/5 mx-auto text-white" v-html="textGreeting"></p>
         </vx-card>
       </div>
 
@@ -171,6 +171,45 @@ export default {
   },
   data () {
     return {
+      textGreeting : '',
+      greetingsByTime: {
+        morning: [
+          "Chào buổi sáng! Hôm nay bạn sẽ làm rất tốt!",
+          "Buổi sáng tốt lành! Bắt đầu ngày mới thôi!",
+          "Chúc bạn một ngày làm việc hiệu quả và đầy cảm hứng!",
+          "Cà phê đã sẵn sàng, bạn thì sao?",
+          "Hôm nay là một ngày tuyệt vời để thành công!",
+          "Đăng nhập thành công – năng lượng tích cực đang chờ bạn!",
+          "Hãy để hôm nay là ngày bạn tự hào về những gì đã làm!",
+          "Bắt đầu nhẹ nhàng, kết thúc rực rỡ!",
+          "Tinh thần tốt tạo nên một ngày tốt – bạn đã sẵn sàng!",
+          "Nụ cười buổi sáng là bước đầu của sự thành công!"
+        ],
+        afternoon: [
+          "Chào buổi chiều! Tiếp tục duy trì phong độ nhé!",
+          "Buổi chiều vui vẻ, hãy hoàn thành mục tiêu nhé!",
+          "Nửa ngày đã trôi qua, bạn đang làm rất tốt!",
+          "Giữ vững tinh thần, sắp tới đích rồi!",
+          "Hãy tự thưởng cho mình một chút thư giãn trước khi tiếp tục!",
+          "Cố lên! Những điều tốt đẹp đang chờ bạn ở cuối ngày!",
+          "Tinh thần vẫn ổn chứ? Bạn đang đi đúng hướng!",
+          "Một chút động lực buổi chiều: Bạn làm được!",
+          "Buổi chiều là cơ hội thứ hai để hoàn thành mục tiêu!",
+          "Chúc bạn một buổi chiều năng suất và hiệu quả!"
+        ],
+        evening: [
+          "Chúc bạn một buổi tối thư giãn!",
+          "Hôm nay bạn đã cố gắng rất nhiều – tuyệt vời!",
+          "Đã đến lúc bạn nghỉ ngơi và nạp lại năng lượng.",
+          "Cảm ơn vì một ngày làm việc đầy cống hiến!",
+          "Bạn xứng đáng được nghỉ ngơi – nghỉ sớm nhé!",
+          "Mỗi nỗ lực hôm nay là bước đệm cho thành công ngày mai.",
+          "Thời gian để tạm dừng và tự hào về những gì bạn đã làm!",
+          "Kết thúc một ngày bằng lòng biết ơn và sự nhẹ nhõm.",
+          "Bạn đã làm rất tốt hôm nay – chúc ngủ ngon!",
+          "Chúc bạn một buổi tối bình yên và tràn đầy yêu thương!"
+        ]
+      },
       branch_list: [],
       searchData: {
         arr_branch: "",
@@ -440,6 +479,7 @@ export default {
     }
   },
   created () {
+    this.getTimeGreeting()
     axios.g(`/api/system/branches-has-user`)
       .then(response => {
       this.branch_list = response.data
@@ -447,6 +487,15 @@ export default {
     this.loadData();
   },
   methods: {
+    getTimeGreeting() {
+      const hour = new Date().getHours();
+      let period = "morning";
+      if (hour >= 12 && hour < 18) period = "afternoon";
+      else if (hour >= 18 || hour < 5) period = "evening";
+
+      const greetings = this.greetingsByTime[period];
+      this.textGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    },
     checkPermission(text){
       return u.checkPermission(this.$store.state.AppActiveUser, text)
     },
