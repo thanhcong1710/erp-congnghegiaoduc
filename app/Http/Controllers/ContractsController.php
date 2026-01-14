@@ -373,7 +373,6 @@ class ContractsController extends Controller
                                 'must_charge' => $tuition_fee_info->price,
                                 'updated_at' => date('Y-m-d H:i:s'),
                                 'updator_id' => Auth::user()->id,
-                                'status' => 1
                             ], ['id' => $existContract->id], 'contracts');
 
                             u::addLogContracts($existContract->id);
@@ -435,7 +434,6 @@ class ContractsController extends Controller
                                 'must_charge' => $fee->price_combo,
                                 'updated_at' => now(),
                                 'updator_id' => Auth::user()->id,
-                                'status' => 1
                             ], ['id' => $existContract->id], 'contracts');
 
                             u::addLogContracts($existContract->id);

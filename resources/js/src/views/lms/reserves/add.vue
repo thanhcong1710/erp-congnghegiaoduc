@@ -47,22 +47,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.product_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.program_name"
+                v-model="student_info.product_name"
                 disabled="true"
               />
             </div>
@@ -77,7 +67,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Gói phí</label>
+              <label>Gói phí lẻ</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -107,32 +97,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi học bổng</label>
+              <label>Số buổi đã học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="student_info.bonus_sessions"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi được phép bảo lưu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.reservable_sessions"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi đã bảo lưu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.reserved_sessions"
+                v-model="student_info.done_sessions"
                 disabled="true"
               />
             </div>
@@ -141,24 +111,6 @@
         <div class="vx-col md:w-1/2 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin bảo lưu</h5>
           <div class="vx-row">
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại bảo lưu <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="reserve.is_reserved" :disabled="input_disabled">
-                <option value="0">Bảo lưu không giữ chỗ</option>
-                <option value="1">Bảo lưu giữ chỗ</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi bảo lưu <span class="text-danger"> (*)</span></label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="number"
-                name="title"
-                v-model="reserve.session"
-                :disabled="input_disabled"
-                @change="getEndDate()"
-              />
-            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày bắt đầu bảo lưu <span class="text-danger"> (*)</span></label>
               <datepicker class="w-full"
@@ -169,6 +121,17 @@
                 :disabled="input_disabled"
                 :not-before="temp.min_date"
                 :not-after="temp.max_date"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi bảo lưu dự kiến <span class="text-danger"> (*)</span></label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="number"
+                name="title"
+                v-model="reserve.session"
+                :disabled="input_disabled"
+                @change="getEndDate()"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -184,6 +147,18 @@
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="reserve.note"></textarea>
+            </div>
+            <vs-divider/>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+            </div>
+            <div class="vx-col md:w-2/3 w-full mb-4">
+              <div  class="invoice-total-wrapper">
+                  <div  class="invoice-total-item" style="font-weight: bold;">
+                      <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
+                      <p  class="invoice-total-amount"> {{ reserve.total_amount_reserve | formatMoney}} </p>
+                  </div>
+              </div>
+              <p><i>(Học sinh đã học cần đóng thêm phí bảo lưu)</i></p>
             </div>
           </div>
 
@@ -264,7 +239,8 @@
           start_date:'',
           end_date:'',
           session:'',
-          is_reserved: 1,
+          is_reserved: 0,
+          total_amount_reserve: 0,
         },
         student_info:{
         },
@@ -316,6 +292,7 @@
           this.temp.max_date = new Date(student.enrolment_last_date)
         }
         this.input_disabled = false
+        this.reserve.total_amount_reserve = this.student_info.done_sessions >0 ? 300000 : 0
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {

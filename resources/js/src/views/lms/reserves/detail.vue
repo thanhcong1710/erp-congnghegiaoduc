@@ -37,22 +37,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Chương trình học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="reserve_info.meta_data.student_info.product_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.student_info.program_name"
+                v-model="reserve_info.meta_data.student_info.product_name"
                 disabled="true"
               />
             </div>
@@ -97,22 +87,12 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi được phép bảo lưu</label>
+              <label>Số buổi đã học</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.student_info.reservable_sessions"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi đã bảo lưu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                 v-model="reserve_info.meta_data.student_info.reserved_sessions"
+                 v-model="reserve_info.meta_data.student_info.done_sessions"
                 disabled="true"
               />
             </div>
@@ -122,29 +102,22 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin bảo lưu</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Loại bảo lưu</label>
-              <select class="vs-inputx vs-input--input normal" v-model="reserve_info.meta_data.reserve.is_reserved" disabled="true">
-                <option value="0">Bảo lưu không giữ chỗ</option>
-                <option value="1">Bảo lưu giữ chỗ</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi bảo lưu</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                 v-model="reserve_info.meta_data.reserve.session"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày bắt đầu bảo lưu</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
                 v-model="reserve_info.meta_data.reserve.start_date"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số buổi bảo lưu dự kiến</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                 v-model="reserve_info.meta_data.reserve.session"
                 disabled="true"
               />
             </div>
@@ -161,6 +134,18 @@
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="reserve_info.meta_data.reserve.note"></textarea>
+            </div>
+            <vs-divider/>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+            </div>
+            <div class="vx-col md:w-2/3 w-full mb-4">
+              <div  class="invoice-total-wrapper">
+                  <div  class="invoice-total-item" style="font-weight: bold;">
+                      <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
+                      <p  class="invoice-total-amount"> {{ reserve_info.meta_data.reserve.total_amount_reserve | formatMoney}} </p>
+                  </div>
+              </div>
+              <p><i>(Học sinh đã học cần đóng thêm phí bảo lưu)</i></p>
             </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú phê duyệt</label>

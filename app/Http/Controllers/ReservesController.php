@@ -60,7 +60,7 @@ class ReservesController extends Controller
                 (SELECT name FROM programs WHERE id=c.program_id) AS program_name,
                 (SELECT cls_name FROM classes WHERE id=c.class_id) AS class_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_charged, c.summary_sessions, c.bonus_sessions, c.real_sessions, c.reservable_sessions, 
+                c.total_charged, c.summary_sessions, c.bonus_sessions, c.real_sessions, c.reservable_sessions, c.done_sessions,
                 c.reserved_sessions , c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date  
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
                 WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
@@ -115,7 +115,10 @@ class ReservesController extends Controller
                 'program_id' => data_get($contract_info,'program_id'),
                 'class_id' => data_get($contract_info,'class_id'),
                 'note' => data_get($request,'reserve.note'),
-                'meta_data' => json_encode($request->input())
+                'meta_data' => json_encode($request->input()),
+                'must_charge' => data_get($request,'reserve.total_amount_reserve', 0),
+                'total_charged'=>0,
+                'debt_amount'=>data_get($request,'reserve.total_amount_reserve', 0),
             ), 'reserves');
             $result = array(
                 'status' => 1,
@@ -220,17 +223,23 @@ class ReservesController extends Controller
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ),array('id'=>$reserve_id),'reserves');
-                    if(data_get($reserve_info,'start_date') > date('Y-m-d')){
-                        u::insertSimpleRow(array(
-                            'student_id'=>data_get($reserve_info, 'student_id'),
-                            'data_id'=>$reserve_id,
-                            'type' => 1,
-                            'status' => 1,
-                            'created_at' => date('Y-m-d H:i:s'),
-                            'processed_at' => data_get($reserve_info, 'start_date')
-                        ),'student_waitting_process');
+                    if(data_get($reserve_info,'debt_amount')>0){
+                        u::updateSimpleRow(array(
+                            'status' => 5
+                        ),array('id'=>$reserve_id),'reserves');
                     } else {
-                        self::processReserve($reserve_id);
+                        if(data_get($reserve_info,'start_date') > date('Y-m-d')){
+                            u::insertSimpleRow(array(
+                                'student_id'=>data_get($reserve_info, 'student_id'),
+                                'data_id'=>$reserve_id,
+                                'type' => 1,
+                                'status' => 1,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'processed_at' => data_get($reserve_info, 'start_date')
+                            ),'student_waitting_process');
+                        } else {
+                            self::processReserve($reserve_id);
+                        }
                     }
                 }
                 $result = array(
