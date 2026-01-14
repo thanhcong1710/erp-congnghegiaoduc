@@ -28,6 +28,13 @@
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Mã HS, tên HS, mã hợp đồng" v-model="searchData.keyword"></vs-input>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Loại thu phí</label>
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.type" @change="getData">
+              <option value="1">Phí nhập học</option>
+              <option value="2">Phí bảo lưu</option>
+            </select>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -163,6 +170,7 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          type: 1,
         },
         contracts: [],
         limitSource: [20, 50, 100, 500],

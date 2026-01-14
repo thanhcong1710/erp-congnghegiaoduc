@@ -45,7 +45,7 @@ class Test extends Command
     public function handle(Request $request)
     {
         $ChargesController = new ChargesController();
-        $ChargesController->processContractsByAgreement(6);
+        $ChargesController->processContractsByAgreement(7);
         echo "ok";
         return "ok";
     }

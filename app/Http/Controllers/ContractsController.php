@@ -183,6 +183,7 @@ class ContractsController extends Controller
                 $contract_code = config('app.prefix_contract_code').$contract_code;
                 u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
                 u::addLogContracts($contract_id);
+                LogStudents::logAdd($student_id, 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
             }
         } elseif (data_get($request, 'tuition_fee_type') == 2) {
             $relation_tuition_fee = u::query("SELECT t.*, r.price_combo, r.stt FROM tuition_fee_relation AS r 
@@ -221,10 +222,9 @@ class ContractsController extends Controller
                 $contract_code = config('app.prefix_contract_code').$contract_code;
                 u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
                 u::addLogContracts($contract_id);
+                LogStudents::logAdd($student_id, 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
             }
         }
-        
-        LogStudents::logAdd($student_id, 'Thêm mới hợp đồng nhập học - '.$contract_code, Auth::user()->id);
 
         $result = array(
             'status' => 1,

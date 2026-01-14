@@ -169,7 +169,7 @@ class StudentsController extends Controller
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) AND s.id=$student_id");
         $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
-        if ( $data->real_sessions > $data->done_sessions) {
+        if ( $data->real_sessions > $data->done_sessions && $data->left_sessions) {
             $data->left_amount = round($data->total_charged * ($data->left_sessions -  $data->done_sessions) / $data->left_sessions);
         } else {
             $data->left_amount =  0;

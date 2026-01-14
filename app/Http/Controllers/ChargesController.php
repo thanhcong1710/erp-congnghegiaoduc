@@ -15,35 +15,62 @@ class ChargesController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $type = isset($request->type) ? $request->type : 1;
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " c.status > 0  AND c.must_charge > 0 AND c.debt_amount > 0 ";
-        $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        if ($type ==1) {
+            $cond = " c.status > 0  AND c.must_charge > 0 AND c.debt_amount > 0 ";
+            $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
 
-        if (!empty($branch_id)) {
-            $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            if (!empty($branch_id)) {
+                $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            }
+            
+            $order_by = " ORDER BY c.id DESC ";
+
+            $total = u::first("SELECT count(c.id) AS total 
+                FROM agreements AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+            
+            $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                    c.must_charge, c.debt_amount, c.status
+                FROM agreements AS c 
+                    LEFT JOIN students AS s ON s.id=c.student_id
+                WHERE $cond $order_by $limitation");
+        } else {
+            $cond = " c.status = 5  AND c.must_charge > 0 AND c.debt_amount > 0 ";
+            $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+            if (!empty($branch_id)) {
+                $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            }
+            
+            $order_by = " ORDER BY c.id DESC ";
+
+            $total = u::first("SELECT count(c.id) AS total 
+                FROM reserves AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+            
+            $list = u::query("SELECT c.id AS reserve_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+                    c.must_charge, c.debt_amount, c.status
+                FROM reserves AS c 
+                    LEFT JOIN students AS s ON s.id=c.student_id
+                WHERE $cond $order_by $limitation");
         }
         
-        if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
-        }
-        
-        $order_by = " ORDER BY c.id DESC ";
-
-        $total = u::first("SELECT count(c.id) AS total 
-            FROM agreements AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
-        
-        $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
-                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
-                c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.must_charge, c.debt_amount, c.status
-            FROM agreements AS c 
-                LEFT JOIN students AS s ON s.id=c.student_id
-            WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
@@ -159,7 +186,7 @@ class ChargesController extends Controller
 
     public static function processContractsByAgreement($agreement_id){
         $agreementInfo = u::getObject(array('id'=>$agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status=8");
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8");
         $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if(!empty($packages)){
@@ -175,7 +202,7 @@ class ChargesController extends Controller
                     'init_total_charged' => (int)data_get($row, 'total_charged'),
                     'debt_amount' => (int)data_get($row, 'contract_data.must_charge') - (int)data_get($row, 'total_charged'),
                     'updated_at'=>date('Y-m-d H:i:s'),
-                    'updator_id'=>Auth::user()->id,
+                    'updator_id'=>Auth::user()->id ?? 0,
                 ],array('id'=>data_get($row, 'contract_id')), 'contracts');
                 u::addLogContracts(data_get($row, 'contract_id'));
             }

@@ -324,6 +324,15 @@
             case 3:
                 resp = 'Từ chối phê duyệt';
                 break;
+            case 4:
+                resp = 'Xử lý bảo lưu thành công';
+                break;
+            case 5:
+              resp = 'Chờ đóng phí bảo lưu';
+              break;
+            case 6:
+              resp = 'Đã đóng phí bảo lưu';
+              break;
             default:
                 resp = 'Chờ phê duyệt'
                 break
