@@ -435,9 +435,11 @@ class ContractsController extends Controller
 
     public static function exitDepost (Request $request){
         $contract_info = u::getObject(array('id'=>data_get($request, 'contract_id')), 'contracts');
+        $active_session = floor(data_get($contract_info, 'total_charged')/500000);
         u::updateSimpleRow(array(
-            'count_recharge' => -1,
-            'status' => 3,
+            'status' => 2,
+            'summary_sessions' => $active_session, 
+            'left_sessions' => $active_session, 
             'debt_amount' => 0,
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,

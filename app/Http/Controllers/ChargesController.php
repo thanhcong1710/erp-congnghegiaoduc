@@ -114,10 +114,10 @@ class ChargesController extends Controller
             $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount');
             if($debt_amount == 0){
                 u::updateSimpleRow(array(
-                    'status' => 3,
+                    'status' => data_get($contract_info, 'status') ==6 ? 6 :3,
                     'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
                     'summary_sessions' => data_get($contract_info, 'total_sessions'), 
-                    'left_sessions' => data_get($contract_info, 'total_sessions'), 
+                    'left_sessions' => data_get($contract_info, 'total_sessions') - data_get($contract_info, 'done_sessions'), 
                     'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'debt_amount' => 0,
