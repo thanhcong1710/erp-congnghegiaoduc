@@ -37,7 +37,7 @@
                 <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                 <p>Công nợ: {{item.debt_amount | formatMoney}}</p>
                 <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
-                <vs-button v-if="item.debt_amount>0 && item.total_charged && item.summary_sessions==0" class="mr-3 mb-2" @click="exitDepost(item.contract_id)">Quy đổi cọc</vs-button>
+                <vs-button v-if="item.debt_amount>0 && item.total_charged && item.status==2" class="mr-3 mb-2" @click="confirmExitDepost(item.contract_id)">Quy đổi cọc</vs-button>
               </td>
               <td class="td vs-table--td">
                 <strong>{{item.label_status}}</strong>
@@ -88,6 +88,7 @@
           pages: [],
           init: 0
         },
+        contract_id:'',
       }
     },
     async created() {
@@ -109,7 +110,8 @@
             this.$vs.loading.close();
           })
       },
-      confirmExitDepost () {
+      confirmExitDepost (contract_id) {
+        this.contract_id = contract_id
         this.$vs.dialog({
           type: 'confirm',
           color: 'danger',
@@ -120,9 +122,9 @@
           cancelText: 'Hủy'
         })
       },
-      exitDepost(contract_id){
+      exitDepost(){
         const data = {
-          contract_id: contract_id,
+          contract_id: this.contract_id,
         }
         this.$vs.loading()
         axios.p('/api/lms/contracts/exit-depost', data)
