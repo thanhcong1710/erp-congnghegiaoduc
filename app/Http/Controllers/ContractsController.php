@@ -437,10 +437,9 @@ class ContractsController extends Controller
         $contract_info = u::getObject(array('id'=>data_get($request, 'contract_id')), 'contracts');
         $active_session = floor(data_get($contract_info, 'total_charged')/500000);
         u::updateSimpleRow(array(
-            'status' => 2,
+            'status' => 3,
             'summary_sessions' => $active_session, 
-            'left_sessions' => $active_session, 
-            'debt_amount' => 0,
+            'left_sessions' => $active_session,
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
         ), array('id'=>data_get($request, 'contract_id')), 'contracts');
