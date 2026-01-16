@@ -33,6 +33,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('scheduleHasStudent:process')->dailyAt('00:05')->withoutOverlapping();
         $schedule->command('scheduleHasStudent:add')->dailyAt('01:00')->withoutOverlapping();
         $schedule->command('processdata:command')->dailyAt('2:00'); 
+        $schedule->command('jobsProcessLockParent:command')->dailyAt('3:00'); 
     }
 
     /**

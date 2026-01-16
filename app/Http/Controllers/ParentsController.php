@@ -146,16 +146,16 @@ class ParentsController extends Controller
                     $result->status = 0;
                     $result->dup_parent_id = $duplicate_info->parent_id;
                     $text = "";
-                    if($duplicate_info->total_care>0 && (61 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24)))>0){
-                        $thoi_gian_con = 61 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24));
+                    if($duplicate_info->total_care>0 && (16 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24)))>0){
+                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24));
                         $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
                     }else{
                         $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
                         $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
                     }
-                    if($duplicate_info->status > 80 || $duplicate_info->status==73){
-                        $text="<br> Khách hàng thuộc các trường hợp không được phép ghi đè - ".u::getStatusParent($duplicate_info->status);
-                    }
+                    // if($duplicate_info->status > 80 || $duplicate_info->status==73){
+                    //     $text="<br> Khách hàng thuộc các trường hợp không được phép ghi đè - ".u::getStatusParent($duplicate_info->status);
+                    // }
                     $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name .".$text;
                 }
             }
@@ -480,5 +480,29 @@ class ParentsController extends Controller
             FROM coupons AS c WHERE c.c2c_mobile = '".data_get($parent_info,'mobile_1')."' 
             ORDER BY c.id DESC");
         return response()->json($data);
+    }
+
+    public function processParentLock(){
+        u::query("UPDATE crm_parent_branch SET is_lock = 1");
+        u::query("UPDATE crm_parent_branch AS p SET p.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.parent_id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
+        u::query("UPDATE crm_parent_branch SET is_lock = 0 
+            WHERE
+                (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
+                (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) ");
+        return "ok";
+    }
+    public static function processParentLockById($parent_id){
+        u::query("UPDATE crm_parent_branch AS pb SET 
+                pb.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=pb.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1) ,
+            WHERE pb.parent_id=$parent_id ");
+        u::query("UPDATE crm_parent_branch AS pb SET pb.is_lock = 1
+            WHERE pb.parent_id=$parent_id ");
+        u::query("UPDATE crm_parent_branch SET is_lock = 0 
+            WHERE
+                parent_id=$parent_id AND (
+                    (last_care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
+                    (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) 
+                ) ");
+        return true;
     }
 }
