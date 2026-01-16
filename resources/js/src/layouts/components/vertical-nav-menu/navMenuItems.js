@@ -175,18 +175,18 @@ export default [
             slug: 'lms-reports-operate',
             permission:'lms_reports_operate',
           },
-          {
-            url: '/lms/reports/academic',
-            name: 'Học thuật',
-            slug: 'lms-reports-academic',
-            permission:'lms_reports_academic',
-          },
-          {
-            url: '/lms/reports/teacher',
-            name: 'Giáo viên',
-            slug: 'lms-reports-teacher',
-            permission:'lms_reports_teacher',
-          }
+          // {
+          //   url: '/lms/reports/academic',
+          //   name: 'Học thuật',
+          //   slug: 'lms-reports-academic',
+          //   permission:'lms_reports_academic',
+          // },
+          // {
+          //   url: '/lms/reports/teacher',
+          //   name: 'Giáo viên',
+          //   slug: 'lms-reports-teacher',
+          //   permission:'lms_reports_teacher',
+          // }
         ],
       },
     ]
