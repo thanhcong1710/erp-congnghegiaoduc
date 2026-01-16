@@ -27,13 +27,44 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã lớp, tên lớp" v-model="searchData.keyword"></vs-input>
+            <label for="" class="vs-input--label">Sản phẩm</label>
+            <multiselect
+                name="search_product"
+                placeholder="Chọn sản phẩm"
+                v-model="searchData.product"
+                :options="products"
+                label="name"
+                :close-on-select="true"
+                :hide-selected="true"
+                :multiple="false"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM" style="width: 100%" type="month"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <multiselect
+                name="search_status"
+                placeholder="Chọn trạng thái"
+                v-model="searchData.status"
+                :options="status_list"
+                label="label"
+                :close-on-select="true"
+                :hide-selected="true"
+                :multiple="false"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Từ khóa</label>
+            <vs-input class="w-full" placeholder="Mã lớp, tên lớp" v-model="searchData.keyword"></vs-input>
           </div>
         </div>
         <div class="vx-row mt-3">
@@ -125,11 +156,19 @@
     data() {
       return {
         branch_list: [],
+        products: [],
+        status_list: [
+            {id: 'THIEU', label: 'Thiếu'},
+            {id: 'THUA', label: 'Thừa'},
+            {id: 'DU', label: 'Đủ'}
+        ],
         searchData: {
           arr_branch: "",
-          branch_id:"",
+          branch_id: "",
           keyword: "",
           dateRange: "",
+          product: "",
+          status: ""
         },
         datepickerOptions: {
           closed: true,
@@ -178,6 +217,10 @@
         .then(response => {
         this.branch_list = response.data
       })
+      axios.g(`/api/system/products`)
+        .then(response => {
+        this.products = response.data
+      })
       this.getData();
       this.searchData.dateRange = new Date();
     },
@@ -186,6 +229,8 @@
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
+        this.searchData.product= ""
+        this.searchData.status= ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
         this.getData();
@@ -201,6 +246,8 @@
         const data = {
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
+            product_id: this.searchData.product ? this.searchData.product.id : '',
+            status: this.searchData.status ? this.searchData.status.id : '',
             start_date: u.getDateMonth(this.searchData.dateRange),
             pagination:this.pagination,
           }
@@ -231,14 +278,46 @@
         this.getData();
       },
       exportExcel() {
-        // Feature not implemented for this report yet
-        this.$vs.notify({
-            title: 'Thông báo',
-            text: 'Chức năng xuất Excel chưa được hỗ trợ cho báo cáo này',
-            color: 'warning',
-            iconPack: 'feather',
-            icon: 'icon-alert-circle'
-        })
+        let keys = []
+        let values = []
+        
+        // Branch
+        const ids_branch = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+          this.searchData.arr_branch.map(item => {
+            ids_branch.push(item.id)
+          })
+        }
+        if (ids_branch.length) {
+            keys.push('branch_id')
+            values.push(ids_branch.join('-'))
+        }
+
+        // Keyword
+        if (this.searchData.keyword) {
+            keys.push('keyword')
+            values.push(this.searchData.keyword)
+        }
+
+        // Product
+        if (this.searchData.product) {
+            keys.push('product_id')
+            values.push(this.searchData.product.id)
+        }
+
+        // Status
+        if (this.searchData.status) {
+            keys.push('status')
+            values.push(this.searchData.status.id)
+        }
+
+        if (keys.length == 0) {
+            keys.push('k')
+            values.push('v')
+        }
+
+        const link = `/api/lms/exports/active-classes/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem("accessToken")}`
+        window.open(link, '_blank')
       },
     }
   }

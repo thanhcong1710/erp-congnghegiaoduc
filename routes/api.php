@@ -215,6 +215,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('report02a/{key}/{value}', 'ExportsController@report02a');
                 Route::get('report02b/{key}/{value}', 'ExportsController@report02b');
                 Route::get('report02c/{key}/{value}', 'ExportsController@report02c');
+                Route::get('active-classes/{key}/{value}', 'ExportsController@reportActiveClasses');
             });
         });
 

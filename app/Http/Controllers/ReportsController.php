@@ -374,6 +374,8 @@ class ReportsController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $product_id = isset($request->product_id) ? $request->product_id : '';
+        $status = isset($request->status) ? $request->status : '';
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -391,9 +393,34 @@ class ReportsController extends Controller
             $cond .= " AND (c.cls_name LIKE '%$keyword%') ";
         }
 
+        if ($product_id !== '') {
+            $cond .= " AND c.product_id = '$product_id' ";
+        }
+
+        $having = "";
+        if ($status !== '') {
+            if ($status == 'THIEU') {
+                $having = " AND (c.max_students - total_students) > 0 ";
+            } elseif ($status == 'THUA') {
+                $having = " AND (c.max_students - total_students) < 0 ";
+            } elseif ($status == 'DU') {
+                $having = " AND (c.max_students - total_students) = 0 ";
+            }
+        }
+
         $order_by = " ORDER BY c.id DESC ";
 
-        $total = u::first("SELECT count(c.id) AS total FROM classes AS c WHERE $cond");
+        if ($having) {
+            $countSql = "SELECT count(*) as total FROM (
+                SELECT c.id, c.max_students, (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND ct.status != 7 AND s.status > 0) AS total_students
+                FROM classes AS c
+                WHERE $cond
+                HAVING 1=1 $having
+             ) as tmp";
+            $total = u::first($countSql);
+        } else {
+            $total = u::first("SELECT count(c.id) AS total FROM classes AS c WHERE $cond");
+        }
 
         $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day,
                     b.name AS branch_name,
@@ -411,6 +438,7 @@ class ReportsController extends Controller
                     LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
                     LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
                 WHERE $cond 
+                HAVING 1=1 $having
                 $order_by $limitation";
 
         $list = u::query($query);

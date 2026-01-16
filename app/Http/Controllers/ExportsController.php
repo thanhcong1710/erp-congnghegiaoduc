@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ExportsController extends Controller
 {
-    public function import(Request $request , $import_id) {
+    public function import(Request $request, $import_id)
+    {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'Tên phụ huynh');
@@ -32,12 +33,12 @@ class ExportsController extends Controller
 
         $parents = u::query("SELECT * FROM crm_import_parents WHERE import_id=$import_id");
         $arr_status = [
-            '0'=>'Chưa xử lý',
-            '1'=>'Đã kiểm tra dữ liệu đầu vào',
-            '2'=>'Dữ liệu đầu vào không hợp lệ',
-            '3'=>'Trùng lặp dữ liệu trong file import',
-            '4'=>'Trùng lặp dữ liệu khách hàng đang chăm sóc',
-            '6'=> 'Đã import thành công'
+            '0' => 'Chưa xử lý',
+            '1' => 'Đã kiểm tra dữ liệu đầu vào',
+            '2' => 'Dữ liệu đầu vào không hợp lệ',
+            '3' => 'Trùng lặp dữ liệu trong file import',
+            '4' => 'Trùng lặp dữ liệu khách hàng đang chăm sóc',
+            '6' => 'Đã import thành công'
         ];
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(30);
@@ -52,19 +53,19 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("K")->setWidth(30);
         $sheet->getColumnDimension("L")->setWidth(30);
         $sheet->getColumnDimension("M")->setWidth(30);
-        for ($i = 0; $i < count($parents) ; $i++) {
+        for ($i = 0; $i < count($parents); $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $parents[$i]->name);
-            $sheet->setCellValue('B' . $x, $parents[$i]->gud_mobile1 ? "'".$parents[$i]->gud_mobile1 : $parents[$i]->gud_mobile1);
-            $sheet->setCellValue('C' . $x, $parents[$i]->gud_mobile2 ? "'".$parents[$i]->gud_mobile2 : $parents[$i]->gud_mobile2);
+            $sheet->setCellValue('B' . $x, $parents[$i]->gud_mobile1 ? "'" . $parents[$i]->gud_mobile1 : $parents[$i]->gud_mobile1);
+            $sheet->setCellValue('C' . $x, $parents[$i]->gud_mobile2 ? "'" . $parents[$i]->gud_mobile2 : $parents[$i]->gud_mobile2);
             $sheet->setCellValue('D' . $x, $parents[$i]->email);
             $sheet->setCellValue('E' . $x, $parents[$i]->address);
             $sheet->setCellValue('F' . $x, $parents[$i]->note);
             $sheet->setCellValue('G' . $x, $parents[$i]->owner_hrm);
             $sheet->setCellValue('H' . $x, $parents[$i]->student_name_1);
-            $sheet->setCellValue('I' . $x, $parents[$i]->student_birthday_1? "'".$parents[$i]->student_birthday_1 : $parents[$i]->student_birthday_1);
+            $sheet->setCellValue('I' . $x, $parents[$i]->student_birthday_1 ? "'" . $parents[$i]->student_birthday_1 : $parents[$i]->student_birthday_1);
             $sheet->setCellValue('J' . $x, $parents[$i]->student_name_2);
-            $sheet->setCellValue('K' . $x, $parents[$i]->student_birthday_2 ? "'".$parents[$i]->student_birthday_2 : $parents[$i]->student_birthday_2);
+            $sheet->setCellValue('K' . $x, $parents[$i]->student_birthday_2 ? "'" . $parents[$i]->student_birthday_2 : $parents[$i]->student_birthday_2);
             $sheet->setCellValue('L' . $x, $arr_status[$parents[$i]->status]);
             $sheet->setCellValue('M' . $x, $parents[$i]->error_message);
             $sheet->getRowDimension($x)->setRowHeight(23);
@@ -73,7 +74,7 @@ class ExportsController extends Controller
         $writer = new Xlsx($spreadsheet);
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="Kết quả import - ID '.$import_id.'.xlsx"');
+            header('Content-Disposition: attachment;filename="Kết quả import - ID ' . $import_id . '.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {
@@ -81,25 +82,26 @@ class ExportsController extends Controller
         }
     }
 
-    public function report01(Request $request , $key,$value) {
+    public function report01(Request $request, $key, $value)
+    {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
-        $arr_key =explode(',',$key);
-        $arr_value =explode(',',$value);
-        foreach($arr_key AS $k=>$key){
-            if($key=='keyword'){
+        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
+        foreach ($arr_key as $k => $key) {
+            if ($key == 'keyword') {
                 $keyword = $arr_value[$k];
                 $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%')";
             }
-            if($key=='start_date'){
+            if ($key == 'start_date') {
                 $cond .= " AND r.report_month = '$arr_value[$k]'";
             }
-            if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            if ($key == 'branch_id') {
+                $cond .= " AND r.branch_id IN (" . str_replace("-", ",", $arr_value[$k]) . ")";
             }
         }
-        
+
         $order_by = " ORDER BY r.id DESC ";
         $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
                 CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
@@ -142,11 +144,11 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("K")->setWidth(20);
         $sheet->getColumnDimension("L")->setWidth(20);
         $sheet->getColumnDimension("M")->setWidth(20);
-        for ($i = 0; $i < count($list) ; $i++) {
+        for ($i = 0; $i < count($list); $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
-            $sheet->setCellValue('B' . $x, $list[$i]->lms_code) ;
-            $sheet->setCellValue('C' . $x, $list[$i]->name );
+            $sheet->setCellValue('B' . $x, $list[$i]->lms_code);
+            $sheet->setCellValue('C' . $x, $list[$i]->name);
             $sheet->setCellValue('D' . $x, $list[$i]->gud_name1);
             $sheet->setCellValue('E' . $x, $list[$i]->cls_name);
             $sheet->setCellValue('F' . $x, $list[$i]->product_name);
@@ -157,7 +159,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('K' . $x, $list[$i]->summary_sessions - $list[$i]->done_sessions);
             $sheet->setCellValue('L' . $x, $list[$i]->start_date);
             $sheet->setCellValue('M' . $x, $list[$i]->end_date);
-            
+
             $sheet->getRowDimension($x)->setRowHeight(23);
 
         }
@@ -172,34 +174,35 @@ class ExportsController extends Controller
         }
     }
 
-    public function report02a(Request $request , $key,$value) {
+    public function report02a(Request $request, $key, $value)
+    {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
-        $arr_key =explode(',',$key);
-        $arr_value =explode(',',$value);
-        foreach($arr_key AS $k=>$key){
-            if($key=='keyword'){
+        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
+        foreach ($arr_key as $k => $key) {
+            if ($key == 'keyword') {
                 $keyword = $arr_value[$k];
                 $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%')";
             }
-            if($key=='branch_id'){
-                $cond .=  " AND r.branch_id IN (".str_replace("-",",", $arr_value[$k]).")";
+            if ($key == 'branch_id') {
+                $cond .= " AND r.branch_id IN (" . str_replace("-", ",", $arr_value[$k]) . ")";
             }
-            if($key=='cm_id'){
-                $cond .=  " AND r.cm_id = ".$arr_value[$k];
+            if ($key == 'cm_id') {
+                $cond .= " AND r.cm_id = " . $arr_value[$k];
             }
-            if($key=='class_id'){
-                $cond .=  " AND r.class_id = ".$arr_value[$k];
+            if ($key == 'class_id') {
+                $cond .= " AND r.class_id = " . $arr_value[$k];
             }
-            if($key=='start_date'){
-                $cond .=  " AND r.last_date >= '".$arr_value[$k]."'";
+            if ($key == 'start_date') {
+                $cond .= " AND r.last_date >= '" . $arr_value[$k] . "'";
             }
-            if($key=='end_date'){
-                $cond .=  " AND r.last_date <= '".$arr_value[$k]."'";
+            if ($key == 'end_date') {
+                $cond .= " AND r.last_date <= '" . $arr_value[$k] . "'";
             }
         }
-        
+
         $order_by = " ORDER BY r.id DESC ";
         $list = u::query("SELECT s.name AS student_name, s.lms_code, s.gud_mobile1, r.last_date, r.status, r.renew_amount,
                 b.name AS branch_name,
@@ -239,17 +242,17 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("H")->setWidth(30);
         $sheet->getColumnDimension("I")->setWidth(20);
         $sheet->getColumnDimension("J")->setWidth(20);
-        for ($i = 0; $i < count($list) ; $i++) {
+        for ($i = 0; $i < count($list); $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
-            $sheet->setCellValue('B' . $x, $list[$i]->lms_code) ;
-            $sheet->setCellValue('C' . $x, $list[$i]->student_name );
+            $sheet->setCellValue('B' . $x, $list[$i]->lms_code);
+            $sheet->setCellValue('C' . $x, $list[$i]->student_name);
             $sheet->setCellValue('D' . $x, $list[$i]->product_name);
             $sheet->setCellValue('E' . $x, $list[$i]->class_name);
             $sheet->setCellValue('F' . $x, $list[$i]->last_date);
             $sheet->setCellValue('G' . $x, $list[$i]->status_title);
-            $sheet->setCellValue('H' . $x, $list[$i]->status==1 ? $list[$i]->tuition_fee_name : '');
-            $sheet->setCellValue('I' . $x, $list[$i]->status==1 ? $$list[$i]->renew_amount : '');
+            $sheet->setCellValue('H' . $x, $list[$i]->status == 1 ? $list[$i]->tuition_fee_name : '');
+            $sheet->setCellValue('I' . $x, $list[$i]->status == 1 ? $$list[$i]->renew_amount : '');
             $sheet->setCellValue('J' . $x, $list[$i]->cm_name);
             $sheet->getRowDimension($x)->setRowHeight(23);
         }
@@ -264,19 +267,20 @@ class ExportsController extends Controller
         }
     }
 
-    public function report02b(Request $request , $key,$value) {
+    public function report02b(Request $request, $key, $value)
+    {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser().")";
-        $arr_key =explode(',',$key);
-        $arr_value =explode(',',$value);
+        $cond = " b.id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
         $start_date = date('Y-m');
-        foreach($arr_key AS $k=>$key){
-            if($key=='start_date'){
+        foreach ($arr_key as $k => $key) {
+            if ($key == 'start_date') {
                 $start_date = $arr_value[$k];
             }
-            if($key=='branch_id'){
-                $cond .=  " AND b.id IN (".str_replace("-",",", $arr_value[$k]).")";
+            if ($key == 'branch_id') {
+                $cond .= " AND b.id IN (" . str_replace("-", ",", $arr_value[$k]) . ")";
             }
         }
 
@@ -299,12 +303,12 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("B")->setWidth(30);
         $sheet->getColumnDimension("C")->setWidth(30);
         $sheet->getColumnDimension("D")->setWidth(30);
-        for ($i = 0; $i < count($list) ; $i++) {
+        for ($i = 0; $i < count($list); $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
-            $sheet->setCellValue('B' . $x, $list[$i]->total_item) ;
-            $sheet->setCellValue('C' . $x, $list[$i]->success_item );
-            $sheet->setCellValue('D' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
+            $sheet->setCellValue('B' . $x, $list[$i]->total_item);
+            $sheet->setCellValue('C' . $x, $list[$i]->success_item);
+            $sheet->setCellValue('D' . $x, $list[$i]->total_item ? floor($list[$i]->success_item * 100 / $list[$i]->total_item) : '--');
             $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
@@ -318,19 +322,159 @@ class ExportsController extends Controller
         }
     }
 
-    public function report02c(Request $request , $key,$value) {
+    public function reportActiveClasses(Request $request, $key, $value)
+    {
         set_time_limit(300);
         ini_set('memory_limit', '-1');
-        $branch_query =  Auth::user()->getBranchesHasUser();
-        $arr_key =explode(',',$key);
-        $arr_value =explode(',',$value);
+        $cond = " c.status = 1 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
+        $status_filter = '';
+        foreach ($arr_key as $k => $key) {
+            if ($key == 'keyword') {
+                $keyword = $arr_value[$k];
+                $cond .= " AND (c.cls_name LIKE '%$keyword%') ";
+            }
+            if ($key == 'branch_id' && $arr_value[$k]) {
+                $cond .= " AND c.branch_id IN (" . str_replace("-", ",", $arr_value[$k]) . ")";
+            }
+            if ($key == 'product_id' && $arr_value[$k]) {
+                $cond .= " AND c.product_id = '" . $arr_value[$k] . "'";
+            }
+            if ($key == 'status' && $arr_value[$k]) {
+                $status_filter = $arr_value[$k];
+            }
+        }
+
+        $ordered_by = " ORDER BY c.id DESC ";
+
+        $having = "";
+        if ($status_filter !== '') {
+            if ($status_filter == 'THIEU') {
+                $having = " AND (c.max_students - total_students) > 0 ";
+            } elseif ($status_filter == 'THUA') {
+                $having = " AND (c.max_students - total_students) < 0 ";
+            } elseif ($status_filter == 'DU') {
+                $having = " AND (c.max_students - total_students) = 0 ";
+            }
+        }
+
+        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day, c.status,
+                    b.name AS branch_name,
+                    p.name AS product_name,
+                    u_teacher.name AS teacher_name,
+                    u_ta.name AS ta_name,
+                    (SELECT name FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS shift_name,
+                    (SELECT start_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS start_time,
+                    (SELECT end_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS end_time,
+                    (SELECT name FROM rooms WHERE id = (SELECT room_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS room_name,
+                    (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND ct.status != 7 AND s.status > 0) AS total_students
+                FROM classes AS c
+                    LEFT JOIN branches AS b ON b.id = c.branch_id
+                    LEFT JOIN products AS p ON p.id = c.product_id
+                    LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
+                    LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
+                WHERE $cond 
+                HAVING 1=1 $having
+                $ordered_by";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Mã lớp');
+        $sheet->setCellValue('D1', 'Team/Sản phẩm');
+        $sheet->setCellValue('E1', 'Sĩ số');
+        $sheet->setCellValue('F1', 'Max');
+        $sheet->setCellValue('G1', 'Trạng thái');
+        $sheet->setCellValue('H1', 'Lịch học');
+        $sheet->setCellValue('I1', 'Khai giảng');
+        $sheet->setCellValue('J1', 'Giáo viên');
+        $sheet->setCellValue('K1', 'Trợ giảng');
+        $sheet->setCellValue('L1', 'Phòng học');
+
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(10);
+        $sheet->getColumnDimension("F")->setWidth(10);
+        $sheet->getColumnDimension("G")->setWidth(15);
+        $sheet->getColumnDimension("H")->setWidth(25);
+        $sheet->getColumnDimension("I")->setWidth(15);
+        $sheet->getColumnDimension("J")->setWidth(25);
+        $sheet->getColumnDimension("K")->setWidth(25);
+        $sheet->getColumnDimension("L")->setWidth(20);
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 2;
+            $item = $list[$i];
+
+            $item->total_students = (int) $item->total_students;
+            $item->max_students = (int) $item->max_students;
+            $diff = $item->max_students - $item->total_students;
+            $status_text = 'ĐỦ';
+            if ($diff > 0) {
+                $status_text = 'THIẾU';
+            } elseif ($diff < 0) {
+                $status_text = 'THỪA';
+            }
+
+            $days = [];
+            if ($item->class_day) {
+                $days_arr = explode(',', $item->class_day);
+                foreach ($days_arr as $d) {
+                    $days[] = "T$d";
+                }
+            }
+            $schedule_text = implode('+', $days);
+            if ($item->start_time && $item->end_time) {
+                $schedule_text .= " (" . substr($item->start_time, 0, 5) . "-" . substr($item->end_time, 0, 5) . ")";
+            }
+            $start_date = date('d/m/Y', strtotime($item->cls_startdate));
+
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->branch_name);
+            $sheet->setCellValue('C' . $x, $item->cls_name);
+            $sheet->setCellValue('D' . $x, $item->product_name);
+            $sheet->setCellValue('E' . $x, $item->total_students);
+            $sheet->setCellValue('F' . $x, $item->max_students);
+            $sheet->setCellValue('G' . $x, $status_text);
+            $sheet->setCellValue('H' . $x, $schedule_text);
+            $sheet->setCellValue('I' . $x, $start_date);
+            $sheet->setCellValue('J' . $x, $item->teacher_name);
+            $sheet->setCellValue('K' . $x, $item->ta_name);
+            $sheet->setCellValue('L' . $x, $item->room_name);
+
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo lớp học.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function report02c(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        $branch_query = Auth::user()->getBranchesHasUser();
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
         $start_date = date('Y-m');
-        foreach($arr_key AS $k=>$key){
-            if($key=='start_date'){
+        foreach ($arr_key as $k => $key) {
+            if ($key == 'start_date') {
                 $start_date = $arr_value[$k];
             }
-            if($key=='branch_id' && $arr_value[$k]){
-                $branch_query=  str_replace("-",",", $arr_value[$k]);
+            if ($key == 'branch_id' && $arr_value[$k]) {
+                $branch_query = str_replace("-", ",", $arr_value[$k]);
             }
         }
 
@@ -360,14 +504,14 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("D")->setWidth(30);
         $sheet->getColumnDimension("E")->setWidth(30);
         $sheet->getColumnDimension("F")->setWidth(30);
-        for ($i = 0; $i < count($list) ; $i++) {
+        for ($i = 0; $i < count($list); $i++) {
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $list[$i]->branch_name);
             $sheet->setCellValue('B' . $x, $list[$i]->cm_name);
             $sheet->setCellValue('C' . $x, $list[$i]->role_name);
-            $sheet->setCellValue('D' . $x, $list[$i]->total_item) ;
-            $sheet->setCellValue('E' . $x, $list[$i]->success_item );
-            $sheet->setCellValue('F' . $x, $list[$i]->total_item ? floor($list[$i]->success_item*100 / $list[$i]->total_item) :'--');
+            $sheet->setCellValue('D' . $x, $list[$i]->total_item);
+            $sheet->setCellValue('E' . $x, $list[$i]->success_item);
+            $sheet->setCellValue('F' . $x, $list[$i]->total_item ? floor($list[$i]->success_item * 100 / $list[$i]->total_item) : '--');
             $sheet->getRowDimension($x)->setRowHeight(23);
         }
         $writer = new Xlsx($spreadsheet);
