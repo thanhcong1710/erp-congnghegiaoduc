@@ -38,19 +38,16 @@ class LogParents extends Model
     public static function logStatus($parent_id,$pre_status,$status,$creator_id){
         $arr_status = array(
             '0'=>'KH mới',
-            '10'=>'KH không liên lạc được',
-            '20'=>'KH ở vùng CMS không có cơ sở',
-            '30'=>'KH không nghe máy',
-            '40'=>'KH hẹn gọi lại sau',
-            '50'=>'KH không quan tâm',
-            '60'=>'KH không tiềm năng',
-            '71'=>'KH quan tâm, cần follow up date',
-            '72'=>' KH tiềm năng nhưng không muốn làm phiền',
-            '73'=>'KH đồng ý đặt lịch Checkin',
-            '81'=>'KH đã đến checkin',
-            '82'=>'KH đã mua gói phí',
-            '83'=>'KH đến hạn tái tục',
-            '90'=>'Danh sách đen',
+            '1'=>'Đã liên hệ',
+            '2'=>'Đã tư vấn',
+            '3'=>'Quan tâm',
+            '4'=>'Chờ quyết định',
+            '5'=>'Đã đăng ký',
+            '11'=>'Không liên hệ được',
+            '12'=>'Không nhu cầu',
+            '13'=>'Từ chối (Giá / Thời gian)',
+            '14'=>'Trì hoãn lâu',
+            '20'=>'Chăm sóc lại',
         );
         $content = "Thay đổi trạng thái: từ `".$arr_status[$pre_status]."` thành `".$arr_status[$status]."`";
         u::insertSimpleRow(array(
