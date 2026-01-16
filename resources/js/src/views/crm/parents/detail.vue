@@ -1202,11 +1202,7 @@
         }else if(this.active_tab ==2){
           this.loadCares();
         }else if(this.active_tab ==3){
-          this.loadStudents();
-        }else if(this.active_tab ==4){
           this.loadLogs();
-        }else if(this.active_tab ==5){
-          this.loadVouchers();
         }else{
           this.loadDetail();
         }
