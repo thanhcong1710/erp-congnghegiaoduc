@@ -139,19 +139,16 @@
                 <label >Trạng thái</label>
                 <select class="vs-inputx vs-input--input normal" v-model="parent.status">
                   <option value="0">0. KH mới</option>
-                  <option value="10">1. KH không liên lạc được</option>
-                  <option value="20">2. KH ở vùng CMS không có cơ sở</option>
-                  <option value="30">3. KH không nghe máy</option>
-                  <option value="40">4. KH hẹn gọi lại sau</option>
-                  <option value="50">5. KH không quan tâm</option>
-                  <option value="60">6. KH không tiềm năng</option>
-                  <option value="71">7.1. KH quan tâm, cần follow up date</option>
-                  <option value="72">7.2. KH tiềm năng nhưng không muốn làm phiền</option>
-                  <option value="73">7.3. KH đồng ý đặt lịch Checkin</option>
-                  <option value="81">8.1. KH đã đến checkin</option>
-                  <option value="82">8.2. KH đã mua gói phí</option>
-                  <option value="83">8.3. KH đến hạn tái tục</option>
-                  <option value="90">9. Danh sách đen</option>
+                  <option value="1">1. Đã liên hệ</option>
+                  <option value="2">2. Đã tư vấn</option>
+                  <option value="3">3. Quan tâm</option>
+                  <option value="4">4. Chờ quyết định</option>
+                  <option value="5">5. Đã đăng ký</option>
+                  <option value="11">11. Không liên hệ được</option>
+                  <option value="12">12. Không nhu cầu</option>
+                  <option value="13">13. Từ chối (Giá / Thời gian)</option>
+                  <option value="14">14. Trì hoãn lâu</option>
+                  <option value="20">20. Chăm sóc lại</option>
                 </select>
               </div>
             </div>

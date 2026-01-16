@@ -214,44 +214,35 @@ class UtilityServiceProvider extends ServiceProvider
             case 0:
                 $tmp = 'KH mới';
                 break;
-            case 10:
-                $tmp = 'KH không liên lạc được';
+            case 1:
+                $tmp = 'Đã liên hệ';
+                break;
+            case 2:
+                $tmp = 'Đã tư vấn';
+                break;
+            case 3:
+                $tmp = 'Quan tâm';
+                break;
+            case 4:
+                $tmp = 'Chờ quyết định';
+                break;
+            case 5:
+                $tmp = 'Đã đăng ký';
+                break;
+            case 11:
+                $tmp = 'Không liên hệ được';
+                break;
+            case 12:
+                $tmp = 'Không nhu cầu';
+                break;
+            case 13:
+                $tmp = 'Từ chối (Giá / Thời gian)';
+                break;
+            case 14:
+                $tmp = 'Trì hoãn lâu';
                 break;
             case 20:
-                $tmp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                $tmp = 'KH không nghe máy';
-                break;
-            case 40:
-                $tmp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                $tmp = 'KH không quan tâm';
-                break;
-            case 60:
-                $tmp = 'KH không tiềm năng';
-                break;
-            case 71:
-                $tmp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                $tmp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                $tmp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                $tmp = 'KH đã đến checkin';
-                break;
-            case 82:
-                $tmp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                $tmp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                $tmp = 'Danh sách đen';
+                $tmp = 'Chăm sóc lại';
                 break;
             default:
                 $tmp = 'KH mới';
@@ -272,29 +263,11 @@ class UtilityServiceProvider extends ServiceProvider
         } elseif ($call_status == 4) {
             return 'KH hẹn gọi lại sau';
         } elseif ($call_status == 5) {
-            if ($call_status_sub == 51) {
-                return 'KH đã từng sử dụng dịch vụ';
-            } elseif ($call_status_sub == 52) {
-                return 'KH không quan tâm';
-            } elseif ($call_status_sub == 53) {
-                return 'KH thực sự không muốn nói chuyện';
-            }
+            return 'KH Từ chối nói chuyện';
         } elseif ($call_status == 6) {
-            if ($call_status_sub == 61) {
-                return 'Không có con';
-            } elseif ($call_status_sub == 62) {
-                return 'Lý do khác';
-            }
+            return 'KH không phù hợp';
         } elseif ($call_status == 7) {
-            if ($call_status_sub == 71) {
-                return 'KH đang cân nhắc';
-            } elseif ($call_status_sub == 72) {
-                return 'KH hẹn thời gian khác';
-            } elseif ($call_status_sub == 73) {
-                return 'KH ko muốn làm phiền';
-            } elseif ($call_status_sub == 74) {
-                return 'Confirm 1';
-            }
+            return 'KH tiềm năng';
         } elseif ($call_status == 9) {
             return 'Blacklist';
         }

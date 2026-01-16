@@ -55,11 +55,7 @@
                   <th colspan="1" rowspan="1">Học sinh</th>
                   <th colspan="1" rowspan="1">Thông tin</th>
                   <th colspan="1" rowspan="1" class="text-right">Số tiền còn phải đóng</th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
