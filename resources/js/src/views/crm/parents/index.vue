@@ -40,7 +40,7 @@
                 placeholder="Chọn trạng thái"
                 v-model="searchData.arr_status"
                 :options="statusOptions"
-                label="label"
+                label="name"
                 :close-on-select="false"
                 :hide-selected="true"
                 :multiple="true"
@@ -183,7 +183,7 @@
                 <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
                 <td class="td vs-table--td">{{ item.last_care }}</td>
                 <td class="td vs-table--td text-center">{{ item.last_time_care }}</td>
-                <td class="td vs-table--td text-center">{{ item.status | getStatusName}}</td>
+                <td class="td vs-table--td text-center">{{ getStatusLabel(item.status)}}</td>
                 <td class="text-center list-action"> 
                   <router-link :to="`/crm/parent/${item.id}/detail`" >
                     <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
@@ -297,19 +297,7 @@
           {id:'L4',label:'L4'},
           {id:'L5',label:'L5'},
         ],
-        statusOptions:[
-          {id:0,label:'0. KH mới'},
-          {id:1,label:'1. Đã liên hệ'},
-          {id:2,label:'2. Đã tư vấn'},
-          {id:3,label:'3. Quan tâm'},
-          {id:4,label:'4. Chờ quyết định'},
-          {id:5,label:'5. Đã đăng ký'},
-          {id:11,label:'11. Không liên hệ được'},
-          {id:12,label:'12. Không nhu cầu'},
-          {id:13,label:'13. Từ chối (Giá / Thời gian)'},
-          {id:14,label:'14. Trì hoãn lâu'},
-          {id:20,label:'20. Chăm sóc lại'}
-        ],
+        statusOptions:[],
         users_manager_list:[],
         source_list:[],
         source_detail_list:[],
@@ -526,6 +514,10 @@
             });
         }
       },
+      getStatusLabel(statusId) {
+        const status = this.statusOptions.find(s => s.id == statusId);
+        return status ? status.name : statusId;
+      },
     },
     created() {
       axios.g(`/api/users/get-data/users-manager`)
@@ -540,6 +532,10 @@
         .then(response => {
         this.source_detail_list = response.data
       })
+      axios.g(`/api/system/customer-statuses`)
+        .then(response => {
+        this.statusOptions = response.data
+      })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
         this.activeItem = this.searchData.type_search
@@ -547,59 +543,7 @@
 
       this.getData();
     },
-    filters: {
-      getStatusName(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 0:
-                resp = 'KH mới';
-                break;
-            case 10:
-                resp = 'KH không liên lạc được';
-                break;
-            case 20:
-                resp = 'KH ở vùng CMS không có cơ sở';
-                break;
-            case 30:
-                resp = 'KH không nghe máy';
-                break;
-            case 40:
-                resp = 'KH hẹn gọi lại sau';
-                break;
-            case 50:
-                resp = 'KH không quan tâm';
-                break;
-            case 60:
-                resp = 'KH không tiềm năng';
-                break;
-            case 71:
-                resp = 'KH quan tâm, cần follow up date';
-                break;
-            case 72:
-                resp = 'KH tiềm năng nhưng không muốn làm phiền';
-                break;
-            case 73:
-                resp = 'KH đồng ý đặt lịch Checkin';
-                break;
-            case 81:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 82:
-                resp = 'KH đã mua gói phí';
-                break;
-            case 83:
-                resp = 'KH đến hạn tái tục';
-                break;
-            case 90:
-                resp = 'Danh sách đen';
-                break;
-            default:
-                resp = 'KH mới'
-                break
-        }
-        return resp
-      },
-    },
+
   }
 </script>
 <style>

@@ -35,17 +35,7 @@
             <p>Trạng thái</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
-                <option value="0">0. KH mới</option>
-                <option value="1">1. Đã liên hệ</option>
-                <option value="2">2. Đã tư vấn</option>
-                <option value="3">3. Quan tâm</option>
-                <option value="4">4. Chờ quyết định</option>
-                <option value="5">5. Đã đăng ký</option>
-                <option value="11">11. Không liên hệ được</option>
-                <option value="12">12. Không nhu cầu</option>
-                <option value="13">13. Từ chối (Giá / Thời gian)</option>
-                <option value="14">14. Trì hoãn lâu</option>
-                <option value="20">20. Chăm sóc lại</option>
+                <option :value="item.id" v-for="(item, index) in customer_statuses" :key="index">{{item.name}}</option>
               </select>
             </p> 
             <p>Người phụ trách</p>
@@ -633,6 +623,7 @@
           }
         },
         check_list: [],
+        customer_statuses:[],
         active_tab: 2,
         alert:{
           active: false,
@@ -847,6 +838,10 @@
       axios.g(`/api/system/jobs`)
         .then(response => {
         this.html.jobs.list = response.data
+      })
+      axios.g(`/api/system/customer-statuses`)
+        .then(response => {
+        this.customer_statuses = response.data
       })
       await axios.g(`/api/system/sources`)
         .then(response => {

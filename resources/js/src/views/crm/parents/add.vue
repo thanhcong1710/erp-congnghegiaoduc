@@ -138,17 +138,7 @@
               <div class="form-group col-sm-6">
                 <label >Trạng thái</label>
                 <select class="vs-inputx vs-input--input normal" v-model="parent.status">
-                  <option value="0">0. KH mới</option>
-                  <option value="1">1. Đã liên hệ</option>
-                  <option value="2">2. Đã tư vấn</option>
-                  <option value="3">3. Quan tâm</option>
-                  <option value="4">4. Chờ quyết định</option>
-                  <option value="5">5. Đã đăng ký</option>
-                  <option value="11">11. Không liên hệ được</option>
-                  <option value="12">12. Không nhu cầu</option>
-                  <option value="13">13. Từ chối (Giá / Thời gian)</option>
-                  <option value="14">14. Trì hoãn lâu</option>
-                  <option value="20">20. Chăm sóc lại</option>
+                  <option :value="item.id" v-for="(item, index) in customer_statuses" :key="index">{{item.name}}</option>
                 </select>
               </div>
             </div>
@@ -285,7 +275,8 @@
         users_manager:[],
         c2c_info:"",
         change_source: false,
-        change_source_parent_id:"",
+        change_source_parent_id:"", 
+        customer_statuses:[],
       }
     },
     methods: {
@@ -504,6 +495,10 @@
       axios.g(`/api/users/get-data/users-manager`)
         .then(response => {
         this.users_manager = response.data
+      })
+      axios.g(`/api/system/customer-statuses`)
+        .then(response => {
+        this.customer_statuses = response.data
       })
       axios.g(`/api/system/provinces`)
         .then(response => {
