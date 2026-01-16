@@ -172,8 +172,11 @@ class ReservesController extends Controller
 
     public function show(Request $request,$reserve_id)
     {
-        $data = u::first("SELECT r.* , (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name 
-            FROM reserves AS r WHERE r.id=$reserve_id");
+        $data = u::first("SELECT r.* , (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
+                s.name, s.gud_mobile1, s.gud_email1, s.lms_code,s.address, (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=r.creator_id) AS creator_name 
+            FROM reserves AS r 
+                LEFT JOIN students AS s ON s.id=r.student_id
+            WHERE r.id=$reserve_id");
         $data->meta_data = $data->meta_data ? json_decode($data->meta_data) : '';
         return response()->json($data);
     }

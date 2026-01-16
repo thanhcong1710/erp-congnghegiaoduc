@@ -28,6 +28,13 @@
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Mã HS, tên HS, mã hợp đồng" v-model="searchData.keyword"></vs-input>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Loại thu phí</label>
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.type" @change="getData">
+              <option value="1">Phí nhập học</option>
+              <option value="2">Phí bảo lưu</option>
+            </select>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -59,19 +66,29 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" class="text-center" v-if="searchData.type==1">
                     <div class="vs-table-text">Mã Hợp đồng
                       <!---->
                     </div>
                   </th>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" class="text-center"  v-if="searchData.type==1">
                     <div class="vs-table-text">Gói phí
                       <!---->
                     </div>
                   </th>
                   <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Loại
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
                     <div class="vs-table-text">Số tiền đã đóng
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Ngày đóng
                       <!---->
                     </div>
                   </th>
@@ -107,14 +124,20 @@
                 <td class="td vs-table--td">
                   <p>{{ item.name }}</p>
                 </td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td" v-if="searchData.type==1">
                   <p> <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td" v-if="searchData.type==1">
                   <p>{{ item.tuition_fee_name }}</p>
+                </td>
+                <td class="td vs-table--td text-right ">
+                  <p>{{ searchData.type==1 ? "Phí nhập học" : "Phí bảo lưu" }}</p>
                 </td>    
                 <td class="td vs-table--td text-right ">
                   <p>{{ item.charge_amount | formatMoney }}</p>
+                </td>
+                <td class="td vs-table--td text-right ">
+                  <p>{{ item.charge_date }}</p>
                 </td>
                 <td class="td vs-table--td text-right ">
                   <p>{{ item.creator_name }}</p>
@@ -125,7 +148,7 @@
                 <td class="td vs-table--td text-right ">
                   <p>{{ item.approver_name }}</p>
                 </td>
-                <td class="td vs-table--td text-center list-action"> 
+                <td class="td vs-table--td text-center list-action" v-if="searchData.type==1"> 
                     <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
@@ -133,6 +156,11 @@
                       <vs-button color="warning" size="small"><i class="fa fa-print"></i></vs-button>
                     </router-link> 
                     
+                </td>
+                <td class="td vs-table--td text-center list-action" v-if="searchData.type==2"> 
+                    <router-link :to="`/lms/waitcharge-approve-reserve/${item.id}/detail`" >
+                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+                    </router-link> 
                 </td>
               </tr>
             </table>
@@ -184,6 +212,7 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          type: 1,
         },
         contracts: [],
         limitSource: [20, 50, 100, 500],
@@ -232,6 +261,7 @@
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
             pagination:this.pagination,
+            type: this.searchData.type
           }
 
         this.$vs.loading()

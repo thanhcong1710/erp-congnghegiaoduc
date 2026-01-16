@@ -2,7 +2,7 @@
 
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
-        <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin hợp đồng</h5>
+        <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin bảo lưu</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/3 w-full mb-4">
             <label>Tên học sinh</label>
@@ -10,7 +10,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.name"
+              v-model="reserve_info.name"
               disabled="true"
             />
           </div>
@@ -20,7 +20,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.lms_code"
+              v-model="reserve_info.lms_code"
               disabled="true"
             />
           </div>
@@ -30,7 +30,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.gud_mobile1"
+              v-model="reserve_info.gud_mobile1"
               disabled="true"
             />
           </div>
@@ -40,7 +40,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.gud_email1"
+              v-model="reserve_info.gud_email1"
               disabled="true"
             />
           </div>
@@ -50,7 +50,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.address"
+              v-model="reserve_info.address"
               disabled="true"
             />
           </div>
@@ -60,27 +60,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.branch_name"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>EC</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.ec_name"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>EC Leader</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.ec_leader_name"
+              v-model="reserve_info.branch_name"
               disabled="true"
             />
           </div>
@@ -90,7 +70,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.creator_name"
+              v-model="reserve_info.creator_name"
               disabled="true"
             />
           </div>
@@ -100,17 +80,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.created_at"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Gói phí</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.tuition_fee_name"
+              v-model="reserve_info.created_at"
               disabled="true"
             />
           </div>
@@ -125,7 +95,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.must_charge | formatNumber"
+              :value="reserve_info.must_charge | formatNumber"
               disabled="true"
             />
           </div>
@@ -135,7 +105,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.total_charged | formatNumber"
+              :value="reserve_info.total_charged | formatNumber"
               disabled="true"
             />
           </div>
@@ -146,6 +116,7 @@
               type="text"
               name="title"
               v-model="amount"
+              :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"
             />
           </div>
           <div class="vx-col md:w-1/4 w-full mb-4">
@@ -154,13 +125,13 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.debt_amount | formatNumber"
+              :value="reserve_info.debt_amount | formatNumber"
               disabled="true"
             />
           </div>
           <div class="vx-col md:w-1/4 w-full mb-4">
             <label>Phương thức đóng phí</label>
-            <select class="vs-inputx vs-input--input normal" v-model="payment.method">
+            <select class="vs-inputx vs-input--input normal" v-model="payment.method" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')">
               <option value="0">Tiền mặt</option>
               <option value="1">Chuyển khoản</option>
               <option value="2">Thẻ tín dụng</option>
@@ -173,11 +144,12 @@
               placeholder="Chọn ngày thu phí"
               :lang="datepickerOptions.lang"
               @change="selectDate"
+              :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"
             />
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>Ghi chú</label>
-            <textarea class="vs-inputx vs-input--input normal" v-model="payment.note"></textarea>
+            <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"></textarea>
           </div>
         </div>
         <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -185,10 +157,12 @@
           </vs-alert>
       <div class="vx-row mt-5">
         <div class="vx-col w-full text-right">
-          <router-link class="btn btn-danger" :to="`/lms/waitcharges`">
+          <router-link class="btn btn-danger" :to="`/lms/waitcharge-approve`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
-          <vs-button class="mb-2" color="success" @click="save">Thêm phiếu thu</vs-button>
+          <vs-button class="mb-2 mr-3" color="success" @click="save" v-if="payment.status==0 && checkPermission('approve_add_fee')">Lưu</vs-button>
+          <vs-button class="mb-2 mr-3" color="success" @click="approve(1)" v-if="payment.status==0 && checkPermission('approve_add_fee')">Phê duyệt</vs-button>
+          <vs-button class="mb-2 mr-3" color="danger" @click="approve(2)" v-if="payment.status==0 && checkPermission('approve_add_fee')">Từ chối</vs-button>
         </div>
       </div>
     </vx-card>
@@ -240,14 +214,15 @@
           body: '',
           color:'',
         },
-        agreement_info:{},
+        reserve_info:{},
         payment:{
           method:1,
           note:'',
           charge_date:'',
           amount:''
         },
-        amount:''
+        amount:'',
+        status:'',
       }
     },
     created() {
@@ -255,15 +230,15 @@
     },
     watch: {
       amount: function (val) {
-        if (this.agreement_info.must_charge) {
+        if (this.reserve_info.must_charge) {
           const value = u.fmc(val)
-          const suma = value.n + parseInt(this.agreement_info.total_charged)
-          const debt = parseInt(this.agreement_info.must_charge) - parseInt(suma)
-          if (suma > parseInt(this.agreement_info.must_charge)) {
-            this.amount = parseInt(this.agreement_info.must_charge, 10) - parseInt(this.agreement_info.total_charged, 10)
+          const suma = value.n + parseInt(this.reserve_info.total_charged)
+          const debt = parseInt(this.reserve_info.must_charge) - parseInt(suma)
+          if (suma > parseInt(this.reserve_info.must_charge)) {
+            this.amount = parseInt(this.reserve_info.must_charge, 10) - parseInt(this.reserve_info.total_charged, 10)
             this.amount = this.amount > 1000 && this.amount % 1000 > 0 ? ((this.amount / 1000) + 1) * 1000 : this.amount
           } else {
-            this.agreement_info.debt_amount = debt
+            this.reserve_info.debt_amount = debt
             this.amount = value.s
           }
           this.payment.amount = value.n
@@ -271,6 +246,9 @@
       }
     },
     methods: {
+      checkPermission(text){
+        return u.checkPermission(this.$store.state.AppActiveUser, text)
+      },
       selectDate(date){
         if (date) {
           this.payment.charge_date = moment(date).format("YYYY-MM-DD");
@@ -278,10 +256,12 @@
       },
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/lms/agreements/show/${this.$route.params.id}`)
+        axios.g(`/api/lms/accounting/waitcharge-approve/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.agreement_info = response.data
+          this.payment = response.data.payment_info
+          this.reserve_info = response.data.agreement_info
+          this.amount = this.payment.charge_amount
         })
       },
       save() {
@@ -308,23 +288,23 @@
           type: 'confirm',
           color: 'danger',
           title: 'Thông báo',
-          text: `Bạn chắc chắn đã nhập đúng thông tin? không thể hủy phiếu thu sau khi đã thêm`,
+          text: `Bạn chắc chắn đã nhập đúng thông tin?`,
           accept: this.processSave,
-          acceptText: 'Thêm phiếu thu',
+          acceptText: 'Lưu phiếu thu',
           cancelText: 'Hủy'
         })
       },
       processSave(){
         const data = {
-          agreement_id: this.agreement_info.id,
+          id: this.$route.params.id,
+          agreement_id: this.reserve_info.id,
           note: this.payment.note,
           charge_date: this.payment.charge_date,
           amount: this.payment.amount,
-          method: this.payment.method,
-          type: 1
+          method: this.payment.method
         };
         this.$vs.loading();
-        axios.p(`/api/lms/accounting/charges/add`,data)
+        axios.p(`/api/lms/accounting/charges/update`,data)
         .then((response) => {
           this.$vs.loading.close();
           this.$vs.notify({
@@ -334,9 +314,40 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
-          this.$router.push('/lms/waitcharges')
+          this.loadDetail();  
         })
       },
+      approve(status){
+        this.status = status;
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: status==1 ? `Bạn chắc chắn muốn duyệt phiếu thu?` : 'Bạn chắc chắn muốn từ chối phiếu thu?',
+          accept: this.processApprove,
+          acceptText: status==1 ? 'Duyệt' : 'Từ chối',
+          cancelText: 'Hủy'
+        })
+      },
+      processApprove(){
+        const data = {
+          id: this.$route.params.id,
+          status: this.status
+        };
+        this.$vs.loading();
+        axios.p(`/api/lms/accounting/waitcharge-approve/update`,data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$router.push('/lms/waitcharge-approve')
+        })
+      }
     },
   }
 </script>

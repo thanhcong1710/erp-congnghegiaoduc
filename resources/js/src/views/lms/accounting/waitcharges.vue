@@ -66,21 +66,22 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" class="text-center">
+                  <th colspan="1" rowspan="1" class="text-center" v-if="searchData.type == 1">
                     <div class="vs-table-text">Mã Hợp đồng
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" >
+                  <th colspan="1" rowspan="1"  v-if="searchData.type == 1">
                     <div class="vs-table-text">Gói phí
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1" >
+                  <th colspan="1" rowspan="1"  v-if="searchData.type == 1">
                     <div class="vs-table-text">EC
                       <!---->
                     </div>
                   </th>
+                  <th colspan="1" rowspan="1" class="text-center">Loại</th>
                   <th colspan="1" rowspan="1" class="text-right">
                     <div class="vs-table-text">Số tiền còn phải đóng
                       <!---->
@@ -103,20 +104,24 @@
                 <td class="td vs-table--td">
                   <p>{{ item.name }}</p>
                 </td>
-                <td class="td vs-table--td text-center">
+                <td class="td vs-table--td text-center" v-if="searchData.type == 1">
                   <p> <router-link :to="`/lms/waitcharge/${item.agreement_id}/detail`" >{{ item.code }}</router-link></p>
                 </td>
-                <td class="td vs-table--td">
+                <td class="td vs-table--td" v-if="searchData.type == 1">
                   <p>{{ item.tuition_fee_name }}</p>
                 </td>                
-                <td class="td vs-table--td">
+                <td class="td vs-table--td" v-if="searchData.type == 1">
                   <p>{{ item.ec_name }}</p>
                 </td>
+                <td class="td vs-table--td text-center">{{ searchData.type == 1 ? "Phí nhập học" : "Phí bảo lưu" }}</td>
                 <td class="td vs-table--td text-right ">
                   <p>{{ item.debt_amount | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/waitcharge/${item.agreement_id}/detail`" >
+                    <router-link :to="`/lms/waitcharge/${item.agreement_id}/detail`" v-if="searchData.type == 1">
+                      <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
+                    </router-link> 
+                    <router-link :to="`/lms/waitcharge-reserve/${item.agreement_id}/detail`" v-else>
                       <vs-button size="small"><i class="fa-brands fa-cc-amazon-pay"></i></vs-button>
                     </router-link> 
                 </td>
@@ -219,6 +224,7 @@
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
             pagination:this.pagination,
+            type: this.searchData.type
           }
 
         this.$vs.loading()

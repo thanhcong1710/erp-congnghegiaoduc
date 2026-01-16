@@ -141,6 +141,20 @@ export default {
         }
       },
       {
+        path: '/lms/waitcharge-reserve/:id/detail',
+        name: 'lms-waitcharges-reserve-detail',
+        component: () => import('@/views/lms/accounting/waitchargeReserveDetail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chờ đóng phí bảo lưu', url: '/lms/waitcharges'},
+            { title: 'Thêm mới phiếu thu', active: true}
+          ],
+          pageTitle: 'Thêm mới phiếu thu',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/waitcharge-approve',
         name: 'lms-waitcharge-approve',
         component: () => import('@/views/lms/accounting/waitchargeApprove.vue'),
@@ -150,6 +164,20 @@ export default {
             { title: 'Danh sách chờ duyệt phí', active: true}
           ],
           pageTitle: 'Danh sách chờ duyệt phí',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/waitcharge-approve-reserve/:id/detail',
+        name: 'lms-waitcharge-approve-reserve-detail',
+        component: () => import('@/views/lms/accounting/waitchargeApproveReserveDetail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve'},
+            { title: 'Thông tin phiếu thu chờ duyệt', active: true}
+          ],
+          pageTitle: 'Thông tin phiếu thu chờ duyệt',
           rule: 'editor'
         }
       },

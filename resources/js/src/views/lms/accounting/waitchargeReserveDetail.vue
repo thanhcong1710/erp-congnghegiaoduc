@@ -2,7 +2,7 @@
 
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
-        <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin hợp đồng</h5>
+        <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin bảo lưu</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/3 w-full mb-4">
             <label>Tên học sinh</label>
@@ -10,7 +10,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.name"
+              v-model="reserve_info.name"
               disabled="true"
             />
           </div>
@@ -20,7 +20,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.lms_code"
+              v-model="reserve_info.lms_code"
               disabled="true"
             />
           </div>
@@ -30,7 +30,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.gud_mobile1"
+              v-model="reserve_info.gud_mobile1"
               disabled="true"
             />
           </div>
@@ -40,7 +40,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.gud_email1"
+              v-model="reserve_info.gud_email1"
               disabled="true"
             />
           </div>
@@ -50,7 +50,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.address"
+              v-model="reserve_info.address"
               disabled="true"
             />
           </div>
@@ -60,27 +60,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.branch_name"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>EC</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.ec_name"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>EC Leader</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.ec_leader_name"
+              v-model="reserve_info.branch_name"
               disabled="true"
             />
           </div>
@@ -90,7 +70,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.creator_name"
+              v-model="reserve_info.creator_name"
               disabled="true"
             />
           </div>
@@ -100,17 +80,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="agreement_info.created_at"
-              disabled="true"
-            />
-          </div>
-          <div class="vx-col md:w-1/3 w-full mb-4">
-            <label>Gói phí</label>
-            <input
-              class="vs-inputx vs-input--input normal"
-              type="text"
-              name="title"
-              v-model="agreement_info.tuition_fee_name"
+              v-model="reserve_info.created_at"
               disabled="true"
             />
           </div>
@@ -125,7 +95,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.must_charge | formatNumber"
+              :value="reserve_info.must_charge | formatNumber"
               disabled="true"
             />
           </div>
@@ -135,7 +105,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.total_charged | formatNumber"
+              :value="reserve_info.total_charged | formatNumber"
               disabled="true"
             />
           </div>
@@ -154,7 +124,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.debt_amount | formatNumber"
+              :value="reserve_info.debt_amount | formatNumber"
               disabled="true"
             />
           </div>
@@ -240,7 +210,7 @@
           body: '',
           color:'',
         },
-        agreement_info:{},
+        reserve_info:{},
         payment:{
           method:1,
           note:'',
@@ -255,15 +225,15 @@
     },
     watch: {
       amount: function (val) {
-        if (this.agreement_info.must_charge) {
+        if (this.reserve_info.must_charge) {
           const value = u.fmc(val)
-          const suma = value.n + parseInt(this.agreement_info.total_charged)
-          const debt = parseInt(this.agreement_info.must_charge) - parseInt(suma)
-          if (suma > parseInt(this.agreement_info.must_charge)) {
-            this.amount = parseInt(this.agreement_info.must_charge, 10) - parseInt(this.agreement_info.total_charged, 10)
+          const suma = value.n + parseInt(this.reserve_info.total_charged)
+          const debt = parseInt(this.reserve_info.must_charge) - parseInt(suma)
+          if (suma > parseInt(this.reserve_info.must_charge)) {
+            this.amount = parseInt(this.reserve_info.must_charge, 10) - parseInt(this.reserve_info.total_charged, 10)
             this.amount = this.amount > 1000 && this.amount % 1000 > 0 ? ((this.amount / 1000) + 1) * 1000 : this.amount
           } else {
-            this.agreement_info.debt_amount = debt
+            this.reserve_info.debt_amount = debt
             this.amount = value.s
           }
           this.payment.amount = value.n
@@ -278,10 +248,10 @@
       },
       loadDetail(){
         this.$vs.loading();
-        axios.g(`/api/lms/agreements/show/${this.$route.params.id}`)
+        axios.g(`/api/lms/reserves/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.agreement_info = response.data
+          this.reserve_info = response.data
         })
       },
       save() {
@@ -316,12 +286,12 @@
       },
       processSave(){
         const data = {
-          agreement_id: this.agreement_info.id,
+          agreement_id: this.reserve_info.id,
           note: this.payment.note,
           charge_date: this.payment.charge_date,
           amount: this.payment.amount,
           method: this.payment.method,
-          type: 1
+          type: 2
         };
         this.$vs.loading();
         axios.p(`/api/lms/accounting/charges/add`,data)

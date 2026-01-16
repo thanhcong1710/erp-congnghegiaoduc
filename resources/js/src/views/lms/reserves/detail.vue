@@ -145,6 +145,18 @@
                       <p  class="invoice-total-amount"> {{ reserve_info.meta_data.reserve.total_amount_reserve | formatMoney}} </p>
                   </div>
               </div>
+              <div  class="invoice-total-wrapper" v-if="reserve_info.meta_data.reserve.total_amount_reserve > 0">
+                  <div  class="invoice-total-item" style="font-weight: bold;">
+                      <p  class="invoice-total-title"> Đã đóng: </p>
+                      <p  class="invoice-total-amount" style=" color: green;"> {{ reserve_info.total_charged | formatMoney}} </p>
+                  </div>
+              </div>
+              <div  class="invoice-total-wrapper" v-if="reserve_info.meta_data.reserve.total_amount_reserve > 0">
+                  <div  class="invoice-total-item" style="font-weight: bold; ">
+                      <p  class="invoice-total-title"> Công nợ: </p>
+                      <p  class="invoice-total-amount" style="color: red;"> {{ reserve_info.debt_amount | formatMoney}} </p>
+                  </div>
+              </div>
               <p><i>(Học sinh đã học cần đóng thêm phí bảo lưu)</i></p>
             </div>
             <div class="vx-col w-full mb-4">
@@ -155,7 +167,7 @@
               <div v-html="alert.body"></div>
             </vs-alert>
             <div class="vx-col w-full mb-4" v-if="status!=1">
-              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status==4 ? 'Đã bảo lưu' : (status==2? 'Đã phê duyệt' : 'Từ chối phê duyệt')}}</strong></label>
+              <label>Trạng thái: <strong :class="status==2? 'text-success' :'text-danger'">{{status | getStatusName}}</strong></label>
             </div>
           </div>
 
@@ -362,6 +374,12 @@
             case 4:
                 resp = 'Đã bảo lưu';
                 break;
+            case 5:
+              resp = 'Chờ đóng phí bảo lưu';
+              break;
+            case 6:
+              resp = 'Đã đóng phí bảo lưu';
+              break;
             default:
                 resp = 'Chờ phê duyệt'
                 break
