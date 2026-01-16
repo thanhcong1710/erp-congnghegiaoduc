@@ -324,43 +324,78 @@ class ChargesController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
+        $type = isset($request->type) ? $request->type : '';
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        if ($type ==1){
+            $cond = " c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
 
-        if (!empty($branch_id)) {
-            $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
-        }
-        
-        if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
-        }
-        if ($end_date !== '') {
-            $cond .= " AND p.charge_date <= '$end_date'";
-        }
-        if ($start_date !== '') {
-            $cond .= " AND p.charge_date >= '$start_date'";
-        }
-        
-        $order_by = " ORDER BY p.id DESC ";
+            if (!empty($branch_id)) {
+                $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            }
+            if ($end_date !== '') {
+                $cond .= " AND p.charge_date <= '$end_date'";
+            }
+            if ($start_date !== '') {
+                $cond .= " AND p.charge_date >= '$start_date'";
+            }
+            
+            $order_by = " ORDER BY p.id DESC ";
 
-        $total = u::first("SELECT count(p.id) AS total 
+            $total = u::first("SELECT count(p.id) AS total 
+                    FROM payments AS p
+                        LEFT JOIN agreements AS c ON c.id=p.agreement_id 
+                        LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+            
+            $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
+                    c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
                 FROM payments AS p
-                    LEFT JOIN agreements AS c ON c.id=p.agreement_id 
-                    LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+                    LEFT JOIN agreements AS c ON c.id=p.agreement_id
+                    LEFT JOIN students AS s ON s.id=c.student_id
+                WHERE $cond $order_by $limitation");
+        }else{
+            $cond = " c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+
+            if (!empty($branch_id)) {
+                $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
+            }
+            
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            }
+            if ($end_date !== '') {
+                $cond .= " AND p.charge_date <= '$end_date'";
+            }
+            if ($start_date !== '') {
+                $cond .= " AND p.charge_date >= '$start_date'";
+            }
+            
+            $order_by = " ORDER BY p.id DESC ";
+
+            $total = u::first("SELECT count(p.id) AS total 
+                    FROM payments AS p
+                        LEFT JOIN reserves AS c ON c.id=p.agreement_id 
+                        LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+            
+            $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
+                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
+                FROM payments AS p
+                    LEFT JOIN reserves AS c ON c.id=p.agreement_id
+                    LEFT JOIN students AS s ON s.id=c.student_id
+                WHERE $cond $order_by $limitation");
+        }
         
-        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
-                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
-                c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
-            FROM payments AS p
-                LEFT JOIN agreements AS c ON c.id=p.agreement_id
-                LEFT JOIN students AS s ON s.id=c.student_id
-            WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }

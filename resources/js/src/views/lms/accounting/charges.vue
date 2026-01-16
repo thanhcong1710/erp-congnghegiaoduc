@@ -33,6 +33,13 @@
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Loại thu phí</label>
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.type" @change="getData">
+              <option value="1">Phí nhập học</option>
+              <option value="2">Phí bảo lưu</option>
+            </select>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -60,7 +67,7 @@
                     </div>
                   </th>
                   <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Hợp đồng
+                    <div class="vs-table-text">Thông tin
                       <!---->
                     </div>
                   </th>
@@ -84,14 +91,18 @@
                    <p><strong>{{ item.name }}</strong></p>
                   <p>Mã: {{ item.lms_code }}</p>
                 </td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.code }}</strong></p>
+                <td class="td vs-table--td" v-if="searchData.type==1">
+                  <p> Thu phí nhập học</p>
+                  <p >Mã HĐ: <strong>{{ item.code }}</strong></p>
                   <p>Gói phí: {{item.tuition_fee_name}}</p>
+                </td>
+                <td class="td vs-table--td"  v-else>
+                  <p> Thu phí bảo lưu</p>
                 </td>
                 <td class="td vs-table--td">
                   <p><strong> {{ item.amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
-                  <p>Tổng tiền đã thu: {{ item.total | formatMoney }}</p>
+                  <p>Đã thu: {{ item.total | formatMoney }}</p>
                   <p>Công nợ: {{ item.debt | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td">
@@ -151,6 +162,7 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          type: 1
         },
         datepickerOptions: {
           closed: true,
@@ -226,6 +238,7 @@
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
             pagination:this.pagination,
+            type: this.searchData.type
           }
 
         this.$vs.loading()

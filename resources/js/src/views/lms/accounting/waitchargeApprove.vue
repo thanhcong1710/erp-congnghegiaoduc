@@ -51,67 +51,13 @@
               <thead class="vs-table--thead">
                 <tr>
                   <!---->
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text text-center">STT
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text text-center" >Mã học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Tên Học sinh
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center" v-if="searchData.type==1">
-                    <div class="vs-table-text">Mã Hợp đồng
-                      <!---->
-                    </div>
-                  </th>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center"  v-if="searchData.type==1">
-                    <div class="vs-table-text">Gói phí
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Loại
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Số tiền đã đóng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Ngày đóng
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Người tạo
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Trạng thái
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Người duyệt
-                      <!---->
-                    </div>
-                  </th>
-                  <th colspan="1" rowspan="1" class="text-center">
-                    <div class="vs-table-text">Thao tác
-                      <!---->
-                    </div>
-                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">STT</th>
+                  <th colspan="1" rowspan="1">Học sinh</th>
+                  <th colspan="1" rowspan="1">Thông tin</th>
+                  <th colspan="1" rowspan="1">Đóng phí</th>
+                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                  <th colspan="1" rowspan="1" class="text-center">Người duyệt</th>
+                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
@@ -119,33 +65,26 @@
                 
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">
-                  <p>{{ item.lms_code }}</p>
-                </td>
-                <td class="td vs-table--td">
                   <p>{{ item.name }}</p>
+                  <p>Mã: {{ item.lms_code }}</p>
                 </td>
                 <td class="td vs-table--td" v-if="searchData.type==1">
-                  <p> <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >{{ item.code }}</router-link></p>
+                  <p>Phí nhập học</p>
+                  <p>Mã HĐ: {{ item.code }}</p>
+                  <p>Gói phí: {{ item.tuition_fee_name }}</p>
                 </td>
-                <td class="td vs-table--td" v-if="searchData.type==1">
-                  <p>{{ item.tuition_fee_name }}</p>
+                <td class="td vs-table--td" v-else>
+                  <p>Phí bảo lưu</p>
+                </td> 
+                <td class="td vs-table--td ">
+                  <p>Số tiền: <strong>{{ item.charge_amount | formatMoney }}</strong></p>
+                  <p>Ngày đóng: {{ item.charge_date }}</p>
+                  <p>Người tạo: {{ item.creator_name }}</p>
                 </td>
-                <td class="td vs-table--td text-right ">
-                  <p>{{ searchData.type==1 ? "Phí nhập học" : "Phí bảo lưu" }}</p>
-                </td>    
-                <td class="td vs-table--td text-right ">
-                  <p>{{ item.charge_amount | formatMoney }}</p>
-                </td>
-                <td class="td vs-table--td text-right ">
-                  <p>{{ item.charge_date }}</p>
-                </td>
-                <td class="td vs-table--td text-right ">
-                  <p>{{ item.creator_name }}</p>
-                </td>
-                <td class="td vs-table--td text-right ">
+                <td class="td vs-table--td text-center">
                   <p>{{item.status==1 ? 'Đã duyệt' : ( item.status==2 ? 'Từ chối duyệt' : 'Chưa duyệt')}}</p>
                 </td>
-                <td class="td vs-table--td text-right ">
+                <td class="td vs-table--td text-center">
                   <p>{{ item.approver_name }}</p>
                 </td>
                 <td class="td vs-table--td text-center list-action" v-if="searchData.type==1"> 
