@@ -121,7 +121,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('upload-avatar', 'StudentsController@uploadAvatar');
                 Route::post('payments', 'StudentsController@payments');
             });
-           
+
             Route::post('agreements/load-tuition-fee', 'ContractsController@loadTuitionFee');
             Route::post('agreements/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('agreements/check-coupon', 'ContractsController@checkCoupon');
@@ -208,6 +208,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('02a', 'ReportsController@report02a');
                 Route::post('02b', 'ReportsController@report02b');
                 Route::post('02c', 'ReportsController@report02c');
+                Route::post('active-classes', 'ReportsController@reportActiveClasses');
             });
             Route::prefix('exports')->group(function () {
                 Route::get('report01/{key}/{value}', 'ExportsController@report01');

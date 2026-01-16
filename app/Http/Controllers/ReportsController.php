@@ -14,16 +14,16 @@ class ReportsController extends Controller
 
     public function collectFullFeeActive(Request $request, $month, $branch)
     {
-        if($month && $month!="_"){
-            $report_month = (int)$month > 9 ? date("Y").'-'.(int)$month : date("Y").'-0'.(int)$month;
-        }else{
-            $report_month = date('Y-m',time()-7*3600);
+        if ($month && $month != "_") {
+            $report_month = (int) $month > 9 ? date("Y") . '-' . (int) $month : date("Y") . '-0' . (int) $month;
+        } else {
+            $report_month = date('Y-m', time() - 7 * 3600);
         }
-        $start_date = date('Y-m-01',strtotime($report_month.'-01'));
-        if(date('Y-m',strtotime($report_month.'-01')) == date('Y-m')){
+        $start_date = date('Y-m-01', strtotime($report_month . '-01'));
+        if (date('Y-m', strtotime($report_month . '-01')) == date('Y-m')) {
             $end_date = date('Y-m-d');
-        }else{
-            $end_date = date('Y-m-t',strtotime($report_month.'-01'));
+        } else {
+            $end_date = date('Y-m-t', strtotime($report_month . '-01'));
         }
         $where = "";
         $where_del = "";
@@ -65,21 +65,22 @@ class ReportsController extends Controller
         return response()->json('ok');
     }
 
-    public function addItems($list) {
+    public function addItems($list)
+    {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
             $query = "INSERT INTO report_full_fee_active (student_id,contract_id, class_id, product_id, cm_id, report_month, branch_id, created_at, creator_id,end_date,`start_date`,done_sessions,summary_sessions,last_done_sessions, `type`, tuition_fee_id, init_tuition_fee_id) VALUES ";
             if (count($list) > 5000) {
-                for($i = 0; $i < 5000; $i++) {
+                for ($i = 0; $i < 5000; $i++) {
                     $item = $list[$i];
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                    $query .= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
                 self::addItems(array_slice($list, 5000));
             } else {
-                foreach($list as $item) {
-                    $query.= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
+                foreach ($list as $item) {
+                    $query .= "('$item->student_id', '$item->contract_id', '$item->class_id', '$item->product_id', '$item->cm_id', '$item->report_month', '$item->branch_id', '$created_at', 99999,'$item->enrolment_last_date','$item->enrolment_start_date','$item->done_sessions','$item->summary_sessions','$item->last_done_sessions','$item->type_fee', '$item->tuition_fee_id', '$item->init_tuition_fee_id'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -93,17 +94,17 @@ class ReportsController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " r.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
-            $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+            $cond .= " AND r.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        
+
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
@@ -111,12 +112,12 @@ class ReportsController extends Controller
         if ($start_date !== '') {
             $cond .= " AND r.report_month = '$start_date'";
         }
-        
+
         $order_by = " ORDER BY r.id DESC ";
 
         $total = u::first("SELECT count(r.id) AS total 
             FROM report_full_fee_active AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
-        
+
         $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
                 CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
                 IF(r.type=0, 'NEW', 'RENEW') AS type_fee, r.last_done_sessions, r.done_sessions,r.summary_sessions,r.start_date, r.end_date
@@ -133,7 +134,8 @@ class ReportsController extends Controller
         return response()->json($data);
     }
 
-    public function updateCompletedDate(){
+    public function updateCompletedDate()
+    {
         u::query("UPDATE contracts AS c LEFT JOIN payments AS  p ON p.contract_id=c.id AND p.debt=0 SET c.completed_date=p.charge_date WHERE c.debt_amount=0 AND c.must_charge>0 AND p.id IS NOT NULL");
         return true;
     }
@@ -154,7 +156,7 @@ class ReportsController extends Controller
             $sql_update_log_contract = "INSERT INTO log_contracts (id,renewed_date,success_renewed_date,renew_runtime) VALUES";
             $renew_runtime = date('Y-m-d H:i:s');
             foreach ($contracts as $contract) {
-                $resp = (object)[
+                $resp = (object) [
                     'renewed_date' => null,
                     'success_renewed_date' => null
                 ];
@@ -217,21 +219,21 @@ class ReportsController extends Controller
             $query = "INSERT INTO report_renews (student_id, contract_id, branch_id, product_id, class_id, init_renew_tuition_fee_id, init_tuition_fee_id, ec_id, cm_id, renewed_cm_id, ec_leader_id, cm_leader_id, ceo_id, renew_amount, `status`, renewed_month, last_date, created_at) VALUES ";
             if (count($list) > 5000) {
                 for ($i = 0; $i < 5000; $i++) {
-                $item = $list[$i];
-                $renewed_cm_id = $item->cm_id;
-                $renew_amount = (int)$item->renew_amount;
-                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id', '".(int)$item->init_renew_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
-                                '".(int)$item->ceo_branch_id."', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
+                    $item = $list[$i];
+                    $renewed_cm_id = $item->cm_id;
+                    $renew_amount = (int) $item->renew_amount;
+                    $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id', '" . (int) $item->init_renew_tuition_fee_id . "', '" . (int) $item->init_tuition_fee_id . "', '" . (int) $item->ec_id . "', '" . (int) $item->cm_id . "', '" . (int) $renewed_cm_id . "','" . (int) $item->ec_leader_id . "','" . (int) $item->cm_leader_id . "',
+                                '" . (int) $item->ceo_branch_id . "', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
                 self::addItems(array_slice($list, 5000));
             } else {
                 foreach ($list as $item) {
-                $renewed_cm_id = $item->cm_id;
-                $renew_amount = (int)$item->renew_amount;
-                $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id','".(int)$item->init_renew_tuition_fee_id."', '".(int)$item->init_tuition_fee_id."', '".(int)$item->ec_id."', '".(int)$item->cm_id."', '".(int)$renewed_cm_id."','".(int)$item->ec_leader_id."','".(int)$item->cm_leader_id."',
-                                '".(int)$item->ceo_branch_id."', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
+                    $renewed_cm_id = $item->cm_id;
+                    $renew_amount = (int) $item->renew_amount;
+                    $query .= "('$item->student_id', '$item->contract_id', '$item->branch_id', '$item->product_id', '$item->class_id','" . (int) $item->init_renew_tuition_fee_id . "', '" . (int) $item->init_tuition_fee_id . "', '" . (int) $item->ec_id . "', '" . (int) $item->cm_id . "', '" . (int) $renewed_cm_id . "','" . (int) $item->ec_leader_id . "','" . (int) $item->cm_leader_id . "',
+                                '" . (int) $item->ceo_branch_id . "', '$renew_amount', '$item->renewed_status', '$item->renewed_month', '$item->renewed_date', '$created_at' ),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -248,17 +250,17 @@ class ReportsController extends Controller
         $class_id = data_get($request, 'class_id');
         $cm_id = data_get($request, 'cm_id');
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " r.`disabled` = 0 AND s.status>0 AND r.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " r.`disabled` = 0 AND s.status>0 AND r.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
-            $cond .= " AND r.branch_id IN (".implode(",",$branch_id).")";
+            $cond .= " AND r.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        
+
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
@@ -276,12 +278,12 @@ class ReportsController extends Controller
         if ($cm_id) {
             $cond .= " AND r.cm_id = '$cm_id'";
         }
-        
+
         $order_by = " ORDER BY r.id DESC ";
 
         $total = u::first("SELECT count(r.id) AS total 
             FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
-        
+
         $list = u::query("SELECT s.name AS student_name, s.lms_code, s.gud_mobile1, r.last_date, r.status, r.renew_amount,
                         b.name AS branch_name,
                         p.name AS product_name,
@@ -307,17 +309,17 @@ class ReportsController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " b.status = 1 AND b.id IN (" . Auth::user()->getBranchesHasUser().")";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " b.status = 1 AND b.id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
-            $cond .= " AND b.id IN (".implode(",",$branch_id).")";
+            $cond .= " AND b.id IN (" . implode(",", $branch_id) . ")";
         }
-        
+
         $order_by = " ORDER BY b.id ";
         $total = u::first("SELECT COUNT(b.id) total FROM branches b WHERE $cond");
         $renewSql = "SELECT COUNT(r.id) FROM report_renews AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE s.status>0 AND  r.`disabled` = 0 AND r.renewed_month = '$start_date' AND r.branch_id =b.id";
@@ -337,16 +339,16 @@ class ReportsController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $start_date = isset($request->start_date) ? $request->start_date : date('Y-m');
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $branch_query =  Auth::user()->getBranchesHasUser();
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $branch_query = Auth::user()->getBranchesHasUser();
         if (!empty($branch_id)) {
-            $branch_query=implode(",",$branch_id);
+            $branch_query = implode(",", $branch_id);
         }
-        
+
         $order_by = " ORDER BY u.id ";
         $total = u::first("SELECT COUNT(u.id) total
                 FROM users AS u 
@@ -363,6 +365,87 @@ class ReportsController extends Controller
                 LEFT JOIN branch_has_user AS bu ON bu.user_id=ru.user_id
                 LEFT JOIN branches AS b ON b.id=bu.branch_id
             WHERE ru.role_id IN (55,56) AND (u.status =1 OR (u.status=0 AND (SELECT COUNT(id) FROM report_renews WHERE cm_id = ru.user_id AND `status` > 0 AND `disabled` = 0 AND renewed_month = '$start_date' AND branch_id IN ($branch_query))>0)) $order_by $limitation ");
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function reportActiveClasses(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " c.status = 1 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; // Active classes
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (c.cls_name LIKE '%$keyword%') ";
+        }
+
+        $order_by = " ORDER BY c.id DESC ";
+
+        $total = u::first("SELECT count(c.id) AS total FROM classes AS c WHERE $cond");
+
+        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day,
+                    b.name AS branch_name,
+                    p.name AS product_name,
+                    u_teacher.name AS teacher_name,
+                    u_ta.name AS ta_name,
+                    (SELECT name FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS shift_name,
+                    (SELECT start_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS start_time,
+                    (SELECT end_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS end_time,
+                    (SELECT name FROM rooms WHERE id = (SELECT room_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS room_name,
+                    (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND ct.status != 7 AND s.status > 0) AS total_students
+                FROM classes AS c
+                    LEFT JOIN branches AS b ON b.id = c.branch_id
+                    LEFT JOIN products AS p ON p.id = c.product_id
+                    LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
+                    LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
+                WHERE $cond 
+                $order_by $limitation";
+
+        $list = u::query($query);
+
+        if ($list) {
+            foreach ($list as $item) {
+                $item->total_students = (int) $item->total_students;
+                $item->max_students = (int) $item->max_students;
+                $diff = $item->max_students - $item->total_students;
+                if ($diff > 0) {
+                    $item->status_text = 'THIẾU';
+                    $item->status_class = 'text-warning';
+                } elseif ($diff < 0) {
+                    $item->status_text = 'THỪA';
+                    $item->status_class = 'text-danger';
+                } else {
+                    $item->status_text = 'ĐỦ';
+                    $item->status_class = 'text-success';
+                }
+
+                $days = [];
+                if ($item->class_day) {
+                    $days_arr = explode(',', $item->class_day);
+                    foreach ($days_arr as $d) {
+                        $days[] = "T$d";
+                    }
+                }
+                $item->schedule_text = implode('+', $days);
+                if ($item->start_time && $item->end_time) {
+                    $item->schedule_text .= " (" . substr($item->start_time, 0, 5) . "-" . substr($item->end_time, 0, 5) . ")";
+                }
+
+                $item->cls_startdate = date('d/m/Y', strtotime($item->cls_startdate));
+            }
+        }
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

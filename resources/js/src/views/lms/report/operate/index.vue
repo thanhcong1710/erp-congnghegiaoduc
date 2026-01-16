@@ -40,7 +40,7 @@
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-07'"  v-if="checkPermission('lms_reports_operate_07')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-07'">
                 <p>07. BÁO CÁO LỚP HỌC</p>
               </router-link>
             </div>
