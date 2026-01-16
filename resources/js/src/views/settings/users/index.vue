@@ -6,6 +6,17 @@
     <div class="flex flex-wrap items-center">
       <vs-button class="p-3" color="success" type="border" @click="addNewData"><i class="fa-solid fa-plus"></i> Thêm mới</vs-button>
       <vs-button class="ml-3 p-3" color="danger" type="border" @click="confirmDelete(0)"><i class="fa-solid fa-right-from-bracket"></i> Xóa hết Token</vs-button>
+      <div class="w-64 ml-3">
+        <v-select 
+          :options="branches" 
+          :reduce="branch => branch.id" 
+          label="name" 
+          v-model="searchQuery.branch_id"
+          placeholder="Chọn trung tâm"
+          @input="getData()">
+          <span slot="no-options">Không có dữ liệu</span>
+        </v-select>
+      </div>
       <div class="con-input-search vs-table--search">
         <input type="text" class="input-search vs-table--search-input" style="padding:14px 35px; font-size:14px;" placeholder="Mã, tên nhân viên" v-model="searchQuery.keyword" @input="getData()">
         <i class="vs-icon notranslate icon-scale material-icons null" style="font-size:24px;">search</i>
@@ -86,7 +97,9 @@
         context : { componentParent: this },
         searchQuery: {
           keyword: '',
+          branch_id: '',
         },
+        branches: [],
 
         users: [],
         limitSource: [10, 20, 30, 40, 50],
@@ -154,6 +167,7 @@
         this.$vs.loading()
         axios.p('/api/users/list', {
             keyword: this.searchQuery.keyword,
+            branch_id: this.searchQuery.branch_id,
             pagination: this.pagination
           })
           .then((response) => {
@@ -181,6 +195,9 @@
       },
     },
     created() {
+      axios.g('/api/system/branches').then(response => {
+        this.branches = response.data
+      })
       this.getData();
     },
   }

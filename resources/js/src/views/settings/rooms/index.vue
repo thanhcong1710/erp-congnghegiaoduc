@@ -11,6 +11,17 @@
             <vs-input class="w-full" placeholder="Tên phòng học" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trung tâm</label>
+             <v-select 
+              :options="branches" 
+              :reduce="branch => branch.id" 
+              label="name" 
+              v-model="searchData.branch_id"
+              placeholder="Chọn trung tâm">
+              <span slot="no-options">Không có dữ liệu</span>
+            </v-select>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
             <multiselect
                 name="search_status"
@@ -118,8 +129,11 @@
         searchData: {
           keyword: "",
           status: "",
+          status: "",
           arr_status:"",
+          branch_id: "",
         },
+        branches: [],
         statusOptions:[
           {id:0,label:'Không kích hoạt'},
           {id:1,label:'Kích hoạt'},
@@ -167,6 +181,9 @@
       }
     },
     created() {
+      axios.g('/api/system/branches').then(response => {
+        this.branches = response.data
+      })
       this.getData();
     },
     methods: {
@@ -174,6 +191,7 @@
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
         this.searchData.status= ""
+        this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
         this.getData();
       },
@@ -189,6 +207,7 @@
         const data = {
             keyword: this.searchData.keyword,
             status:this.searchData.status,
+            branch_id:this.searchData.branch_id,
             pagination:this.pagination,
           }
 
