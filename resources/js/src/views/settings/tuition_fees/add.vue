@@ -342,6 +342,17 @@
           mess += " - Loại gói phí không được để trống<br/>";
           resp = false;
         }
+        // Validate tổng giá combo = giá bán
+        if (this.tuition_fee.type_fee == 2) {
+          const totalComboPrice = this.getTotalPriceCombo()
+          const salePrice = Number(this.tuition_fee.price || 0)
+
+          if (totalComboPrice !== salePrice) {
+            mess += `- Tổng giá các gói lẻ (<b>${u.fmc(totalComboPrice).s}</b>) 
+              phải bằng giá bán (<b>${u.fmc(salePrice).s}</b>)<br/>`;
+            resp = false;
+          }
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
