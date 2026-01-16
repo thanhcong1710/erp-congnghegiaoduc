@@ -54,6 +54,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('ta/{branch_id}', 'SystemController@getTAs');
             Route::get('get-class-by-cm/{cm_id}', 'SystemController@getClassByCM');
             Route::get('customer-statuses', 'SystemController@getCustomerStatuses');
+            Route::get('call-statuses', 'SystemController@getCallStatuses');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');

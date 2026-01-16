@@ -198,4 +198,9 @@ class SystemController extends Controller
     {
         return response()->json(config('crm.customer_statuses'));
     }
+
+    public function getCallStatuses()
+    {
+        return response()->json(config('crm.call_statuses'));
+    }
 }

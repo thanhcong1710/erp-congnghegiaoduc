@@ -13,5 +13,15 @@ return [
         ['id' => 13, 'name' => '13. Từ chối (Giá / Thời gian)'],
         ['id' => 14, 'name' => '14. Trì hoãn lâu'],
         ['id' => 20, 'name' => '20. Chăm sóc lại'],
+    ],
+    'call_statuses' => [
+        ['id' => 1, 'name' => 'Thuê bao - Tắt máy - Sai số'],
+        ['id' => 2, 'name' => 'Location'],
+        ['id' => 3, 'name' => 'Máy bận - Không nghe máy'],
+        ['id' => 4, 'name' => 'KH hẹn gọi lại sau'],
+        ['id' => 5, 'name' => 'KH Từ chối nói chuyện'],
+        ['id' => 6, 'name' => 'KH không phù hợp'],
+        ['id' => 7, 'name' => 'KH tiềm năng'],
+        ['id' => 9, 'name' => 'Blacklist'],
     ]
 ];

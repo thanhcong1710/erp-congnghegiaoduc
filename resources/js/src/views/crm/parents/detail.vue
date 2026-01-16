@@ -57,14 +57,7 @@
               <label for="nf-email">Trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
               <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status">
                 <option value="">Chọn trạng thái</option>
-                <option value="1">Thuê bao - Tắt máy - Sai số</option>
-                <option value="2">Location</option>
-                <option value="3">Máy bận - Không nghe máy</option>
-                <option value="4">KH hẹn gọi lại sau</option>
-                <option value="5">KH Từ chối nói chuyện</option>
-                <option value="6">KH không phù hợp</option>
-                <option value="7">KH tiềm năng</option>
-                <option value="9">Blacklist</option>
+                <option :value="item.id" v-for="(item, index) in call_statuses" :key="index">{{item.name}}</option>
               </select>
             </div>
             <div class="mt-3">
@@ -624,6 +617,7 @@
         },
         check_list: [],
         customer_statuses:[],
+        call_statuses:[],
         active_tab: 2,
         alert:{
           active: false,
@@ -842,6 +836,10 @@
       axios.g(`/api/system/customer-statuses`)
         .then(response => {
         this.customer_statuses = response.data
+      })
+      axios.g(`/api/system/call-statuses`)
+        .then(response => {
+        this.call_statuses = response.data
       })
       await axios.g(`/api/system/sources`)
         .then(response => {

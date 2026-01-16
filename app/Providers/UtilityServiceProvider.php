@@ -122,13 +122,13 @@ class UtilityServiceProvider extends ServiceProvider
     }
     public static function makingPagination($list, $total, $page, $limit)
     {
-        $pagination = (object)[];
-        $data = (object)[];
+        $pagination = (object) [];
+        $data = (object) [];
         $pagination->spage = 1;
         $pagination->cpage = $page;
         $pagination->total = $total;
         $pagination->limit = $limit;
-        $pagination->lpage = ($total % $limit) == 0 ? (int)($total / $limit) : (int)($total / $limit) + 1;
+        $pagination->lpage = ($total % $limit) == 0 ? (int) ($total / $limit) : (int) ($total / $limit) + 1;
         $pagination->ppage = $page > 0 ? $page - 1 : 0;
         $pagination->npage = $page < $pagination->lpage ? $page + 1 : $pagination->lpage;
         $data->list = $list;
@@ -180,7 +180,7 @@ class UtilityServiceProvider extends ServiceProvider
         return array(
             'displayName' => data_get($data, 'name'),
             'name' => data_get($data, 'name'),
-            'email' =>  data_get($data, 'email'),
+            'email' => data_get($data, 'email'),
             'phone' => data_get($data, 'phone'),
             'photoURL' => data_get($data, 'avatar_url') ? data_get($data, 'avatar_url') : "/images/avatar-default.jpg",
             'providerId' => "jwt",
@@ -195,7 +195,7 @@ class UtilityServiceProvider extends ServiceProvider
     {
         $resp = false;
         if ($number) {
-            $resp = trim(str_replace(array('-', '.', ' '), '', (string)$number));
+            $resp = trim(str_replace(array('-', '.', ' '), '', (string) $number));
             if (substr($resp, 0, 2) == "84") {
                 $resp = "0" . substr($resp, 2);
             } elseif (substr($resp, 0, 1) != "0") {
@@ -254,23 +254,14 @@ class UtilityServiceProvider extends ServiceProvider
     {
         if ($call_status === 0) {
             return 'Blank';
-        } elseif ($call_status == 1) {
-            return 'Thuê bao - Tắt máy - Sai số';
-        } elseif ($call_status == 2) {
-            return 'Location';
-        } elseif ($call_status == 3) {
-            return 'Máy bận - Không nghe máy';
-        } elseif ($call_status == 4) {
-            return 'KH hẹn gọi lại sau';
-        } elseif ($call_status == 5) {
-            return 'KH Từ chối nói chuyện';
-        } elseif ($call_status == 6) {
-            return 'KH không phù hợp';
-        } elseif ($call_status == 7) {
-            return 'KH tiềm năng';
-        } elseif ($call_status == 9) {
-            return 'Blacklist';
         }
+        $statuses = config('crm.call_statuses');
+        foreach ($statuses as $status) {
+            if ($status['id'] == $call_status) {
+                return $status['name'];
+            }
+        }
+        return '';
     }
 
     public static function genStatusByCallStatus($call_status, $call_status_sub)
@@ -304,7 +295,7 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function explodeName($text)
     {
-        $data = (object)[
+        $data = (object) [
             'firstname' => "",
             'midname' => "",
             'lastname' => "",
@@ -333,7 +324,7 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function addLogContracts($contract_id)
     {
-        $contract_info = (array)self::getObject(['id' => $contract_id], 'contracts');
+        $contract_info = (array) self::getObject(['id' => $contract_id], 'contracts');
         $class_date = date('Y-m-d');
         if (data_get($contract_info, 'status') == 6) {
             $schedule = self::first("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id,s.subject_id, s.subject_stt
@@ -373,7 +364,7 @@ class UtilityServiceProvider extends ServiceProvider
                 }
             } else {
                 if ($schedule_has_student_info) {
-                    self::query("DELETE FROM  schedule_has_student WHERE id=" . (int)data_get($schedule_has_student_info, 'id')." AND `status`=0");
+                    self::query("DELETE FROM  schedule_has_student WHERE id=" . (int) data_get($schedule_has_student_info, 'id') . " AND `status`=0");
                 }
             }
         } else {
@@ -415,13 +406,13 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function calculatorSessions($start, $end, $holidays = [], $classdays = [], $onlyTotal = false)
     {
-        $resp = (object)[
+        $resp = (object) [
             "date" => [],
             "total" => 0,
             "end_date" => null
         ];
         $startTime = strtotime(date("Y-m-d", strtotime($start)));
-        $endTime =   strtotime(date("Y-m-d", strtotime($end)));
+        $endTime = strtotime(date("Y-m-d", strtotime($end)));
         if (!$startTime || !$endTime || !is_array($classdays) || !count($classdays)) {
             return $resp;
         }
@@ -474,7 +465,8 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function stringToTimestampHolidays($holidays, $startTime, $endTime)
     {
-        if (!$holidays) return null;
+        if (!$holidays)
+            return null;
         $res = [];
         foreach ($holidays as $holiday) {
             $hStart = strtotime(date("Y-m-d", strtotime($holiday->start_date)));
@@ -498,7 +490,7 @@ class UtilityServiceProvider extends ServiceProvider
         $days = [];
         $weekday = (int) date('N', $startTime);
         if ($weekday === 7) {
-            if(in_array(8,$classdays)){
+            if (in_array(8, $classdays)) {
                 --$numberOfSessions;
                 $days[] = date("Y-m-d", $startTime);
             }
@@ -506,7 +498,7 @@ class UtilityServiceProvider extends ServiceProvider
         }
         while ($numberOfSessions >= 0) {
             foreach ($classdays as $key => $classday) {
-                $classday = $classday -1;
+                $classday = $classday - 1;
                 if ($weekday > $classday) {
                     if ($key >= $maxLength) {
                         $startTime += (7 - $weekday) * $timeOfDay;
@@ -542,7 +534,8 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function mergeHolidays($holidays, $pStart, $pEnd)
     {
-        if (!$holidays || count($holidays) <= 1) return $holidays;
+        if (!$holidays || count($holidays) <= 1)
+            return $holidays;
         $res = [];
         foreach ($holidays as $holiday) {
             if ($holiday['end_date'] >= $pStart) {
@@ -554,7 +547,8 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function checkInHolidayByTimestampBinarySearch($date, $holidays)
     {
-        if (!$holidays) return false;
+        if (!$holidays)
+            return false;
         foreach ($holidays as $holiday) {
             if ($date >= $holiday['start_date'] && $date <= $holiday['end_date']) {
                 return true;
@@ -626,7 +620,7 @@ class UtilityServiceProvider extends ServiceProvider
                     $product_ids = explode(',', $re->products);
                     foreach ($holidays as $key => $holiday) {
                         if (in_array($key, $product_ids)) {
-                            $holidays[$key][] = (object)[
+                            $holidays[$key][] = (object) [
                                 'start_date' => $re->start_date,
                                 'end_date' => $re->end_date
                             ];
@@ -637,7 +631,7 @@ class UtilityServiceProvider extends ServiceProvider
                 $resp = $holidays;
             } else {
                 foreach ($resp as &$re) {
-                    $re = (object)[
+                    $re = (object) [
                         'start_date' => $re->start_date,
                         'end_date' => $re->end_date
                     ];
@@ -724,13 +718,13 @@ class UtilityServiceProvider extends ServiceProvider
                 'left_sessions' => $left_sessions
             ), array('id' => $contract_id), 'contracts');
         }
-        if($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info,'summary_sessions')>0){
+        if ($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info, 'summary_sessions') > 0) {
             self::updateSimpleRow(array(
                 'status' => 7,
                 'action' => 'Tự động withdraw do hết phí'
             ), array('id' => $contract_id), 'contracts');
             self::addLogContracts($contract_id);
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " .data_get($contract_info, 'code')." hết phí", 0);
+            LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " . data_get($contract_info, 'code') . " hết phí", 0);
         }
         return true;
     }
@@ -762,7 +756,8 @@ class UtilityServiceProvider extends ServiceProvider
         return $text;
     }
 
-    public static function getPermissions($user_id){
+    public static function getPermissions($user_id)
+    {
         $permissions = self::query("SELECT DISTINCT p.name , p.group_id
             FROM role_has_user AS ru 
                 LEFT JOIN permission_has_role AS pr ON pr.role_id=ru.role_id
@@ -770,41 +765,42 @@ class UtilityServiceProvider extends ServiceProvider
             WHERE ru.user_id = $user_id");
         $arr = [];
         $arr_group = [0];
-        foreach($permissions AS $p){
+        foreach ($permissions as $p) {
             $arr[] = $p->name;
-            if(!in_array($p->group_id,$arr_group)){
+            if (!in_array($p->group_id, $arr_group)) {
                 $arr_group[] = $p->group_id;
             }
         }
-        $permission_groups = self::query("SELECT DISTINCT g.name FROM permission_groups AS g WHERE g.id IN(".implode(",",$arr_group).")");
-        foreach($permission_groups AS $p){
+        $permission_groups = self::query("SELECT DISTINCT g.name FROM permission_groups AS g WHERE g.id IN(" . implode(",", $arr_group) . ")");
+        foreach ($permission_groups as $p) {
             $arr[] = $p->name;
         }
         return $arr;
     }
 
-    public static function updateBranchIDParents(){
+    public static function updateBranchIDParents()
+    {
         self::query("UPDATE crm_parents AS p LEFT JOIN branch_has_user AS b ON b.user_id = p.owner_id SET p.branch_id=b.branch_id");
         return true;
     }
 
     public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id)
     {
-        $resp = (object)[];
+        $resp = (object) [];
         if ($from_tuition_fee_id) {
             $available_tuiotion_fee_ids = self::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
             if (count($available_tuiotion_fee_ids)) {
                 $available_ids = [];
                 foreach ($available_tuiotion_fee_ids as $id) {
-                    $available_ids[] = (int)$id->exchange_tuition_fee_id;
+                    $available_ids[] = (int) $id->exchange_tuition_fee_id;
                 }
                 $available_ids = implode(',', $available_ids);
                 $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
                     FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
                     WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
                         AND t.id IN ($available_ids)");
-                if($to_tuition_fee){
-                    $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
+                if ($to_tuition_fee) {
+                    $resp->sessions = ceil($transfer_amount / ($to_tuition_fee->price / $to_tuition_fee->session));
                     $resp->receive_tuition_fee = $to_tuition_fee;
                     $resp->transfer_amount = $transfer_amount;
                 }
@@ -813,63 +809,64 @@ class UtilityServiceProvider extends ServiceProvider
         return $resp;
     }
 
-    public static function update_file_name($file) 
-	{
-	  $pos = strrpos($file,'.');
-	  $ext = substr($file,$pos); 
-	  $dir = strrpos($file,'/');
-	  $dr  = substr($file,0,($dir+1)); 
-  
-	  $arr = explode('/',$file);
-	  $fName = self::convert_slug(trim($arr[(count($arr) - 1)],$ext));
-  
-	  $exist = FALSE;
-	  $i = 0;
-	  
-	  while(!$exist)
-	  {
-		$file = $i > 0 ? $dr.$fName.'_'.$i.$ext : $dr.$fName.$ext;
-		
-		if(!file_exists($file))
-		  $exist = TRUE;
-		
-		$i++;
-	  }
-  
-	  return $file;
-	}
+    public static function update_file_name($file)
+    {
+        $pos = strrpos($file, '.');
+        $ext = substr($file, $pos);
+        $dir = strrpos($file, '/');
+        $dr = substr($file, 0, ($dir + 1));
 
-    public static function convert_slug($str) {
-		
-        $str = trim(mb_strtolower($str));
-		$str = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $str);
-		$str = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $str);
-		$str = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $str);
-		$str = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $str);
-		$str = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $str);
-		$str = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $str);
-		$str = preg_replace('/(đ)/', 'd', $str);
-		$str = preg_replace('/[^a-z0-9-\s]/', '', $str);
-		$str = preg_replace('/([\s]+)/', '_', $str);
-		return $str;
+        $arr = explode('/', $file);
+        $fName = self::convert_slug(trim($arr[(count($arr) - 1)], $ext));
+
+        $exist = FALSE;
+        $i = 0;
+
+        while (!$exist) {
+            $file = $i > 0 ? $dr . $fName . '_' . $i . $ext : $dr . $fName . $ext;
+
+            if (!file_exists($file))
+                $exist = TRUE;
+
+            $i++;
+        }
+
+        return $file;
     }
 
-    public static function generateRandomAlphanumeric($length = 10) {
+    public static function convert_slug($str)
+    {
+
+        $str = trim(mb_strtolower($str));
+        $str = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $str);
+        $str = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $str);
+        $str = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $str);
+        $str = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $str);
+        $str = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $str);
+        $str = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $str);
+        $str = preg_replace('/(đ)/', 'd', $str);
+        $str = preg_replace('/[^a-z0-9-\s]/', '', $str);
+        $str = preg_replace('/([\s]+)/', '_', $str);
+        return $str;
+    }
+
+    public static function generateRandomAlphanumeric($length = 10)
+    {
         // Define the characters to be used
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
-        
+
         // Generate random string
         for ($i = 0; $i < $length; $i++) {
             $randomIndex = rand(0, $charactersLength - 1); // Generate random index
             $randomString .= $characters[$randomIndex];   // Append character
         }
-        
+
         return $randomString;
     }
 
-    public static function convert_number_to_words( $number )
+    public static function convert_number_to_words($number)
     {
         $hyphen = ' ';
         $conjunction = '  ';
@@ -914,41 +911,35 @@ class UtilityServiceProvider extends ServiceProvider
             1000000000000000000 => 'tỷ tỷ'
         );
 
-        if( !is_numeric( $number ) )
-        {
+        if (!is_numeric($number)) {
             return false;
         }
 
-        if( ($number >= 0 && (int)$number < 0) || (int)$number < 0 - PHP_INT_MAX )
-        {
+        if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
             // overflow
-            trigger_error( 'convert_number_to_words only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX, E_USER_WARNING );
+            trigger_error('convert_number_to_words only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX, E_USER_WARNING);
             return false;
         }
 
-        if( $number < 0 )
-        {
-            return $negative . self::convert_number_to_words( abs( $number ) );
+        if ($number < 0) {
+            return $negative . self::convert_number_to_words(abs($number));
         }
 
         $string = $fraction = null;
 
-        if( strpos( $number, '.' ) !== false )
-        {
-            list( $number, $fraction ) = explode( '.', $number );
+        if (strpos($number, '.') !== false) {
+            list($number, $fraction) = explode('.', $number);
         }
 
-        switch (true)
-        {
+        switch (true) {
             case $number < 21:
                 $string = $dictionary[$number];
                 break;
             case $number < 100:
-                $tens = ((int)($number / 10)) * 10;
+                $tens = ((int) ($number / 10)) * 10;
                 $units = $number % 10;
                 $string = $dictionary[$tens];
-                if( $units )
-                {
+                if ($units) {
                     $string .= $hyphen . $dictionary[$units];
                 }
                 break;
@@ -956,33 +947,29 @@ class UtilityServiceProvider extends ServiceProvider
                 $hundreds = $number / 100;
                 $remainder = $number % 100;
                 $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
-                if( $remainder )
-                {
-                    $string .= $conjunction . self::convert_number_to_words( $remainder );
+                if ($remainder) {
+                    $string .= $conjunction . self::convert_number_to_words($remainder);
                 }
                 break;
             default:
-                $baseUnit = pow( 1000, floor( log( $number, 1000 ) ) );
-                $numBaseUnits = (int)($number / $baseUnit);
+                $baseUnit = pow(1000, floor(log($number, 1000)));
+                $numBaseUnits = (int) ($number / $baseUnit);
                 $remainder = $number % $baseUnit;
-                $string = self::convert_number_to_words( $numBaseUnits ) . ' ' . $dictionary[$baseUnit];
-                if( $remainder )
-                {
+                $string = self::convert_number_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+                if ($remainder) {
                     $string .= $remainder < 100 ? $conjunction : $separator;
-                    $string .= self::convert_number_to_words( $remainder );
+                    $string .= self::convert_number_to_words($remainder);
                 }
                 break;
         }
 
-        if( null !== $fraction && is_numeric( $fraction ) )
-        {
+        if (null !== $fraction && is_numeric($fraction)) {
             $string .= $decimal;
-            $words = array( );
-            foreach( str_split((string) $fraction) as $number )
-            {
+            $words = array();
+            foreach (str_split((string) $fraction) as $number) {
                 $words[] = $dictionary[$number];
             }
-            $string .= implode( ' ', $words );
+            $string .= implode(' ', $words);
         }
 
         return $string;
@@ -990,7 +977,7 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function addLogAgreements($agreement_id)
     {
-        $agreement_info = (array)self::getObject(['id' => $agreement_id], 'agreements');
+        $agreement_info = (array) self::getObject(['id' => $agreement_id], 'agreements');
         $agreement_info['agreement_id'] = data_get($agreement_info, 'id');
         unset($agreement_info['id']);
         $log_agreement_id = self::insertSimpleRow($agreement_info, 'log_agreements');
