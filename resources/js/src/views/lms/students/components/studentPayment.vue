@@ -64,7 +64,7 @@
             </thead>
             <tr  v-if="agreements && agreements.length > 0" class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreements" :key="index">
               <td class="td vs-table--td">
-                <p>'Phí nhập học'</p>
+                <p>Phí nhập học</p>
               </td>
               <td class="td vs-table--td">
                 <p>{{item.tuition_fee_name}}</p>
@@ -84,7 +84,7 @@
             </tr>
             <tr  v-if="reserves && reserves.length > 0" class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in reserves" :key="index">
              <td class="td vs-table--td">
-                <p>'Phí bảo lưu'</p>
+                <p>Phí bảo lưu</p>
               </td>
               <td class="td vs-table--td">
                 <p></p>
