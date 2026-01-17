@@ -252,6 +252,7 @@
                         <tr>
                           <!---->
                           <th colspan="1" rowspan="1" class="text-center">Thời gian tạo</th>
+                          <th colspan="1" rowspan="1" class="text-center">Thời gian cập nhật</th>
                           <th colspan="1" rowspan="1" class="text-center">Loại</th>
                           <th colspan="1" rowspan="1" >Nội dung</th>
                           <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -260,6 +261,7 @@
                       </thead>
                       <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tickets" :key="index">
                         <td class="td vs-table--td text-center">{{ item.created_at }}</td>
+                        <td class="td vs-table--td text-center">{{ item.updated_at }}</td>
                         <td class="td vs-table--td text-center">{{ item.type | genTypeTicket }}</td>
                         <td class="td vs-table--td" style="max-width: 284px">{{ item.description }}</td>
                         <td class="td vs-table--td text-center">
