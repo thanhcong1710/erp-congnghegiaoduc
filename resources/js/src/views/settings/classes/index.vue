@@ -123,7 +123,7 @@
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Trạng thái</label>
               <select class="vs-inputx vs-input--input normal" v-model="config.status" >
-                <option value="" disabled>Chọn loại hợp đồng</option>
+                <option value="" disabled>Chọn trạng thái</option>
                 <option value="0">Không hoạt động</option>
                 <option value="1">Hoạt động</option>
               </select>
@@ -170,10 +170,10 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Loại lớp học</label>
-              <select class="vs-inputx vs-input--input normal" v-model="config.type" :disabled="disabled_input">
-                <option value="" disabled>Chọn loại hợp đồng</option>
-                <option value="0">Trải nghiệm</option>
-                <option value="1">Chính thức</option>
+              <select class="vs-inputx vs-input--input normal" v-model="config.is_online" :disabled="disabled_input">
+                <option value="" disabled>Chọn loại</option>
+                <option value="0">Offline</option>
+                <option value="1">Online</option>
               </select>
             </div>
             <!-- <div class="vx-col md:w-1/2 w-full mb-4">
@@ -599,6 +599,7 @@
         this.config.session= 0
         this.config.max_students= 16
         this.config.type= 1
+        this.config.is_online = 0
         this.config.start_date=''
         this.config.cm_id=''
         this.config.teacher_id=''
