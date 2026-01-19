@@ -78,13 +78,13 @@ class AddScheduleHasStudent extends Command
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
             $status = 0; 
-            $query = "INSERT INTO schedule_has_student (student_id, branch_id, class_id, contract_id, product_id, program_id, subject_id, subject_stt, class_date, created_at, `status`, amount) VALUES ";
+            $query = "INSERT INTO schedule_has_student (student_id, branch_id, class_id, contract_id, product_id, subject_id, subject_stt, class_date, created_at, `status`, amount) VALUES ";
            
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
                     $amount = data_get($item, 'total_sessions') ? round(data_get($item, 'must_charge')/data_get($item, 'total_sessions')) : 0;
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."', '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status', $amount),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id',  '".(int)$item->subject_id."', '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status', $amount),";
                 }
                 $query = substr($query, 0, -1);
                 $this->addItem(array_slice($list, 10000), $class_date);
@@ -92,7 +92,7 @@ class AddScheduleHasStudent extends Command
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
                     $amount = data_get($item, 'total_sessions') ? round(data_get($item, 'must_charge')/data_get($item, 'total_sessions')) : 0;
-                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id', '$item->program_id', '".(int)$item->subject_id."',  '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status', $amount),";
+                    $query.= "('$item->student_id', '$item->branch_id', '$item->class_id', '$item->contract_id', '$item->product_id',  '".(int)$item->subject_id."',  '".(int)$item->subject_stt."', '$class_date', '$created_at', '$status', $amount),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);

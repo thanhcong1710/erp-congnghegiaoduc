@@ -527,4 +527,114 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report13(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $arr_key = explode(',', $key);
+        $arr_value = explode(',', $value);
+
+        $branch_id = [];
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($arr_key as $k => $key_name) {
+            if ($key_name == 'branch_id' && $arr_value[$k] && $arr_value[$k] != 'v') {
+                $branch_id = explode('-', $arr_value[$k]);
+            }
+            if ($key_name == 'keyword' && $arr_value[$k] && $arr_value[$k] != 'v') {
+                $keyword = $arr_value[$k];
+            }
+            if ($key_name == 'start_date' && $arr_value[$k] && $arr_value[$k] != 'v') {
+                $start_date = $arr_value[$k];
+            }
+            if ($key_name == 'end_date' && $arr_value[$k] && $arr_value[$k] != 'v') {
+                $end_date = $arr_value[$k];
+            }
+        }
+
+        $cond = " c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (st.lms_code LIKE '%$keyword%' OR st.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND sks.class_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND sks.class_date <= '$end_date'";
+        }
+
+        $order_by = " ORDER BY sks.class_date DESC, st.name ASC ";
+
+        $query = "SELECT
+                    b.name AS branch_name,
+                    st.lms_code,
+                    st.name AS student_name,
+                    c.cls_name AS class_name,
+                    sks.class_date,
+                    sks.status,
+                    (ct.must_charge / ct.summary_sessions) AS session_value
+                   FROM schedule_has_student AS sks
+                   JOIN classes AS c ON sks.class_id = c.id
+                   JOIN branches AS b ON c.branch_id = b.id
+                   JOIN students AS st ON sks.student_id = st.id
+                   JOIN contracts AS ct ON sks.contract_id = ct.id
+                   WHERE $cond
+                   $order_by";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Mã HS');
+        $sheet->setCellValue('D1', 'Tên HS');
+        $sheet->setCellValue('E1', 'Lớp học');
+        $sheet->setCellValue('F1', 'Ngày học');
+        $sheet->setCellValue('G1', 'Doanh số');
+
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(30);
+        $sheet->getColumnDimension("E")->setWidth(30);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(20);
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 2;
+            $item = $list[$i];
+
+            $status_text = '';
+            $revenue = 0;
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->branch_name);
+            $sheet->setCellValue('C' . $x, $item->lms_code);
+            $sheet->setCellValue('D' . $x, $item->student_name);
+            $sheet->setCellValue('E' . $x, $item->class_name);
+            $sheet->setCellValue('F' . $x, $item->class_date);
+            $sheet->setCellValue('G' . $x, $revenue);
+
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo doanh số chi tiết.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

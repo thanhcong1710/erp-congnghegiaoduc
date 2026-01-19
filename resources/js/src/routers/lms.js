@@ -37,8 +37,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách học sinh', url: '/lms/students'},
-            { title: 'Thông tin học sinh', active: true}
+            { title: 'Danh sách học sinh', url: '/lms/students' },
+            { title: 'Thông tin học sinh', active: true }
           ],
           pageTitle: 'Thông tin học sinh',
           rule: 'editor'
@@ -79,8 +79,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements'},
-            { title: 'Thông tin nhập học', active: true}
+            { title: 'Danh sách nhập học', url: '/lms/agreements' },
+            { title: 'Thông tin nhập học', active: true }
           ],
           pageTitle: 'Thông tin nhập học',
           rule: 'editor'
@@ -93,8 +93,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements'},
-            { title: 'Cập nhật nhập học', active: true}
+            { title: 'Danh sách nhập học', url: '/lms/agreements' },
+            { title: 'Cập nhật nhập học', active: true }
           ],
           pageTitle: 'Cập nhật nhập học',
           rule: 'editor'
@@ -107,7 +107,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách đã thu phí', active: true}
+            { title: 'Danh sách đã thu phí', active: true }
           ],
           pageTitle: 'Danh sách đã thu phí',
           rule: 'editor'
@@ -120,7 +120,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí', active: true}
+            { title: 'Danh sách chờ đóng phí', active: true }
           ],
           pageTitle: 'Danh sách chờ đóng phí',
           rule: 'editor'
@@ -133,8 +133,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí', url: '/lms/waitcharges'},
-            { title: 'Thêm mới phiếu thu', active: true}
+            { title: 'Danh sách chờ đóng phí', url: '/lms/waitcharges' },
+            { title: 'Thêm mới phiếu thu', active: true }
           ],
           pageTitle: 'Thêm mới phiếu thu',
           rule: 'editor'
@@ -147,8 +147,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí bảo lưu', url: '/lms/waitcharges'},
-            { title: 'Thêm mới phiếu thu', active: true}
+            { title: 'Danh sách chờ đóng phí bảo lưu', url: '/lms/waitcharges' },
+            { title: 'Thêm mới phiếu thu', active: true }
           ],
           pageTitle: 'Thêm mới phiếu thu',
           rule: 'editor'
@@ -161,7 +161,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', active: true}
+            { title: 'Danh sách chờ duyệt phí', active: true }
           ],
           pageTitle: 'Danh sách chờ duyệt phí',
           rule: 'editor'
@@ -174,8 +174,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve'},
-            { title: 'Thông tin phiếu thu chờ duyệt', active: true}
+            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve' },
+            { title: 'Thông tin phiếu thu chờ duyệt', active: true }
           ],
           pageTitle: 'Thông tin phiếu thu chờ duyệt',
           rule: 'editor'
@@ -188,8 +188,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve'},
-            { title: 'Thông tin phiếu thu chờ duyệt', active: true}
+            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve' },
+            { title: 'Thông tin phiếu thu chờ duyệt', active: true }
           ],
           pageTitle: 'Thông tin phiếu thu chờ duyệt',
           rule: 'editor'
@@ -202,7 +202,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Xếp lớp', active: true}
+            { title: 'Xếp lớp', active: true }
           ],
           pageTitle: 'Xếp lớp',
           rule: 'editor'
@@ -215,7 +215,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', active: true}
+            { title: 'Danh sách bảo lưu', active: true }
           ],
           pageTitle: 'Danh sách bảo lưu',
           rule: 'editor'
@@ -242,8 +242,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', url: '/lms/reserves'},
-            { title: 'Thông tin bảo lưu', active: true}
+            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
+            { title: 'Thông tin bảo lưu', active: true }
           ],
           pageTitle: 'Thông tin bảo lưu',
           rule: 'editor'
@@ -256,7 +256,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển lớp', active: true}
+            { title: 'Danh sách chuyển lớp', active: true }
           ],
           pageTitle: 'Danh sách chuyển lớp',
           rule: 'editor'
@@ -283,8 +283,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers'},
-            { title: 'Thông tin chuyển lớp', active: true}
+            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers' },
+            { title: 'Thông tin chuyển lớp', active: true }
           ],
           pageTitle: 'Thông tin chuyển lớp',
           rule: 'editor'
@@ -297,7 +297,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển trung tâm', active: true}
+            { title: 'Danh sách chuyển trung tâm', active: true }
           ],
           pageTitle: 'Danh sách chuyển trung tâm',
           rule: 'editor'
@@ -324,8 +324,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers'},
-            { title: 'Thông tin chuyển trung tâm', active: true}
+            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers' },
+            { title: 'Thông tin chuyển trung tâm', active: true }
           ],
           pageTitle: 'Thông tin chuyển trung tâm',
           rule: 'editor'
@@ -338,7 +338,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển phí', active: true}
+            { title: 'Danh sách chuyển phí', active: true }
           ],
           pageTitle: 'Danh sách chuyển phí',
           rule: 'editor'
@@ -365,8 +365,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers'},
-            { title: 'Thông tin chuyển phí', active: true}
+            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers' },
+            { title: 'Thông tin chuyển phí', active: true }
           ],
           pageTitle: 'Thông tin chuyển phí',
           rule: 'editor'
@@ -379,7 +379,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách quy đổi', active: true}
+            { title: 'Danh sách quy đổi', active: true }
           ],
           pageTitle: 'Danh sách quy đổi',
           rule: 'editor'
@@ -419,7 +419,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', active: true}
+            { title: 'Danh sách nhận xét & đánh giá', active: true }
           ],
           pageTitle: 'Danh sách nhận xét & đánh giá',
           rule: 'editor'
@@ -446,8 +446,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments'},
-            { title: 'Cập nhật nhận xét & đánh giá', active: true}
+            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
+            { title: 'Cập nhật nhận xét & đánh giá', active: true }
           ],
           pageTitle: 'Cập nhật nhận xét & đánh giá',
           rule: 'editor'
@@ -460,8 +460,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments'},
-            { title: 'Thông tin nhận xét & đánh giá', active: true}
+            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
+            { title: 'Thông tin nhận xét & đánh giá', active: true }
           ],
           pageTitle: 'Thông tin nhận xét & đánh giá',
           rule: 'editor'
@@ -474,7 +474,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách buổi dạy', active: true}
+            { title: 'Danh sách buổi dạy', active: true }
           ],
           pageTitle: 'Danh sách buổi dạy',
           rule: 'editor'
@@ -487,8 +487,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách buổi dạy', url: '/lms/teachers'},
-            { title: 'Cập nhật buổi dạy', active: true}
+            { title: 'Danh sách buổi dạy', url: '/lms/teachers' },
+            { title: 'Cập nhật buổi dạy', active: true }
           ],
           pageTitle: 'Cập nhật buổi dạy',
           rule: 'editor'
@@ -501,7 +501,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', active: true},
+            { title: 'Danh sách báo cáo vận hành', active: true },
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
@@ -514,8 +514,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo full fee active', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo full fee active', active: true }
           ],
           pageTitle: 'Báo cáo full fee active',
           rule: 'editor'
@@ -528,8 +528,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - chi tiết', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo tái phí - chi tiết', active: true }
           ],
           pageTitle: 'Báo cáo tái phí - chi tiết',
           rule: 'editor'
@@ -542,8 +542,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - tổng hợp', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo tái phí - tổng hợp', active: true }
           ],
           pageTitle: 'Báo cáo tái phí - tổng hợp',
           rule: 'editor'
@@ -556,8 +556,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tái phí - AF', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo tái phí - AF', active: true }
           ],
           pageTitle: 'Báo cáo tái phí - AF',
           rule: 'editor'
@@ -570,8 +570,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học sinh pending', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo học sinh pending', active: true }
           ],
           pageTitle: 'Báo cáo học sinh pending',
           rule: 'editor'
@@ -584,8 +584,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học sinh bảo lưu', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo học sinh bảo lưu', active: true }
           ],
           pageTitle: 'Báo cáo học sinh bảo lưu',
           rule: 'editor'
@@ -598,8 +598,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo lớp học', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo lớp học', active: true }
           ],
           pageTitle: 'Báo cáo lớp học',
           rule: 'editor'
@@ -612,8 +612,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Chỉ số vận hành ACS', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Chỉ số vận hành ACS', active: true }
           ],
           pageTitle: 'Chỉ số vận hành ACS',
           rule: 'editor'
@@ -626,8 +626,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tỷ lệ ACS của từng AF', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo tỷ lệ ACS của từng AF', active: true }
           ],
           pageTitle: 'Báo cáo tỷ lệ ACS của từng AF',
           rule: 'editor'
@@ -640,8 +640,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo tỷ lệ ACS của từng trung tâm', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo tỷ lệ ACS của từng trung tâm', active: true }
           ],
           pageTitle: 'Báo cáo tỷ lệ ACS của từng trung tâm',
           rule: 'editor'
@@ -654,8 +654,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học viên trial', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo học viên trial', active: true }
           ],
           pageTitle: 'Báo cáo học viên trial',
           rule: 'editor'
@@ -668,10 +668,24 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate'},
-            { title: 'Báo cáo học viên đặt cọc', active: true}
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo học viên đặt cọc', active: true }
           ],
           pageTitle: 'Báo cáo học viên đặt cọc',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/reports/operate/report-13',
+        name: 'lms-report-operate-13',
+        component: () => import('@/views/lms/report/operate/report13.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo doanh số chi tiết', active: true }
+          ],
+          pageTitle: 'Báo cáo doanh số chi tiết',
           rule: 'editor'
         }
       },
@@ -682,7 +696,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', active: true},
+            { title: 'Danh sách báo cáo học thuật', active: true },
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
@@ -695,8 +709,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic'},
-            { title: 'Giờ dạy trợ giảng', active: true}
+            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic' },
+            { title: 'Giờ dạy trợ giảng', active: true }
           ],
           pageTitle: 'Giờ dạy trợ giảng',
           rule: 'editor'
@@ -709,8 +723,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic'},
-            { title: 'Danh sách lớp test', active: true}
+            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic' },
+            { title: 'Danh sách lớp test', active: true }
           ],
           pageTitle: 'Danh sách lớp test',
           rule: 'editor'
@@ -723,7 +737,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo giáo viên', active: true},
+            { title: 'Danh sách báo cáo giáo viên', active: true },
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
@@ -736,8 +750,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo giáo viên', url: '/lms/reports/teacher'},
-            { title: 'Báo cáo chi tiết giờ dạy của giáo viên', active: true}
+            { title: 'Danh sách báo cáo giáo viên', url: '/lms/reports/teacher' },
+            { title: 'Báo cáo chi tiết giờ dạy của giáo viên', active: true }
           ],
           pageTitle: 'Báo cáo chi tiết giờ dạy của giáo viên',
           rule: 'editor'
@@ -750,7 +764,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo kinh doanh', active: true},
+            { title: 'Danh sách báo cáo kinh doanh', active: true },
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
@@ -763,8 +777,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo kinh doanh', url: '/lms/reports/business'},
-            { title: 'Kết quả kinh doanh ngày', active: true}
+            { title: 'Danh sách báo cáo kinh doanh', url: '/lms/reports/business' },
+            { title: 'Kết quả kinh doanh ngày', active: true }
           ],
           pageTitle: 'Kết quả kinh doanh ngày',
           rule: 'editor'
@@ -777,7 +791,7 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', active: true},
+            { title: 'Danh sách báo cáo tài chính kế toán', active: true },
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
@@ -790,8 +804,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
-            { title: 'Báo cáo chi tiết doanh số', active: true}
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
+            { title: 'Báo cáo chi tiết doanh số', active: true }
           ],
           pageTitle: 'Báo cáo chi tiết doanh số',
           rule: 'editor'
@@ -804,8 +818,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
-            { title: 'Báo cáo doanh số theo trung tâm', active: true}
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
+            { title: 'Báo cáo doanh số theo trung tâm', active: true }
           ],
           pageTitle: 'Báo cáo doanh số theo trung tâm',
           rule: 'editor'
@@ -818,8 +832,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
-            { title: 'Báo cáo doanh thu thực hiện', active: true}
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
+            { title: 'Báo cáo doanh thu thực hiện', active: true }
           ],
           pageTitle: 'Báo cáo doanh thu thực hiện',
           rule: 'editor'
@@ -832,8 +846,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
-            { title: 'Báo cáo doanh số theo nhân viên', active: true}
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
+            { title: 'Báo cáo doanh số theo nhân viên', active: true }
           ],
           pageTitle: 'Báo cáo doanh số theo nhân viên',
           rule: 'editor'
@@ -846,8 +860,8 @@ export default {
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance'},
-            { title: 'Báo cáo chi tiết đơn hàng', active: true}
+            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
+            { title: 'Báo cáo chi tiết đơn hàng', active: true }
           ],
           pageTitle: 'Báo cáo chi tiết đơn hàng',
           rule: 'editor'

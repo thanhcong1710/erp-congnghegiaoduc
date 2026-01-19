@@ -479,4 +479,64 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
+
+    public function report13(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " sks.status=1 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (st.lms_code LIKE '%$keyword%' OR st.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND sks.class_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND sks.class_date <= '$end_date'";
+        }
+
+        $order_by = " ORDER BY sks.class_date DESC, st.name ASC ";
+
+        $total = u::first("SELECT count(sks.id) AS total 
+                           FROM schedule_has_student AS sks
+                           JOIN classes AS c ON sks.class_id = c.id
+                           JOIN students AS st ON sks.student_id = st.id
+                           WHERE $cond");
+
+        $query = "SELECT
+                    b.name AS branch_name,
+                    st.lms_code,
+                    st.name AS student_name,
+                    c.cls_name AS class_name,
+                    sks.class_date,
+                    sks.status,
+                    (ct.must_charge / ct.summary_sessions) AS session_value
+                   FROM schedule_has_student AS sks
+                   JOIN classes AS c ON sks.class_id = c.id
+                   JOIN branches AS b ON c.branch_id = b.id
+                   JOIN students AS st ON sks.student_id = st.id
+                   JOIN contracts AS ct ON sks.contract_id = ct.id
+                   WHERE $cond
+                   $order_by $limitation";
+
+        $list = u::query($query);
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
 }

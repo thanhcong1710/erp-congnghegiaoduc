@@ -44,6 +44,11 @@
                 <p>01. BÁO CÁO LỚP HỌC</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-13'">
+                <p>02. BÁO CÁO DOANH SỐ CHI TIẾT HỌC SINH ĐI HỌC</p>
+              </router-link>
+            </div>
             <!-- <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-08'"  v-if="checkPermission('lms_reports_operate_08')">
                 <p>08. CHỈ SỐ VẬN HÀNH ACS</p>
