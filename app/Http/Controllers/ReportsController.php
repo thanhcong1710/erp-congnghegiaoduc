@@ -422,7 +422,7 @@ class ReportsController extends Controller
             $total = u::first("SELECT count(c.id) AS total FROM classes AS c WHERE $cond");
         }
 
-        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day,
+        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day, c.is_online,
                     b.name AS branch_name,
                     p.name AS product_name,
                     u_teacher.name AS teacher_name,
@@ -472,6 +472,7 @@ class ReportsController extends Controller
                 }
 
                 $item->cls_startdate = date('d/m/Y', strtotime($item->cls_startdate));
+                $item->is_online_text = $item->is_online == 1 ? 'Online' : 'Offline';
             }
         }
 

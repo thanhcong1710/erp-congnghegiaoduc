@@ -359,7 +359,7 @@ class ExportsController extends Controller
             }
         }
 
-        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day, c.status,
+        $query = "SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day, c.status, c.is_online,
                     b.name AS branch_name,
                     p.name AS product_name,
                     u_teacher.name AS teacher_name,
@@ -394,6 +394,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('J1', 'Giáo viên');
         $sheet->setCellValue('K1', 'Trợ giảng');
         $sheet->setCellValue('L1', 'Phòng học');
+        $sheet->setCellValue('M1', 'Loại lớp học');
 
         $sheet->getColumnDimension("A")->setWidth(10);
         $sheet->getColumnDimension("B")->setWidth(30);
@@ -407,6 +408,7 @@ class ExportsController extends Controller
         $sheet->getColumnDimension("J")->setWidth(25);
         $sheet->getColumnDimension("K")->setWidth(25);
         $sheet->getColumnDimension("L")->setWidth(20);
+        $sheet->getColumnDimension("M")->setWidth(20);
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 2;
@@ -447,6 +449,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('J' . $x, $item->teacher_name);
             $sheet->setCellValue('K' . $x, $item->ta_name);
             $sheet->setCellValue('L' . $x, $item->room_name);
+            $sheet->setCellValue('M' . $x, $item->is_online == 1 ? 'Online' : 'Offline');
 
             $sheet->getRowDimension($x)->setRowHeight(23);
         }

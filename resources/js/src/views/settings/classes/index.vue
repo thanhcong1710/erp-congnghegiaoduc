@@ -46,6 +46,16 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin cấu hình lớp học</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Mã lớp</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="config.code"
+                :disabled="disabled_input"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Tên lớp</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -606,6 +616,7 @@
         this.config.shift_id=''
         this.config.room_id=''
         this.config.title=''
+        this.config.code=''
         this.html.rooms.item = ''
         this.html.teachers.item = ''
         this.html.cms.item = ''
@@ -622,6 +633,10 @@
         }
         if (this.config.product_id == "") {
           mess += " - Khóa học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.config.code == "") {
+          mess += " - Mã lớp không được để trống<br/>";
           resp = false;
         }
         if (this.config.title == "") {

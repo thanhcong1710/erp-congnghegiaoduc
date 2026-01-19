@@ -105,17 +105,23 @@ class EnrolmentsController extends Controller
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
 
         $product_id = data_get($class_info, 'product_id');
-        $cond = " c.status IN (2, 3, 4, 5) AND c.product_id = $product_id AND c.type = ".(int)$class_info->type;
+        $cond = " c.status IN (2, 3, 4, 5) AND c.product_id = $product_id ";
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0";
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
         }
+        if(data_get($class_info, 'is_online')==1){
+            $cond .= " AND t.type IN(0,2) ";
+        } else{
+            $cond .= " AND t.type IN(0,1) ";
+        }
         
         $order_by = " ORDER BY s.id DESC ";
 
         $total = u::first("SELECT count(s.id) AS total  FROM contracts AS c
-                LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+                LEFT JOIN students AS s ON s.id=c.student_id 
+                LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id WHERE $cond");
         
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,

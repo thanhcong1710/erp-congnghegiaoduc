@@ -9,7 +9,7 @@
           <div class="vx-col w-full mb-4">
             <h4 class="w-full mb-4"><i class="fa-solid fa-file-contract mr-1"></i> DANH SÁCH BÁO CÁO VẬN HÀNH</h4>
             <hr class="mb-3" style="border: 0.5px solid #ccc;">
-            <div class="mb-2">
+            <!-- <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-01'"  v-if="checkPermission('lms_reports_operate_01')">
                 <p>01. BÁO CÁO CHI TIẾT HỌC SINH FULL FEE ACTIVE</p>
               </router-link>
@@ -38,13 +38,13 @@
               <router-link class="link-report" :to="'/lms/reports/operate/report-06'"  v-if="checkPermission('lms_reports_operate_06')">
                 <p>06. BÁO CÁO HỌC SINH BẢO LƯU</p>
               </router-link>
-            </div>
+            </div> -->
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-07'">
-                <p>07. BÁO CÁO LỚP HỌC</p>
+                <p>01. BÁO CÁO LỚP HỌC</p>
               </router-link>
             </div>
-            <div class="mb-2">
+            <!-- <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-08'"  v-if="checkPermission('lms_reports_operate_08')">
                 <p>08. CHỈ SỐ VẬN HÀNH ACS</p>
               </router-link>
@@ -68,7 +68,7 @@
               <router-link class="link-report" :to="'/lms/reports/operate/report-12'" v-if="checkPermission('lms_reports_operate_12')">
                 <p>12. BÁO CÁO HỌC VIÊN ĐẶT CỌC</p>
               </router-link>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

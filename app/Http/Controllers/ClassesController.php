@@ -136,6 +136,7 @@ class ClassesController extends Controller
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
                 'cls_name'=> data_get($request,'title'),
+                'code'=> data_get($request,'code'),
                 'product_id'=> data_get($request,'product_id'),
                 'program_id'=> data_get($request,'program_id'),
                 'cm_id'=> data_get($request,'cm_id'),
@@ -158,6 +159,7 @@ class ClassesController extends Controller
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
                 'cls_name'=> data_get($request,'title'),
+                'code'=> data_get($request,'code'),
                 'product_id'=> data_get($request,'product_id'),
                 'program_id'=> data_get($request,'program_id'),
                 'cm_id'=> data_get($request,'cm_id'),
@@ -248,6 +250,7 @@ class ClassesController extends Controller
         $arr_day = explode(',',data_get($class_info, 'class_day'));
         $data = [
             'is_edit' => 1,
+            'code'=> data_get($class_info, 'code'),
             'title'=> data_get($class_info, 'cls_name'),
             'class_id' =>$class_id,
             'branch_id' => data_get($class_info, 'branch_id'),
@@ -255,6 +258,7 @@ class ClassesController extends Controller
             'program_id'=> data_get($class_info, 'program_id'),
             'max_students' => data_get($class_info, 'max_students'),
             'type' => data_get($class_info, 'type'),
+            'is_online' => data_get($class_info, 'is_online'),
             'status' => data_get($class_info, 'status'),
             'start_date' => data_get($class_info, 'cls_startdate'),
             'cm_id' => data_get($class_info, 'cm_id'),

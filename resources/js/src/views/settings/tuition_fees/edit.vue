@@ -14,6 +14,16 @@
               </div>
             </div>
             <div class="mb-6 vx-col md:w-1/2 w-full">
+              <label>Hình thức học <span class="text-danger"> (*)</span></label>
+              <div class=w-full>
+                <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type">
+                  <option value="0">Online và Offline </option>
+                  <option value="1">Offline</option>
+                  <option value="2">Online</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-6 vx-col md:w-1/2 w-full">
               <label>Loại gói phí <span class="text-danger"> (*)</span></label>
               <div class=w-full>
                 <select class="vs-inputx vs-input--input normal" v-model="tuition_fee.type_fee" :disabled="disabledFee">

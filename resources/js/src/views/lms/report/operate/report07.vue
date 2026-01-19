@@ -93,6 +93,7 @@
                   <th>Khai giảng</th>
                   <th>Giáo viên</th>
                   <th>Trợ giảng</th>
+                  <th>Loại lớp học</th>
                   <th>Phòng học</th>
                 </tr>
               </thead>
@@ -108,6 +109,7 @@
                 <td class="td vs-table--td">{{item.cls_startdate}}</td>
                 <td class="td vs-table--td">{{item.teacher_name}}</td>
                 <td class="td vs-table--td">{{item.ta_name}}</td>
+                <td class="td vs-table--td">{{item.is_online_text}}</td>
                 <td class="td vs-table--td">{{item.room_name}}</td>
               </tr>
             </table>

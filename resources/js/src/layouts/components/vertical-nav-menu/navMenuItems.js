@@ -153,28 +153,29 @@ export default [
         ],
       },
       {
-        url: '/lms/reports',
+        url: '/lms/reports/operate',
         name: 'Báo cáo',
         icon: 'TrendingUpIcon',
-        submenu: [
-          {
-            url: '/lms/reports/business',
-            name: 'Kinh doanh',
-            slug: 'lms-reports-business',
-            permission:'lms_reports_business',
-          },
-          {
-            url: '/lms/reports/finance',
-            name: 'Tài chính kế toán',
-            slug: 'lms-reports-finance',
-            permission:'lms_reports_finance',
-          },
-          {
-            url: '/lms/reports/operate',
-            name: 'Vận hành',
-            slug: 'lms-reports-operate',
-            permission:'lms_reports_operate',
-          },
+        permission:'lms_reports_operate',
+        // submenu: [
+        //   {
+        //     url: '/lms/reports/business',
+        //     name: 'Kinh doanh',
+        //     slug: 'lms-reports-business',
+        //     permission:'lms_reports_business',
+        //   },
+        //   {
+        //     url: '/lms/reports/finance',
+        //     name: 'Tài chính kế toán',
+        //     slug: 'lms-reports-finance',
+        //     permission:'lms_reports_finance',
+        //   },
+        //   {
+        //     url: '/lms/reports/operate',
+        //     name: 'Vận hành',
+        //     slug: 'lms-reports-operate',
+        //     permission:'lms_reports_operate',
+        //   },
           // {
           //   url: '/lms/reports/academic',
           //   name: 'Học thuật',
@@ -187,7 +188,7 @@ export default [
           //   slug: 'lms-reports-teacher',
           //   permission:'lms_reports_teacher',
           // }
-        ],
+        // ],
       },
     ]
   },
