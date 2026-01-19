@@ -44,6 +44,9 @@
         </div>
       </div>
 
+      <div class="mb-4 text-right" style="font-size: 1.1rem; font-weight: bold;">
+        <span>Tổng doanh thu: {{ totalRevenue | formatMoney }} VNĐ</span>
+      </div>
       <div class="vs-component vs-con-table stripe vs-table-primary">
         <div class="con-tablex vs-table--content">
           <div class="vs-con-tbody vs-table--tbody ">
@@ -144,6 +147,7 @@
           }
         },
         datas: [],
+        totalRevenue: 0,
         limitSource: [20, 50, 100, 500],
         pagination: {
           url: "/api/roles/list",
@@ -207,6 +211,7 @@
             this.$vs.loading.close()
             this.datas = response.data.list
             this.pagination = response.data.paging;
+            this.totalRevenue = response.data.total_revenue || 0;
             setTimeout(() => {
               this.pagination.init = 1;
             }, 500)

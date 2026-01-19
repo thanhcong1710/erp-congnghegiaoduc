@@ -637,4 +637,118 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+
+    public function report14(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+        $params = array_combine($keys, $values);
+
+        $start_date = isset($params['start_date']) ? $params['start_date'] : '';
+        $end_date = isset($params['end_date']) ? $params['end_date'] : '';
+
+        // Get all branches accessible by user
+        $branchIds = Auth::user()->getBranchesHasUser();
+
+        // Build condition for date filtering
+        $dateCond = " sks.status=1 ";
+        if ($start_date) {
+            $dateCond .= " AND sks.class_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $dateCond .= " AND sks.class_date <= '$end_date'";
+        }
+
+        // Query to get all branches with their revenue data (including branches with 0 revenue)
+        $query = "SELECT
+                    b.id AS branch_id,
+                    b.name AS branch_name,
+                    COALESCE(COUNT(DISTINCT sks.student_id), 0) AS total_students,
+                    COALESCE(COUNT(sks.id), 0) AS total_sessions,
+                    COALESCE(SUM(ct.must_charge / ct.summary_sessions), 0) AS total_revenue
+                   FROM branches AS b
+                   LEFT JOIN classes AS c ON b.id = c.branch_id
+                   LEFT JOIN schedule_has_student AS sks ON c.id = sks.class_id AND $dateCond
+                   LEFT JOIN contracts AS ct ON sks.contract_id = ct.id
+                   WHERE b.id IN ($branchIds)
+                   GROUP BY b.id, b.name
+                   ORDER BY total_revenue DESC";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Tổng số HS');
+        $sheet->setCellValue('D1', 'Số buổi học');
+        $sheet->setCellValue('E1', 'Doanh thu (VNĐ)');
+
+        // Set column widths
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(40);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(25);
+
+        // Style header row
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ];
+        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+
+        // Fill data
+        $totalRevenue = 0;
+        $totalStudents = 0;
+        $totalSessions = 0;
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 2;
+            $item = $list[$i];
+
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->branch_name);
+            $sheet->setCellValue('C' . $x, $item->total_students);
+            $sheet->setCellValue('D' . $x, $item->total_sessions);
+            $sheet->setCellValue('E' . $x, $item->total_revenue);
+
+            $totalRevenue += $item->total_revenue;
+            $totalStudents += $item->total_students;
+            $totalSessions += $item->total_sessions;
+
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+
+        // Add total row
+        $totalRow = count($list) + 2;
+        $sheet->setCellValue('A' . $totalRow, '');
+        $sheet->setCellValue('B' . $totalRow, 'TỔNG CỘNG:');
+        $sheet->setCellValue('C' . $totalRow, $totalStudents);
+        $sheet->setCellValue('D' . $totalRow, $totalSessions);
+        $sheet->setCellValue('E' . $totalRow, $totalRevenue);
+
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
+        ];
+        $sheet->getStyle('B' . $totalRow . ':E' . $totalRow)->applyFromArray($totalStyle);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng quan doanh thu theo trung tâm.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
+

@@ -536,7 +536,75 @@ class ReportsController extends Controller
 
         $list = u::query($query);
 
+        // Calculate total revenue for all filtered records
+        $totalRevenueQuery = "SELECT SUM(ct.must_charge / ct.summary_sessions) AS total_revenue
+                               FROM schedule_has_student AS sks
+                               JOIN classes AS c ON sks.class_id = c.id
+                               JOIN students AS st ON sks.student_id = st.id
+                               JOIN contracts AS ct ON sks.contract_id = ct.id
+                               WHERE $cond";
+        $totalRevenueResult = u::first($totalRevenueQuery);
+        $totalRevenue = $totalRevenueResult->total_revenue ?? 0;
+
         $data = u::makingPagination($list, $total->total, $page, $limit);
+        $data->total_revenue = $totalRevenue;
+        return response()->json($data);
+    }
+
+    public function report14(Request $request)
+    {
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        // Get all branches accessible by user
+        $branchIds = Auth::user()->getBranchesHasUser();
+
+        // Build condition for date filtering
+        $dateCond = " sks.status=1 ";
+        if ($start_date) {
+            $dateCond .= " AND sks.class_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $dateCond .= " AND sks.class_date <= '$end_date'";
+        }
+
+        // Query to get all branches with their revenue data (including branches with 0 revenue)
+        $query = "SELECT
+                    b.id AS branch_id,
+                    b.name AS branch_name,
+                    COALESCE(COUNT(DISTINCT sks.student_id), 0) AS total_students,
+                    COALESCE(COUNT(sks.id), 0) AS total_sessions,
+                    COALESCE(SUM(ct.must_charge / ct.summary_sessions), 0) AS total_revenue
+                   FROM branches AS b
+                   LEFT JOIN classes AS c ON b.id = c.branch_id
+                   LEFT JOIN schedule_has_student AS sks ON c.id = sks.class_id AND $dateCond
+                   LEFT JOIN contracts AS ct ON sks.contract_id = ct.id
+                   WHERE b.id IN ($branchIds)
+                   GROUP BY b.id, b.name
+                   ORDER BY total_revenue DESC";
+
+        $list = u::query($query);
+
+        // Calculate totals across all branches
+        $totalRevenue = 0;
+        $totalStudents = 0;
+        $totalSessions = 0;
+
+        if ($list) {
+            foreach ($list as $item) {
+                $totalRevenue += $item->total_revenue;
+                $totalStudents += $item->total_students;
+                $totalSessions += $item->total_sessions;
+            }
+        }
+
+        $data = (object) [
+            'list' => $list,
+            'total_revenue' => $totalRevenue,
+            'total_students' => $totalStudents,
+            'total_sessions' => $totalSessions
+        ];
+
         return response()->json($data);
     }
 }

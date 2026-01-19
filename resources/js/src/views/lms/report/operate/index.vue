@@ -49,6 +49,11 @@
                 <p>02. BÁO CÁO DOANH SỐ CHI TIẾT HỌC SINH ĐI HỌC</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-14'">
+                <p>03. BÁO CÁO TỔNG QUAN DOANH THU THEO TRUNG TÂM</p>
+              </router-link>
+            </div>
             <!-- <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-08'"  v-if="checkPermission('lms_reports_operate_08')">
                 <p>08. CHỈ SỐ VẬN HÀNH ACS</p>
