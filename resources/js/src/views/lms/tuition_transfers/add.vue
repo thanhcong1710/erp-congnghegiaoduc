@@ -675,11 +675,11 @@
           mess += " - Ngày bắt đầu chuyển phí không được để trống<br/>";
           resp = false;
         }
-        if (this.tuition_transfer.transferred_real_session < 24) {
-          mess += " - Học sinh chỉ được chuyển phí khi con tối thiếu 24 buổi học chính thức<br/>";
+        if (this.tuition_transfer.transferred_real_session < 24 && !u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')) {
+          mess += " - Học sinh chỉ được chuyển phí khi còn tối thiểu 24 buổi học chính thức<br/>";
         }
-        if (this.tuition_transfer.transferred_amount <= 0 && !u.checkPermission(this.$store.state.AppActiveUser, 'role_999999')) {
-          mess += " - Tổng số tiền nhận phải lớn hơn 0<br/>";
+        if ( !(this.tuition_transfer.transferred_amount > 0 || this.tuition_transfer.transferred_real_session >0)) {
+          mess += " - Tổng số tiền nhận hoặc số buổi nhận phải lớn hơn 0<br/>";
           resp = false;
         }
         if (!resp) {
