@@ -140,7 +140,7 @@ class TuitionTransfersController extends Controller
                 'product_name' => data_get($data_calc_transfer, 'receive_tuition_fee.product_name'),
             );
             $total_amount_transfer = $total_amount_transfer + $left_real_amount;
-            $total_real_session_transfer = data_get($data_calc_transfer, 'sessions');
+            $total_real_session_transfer = data_get($data_calc_transfer, 'sessions')+$left_bonus_sessions;
         }
         $data = [
             'status' => 1,
