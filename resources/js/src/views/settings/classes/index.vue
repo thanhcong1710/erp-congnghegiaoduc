@@ -31,6 +31,7 @@
             </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
+              <vs-button class="mb-2" color="success" @click="selectClass(0)">Thêm mới lớp học</vs-button><br>
               <label>Lớp học</label>
               <tree
                 :data="classes"
@@ -578,7 +579,7 @@
         }
       },
       selectClass(selected_class) {
-        if (selected_class.model.item_type === 'class') {
+        if (selected_class && selected_class.model.item_type === 'class') {
           this.config.is_edit=1
           this.$vs.loading();
           axios.g(`/api/settings/classes/info-config/${selected_class.model.item_id}`)
@@ -592,7 +593,6 @@
             this.getDataSessions();
           })
         } else {
-          this.config.program_id = selected_class.model.item_id
           this.config.is_edit=0
           this.resetInput();
           this.list_sessions=[]
