@@ -771,8 +771,11 @@ class UtilityServiceProvider extends ServiceProvider
         if ($from_tuition_fee_id) {
             $from_tuition_fee_info =self::first("SELECT * FROM tuition_fee WHERE id=$from_tuition_fee_id");
             if(data_get($from_tuition_fee_info, 'product_id') ==  $to_product_id){
+                $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
+                        FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
+                        WHERE t.id=$from_tuition_fee_id");
                 $resp->sessions = $transfer_session;
-                $resp->receive_tuition_fee = $from_tuition_fee_id;
+                $resp->receive_tuition_fee = $to_tuition_fee;
                 $resp->transfer_amount = $transfer_amount;
             } else{
                 $available_tuiotion_fee_ids = self::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
