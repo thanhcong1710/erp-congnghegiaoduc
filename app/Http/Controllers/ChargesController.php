@@ -155,6 +155,7 @@ class ChargesController extends Controller
                     'note' => data_get($tmp_payment, 'note'),
                     'created_at'=>date('Y-m-d H:i:s'),
                     'creator_id'=>Auth::user()->id,
+                    'type' => 1
                 ), 'payments');
 
                 $debt_amount = (int)data_get($agreement_info, 'must_charge') - (int)data_get($agreement_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount');
@@ -195,6 +196,7 @@ class ChargesController extends Controller
                     'note' => data_get($tmp_payment, 'note'),
                     'created_at'=>date('Y-m-d H:i:s'),
                     'creator_id'=>Auth::user()->id,
+                    'type' => 2
                 ), 'payments');
 
                 $debt_amount = (int)data_get($reserve_info, 'must_charge') - (int)data_get($reserve_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount');
@@ -205,7 +207,7 @@ class ChargesController extends Controller
                         'debt_amount' => 0,
                         'updated_at'=>date('Y-m-d H:i:s'),
                         'updator_id'=>Auth::user()->id,
-                    ), array('id'=>data_get($reserve_info, 'id')), 'agreements');
+                    ), array('id'=>data_get($reserve_info, 'id')), 'reserves');
                     LogStudents::logAdd(data_get($reserve_info, 'student_id'), 'Thu đủ phí bảo lưu ', Auth::user()->id);
                     if(data_get($reserve_info,'start_date') > date('Y-m-d')){
                         u::insertSimpleRow(array(
@@ -226,7 +228,7 @@ class ChargesController extends Controller
                         'debt_amount' => $debt_amount,
                         'updated_at'=>date('Y-m-d H:i:s'),
                         'updator_id'=>Auth::user()->id,
-                    ), array('id'=>data_get($reserve_info, 'id')), 'agreements');
+                    ), array('id'=>data_get($reserve_info, 'id')), 'reserves');
                     LogStudents::logAdd(data_get($reserve_info, 'student_id'), 'Thu phí bảo lưu ', Auth::user()->id);
                 }
             }

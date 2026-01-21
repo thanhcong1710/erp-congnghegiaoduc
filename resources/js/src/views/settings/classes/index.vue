@@ -31,8 +31,8 @@
             </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
-              <vs-button class="mb-2" color="success" @click="selectClass(0)">Thêm mới lớp học</vs-button><br>
-              <label>Lớp học</label>
+              <label @click="selectClass(0)" style="font-size: 18px; cursor: pointer;" v-if="productName">
+                {{productName}}<i style="font-size: 12px;margin-left: 5px;">(Click để thêm mới)</i></label>
               <tree
                 :data="classes"
                 text-field-name="text"
@@ -425,6 +425,7 @@
           init: 0
         },
         check_exit:0,
+        productName:'',
       }
     },
     created() {
@@ -469,9 +470,11 @@
           this.config.product_id = product_id
           this.disabled_input = false
           this.config.session =  data.num_sessions
+          this.productName = data.name
         }else{
           this.config.product_id = ""
           this.disabled_input = true
+          this.productName = ""
         }
         this.loadClasses();
       },
@@ -516,6 +519,7 @@
         }
       },
       loadClasses(){
+        this.selectClass(0)
         if(this.config.branch_id && this.config.product_id){
           this.$vs.loading();
           axios.p(`/api/settings/classes/load-classes`, {
