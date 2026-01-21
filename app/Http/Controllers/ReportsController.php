@@ -607,4 +607,139 @@ class ReportsController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Báo cáo số tiền còn lại theo contracts
+     * Chỉ lấy contracts có status NOT IN (0,1,7,8) - tức là status 2,3,4,5,6
+     * Số tiền còn lại = (total_charged * left_sessions / summary_sessions)
+     */
+    public function report15(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $product_id = isset($request->product_id) ? $request->product_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        // Điều kiện cơ bản: chỉ lấy contracts có status NOT IN (0,1,7,8)
+        $cond = " c.status NOT IN (0,1,7,8) AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if (!empty($product_id)) {
+            $cond .= " AND c.product_id IN (" . implode(",", $product_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND c.created_at >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+
+        $order_by = " ORDER BY c.id DESC ";
+
+        // Đếm tổng số contracts
+        $total = u::first("SELECT count(c.id) AS total 
+            FROM contracts AS c 
+            LEFT JOIN students AS s ON s.id = c.student_id 
+            WHERE $cond");
+
+        // Query danh sách contracts với thông tin chi tiết
+        $query = "SELECT 
+                c.id AS contract_id,
+                c.code AS contract_code,
+                c.status,
+                c.type,
+                c.summary_sessions,
+                c.done_sessions,
+                c.left_sessions,
+                c.total_charged,
+                c.must_charge,
+                c.debt_amount,
+                c.created_at,
+                c.enrolment_start_date,
+                c.enrolment_last_date,
+                s.id AS student_id,
+                s.lms_code,
+                s.name AS student_name,
+                s.gud_mobile1,
+                b.name AS branch_name,
+                p.name AS product_name,
+                cl.cls_name AS class_name,
+                t.name AS tuition_fee_name,
+                CONCAT(u_ec.name, ' - ', u_ec.hrm_id) AS ec_name,
+                CONCAT(u_cm.name, ' - ', u_cm.hrm_id) AS cm_name,
+                -- Tính số tiền còn lại
+                CASE 
+                    WHEN c.summary_sessions > 0 THEN 
+                        ROUND((c.total_charged * c.left_sessions / c.summary_sessions), 0)
+                    ELSE 0
+                END AS left_amount
+            FROM contracts AS c
+                LEFT JOIN students AS s ON s.id = c.student_id
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN products AS p ON p.id = c.product_id
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+                LEFT JOIN tuition_fee AS t ON t.id = c.tuition_fee_id
+                LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+                LEFT JOIN users AS u_cm ON u_cm.id = c.cm_id
+            WHERE $cond
+            $order_by $limitation";
+
+        $list = u::query($query);
+
+        // Thêm label status cho mỗi contract
+        foreach ($list as $k => $row) {
+            $list[$k]->label_status = u::geLabelStatusContract($row->status);
+            $list[$k]->left_amount = (float) $row->left_amount;
+            $list[$k]->total_charged = (float) $row->total_charged;
+            $list[$k]->must_charge = (float) $row->must_charge;
+            $list[$k]->debt_amount = (float) $row->debt_amount;
+        }
+
+        // Tính tổng số tiền còn lại của tất cả contracts (không phân trang)
+        $totalAmountQuery = "SELECT 
+                SUM(
+                    CASE 
+                        WHEN c.summary_sessions > 0 THEN 
+                            ROUND((c.total_charged * c.left_sessions / c.summary_sessions), 0)
+                        ELSE 0
+                    END
+                ) AS total_left_amount,
+                SUM(c.total_charged) AS total_charged_sum,
+                SUM(c.must_charge) AS total_must_charge,
+                SUM(c.debt_amount) AS total_debt_amount,
+                SUM(c.left_sessions) AS total_left_sessions,
+                SUM(c.summary_sessions) AS total_summary_sessions
+            FROM contracts AS c
+                LEFT JOIN students AS s ON s.id = c.student_id
+            WHERE $cond";
+
+        $totalAmount = u::first($totalAmountQuery);
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        $data->summary = [
+            'total_left_amount' => (float) ($totalAmount->total_left_amount ?? 0),
+            'total_charged_sum' => (float) ($totalAmount->total_charged_sum ?? 0),
+            'total_must_charge' => (float) ($totalAmount->total_must_charge ?? 0),
+            'total_debt_amount' => (float) ($totalAmount->total_debt_amount ?? 0),
+            'total_left_sessions' => (int) ($totalAmount->total_left_sessions ?? 0),
+            'total_summary_sessions' => (int) ($totalAmount->total_summary_sessions ?? 0),
+        ];
+
+        return response()->json($data);
+    }
 }
