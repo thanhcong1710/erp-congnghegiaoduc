@@ -44,6 +44,24 @@
               </multiselect>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <multiselect
+                name="search_status"
+                placeholder="Chọn trạng thái"
+                v-model="searchData.arr_status"
+                :options="statusOptions"
+                label="label"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Mã HS, Tên HS, Mã contract" v-model="searchData.keyword"></vs-input>
           </div>
@@ -209,11 +227,18 @@
       return {
         branch_list: [],
         product_list: [],
+        statusOptions:[
+          {id:'2',label:'Đặt cọc'},
+          {id:'3-4-5',label:'Chờ xếp lớp'},
+          {id:'6',label:'Đang học'},
+        ],
         searchData: {
           arr_branch: "",
           branch_id: "",
           arr_product: "",
           product_id: "",
+          arr_status: "",
+          status: "",
           keyword: "",
           dateRange: "",
           pagination: this.pagination
@@ -277,8 +302,10 @@
         this.searchData.keyword = ""
         this.searchData.arr_branch = ""
         this.searchData.arr_product = ""
+        this.searchData.arr_status = ""
         this.searchData.branch_id = ""
         this.searchData.product_id = ""
+        this.searchData.status = ""
         this.searchData.dateRange = ""
         this.searchData.pagination = this.pagination
         this.getData();
@@ -300,6 +327,19 @@
         }
         this.searchData.product_id = product_ids
 
+        const status_ids = []
+        if (this.searchData.arr_status && this.searchData.arr_status.length) {
+          this.searchData.arr_status.map(item => {
+            // Nếu là '3-4-5', expand thành [3,4,5]
+            if (item.id === '3-4-5') {
+              status_ids.push(3, 4, 5)
+            } else {
+              status_ids.push(parseInt(item.id))
+            }
+          })
+        }
+        this.searchData.status = status_ids
+
         let start_date = ''
         let end_date = ''
         if(this.searchData.dateRange && this.searchData.dateRange.length == 2){
@@ -310,6 +350,7 @@
         const data = {
             branch_id: this.searchData.branch_id,
             product_id: this.searchData.product_id,
+            status: this.searchData.status,
             keyword: this.searchData.keyword,
             start_date: start_date,
             end_date: end_date,
@@ -358,6 +399,12 @@
         if(this.searchData.product_id && this.searchData.product_id.length > 0){
           keys.push('product_id')
           values.push(this.searchData.product_id.join('-'))
+        }
+
+        // Status IDs
+        if(this.searchData.status && this.searchData.status.length > 0){
+          keys.push('status')
+          values.push(this.searchData.status.join('-'))
         }
 
         // Keyword

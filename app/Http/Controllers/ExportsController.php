@@ -762,6 +762,7 @@ class ExportsController extends Controller
 
         $branch_id = [];
         $product_id = [];
+        $status = [];
         $keyword = '';
         $start_date = '';
         $end_date = '';
@@ -772,6 +773,9 @@ class ExportsController extends Controller
             }
             if ($key_name == 'product_id' && isset($values[$k]) && $values[$k] != 'v') {
                 $product_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'status' && isset($values[$k]) && $values[$k] != 'v') {
+                $status = explode('-', $values[$k]);
             }
             if ($key_name == 'keyword' && isset($values[$k]) && $values[$k] != 'v') {
                 $keyword = $values[$k];
@@ -793,6 +797,10 @@ class ExportsController extends Controller
 
         if (!empty($product_id)) {
             $cond .= " AND c.product_id IN (" . implode(",", $product_id) . ")";
+        }
+
+        if (!empty($status)) {
+            $cond .= " AND c.status IN (" . implode(",", $status) . ")";
         }
 
         if ($keyword !== '') {

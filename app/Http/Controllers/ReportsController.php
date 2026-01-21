@@ -617,6 +617,7 @@ class ReportsController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $product_id = isset($request->product_id) ? $request->product_id : [];
+        $status = isset($request->status) ? $request->status : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
@@ -636,6 +637,10 @@ class ReportsController extends Controller
 
         if (!empty($product_id)) {
             $cond .= " AND c.product_id IN (" . implode(",", $product_id) . ")";
+        }
+
+        if (!empty($status)) {
+            $cond .= " AND c.status IN (" . implode(",", $status) . ")";
         }
 
         if ($keyword !== '') {
