@@ -279,7 +279,7 @@ class TuitionTransfersController extends Controller
             $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
             $done_bonus_sessions =  $contract->done_sessions > $contract->real_sessions ? ( $contract->done_sessions - $contract->real_sessions > $contract->bonus_sessions ? $contract->bonus_sessions :  $contract->done_sessions - $contract->real_sessions) : 0;
             $left_bonus_sessions = $contract->bonus_sessions - $done_bonus_sessions;
-            $left_bonus_sessions = data_get($contractToStudentActive, 'id') ?  $left_bonus_sessions : 0;
+            $left_bonus_sessions = $left_bonus_sessions;
             $contract_id = 0;
             if($left_real_amount > 0 || $left_real_sessions >0 || $left_bonus_sessions> 0){
                 $last_contract_to_student = u::first("SELECT count_recharge FROM contracts WHERE student_id=$to_student_id ORDER BY count_recharge DESC LIMIT 1");
