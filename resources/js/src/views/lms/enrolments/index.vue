@@ -144,8 +144,8 @@
                       </td>
                       <td class="td vs-table--td">
                         <p><strong>{{item.tuition_fee_name}}</strong></p>
-                        <p>Phải đóng: {{item.must_charge}}</p>
-                        <p>Đã đóng: {{item.total_charged}}</p>
+                        <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
+                        <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
                       </td>
                       <td class="td vs-table--td">
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>

@@ -185,14 +185,11 @@
           pagination: this.pagination
         },
         statusOptions:[
-          {id:1,label:'Chờ xếp lớp học thử'},
-          {id:2,label:'Đang học thử'},
-          {id:3,label:'Kết thúc học thử'},
-          {id:4,label:'Chưa đóng phí'},
-          {id:5,label:'Đặt cọc'},
-          {id:6,label:'Chờ xếp lớp'},
-          {id:7,label:'Đang học chính thức'},
-          {id:8,label:'Hết phí'},
+          {id:1,label:'Chưa đóng phí'},
+          {id:2,label:'Đang học'},
+          {id:3,label:'Hết phí'},
+          {id:4,label:'Đặt cọc'},
+          {id:5,label:'Chờ xếp lớp'},
         ],
 
         students: [],
