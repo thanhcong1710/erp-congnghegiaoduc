@@ -143,7 +143,7 @@ class ImportsController extends Controller
         );
         if(!$data->name){
             $result->has_error = 1;
-            $result->message = "Tên phụ huynh không để trống";
+            $result->message = "Họ tên không để trống";
         }if(!$data->gud_mobile1){
             $result->has_error = 1;
             $result->message = "Số điện thoại không hợp lệ";
