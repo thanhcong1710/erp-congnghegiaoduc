@@ -130,7 +130,7 @@ class TuitionTransfersController extends Controller
                 );
                 return response()->json($result);
             }
-            $left_bonus_sessions = data_get($contractToStudentActive, 'id') ? $left_bonus_sessions : 0;
+            $left_bonus_sessions = $left_bonus_sessions;
             $received_contracts[$k] = array(
                 'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                 'tuition_fee_name' => data_get($data_calc_transfer, 'receive_tuition_fee.name'),
