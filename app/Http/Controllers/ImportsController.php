@@ -97,7 +97,7 @@ class ImportsController extends Controller
     public function addItemDataImport($list,$import_id,$creator_id) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $query = "INSERT INTO crm_import_parents (import_id,`name`,email,gud_mobile1,`address`,note,created_at,creator_id,`status`,error_message,student_name_1,student_name_2,student_birthday_1,student_birthday_2,owner_hrm,link_facebook, checkin_at, checkin_branch_accounting_id) VALUES ";
+            $query = "INSERT INTO crm_import_parents (import_id,`name`,email,gud_mobile1,`address`,note,created_at,creator_id,`status`,error_message,owner_hrm,link_facebook) VALUES ";
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = $this->convertData($list[$i]);
@@ -105,13 +105,7 @@ class ImportsController extends Controller
                     $status = $validate->has_error ? 2 : 1;
                     $error_message = $validate->message;
                     $gud_mobile1 = $item->gud_mobile1 ? $item->gud_mobile1 : $list[$i][1];
-                    $gud_mobile2 = $item->gud_mobile2 ? $item->gud_mobile2 : $list[$i][2];
-                    $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                    $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                    $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                    $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,'$item->owner_hrm','$item->link_facebook',$checkin_at,$checkin_branch_accounting_id),";
-                    
+                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->owner_hrm','$item->link_facebook'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -123,12 +117,7 @@ class ImportsController extends Controller
                     $status = $validate->has_error ? 2 : 1;
                     $error_message = $validate->message;
                     $gud_mobile1 = $item->gud_mobile1 ? $item->gud_mobile1 : $list[$i][1];
-                    $gud_mobile2 = $item->gud_mobile2 ? $item->gud_mobile2 : $list[$i][2];
-                    $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                    $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                    $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                    $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,'$item->owner_hrm','$gud_mobile2',$checkin_at,$checkin_branch_accounting_id),";
+                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->owner_hrm','$item->link_facebook'),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -136,16 +125,6 @@ class ImportsController extends Controller
         }
     }
     public function convertData($data){
-        if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$data[8])) {
-            $student_birthday_1 = $data[8];
-        } else {
-            $student_birthday_1 = NULL;
-        }
-        if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$data[10])) {
-            $student_birthday_2 = $data[10];
-        } else {
-            $student_birthday_2 = NULL;
-        }
         $result = (object)array(
             'name'=> str_replace(array("'","]","\\"),"",$data[0]),
             'gud_mobile1'=> u::phoneNew($data[1]),
@@ -154,12 +133,6 @@ class ImportsController extends Controller
             'address'=>str_replace(array("'","]","\\"),"",$data[4]),
             'note'=>$data[5],
             'owner_hrm'=>$data[6],
-            'student_name_1'=>str_replace(array("'","]","\\"),"",$data[7]),
-            'student_birthday_1'=>$student_birthday_1,
-            'student_name_2'=>str_replace(array("'","]","\\"),"",$data[9]),
-            'student_birthday_2'=>$student_birthday_2,
-            'checkin_branch_accounting_id'=>$data[11] ? $data[11] :NULL,
-            'checkin_at'=>$data[12] ? $data[12] :NULL
         );
         return $result;
     }
@@ -185,30 +158,6 @@ class ImportsController extends Controller
                 LEFT JOIN crm_import_parents AS p1 ON (p.gud_mobile1 = p1.gud_mobile1 AND p.id>p1.id)
             WHERE
                 p.import_id = $import_id AND p1.import_id=$import_id 
-                AND p1.id IS NOT NULL
-        UNION 
-            SELECT p.id, p1.id
-            FROM
-                crm_import_parents AS p
-                LEFT JOIN crm_import_parents AS p1 ON ( p1.gud_mobile2 = p.gud_mobile1 AND p1.gud_mobile2 IS NOT NULL AND p1.gud_mobile2 != '' AND p.id>p1.id)
-            WHERE
-                p.import_id = $import_id AND p1.import_id=$import_id 
-                AND p1.id IS NOT NULL
-        UNION 
-            SELECT p.id, p1.id
-            FROM
-                crm_import_parents AS p
-                LEFT JOIN crm_import_parents AS p1 ON ( p1.gud_mobile1 = p.gud_mobile2 AND p.gud_mobile2 IS NOT NULL AND p.gud_mobile2 != '' AND p.id>p1.id)
-            WHERE
-                p.import_id = $import_id AND p1.import_id=$import_id 
-                AND p1.id IS NOT NULL
-        UNION 
-            SELECT p.id, p1.id
-            FROM
-                crm_import_parents AS p
-                LEFT JOIN crm_import_parents AS p1 ON ( p1.gud_mobile2 = p.gud_mobile2 AND p1.gud_mobile2 IS NOT NULL AND p1.gud_mobile2 != '' AND p.id>p1.id)
-            WHERE
-                p.import_id = $import_id AND p1.import_id=$import_id 
                 AND p1.id IS NOT NULL");
         if(!empty($list)){
             $sql_update = "INSERT INTO crm_import_parents (id,`status`,error_message) VALUES ";
@@ -224,33 +173,6 @@ class ImportsController extends Controller
                     FROM
                         crm_import_parents AS p
                         LEFT JOIN crm_parents AS ps ON ps.mobile_1 = p.gud_mobile1
-                        LEFT JOIN users AS u ON ps.owner_id = u.id 
-                    WHERE
-                        p.import_id = $import_id 
-                        AND ps.id IS NOT NULL 
-                UNION
-                    SELECT p.id, u.name, u.hrm_id,u.branch_name, ps.is_lock, ps.id AS parent_id
-                    FROM
-                        crm_import_parents AS p
-                        LEFT JOIN crm_parents AS ps ON ( ps.mobile_2 = p.gud_mobile1 AND ps.mobile_2 IS NOT NULL AND ps.mobile_2 != '' )
-                        LEFT JOIN users AS u ON ps.owner_id = u.id 
-                    WHERE
-                        p.import_id = $import_id 
-                        AND ps.id IS NOT NULL 
-                UNION
-                    SELECT p.id, u.name, u.hrm_id,u.branch_name, ps.is_lock, ps.id AS parent_id
-                    FROM
-                        crm_import_parents AS p
-                        LEFT JOIN crm_parents AS ps ON ( ps.mobile_1 = p.gud_mobile2 AND p.gud_mobile2 IS NOT NULL AND p.gud_mobile2 != '' )
-                        LEFT JOIN users AS u ON ps.owner_id = u.id 
-                    WHERE
-                        p.import_id = $import_id 
-                        AND ps.id IS NOT NULL 
-                UNION
-                    SELECT p.id, u.name, u.hrm_id,u.branch_name, ps.is_lock, ps.id AS parent_id
-                    FROM
-                        crm_import_parents AS p
-                        LEFT JOIN crm_parents AS ps ON ( ps.mobile_2 = p.gud_mobile2 AND ps.mobile_2 IS NOT NULL AND ps.mobile_2 != '' )
                         LEFT JOIN users AS u ON ps.owner_id = u.id 
                     WHERE
                         p.import_id = $import_id 
@@ -282,8 +204,6 @@ class ImportsController extends Controller
         u::query("UPDATE crm_import_parents SET status=6 WHERE import_id=$import_id AND status=1");
         u::query("UPDATE crm_import_parents SET status=6 WHERE import_id=$import_id AND status=4 AND is_lock=0");
         u::query("UPDATE crm_imports SET status=1 WHERE id=$import_id ");
-        u::query("UPDATE crm_students AS s LEFT JOIN crm_parents AS p ON s.gud_mobile_1 =p.mobile_1 SET s.parent_id=p.id WHERE s.parent_id IS NULL ");
-        u::query("UPDATE crm_students AS s LEFT JOIN branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
         $data = u::first("SELECT (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status=6) AS total_success,
             (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status!=6) AS total_error");
         u::updateBranchIDParents();
@@ -293,80 +213,26 @@ class ImportsController extends Controller
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
             $query = "INSERT INTO crm_parents (`name`,email,mobile_1,`address`,note,created_at,creator_id,`status`,source_id,source_detail_id,owner_id,link_facebook,last_assign_date) VALUES ";
-            $query_student = "INSERT INTO crm_students (`name`,`birthday`,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
-            $check_import_student =0;
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
                     $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
                     $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->link_facebook',''$created_at''),";
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
-                }
                 $this->addItemDataParent(array_slice($list, 10000),$arr_owner,$source_id,$creator_id,$source_detail_id);
             } else {
                 foreach($list as $i=>$item) {
                     $item = (object)$item;
                     $owner_id = $item->owner_id? $item->owner_id : $arr_owner[$i%count($arr_owner)];
                     $query.= "('$item->name','$item->email','$item->gud_mobile1','$item->address','$item->note','$created_at','$creator_id',0,'$source_id','$source_detail_id','$owner_id','$item->link_facebook','$created_at'),";
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
-                }
             }
         }
     }
-    // public function processImportCheckin(){
-    //     $list_students = u::query("SELECT id,checkin_at,checkin_branch_id,type_product FROM crm_students WHERE crm_id IS NULL AND checkin_branch_id IS NOT NULL LIMIT 100");
-    //     foreach($list_students AS $student){
-    //         $crm_id= StudentsController::createCheckinCRM($student->id,$student->checkin_at,$student->checkin_branch_id,$student->type_product);
-    //         if($crm_id){
-    //             $data_update = array(
-    //                 'status' => 1,
-    //                 'updated_at' => date('Y-m-d H:i:s'),
-    //                 'crm_id'=>$crm_id
-    //             );
-    //             u::updateSimpleRow($data_update,array('id'=>$student->id), 'crm_students');
-    //         }
-    //     }
-    //     return "ok";
-    // }
 
     public function OverwirteItemDataParent($list,$arr_owner,$source_id,$creator_id,$source_detail_id) {
         if ($list) {
@@ -374,9 +240,6 @@ class ImportsController extends Controller
             $sql_update_owner = "INSERT INTO crm_parents (id,updated_at,updator_id,owner_id,last_assign_date,is_lock,source_id,source_detail_id,`name`,email,`address`,note) VALUES ";
             $sql_crm_parent_overwrite = "INSERT INTO crm_parent_overwrite (`parent_id`,last_owner_id,owner_id,`created_at`,creator_id) VALUES ";
             $sql_crm_parent_logs = "INSERT INTO crm_parent_logs (`parent_id`,`content`,creator_id,created_at,`status`) VALUES ";
-            $query_student = "INSERT INTO crm_students (`name`,`birthday`,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
-            $check_import_student =0;
-            $check_student =0;
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = (object)$list[$i];
@@ -386,36 +249,7 @@ class ImportsController extends Controller
                     
                     $content = "Ghi đè người phụ trách khi import: từ $item->curr_owner_id thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',0),";
-                    $check_student = 1;
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-
-                }
-                
-                if($check_student){
-                    $sql_update_owner = substr($sql_update_owner, 0, -1);
-                    $sql_update_owner.= " ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `updated_at` = VALUES(`updated_at`), `updator_id` = VALUES(`updator_id`), `owner_id` = VALUES(`owner_id`), `last_assign_date` = VALUES(`last_assign_date`), `is_lock` = VALUES(`is_lock`), `source_id` = VALUES(`source_id`), `source_detail_id` = VALUES(`source_detail_id`), `name` = VALUES(`name`), `email` = VALUES(`email`), `address` = VALUES(`address`), `note` = VALUES(`note`)";
-                    u::query($sql_update_owner);
-                    $sql_crm_parent_overwrite = substr($sql_crm_parent_overwrite, 0, -1);
-                    u::query($sql_crm_parent_overwrite);
-                    $sql_crm_parent_logs = substr($sql_crm_parent_logs, 0, -1);
-                    u::query($sql_crm_parent_logs);
-                }
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
+                    
                 }
                 $this->OverwirteItemDataParent(array_slice($list, 10000),$arr_owner,$source_id,$creator_id,$source_detail_id);
             } else {
@@ -427,34 +261,6 @@ class ImportsController extends Controller
                     
                     $content = "Ghi đè người phụ trách khi import: từ $item->curr_owner_id thành $owner_id`";
                     $sql_crm_parent_logs.=" ($item->parent_id,'$content',$creator_id,'$created_at',1),";
-                    $check_student = 1;
-                    if($item->student_name_1){
-                        $check_import_student =1;
-                        $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                    if($item->student_name_2){
-                        $check_import_student =1;
-                        $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
-                        $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
-                        $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
-                    }
-                }
-                if($check_student){
-                    $sql_update_owner = substr($sql_update_owner, 0, -1);
-                    $sql_update_owner.= " ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `updated_at` = VALUES(`updated_at`), `updator_id` = VALUES(`updator_id`), `owner_id` = VALUES(`owner_id`), `last_assign_date` = VALUES(`last_assign_date`), `is_lock` = VALUES(`is_lock`), `source_id` = VALUES(`source_id`), `source_detail_id` = VALUES(`source_detail_id`), `name` = VALUES(`name`), `email` = VALUES(`email`), `address` = VALUES(`address`), `note` = VALUES(`note`)";
-                    u::query($sql_update_owner);
-                    $sql_crm_parent_overwrite = substr($sql_crm_parent_overwrite, 0, -1);
-                    u::query($sql_crm_parent_overwrite);
-                    $sql_crm_parent_logs = substr($sql_crm_parent_logs, 0, -1);
-                    u::query($sql_crm_parent_logs);
-                }
-                if($check_import_student){
-                    $query_student = substr($query_student, 0, -1);
-                    u::query($query_student);
                 }
             }
         }
