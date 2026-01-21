@@ -56,7 +56,12 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-15'">
-                <p>03. BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO HỌC SINH</p>
+                <p>04. BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO HỌC SINH</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-16'">
+                <p>05. BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO TRUNG TÂM</p>
               </router-link>
             </div>
             <!-- <div class="mb-2">

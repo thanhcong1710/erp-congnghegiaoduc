@@ -747,4 +747,83 @@ class ReportsController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Báo cáo 16: Tổng hợp số tiền còn lại theo trung tâm
+     */
+    public function report16(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $product_id = isset($request->product_id) ? $request->product_id : [];
+        $status = isset($request->status) ? $request->status : [];
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        // Get all branches accessible by user
+        $branchIds = Auth::user()->getBranchesHasUser();
+
+        // Build condition for JOIN
+        $joinCond = " c.status NOT IN (0,1,7,8) ";
+        if (!empty($product_id)) {
+            $joinCond .= " AND c.product_id IN (" . implode(",", $product_id) . ")";
+        }
+        if (!empty($status)) {
+            $joinCond .= " AND c.status IN (" . implode(",", $status) . ")";
+        }
+        if ($start_date) {
+            $joinCond .= " AND c.created_at >= '$start_date'";
+        }
+        if ($end_date) {
+            $joinCond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+
+        // Branch filter on the main query if provided
+        $branchCond = " b.id IN ($branchIds) ";
+        if (!empty($branch_id)) {
+            $branchCond .= " AND b.id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        $query = "SELECT 
+                    b.id AS branch_id,
+                    b.name AS branch_name,
+                    COUNT(c.id) AS total_contracts,
+                    SUM(COALESCE(c.must_charge, 0)) AS total_must_charge,
+                    SUM(COALESCE(c.total_charged, 0)) AS total_charged,
+                    SUM(COALESCE(c.debt_amount, 0)) AS total_debt_amount,
+                    SUM(
+                        CASE 
+                            WHEN c.summary_sessions > 0 THEN 
+                                ROUND((c.total_charged * c.left_sessions / c.summary_sessions), 0)
+                            ELSE 0
+                        END
+                    ) AS total_left_amount
+                   FROM branches AS b
+                   LEFT JOIN contracts AS c ON b.id = c.branch_id AND $joinCond
+                   WHERE $branchCond
+                   GROUP BY b.id, b.name
+                   ORDER BY total_left_amount DESC";
+
+        $list = u::query($query);
+
+        $total_summary = [
+            'total_contracts' => 0,
+            'total_must_charge' => 0,
+            'total_charged' => 0,
+            'total_debt_amount' => 0,
+            'total_left_amount' => 0,
+        ];
+
+        foreach ($list as $row) {
+            $total_summary['total_contracts'] += (int) $row->total_contracts;
+            $total_summary['total_must_charge'] += (float) $row->total_must_charge;
+            $total_summary['total_charged'] += (float) $row->total_charged;
+            $total_summary['total_debt_amount'] += (float) $row->total_debt_amount;
+            $total_summary['total_left_amount'] += (float) $row->total_left_amount;
+        }
+
+        return response()->json([
+            'list' => $list,
+            'summary' => $total_summary
+        ]);
+    }
 }

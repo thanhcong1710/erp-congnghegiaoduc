@@ -214,6 +214,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('13', 'ReportsController@report13');
                 Route::post('14', 'ReportsController@report14');
                 Route::post('15', 'ReportsController@report15');
+                Route::post('16', 'ReportsController@report16');
             });
             Route::prefix('exports')->group(function () {
                 Route::get('report01/{key}/{value}', 'ExportsController@report01');
@@ -223,6 +224,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('report13/{key}/{value}', 'ExportsController@report13');
                 Route::get('report14/{key}/{value}', 'ExportsController@report14');
                 Route::get('report15/{key}/{value}', 'ExportsController@report15');
+                Route::get('report16/{key}/{value}', 'ExportsController@report16');
                 Route::get('active-classes/{key}/{value}', 'ExportsController@reportActiveClasses');
             });
         });

@@ -999,5 +999,175 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report16(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+        $params = array_combine($keys, $values);
+
+        $branch_id = [];
+        $product_id = [];
+        $status = [];
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'product_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $product_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'status' && isset($values[$k]) && $values[$k] != 'v') {
+                $status = explode('-', $values[$k]);
+            }
+            if ($key_name == 'start_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $start_date = $values[$k];
+            }
+            if ($key_name == 'end_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $end_date = $values[$k];
+            }
+        }
+
+        // Get all branches accessible by user
+        $branchIdsQuery = Auth::user()->getBranchesHasUser();
+
+        // Build condition for JOIN
+        $joinCond = " c.status NOT IN (0,1,7,8) ";
+        if (!empty($product_id)) {
+            $joinCond .= " AND c.product_id IN (" . implode(",", $product_id) . ")";
+        }
+        if (!empty($status)) {
+            $joinCond .= " AND c.status IN (" . implode(",", $status) . ")";
+        }
+        if ($start_date) {
+            $joinCond .= " AND c.created_at >= '$start_date'";
+        }
+        if ($end_date) {
+            $joinCond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+
+        // Branch filter
+        $branchCond = " b.id IN ($branchIdsQuery) ";
+        if (!empty($branch_id)) {
+            $branchCond .= " AND b.id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        $query = "SELECT 
+                    b.id AS branch_id,
+                    b.name AS branch_name,
+                    COUNT(c.id) AS total_contracts,
+                    SUM(COALESCE(c.must_charge, 0)) AS total_must_charge,
+                    SUM(COALESCE(c.total_charged, 0)) AS total_charged,
+                    SUM(COALESCE(c.debt_amount, 0)) AS total_debt_amount,
+                    SUM(
+                        CASE 
+                            WHEN c.summary_sessions > 0 THEN 
+                                ROUND((c.total_charged * c.left_sessions / c.summary_sessions), 0)
+                            ELSE 0
+                        END
+                    ) AS total_left_amount
+                   FROM branches AS b
+                   LEFT JOIN contracts AS c ON b.id = c.branch_id AND $joinCond
+                   WHERE $branchCond
+                   GROUP BY b.id, b.name
+                   ORDER BY total_left_amount DESC";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Trung tâm');
+        $sheet->setCellValue('C1', 'Tổng contracts');
+        $sheet->setCellValue('D1', 'Tổng phải đóng');
+        $sheet->setCellValue('E1', 'Tổng đã đóng');
+        $sheet->setCellValue('F1', 'Tổng nợ');
+        $sheet->setCellValue('G1', 'Tổng số tiền còn lại');
+
+        // Set column widths
+        $sheet->getColumnDimension("A")->setWidth(8);
+        $sheet->getColumnDimension("B")->setWidth(35);
+        $sheet->getColumnDimension("C")->setWidth(15);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(20);
+        $sheet->getColumnDimension("F")->setWidth(20);
+        $sheet->getColumnDimension("G")->setWidth(25);
+
+        // Style header row
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4']
+            ]
+        ];
+        $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+        // Fill data
+        $totalContracts = 0;
+        $totalMustCharge = 0;
+        $totalCharged = 0;
+        $totalDebt = 0;
+        $totalLeftAmount = 0;
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 2;
+            $item = $list[$i];
+
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->branch_name);
+            $sheet->setCellValue('C' . $x, $item->total_contracts);
+            $sheet->setCellValue('D' . $x, $item->total_must_charge);
+            $sheet->setCellValue('E' . $x, $item->total_charged);
+            $sheet->setCellValue('F' . $x, $item->total_debt_amount);
+            $sheet->setCellValue('G' . $x, $item->total_left_amount);
+
+            $totalContracts += $item->total_contracts;
+            $totalMustCharge += $item->total_must_charge;
+            $totalCharged += $item->total_charged;
+            $totalDebt += $item->total_debt_amount;
+            $totalLeftAmount += $item->total_left_amount;
+
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+
+        // Add total row
+        $totalRow = count($list) + 2;
+        $sheet->setCellValue('A' . $totalRow, '');
+        $sheet->setCellValue('B' . $totalRow, 'TỔNG CỘNG:');
+        $sheet->setCellValue('C' . $totalRow, $totalContracts);
+        $sheet->setCellValue('D' . $totalRow, $totalMustCharge);
+        $sheet->setCellValue('E' . $totalRow, $totalCharged);
+        $sheet->setCellValue('F' . $totalRow, $totalDebt);
+        $sheet->setCellValue('G' . $totalRow, $totalLeftAmount);
+
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E8F5E9']
+            ]
+        ];
+        $sheet->getStyle('B' . $totalRow . ':G' . $totalRow)->applyFromArray($totalStyle);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo tổng hợp số tiền còn lại theo trung tâm.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 

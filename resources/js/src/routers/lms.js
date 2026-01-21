@@ -718,6 +718,20 @@ export default {
         }
       },
       {
+      path: '/lms/reports/operate/report-16',
+      name: 'lms-report-operate-16',
+      component: () => import('@/views/lms/report/operate/report16.vue'),
+      meta: {
+        breadcrumb: [
+          { title: 'Home', url: '/' },
+          { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+          { title: 'Báo cáo doanh thu chưa phân bổ theo trung tâm', active: true }
+        ],
+        pageTitle: 'Báo cáo doanh thu chưa phân bổ theo học sinh',
+        rule: 'editor'
+      }
+    },
+      {
         path: '/lms/reports/academic',
         name: 'lms-reports-academic',
         component: () => import('@/views/lms/report/academic/index.vue'),

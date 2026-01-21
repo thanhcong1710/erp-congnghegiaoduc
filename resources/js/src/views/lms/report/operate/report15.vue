@@ -3,7 +3,7 @@
 
   <div id="page-report-15">
     <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO SỐ TIỀN CÒN LẠI THEO CONTRACTS</h5>
+      <h5>BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO HỌC SINH</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
