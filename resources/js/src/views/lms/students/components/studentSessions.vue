@@ -27,6 +27,7 @@
                   <p class="fw-bold">{{ item.branch_name }}</p>
                   <p class="text-muted">EC: {{ item.ec_name }}</p>
                   <p class="text-muted">AF: {{ item.cm_name }}</p>
+                  <p class="text-muted">Lớp: {{ item.cls_name }}</p>
                 </td>
 
                 <td class="td vs-table--td">

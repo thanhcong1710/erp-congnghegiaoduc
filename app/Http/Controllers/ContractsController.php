@@ -273,12 +273,12 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.must_charge, c.debt_amount, c.total_charged, c.status
+                c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         foreach($list AS $k=> $row){
-            $list[$k]->label_status = u::genStatusStudent($row->status, 1);
+            $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id );
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);

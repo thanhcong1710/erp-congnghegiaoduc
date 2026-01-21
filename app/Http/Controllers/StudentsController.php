@@ -146,7 +146,7 @@ class StudentsController extends Controller
                 OR c.id IS NULL) 
                 AND $cond $order_by $limitation");
         foreach($list AS $k=> $row){
-            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+            $list[$k]->label_status = u::genLearningStatusByContracts($row->id);
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -168,7 +168,7 @@ class StudentsController extends Controller
                         (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) AND s.id=$student_id");
-        $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
+        $data->status_label = u::genLearningStatusByContracts($data->id);
         if ( $data->real_sessions > $data->done_sessions && $data->left_sessions) {
             $data->left_amount = round($data->total_charged * ($data->left_sessions -  $data->done_sessions) / $data->left_sessions);
         } else {
@@ -262,11 +262,13 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
-                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.id
+                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.id,
+                cl.cls_name 
             FROM contracts AS c
+                LEFT JOIN classes AS cl ON cl.id=c.class_id
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach($list AS $k=> $row){
-            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+            $list[$k]->label_status = u::genLearningStatusByContract($row->status);
         }
         return response()->json($list);
     }
@@ -288,12 +290,12 @@ class StudentsController extends Controller
         }
         
         if($contract_active){
-            $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
+            $done_sessions = u::query("SELECT s.class_date,  s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s 
                 WHERE s.contract_id = $contract_active->id");
             $limit = $contract_active->summary_sessions - count($done_sessions);
             $limit = $limit > 0 ? $limit : 0;
             if($contract_active->class_id){
-                $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
+                $next_sessions = u::query("SELECT s.class_date,  s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s 
                     WHERE s.class_id = $contract_active->class_id AND s.class_date > CURRENT_DATE ORDER BY s.class_date LIMIT $limit");
             }
         }

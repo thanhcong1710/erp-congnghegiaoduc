@@ -727,32 +727,6 @@ class UtilityServiceProvider extends ServiceProvider
         return true;
     }
 
-    public static function genStatusStudent($status, $type)
-    {
-        $text = "";
-        if ($type == 1) {
-            if ($status == 6) {
-                $text = "Đang học chính thức";
-            } elseif ($status == 7) {
-                $text = "Hết phí";
-            } elseif (in_array($status, [3, 4, 5])) {
-                $text = "Chờ xếp lớp";
-            } elseif ($status == 2) {
-                $text = "Đặt cọc";
-            } elseif ($status == 1) {
-                $text = "Chưa đóng phí";
-            }
-        } else {
-            if ($status == 6) {
-                $text = "Đang học thử";
-            } elseif ($status == 7) {
-                $text = "Kết thúc học thử";
-            } else {
-                $text = "Chờ xếp lớp học thử";
-            }
-        }
-        return $text;
-    }
 
     public static function getPermissions($user_id)
     {
@@ -1008,6 +982,131 @@ class UtilityServiceProvider extends ServiceProvider
                 break;
             default:
                 $text = "";
+        }
+        return $text;
+    }
+
+    /**
+     * Xác định trạng thái học của học sinh dựa trên tất cả contracts
+     * Lưu ý: 1 học sinh có thể có nhiều contracts
+     * 
+     * @param int $student_id - ID của học sinh
+     * @param bool $return_label - Trả về label text hay status code (mặc định: true)
+     * @return mixed - Trả về label text hoặc status code hoặc object chứa cả hai
+     * 
+     * Logic ưu tiên:
+     * 1. Nếu có bất kỳ contract nào đang học (status = 6) => "Đang học"
+     * 2. Nếu có contract chờ xếp lớp (status = 3,4,5) => "Chờ xếp lớp"
+     * 3. Nếu có contract đặt cọc (status = 2) => "Đặt cọc"
+     * 4. Nếu có contract chưa đóng phí (status = 1) => "Chưa đóng phí"
+     * 5. Nếu tất cả contracts đều hết phí (status = 7) => "Hết phí"
+     * 6. Nếu tất cả contracts đều bị hủy (status = 8 hoặc 0) => "Không có hợp đồng"
+     */
+    public static function genLearningStatusByContracts($student_id, $return_label = true, $agreement_id = null)
+    {
+        $cond = $agreement_id ? " AND agreement_id=$agreement_id" : "";
+        // Lấy tất cả contracts của học sinh (loại trừ status = 0 và 8)
+        $contracts = self::query("SELECT id, status, type, class_id 
+            FROM contracts 
+            WHERE student_id = $student_id 
+            AND status NOT IN (0, 8) $cond
+            ORDER BY status DESC, id DESC");
+
+        if (!$contracts || count($contracts) == 0) {
+            // Không có contract hợp lệ
+            return $return_label ? "Không có hợp đồng" : 0;
+        }
+
+        // Khởi tạo biến để theo dõi các trạng thái
+        $has_learning = false;          // status = 6
+        $has_waiting_class = false;     // status = 3,4,5
+        $has_deposit = false;           // status = 2
+        $has_not_paid = false;          // status = 1
+        $has_expired = false;           // status = 7
+
+        // Duyệt qua tất cả contracts để xác định trạng thái
+        foreach ($contracts as $contract) {
+            $status = (int) $contract->status;
+
+            switch ($status) {
+                case 6:
+                    $has_learning = true;
+                    break;
+                case 3:
+                case 4:
+                case 5:
+                    $has_waiting_class = true;
+                    break;
+                case 2:
+                    $has_deposit = true;
+                    break;
+                case 1:
+                    $has_not_paid = true;
+                    break;
+                case 7:
+                    $has_expired = true;
+                    break;
+            }
+        }
+
+        // Xác định trạng thái cuối cùng theo thứ tự ưu tiên
+        $final_status = 0;
+        $final_label = "";
+
+        if ($has_learning) {
+            $final_status = 6;
+            $final_label = "Đang học";
+        } elseif ($has_waiting_class) {
+            $final_status = 5;  // Sử dụng 5 để đại diện cho nhóm 3,4,5
+            $final_label = "Chờ xếp lớp";
+        } elseif ($has_deposit) {
+            $final_status = 2;
+            $final_label = "Đặt cọc";
+        } elseif ($has_not_paid) {
+            $final_status = 1;
+            $final_label = "Chưa đóng phí";
+        } elseif ($has_expired) {
+            $final_status = 7;
+            $final_label = "Hết phí";
+        } else {
+            $final_status = 0;
+            $final_label = "Không xác định";
+        }
+
+        // Trả về kết quả theo yêu cầu
+        if ($return_label) {
+            return $final_label;
+        } else {
+            return $final_status;
+        }
+    }
+
+    public static function genLearningStatusByContract($status)
+    {
+        $text = "";
+        switch ($status) {
+            case 6:
+                $text = "Đang học chính thức";
+                break;
+            case 7:
+                $text = "Hết phí";
+                break;
+            case 8:
+                $text = "Hủy";
+                break;
+            case 3:
+            case 4:
+            case 5:
+                $text = "Chờ xếp lớp";
+                break;
+            case 2:
+                $text = "Đặt cọc";
+                break;
+            case 1:
+                $text = "Chưa đóng phí";
+                break;
+            default:
+                break;
         }
         return $text;
     }
