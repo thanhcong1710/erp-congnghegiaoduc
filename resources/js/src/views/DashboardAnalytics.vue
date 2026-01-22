@@ -45,8 +45,8 @@
             </template>
           </vx-input-group>
       </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
-        <div class="vx-card overflow-hidden"><!---->
+      <!-- <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_02')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -96,7 +96,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_03')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -121,7 +121,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -200,7 +200,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Số điện thoại</th>
@@ -232,7 +232,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Số điện thoại</th>
@@ -268,7 +268,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Mã LMS</th>
@@ -301,7 +301,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Mã LMS</th>
@@ -318,6 +318,292 @@
                   </tr>
                 </table>
                 
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div> -->
+
+      <!-- Revenue Table Section - Dashboard 17 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">1. DOANH SỐ THEO TRUNG TÂM</h4>
+          
+          <!-- Revenue Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-right">Doanh số ngày</th>
+                      <th class="text-right">Doanh số 3 ngày gần nhất</th>
+                      <th class="text-right">Doanh số tháng</th>
+                      <th class="text-right">Doanh số 3 tháng gần nhất</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in revenueTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount">{{ item.revenue_today | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount">{{ item.revenue_3days | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount highlight-month">{{ item.revenue_month | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount highlight-3months">{{ item.revenue_3months | formatNumber }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="revenueTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount">{{ totalRevenueTable.today | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount">{{ totalRevenueTable.days3 | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount highlight-month">{{ totalRevenueTable.month | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount highlight-3months">{{ totalRevenueTable.months3 | formatNumber }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
+
+      <!-- Operations Dashboard Section - Dashboard 18 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">2. VẬN HÀNH</h4>
+          
+          <!-- Operations Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-center">Số học sinh Check in mới</th>
+                      <th class="text-center">Số học sinh đăng ký mới</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng</th>
+                      <th class="text-center">Tổng số hs active</th>
+                      <th class="text-center">Tổng số lớp</th>
+                      <th class="text-center">Tỉ lệ ACS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in operationsTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.checkin_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.registered_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-warning">{{ item.expired_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-success">{{ item.active_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.total_classes | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-primary">{{ item.acs_ratio }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="operationsTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.checkin | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.registered | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-warning">{{ totalOperations.expired | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-success">{{ totalOperations.active | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.classes | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-primary">{{ totalOperations.acsRatio }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
+
+      <!-- Student Re-enrollment Section - Dashboard 19 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">
+            3. SỐ LƯỢNG HỌC SINH CHƯA TÁI PHÍ
+          </h4>
+          
+          <!-- Re-enrollment Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng hiện tại (T)</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+1</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+2</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+3</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in reenrollmentTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t1 }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t2 }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t3 }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="reenrollmentTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t1 }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t2 }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t3 }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
+
+      <!-- Student Expired Details Section - Dashboard 20 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">
+            4. CHI TIẾT HỌC SINH HẾT PHÍ TRONG THÁNG HIỆN TẠI
+          </h4>
+          
+          <!-- Expired Students Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th>Tên học sinh</th>
+                      <th>Mã học sinh</th>
+                      <th>Lớp học hiện tại</th>
+                      <th>Ngày hết phí</th>
+                      <th>Tình trạng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in expiredStudentsData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td">{{ item.student_name }}</td>
+                      <td class="td vs-table--td">{{ item.lms_code || item.lms_id }}</td>
+                      <td class="td vs-table--td">{{ item.class_name }}</td>
+                      <td class="td vs-table--td">{{ item.enrolment_last_date }}</td>
+                      <td class="td vs-table--td">
+                        <span 
+                          :class="{
+                            'status-withdraw': item.status === 'Đã Withdraw',
+                            'status-processing': item.status === 'Đang xử lý',
+                            'status-renewed': item.status === 'Đã tái phí',
+                            'status-upcoming': item.status === 'Sắp hết phí'
+                          }"
+                        >
+                          {{ item.status }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr v-if="expiredStudentsData.length === 0" class="tr-values vs-table--tr">
+                      <td class="td vs-table--td text-center" colspan="7">
+                        <em>Không có dữ liệu</em>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -585,6 +871,30 @@ export default {
       dataStudentDeposit:[],
       dataStudentPending:[],
       dataStudentWithdraw:[],
+      revenueTableData: [],
+      totalRevenueTable: {
+        today: 0,
+        days3: 0,
+        month: 0,
+        months3: 0
+      },
+      operationsTableData: [],
+      totalOperations: {
+        checkin: 0,
+        registered: 0,
+        expired: 0,
+        active: 0,
+        classes: 0,
+        acsRatio: '0'
+      },
+      reenrollmentTableData: [],
+      totalReenrollment: {
+        ratio_t: '0/0',
+        ratio_t1: '0/0',
+        ratio_t2: '0/0',
+        ratio_t3: '0/0'
+      },
+      expiredStudentsData: []
     }
   },
   created () {
@@ -1037,60 +1347,173 @@ export default {
       })
     },
     loadData(){
-      if(this.checkPermission('dashboard_01')){
-        this.loadDataDashboard01();
+      this.loadDataDashboard17();
+      this.loadDataDashboard18();
+      this.loadDataDashboard19();
+      this.loadDataDashboard20();
+    },
+    loadDataDashboard17(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
       }
-      if(this.checkPermission('dashboard_02')){
-        this.loadDataDashboard02();
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/17`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.revenueTableData = response.data
+        this.calculateTotalRevenue()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading revenue table:', error)
+      })
+    },
+    calculateTotalRevenue() {
+      this.totalRevenueTable = {
+        today: 0,
+        days3: 0,
+        month: 0,
+        months3: 0
       }
-      if(this.checkPermission('dashboard_03')){
-        this.loadDataDashboard03();
+      
+      this.revenueTableData.forEach(item => {
+        this.totalRevenueTable.today += item.revenue_today
+        this.totalRevenueTable.days3 += item.revenue_3days
+        this.totalRevenueTable.month += item.revenue_month
+        this.totalRevenueTable.months3 += item.revenue_3months
+      })
+    },
+    loadDataDashboard18(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
       }
-      if(this.checkPermission('dashboard_04')){
-        this.loadDataDashboard04();
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/18`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.operationsTableData = response.data
+        this.calculateTotalOperations()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading operations table:', error)
+      })
+    },
+    calculateTotalOperations() {
+      this.totalOperations = {
+        checkin: 0,
+        registered: 0,
+        expired: 0,
+        active: 0,
+        classes: 0,
+        acsRatio: '0'
       }
-      if(this.checkPermission('dashboard_05')){
-        this.loadDataDashboard05();
+      
+      this.operationsTableData.forEach(item => {
+        this.totalOperations.checkin += item.checkin_students
+        this.totalOperations.registered += item.registered_students
+        this.totalOperations.expired += item.expired_students
+        this.totalOperations.active += item.active_students
+        this.totalOperations.classes += item.total_classes
+      })
+      
+      // Calculate average ACS ratio
+      if (this.totalOperations.classes > 0) {
+        this.totalOperations.acsRatio = (this.totalOperations.active / this.totalOperations.classes).toFixed(2)
       }
-      if(this.checkPermission('dashboard_06')){
-        this.loadDataDashboard06();
+    },
+    loadDataDashboard19(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
       }
-      if(this.checkPermission('dashboard_07')){
-        this.loadDataDashboard07();
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/19`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.reenrollmentTableData = response.data
+        this.calculateTotalReenrollment()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading re-enrollment table:', error)
+      })
+    },
+    calculateTotalReenrollment() {
+      let totalExpiredT = 0
+      let totalRenewedT = 0
+      let totalExpiredT1 = 0
+      let totalRenewedT1 = 0
+      let totalExpiredT2 = 0
+      let totalRenewedT2 = 0
+      let totalExpiredT3 = 0
+      let totalRenewedT3 = 0
+      
+      this.reenrollmentTableData.forEach(item => {
+        totalExpiredT += item.total_expired_t
+        totalRenewedT += item.total_renewed_t
+        totalExpiredT1 += item.total_expired_t1
+        totalRenewedT1 += item.total_renewed_t1
+        totalExpiredT2 += item.total_expired_t2
+        totalRenewedT2 += item.total_renewed_t2
+        totalExpiredT3 += item.total_expired_t3
+        totalRenewedT3 += item.total_renewed_t3
+      })
+      
+      this.totalReenrollment = {
+        ratio_t: totalExpiredT > 0 ? `${totalRenewedT}/${totalExpiredT}` : '0/0',
+        ratio_t1: totalExpiredT1 > 0 ? `${totalRenewedT1}/${totalExpiredT1}` : '0/0',
+        ratio_t2: totalExpiredT2 > 0 ? `${totalRenewedT2}/${totalExpiredT2}` : '0/0',
+        ratio_t3: totalExpiredT3 > 0 ? `${totalRenewedT3}/${totalExpiredT3}` : '0/0'
       }
-      if(this.checkPermission('dashboard_08')){
-        this.loadDataDashboard08();
+    },
+    loadDataDashboard20(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
       }
-      if(this.checkPermission('dashboard_09')){
-        this.loadDataDashboard09();
-      }
-      if(this.checkPermission('dashboard_10')){
-        this.loadDataDashboard10();
-      }
-      if(this.checkPermission('dashboard_11')){
-        this.loadDataDashboard11();
-      }
-      if(this.checkPermission('dashboard_12')){
-        this.loadDataDashboard12();
-      }
-      if(this.checkPermission('dashboard_13')){
-        this.loadDataDashboard13();
-      }
-      if(this.checkPermission('dashboard_14')){
-        this.loadDataDashboard14();
-      }
-      if(this.checkPermission('dashboard_15')){
-        this.loadDataDashboard15();
-      }
-      if(this.checkPermission('dashboard_16')){
-        this.loadDataDashboard16();
-      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/20`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.expiredStudentsData = response.data
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading expired students table:', error)
+      })
     }
-  },
+  }
 }
 </script>
 
 <style lang="scss">
+.dash-select-branch {
+  position: relative;
+  z-index: 1000;
+}
 .dash-select-branch .multiselect.vs-inputx.vs-input--input{
   padding: 0px;
   border: none;
@@ -1098,6 +1521,10 @@ export default {
 .dash-select-branch .multiselect__tags{
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
+}
+.dash-select-branch .multiselect__content-wrapper{
+  z-index: 10000 !important;
+  position: absolute !important;
 }
 /*! rtl:begin:ignore */
 #dashboard-analytics {
@@ -1120,6 +1547,109 @@ export default {
     .decore-left, .decore-right{
       width: 140px;
     }
+  }
+
+  // Revenue Table Styles
+  .revenue-amount {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .highlight-month {
+    color: #f39c12 !important;
+    font-weight: 700;
+  }
+
+  .highlight-3months {
+    color: #e74c3c !important;
+    font-weight: 700;
+  }
+
+  .total-row {
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    font-size: 1.05rem;
+  }
+
+  .total-row td {
+    padding: 15px 10px !important;
+  }
+
+  .text-muted {
+    color: #a0aec0;
+  }
+
+  // Ensure cards don't cover dropdown
+  .vx-card {
+    position: relative;
+    z-index: 1;
+  }
+
+  // Operations Table Styles
+  .ops-number {
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .ops-note {
+    font-size: 0.75rem;
+    color: #718096;
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  .highlight-warning {
+    color: #f39c12 !important;
+  }
+
+  .highlight-success {
+    color: #28c76f !important;
+  }
+
+  .highlight-primary {
+    color: #7367f0 !important;
+  }
+
+  // Re-enrollment Table Styles
+  .renew-ratio {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2c3e50;
+  }
+
+  // Expired Students Table Styles
+  .status-withdraw {
+    color: #ea5455;
+    font-weight: 600;
+  }
+
+  .status-processing {
+    color: #ff9f43;
+    font-weight: 600;
+  }
+
+  .status-renewed {
+    color: #28c76f;
+    font-weight: 600;
+  }
+
+  .status-upcoming {
+    color: #7367f0;
+    font-weight: 600;
+  }
+
+  .vs-table--thead th {
+    vertical-align: middle;
+  }
+
+  .vs-table--thead th small {
+    display: block;
+    font-weight: normal;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 4px;
   }
 }
 /*! rtl:end:ignore */
