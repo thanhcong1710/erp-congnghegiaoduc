@@ -546,6 +546,69 @@
           </div>
         </vx-card>
       </div>
+
+      <!-- Student Expired Details Section - Dashboard 20 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">
+            4. CHI TIẾT HỌC SINH HẾT PHÍ TRONG THÁNG HIỆN TẠI
+          </h4>
+          
+          <!-- Expired Students Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm<br><small>Tên trung tâm</small></th>
+                      <th>Tên học sinh<br><small>Họ và tên học sinh</small></th>
+                      <th>Mã học sinh<br><small>Mã LMS của học sinh</small></th>
+                      <th>Lớp học hiện tại<br><small>Tên lớp hiện đang theo học</small></th>
+                      <th>Ngày hết phí<br><small>Ngày của buổi học cuối cùng</small></th>
+                      <th>Tình trạng<br><small>Đã Withdraw / Đang xử lý / Đã tái phí / Sắp hết phí</small></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in expiredStudentsData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td">{{ item.student_name }}</td>
+                      <td class="td vs-table--td">{{ item.lms_code || item.lms_id }}</td>
+                      <td class="td vs-table--td">{{ item.class_name }}</td>
+                      <td class="td vs-table--td">{{ item.enrolment_last_date }}</td>
+                      <td class="td vs-table--td">
+                        <span 
+                          :class="{
+                            'status-withdraw': item.status === 'Đã Withdraw',
+                            'status-processing': item.status === 'Đang xử lý',
+                            'status-renewed': item.status === 'Đã tái phí',
+                            'status-upcoming': item.status === 'Sắp hết phí'
+                          }"
+                        >
+                          {{ item.status }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr v-if="expiredStudentsData.length === 0" class="tr-values vs-table--tr">
+                      <td class="td vs-table--td text-center" colspan="7">
+                        <em>Không có dữ liệu</em>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
     </div>
   </div>
 </template>
@@ -830,7 +893,8 @@ export default {
         ratio_t1: '0/0',
         ratio_t2: '0/0',
         ratio_t3: '0/0'
-      }
+      },
+      expiredStudentsData: []
     }
   },
   created () {
@@ -1286,6 +1350,7 @@ export default {
       this.loadDataDashboard17();
       this.loadDataDashboard18();
       this.loadDataDashboard19();
+      this.loadDataDashboard20();
     },
     loadDataDashboard17(){
       const ids_branch = []
@@ -1418,6 +1483,27 @@ export default {
         ratio_t2: totalExpiredT2 > 0 ? `${totalRenewedT2}/${totalExpiredT2}` : '0/0',
         ratio_t3: totalExpiredT3 > 0 ? `${totalRenewedT3}/${totalExpiredT3}` : '0/0'
       }
+    },
+    loadDataDashboard20(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/20`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.expiredStudentsData = response.data
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading expired students table:', error)
+      })
     }
   }
 }
@@ -1531,6 +1617,39 @@ export default {
     font-weight: 600;
     font-size: 1rem;
     color: #2c3e50;
+  }
+
+  // Expired Students Table Styles
+  .status-withdraw {
+    color: #ea5455;
+    font-weight: 600;
+  }
+
+  .status-processing {
+    color: #ff9f43;
+    font-weight: 600;
+  }
+
+  .status-renewed {
+    color: #28c76f;
+    font-weight: 600;
+  }
+
+  .status-upcoming {
+    color: #7367f0;
+    font-weight: 600;
+  }
+
+  .vs-table--thead th {
+    vertical-align: middle;
+  }
+
+  .vs-table--thead th small {
+    display: block;
+    font-weight: normal;
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 4px;
   }
 }
 /*! rtl:end:ignore */

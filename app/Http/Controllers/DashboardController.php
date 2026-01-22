@@ -709,5 +709,81 @@ class DashboardController extends Controller
 
         return response()->json($result);
     }
+
+    public function dashboard20(Request $request)
+    {
+        if (data_get($request, 'branch_id')) {
+            $cond = " AND c.branch_id IN (" . implode(",", data_get($request, 'branch_id')) . ")";
+        } else {
+            $cond = " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        }
+
+        $currentMonth = date('Y-m');
+        $startOfMonth = date('Y-m-01');
+        $endOfMonth = date('Y-m-t');
+
+        // Lấy danh sách học sinh hết phí trong tháng hiện tại
+        // Bao gồm cả học sinh đã hết phí (left_sessions <= 0) và sắp hết phí (left_sessions > 0)
+        $students = u::query("SELECT 
+                c.id AS contract_id,
+                c.student_id,
+                s.name AS student_name,
+                s.lms_code,
+                s.lms_id,
+                c.enrolment_last_date,
+                c.status AS contract_status,
+                c.left_sessions,
+                cl.cls_name,
+                b.name AS branch_name
+            FROM contracts AS c
+            LEFT JOIN students AS s ON s.id = c.student_id
+            LEFT JOIN classes AS cl ON cl.id = c.class_id
+            LEFT JOIN branches AS b ON b.id = c.branch_id
+            WHERE c.status IN (6, 7)
+            AND c.class_id IS NOT NULL
+            AND DATE_FORMAT(c.enrolment_last_date, '%Y-%m') = '$currentMonth'
+            $cond
+            ORDER BY c.enrolment_last_date ASC, b.name ASC, s.name ASC");
+
+        $result = [];
+        foreach ($students as $index => $student) {
+            // Xác định tình trạng
+            $status = '';
+            if ($student->contract_status == 7) {
+                $status = 'Đã Withdraw';
+            } elseif ($student->left_sessions > 0) {
+                // Học sinh còn buổi học nhưng ngày hết phí trong tháng hiện tại
+                $status = 'Sắp hết phí';
+            } else {
+                // Kiểm tra xem có contract mới chưa (đã tái phí)
+                $hasNewContract = u::first("SELECT COUNT(id) AS total 
+                    FROM contracts 
+                    WHERE student_id = {$student->student_id} 
+                    AND status != 7 
+                    AND count_recharge > (SELECT count_recharge FROM contracts WHERE id = {$student->contract_id})
+                    AND (debt_amount = 0 OR total_charged > 0)");
+                
+                if ($hasNewContract->total > 0) {
+                    $status = 'Đã tái phí';
+                } else {
+                    $status = 'Đang xử lý';
+                }
+            }
+
+            $result[] = [
+                'stt' => $index + 1,
+                'branch_name' => $student->branch_name,
+                'student_name' => $student->student_name,
+                'lms_code' => $student->lms_code,
+                'lms_id' => $student->lms_id,
+                'class_name' => $student->cls_name,
+                'enrolment_last_date' => $student->enrolment_last_date,
+                'status' => $status,
+                'left_sessions' => (int) $student->left_sessions
+            ];
+        }
+
+        return response()->json($result);
+    }
 }
 
