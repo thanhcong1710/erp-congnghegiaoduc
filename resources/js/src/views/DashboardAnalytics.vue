@@ -475,6 +475,77 @@
           </div>
         </vx-card>
       </div>
+
+      <!-- Student Re-enrollment Section - Dashboard 19 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">
+            3. SỐ LƯỢNG HỌC SINH CHƯA TÁI PHÍ
+          </h4>
+          
+          <!-- Re-enrollment Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng hiện tại (T)</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+1</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+2</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng T+3</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in reenrollmentTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t1 }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t2 }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="renew-ratio">{{ item.ratio_t3 }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="reenrollmentTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t1 }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t2 }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t3 }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
     </div>
   </div>
 </template>
@@ -752,6 +823,13 @@ export default {
         active: 0,
         classes: 0,
         acsRatio: '0'
+      },
+      reenrollmentTableData: [],
+      totalReenrollment: {
+        ratio_t: '0/0',
+        ratio_t1: '0/0',
+        ratio_t2: '0/0',
+        ratio_t3: '0/0'
       }
     }
   },
@@ -1207,6 +1285,7 @@ export default {
     loadData(){
       this.loadDataDashboard17();
       this.loadDataDashboard18();
+      this.loadDataDashboard19();
     },
     loadDataDashboard17(){
       const ids_branch = []
@@ -1288,6 +1367,56 @@ export default {
       // Calculate average ACS ratio
       if (this.totalOperations.classes > 0) {
         this.totalOperations.acsRatio = (this.totalOperations.active / this.totalOperations.classes).toFixed(2)
+      }
+    },
+    loadDataDashboard19(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/19`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.reenrollmentTableData = response.data
+        this.calculateTotalReenrollment()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading re-enrollment table:', error)
+      })
+    },
+    calculateTotalReenrollment() {
+      let totalExpiredT = 0
+      let totalRenewedT = 0
+      let totalExpiredT1 = 0
+      let totalRenewedT1 = 0
+      let totalExpiredT2 = 0
+      let totalRenewedT2 = 0
+      let totalExpiredT3 = 0
+      let totalRenewedT3 = 0
+      
+      this.reenrollmentTableData.forEach(item => {
+        totalExpiredT += item.total_expired_t
+        totalRenewedT += item.total_renewed_t
+        totalExpiredT1 += item.total_expired_t1
+        totalRenewedT1 += item.total_renewed_t1
+        totalExpiredT2 += item.total_expired_t2
+        totalRenewedT2 += item.total_renewed_t2
+        totalExpiredT3 += item.total_expired_t3
+        totalRenewedT3 += item.total_renewed_t3
+      })
+      
+      this.totalReenrollment = {
+        ratio_t: totalExpiredT > 0 ? `${totalRenewedT}/${totalExpiredT}` : '0/0',
+        ratio_t1: totalExpiredT1 > 0 ? `${totalRenewedT1}/${totalExpiredT1}` : '0/0',
+        ratio_t2: totalExpiredT2 > 0 ? `${totalRenewedT2}/${totalExpiredT2}` : '0/0',
+        ratio_t3: totalExpiredT3 > 0 ? `${totalRenewedT3}/${totalExpiredT3}` : '0/0'
       }
     }
   }
@@ -1395,6 +1524,13 @@ export default {
 
   .highlight-primary {
     color: #7367f0 !important;
+  }
+
+  // Re-enrollment Table Styles
+  .renew-ratio {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #2c3e50;
   }
 }
 /*! rtl:end:ignore */

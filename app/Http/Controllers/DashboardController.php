@@ -613,5 +613,101 @@ class DashboardController extends Controller
 
         return response()->json($result);
     }
+
+    public function dashboard19(Request $request)
+    {
+        if (data_get($request, 'branch_id')) {
+            $cond = " AND b.id IN (" . implode(",", data_get($request, 'branch_id')) . ")";
+        } else {
+            $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser() . ") AND b.id > 10";
+        }
+
+        $currentMonth = date('Y-m');
+        $monthT1 = date('Y-m', strtotime('+1 month'));
+        $monthT2 = date('Y-m', strtotime('+2 months'));
+        $monthT3 = date('Y-m', strtotime('+3 months'));
+
+        $branches = u::query("SELECT b.id, b.name AS branch_name
+            FROM branches AS b 
+            WHERE b.status=1 $cond 
+            ORDER BY b.id");
+
+        $result = [];
+        foreach ($branches as $index => $branch) {
+            $branchId = $branch->id;
+
+            // Tháng hiện tại (T)
+            $renewT = u::first("SELECT 
+                    COUNT(id) AS total_expired,
+                    SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS total_renewed
+                FROM report_renews 
+                WHERE branch_id = $branchId 
+                AND renewed_month = '$currentMonth'");
+            
+            $ratioT = '0/0';
+            if ($renewT->total_expired > 0) {
+                $ratioT = $renewT->total_renewed . '/' . $renewT->total_expired;
+            }
+
+            // Tháng T+1
+            $renewT1 = u::first("SELECT 
+                    COUNT(id) AS total_expired,
+                    SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS total_renewed
+                FROM report_renews 
+                WHERE branch_id = $branchId 
+                AND renewed_month = '$monthT1'");
+            
+            $ratioT1 = '0/0';
+            if ($renewT1->total_expired > 0) {
+                $ratioT1 = $renewT1->total_renewed . '/' . $renewT1->total_expired;
+            }
+
+            // Tháng T+2
+            $renewT2 = u::first("SELECT 
+                    COUNT(id) AS total_expired,
+                    SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS total_renewed
+                FROM report_renews 
+                WHERE branch_id = $branchId 
+                AND renewed_month = '$monthT2'");
+            
+            $ratioT2 = '0/0';
+            if ($renewT2->total_expired > 0) {
+                $ratioT2 = $renewT2->total_renewed . '/' . $renewT2->total_expired;
+            }
+
+            // Tháng T+3
+            $renewT3 = u::first("SELECT 
+                    COUNT(id) AS total_expired,
+                    SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS total_renewed
+                FROM report_renews 
+                WHERE branch_id = $branchId 
+                AND renewed_month = '$monthT3'");
+            
+            $ratioT3 = '0/0';
+            if ($renewT3->total_expired > 0) {
+                $ratioT3 = $renewT3->total_renewed . '/' . $renewT3->total_expired;
+            }
+
+            $result[] = [
+                'stt' => $index + 1,
+                'branch_id' => $branchId,
+                'branch_name' => $branch->branch_name,
+                'ratio_t' => $ratioT,
+                'ratio_t1' => $ratioT1,
+                'ratio_t2' => $ratioT2,
+                'ratio_t3' => $ratioT3,
+                'total_expired_t' => (int) $renewT->total_expired,
+                'total_renewed_t' => (int) $renewT->total_renewed,
+                'total_expired_t1' => (int) $renewT1->total_expired,
+                'total_renewed_t1' => (int) $renewT1->total_renewed,
+                'total_expired_t2' => (int) $renewT2->total_expired,
+                'total_renewed_t2' => (int) $renewT2->total_renewed,
+                'total_expired_t3' => (int) $renewT3->total_expired,
+                'total_renewed_t3' => (int) $renewT3->total_renewed,
+            ];
+        }
+
+        return response()->json($result);
+    }
 }
 
