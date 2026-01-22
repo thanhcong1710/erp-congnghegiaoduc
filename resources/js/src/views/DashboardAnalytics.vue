@@ -45,8 +45,8 @@
             </template>
           </vx-input-group>
       </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
-        <div class="vx-card overflow-hidden"><!---->
+      <!-- <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -71,7 +71,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_02')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -96,7 +96,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_03')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -121,7 +121,7 @@
         </div>
       </div>
       <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
-        <div class="vx-card overflow-hidden"><!---->
+        <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
                   <div class="p-6">
@@ -200,7 +200,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Số điện thoại</th>
@@ -232,7 +232,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Số điện thoại</th>
@@ -268,7 +268,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Mã LMS</th>
@@ -301,7 +301,7 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <!---->
+                      
                       <th colspan="1" rowspan="1" class="text-center">#</th>
                       <th colspan="1" rowspan="1" >Họ tên</th>
                       <th colspan="1" rowspan="1" >Mã LMS</th>
@@ -318,6 +318,75 @@
                   </tr>
                 </table>
                 
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div> -->
+
+      <!-- Revenue Table Section - Dashboard 17 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">1. DOANH SỐ THEO TRUNG TÂM</h4>
+          
+          <!-- Revenue Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-right">Doanh số ngày</th>
+                      <th class="text-right">Doanh số 3 ngày gần nhất</th>
+                      <th class="text-right">Doanh số tháng</th>
+                      <th class="text-right">Doanh số 3 tháng gần nhất</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in revenueTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount">{{ item.revenue_today | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount">{{ item.revenue_3days | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount highlight-month">{{ item.revenue_month | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <span class="revenue-amount highlight-3months">{{ item.revenue_3months | formatNumber }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="revenueTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount">{{ totalRevenueTable.today | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount">{{ totalRevenueTable.days3 | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount highlight-month">{{ totalRevenueTable.month | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-right">
+                        <strong class="revenue-amount highlight-3months">{{ totalRevenueTable.months3 | formatNumber }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -585,6 +654,13 @@ export default {
       dataStudentDeposit:[],
       dataStudentPending:[],
       dataStudentWithdraw:[],
+      revenueTableData: [],
+      totalRevenueTable: {
+        today: 0,
+        days3: 0,
+        month: 0,
+        months3: 0
+      }
     }
   },
   created () {
@@ -1037,60 +1113,54 @@ export default {
       })
     },
     loadData(){
-      if(this.checkPermission('dashboard_01')){
-        this.loadDataDashboard01();
+      this.loadDataDashboard17();
+    },
+    loadDataDashboard17(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
       }
-      if(this.checkPermission('dashboard_02')){
-        this.loadDataDashboard02();
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/17`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.revenueTableData = response.data
+        this.calculateTotalRevenue()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading revenue table:', error)
+      })
+    },
+    calculateTotalRevenue() {
+      this.totalRevenueTable = {
+        today: 0,
+        days3: 0,
+        month: 0,
+        months3: 0
       }
-      if(this.checkPermission('dashboard_03')){
-        this.loadDataDashboard03();
-      }
-      if(this.checkPermission('dashboard_04')){
-        this.loadDataDashboard04();
-      }
-      if(this.checkPermission('dashboard_05')){
-        this.loadDataDashboard05();
-      }
-      if(this.checkPermission('dashboard_06')){
-        this.loadDataDashboard06();
-      }
-      if(this.checkPermission('dashboard_07')){
-        this.loadDataDashboard07();
-      }
-      if(this.checkPermission('dashboard_08')){
-        this.loadDataDashboard08();
-      }
-      if(this.checkPermission('dashboard_09')){
-        this.loadDataDashboard09();
-      }
-      if(this.checkPermission('dashboard_10')){
-        this.loadDataDashboard10();
-      }
-      if(this.checkPermission('dashboard_11')){
-        this.loadDataDashboard11();
-      }
-      if(this.checkPermission('dashboard_12')){
-        this.loadDataDashboard12();
-      }
-      if(this.checkPermission('dashboard_13')){
-        this.loadDataDashboard13();
-      }
-      if(this.checkPermission('dashboard_14')){
-        this.loadDataDashboard14();
-      }
-      if(this.checkPermission('dashboard_15')){
-        this.loadDataDashboard15();
-      }
-      if(this.checkPermission('dashboard_16')){
-        this.loadDataDashboard16();
-      }
+      
+      this.revenueTableData.forEach(item => {
+        this.totalRevenueTable.today += item.revenue_today
+        this.totalRevenueTable.days3 += item.revenue_3days
+        this.totalRevenueTable.month += item.revenue_month
+        this.totalRevenueTable.months3 += item.revenue_3months
+      })
     }
   },
 }
 </script>
 
 <style lang="scss">
+.dash-select-branch {
+  position: relative;
+  z-index: 1000;
+}
 .dash-select-branch .multiselect.vs-inputx.vs-input--input{
   padding: 0px;
   border: none;
@@ -1098,6 +1168,10 @@ export default {
 .dash-select-branch .multiselect__tags{
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
+}
+.dash-select-branch .multiselect__content-wrapper{
+  z-index: 10000 !important;
+  position: absolute !important;
 }
 /*! rtl:begin:ignore */
 #dashboard-analytics {
@@ -1120,6 +1194,42 @@ export default {
     .decore-left, .decore-right{
       width: 140px;
     }
+  }
+
+  // Revenue Table Styles
+  .revenue-amount {
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  .highlight-month {
+    color: #f39c12 !important;
+    font-weight: 700;
+  }
+
+  .highlight-3months {
+    color: #e74c3c !important;
+    font-weight: 700;
+  }
+
+  .total-row {
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    font-size: 1.05rem;
+  }
+
+  .total-row td {
+    padding: 15px 10px !important;
+  }
+
+  .text-muted {
+    color: #a0aec0;
+  }
+
+  // Ensure cards don't cover dropdown
+  .vx-card {
+    position: relative;
+    z-index: 1;
   }
 }
 /*! rtl:end:ignore */

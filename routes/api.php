@@ -127,7 +127,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('delete-file', 'StudentsController@deleteFile');
                 Route::post('validate_lms', 'StudentsController@validateLMS');
             });
-           
+
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
@@ -154,7 +154,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('enrolments/withdraw', 'EnrolmentsController@withdraw');
             Route::post('enrolments/get-contract-join', 'EnrolmentsController@getContractJoin');
             Route::post('enrolments/contract-join', 'EnrolmentsController@contractJoin');
-            
+
             Route::post('reserves/list', 'ReservesController@list');
             Route::post('reserves/search-student', 'ReservesController@searchStudent');
             Route::post('reserves/add', 'ReservesController@add');
@@ -394,6 +394,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('14', 'DashboardController@dashboard14');
             Route::post('15', 'DashboardController@dashboard15');
             Route::post('16', 'DashboardController@dashboard16');
+            Route::post('17', 'DashboardController@dashboard17');
         });
     });
 });
