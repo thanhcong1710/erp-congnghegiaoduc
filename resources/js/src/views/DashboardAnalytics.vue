@@ -562,12 +562,12 @@
                   <thead class="vs-table--thead">
                     <tr>
                       <th class="text-center" style="width: 60px">STT</th>
-                      <th>Trung tâm<br><small>Tên trung tâm</small></th>
-                      <th>Tên học sinh<br><small>Họ và tên học sinh</small></th>
-                      <th>Mã học sinh<br><small>Mã LMS của học sinh</small></th>
-                      <th>Lớp học hiện tại<br><small>Tên lớp hiện đang theo học</small></th>
-                      <th>Ngày hết phí<br><small>Ngày của buổi học cuối cùng</small></th>
-                      <th>Tình trạng<br><small>Đã Withdraw / Đang xử lý / Đã tái phí / Sắp hết phí</small></th>
+                      <th>Trung tâm</th>
+                      <th>Tên học sinh</th>
+                      <th>Mã học sinh</th>
+                      <th>Lớp học hiện tại</th>
+                      <th>Ngày hết phí</th>
+                      <th>Tình trạng</th>
                     </tr>
                   </thead>
                   <tbody>
