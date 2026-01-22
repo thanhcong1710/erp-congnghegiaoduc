@@ -526,5 +526,92 @@ class DashboardController extends Controller
 
         return response()->json($result);
     }
+
+    public function dashboard18(Request $request)
+    {
+        if (data_get($request, 'branch_id')) {
+            $cond = " AND b.id IN (" . implode(",", data_get($request, 'branch_id')) . ")";
+        } else {
+            $cond = " AND b.id IN (" . Auth::user()->getBranchesHasUser() . ") AND b.id > 10";
+        }
+
+        $currentMonth = date('Y-m');
+        $startOfMonth = date('Y-m-01');
+        $today = date('Y-m-d');
+
+        $branches = u::query("SELECT b.id, b.name AS branch_name
+            FROM branches AS b 
+            WHERE b.status=1 $cond 
+            ORDER BY b.id");
+
+        $result = [];
+        foreach ($branches as $index => $branch) {
+            $branchId = $branch->id;
+
+            // Số học sinh Check in mới (trong tháng hiện tại)
+            $checkinStudents = u::first("SELECT COUNT(DISTINCT crm_student_id) AS total 
+                FROM crm_student_checkin 
+                WHERE checkin_branch_id = $branchId 
+                AND status >= 1
+                AND DATE_FORMAT(checkin_at, '%Y-%m') = '$currentMonth'");
+
+            // Số học sinh đăng ký mới (hoàn thành học phí trong tháng)
+            $registeredStudents = u::first("SELECT COUNT(DISTINCT student_id) AS total 
+                FROM contracts 
+                WHERE branch_id = $branchId 
+                AND type > 0
+                AND count_recharge = 0
+                AND debt_amount = 0
+                AND DATE_FORMAT(created_at, '%Y-%m') = '$currentMonth'");
+
+            // Số học sinh hết phí trong tháng (chưa được nối phí)
+            $expiredStudents = u::first("SELECT COUNT(DISTINCT c.student_id) AS total 
+                FROM contracts c
+                WHERE c.branch_id = $branchId 
+                AND c.status = 6
+                AND c.enrolment_last_date >= '$startOfMonth'
+                AND c.enrolment_last_date <= '$today'
+                AND c.left_sessions <= 0
+                AND (SELECT COUNT(id) FROM contracts 
+                     WHERE student_id = c.student_id 
+                     AND count_recharge > c.count_recharge 
+                     AND status != 7) = 0");
+
+            // Tổng số học sinh active (đang học)
+            $activeStudents = u::first("SELECT COUNT(DISTINCT student_id) AS total 
+                FROM contracts 
+                WHERE branch_id = $branchId 
+                AND status = 6 
+                AND type > 0");
+
+            // Tổng số lớp chính thức
+            $totalClasses = u::first("SELECT COUNT(id) AS total 
+                FROM classes 
+                WHERE branch_id = $branchId 
+                AND status = 1
+                AND cls_startdate <= '$today'
+                AND cls_enddate >= '$today'");
+
+            // Tính tỉ lệ ACS
+            $acsRatio = '0';
+            if ($totalClasses->total > 0) {
+                $acsRatio = number_format($activeStudents->total / $totalClasses->total, 2);
+            }
+
+            $result[] = [
+                'stt' => $index + 1,
+                'branch_id' => $branchId,
+                'branch_name' => $branch->branch_name,
+                'checkin_students' => (int) $checkinStudents->total,
+                'registered_students' => (int) $registeredStudents->total,
+                'expired_students' => (int) $expiredStudents->total,
+                'active_students' => (int) $activeStudents->total,
+                'total_classes' => (int) $totalClasses->total,
+                'acs_ratio' => $acsRatio
+            ];
+        }
+
+        return response()->json($result);
+    }
 }
 

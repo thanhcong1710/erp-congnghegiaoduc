@@ -392,6 +392,89 @@
           </div>
         </vx-card>
       </div>
+
+      <!-- Operations Dashboard Section - Dashboard 18 -->
+      <div class="vx-col w-full mb-base">
+        <vx-card>
+          <h4 class="mb-4">2. VẬN HÀNH</h4>
+          
+          <!-- Operations Table -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
+            <div class="con-tablex vs-table--content">
+              <div class="vs-con-tbody vs-table--tbody">
+                <table class="vs-table vs-table--tbody-table" style="width: 100%">
+                  <thead class="vs-table--thead">
+                    <tr>
+                      <th class="text-center" style="width: 60px">STT</th>
+                      <th>Trung tâm</th>
+                      <th class="text-center">Số học sinh Check in mới</th>
+                      <th class="text-center">Số học sinh đăng ký mới</th>
+                      <th class="text-center">Số học sinh hết phí trong tháng</th>
+                      <th class="text-center">Tổng số hs active</th>
+                      <th class="text-center">Tổng số lớp</th>
+                      <th class="text-center">Tỉ lệ ACS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr 
+                      v-for="(item, index) in operationsTableData" 
+                      :key="index"
+                      class="tr-values vs-table--tr"
+                    >
+                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
+                      <td class="td vs-table--td">
+                        <strong>{{ item.branch_name }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.checkin_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.registered_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-warning">{{ item.expired_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-success">{{ item.active_students | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number">{{ item.total_classes | formatNumber }}</span>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <span class="ops-number highlight-primary">{{ item.acs_ratio }}</span>
+                      </td>
+                    </tr>
+                    <!-- Total Row - Only show when more than 1 branch -->
+                    <tr v-if="operationsTableData.length > 1" class="tr-values vs-table--tr total-row">
+                      <td class="td vs-table--td text-center" colspan="2">
+                        <strong>TỔNG CỘNG</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.checkin | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.registered | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-warning">{{ totalOperations.expired | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-success">{{ totalOperations.active | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number">{{ totalOperations.classes | formatNumber }}</strong>
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <strong class="ops-number highlight-primary">{{ totalOperations.acsRatio }}</strong>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </vx-card>
+      </div>
     </div>
   </div>
 </template>
@@ -660,6 +743,15 @@ export default {
         days3: 0,
         month: 0,
         months3: 0
+      },
+      operationsTableData: [],
+      totalOperations: {
+        checkin: 0,
+        registered: 0,
+        expired: 0,
+        active: 0,
+        classes: 0,
+        acsRatio: '0'
       }
     }
   },
@@ -1114,6 +1206,7 @@ export default {
     },
     loadData(){
       this.loadDataDashboard17();
+      this.loadDataDashboard18();
     },
     loadDataDashboard17(){
       const ids_branch = []
@@ -1151,8 +1244,53 @@ export default {
         this.totalRevenueTable.month += item.revenue_month
         this.totalRevenueTable.months3 += item.revenue_3months
       })
+    },
+    loadDataDashboard18(){
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch
+      this.$vs.loading()
+      axios.p(`/api/dashboard/18`,{
+        branch_id: this.searchData.branch_id,
+      })
+      .then(response => {
+        this.$vs.loading.close()
+        this.operationsTableData = response.data
+        this.calculateTotalOperations()
+      })
+      .catch(error => {
+        this.$vs.loading.close()
+        console.error('Error loading operations table:', error)
+      })
+    },
+    calculateTotalOperations() {
+      this.totalOperations = {
+        checkin: 0,
+        registered: 0,
+        expired: 0,
+        active: 0,
+        classes: 0,
+        acsRatio: '0'
+      }
+      
+      this.operationsTableData.forEach(item => {
+        this.totalOperations.checkin += item.checkin_students
+        this.totalOperations.registered += item.registered_students
+        this.totalOperations.expired += item.expired_students
+        this.totalOperations.active += item.active_students
+        this.totalOperations.classes += item.total_classes
+      })
+      
+      // Calculate average ACS ratio
+      if (this.totalOperations.classes > 0) {
+        this.totalOperations.acsRatio = (this.totalOperations.active / this.totalOperations.classes).toFixed(2)
+      }
     }
-  },
+  }
 }
 </script>
 
@@ -1230,6 +1368,33 @@ export default {
   .vx-card {
     position: relative;
     z-index: 1;
+  }
+
+  // Operations Table Styles
+  .ops-number {
+    font-weight: 700;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .ops-note {
+    font-size: 0.75rem;
+    color: #718096;
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  .highlight-warning {
+    color: #f39c12 !important;
+  }
+
+  .highlight-success {
+    color: #28c76f !important;
+  }
+
+  .highlight-primary {
+    color: #7367f0 !important;
   }
 }
 /*! rtl:end:ignore */
