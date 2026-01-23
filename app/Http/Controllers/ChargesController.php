@@ -572,7 +572,7 @@ class ChargesController extends Controller
             (SELECT name FROM products WHERe id=c.product_id) AS product_name, tp.note,
             '' AS text_2, '' AS text_amount, '' AS text_amount_words,'' AS text_3,'' AS text_debt_amount
           FROM tmp_payments AS tp
-            LEFT JOIN contracts AS c ON tp.contract_id=c.id
+            LEFT JOIN agreements AS c ON tp.agreement_id=c.id
             LEFT JOIN students AS s ON c.student_id = s.id
           WHERE tp.id = $id");
         $data->text_1 = "Ngày ".date('d').  " tháng ". date('m'). " năm ". date('Y');
