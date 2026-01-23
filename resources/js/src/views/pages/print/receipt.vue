@@ -6,7 +6,7 @@
                     <div class="inner">
                         <!-- BEGIN FORM -->
                         <div class="print-header">
-                            <div class="h-left" style="width: 30%">
+                            <div class="h-left" style="width: 20%; max-width: 100%;">
                                 <span class="logo"><img src="/images/logo.png" /></span>
                             </div>
                             <div class="h-right" style="border:none">
