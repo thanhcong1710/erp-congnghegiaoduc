@@ -181,9 +181,9 @@ class StudentsController extends Controller
                 LIMIT 1");
 
             if ($contract) {
-                $list[$k]->class_name = u::first("SELECT cls_name FROM classes WHERE id = ".(int)$contract->class_id)->cls_name ?? '';
-                $list[$k]->ec_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS ec_name FROM users WHERE id = ".(int)$contract->ec_id)->ec_name ?? '';
-                $list[$k]->cm_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS cm_name FROM users WHERE id = ".(int)$contract->cm_id)->cm_name ?? '';
+                $list[$k]->class_name = u::first("SELECT cls_name FROM classes WHERE id = " . (int) $contract->class_id)->cls_name ?? '';
+                $list[$k]->ec_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS ec_name FROM users WHERE id = " . (int) $contract->ec_id)->ec_name ?? '';
+                $list[$k]->cm_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS cm_name FROM users WHERE id = " . (int) $contract->cm_id)->cm_name ?? '';
                 $list[$k]->done_sessions = $contract->done_sessions;
                 $list[$k]->summary_sessions = $contract->summary_sessions;
                 $list[$k]->type = $contract->type;
@@ -312,6 +312,7 @@ class StudentsController extends Controller
         $student_id = isset($request->student_id) ? $request->student_id : 0;
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
                 c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type,
+                c.enrolment_start_date, c.enrolment_last_date,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
