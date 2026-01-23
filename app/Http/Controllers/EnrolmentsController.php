@@ -7,6 +7,7 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
+use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -176,6 +177,10 @@ class EnrolmentsController extends Controller
                 'updator_id' => Auth::user()->id
             ), array('student_id'=>$student_id), 'term_student_user');
             LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
+            
+            // Tự động tạo tickets khi học sinh được thêm vào lớp
+            $actions = ['Phát sách', 'Thông báo lịch học'];
+            TicketService::createTicketsForStudentEnrollment($student_id, $class_id, $contract_id, $actions);
         }
 
         $result = array(
