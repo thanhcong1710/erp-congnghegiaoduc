@@ -16,44 +16,44 @@ class ParentsController extends Controller
         $status = isset($request->status) ? $request->status : [];
         $level = isset($request->level) ? $request->level : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
-        $owner_id = isset($request->owner_id) ? $request->owner_id :  [];
+        $owner_id = isset($request->owner_id) ? $request->owner_id : [];
         $source_id = isset($request->source_id) ? $request->source_id : [];
         $source_detail_id = isset($request->source_detail_id) ? $request->source_detail_id : [];
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_search = isset($request->type_search) ? $request->type_search : 0;
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " p.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " p.branch_id IN (" . Auth::user()->getBranchesHasUser() . ") ";
 
-        if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+        if (!Auth::user()->checkPermission('canViewAllParents')) {
+            $cond .= " AND p.owner_id IN (" . Auth::user()->getStaffHasUser() . ")";
         }
-        
+
         if (!empty($status)) {
-            $cond .= " AND p.status IN (".implode(",",$status).")";
+            $cond .= " AND p.status IN (" . implode(",", $status) . ")";
         }
         if (!empty($level)) {
-            $tmp_level ='';
-            foreach($level AS $l){
-                $tmp_level.= $tmp_level ? ", '".$l."'" : "'".$l."'";
+            $tmp_level = '';
+            foreach ($level as $l) {
+                $tmp_level .= $tmp_level ? ", '" . $l . "'" : "'" . $l . "'";
             }
             $cond .= " AND p.level IN ($tmp_level)";
         }
         if (!empty($owner_id)) {
-            $cond .= " AND p.owner_id IN (".implode(",",$owner_id).")" ;
+            $cond .= " AND p.owner_id IN (" . implode(",", $owner_id) . ")";
         }
         if (!empty($source_id)) {
-            $cond .= " AND p.source_id IN (".implode(",",$source_id).")";
+            $cond .= " AND p.source_id IN (" . implode(",", $source_id) . ")";
         }
         if (!empty($source_detail_id)) {
-            $cond .= " AND p.source_detail_id IN (".implode(",",$source_detail_id).")";
+            $cond .= " AND p.source_detail_id IN (" . implode(",", $source_detail_id) . ")";
         }
-        
+
         if ($keyword !== '') {
             $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%') ";
         }
@@ -66,28 +66,28 @@ class ParentsController extends Controller
         //type_search=1
         $cond_1 = " AND p.care_date IS NULL AND p.status <80 ";
         //type_search=2
-        $cond_2 = " AND DATE_FORMAT(next_care_date,'%Y-%m-%d') = '".date('Y-m-d')."'";
-        $cond_3 = " AND next_care_date < '".date('Y-m-d')."' 
+        $cond_2 = " AND DATE_FORMAT(next_care_date,'%Y-%m-%d') = '" . date('Y-m-d') . "'";
+        $cond_3 = " AND next_care_date < '" . date('Y-m-d') . "' 
             AND (p.care_date < p.next_care_date OR p.care_date IS NULL) AND p.status NOT IN (8,9,10,12)";
         $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5)>0 ";
 
         $order_by = " ORDER BY p.id DESC ";
-        $tmp_cond="";
-        if($type_search==1){
+        $tmp_cond = "";
+        if ($type_search == 1) {
             $tmp_cond = $cond_1;
-        }elseif($type_search==2){
+        } elseif ($type_search == 2) {
             $tmp_cond = $cond_2;
             $order_by = " ORDER BY next_care_date ASC ";
-        }elseif($type_search==3){
+        } elseif ($type_search == 3) {
             $tmp_cond = $cond_3;
             $order_by = " ORDER BY next_care_date ASC ";
-        }elseif($type_search==4){
+        } elseif ($type_search == 4) {
             $tmp_cond = $cond_4;
             $order_by = " ORDER BY p.last_ticket_date DESC ";
         }
 
         $total = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
-        
+
         $list = u::query("SELECT p.name,p.id,p.mobile_1,p.status,p.next_care_date, (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
@@ -103,7 +103,7 @@ class ParentsController extends Controller
         $total_2 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
         $total_3 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
         $total_4 = u::first("SELECT count(id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
-        $data->detail_total = (object)array(
+        $data->detail_total = (object) array(
             'total_0' => $total_0->total,
             'total_1' => $total_1->total,
             'total_2' => $total_2->total,
@@ -113,96 +113,99 @@ class ParentsController extends Controller
         return response()->json($data);
     }
 
-    public function validatePhone(Request $request){
+    public function validatePhone(Request $request)
+    {
         $parent_id = isset($request->parent_id) ? $request->parent_id : '';
         $phone = isset($request->phone) ? $request->phone : '';
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'',
-            'dup_parent_id'=>'',
+        $result = (object) array(
+            'status' => 1,
+            'message' => '',
+            'dup_parent_id' => '',
         );
-        if($parent_id){
+        if ($parent_id) {
             $duplicate_info = u::first("SELECT p.is_lock,u.name,u.hrm_id, u.branch_name,p.id AS parent_id,
                     (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS care_date,
                     (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1 ) AS total_care, p.last_assign_date
                 FROM crm_parents AS p LEFT JOIN users AS u ON u.id=p.owner_id  
                 WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') AND p.id!='$parent_id'");
-            if($duplicate_info){
+            if ($duplicate_info) {
                 $result->status = 0;
                 $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name";
                 $result->dup_parent_id = $duplicate_info->parent_id;
             }
-        }else{
+        } else {
             $duplicate_info = u::first("SELECT p.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,p.owner_id,
                     (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND status=1 AND creator_id=p.owner_id ORDER BY care_date DESC LIMIT 1) AS care_date,
                     (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1  AND creator_id=p.owner_id) AS total_care, p.last_assign_date
                 FROM crm_parents AS p LEFT JOIN users AS u ON u.id=p.owner_id  WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone') ");
-            if($duplicate_info){
-                if($duplicate_info->is_lock==0){
+            if ($duplicate_info) {
+                if ($duplicate_info->is_lock == 0) {
                     $result->status = 2;
                     $result->message = "Khách hàng có SĐT: $phone đã tồn tại trên hệ thống, bạn có muốn chăm sóc?";
                     $result->dup_parent_id = $duplicate_info->parent_id;
-                }else{
+                } else {
                     $result->status = 0;
                     $result->dup_parent_id = $duplicate_info->parent_id;
                     $text = "";
-                    if($duplicate_info->total_care>0 && (16 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24)))>0){
-                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24));
-                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
-                    }else{
-                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
-                        $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    if ($duplicate_info->total_care > 0 && (16 - floor((time() - strtotime($duplicate_info->care_date)) / (3600 * 24))) > 0) {
+                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->care_date)) / (3600 * 24));
+                        $text .= "<br> Thời gian chăm sóc gần nhất: $duplicate_info->care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    } else {
+                        $thoi_gian_con = 16 - floor((time() - strtotime($duplicate_info->last_assign_date)) / (3600 * 24));
+                        $text .= "<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
                     }
                     // if($duplicate_info->status > 80 || $duplicate_info->status==73){
                     //     $text="<br> Khách hàng thuộc các trường hợp không được phép ghi đè - ".u::getStatusParent($duplicate_info->status);
                     // }
-                    $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name .".$text;
+                    $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name ." . $text;
                 }
             }
         }
         return response()->json($result);
     }
 
-    public function overwrite(Request $request){
+    public function overwrite(Request $request)
+    {
         $phone = isset($request->phone) ? $request->phone : '';
         $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1='$phone'");
-        if($parent_info){
+        if ($parent_info) {
             u::updateSimpleRow(array(
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
-                'owner_id'=>Auth::user()->id,
-                'last_assign_date'=> date('Y-m-d H:i:s'),
-                'is_lock'=>1,
+                'owner_id' => Auth::user()->id,
+                'last_assign_date' => date('Y-m-d H:i:s'),
+                'is_lock' => 1,
             ), array('id' => $parent_info->id), 'crm_parents');
             u::insertSimpleRow(array(
-                'parent_id'=>$parent_info->id,
-                'last_owner_id'=>$parent_info->owner_id,
-                'owner_id'=>Auth::user()->id,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>Auth::user()->id,
+                'parent_id' => $parent_info->id,
+                'last_owner_id' => $parent_info->owner_id,
+                'owner_id' => Auth::user()->id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
             ), 'crm_parent_overwrite');
-            LogParents::logAssign($parent_info->id,$parent_info->owner_id,Auth::user()->id,Auth::user()->id,true);
+            LogParents::logAssign($parent_info->id, $parent_info->owner_id, Auth::user()->id, Auth::user()->id, true);
         }
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Ghi đè quyền chăm sóc thành công'
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Ghi đè quyền chăm sóc thành công'
         );
         return response()->json($result);
     }
 
-    public function validateC2CPhone(Request $request){
+    public function validateC2CPhone(Request $request)
+    {
         $phone = isset($request->phone) ? $request->phone : '';
-        
-        $parent_info=u::first("SELECT name,mobile_1,mobile_2 FROM crm_parents WHERE mobile_1 = '$phone' OR mobile_2 ='$phone'");
-        if($parent_info){
-            $result =(object)array(
-                'status'=>1,
-                'message'=> "Khách hàng: ".$parent_info->name." - ".$parent_info->mobile_1.($parent_info->mobile_2?" - ".$parent_info->mobile_2:'')
+
+        $parent_info = u::first("SELECT name,mobile_1,mobile_2 FROM crm_parents WHERE mobile_1 = '$phone' OR mobile_2 ='$phone'");
+        if ($parent_info) {
+            $result = (object) array(
+                'status' => 1,
+                'message' => "Khách hàng: " . $parent_info->name . " - " . $parent_info->mobile_1 . ($parent_info->mobile_2 ? " - " . $parent_info->mobile_2 : '')
             );
-        }else{
-            $result =(object)array(
-                'status'=>0,
-                'message'=>'Không tồn tại số điện thoại của khách hàng giới thiệu trên hệ thống'
+        } else {
+            $result = (object) array(
+                'status' => 0,
+                'message' => 'Không tồn tại số điện thoại của khách hàng giới thiệu trên hệ thống'
             );
         }
         return response()->json($result);
@@ -211,8 +214,8 @@ class ParentsController extends Controller
     public function add(Request $request)
     {
         $id = u::insertSimpleRow(array(
-            'name'=>$request->name,
-            'email'=>$request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'mobile_1' => $request->mobile_1,
             'address' => $request->address,
             'province_id' => $request->province_id,
@@ -226,24 +229,24 @@ class ParentsController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'last_assign_date' => date('Y-m-d H:i:s'),
-            'owner_id'=>$request->owner_id,
-            'status'=>$request->status,
-            'c2c_mobile'=>$request->c2c_mobile,
+            'owner_id' => $request->owner_id,
+            'status' => $request->status,
+            'c2c_mobile' => $request->c2c_mobile,
         ), 'crm_parents');
         u::updateBranchIDParents();
-        LogParents::logAdd($id,'Khởi tạo khách hàng thủ công',Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Thêm mới khách hàng thành công'
+        LogParents::logAdd($id, 'Khởi tạo khách hàng thủ công', Auth::user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Thêm mới khách hàng thành công'
         );
         return response()->json($result);
     }
 
-    public function show(Request $request,$parent_id)
+    public function show(Request $request, $parent_id)
     {
-        $cond="";
-        if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
+        $cond = "";
+        if (!Auth::user()->checkPermission('canViewAllParents')) {
+            $cond .= " AND p.owner_id IN (" . Auth::user()->getStaffHasUser() . ")";
         }
         $data = u::first("SELECT p.*,(SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
                 (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
@@ -261,8 +264,8 @@ class ParentsController extends Controller
     {
         $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $request->id");
         $data_update = array(
-            'name'=>$request->name,
-            'email'=>$request->email,
+            'name' => $request->name,
+            'email' => $request->email,
             'mobile_1' => $request->mobile_1,
             'address' => $request->address,
             'province_id' => $request->province_id,
@@ -275,13 +278,13 @@ class ParentsController extends Controller
             'note' => $request->note,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'c2c_mobile'=>$request->c2c_mobile,
+            'c2c_mobile' => $request->c2c_mobile,
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_parents');
-        LogParents::logUpdateInfo($pre_parent_info,$data_update,Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật khách hàng thành công'
+        LogParents::logUpdateInfo($pre_parent_info, $data_update, Auth::user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật khách hàng thành công'
         );
         return response()->json($result);
     }
@@ -292,12 +295,12 @@ class ParentsController extends Controller
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'status'=>$request->status,
+            'status' => $request->status,
         ), array('id' => $request->parent_id), 'crm_parents');
-        LogParents::logStatus($request->parent_id,$pre_parent_info->status,$request->status,Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật trạng thái khách hàng thành công'
+        LogParents::logStatus($request->parent_id, $pre_parent_info->status, $request->status, Auth::user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật trạng thái khách hàng thành công'
         );
         return response()->json($result);
     }
@@ -308,13 +311,13 @@ class ParentsController extends Controller
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'level'=>$request->level,
+            'level' => $request->level,
         ), array('id' => $request->parent_id), 'crm_parents');
         $content = "Thay đổi level khách hàng từ `$pre_parent_info->level` thành `$request->level`";
-        LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật level khách hàng thành công'
+        LogParents::logAdd($request->parent_id, $content, Auth::user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật level khách hàng thành công'
         );
         return response()->json($result);
     }
@@ -329,134 +332,140 @@ class ParentsController extends Controller
             'last_assign_date' => $request->owner_id != $pre_parent_info->owner_id ? date('Y-m-d H:i:s') : $pre_parent_info->last_assign_date,
         ), array('id' => $request->parent_id), 'crm_parents');
         u::updateBranchIDParents();
-        LogParents::logAssign($request->parent_id,$pre_parent_info->owner_id,$request->owner_id,Auth::user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật người phụ trách thành công'
+        LogParents::logAssign($request->parent_id, $pre_parent_info->owner_id, $request->owner_id, Auth::user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật người phụ trách thành công'
         );
         return response()->json($result);
     }
 
     public function assignList(Request $request)
     {
-        $cond = implode(",",$request->parents);
+        $cond = implode(",", $request->parents);
         $arr_owner = $request->owners;
         $list_parent_info = u::query("SELECT p.id AS parent_id,p.owner_id,(SELECT CONCAT(name,' (',hrm_id,')') FROM users WHERE id= p.owner_id) AS pre_owner,p.last_assign_date FROM crm_parents AS p WHERE p.id IN ($cond)");
-        foreach($list_parent_info AS $k=>$row){
-            $owner_id =  $arr_owner[$k%count($arr_owner)];
+        foreach ($list_parent_info as $k => $row) {
+            $owner_id = $arr_owner[$k % count($arr_owner)];
             $last_assign_date = $owner_id != $row->owner_id ? date('Y-m-d H:i:s') : $row->last_assign_date;
             u::query("UPDATE crm_parents SET owner_id= $owner_id,last_assign_date='$last_assign_date' WHERE id =$row->parent_id");
-            LogParents::logAssign($row->parent_id,$row->owner_id,$owner_id,Auth::user()->id);
+            LogParents::logAssign($row->parent_id, $row->owner_id, $owner_id, Auth::user()->id);
         }
         u::updateBranchIDParents();
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Bàn giao thành công'
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Bàn giao thành công'
         );
         return response()->json($result);
     }
 
-    public function updateNextCareDate(Request $request){
-        $data=u::updateSimpleRow(array(
+    public function updateNextCareDate(Request $request)
+    {
+        $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => $request->user()->id,
-            'next_care_date'=>date('Y-m-d H:i:s',strtotime($request->next_care_date)),
+            'next_care_date' => date('Y-m-d H:i:s', strtotime($request->next_care_date)),
         ), array('id' => $request->parent_id), 'crm_parents');
-        LogParents::logAdd($request->parent_id,'Cập nhật lịch chăm sóc tiếp theo: '.date('Y-m-d H:i:s',strtotime($request->next_care_date)),$request->user()->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật lịch chăm sóc thành công'
+        LogParents::logAdd($request->parent_id, 'Cập nhật lịch chăm sóc tiếp theo: ' . date('Y-m-d H:i:s', strtotime($request->next_care_date)), $request->user()->id);
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật lịch chăm sóc thành công'
         );
         return response()->json($result);
     }
 
-    public function getLogs(Request $request, $parent_id){
+    public function getLogs(Request $request, $parent_id)
+    {
         $data = u::query("SELECT l.*,(SELECT name FROM users WHERE id=l.creator_id) AS creator_name
             FROM crm_parent_logs AS l WHERE l.parent_id=$parent_id AND l.status=1 
             ORDER BY l.id DESC");
         return response()->json($data);
     }
 
-    public function sendSms(Request $request){
+    public function sendSms(Request $request)
+    {
         $parent_info = u::first("SELECT id,mobile_1,mobile_2 FROM crm_parents WHERE id='$request->parent_id'");
-        $phone = $request->phone ? $request->phone :$parent_info->mobile_1;
-        if($parent_info){
-            u::insertSimpleRow( array(
-                'parent_id'=>$parent_info->id,
-                'note'=>$request->content,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>$request->user()->id,
-                'method_id'=>4,
-                'care_date'=>date('Y-m-d H:i:s'),
-                'phone'=>$phone, 
+        $phone = $request->phone ? $request->phone : $parent_info->mobile_1;
+        if ($parent_info) {
+            u::insertSimpleRow(array(
+                'parent_id' => $parent_info->id,
+                'note' => $request->content,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => $request->user()->id,
+                'method_id' => 4,
+                'care_date' => date('Y-m-d H:i:s'),
+                'phone' => $phone,
                 'branch_id' => Auth::user()->branch_id,
-            ),'crm_customer_care');
+            ), 'crm_customer_care');
         }
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Gửi tin nhắn sms thành công'
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Gửi tin nhắn sms thành công'
         );
         return response()->json($result);
     }
 
-    public function getAllDataTicketByParent(Request $request, $parent_id){
+    public function getAllDataTicketByParent(Request $request, $parent_id)
+    {
         $list = u::query("SELECT t.*
             FROM crm_tickets AS t WHERE parent_id=$parent_id ORDER BY t.id DESC");
         $total = u::first("SELECT count(t.id) AS total
             FROM crm_tickets AS t WHERE parent_id=$parent_id AND status NOT IN (4,5)");
         return response()->json([
-            'list'=>$list,
-            'total_unsuccess'=>$total->total
+            'list' => $list,
+            'total_unsuccess' => $total->total
         ]);
     }
 
     public function addTicket(Request $request)
     {
         $id = u::insertSimpleRow(array(
-            'parent_id'=>data_get($request, 'parent_id'),
-            'type'=>data_get($request, 'type'),
+            'parent_id' => data_get($request, 'parent_id'),
+            'type' => data_get($request, 'type'),
             'description' => data_get($request, 'description'),
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
         ), 'crm_tickets');
-        $data = (object)[
-            'status' => 1 ,
+        $data = (object) [
+            'status' => 1,
             'message' => "Thêm mới ticket thành công",
-            'data'=>$id
+            'data' => $id
         ];
-        u::updateSimpleRow(array('last_ticket_date'=>date('Y-m-d H:i:s')), array('id'=>data_get($request, 'parent_id')), 'crm_parents');
-       
+        u::updateSimpleRow(array('last_ticket_date' => date('Y-m-d H:i:s')), array('id' => data_get($request, 'parent_id')), 'crm_parents');
+
         return response()->json($data);
     }
 
-    public function updateTicket(Request $request){
+    public function updateTicket(Request $request)
+    {
         u::updateSimpleRow(array(
             'status' => data_get($request, 'status'),
             'note' => data_get($request, 'note'),
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-        ), array('id'=>data_get($request, 'id')), 'crm_tickets');
-        $data = (object)[
-            'status' => 1 ,
+        ), array('id' => data_get($request, 'id')), 'crm_tickets');
+        $data = (object) [
+            'status' => 1,
             'message' => "Cập nhật thành công",
         ];
         return response()->json($data);
     }
 
-    public function uploadAvatar(Request $request){
+    public function uploadAvatar(Request $request)
+    {
         $parent_id = isset($_POST['parent_id']) ? $_POST['parent_id'] : '';
         $total = count($_FILES['files']['name']);
-        if ($total > 0){
+        if ($total > 0) {
             $tmpFilePath = $_FILES['files']['tmp_name'][0];
-            if ($tmpFilePath != ""){
-                $dir = __DIR__.'/../../../public/static/upload/avatar_parents/'. date('Y_m').'/';
-                if(!file_exists($dir)){
-                    mkdir($dir);
+            if ($tmpFilePath != "") {
+                $dir = __DIR__ . '/../../../public/static/upload/avatar_parents/' . date('Y_m') . '/';
+                if (!file_exists($dir)) {
+                    mkdir($dir, 0755, true);
                 }
                 $newFilePath = $dir . $_FILES['files']['name'][0];
                 $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                $dir_file_insert = str_replace(__DIR__ . '/../../../public', '', $newFilePath);
                 move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
@@ -474,15 +483,17 @@ class ParentsController extends Controller
         ]);
     }
 
-    public function getVouchers(Request $request, $parent_id){
+    public function getVouchers(Request $request, $parent_id)
+    {
         $parent_info = u::first("SELECT mobile_1 FROM crm_parents WHERE id=$parent_id");
         $data = u::query("SELECT c.*
-            FROM coupons AS c WHERE c.c2c_mobile = '".data_get($parent_info,'mobile_1')."' 
+            FROM coupons AS c WHERE c.c2c_mobile = '" . data_get($parent_info, 'mobile_1') . "' 
             ORDER BY c.id DESC");
         return response()->json($data);
     }
 
-    public function processParentLock(){
+    public function processParentLock()
+    {
         u::query("UPDATE crm_parent_branch SET is_lock = 1");
         u::query("UPDATE crm_parent_branch AS p SET p.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.parent_id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
         u::query("UPDATE crm_parent_branch SET is_lock = 0 
@@ -491,7 +502,8 @@ class ParentsController extends Controller
                 (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) ");
         return "ok";
     }
-    public static function processParentLockById($parent_id){
+    public static function processParentLockById($parent_id)
+    {
         u::query("UPDATE crm_parent_branch AS pb SET 
                 pb.last_care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=pb.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1) ,
             WHERE pb.parent_id=$parent_id ");

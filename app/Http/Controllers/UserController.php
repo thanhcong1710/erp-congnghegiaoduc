@@ -265,7 +265,7 @@ class UserController extends Controller
             if ($tmpFilePath != "") {
                 $dir = __DIR__ . '/../../../public/static/upload/avatars/' . date('Y_m') . '/';
                 if (!file_exists($dir)) {
-                    mkdir($dir);
+                    mkdir($dir, 0755, true);
                 }
                 $newFilePath = $dir . $_FILES['files']['name'][0];
                 $newFilePath = u::update_file_name($newFilePath);
