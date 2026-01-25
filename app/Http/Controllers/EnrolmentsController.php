@@ -106,7 +106,7 @@ class EnrolmentsController extends Controller
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
 
         $product_id = data_get($class_info, 'product_id');
-        $cond = " c.status IN (2, 3, 4, 5) AND c.product_id = $product_id ";
+        $cond = " c.status IN (2, 3, 4, 5) AND c.product_id = $product_id AND c.left_sessions > 0";
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0";
 
         if ($keyword !== '') {
