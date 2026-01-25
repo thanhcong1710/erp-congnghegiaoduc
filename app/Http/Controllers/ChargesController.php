@@ -267,7 +267,7 @@ class ChargesController extends Controller
                 $availableSession = (int)data_get($row, 'contract_data.init_tuition_fee_session') && (int)data_get($row, 'contract_data.must_charge') ? 
                     round((int)data_get($row, 'total_charged') / ((int)data_get($row, 'contract_data.must_charge')/(int)data_get($row, 'contract_data.init_tuition_fee_session'))) : 0; 
                 u::updateSimpleRow([
-                    'status' => data_get($row, 'is_fully_paid') ? 3 : 2,
+                    'status' => data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status'): 3) : 2,
                     'real_sessions' => $availableSession,
                     'summary_sessions' => $availableSession, 
                     'left_sessions' => $availableSession - data_get($row, 'done_sessions'), 
