@@ -321,7 +321,7 @@ class ContractsController extends Controller
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'),  c.count_recharge ASC") ;
         foreach ($dataContracts AS $k=> $contract){
             $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status, 1);
-            $dataContracts[$k]->left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : 0;
+            $dataContracts[$k]->left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : $contract->total_charged;
             $total_left_amount = $total_left_amount + $dataContracts[$k]->left_amount;
         }
         $data->contracts = $dataContracts;
