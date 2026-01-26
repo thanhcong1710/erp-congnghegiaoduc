@@ -300,6 +300,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'DiscountCodesController@show');
                 Route::post('update', 'DiscountCodesController@update');
             });
+            Route::prefix('zoom-rooms')->group(function () {
+                Route::post('list', 'ZoomRoomsController@list');
+                Route::post('save', 'ZoomRoomsController@save');
+                Route::get('show/{id}', 'ZoomRoomsController@show');
+                Route::get('by-class/{class_id}', 'ZoomRoomsController@getByClass');
+                Route::post('delete/{id}', 'ZoomRoomsController@delete');
+                Route::post('available-classes', 'ZoomRoomsController@getAvailableClasses');
+            });
         });
 
         Route::prefix('marketing')->group(function () {

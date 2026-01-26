@@ -287,6 +287,13 @@ export default [
         permission:'settings_rooms',
       },
       {
+        url: '/settings/zoom-rooms',
+        name: 'Quản lý phòng Zoom',
+        icon: 'MonitorIcon',
+        slug: 'setting-zoom-rooms',
+        permission:'settings_zooms',
+      },
+      {
         url: '/settings/shifts',
         name: 'Ca học',
         icon: 'WatchIcon',

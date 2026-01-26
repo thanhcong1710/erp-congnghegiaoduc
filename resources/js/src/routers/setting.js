@@ -466,6 +466,47 @@ export default {
           pageTitle: 'Cập nhật mã chiết khấu',
           rule: 'editor'
         }
+      },
+      {
+        path: '/settings/zoom-rooms',
+        name: 'setting-zoom-rooms',
+        component: () => import('@/views/settings/zoom_rooms/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý phòng Zoom', active: true }
+          ],
+          pageTitle: 'Quản lý phòng Zoom',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/zoom-rooms/add',
+        name: 'setting-zoom-rooms-add',
+        component: () => import('@/views/settings/zoom_rooms/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý phòng Zoom', url: '/settings/zoom-rooms' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới phòng Zoom',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/zoom-rooms/edit/:id',
+        name: 'setting-zoom-rooms-edit',
+        component: () => import('@/views/settings/zoom_rooms/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý phòng Zoom', url: '/settings/zoom-rooms' },
+            { title: 'Cập nhật', active: true }
+          ],
+          pageTitle: 'Cập nhật phòng Zoom',
+          rule: 'editor'
+        }
       }
     ]
   },
