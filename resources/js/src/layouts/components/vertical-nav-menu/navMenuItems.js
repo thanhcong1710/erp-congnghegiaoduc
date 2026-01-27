@@ -25,40 +25,40 @@ export default [
     name: 'Dashboard',
     icon: 'HomeIcon',
     slug: 'dashboard',
-    permission:'Dashboard',
+    permission: 'Dashboard',
   },
   {
     header: 'CRM',
     icon: 'PackageIcon',
-    permission:'CRM',
+    permission: 'CRM',
     items: [
       {
         url: '/crm/parent',
         name: 'Khách hàng',
         icon: 'UsersIcon',
         slug: 'crm-parent',
-        permission:'crm_parent',
+        permission: 'crm_parent',
       },
       {
         url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',
         slug: 'crm-imports',
-        permission:'crm_imports',
+        permission: 'crm_imports',
       }
     ]
   },
   {
     header: 'LMS',
     icon: 'PackageIcon',
-    permission:'LMS',
+    permission: 'LMS',
     items: [
       {
         url: null,
         name: 'Học sinh',
         icon: 'UserIcon',
         url: '/lms/students',
-        permission:'lms_students',
+        permission: 'lms_students',
       },
       {
         url: null,
@@ -69,25 +69,25 @@ export default [
             url: '/lms/agreements',
             name: 'Nhập học',
             slug: 'lms-agreements',
-            permission:'lms_agreements',
+            permission: 'lms_agreements',
           },
           {
             url: '/lms/enrolments',
             name: 'Xếp lớp',
             slug: 'lms-enrolments',
-            permission:'lms_enrolments',
+            permission: 'lms_enrolments',
           },
           {
             url: '/lms/reserves',
             name: 'Bảo lưu',
             slug: 'lms-reserves',
-            permission:'lms_reserves',
+            permission: 'lms_reserves',
           },
           {
             url: '/lms/class_transfers',
             name: 'Chuyển lớp',
             slug: 'lms-class_transfers',
-            permission:'lms_class_transfers',
+            permission: 'lms_class_transfers',
           },
           // {
           //   url: '/lms/branch_transfers',
@@ -111,19 +111,19 @@ export default [
             url: '/lms/attendances',
             name: 'Điểm danh',
             slug: 'lms-attendances',
-            permission:'lms_attendances',
+            permission: 'lms_attendances',
           },
           {
             url: '/lms/assessments',
             name: 'Nhận xét & đánh giá',
             slug: 'lms-attendances',
-            permission:'lms_assessments',
+            permission: 'lms_assessments',
           },
           {
             url: '/lms/teachers',
             name: 'Giáo viên & trợ giảng',
             slug: 'lms-teachers',
-            permission:'lms_teachers',
+            permission: 'lms_teachers',
           }
         ]
       },
@@ -136,19 +136,19 @@ export default [
             url: '/lms/charges',
             name: 'Đã thu phí',
             slug: 'lms-charges',
-            permission:'lms_charges',
+            permission: 'lms_charges',
           },
           {
             url: '/lms/waitcharges',
             name: 'Chờ thu phí',
             slug: 'lms-waitcharges',
-            permission:'lms_waitcharges',
+            permission: 'lms_waitcharges',
           },
           {
             url: '/lms/waitcharge-approve',
             name: 'Duyệt đóng phí',
             slug: 'lms-waitcharge-approve',
-            permission:'lms_waitcharge_approve',
+            permission: 'lms_waitcharge_approve',
           }
         ],
       },
@@ -156,7 +156,7 @@ export default [
         url: '/lms/reports/operate',
         name: 'Báo cáo',
         icon: 'TrendingUpIcon',
-        permission:'lms_reports_operate',
+        permission: 'lms_reports_operate',
         // submenu: [
         //   {
         //     url: '/lms/reports/business',
@@ -176,18 +176,18 @@ export default [
         //     slug: 'lms-reports-operate',
         //     permission:'lms_reports_operate',
         //   },
-          // {
-          //   url: '/lms/reports/academic',
-          //   name: 'Học thuật',
-          //   slug: 'lms-reports-academic',
-          //   permission:'lms_reports_academic',
-          // },
-          // {
-          //   url: '/lms/reports/teacher',
-          //   name: 'Giáo viên',
-          //   slug: 'lms-reports-teacher',
-          //   permission:'lms_reports_teacher',
-          // }
+        // {
+        //   url: '/lms/reports/academic',
+        //   name: 'Học thuật',
+        //   slug: 'lms-reports-academic',
+        //   permission:'lms_reports_academic',
+        // },
+        // {
+        //   url: '/lms/reports/teacher',
+        //   name: 'Giáo viên',
+        //   slug: 'lms-reports-teacher',
+        //   permission:'lms_reports_teacher',
+        // }
         // ],
       },
     ]
@@ -242,21 +242,21 @@ export default [
   {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
-    permission:'Config',
+    permission: 'Config',
     items: [
       {
         url: '/settings/branches',
         name: 'Trung tâm',
         icon: 'HomeIcon',
         slug: 'settings-branches',
-        permission:'settings_branches',
+        permission: 'settings_branches',
       },
       {
         url: '/settings/products',
         name: 'Khóa học',
         icon: 'LayersIcon',
         slug: 'settings-products',
-        permission:'settings_products',
+        permission: 'settings_products',
       },
       // {
       //   url: '/settings/programs',
@@ -277,42 +277,42 @@ export default [
         name: 'Lớp học',
         icon: 'FileIcon',
         slug: 'settings-classes',
-        permission:'settings_classes',
+        permission: 'settings_classes',
       },
       {
         url: '/settings/rooms',
         name: 'Phòng học',
         icon: 'CastIcon',
         slug: 'settings-rooms',
-        permission:'settings_rooms',
+        permission: 'settings_rooms',
       },
       {
         url: '/settings/zoom-rooms',
         name: 'Quản lý phòng Zoom',
         icon: 'MonitorIcon',
         slug: 'setting-zoom-rooms',
-        permission:'settings_zooms',
+        permission: 'settings_zooms',
       },
       {
         url: '/settings/shifts',
         name: 'Ca học',
         icon: 'WatchIcon',
         slug: 'settings-shifts',
-        permission:'settings_shifts',
+        permission: 'settings_shifts',
       },
       {
         url: '/settings/holidays',
         name: 'Ngày nghỉ lễ',
         icon: 'CloudOffIcon',
         slug: 'settings-holidays',
-        permission:'settings_holidays',
+        permission: 'settings_holidays',
       },
       {
         url: '/settings/tuition-fees',
         name: 'Gói phí',
         icon: 'SlackIcon',
         slug: 'settings-tuition-fee',
-        permission:'settings_tuition_fees',
+        permission: 'settings_tuition_fees',
       },
       // {
       //   url: '/settings/discount-codes',
@@ -326,16 +326,16 @@ export default [
         name: 'Người dùng',
         icon: 'UserIcon',
         slug: 'settings-users',
-        permission:'settings_users',
+        permission: 'settings_users',
       },
       {
         url: '/settings/roles',
         name: 'Chức vụ, phân quyền',
         icon: 'PocketIcon',
         slug: 'settings-roles',
-        permission:'settings_roles',
+        permission: 'settings_roles',
       },
-      
+
     ]
   },
 ]

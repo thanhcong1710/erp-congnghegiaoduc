@@ -73,6 +73,20 @@ export default {
         }
       },
       {
+        path: '/lms/agreements/add-with-new-student',
+        name: 'lms-agreements-add-with-new-student',
+        component: () => import('@/views/lms/agreements/addWithNewStudent.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách nhập học', url: '/lms/agreements' },
+            { title: 'Thêm mới nhập học cho HS mới', active: true }
+          ],
+          pageTitle: 'Thêm mới nhập học cho HS mới',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/agreements/:id/detail',
         name: 'lms-agreements-detail',
         component: () => import('@/views/lms/agreements/detail.vue'),
@@ -718,19 +732,19 @@ export default {
         }
       },
       {
-      path: '/lms/reports/operate/report-16',
-      name: 'lms-report-operate-16',
-      component: () => import('@/views/lms/report/operate/report16.vue'),
-      meta: {
-        breadcrumb: [
-          { title: 'Home', url: '/' },
-          { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-          { title: 'Báo cáo doanh thu chưa phân bổ theo trung tâm', active: true }
-        ],
-        pageTitle: 'Báo cáo doanh thu chưa phân bổ theo học sinh',
-        rule: 'editor'
-      }
-    },
+        path: '/lms/reports/operate/report-16',
+        name: 'lms-report-operate-16',
+        component: () => import('@/views/lms/report/operate/report16.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo doanh thu chưa phân bổ theo trung tâm', active: true }
+          ],
+          pageTitle: 'Báo cáo doanh thu chưa phân bổ theo học sinh',
+          rule: 'editor'
+        }
+      },
       {
         path: '/lms/reports/academic',
         name: 'lms-reports-academic',

@@ -37,7 +37,10 @@
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <router-link class="btn btn-success" :to="'/lms/agreements/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Đăng ký lại</vs-button>
+            </router-link>
+            <router-link class="btn btn-success" :to="'/lms/agreements/add-with-new-student'">
+              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Đăng ký mới</vs-button>
             </router-link>
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
             <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
