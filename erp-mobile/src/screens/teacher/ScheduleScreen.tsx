@@ -53,7 +53,7 @@ export default function TeacherScheduleScreen() {
 
             <ScrollView
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} />
                 }
             >
                 <Calendar
@@ -61,7 +61,7 @@ export default function TeacherScheduleScreen() {
                     onDayPress={(day) => setSelectedDate(day.dateString)}
                     markedDates={{
                         [selectedDate]: {
-                            selected: true,
+                            selected: true as boolean,
                             selectedColor: COLORS.teacher.primary,
                         },
                     }}

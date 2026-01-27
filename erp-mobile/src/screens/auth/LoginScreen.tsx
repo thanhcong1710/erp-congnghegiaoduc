@@ -72,7 +72,7 @@ export default function LoginScreen() {
                         value={username}
                         onChangeText={setUsername}
                         autoCapitalize="none"
-                        autoCorrect={false}
+                        autoCorrect={false as boolean}
                     />
                 </View>
 
@@ -87,7 +87,7 @@ export default function LoginScreen() {
                             onChangeText={setPassword}
                             secureTextEntry={!showPassword}
                             autoCapitalize="none"
-                            autoCorrect={false}
+                            autoCorrect={false as boolean}
                         />
                         <TouchableOpacity
                             style={styles.eyeIcon}

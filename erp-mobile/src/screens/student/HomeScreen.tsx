@@ -69,7 +69,7 @@ export default function StudentHomeScreen() {
         <SafeAreaView style={styles.container}>
             <ScrollView
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={Boolean(refreshing)} onRefresh={onRefresh} />
                 }
             >
                 {/* Header */}

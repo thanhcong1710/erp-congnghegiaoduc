@@ -56,22 +56,22 @@ function TeacherTabs() {
             <Tab.Screen
                 name="Home"
                 component={TeacherHomeScreen}
-                options={{ title: 'Trang chủ' }}
+                options={{ title: 'Trang chủ', headerShown: false }}
             />
             <Tab.Screen
                 name="Schedule"
                 component={TeacherScheduleScreen}
-                options={{ title: 'Lịch dạy' }}
+                options={{ title: 'Lịch dạy', headerShown: false }}
             />
             <Tab.Screen
                 name="Classes"
                 component={TeacherClassesScreen}
-                options={{ title: 'Lớp học' }}
+                options={{ title: 'Lớp học', headerShown: false }}
             />
             <Tab.Screen
                 name="Profile"
                 component={TeacherProfileScreen}
-                options={{ title: 'Cá nhân' }}
+                options={{ title: 'Cá nhân', headerShown: false }}
             />
         </Tab.Navigator>
     );
@@ -107,27 +107,27 @@ function StudentTabs() {
             <Tab.Screen
                 name="Home"
                 component={StudentHomeScreen}
-                options={{ title: 'Trang chủ' }}
+                options={{ title: 'Trang chủ', headerShown: false }}
             />
             <Tab.Screen
                 name="Schedule"
                 component={StudentScheduleScreen}
-                options={{ title: 'Lịch học' }}
+                options={{ title: 'Lịch học', headerShown: false }}
             />
             <Tab.Screen
                 name="Grades"
                 component={StudentGradesScreen}
-                options={{ title: 'Điểm số' }}
+                options={{ title: 'Điểm số', headerShown: false }}
             />
             <Tab.Screen
                 name="Payments"
                 component={StudentPaymentsScreen}
-                options={{ title: 'Học phí' }}
+                options={{ title: 'Học phí', headerShown: false }}
             />
             <Tab.Screen
                 name="Profile"
                 component={StudentProfileScreen}
-                options={{ title: 'Cá nhân' }}
+                options={{ title: 'Cá nhân', headerShown: false }}
             />
         </Tab.Navigator>
     );
@@ -153,13 +153,30 @@ export default function AppNavigator() {
 
     return (
         <NavigationContainer>
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Navigator
+                screenOptions={{
+                    headerShown: false,
+                    animation: 'fade',
+                }}
+            >
                 {!isAuthenticated ? (
-                    <Stack.Screen name="Login" component={LoginScreen} />
+                    <Stack.Screen
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false }}
+                    />
                 ) : userType === 'teacher' ? (
-                    <Stack.Screen name="TeacherApp" component={TeacherTabs} />
+                    <Stack.Screen
+                        name="TeacherApp"
+                        component={TeacherTabs}
+                        options={{ headerShown: false }}
+                    />
                 ) : (
-                    <Stack.Screen name="StudentApp" component={StudentTabs} />
+                    <Stack.Screen
+                        name="StudentApp"
+                        component={StudentTabs}
+                        options={{ headerShown: false }}
+                    />
                 )}
             </Stack.Navigator>
         </NavigationContainer>
