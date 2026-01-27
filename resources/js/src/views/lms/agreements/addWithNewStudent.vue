@@ -193,6 +193,18 @@
                     :disabled="!agreement.branch_id"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Chọn lớp để xếp lớp ngay</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu <= hôm nay)"
+                    :options="html.classes.list"
+                    v-model="html.classes.item"
+                    :searchable="true"
+                    @input="saveClass"
+                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id"
+                ></vue-select>
+            </div>
             <div class="vx-col w-full mb-4 vs-con-table stripe vs-table-primary" v-if="agreement.tuition_fee_type==2">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
@@ -329,6 +341,10 @@
             item: '',
             list: []
           },
+          classes:{
+            item: '',
+            list: []
+          },
           ec:{
             item: '',
             list: []
@@ -379,6 +395,7 @@
           total_session:'',
           start_date:'',
           note:'',
+          class_id:'',
         },
         alert:{
           active: false,
@@ -483,6 +500,7 @@
         }
          this.resetTuitionFee()
         this.html.tuition_fee.item =''
+        this.resetClass()
       },
       saveStudyType(data = null){
         if (data && typeof data === 'object') {
@@ -495,6 +513,7 @@
         }
         this.resetTuitionFee()
         this.html.tuition_fee.item =''
+        this.resetClass()
       },
       saveGender(data = null){
         if (data && typeof data === 'object') {
@@ -532,6 +551,11 @@
         this.agreement.tuition_fee_relation = []
         this.agreement.session = ''
       },
+      resetClass(){
+        this.html.classes.list = []
+        this.html.classes.item = ''
+        this.agreement.class_id = ''
+      },
       saveTuitionFee(data = null){
         if (data && typeof data === 'object') {
           const tuition_fee_id = data.id
@@ -541,8 +565,33 @@
           this.agreement.tuition_fee_type = data.type_fee
           this.agreement.tuition_fee_relation = data.tuition_fee_relation
           this.caculatorSession();
+          this.loadClassesForEnrolment();
         }else{
           this.agreement.tuition_fee_id = ""
+        }
+      },
+      saveClass(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.class_id = data.id
+        }else{
+          this.agreement.class_id = ""
+        }
+      },
+      loadClassesForEnrolment(){
+        this.resetClass()
+        if(this.agreement.branch_id && this.agreement.tuition_fee_id && this.agreement.tuition_fee_type){
+          this.$vs.loading();
+          axios.p(`/api/lms/agreements/load-classes-for-enrolment`,{
+            branch_id: this.agreement.branch_id,
+            tuition_fee_id: this.agreement.tuition_fee_id,
+            tuition_fee_type: this.agreement.tuition_fee_type,
+          }).then((response) => {
+            this.$vs.loading.close();
+            this.html.classes.list = response.data || []
+          }).catch(e => {
+            console.log(e)
+            this.$vs.loading.close();
+          })
         }
       },
       loadTuitionFee(){
@@ -633,6 +682,7 @@
           tuition_fee_amount: this.agreement.tuition_fee_amount,
           start_date: this.agreement.start_date,
           note: this.agreement.note,
+          class_id: this.agreement.class_id,
         };
 
         this.$vs.loading()

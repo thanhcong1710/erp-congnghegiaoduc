@@ -128,6 +128,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('agreements/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('agreements/check-coupon', 'ContractsController@checkCoupon');
             Route::post('agreements/get-ec-leader', 'ContractsController@getEcLeader');
+            Route::post('agreements/load-classes-for-enrolment', 'ContractsController@loadClassesForEnrolment');
             Route::post('agreements/add', 'ContractsController@add');
             Route::post('agreements/add-with-new-student', 'ContractsController@addWithNewStudent');
             Route::post('agreements/list', 'ContractsController@list');

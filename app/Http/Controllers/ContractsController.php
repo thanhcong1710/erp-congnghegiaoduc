@@ -8,11 +8,130 @@ use App\Http\Controllers\Controller;
 use App\Models\LogStudents;
 use App\Models\LogParents;
 use App\Providers\UtilityServiceProvider as u;
+use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ContractsController extends Controller
 {
+    /**
+     * Load danh sách lớp để xếp lớp ngay khi nhập học (form Đăng ký mới).
+     * Điều kiện:
+     * - class.cls_startdate <= CURRENT_DATE
+     * - class.cls_enddate >= CURRENT_DATE
+     * - class.product_id = product_id của gói lẻ hoặc gói đầu tiên của combo
+     */
+    public function loadClassesForEnrolment(Request $request)
+    {
+        $branch_id = (int) data_get($request, 'branch_id');
+        $tuition_fee_id = (int) data_get($request, 'tuition_fee_id');
+        $tuition_fee_type = (int) data_get($request, 'tuition_fee_type'); // 1: lẻ, 2: combo
+
+        if (!$branch_id || !$tuition_fee_id || !$tuition_fee_type) {
+            return response()->json([]);
+        }
+
+        $product_id = 0;
+        if ($tuition_fee_type === 1) {
+            $fee = u::first("SELECT product_id FROM tuition_fee WHERE id = $tuition_fee_id LIMIT 1");
+            $product_id = (int) data_get($fee, 'product_id');
+        } elseif ($tuition_fee_type === 2) {
+            $firstFee = u::first("SELECT t.product_id
+                FROM tuition_fee_relation r
+                    LEFT JOIN tuition_fee t ON t.id = r.exchange_tuition_fee_id
+                WHERE r.status = 1 AND r.tuition_fee_id = $tuition_fee_id
+                ORDER BY r.stt ASC
+                LIMIT 1");
+            $product_id = (int) data_get($firstFee, 'product_id');
+        }
+
+        if (!$product_id) {
+            return response()->json([]);
+        }
+
+        $classes = u::query("SELECT c.id, c.cls_name AS label
+            FROM classes c
+            WHERE c.status = 1
+                AND c.branch_id = $branch_id
+                AND c.product_id = $product_id
+                AND c.cls_startdate <= CURRENT_DATE
+                AND c.cls_enddate >= CURRENT_DATE
+            ORDER BY c.cls_name");
+
+        return response()->json($classes);
+    }
+
+    /**
+     * Xếp lớp cho 1 contract (logic giống EnrolmentsController@addStudent nhưng dành cho 1 học sinh).
+     */
+    private function enrolContractToClass(int $contract_id, int $student_id, int $class_id, int $branch_id, int $product_id, string $start_date): void
+    {
+        $class_info = u::getObject(['id' => $class_id], 'classes');
+        if (!$class_info) {
+            return;
+        }
+        // Safety: chỉ cho xếp đúng trung tâm & đúng product
+        if ((int) data_get($class_info, 'branch_id') !== (int) $branch_id) {
+            return;
+        }
+        if ((int) data_get($class_info, 'product_id') !== (int) $product_id) {
+            return;
+        }
+        if (data_get($class_info, 'cls_startdate') && data_get($class_info, 'cls_startdate') > date('Y-m-d')) {
+            return;
+        }
+
+        $cm_id = data_get($class_info, 'cm_id', null);
+        $teacher_id = data_get($class_info, 'teacher_id', null);
+        $cm_leader = u::first("SELECT ul.id
+            FROM users AS u
+                LEFT JOIN users AS ul ON ul.id=u.manager_id
+                LEFT JOIN role_has_user AS ru ON ru.user_id= ul.id
+                LEFT JOIN roles AS r ON r.id=ru.role_id
+            WHERE r.code = '" . SystemCode::ROLE_CM_LEADER . "' AND ul.status=1 AND u.id = " . (int) data_get($class_info, 'cm_id', 0) . " LIMIT 1");
+        $cm_leader_id = data_get($cm_leader, 'id') ? data_get($cm_leader, 'id') : $cm_id;
+
+        $contract = u::getObject(['id' => $contract_id], 'contracts');
+        if (!$contract) {
+            return;
+        }
+
+        $session = (int) data_get($contract, 'real_sessions', 0);
+        if ($session <= 0) {
+            $session = (int) data_get($contract, 'total_sessions', 0);
+        }
+
+        $holidays = u::getPublicHolidays($branch_id, $product_id);
+        $arr_day = explode(",", (string) data_get($class_info, 'class_day'));
+        $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
+
+        u::updateSimpleRow([
+            'cm_id' => $cm_id,
+            'cm_leader_id' => $cm_leader_id,
+            'program_id' => data_get($class_info, 'program_id', null),
+            'class_id' => data_get($class_info, 'id', null),
+            'enrolment_start_date' => $start_date,
+            'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+            'status' => 6,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $contract_id], 'contracts');
+        u::addLogContracts($contract_id);
+
+        u::updateSimpleRow([
+            'cm_id' => $cm_id,
+            'teacher_id' => $teacher_id,
+            'cm_leader_id' => $cm_leader_id,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id
+        ], ['student_id' => $student_id], 'term_student_user');
+
+        LogStudents::logAdd($student_id, 'Xếp vào lớp ' . data_get($class_info, 'cls_name'), Auth::user()->id);
+
+        $actions = ['Phát sách', 'Thông báo lịch học'];
+        TicketService::createTicketsForStudentEnrollment($student_id, $class_id, $contract_id, $actions);
+    }
+
     public function loadTuitionFee(Request $request)
     {
         $branch_id = $request->branch_id;
@@ -379,6 +498,7 @@ class ContractsController extends Controller
         u::addLogAgreements($agreement_id);
 
         // Tạo contract
+        $created_contract_ids = [];
         if (data_get($request, 'tuition_fee_type') == 1) {
             $tuition_fee_info = u::getObject(['id' => data_get($request, 'tuition_fee_id')], 'tuition_fee');
             if ($tuition_fee_info) {
@@ -415,6 +535,71 @@ class ContractsController extends Controller
                 u::updateSimpleRow(array('code' => $contract_code), array('id' => $contract_id), 'contracts');
                 u::addLogContracts($contract_id);
                 LogStudents::logAdd($student_id, 'Thêm mới học sinh và hợp đồng nhập học - ' . $contract_code, Auth::user()->id);
+                $created_contract_ids[] = $contract_id;
+            }
+        } elseif (data_get($request, 'tuition_fee_type') == 2) {
+            $relation_tuition_fee = u::query("SELECT t.*, r.price_combo, r.stt FROM tuition_fee_relation AS r
+                LEFT JOIN tuition_fee AS t ON r.exchange_tuition_fee_id=t.id
+                WHERE r.status=1 AND r.tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . "
+                ORDER BY r.stt ASC");
+            foreach ($relation_tuition_fee as $tuition_fee_info) {
+                $contract_id = u::insertSimpleRow(array(
+                    'type' => 1,
+                    'student_id' => $student_id,
+                    'branch_id' => data_get($request, 'branch_id'),
+                    'ec_id' => $ec_id,
+                    'ec_leader_id' => $ec_leader_id,
+                    'product_id' => data_get($tuition_fee_info, 'product_id'),
+                    'tuition_fee_id' => data_get($tuition_fee_info, 'id'),
+                    'init_tuition_fee_id' => data_get($tuition_fee_info, 'id'),
+                    'init_tuition_fee_amount' => data_get($tuition_fee_info, 'price_combo'),
+                    'init_tuition_fee_session' => data_get($tuition_fee_info, 'session'),
+                    'init_total_charged' => 0,
+                    'must_charge' => data_get($tuition_fee_info, 'price_combo'),
+                    'total_charged' => 0,
+                    'debt_amount' => data_get($tuition_fee_info, 'price_combo'),
+                    'total_sessions' => data_get($tuition_fee_info, 'session'),
+                    'real_sessions' => data_get($tuition_fee_info, 'session'),
+                    'bonus_sessions' => 0,
+                    'summary_sessions' => 0,
+                    'reservable_sessions' => 0,
+                    'start_date' => data_get($request, 'start_date'),
+                    'note' => data_get($request, 'note'),
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'creator_id' => Auth::user()->id,
+                    'status' => 1,
+                    'count_recharge' => data_get($tuition_fee_info, 'stt'),
+                    'agreement_id' => $agreement_id
+                ), 'contracts');
+                $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
+                $contract_code = config('app.prefix_contract_code') . $contract_code;
+                u::updateSimpleRow(array('code' => $contract_code), array('id' => $contract_id), 'contracts');
+                u::addLogContracts($contract_id);
+                LogStudents::logAdd($student_id, 'Thêm mới học sinh và hợp đồng nhập học - ' . $contract_code, Auth::user()->id);
+                $created_contract_ids[] = $contract_id;
+            }
+        }
+
+        // Xếp lớp ngay khi nhập học (nếu chọn)
+        $class_id = (int) data_get($request, 'class_id', 0);
+        if ($class_id > 0) {
+            // chọn contract để xếp lớp: gói lẻ => contract đầu; combo => contract stt=1 (count_recharge=1)
+            $enrol_contract_id = 0;
+            if (data_get($request, 'tuition_fee_type') == 1) {
+                $enrol_contract_id = (int) ($created_contract_ids[0] ?? 0);
+            } else {
+                $first = u::first("SELECT id, product_id FROM contracts
+                    WHERE agreement_id = $agreement_id AND status > 0
+                    ORDER BY count_recharge ASC, id ASC
+                    LIMIT 1");
+                $enrol_contract_id = (int) data_get($first, 'id', 0);
+            }
+
+            if ($enrol_contract_id > 0) {
+                $contract_info = u::first("SELECT id, product_id FROM contracts WHERE id = $enrol_contract_id LIMIT 1");
+                $product_id = (int) data_get($contract_info, 'product_id', 0);
+                $start_date_enrol = date('Y-m-d');
+                $this->enrolContractToClass($enrol_contract_id, $student_id, $class_id, (int) data_get($request, 'branch_id'), $product_id, $start_date_enrol);
             }
         }
 

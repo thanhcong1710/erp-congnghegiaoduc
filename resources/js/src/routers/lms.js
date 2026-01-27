@@ -66,9 +66,9 @@ export default {
           breadcrumb: [
             { title: 'Home', url: '/' },
             { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Thêm mới nhập học', active: true }
+            { title: 'Đăng ký lại', active: true }
           ],
-          pageTitle: 'Thêm mới nhập học',
+          pageTitle: 'Đăng ký lại',
           rule: 'editor'
         }
       },
@@ -80,9 +80,9 @@ export default {
           breadcrumb: [
             { title: 'Home', url: '/' },
             { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Thêm mới nhập học cho HS mới', active: true }
+            { title: 'Đăng ký mới', active: true }
           ],
-          pageTitle: 'Thêm mới nhập học cho HS mới',
+          pageTitle: 'Đăng ký mới',
           rule: 'editor'
         }
       },
