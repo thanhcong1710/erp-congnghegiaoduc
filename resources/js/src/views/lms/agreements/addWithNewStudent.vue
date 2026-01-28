@@ -72,7 +72,7 @@
               />
             </div>
 
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <div class="vx-col w-full mb-4">
               <label>Link Facebook</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -80,6 +80,17 @@
                 v-model="student.link_facebook"
                 placeholder="Nhập link Facebook"
               />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Nguồn <span class="text-danger">(*)</span></label>
+              <vue-select
+                    label="name"
+                    placeholder="Chọn nguồn"
+                    :options="html.source.list"
+                    v-model="html.source.item"
+                    :searchable="true"
+                    @input="saveSource"
+                ></vue-select>
             </div>
 
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -124,18 +135,6 @@
                 v-model="student.address"
                 placeholder="Nhập địa chỉ đầy đủ"
               />
-            </div>
-
-            <div class="vx-col w-full mb-4">
-              <label>Nguồn <span class="text-danger">(*)</span></label>
-              <vue-select
-                    label="name"
-                    placeholder="Chọn nguồn"
-                    :options="html.source.list"
-                    v-model="html.source.item"
-                    :searchable="true"
-                    @input="saveSource"
-                ></vue-select>
             </div>
 
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -324,10 +323,57 @@
                 disabled="true"
               />
             </div>
+            
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận sách</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận sách"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]"
+                    v-model="agreement.book_receive_obj"
+                    :searchable="false"
+                    @input="saveBookReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col w-full mb-4">
+              <label>Địa chỉ nhận sách</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="agreement.book_receive_address"
+                placeholder="Nhập địa chỉ nhận sách"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận hợp đồng</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận hợp đồng"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    v-model="agreement.contract_receive_obj"
+                    :searchable="false"
+                    @input="saveContractReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký theo nhóm</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn nhóm đăng ký"
+                    :options="[{label: 'Không', value: 0}, {label: 'Nhóm 2', value: 2}, {label: 'Nhóm 3', value: 3}, {label: 'Nhóm 4', value: 4}, {label: 'Nhóm 5', value: 5}, {label: 'Nhóm 6', value: 6}]"
+                    v-model="agreement.group_type_obj"
+                    :searchable="false"
+                    @input="saveGroupType"
+                ></vue-select>
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"></textarea>
             </div>
+
             <vs-divider/>
             <div class="vx-col md:w-1/3 w-full mb-4">
             </div>
@@ -461,6 +507,13 @@
           start_date:'',
           note:'',
           class_id:'',
+          book_receive: 0,
+          book_receive_obj: null,
+          book_receive_address: '',
+          contract_receive: 0,
+          contract_receive_obj: null,
+          group_type: 0,
+          group_type_obj: null,
         },
         classInfo: null,
         alert:{
@@ -607,6 +660,27 @@
           this.agreement.ec_id = ""
           this.student.ec_leader_id = ""
           this.student.ec_leader_name = ""
+        }
+      },
+      saveBookReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.book_receive = data.value
+        }else{
+          this.agreement.book_receive = 0
+        }
+      },
+      saveContractReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.contract_receive = data.value
+        }else{
+          this.agreement.contract_receive = 0
+        }
+      },
+      saveGroupType(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.group_type = data.value
+        }else{
+          this.agreement.group_type = 0
         }
       },
       resetTuitionFee(){
@@ -775,6 +849,10 @@
           start_date: this.agreement.start_date,
           note: this.agreement.note,
           class_id: this.agreement.class_id,
+          book_receive: this.agreement.book_receive,
+          book_receive_address: this.agreement.book_receive_address,
+          contract_receive: this.agreement.contract_receive,
+          group_type: this.agreement.group_type,
         };
 
         this.$vs.loading()
