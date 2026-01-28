@@ -13,11 +13,11 @@ class RolesController extends Controller
     public function list(Request $request)
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " 1=1 ";
         if ($keyword !== '') {
             $cond .= " AND (r.description LIKE '%$keyword%' OR r.name LIKE '%$keyword%')";
@@ -66,20 +66,33 @@ class RolesController extends Controller
         foreach ($groups as $k => $row) {
             $permissions = u::query("SELECT p.*, IF(r.role_id IS NOT NULL, 1, 0) AS active 
                 FROM permissions AS p 
-                LEFT JOIN permission_has_role AS r ON r.permission_id = p.id AND r.role_id = " .$role_info->id . " 
-                WHERE p.status=1 AND p.group_id=$row->id  ORDER BY p.display_order");
+                LEFT JOIN permission_has_role AS r ON r.permission_id = p.id AND r.role_id = " . $role_info->id . " 
+                WHERE p.status=1 AND p.group_id=$row->id AND (p.parent_id IS NULL OR p.parent_id = 0) ORDER BY p.display_order");
+
             $groups[$k]->permissions = $permissions;
             $check_group_active = 1;
+
             foreach ($permissions as $p) {
                 if ($p->active == 0) {
                     $check_group_active = 0;
                 }
-                if(in_array($p->id, [41,42,43,44,45])){
-                    $listSub = u::query("SELECT p.*, IF(r.role_id IS NOT NULL, 1, 0) AS active 
-                        FROM permissions AS p 
-                            LEFT JOIN permission_has_role AS r ON r.permission_id = p.id AND r.role_id = " .$role_info->id . " 
-                        WHERE p.status=1 AND p.parent_id=$p->id  ORDER BY p.display_order");
+
+                // Tự động load sub-permissions cho tất cả permissions có children
+                $listSub = u::query("SELECT p.*, IF(r.role_id IS NOT NULL, 1, 0) AS active 
+                    FROM permissions AS p 
+                        LEFT JOIN permission_has_role AS r ON r.permission_id = p.id AND r.role_id = " . $role_info->id . " 
+                    WHERE p.status=1 AND p.parent_id=$p->id ORDER BY p.display_order");
+
+                if (count($listSub) > 0) {
                     $p->listSub = $listSub;
+                    // Kiểm tra nếu có sub-permission nào chưa active thì parent cũng chưa active
+                    foreach ($listSub as $sub) {
+                        if ($sub->active == 0) {
+                            $check_group_active = 0;
+                        }
+                    }
+                } else {
+                    $p->listSub = [];
                 }
             }
             $groups[$k]->active = $check_group_active;
@@ -105,8 +118,8 @@ class RolesController extends Controller
                             'permission_id' => data_get($per, 'id')
                         ), 'permission_has_role');
                     }
-                    if(!empty(data_get($per, 'listSub'))){
-                        foreach(data_get($per, 'listSub') AS $sub){
+                    if (!empty(data_get($per, 'listSub'))) {
+                        foreach (data_get($per, 'listSub') as $sub) {
                             if (data_get($sub, 'active')) {
                                 u::insertSimpleRow(array(
                                     'role_id' => $request->role_id,

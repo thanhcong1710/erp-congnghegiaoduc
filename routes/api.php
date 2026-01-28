@@ -68,6 +68,21 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('list', 'RolesController@list');
             Route::post('permissions', 'RolesController@permissions');
         });
+        Route::prefix('permissions')->group(function () {
+            Route::post('list', 'PermissionsController@list');
+            Route::get('show/{id}', 'PermissionsController@show');
+            Route::post('add', 'PermissionsController@add');
+            Route::post('update', 'PermissionsController@update');
+            Route::post('delete', 'PermissionsController@delete');
+            Route::get('groups', 'PermissionsController@getGroups');
+        });
+        Route::prefix('permission-groups')->group(function () {
+            Route::post('list', 'PermissionGroupsController@list');
+            Route::get('show/{id}', 'PermissionGroupsController@show');
+            Route::post('add', 'PermissionGroupsController@add');
+            Route::post('update', 'PermissionGroupsController@update');
+            Route::post('delete', 'PermissionGroupsController@delete');
+        });
         Route::prefix('users')->group(function () {
             Route::post('list', 'UserController@list');
             Route::post('add', 'UserController@add');

@@ -31,6 +31,32 @@ export default {
         }
       },
       {
+        path: '/settings/permissions',
+        name: 'settings-permissions',
+        component: () => import('@/views/settings/permissions/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý Permissions', active: true }
+          ],
+          pageTitle: 'Quản lý Permissions',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/permission-groups',
+        name: 'settings-permission-groups',
+        component: () => import('@/views/settings/permission_groups/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý Nhóm Permissions', active: true }
+          ],
+          pageTitle: 'Quản lý Nhóm Permissions',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/settings/users',
         name: 'setting-users',
         component: () => import('@/views/settings/users/index.vue'),

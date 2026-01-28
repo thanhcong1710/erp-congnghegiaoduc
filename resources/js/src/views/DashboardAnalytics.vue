@@ -49,7 +49,7 @@
         </vx-card>
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_09')">
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_05')">
         <statistics-card-line icon="DollarSignIcon" 
           v-if="totalRevenueDay.analyticsData" 
           :statistic="totalRevenueDay.analyticsData.data" 
@@ -59,7 +59,7 @@
         ></statistics-card-line>
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_10')">
+      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_06')">
         <statistics-card-line icon="DollarSignIcon" 
           v-if="totalRevenueMonth.analyticsData" 
           :statistic="totalRevenueMonth.analyticsData.data " 
@@ -110,48 +110,6 @@
             color="warning"
             type="area" />
       </div>
-      <!-- <div class="vx-col w-full md:w-1/2 mb-base"  v-if="checkPermission('dashboard_05')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Tình hình học viên</h5>
-          <vue-apex-charts type="pie" :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_06')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Đăng ký chương trình học</h5>
-          <vue-apex-charts type="pie" :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_07')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Doanh thu theo trung tâm</h5>
-          <vue-apex-charts type="line" :options="lineChartRevenue.chartOptions" :series="lineChartRevenue.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_08')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Doanh thu theo EC</h5>
-          <vue-apex-charts type="line" :options="lineChartRevenueEC.chartOptions" :series="lineChartRevenueEC.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_11')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Học sinh Renew theo trung tâm</h5>
-          <vue-apex-charts type="bar" :options="lineChartRenew.chartOptions" :series="lineChartRenew.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_12')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Học sinh Renew theo AF</h5>
-          <vue-apex-charts type="bar" :options="lineChartRenewAF.chartOptions" :series="lineChartRenewAF.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/2 mb-base" v-if="checkPermission('dashboard_13')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Học sinh Renew theo tháng</h5>
-          <vue-apex-charts type="bar" :options="lineChartRenewLog.chartOptions" :series="lineChartRenewLog.series"></vue-apex-charts>
-        </vx-card>
-      </div> -->
     </div>
   </div>
 </template>
@@ -950,30 +908,12 @@ export default {
       if(this.checkPermission('dashboard_04')){
         this.loadDataDashboard04();
       }
-      // if(this.checkPermission('dashboard_05')){
-      //   this.loadDataDashboard05();
-      // }
-      // if(this.checkPermission('dashboard_06')){
-      //   this.loadDataDashboard06();
-      // }
-      // if(this.checkPermission('dashboard_07')){
-      //   this.loadDataDashboard07();
-      // }
-      // if(this.checkPermission('dashboard_08')){
-      //   this.loadDataDashboard08();
-      // }
-      if(this.checkPermission('dashboard_09')){
+      if(this.checkPermission('dashboard_05')){
         this.loadDataDashboard09();
       }
-      if(this.checkPermission('dashboard_10')){
+      if(this.checkPermission('dashboard_06')){
         this.loadDataDashboard10();
       }
-      // if(this.checkPermission('dashboard_11')){
-      //   this.loadDataDashboard11();
-      // }
-      // if(this.checkPermission('dashboard_12')){
-      //   this.loadDataDashboard12();
-      // }
     }
   },
 }
