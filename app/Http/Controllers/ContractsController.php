@@ -424,7 +424,6 @@ class ContractsController extends Controller
             'province_id' => data_get($request, 'province_id'),
             'district_id' => data_get($request, 'district_id'),
             'source_id' => data_get($request, 'source_id'),
-            'type_obj' => data_get($request, 'type_obj'),
             'gender' => data_get($request, 'student_gender', 0),
             'birthday' => data_get($request, 'student_birthday'),
             'link_facebook' => data_get($request, 'student_facebook'),
@@ -453,7 +452,6 @@ class ContractsController extends Controller
             'gud_mobile1' => data_get($request, 'student_phone'),
             'gud_email1' => data_get($request, 'student_email'),
             'address' => data_get($request, 'student_address'),
-            'parent_id' => $parent_id,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'branch_id' => data_get($request, 'branch_id'),
@@ -509,6 +507,7 @@ class ContractsController extends Controller
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
+            'type_obj' => data_get($request, 'type_obj'),
         ), 'agreements');
 
         $agreement_code = str_pad((string) $agreement_id, 6, '0', STR_PAD_LEFT);
