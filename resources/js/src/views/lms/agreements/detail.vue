@@ -159,6 +159,45 @@
                  disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận sách</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="getBookReceiveLabel(agreement.book_receive)"
+                disabled="true"
+              />
+            </div>
+
+            <div class="vx-col w-full mb-4">
+              <label>Địa chỉ nhận sách</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="agreement.book_receive_address"
+                disabled="true"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận hợp đồng</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="getContractReceiveLabel(agreement.contract_receive)"
+                disabled="true"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký theo nhóm</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="getGroupTypeLabel(agreement.group_type)"
+                disabled="true"
+              />
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"  disabled="true"></textarea>
@@ -430,6 +469,34 @@
       caculatorSession(){
         console.log(this.agreement);
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount) - Number(this.agreement.discount_code_amount) - Number(this.agreement.coupon_amount) - Number(this.agreement.b2b_amount) > 0 ? Number(this.agreement.tuition_fee_amount) - Number(this.agreement.discount_code_amount) - Number(this.agreement.coupon_amount) - Number(this.agreement.b2b_amount): 0;
+      },
+      getBookReceiveLabel(value) {
+        const labels = {
+          0: 'Chưa điền',
+          1: 'Có nhận',
+          2: 'Không nhận',
+          3: 'Đã nhận'
+        };
+        return labels[value] || 'Chưa điền';
+      },
+      getContractReceiveLabel(value) {
+        const labels = {
+          0: 'Chưa điền',
+          1: 'Có nhận',
+          2: 'Không nhận'
+        };
+        return labels[value] || 'Chưa điền';
+      },
+      getGroupTypeLabel(value) {
+        const labels = {
+          0: 'Không',
+          2: 'Nhóm 2',
+          3: 'Nhóm 3',
+          4: 'Nhóm 4',
+          5: 'Nhóm 5',
+          6: 'Nhóm 6'
+        };
+        return labels[value] || 'Không';
       },
       
     },

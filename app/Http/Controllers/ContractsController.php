@@ -301,6 +301,10 @@ class ContractsController extends Controller
             'debt_amount' => data_get($request, 'tuition_fee_amount'),
             'start_date' => data_get($request, 'start_date'),
             'note' => data_get($request, 'note'),
+            'book_receive' => data_get($request, 'book_receive', 0),
+            'book_receive_address' => data_get($request, 'book_receive_address', ''),
+            'contract_receive' => data_get($request, 'contract_receive', 0),
+            'group_type' => data_get($request, 'group_type', 0),
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
@@ -385,6 +389,32 @@ class ContractsController extends Controller
                 u::updateSimpleRow(array('code' => $contract_code), array('id' => $contract_id), 'contracts');
                 u::addLogContracts($contract_id);
                 LogStudents::logAdd($student_id, 'Thêm mới hợp đồng nhập học - ' . $contract_code, Auth::user()->id);
+            }
+        }
+
+        // Xếp lớp ngay khi nhập học (nếu chọn)
+        $class_id = (int) data_get($request, 'class_id', 0);
+        if ($class_id > 0) {
+            // Lấy danh sách contracts vừa tạo
+            $created_contracts = u::query("SELECT id, product_id FROM contracts 
+                WHERE agreement_id = $agreement_id AND status > 0 
+                ORDER BY count_recharge ASC, id ASC");
+
+            if (count($created_contracts) > 0) {
+                // Chọn contract đầu tiên để xếp lớp
+                $enrol_contract = $created_contracts[0];
+                $enrol_contract_id = (int) $enrol_contract->id;
+                $product_id = (int) $enrol_contract->product_id;
+                $start_date_enrol = date('Y-m-d');
+
+                $this->enrolContractToClass(
+                    $enrol_contract_id,
+                    $student_id,
+                    $class_id,
+                    (int) data_get($request, 'branch_id'),
+                    $product_id,
+                    $start_date_enrol
+                );
             }
         }
 

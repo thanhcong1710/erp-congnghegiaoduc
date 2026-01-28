@@ -162,14 +162,130 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Chọn lớp để xếp lớp ngay <span class="text-danger">(*)</span></label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu <= hôm nay)"
+                    :options="html.classes.list"
+                    v-model="html.classes.item"
+                    :searchable="true"
+                    @input="saveClass"
+                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id"
+                ></vue-select>
+            </div>
+            
+            <!-- Hiển thị thông tin chi tiết lớp học -->
+            <div class="vx-col w-full mb-4" v-if="classInfo">
+              <div class="border border-gray-300 rounded">
+                <div class="bg-gray-100 px-3 py-2 border-b border-gray-300">
+                  <h6 class="font-semibold">
+                    <i class="fas fa-info-circle mr-2"></i> Thông tin lớp học
+                  </h6>
+                </div>
+                <div class="p-3 pt-0">
+                  <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div>
+                      <span class="text-gray-600">Giáo viên:</span>
+                      <span class="ml-2">{{ classInfo.teacher_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">CM:</span>
+                      <span class="ml-2">{{ classInfo.cm_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Lịch học:</span>
+                      <span class="ml-2">{{ classInfo.schedule_text || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Phòng:</span>
+                      <span class="ml-2">{{ classInfo.room_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Khóa học:</span>
+                      <span class="ml-2">{{ classInfo.product_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Ca học:</span>
+                      <span class="ml-2">{{ classInfo.shift_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Thời gian:</span>
+                      <span class="ml-2">{{ formatDate(classInfo.cls_startdate) }} - {{ formatDate(classInfo.cls_enddate) }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Sĩ số:</span>
+                      <span class="ml-2 font-bold" :class="getSisoClass(classInfo.enrolled_students, classInfo.max_students)">
+                        {{ classInfo.enrolled_students }}/{{ classInfo.max_students }}
+                      </span>
+                      <span class="ml-1 px-2 py-1 rounded text-sm font-medium" :class="getAvailabilityBadgeClass(classInfo.enrolled_students, classInfo.max_students)">
+                        {{ classInfo.availability_text }}
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Trạng thái:</span>
+                      <span class="ml-2 font-bold" :class="getStatusClass(classInfo.status_text)">
+                        {{ classInfo.status_text }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
-              <datepicker class="w-full"
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
                 v-model="agreement.start_date"
-                placeholder="Chọn ngày dự kiến học"
-                :lang="datepickerOptions.lang"
-                @change="selectDate"
+                disabled="true"
               />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận sách</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận sách"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]"
+                    v-model="agreement.book_receive_obj"
+                    :searchable="false"
+                    @input="saveBookReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col w-full mb-4">
+              <label>Địa chỉ nhận sách</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="agreement.book_receive_address"
+                placeholder="Nhập địa chỉ nhận sách"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận hợp đồng</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận hợp đồng"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    v-model="agreement.contract_receive_obj"
+                    :searchable="false"
+                    @input="saveContractReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký theo nhóm</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn nhóm đăng ký"
+                    :options="[{label: 'Không', value: 0}, {label: 'Nhóm 2', value: 2}, {label: 'Nhóm 3', value: 3}, {label: 'Nhóm 4', value: 4}, {label: 'Nhóm 5', value: 5}, {label: 'Nhóm 6', value: 6}]"
+                    v-model="agreement.group_type_obj"
+                    :searchable="false"
+                    @input="saveGroupType"
+                ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
@@ -265,6 +381,10 @@
             item: '',
             list: []
           },
+          classes:{
+            item: '',
+            list: []
+          },
         },
         agreement:{
           branch_id:'',
@@ -280,7 +400,16 @@
           total_session:'',
           start_date:'',
           note:'',
+          book_receive: 0,
+          book_receive_obj: null,
+          book_receive_address: '',
+          contract_receive: 0,
+          contract_receive_obj: null,
+          group_type: 0,
+          group_type_obj: null,
+          class_id: '',
         },
+        classInfo: null,
         student_info:{
 
         },
@@ -363,6 +492,7 @@
           this.agreement.tuition_fee_type = data.type_fee
           this.agreement.tuition_fee_relation = data.tuition_fee_relation
           this.caculatorSession();
+          this.loadClassesForEnrolment();
         }else{
           this.agreement.tuition_fee_id = ""
         }
@@ -386,6 +516,106 @@
       caculatorSession(){
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount) > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
         this.agreement.total_session = Number(this.agreement.tuition_fee_session);
+      },
+      saveBookReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.book_receive = data.value
+        }else{
+          this.agreement.book_receive = 0
+        }
+      },
+      saveContractReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.contract_receive = data.value
+        }else{
+          this.agreement.contract_receive = 0
+        }
+      },
+      saveGroupType(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.group_type = data.value
+        }else{
+          this.agreement.group_type = 0
+        }
+      },
+      saveClass(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.class_id = data.id
+          this.loadClassInfo(data.id)
+        }else{
+          this.agreement.class_id = ""
+          this.classInfo = null
+        }
+      },
+      loadClassInfo(classId) {
+        if (!classId) {
+          this.classInfo = null
+          return
+        }
+        
+        this.$vs.loading()
+        axios.p(`/api/lms/class-info`, {
+          class_id: classId
+        }).then(response => {
+          this.$vs.loading.close()
+          if (response.data.status == 1) {
+            this.classInfo = response.data.data
+            this.agreement.start_date = this.classInfo.cls_startdate
+          } else {
+            this.classInfo = null
+          }
+        }).catch(e => {
+          console.log(e)
+          this.$vs.loading.close()
+          this.classInfo = null
+        })
+      },
+      loadClassesForEnrolment(){
+        this.resetClass()
+        if(this.agreement.branch_id && this.agreement.tuition_fee_id && this.agreement.tuition_fee_type){
+          this.$vs.loading();
+          axios.p(`/api/lms/agreements/load-classes-for-enrolment`,{
+            branch_id: this.agreement.branch_id,
+            tuition_fee_id: this.agreement.tuition_fee_id,
+            tuition_fee_type: this.agreement.tuition_fee_type,
+          }).then((response) => {
+            this.$vs.loading.close();
+            this.html.classes.list = response.data || []
+          }).catch(e => {
+            console.log(e)
+            this.$vs.loading.close();
+          })
+        }
+      },
+      resetClass(){
+        this.html.classes.list = []
+        this.html.classes.item = ''
+        this.agreement.class_id = ''
+        this.classInfo = null
+      },
+      formatDate(date) {
+        if (!date) return 'Chưa có'
+        return moment(date).format('DD/MM/YYYY')
+      },
+      getSisoClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'text-danger font-bold'
+        if (ratio >= 0.8) return 'text-warning font-bold'
+        return 'text-success'
+      },
+      getAvailabilityBadgeClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'bg-red-100 text-red-800'
+        if (ratio >= 0.8) return 'bg-yellow-100 text-yellow-800'
+        return 'bg-green-100 text-green-800'
+      },
+      getStatusClass(status) {
+        switch(status) {
+          case 'Sắp khai giảng': return 'text-info'
+          case 'Đang diễn ra': return 'text-success'
+          case 'Đã kết thúc': return 'text-secondary'
+          default: return 'text-muted'
+        }
       },
       save() {
         let mess = "";

@@ -277,10 +277,11 @@ class StudentsController extends Controller
                 p.id AS parent_id, CONCAT(p.name, ' - ', p.mobile_1) AS label,
                 CONCAT(u.name,' - ', u.hrm_id) AS ec_name,
                 (SELECT CONCAT(name,' - ', hrm_id) FROM users WHERE id = u.manager_id ) AS ec_leader_name,
-                IF(t.branch_id IS NULL ,0, t.branch_id) AS branch_id
+                IF(t.branch_id IS NULL ,0, t.branch_id) AS branch_id, s.lms_code
             FROM crm_parents AS p 
                 LEFT JOIN users AS u ON u.id = p.owner_id
                 LEFT JOIN term_student_user AS t ON t.student_id = p.student_id
+                LEFT JOIN students As s ON s.id = p.student_id
                 WHERE p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%'");
         return response()->json($data);
     }
