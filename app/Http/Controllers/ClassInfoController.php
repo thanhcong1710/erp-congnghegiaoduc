@@ -34,8 +34,8 @@ class ClassInfoController extends Controller
                  LEFT JOIN sessions s ON s.shift_id = sh.id 
                  WHERE s.class_id = c.id AND s.status = 1 LIMIT 1) AS shift_name,
                 CASE 
-                    WHEN c.cls_startdate > CURRENT_DATE THEN 'Sắp khai giảng'
-                    WHEN c.cls_enddate < CURRENT_DATE THEN 'Đã kết thúc'
+                    WHEN c.cls_startdate >= CURRENT_DATE THEN 'Sắp khai giảng'
+                    WHEN c.cls_enddate <= CURRENT_DATE THEN 'Đã kết thúc'
                     ELSE 'Đang diễn ra'
                 END AS status_text,
                 CASE 

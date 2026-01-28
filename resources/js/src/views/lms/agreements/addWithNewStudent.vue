@@ -221,7 +221,7 @@
               <label>Chọn lớp để xếp lớp ngay <span class="text-danger">(*)</span></label>
               <vue-select
                     label="label"
-                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu <= hôm nay)"
+                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu >= hôm nay)"
                     :options="html.classes.list"
                     v-model="html.classes.item"
                     :searchable="true"
