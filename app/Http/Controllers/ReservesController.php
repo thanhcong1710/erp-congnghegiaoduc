@@ -98,65 +98,103 @@ class ReservesController extends Controller
             return response()->json($result);
         }
 
-        if($required_approve){
+        $reserve_id = u::insertSimpleRow(array(
+            'student_id' => data_get($contract_info,'student_id'),
+            'type'=> 1 ,
+            'start_date' => $start_date,
+            'session'=> $reserve_session,
+            'end_date' => $end_date,
+            'status' => 2,
+            'creator_id' => Auth::user()->id,
+            'created_at' => date('Y-m-d H:i:s'),
+            'is_reserved' => $is_reserved,
+            'contract_id' => data_get($contract_info,'id'),
+            'branch_id' => data_get($contract_info,'branch_id'),
+            'product_id' => data_get($contract_info,'product_id'),
+            'program_id' => data_get($contract_info,'program_id'),
+            'class_id' => data_get($contract_info,'class_id'),
+            'note' => data_get($request,'reserve.note'),
+            'meta_data' => json_encode($request->input()),
+            'must_charge' => data_get($request,'reserve.total_amount_reserve', 0),
+            'total_charged'=>0,
+            'debt_amount'=>data_get($request,'reserve.total_amount_reserve', 0),
+        ), 'reserves');
+        $result = array(
+            'status' => 1,
+            'message' => 'Thêm mới bảo lưu thành công'
+        );
+        if($start_date > date('Y-m-d')){
             u::insertSimpleRow(array(
-                'student_id' => data_get($contract_info,'student_id'),
-                'type'=> 1 ,
-                'start_date' => $start_date,
-                'session'=> $reserve_session,
-                'end_date' => $end_date,
-                'status' => $required_approve ? 1 : 2,
-                'creator_id' => Auth::user()->id,
-                'created_at' => date('Y-m-d H:i:s'),
-                'is_reserved' => $is_reserved,
-                'contract_id' => data_get($contract_info,'id'),
-                'branch_id' => data_get($contract_info,'branch_id'),
-                'product_id' => data_get($contract_info,'product_id'),
-                'program_id' => data_get($contract_info,'program_id'),
-                'class_id' => data_get($contract_info,'class_id'),
-                'note' => data_get($request,'reserve.note'),
-                'meta_data' => json_encode($request->input()),
-                'must_charge' => data_get($request,'reserve.total_amount_reserve', 0),
-                'total_charged'=>0,
-                'debt_amount'=>data_get($request,'reserve.total_amount_reserve', 0),
-            ), 'reserves');
-            $result = array(
+                'student_id'=>data_get($contract_info,'student_id'),
+                'data_id'=>$reserve_id,
+                'type' => 1,
                 'status' => 1,
-                'message' => 'Loại bảo lưu đặc biệt cần GĐTT phê duyệt'
-            );
-        }else{
-            u::insertSimpleRow(array(
-                'student_id' => data_get($contract_info,'student_id'),
-                'type'=> 0 ,
-                'start_date' => $start_date,
-                'session'=> $reserve_session,
-                'end_date' => $end_date,
-                'status' => $required_approve ? 1 : 2,
-                'creator_id' => Auth::user()->id,
                 'created_at' => date('Y-m-d H:i:s'),
-                'is_reserved' => $is_reserved,
-                'contract_id' => data_get($contract_info,'id'),
-                'branch_id' => data_get($contract_info,'branch_id'),
-                'product_id' => data_get($contract_info,'product_id'),
-                'program_id' => data_get($contract_info,'program_id'),
-                'class_id' => data_get($contract_info,'class_id'),
-                'note' => data_get($request,'reserve.note'),
-                'meta_data' => json_encode($request->input())
-            ), 'reserves');
-            u::updateSimpleRow(array(
-                'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updator_id' => Auth::user()->id,
-            ),array('id'=>$contract_id),'contracts');
-            u::addLogContracts(data_get($contract_info,'id'));
-            LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
-
-            $result = array(
-                'status' => 1,
-                'message' => 'Thêm mới bảo lưu thành công'
-            );
-            
+                'processed_at' => $start_date
+            ),'student_waitting_process');
+        } else {
+            self::processReserve($reserve_id);
         }
+
+        // if($required_approve){
+        //     u::insertSimpleRow(array(
+        //         'student_id' => data_get($contract_info,'student_id'),
+        //         'type'=> 1 ,
+        //         'start_date' => $start_date,
+        //         'session'=> $reserve_session,
+        //         'end_date' => $end_date,
+        //         'status' => $required_approve ? 1 : 2,
+        //         'creator_id' => Auth::user()->id,
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'is_reserved' => $is_reserved,
+        //         'contract_id' => data_get($contract_info,'id'),
+        //         'branch_id' => data_get($contract_info,'branch_id'),
+        //         'product_id' => data_get($contract_info,'product_id'),
+        //         'program_id' => data_get($contract_info,'program_id'),
+        //         'class_id' => data_get($contract_info,'class_id'),
+        //         'note' => data_get($request,'reserve.note'),
+        //         'meta_data' => json_encode($request->input()),
+        //         'must_charge' => data_get($request,'reserve.total_amount_reserve', 0),
+        //         'total_charged'=>0,
+        //         'debt_amount'=>data_get($request,'reserve.total_amount_reserve', 0),
+        //     ), 'reserves');
+        //     $result = array(
+        //         'status' => 1,
+        //         'message' => 'Loại bảo lưu đặc biệt cần GĐTT phê duyệt'
+        //     );
+        // }else{
+        //     u::insertSimpleRow(array(
+        //         'student_id' => data_get($contract_info,'student_id'),
+        //         'type'=> 0 ,
+        //         'start_date' => $start_date,
+        //         'session'=> $reserve_session,
+        //         'end_date' => $end_date,
+        //         'status' => $required_approve ? 1 : 2,
+        //         'creator_id' => Auth::user()->id,
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'is_reserved' => $is_reserved,
+        //         'contract_id' => data_get($contract_info,'id'),
+        //         'branch_id' => data_get($contract_info,'branch_id'),
+        //         'product_id' => data_get($contract_info,'product_id'),
+        //         'program_id' => data_get($contract_info,'program_id'),
+        //         'class_id' => data_get($contract_info,'class_id'),
+        //         'note' => data_get($request,'reserve.note'),
+        //         'meta_data' => json_encode($request->input())
+        //     ), 'reserves');
+        //     u::updateSimpleRow(array(
+        //         'reserved_sessions' => data_get($contract_info, 'reserved_sessions') + $reserve_session,
+        //         'updated_at' => date('Y-m-d H:i:s'),
+        //         'updator_id' => Auth::user()->id,
+        //     ),array('id'=>$contract_id),'contracts');
+        //     u::addLogContracts(data_get($contract_info,'id'));
+        //     LogStudents::logAdd(data_get($contract_info,'student_id'), "Bảo lưu $reserve_session buổi từ ngày $start_date đến ngày $end_date", Auth::user()->id);
+
+        //     $result = array(
+        //         'status' => 1,
+        //         'message' => 'Thêm mới bảo lưu thành công'
+        //     );
+            
+        // }
 
         return response()->json($result);
     }  

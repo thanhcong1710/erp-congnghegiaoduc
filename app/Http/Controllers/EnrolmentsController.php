@@ -16,8 +16,8 @@ class EnrolmentsController extends Controller
     public function loadClasses(Request $request)
     {
         $data = [];
-        $branch_id = (int)$request->branch_id;
-        $product_id = (int)$request->product_id;
+        $branch_id = (int) $request->branch_id;
+        $product_id = (int) $request->product_id;
         $query = "SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
             'class' AS item_type, 
@@ -43,7 +43,7 @@ class EnrolmentsController extends Controller
             $classes = u::get_tree_data($class);
             if ($classes) {
                 foreach ($classes as $cls) {
-                    if ($cls ) {
+                    if ($cls) {
                         $data[] = $cls;
                     }
                 }
@@ -52,24 +52,25 @@ class EnrolmentsController extends Controller
         return response()->json($data);
     }
 
-    public function getClassInfo(Request $request, $class_id){
+    public function getClassInfo(Request $request, $class_id)
+    {
         $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.ta_id) AS ta_name,
                 cl.max_students, cl.class_day,'' AS room_text, '' AS shift_text, '' AS class_day_text
             FROM classes AS cl WHERE id = $class_id");
-        $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
-        $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND s.class_id =".$class_id);
+        $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =" . $class_id);
+        $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND s.class_id =" . $class_id);
 
         $room_text = "";
-        foreach($rooms AS $room){
-            $room_text.= $room_text ? ", ".$room->name : $room->name;
+        foreach ($rooms as $room) {
+            $room_text .= $room_text ? ", " . $room->name : $room->name;
         }
         $class_info->room_text = $room_text;
         $shift_text = "";
-        foreach($shifts AS $shift){
-            $shift_text.= $shift_text ? ", ".$shift->name : $shift->name;
+        foreach ($shifts as $shift) {
+            $shift_text .= $shift_text ? ", " . $shift->name : $shift->name;
         }
         $class_info->shift_text = $shift_text;
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
@@ -86,44 +87,49 @@ class EnrolmentsController extends Controller
         $next_schedules = u::query("SELECT s.class_date, s.subject_stt, sj.code FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.class_id = $class_id AND s.status=1 AND s.class_date >= CURRENT_DATE ORDER BY s.class_date LIMIT 3");
         $reversed = array_reverse($pre_schedules);
         $data = [
-            'class_info' =>$class_info,
+            'class_info' => $class_info,
             'students' => $students,
             'class_dates' => $class_dates,
-            'pre_schedules'=>$reversed,
-            'next_schedules'=>$next_schedules,
+            'pre_schedules' => $reversed,
+            'next_schedules' => $next_schedules,
         ];
         return response()->json($data);
     }
 
-    public function getStudentsAdd(Request $request){
-        $class_info =u::first("SELECT id, branch_id, product_id,type, program_id, type_fee FROM classes WHERE id=$request->class_id");
+    public function getStudentsAdd(Request $request)
+    {
+        $class_info = u::first("SELECT id, branch_id, product_id,type, program_id, type_fee, cls_startdate FROM classes WHERE id=$request->class_id");
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
         $product_id = data_get($class_info, 'product_id');
-        $cond = " c.status IN (2, 3, 4, 5) AND c.product_id = $product_id AND c.left_sessions > 0";
-        $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0";
+        if (data_get($class_info, 'cls_startdate') < date('Y-m-d')) {
+            $cond = " c.status IN (2, 3, 4, 5) AND c.left_sessions > 0";
+        } else {
+            $cond = " c.status IN (1, 2, 3, 4, 5)";
+        }
+        $cond .= " AND c.product_id = $product_id  AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0";
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
         }
-        if(data_get($class_info, 'is_online')==1){
+        if (data_get($class_info, 'is_online') == 1) {
             $cond .= " AND t.type IN(0,2) ";
-        } else{
+        } else {
             $cond .= " AND t.type IN(0,1) ";
         }
-        
+
         $order_by = " ORDER BY s.id DESC ";
 
         $total = u::first("SELECT count(s.id) AS total  FROM contracts AS c
                 LEFT JOIN students AS s ON s.id=c.student_id 
                 LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id WHERE $cond");
-        
+
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
@@ -135,49 +141,50 @@ class EnrolmentsController extends Controller
         return response()->json($data);
     }
 
-    public function addStudent(Request $request){
+    public function addStudent(Request $request)
+    {
         $contracts = $request->contracts;
         $class_id = $request->class_id;
-        $class_info = u::getObject(array('id'=>$class_id), 'classes');
-        $cm_id =data_get($class_info,'cm_id', null);
-        $teacher_id =data_get($class_info,'teacher_id', null);
+        $class_info = u::getObject(array('id' => $class_id), 'classes');
+        $cm_id = data_get($class_info, 'cm_id', null);
+        $teacher_id = data_get($class_info, 'teacher_id', null);
         $cm_leader = u::first("SELECT ul.id 
             FROM users AS u 
                 LEFT JOIN users AS ul ON ul.id=u.manager_id
                 LEFT JOIN role_has_user AS ru ON ru.user_id= ul.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
-            WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
-        $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
-        $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
-        $arr_day = explode(",",data_get($class_info, 'class_day'));
-        
-        foreach($contracts AS $contract){
-            $contract_id = data_get($contract,'contract_id');
-            $student_id = data_get($contract,'student_id');
-            $start_date = data_get($contract,'class_date', null);
-            $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
+            WHERE r.code = '" . SystemCode::ROLE_CM_LEADER . "' AND ul.status=1 AND u.id = " . data_get($class_info, 'cm_id', 0) . " LIMIT 1");
+        $cm_leader_id = data_get($cm_leader, 'id') ? data_get($cm_leader, 'id') : $cm_id;
+        $holidays = u::getPublicHolidays(data_get($request, 'branch_id'), data_get($request, 'product_id'));
+        $arr_day = explode(",", data_get($class_info, 'class_day'));
+
+        foreach ($contracts as $contract) {
+            $contract_id = data_get($contract, 'contract_id');
+            $student_id = data_get($contract, 'student_id');
+            $start_date = data_get($contract, 'class_date', null);
+            $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request, 'session'), $holidays, $arr_day);
             u::updateSimpleRow(array(
                 'cm_id' => $cm_id,
                 'cm_leader_id' => $cm_leader_id,
-                'program_id' => data_get($class_info,'program_id', null),
-                'class_id' => data_get($class_info,'id', null),
-                'class_id' => data_get($class_info,'id', null),
+                'program_id' => data_get($class_info, 'program_id', null),
+                'class_id' => data_get($class_info, 'id', null),
+                'class_id' => data_get($class_info, 'id', null),
                 'enrolment_start_date' => $start_date,
                 'enrolment_last_date' => data_get($data_sessions, 'end_date'),
                 'status' => 6,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
-            ),array('id'=>$contract_id),'contracts');
+            ), array('id' => $contract_id), 'contracts');
             u::addLogContracts($contract_id);
             u::updateSimpleRow(array(
-                'cm_id'=> $cm_id,
-                'teacher_id'=>$teacher_id,
+                'cm_id' => $cm_id,
+                'teacher_id' => $teacher_id,
                 'cm_leader_id' => $cm_leader_id,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id
-            ), array('student_id'=>$student_id), 'term_student_user');
-            LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name'), Auth::user()->id);
-            
+            ), array('student_id' => $student_id), 'term_student_user');
+            LogStudents::logAdd($student_id, 'Xếp vào lớp ' . data_get($class_info, 'cls_name'), Auth::user()->id);
+
             // Tự động tạo tickets khi học sinh được thêm vào lớp
             $actions = ['Phát sách', 'Thông báo lịch học'];
             TicketService::createTicketsForStudentEnrollment($student_id, $class_id, $contract_id, $actions);
@@ -188,5 +195,55 @@ class EnrolmentsController extends Controller
             'message' => 'Thêm học sinh vào lớp thành công'
         );
         return response()->json($result);
+    }
+
+    public function removeStudent(Request $request)
+    {
+        $contract_id = (int) data_get($request, 'contract_id');
+        $class_id = (int) data_get($request, 'class_id');
+
+        // Lấy thông tin contract
+        $contract = u::getObject(['id' => $contract_id], 'contracts');
+
+        if (!$contract) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy hợp đồng'
+            ], 404);
+        }
+
+        // Kiểm tra xem học sinh đã bắt đầu học chưa (done_sessions > 0)
+        if ((int) data_get($contract, 'done_sessions', 0) > 0) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không thể xóa học sinh đã bắt đầu học khỏi lớp'
+            ], 400);
+        }
+
+        // Cập nhật contract: status=3, class_id=null, enrolment_start_date=null, enrolment_last_date=null
+        u::updateSimpleRow([
+            'status' => data_get($contract, 'debt_amount') == 0 ? 3 : (data_get($contract, 'total_charged') > 0 ? 2 : 1),
+            'class_id' => null,
+            'enrolment_start_date' => null,
+            'enrolment_last_date' => null,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $contract_id], 'contracts');
+
+        u::addLogContracts($contract_id);
+
+        $student_id = data_get($contract, 'student_id');
+        $class_info = u::getObject(['id' => $class_id], 'classes');
+
+        LogStudents::logAdd(
+            $student_id,
+            'Xóa khỏi lớp ' . data_get($class_info, 'cls_name'),
+            Auth::user()->id
+        );
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Xóa học sinh khỏi lớp thành công'
+        ]);
     }
 }

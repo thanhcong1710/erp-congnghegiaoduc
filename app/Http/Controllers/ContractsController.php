@@ -69,7 +69,7 @@ class ContractsController extends Controller
             WHERE c.status = 1
                 AND c.branch_id = $branch_id
                 AND c.product_id = $product_id
-                AND c.cls_startdate <= CURRENT_DATE
+                AND c.cls_startdate >= CURRENT_DATE
                 AND c.cls_enddate >= CURRENT_DATE
             ORDER BY c.cls_name");
 
@@ -772,6 +772,10 @@ class ContractsController extends Controller
                     'total_charged' => data_get($request, 'total_left_amount'),
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
+                    'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_receive_address' => data_get($request, 'book_receive_address', ''),
+                    'contract_receive' => data_get($request, 'contract_receive', 0),
+                    'group_type' => data_get($request, 'group_type', 0),
                     'status' => data_get($request, 'total_left_amount') == 0 ? 1 : (data_get($request, 'debt_amount') > 0 ? 3 : 2),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
@@ -921,6 +925,10 @@ class ContractsController extends Controller
                 u::updateSimpleRow(array(
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
+                    'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_receive_address' => data_get($request, 'book_receive_address', ''),
+                    'contract_receive' => data_get($request, 'contract_receive', 0),
+                    'group_type' => data_get($request, 'group_type', 0),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');

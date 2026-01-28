@@ -159,6 +159,51 @@
                 @change="selectDate"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận sách</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận sách"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]"
+                    v-model="agreement.book_receive_obj"
+                    :searchable="false"
+                    @input="saveBookReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col w-full mb-4">
+              <label>Địa chỉ nhận sách</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="agreement.book_receive_address"
+                placeholder="Nhập địa chỉ nhẫn sách"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký nhận hợp đồng</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái nhận hợp đồng"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    v-model="agreement.contract_receive_obj"
+                    :searchable="false"
+                    @input="saveContractReceive"
+                ></vue-select>
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Đăng ký theo nhóm</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn nhóm đăng ký"
+                    :options="[{label: 'Không', value: 0}, {label: 'Nhóm 2', value: 2}, {label: 'Nhóm 3', value: 3}, {label: 'Nhóm 4', value: 4}, {label: 'Nhóm 5', value: 5}, {label: 'Nhóm 6', value: 6}]"
+                    v-model="agreement.group_type_obj"
+                    :searchable="false"
+                    @input="saveGroupType"
+                ></vue-select>
+            </div>
             <div class="vx-col w-full mb-4">
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"></textarea>
@@ -432,6 +477,13 @@
           b2b_bonus_session:'',
           tuition_fee_relation:[],
           tuition_fee_type:'',
+          book_receive: 0,
+          book_receive_obj: null,
+          book_receive_address: '',
+          contract_receive: 0,
+          contract_receive_obj: null,
+          group_type: 0,
+          group_type_obj: null,
         },
         student_info:{
 
@@ -540,6 +592,27 @@
           this.agreement.tuition_fee_session = response.data.init_tuition_fee_session
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.agreement.contracts = response.data.contracts
+          
+          // Load các trường mới
+          this.agreement.book_receive = response.data.book_receive || 0
+          this.agreement.book_receive_address = response.data.book_receive_address || ''
+          this.agreement.contract_receive = response.data.contract_receive || 0
+          this.agreement.group_type = response.data.group_type || 0
+          
+          // Set các obj cho vue-select
+          if (this.agreement.book_receive > 0) {
+            const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]
+            this.agreement.book_receive_obj = bookOptions.find(o => o.value === this.agreement.book_receive)
+          }
+          if (this.agreement.contract_receive > 0) {
+            const contractOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]
+            this.agreement.contract_receive_obj = contractOptions.find(o => o.value === this.agreement.contract_receive)
+          }
+          if (this.agreement.group_type > 0) {
+            const groupOptions = [{label: 'Không', value: 0}, {label: 'Nhóm 2', value: 2}, {label: 'Nhóm 3', value: 3}, {label: 'Nhóm 4', value: 4}, {label: 'Nhóm 5', value: 5}, {label: 'Nhóm 6', value: 6}]
+            this.agreement.group_type_obj = groupOptions.find(o => o.value === this.agreement.group_type)
+          }
+          
           this.loadTuitionFee(response.data.tuition_fee_id);
         })
       },
@@ -628,6 +701,27 @@
       caculatorSession(){
         console.log(this.agreement);
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount)  > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
+      },
+      saveBookReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.book_receive = data.value
+        }else{
+          this.agreement.book_receive = 0
+        }
+      },
+      saveContractReceive(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.contract_receive = data.value
+        }else{
+          this.agreement.contract_receive = 0
+        }
+      },
+      saveGroupType(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.group_type = data.value
+        }else{
+          this.agreement.group_type = 0
+        }
       },
       confirmSave () {
         this.$vs.dialog({

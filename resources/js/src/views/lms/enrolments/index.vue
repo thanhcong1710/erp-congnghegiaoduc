@@ -129,6 +129,7 @@
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
+                        <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                       </tr>
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
@@ -151,6 +152,20 @@
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
                         <!-- <p>Trạng thái: <strong></strong></p> -->
+                      </td>
+                      <td class="td vs-table--td text-center">
+                        <vs-button 
+                          v-if="canRemoveStudent(item)"
+                          size="small" 
+                          color="danger" 
+                          type="border" 
+                          icon-pack="feather" 
+                          icon="icon-trash-2"
+                          @click="confirmRemoveStudent(item)"
+                        >
+                          Xóa
+                        </vs-button>
+                        <span v-else class="text-muted" style="font-size: 12px;">Đã học</span>
                       </td>
                     </tr>
                   </table>
@@ -494,6 +509,50 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      canRemoveStudent(student) {
+        // Chỉ cho phép xóa nếu lớp chưa bắt đầu (done_sessions = 0)
+        return student.done_sessions === 0 || student.done_sessions === '0'
+      },
+      confirmRemoveStudent(student) {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Xác nhận xóa học sinh',
+          text: `Bạn có chắc chắn muốn xóa học sinh "${student.name}" (${student.lms_code}) khỏi lớp này?`,
+          accept: () => this.removeStudent(student),
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      removeStudent(student) {
+        this.$vs.loading()
+        axios.p("/api/lms/enrolments/remove-student", {
+          contract_id: student.contract_id,
+          class_id: this.class_info.class_id
+        })
+        .then((response) => {
+          this.$vs.loading.close()
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.loadDataClassSelected(this.class_info.class_id)
+        })
+        .catch((e) => {
+          console.log(e)
+          this.$vs.loading.close()
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: e.response?.data?.message || 'Có lỗi xảy ra khi xóa học sinh',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+        })
       }
     },
   }
