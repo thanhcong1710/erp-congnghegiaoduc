@@ -151,6 +151,57 @@
             <label>Ghi chú</label>
             <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"></textarea>
           </div>
+          <div class="vx-col md:w-1/2 w-full mb-4" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <label>Đính kèm thêm ảnh chuyển khoản</label>
+            <input 
+              type="file" 
+              ref="fileInput"
+              @change="handleFileUpload" 
+              multiple 
+              accept="image/*"
+              class="vs-inputx vs-input--input normal"
+            />
+            <small class="text-muted">Có thể chọn nhiều ảnh</small>
+            <div v-if="selectedFiles.length > 0" class="mt-3">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div v-for="(file, index) in selectedFiles" :key="index" class="relative">
+                  <img 
+                    :src="file.preview" 
+                    class="w-full h-32 object-cover rounded border-2 border-gray-300 cursor-pointer" 
+                    @click="viewImagePreview(file.preview)"
+                  />
+                  <vs-button 
+                    size="small" 
+                    color="danger" 
+                    type="filled" 
+                    icon-pack="feather" 
+                    icon="icon-trash" 
+                    class="absolute top-1 right-1"
+                    @click="removeNewFile(index)"
+                  ></vs-button>
+                  <div class="text-xs mt-1 truncate" :title="file.name">{{ file.name }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vx-col w-full mb-4" v-if="existingAttachments.length > 0">
+            <label>Ảnh đã đính kèm</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+              <div v-for="(attachment, index) in existingAttachments" :key="index" class="relative">
+                <img :src="getAttachmentUrl(attachment)" class="w-full h-32 object-cover rounded cursor-pointer" @click="viewImage(getAttachmentUrl(attachment))"/>
+                <vs-button 
+                  v-if="payment.status==0 && checkPermission('approve_add_fee')"
+                  size="small" 
+                  color="danger" 
+                  type="filled" 
+                  icon-pack="feather" 
+                  icon="icon-trash" 
+                  class="absolute top-1 right-1"
+                  @click="removeExistingFile(index)"
+                ></vs-button>
+              </div>
+            </div>
+          </div>
         </div>
         <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="alert.body"></div>
@@ -223,6 +274,8 @@
         },
         amount:'',
         status:'',
+        selectedFiles: [],
+        existingAttachments: []
       }
     },
     created() {
@@ -254,6 +307,42 @@
           this.payment.charge_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      handleFileUpload(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.selectedFiles.push({
+              file: file,
+              name: file.name,
+              preview: e.target.result
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      },
+      removeNewFile(index) {
+        this.selectedFiles.splice(index, 1);
+        if (this.selectedFiles.length === 0 && this.$refs.fileInput) {
+          this.$refs.fileInput.value = '';
+        }
+      },
+      removeExistingFile(index) {
+        this.existingAttachments.splice(index, 1);
+      },
+      viewImage(url) {
+        window.open(url, '_blank');
+      },
+      viewImagePreview(url) {
+        window.open(url, '_blank');
+      },
+      getAttachmentUrl(path) {
+        if (!path) return '';
+        if (path.indexOf('static/upload') !== -1) {
+          return path.startsWith('/') ? path : '/' + path;
+        }
+        return `/storage/${path}`;
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/lms/accounting/waitcharge-approve/${this.$route.params.id}`)
@@ -262,6 +351,18 @@
           this.payment = response.data.payment_info
           this.reserve_info = response.data.agreement_info
           this.amount = this.payment.charge_amount
+
+          if (this.payment.attachments) {
+            if (typeof this.payment.attachments === 'string') {
+              try {
+                this.existingAttachments = JSON.parse(this.payment.attachments);
+              } catch (e) {
+                this.existingAttachments = [];
+              }
+            } else {
+              this.existingAttachments = this.payment.attachments;
+            }
+          }
         })
       },
       save() {
@@ -295,16 +396,22 @@
         })
       },
       processSave(){
-        const data = {
-          id: this.$route.params.id,
-          agreement_id: this.reserve_info.id,
-          note: this.payment.note,
-          charge_date: this.payment.charge_date,
-          amount: this.payment.amount,
-          method: this.payment.method
-        };
+        const formData = new FormData();
+        formData.append('id', this.$route.params.id);
+        formData.append('agreement_id', this.reserve_info.id);
+        formData.append('note', this.payment.note);
+        formData.append('charge_date', this.payment.charge_date);
+        formData.append('amount', this.payment.amount);
+        formData.append('method', this.payment.method);
+        
+        this.selectedFiles.forEach((fileObj, index) => {
+          formData.append(`attachments[${index}]`, fileObj.file);
+        });
+        
+        formData.append('existing_attachments', JSON.stringify(this.existingAttachments));
+
         this.$vs.loading();
-        axios.p(`/api/lms/accounting/charges/update`,data)
+        axios.p(`/api/lms/accounting/charges/update`, formData)
         .then((response) => {
           this.$vs.loading.close();
           this.$vs.notify({
