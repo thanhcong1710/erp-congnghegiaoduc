@@ -49,7 +49,22 @@ class ContractsController extends Controller
             return response()->json([]);
         }
 
-        $classes = u::query("SELECT c.id, c.cls_name AS label
+        $classes = u::query("SELECT c.id, c.cls_name AS label,
+                c.cls_startdate, c.cls_enddate, c.max_students,
+                (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) AS enrolled_students,
+                (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.teacher_id) AS teacher_name,
+                (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.cm_id) AS cm_name,
+                c.class_day,
+                CASE 
+                    WHEN c.cls_startdate > CURRENT_DATE THEN 'Sắp khai giảng'
+                    WHEN c.cls_enddate < CURRENT_DATE THEN 'Đã kết thúc'
+                    ELSE 'Đang diễn ra'
+                END AS status_text,
+                CASE 
+                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) >= c.max_students THEN 'Đã đầy'
+                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) >= c.max_students * 0.8 THEN 'Sắp đầy'
+                    ELSE 'Còn chỗ'
+                END AS availability_text
             FROM classes c
             WHERE c.status = 1
                 AND c.branch_id = $branch_id

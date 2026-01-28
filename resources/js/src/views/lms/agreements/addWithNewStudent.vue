@@ -193,18 +193,6 @@
                     :disabled="!agreement.branch_id"
                 ></vue-select>
             </div>
-            <div class="vx-col w-full mb-4">
-              <label>Chọn lớp để xếp lớp ngay</label>
-              <vue-select
-                    label="label"
-                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu <= hôm nay)"
-                    :options="html.classes.list"
-                    v-model="html.classes.item"
-                    :searchable="true"
-                    @input="saveClass"
-                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id"
-                ></vue-select>
-            </div>
             <div class="vx-col w-full mb-4 vs-con-table stripe vs-table-primary" v-if="agreement.tuition_fee_type==2">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
@@ -230,6 +218,76 @@
                 </div>
               </div>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Chọn lớp để xếp lớp ngay <span class="text-danger">(*)</span></label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn lớp (chỉ hiện lớp có ngày bắt đầu <= hôm nay)"
+                    :options="html.classes.list"
+                    v-model="html.classes.item"
+                    :searchable="true"
+                    @input="saveClass"
+                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id"
+                ></vue-select>
+            </div>
+            
+            <!-- Hiển thị thông tin chi tiết lớp học -->
+            <div class="vx-col w-full mb-4" v-if="classInfo">
+              <div class="border border-gray-300 rounded">
+                <div class="bg-gray-100 px-3 py-2 border-b border-gray-300">
+                  <h6 class="font-semibold">
+                    <i class="fas fa-info-circle mr-2"></i> Thông tin lớp học
+                  </h6>
+                </div>
+                <div class="p-3 pt-0">
+                  <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div>
+                      <span class="text-gray-600">Giáo viên:</span>
+                      <span class="ml-2">{{ classInfo.teacher_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">CM:</span>
+                      <span class="ml-2">{{ classInfo.cm_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Lịch học:</span>
+                      <span class="ml-2">{{ classInfo.schedule_text || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Phòng:</span>
+                      <span class="ml-2">{{ classInfo.room_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Khóa học:</span>
+                      <span class="ml-2">{{ classInfo.product_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Ca học:</span>
+                      <span class="ml-2">{{ classInfo.shift_name || 'Chưa có' }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Thời gian:</span>
+                      <span class="ml-2">{{ formatDate(classInfo.cls_startdate) }} - {{ formatDate(classInfo.cls_enddate) }}</span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Sĩ số:</span>
+                      <span class="ml-2 font-bold" :class="getSisoClass(classInfo.enrolled_students, classInfo.max_students)">
+                        {{ classInfo.enrolled_students }}/{{ classInfo.max_students }}
+                      </span>
+                      <span class="ml-1 px-2 py-1 rounded text-sm font-medium" :class="getAvailabilityBadgeClass(classInfo.enrolled_students, classInfo.max_students)">
+                        {{ classInfo.availability_text }}
+                      </span>
+                    </div>
+                    <div>
+                      <span class="text-gray-600">Trạng thái:</span>
+                      <span class="ml-2 font-bold" :class="getStatusClass(classInfo.status_text)">
+                        {{ classInfo.status_text }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Giá bán</label>
               <input
@@ -251,12 +309,19 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ngày dự kiến học <span class="text-danger">(*)</span></label>
-              <datepicker class="w-full"
+              <label>Ngày dự kiến học</label>
+              <!-- <datepicker class="w-full"
                 v-model="agreement.start_date"
                 placeholder="Chọn ngày dự kiến học"
                 :lang="datepickerOptions.lang"
                 @change="selectDate"
+              /> -->
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="title"
+                v-model="agreement.start_date"
+                disabled="true"
               />
             </div>
             <div class="vx-col w-full mb-4">
@@ -397,6 +462,7 @@
           note:'',
           class_id:'',
         },
+        classInfo: null,
         alert:{
           active: false,
           body: '',
@@ -555,6 +621,7 @@
         this.html.classes.list = []
         this.html.classes.item = ''
         this.agreement.class_id = ''
+        this.classInfo = null
       },
       saveTuitionFee(data = null){
         if (data && typeof data === 'object') {
@@ -573,9 +640,34 @@
       saveClass(data = null){
         if (data && typeof data === 'object') {
           this.agreement.class_id = data.id
+          this.loadClassInfo(data.id)
         }else{
           this.agreement.class_id = ""
+          this.classInfo = null
         }
+      },
+      loadClassInfo(classId) {
+        if (!classId) {
+          this.classInfo = null
+          return
+        }
+        
+        this.$vs.loading()
+        axios.p(`/api/lms/class-info`, {
+          class_id: classId
+        }).then(response => {
+          this.$vs.loading.close()
+          if (response.data.status == 1) {
+            this.classInfo = response.data.data
+            this.agreement.start_date = this.classInfo.cls_startdate
+          } else {
+            this.classInfo = null
+          }
+        }).catch(e => {
+          console.log(e)
+          this.$vs.loading.close()
+          this.classInfo = null
+        })
       },
       loadClassesForEnrolment(){
         this.resetClass()
@@ -709,7 +801,43 @@
             icon: 'icon-x'
           })
         });
-      }
+      },
+      formatDate(date) {
+        if (!date) return 'Chưa có'
+        return moment(date).format('DD/MM/YYYY')
+      },
+      getSisoClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'text-danger font-bold'
+        if (ratio >= 0.8) return 'text-warning font-bold'
+        return 'text-success'
+      },
+      getAvailabilityClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'text-danger'
+        if (ratio >= 0.8) return 'text-warning'
+        return 'text-success'
+      },
+      getStatusClass(status) {
+        switch(status) {
+          case 'Sắp khai giảng': return 'text-info'
+          case 'Đang diễn ra': return 'text-success'
+          case 'Đã kết thúc': return 'text-secondary'
+          default: return 'text-muted'
+        }
+      },
+      getAvailabilityBadgeClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'bg-red-100 text-red-800'
+        if (ratio >= 0.8) return 'bg-yellow-100 text-yellow-800'
+        return 'bg-green-100 text-green-800'
+      },
+      getProgressBarClass(enrolled, max) {
+        const ratio = enrolled / max
+        if (ratio >= 1) return 'bg-red-500'
+        if (ratio >= 0.8) return 'bg-yellow-500'
+        return 'bg-green-500'
+      },
     },
   }
 
