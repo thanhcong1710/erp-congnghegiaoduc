@@ -153,7 +153,7 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày bắt đầu học</label>
-              <datepicker class="w-full"
+              <datepicker class="w-full calendar"
                 v-model="config.start_date"
                 placeholder="Chọn ngày bắt đầu học"
                 :lang="datepickerOptions.lang"
@@ -267,7 +267,7 @@
                   v-model="modal_session.class_date"
                   placeholder="Chọn ngày học"
                   :lang="datepickerOptions.lang"
-                  @change="selectDate"
+                  @change="selectDateEdit"
                 />
               </div>
               <div class="vx-col w-full">
@@ -447,6 +447,12 @@
         location.reload();
       },
       selectDate(date){
+        if (date) {
+          this.config.start_date = moment(date).format("YYYY-MM-DD");
+          console.log(this.config.start_date)
+        }
+      },
+      selectDateEdit(date){
         if (date) {
           this.config.start_date = moment(date).format("YYYY-MM-DD");
         }
@@ -742,11 +748,6 @@
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getDataSessions();
-      },
-      selectDate(date) {
-        if (date) {
-          this.modal_session.class_date = moment(date).format("YYYY-MM-DD");
-        }
       },
       showModalEditClassDate(item){
         this.modal_session.show= true
