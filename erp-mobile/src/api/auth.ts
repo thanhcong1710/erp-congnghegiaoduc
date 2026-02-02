@@ -4,7 +4,41 @@ import { LoginRequest, LoginResponse, User } from '../types';
 export const authApi = {
     // Login
     login: async (credentials: LoginRequest) => {
-        return apiClient.post<LoginResponse>('/auth/login', credentials);
+        // Map username to hrm_id as expected by backend
+        const payload = {
+            hrm_id: credentials.username,
+            password: credentials.password
+        };
+
+        // Call API
+        const response = await apiClient.post<any>('/auth/login', payload);
+
+        // Transform backend response to LoginResponse format
+        if (response && (response as any).status === 1) {
+            const backendData = response as any;
+            return {
+                code: 200,
+                message: 'Login successful',
+                data: {
+                    token: backendData.accessToken,
+                    user: backendData.userData,
+                    status: backendData.status,
+                    accessToken: backendData.accessToken,
+                    userData: backendData.userData
+                }
+            };
+        } else if (response && (response as any).status === 0) {
+            // Handle backend error (status 0)
+            throw {
+                response: {
+                    data: {
+                        message: (response as any).message || 'Login failed'
+                    }
+                }
+            };
+        }
+
+        return response;
     },
 
     // Logout

@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: 'http://localhost:8000/api', // Change this to your actual API URL
+  BASE_URL: 'http://local-erp.congnghegiaoduc.com/api', // Change this to your actual API URL
   TIMEOUT: 30000,
 };
 

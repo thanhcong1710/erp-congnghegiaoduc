@@ -183,12 +183,19 @@ export interface PaginatedResponse<T> {
 // Auth Types
 export interface LoginRequest {
     username: string;
+
     password: string;
+    hrm_id?: string; // Backend expects this
 }
 
 export interface LoginResponse {
     token: string;
     user: User;
+    // Backend raw response fields
+    status?: number;
+    accessToken?: string;
+    userData?: User;
+    type?: string;
 }
 
 export interface AuthState {
