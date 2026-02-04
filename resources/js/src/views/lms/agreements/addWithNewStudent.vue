@@ -336,7 +336,7 @@
                 ></vue-select>
             </div>
 
-            <div class="vx-col w-full mb-4">
+            <!-- <div class="vx-col w-full mb-4">
               <label>Địa chỉ nhận sách</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -344,7 +344,7 @@
                 v-model="agreement.book_receive_address"
                 placeholder="Nhập địa chỉ nhận sách"
               />
-            </div>
+            </div> -->
 
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Đăng ký nhận hợp đồng</label>
