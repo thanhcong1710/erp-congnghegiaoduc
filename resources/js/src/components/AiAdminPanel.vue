@@ -108,11 +108,7 @@
             <div class="stat-value">{{ (statistics.summary?.total_tokens || 0).toLocaleString() }}</div>
             <div class="stat-label">Tổng tokens đã dùng</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-value">${{ statistics.summary?.total_cost || 0 }}</div>
-            <div class="stat-label">Tổng chi phí</div>
-          </div>
+
           <div class="stat-card">
             <div class="stat-icon">📨</div>
             <div class="stat-value">{{ (statistics.summary?.total_requests || 0).toLocaleString() }}</div>
@@ -207,7 +203,49 @@
         </div>
         <div class="modal-footer">
           <button class="btn-secondary" @click="showEditModal = false">Hủy</button>
-          <button class="btn-primary" @click="saveUserPermission">Lưu</button>
+          <button class="btn-primary mb-0" @click="saveUserPermission">Lưu</button>
+        </div>
+      </div>
+    </div>
+    <!-- Knowledge Modal -->
+    <div v-if="showKnowledgeModalState" class="modal" @click.self="closeKnowledgeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>{{ editingKnowledge ? 'Chỉnh sửa tài liệu' : 'Thêm tài liệu mới' }}</h3>
+          <button @click="closeKnowledgeModal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tiêu đề</label>
+            <input type="text" v-model="knowledgeForm.title" placeholder="VD: Hướng dẫn tạo hợp đồng" />
+          </div>
+          <div class="form-group">
+            <label>Danh mục</label>
+            <select v-model="knowledgeForm.category" class="form-control">
+              <option value="user_guide">Hướng dẫn sử dụng</option>
+              <option value="faq">Câu hỏi thường gặp</option>
+              <option value="policy">Chính sách</option>
+              <option value="other">Khác</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nội dung</label>
+            <textarea v-model="knowledgeForm.content" rows="6" placeholder="Nội dung chi tiết..."></textarea>
+          </div>
+          <div class="form-group">
+             <label>Tags (cách nhau bởi dấu phẩy)</label>
+             <input type="text" v-model="knowledgeForm.tags" placeholder="VD: contract, guide" />
+          </div>
+           <div class="form-group">
+            <label class="checkbox-group">
+              <input type="checkbox" v-model="knowledgeForm.is_active" />
+              <span>Kích hoạt</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeKnowledgeModal">Hủy</button>
+          <button class="btn-primary" @click="saveKnowledge">Lưu</button>
         </div>
       </div>
     </div>
@@ -245,6 +283,15 @@ export default {
         can_query_data: true,
         can_generate_reports: true,
         can_access_knowledge: true,
+      },
+      showKnowledgeModalState: false,
+      editingKnowledge: null,
+      knowledgeForm: {
+        title: '',
+        category: 'user_guide',
+        content: '',
+        tags: '',
+        is_active: true,
       },
     };
   },
@@ -349,11 +396,61 @@ export default {
     },
 
     showKnowledgeModal() {
-      alert('Chức năng thêm tài liệu sẽ được bổ sung sau');
+      this.editingKnowledge = null;
+      this.knowledgeForm = {
+        title: '',
+        category: 'user_guide',
+        content: '',
+        tags: '',
+        is_active: true,
+      };
+      this.showKnowledgeModalState = true;
+    },
+
+    closeKnowledgeModal() {
+      this.showKnowledgeModalState = false;
+      this.editingKnowledge = null;
     },
 
     editKnowledge(doc) {
-      alert('Chức năng sửa tài liệu sẽ được bổ sung sau');
+      this.editingKnowledge = doc;
+      this.knowledgeForm = {
+        title: doc.title,
+        category: doc.category,
+        content: doc.content,
+        tags: Array.isArray(doc.tags) ? doc.tags.join(', ') : (JSON.parse(doc.tags || '[]').join(', ')),
+        is_active: doc.is_active,
+      };
+      this.showKnowledgeModalState = true;
+    },
+
+    async saveKnowledge() {
+      try {
+        const payload = {
+          ...this.knowledgeForm,
+          tags: this.knowledgeForm.tags.split(',').map(t => t.trim()).filter(t => t),
+        };
+
+        if (this.editingKnowledge) {
+          // Update
+           const res = await axios.u(`/api/ai/admin/knowledge/${this.editingKnowledge.id}`, payload);
+           if (res.data.success) {
+             alert('Cập nhật thành công');
+           }
+        } else {
+          // Create
+          const res = await axios.p('/api/ai/admin/knowledge', payload);
+          if (res.data.success) {
+            alert('Thêm mới thành công');
+          }
+        }
+        
+        this.closeKnowledgeModal();
+        this.loadKnowledge();
+      } catch (error) {
+        console.error('Lỗi khi lưu knowledge:', error);
+        alert('Có lỗi xảy ra');
+      }
     },
   },
 };
@@ -613,6 +710,7 @@ export default {
 }
 
 /* Modal */
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -624,6 +722,8 @@ export default {
   align-items: center;
   justify-content: center;
   z-index: 10000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
@@ -633,6 +733,18 @@ export default {
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal-header {
@@ -645,6 +757,8 @@ export default {
 
 .modal-header h3 {
   margin: 0;
+  font-size: 1.25rem;
+  color: #2d3748;
 }
 
 .modal-header button {
@@ -653,14 +767,19 @@ export default {
   font-size: 24px;
   cursor: pointer;
   color: #a0aec0;
+  transition: color 0.2s;
+}
+
+.modal-header button:hover {
+  color: #4a5568;
 }
 
 .modal-body {
-  padding: 20px;
+  padding: 24px;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
@@ -668,17 +787,54 @@ export default {
   margin-bottom: 8px;
   font-weight: 500;
   color: #4a5568;
+  font-size: 0.95rem;
 }
 
-.form-group input[type="number"] {
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+  background-color: #fff;
+  color: #2d3748;
 }
 
-.form-group input[type="checkbox"] {
-  margin-right: 8px;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+
+.checkbox-group span {
+  font-size: 14px;
+  color: #4a5568;
 }
 
 .modal-footer {
@@ -687,15 +843,28 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+  background-color: #f7fafc;
+  border-radius: 0 0 12px 12px;
 }
 
 .btn-secondary {
-  background: #edf2f7;
+  background: white;
   color: #4a5568;
-  border: none;
+  border: 1px solid #e2e8f0;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 </style>

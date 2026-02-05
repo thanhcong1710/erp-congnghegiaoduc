@@ -2,7 +2,7 @@
 import axios from 'axios'
 const g = (link, attributes = null) => new Promise((resolve, reject) => {
   if (typeof link === 'string') {
-    axios.get(link,{
+    axios.get(link, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
       },
@@ -18,18 +18,53 @@ const g = (link, attributes = null) => new Promise((resolve, reject) => {
 })
 const p = (link, params = null) => new Promise((resolve, reject) => {
   if (typeof link === 'string') {
-    axios.post(link,params,
+    axios.post(link, params,
       {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
         }
       }
     )
-    .then(response => {
-      resolve(response)
-    }).catch(e => {
-      processAuthen(e);
+      .then(response => {
+        resolve(response)
+      }).catch(e => {
+        processAuthen(e);
+      })
+  } else {
+    reject('Request url is not valid')
+  }
+})
+const u = (link, params = null) => new Promise((resolve, reject) => {
+  if (typeof link === 'string') {
+    axios.put(link, params,
+      {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+        }
+      }
+    )
+      .then(response => {
+        resolve(response)
+      }).catch(e => {
+        processAuthen(e);
+      })
+  } else {
+    reject('Request url is not valid')
+  }
+})
+const d = (link, params = null) => new Promise((resolve, reject) => {
+  if (typeof link === 'string') {
+    axios.delete(link, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+      },
+      data: params
     })
+      .then(response => {
+        resolve(response)
+      }).catch(e => {
+        processAuthen(e);
+      })
   } else {
     reject('Request url is not valid')
   }
@@ -37,15 +72,17 @@ const p = (link, params = null) => new Promise((resolve, reject) => {
 function processAuthen(error) {
   // console.log(error.response.headers);
   try {
-      if (error.response.status == 401) {
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('userInfo')
-          window.location.href = '/pages/login';
-      }
-  } catch (err) {}
+    if (error.response.status == 401) {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('userInfo')
+      window.location.href = '/pages/login';
+    }
+  } catch (err) { }
 
 }
 export default {
   g,
-  p
+  p,
+  u,
+  d
 }
