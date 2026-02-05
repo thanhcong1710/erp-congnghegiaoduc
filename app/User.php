@@ -17,7 +17,7 @@ class User extends Authenticatable implements JWTSubject
     use SoftDeletes;
     use HasRoles;
     private static $instance = null;
- 
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
@@ -36,7 +36,7 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
-    }    
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -44,7 +44,11 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password', 'status','hrm_id'
+        'name',
+        'email',
+        'password',
+        'status',
+        'hrm_id'
     ];
 
     /**
@@ -53,7 +57,8 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     /**
@@ -68,10 +73,10 @@ class User extends Authenticatable implements JWTSubject
     protected $dates = [
         'deleted_at'
     ];
-    
+
     protected $guard_name = 'api';
 
-    protected $attributes = [ 
+    protected $attributes = [
         'menuroles' => 'user',
     ];
 
@@ -80,22 +85,23 @@ class User extends Authenticatable implements JWTSubject
         $user_permission = u::first("SELECT pr.permission_id FROM permission_has_role AS pr 
             LEFT JOIN role_has_user AS r ON r.role_id=pr.role_id 
             LEFT JOIN permissions AS p ON p.id = pr.permission_id
-            WHERE r.user_id = ".Auth::user()->id." AND p.name = '$permission'");
-        
+            WHERE r.user_id = " . Auth::user()->id . " AND p.name = '$permission'");
+
         return empty($user_permission) ? false : true;
     }
 
     public function getStaffHasUser()
     {
         $list_users = u::query("SELECT u.id,u.manager_id FROM users AS u WHERE u.status=1");
-        $staff_has_user = Auth::user()->id. ",".implode(",",self::data_tree($list_users, Auth::user()->id));
+        $staff_has_user = Auth::user()->id . "," . implode(",", self::data_tree($list_users, Auth::user()->id));
         return trim($staff_has_user, ',');
     }
 
-    private function data_tree($data, $manager_id = 0){
+    private function data_tree($data, $manager_id = 0)
+    {
         $result = [];
-        foreach($data as $k=> $item){
-            if($item->manager_id == $manager_id){
+        foreach ($data as $k => $item) {
+            if ($item->manager_id == $manager_id) {
                 $result[] = $item->id;
                 unset($data[$k]);
                 $child = self::data_tree($data, $item->id);
@@ -107,11 +113,19 @@ class User extends Authenticatable implements JWTSubject
 
     public function getBranchesHasUser()
     {
-        $list_branches = u::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = ".Auth::user()->id);
+        $list_branches = u::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = " . Auth::user()->id);
         $tmp = "";
-        foreach($list_branches AS $branch){
-            $tmp.= $tmp ? ",".$branch->branch_id : $branch->branch_id;
+        foreach ($list_branches as $branch) {
+            $tmp .= $tmp ? "," . $branch->branch_id : $branch->branch_id;
         }
         return $tmp ? $tmp : 0;
+    }
+
+    /**
+     * AI Permission relationship
+     */
+    public function aiPermission()
+    {
+        return $this->hasOne('App\Models\AiUserPermission', 'user_id');
     }
 }

@@ -30,7 +30,7 @@ Vue.use(Router)
 const router = new Router({
   mode: 'history',
   base: '/',
-  scrollBehavior () {
+  scrollBehavior() {
     return { x: 0, y: 0 }
   },
   routes: [
@@ -40,9 +40,9 @@ const router = new Router({
     LMS.router,
     Marketing.router,
     {
-    // =============================================================================
-    // MAIN LAYOUT ROUTES
-    // =============================================================================
+      // =============================================================================
+      // MAIN LAYOUT ROUTES
+      // =============================================================================
       path: '',
       component: () => import('./layouts/main/Main.vue'),
       children: [
@@ -65,12 +65,25 @@ const router = new Router({
             rule: 'editor'
           }
         },
-       
-        
+        {
+          path: '/ai-admin',
+          name: 'ai-admin',
+          component: () => import('@/components/AiAdminPanel.vue'),
+          meta: {
+            rule: 'editor',
+            breadcrumb: [
+              { title: 'Home', url: '/' },
+              { title: 'Quản lý AI', active: true }
+            ],
+            pageTitle: 'Quản lý AI Chatbot'
+          }
+        },
+
+
         // =============================================================================
         // LAW MAIN PAGE LAYOUTS
         // =============================================================================
-        
+
       ]
     },
     // =============================================================================
