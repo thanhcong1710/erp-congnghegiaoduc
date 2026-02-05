@@ -726,4 +726,234 @@ class FunctionExecutor
             ],
         ];
     }
+
+    /**
+     * Function: Lấy danh sách lớp học
+     */
+    protected function execute_get_classes_list($args)
+    {
+        $keyword = $args['keyword'] ?? '';
+        $productName = $args['product_name'] ?? '';
+        $status = $args['status'] ?? '';
+        $classDay = $args['class_day'] ?? '';
+        $roomName = $args['room_name'] ?? '';
+        $limit = $args['limit'] ?? 20;
+
+        $cond = " c.status = 1 "; // Active classes only
+
+        if ($keyword !== '') {
+            $cond .= " AND c.cls_name LIKE '%{$keyword}%' ";
+        }
+
+        if ($productName !== '') {
+            $cond .= " AND (SELECT name FROM products WHERE id = c.product_id) LIKE '%{$productName}%' ";
+        }
+
+        // Filter theo thứ học
+        if ($classDay !== '') {
+            // Chuyển "Thứ 2" -> "2", "Thứ 3" -> "3"...
+            $dayNumber = preg_replace('/[^0-9]/', '', $classDay);
+            if ($dayNumber) {
+                $cond .= " AND (c.class_day LIKE '{$dayNumber},%' 
+                            OR c.class_day LIKE '%,{$dayNumber},%' 
+                            OR c.class_day LIKE '%,{$dayNumber}' 
+                            OR c.class_day = '{$dayNumber}') ";
+            }
+        }
+
+        // Filter theo phòng học
+        if ($roomName !== '') {
+            $cond .= " AND EXISTS (
+                SELECT 1 FROM sessions s 
+                JOIN rooms r ON r.id = s.room_id 
+                WHERE s.class_id = c.id 
+                AND r.name LIKE '%{$roomName}%'
+            ) ";
+        }
+
+        $having = "";
+        if ($status !== '') {
+            $statusMap = [
+                'THIEU' => " AND (c.max_students - total_students) > 0 ",
+                'THUA' => " AND (c.max_students - total_students) < 0 ",
+                'DU' => " AND (c.max_students - total_students) = 0 ",
+            ];
+            $having = $statusMap[$status] ?? "";
+        }
+
+        $classes = DB::select("
+            SELECT c.id, c.cls_name, c.max_students, c.cls_startdate, c.class_day, c.is_online,
+                b.name AS branch_name,
+                p.name AS product_name,
+                u_teacher.name AS teacher_name,
+                u_ta.name AS ta_name,
+                (SELECT name FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS shift_name,
+                (SELECT start_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS start_time,
+                (SELECT end_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS end_time,
+                (SELECT name FROM rooms WHERE id = (SELECT room_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS room_name,
+                (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND ct.status != 7 AND s.status > 0) AS total_students
+            FROM classes AS c
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN products AS p ON p.id = c.product_id
+                LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
+                LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
+            WHERE {$cond}
+            HAVING 1=1 {$having}
+            ORDER BY c.id DESC
+            LIMIT {$limit}
+        ");
+
+        if (empty($classes)) {
+            return [
+                'success' => false,
+                'message' => "❌ Không tìm thấy lớp học nào",
+            ];
+        }
+
+        // Format dữ liệu
+        foreach ($classes as $class) {
+            $class->total_students = (int) $class->total_students;
+            $class->max_students = (int) $class->max_students;
+            $diff = $class->max_students - $class->total_students;
+
+            if ($diff > 0) {
+                $class->status_text = "THIẾU {$diff} HS";
+                $class->status_class = 'warning';
+            } elseif ($diff < 0) {
+                $class->status_text = "THỪA " . abs($diff) . " HS";
+                $class->status_class = 'danger';
+            } else {
+                $class->status_text = "ĐỦ";
+                $class->status_class = 'success';
+            }
+
+            // Format lịch học
+            $days = [];
+            if ($class->class_day) {
+                $days_arr = explode(',', $class->class_day);
+                foreach ($days_arr as $d) {
+                    $days[] = "T{$d}";
+                }
+            }
+            $class->schedule_text = implode('+', $days);
+            if ($class->start_time && $class->end_time) {
+                $class->schedule_text .= " (" . substr($class->start_time, 0, 5) . "-" . substr($class->end_time, 0, 5) . ")";
+            }
+
+            $class->cls_startdate = date('d/m/Y', strtotime($class->cls_startdate));
+            $class->is_online_text = $class->is_online == 1 ? 'Online' : 'Offline';
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'total_found' => count($classes),
+                'classes' => $classes,
+            ],
+        ];
+    }
+
+    /**
+     * Function: Lấy chi tiết lớp học
+     */
+    protected function execute_get_class_detail($args)
+    {
+        $classId = $args['class_id'] ?? 0;
+
+        // Lấy thông tin lớp
+        $class = DB::selectOne("
+            SELECT c.*, 
+                b.name AS branch_name,
+                p.name AS product_name,
+                pr.name AS program_name,
+                u_teacher.name AS teacher_name,
+                u_cm.name AS cm_name,
+                u_ta.name AS ta_name
+            FROM classes AS c
+                LEFT JOIN branches AS b ON b.id = c.branch_id
+                LEFT JOIN products AS p ON p.id = c.product_id
+                LEFT JOIN programs AS pr ON pr.id = c.program_id
+                LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
+                LEFT JOIN users AS u_cm ON u_cm.id = c.cm_id
+                LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
+            WHERE c.id = ?
+        ", [$classId]);
+
+        if (!$class) {
+            return [
+                'success' => false,
+                'message' => "❌ Không tìm thấy lớp học ID {$classId}",
+            ];
+        }
+
+        // Lấy thông tin session (shift, room)
+        $session = DB::selectOne("
+            SELECT s.shift_id, s.room_id,
+                (SELECT name FROM shifts WHERE id = s.shift_id) AS shift_name,
+                (SELECT start_time FROM shifts WHERE id = s.shift_id) AS start_time,
+                (SELECT end_time FROM shifts WHERE id = s.shift_id) AS end_time,
+                (SELECT name FROM rooms WHERE id = s.room_id) AS room_name
+            FROM sessions AS s
+            WHERE s.class_id = ? AND s.status = 1
+            LIMIT 1
+        ", [$classId]);
+
+        // Lấy danh sách học sinh
+        $students = DB::select("
+            SELECT s.id, s.name, s.email, s.phone, c.status as contract_status
+            FROM contracts AS c
+            JOIN students AS s ON s.id = c.student_id
+            WHERE c.class_id = ? AND c.status != 7 AND s.status > 0
+            ORDER BY s.name
+        ", [$classId]);
+
+        // Lấy danh sách môn học
+        $subjects = DB::select("
+            SELECT s.name, sc.session, sc.stt
+            FROM subject_has_class AS sc
+            LEFT JOIN subjects AS s ON s.id = sc.subject_id
+            WHERE sc.class_id = ?
+            ORDER BY sc.stt
+        ", [$classId]);
+
+        // Format lịch học
+        $days = [];
+        if ($class->class_day) {
+            $days_arr = explode(',', $class->class_day);
+            foreach ($days_arr as $d) {
+                $days[] = "Thứ {$d}";
+            }
+        }
+        $schedule_text = implode(', ', $days);
+        if ($session && $session->start_time && $session->end_time) {
+            $schedule_text .= " (" . substr($session->start_time, 0, 5) . "-" . substr($session->end_time, 0, 5) . ")";
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'class_info' => [
+                    'id' => $class->id,
+                    'name' => $class->cls_name,
+                    'code' => $class->code ?? '',
+                    'branch' => $class->branch_name,
+                    'product' => $class->product_name,
+                    'program' => $class->program_name,
+                    'start_date' => date('d/m/Y', strtotime($class->cls_startdate)),
+                    'max_students' => $class->max_students,
+                    'total_students' => count($students),
+                    'type' => $class->type,
+                    'is_online' => $class->is_online == 1 ? 'Online' : 'Offline',
+                    'status' => $class->status == 1 ? 'Đang hoạt động' : 'Ngừng hoạt động',
+                    'schedule' => $schedule_text,
+                    'room' => $session->room_name ?? '',
+                    'teacher' => $class->teacher_name ?? '',
+                    'ta' => $class->ta_name ?? '',
+                    'cm' => $class->cm_name ?? '',
+                ],
+                'students' => $students,
+                'subjects' => $subjects,
+            ],
+        ];
+    }
 }

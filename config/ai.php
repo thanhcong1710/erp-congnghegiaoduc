@@ -120,6 +120,23 @@ return [
                 'tuition_fee_id' => 'integer|required',
             ],
         ],
+        'get_classes_list' => [
+            'description' => 'Lấy danh sách lớp học đang hoạt động',
+            'parameters' => [
+                'keyword' => 'string|nullable', // Tên lớp
+                'product_name' => 'string|nullable', // Sản phẩm (IELTS, TOEIC...)
+                'status' => 'string|nullable', // THIEU (thiếu HS), THUA (thừa HS), DU (đủ HS)
+                'class_day' => 'string|nullable', // Thứ học (2,3,4,5,6,7,8 hoặc "Thứ 2", "Thứ 3"...)
+                'room_name' => 'string|nullable', // Tên phòng học
+                'limit' => 'integer|nullable',
+            ],
+        ],
+        'get_class_detail' => [
+            'description' => 'Lấy thông tin chi tiết của 1 lớp học (giáo viên, TA, lịch học, học sinh...)',
+            'parameters' => [
+                'class_id' => 'integer|required',
+            ],
+        ],
         'search_knowledge' => [
             'description' => 'Tìm kiếm tài liệu hướng dẫn trong knowledge base',
             'parameters' => [
