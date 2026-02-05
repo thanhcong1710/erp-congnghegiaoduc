@@ -40,36 +40,35 @@
 
       <!-- Messages -->
       <div class="chat-messages" ref="messagesContainer">
-        <div v-if="messages.length === 0" class="welcome-message">
-          <div class="welcome-icon">👋</div>
-          <h4>Xin chào! Tôi là trợ lý AI</h4>
-          <p>Tôi có thể giúp bạn:</p>
-          <ul>
-            <li>📊 Tra cứu thông tin học viên</li>
-            <li>💰 Xem báo cáo doanh thu</li>
-            <li>📁 Tạo file Excel</li>
-            <li>📚 Tìm tài liệu hướng dẫn</li>
-          </ul>
-        </div>
-
-        <div 
-          v-for="(msg, index) in messages" 
-          :key="index"
-          :class="['message', msg.role]"
-        >
-          <div class="message-content">
-            <div class="message-text" v-html="formatMessage(msg.content)"></div>
-            <div class="message-time">{{ formatTime(msg.created_at) }}</div>
+        <!-- Welcome Message -->
+        <div v-if="messages.length === 0 && !isLoading" class="welcome-message">
+          <h3>👋 Xin chào!</h3>
+          <p>Tôi là trợ lý ảo ERP. Bạn cần giúp gì hôm nay?</p>
+          <div class="suggestion-chips">
+            <button @click="setInput('Doanh thu tháng này thế nào?')">Doanh thu tháng này</button>
+            <button @click="setInput('Danh sách học viên mới?')">Học viên mới</button>
+            <button @click="setInput('Hướng dẫn tạo hợp đồng')">Tạo hợp đồng</button>
           </div>
         </div>
 
-        <div v-if="isTyping" class="message assistant">
-          <div class="message-content">
-            <div class="typing-indicator">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
+        <!-- Loading History -->
+        <div v-if="isLoading" class="loading-history">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+          <p>Đang tải lịch sử trò chuyện...</p>
+        </div>
+
+        <!-- Messages -->
+        <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.role]">
+          <div class="message-content" v-html="formatMessage(msg.content)"></div>
+          <div class="message-time">{{ formatTime(msg.created_at) }}</div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div v-if="isTyping" class="message assistant typing">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
           </div>
         </div>
       </div>
@@ -81,6 +80,7 @@
         </div>
         <div class="input-wrapper">
           <textarea
+            ref="userInput"
             v-model="inputMessage"
             @keydown.enter.exact.prevent="sendMessage"
             placeholder="Nhập tin nhắn..."
@@ -112,6 +112,7 @@ export default {
   data() {
     return {
       isOpen: false,
+      isLoading: false,
       messages: [],
       inputMessage: '',
       isTyping: false,
@@ -122,6 +123,9 @@ export default {
 
   mounted() {
     this.loadQuota();
+    
+    // Tự động load hội thoại gần nhất
+    this.loadLastConversation();
   },
 
   methods: {
@@ -200,14 +204,109 @@ export default {
       this.messages = [];
       this.sessionId = null;
       this.loadQuota();
+      
+      // Gọi API tạo session mới nếu cần, hoặc để chat tự tạo
+      // Nhưng tốt nhất là reset session ID client side là đủ
+    },
+
+    async loadLastConversation() {
+      this.isLoading = true;
+      try {
+        // 1. Lấy danh sách conversations
+        const res = await axios.g('/api/ai/conversations');
+        if (res.data.success && res.data.data.length > 0) {
+          const lastConv = res.data.data[0];
+          this.sessionId = lastConv.session_id;
+
+          // 2. Lấy chi tiết tin nhắn
+          const detailRes = await axios.g(`/api/ai/conversations/${this.sessionId}`);
+          if (detailRes.data.success) {
+            this.messages = detailRes.data.data.messages.map(msg => ({
+              role: msg.role,
+              content: msg.content,
+              created_at: msg.created_at, // API trả về string format sẵn hoặc date object
+            }));
+            this.scrollToBottom();
+          }
+        }
+      } catch (error) {
+        console.error('Lỗi load history:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     formatMessage(content) {
-      // Convert markdown-like syntax
-      return content
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>')
-        .replace(/- (.*?)(<br>|$)/g, '• $1$2');
+      // Xử lý markdown tables trước
+      content = this.parseMarkdownTable(content);
+
+      // Xử lý code blocks (```language\ncode\n```)
+      content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        const language = lang || 'text';
+        return `<pre><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
+      });
+
+      // Xử lý inline code (`code`)
+      content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+      // Xử lý bold (**text**)
+      content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Xử lý italic (*text*)
+      content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+      // Xử lý newline
+      content = content.replace(/\n/g, '<br>');
+
+      // Xử lý list items
+      content = content.replace(/- (.*?)(<br>|$)/g, '• $1$2');
+
+      return content;
+    },
+
+    parseMarkdownTable(content) {
+      // Regex để tìm markdown table
+      const tableRegex = /\|(.+)\|\n\|([:\-\s|]+)\|\n((\|.+\|\n?)+)/g;
+      
+      return content.replace(tableRegex, (match) => {
+        const lines = match.trim().split('\n');
+        if (lines.length < 3) return match;
+
+        let html = '<table class="markdown-table">';
+        
+        // Header
+        const headers = lines[0].split('|').filter(cell => cell.trim());
+        html += '<thead><tr>';
+        headers.forEach(header => {
+          html += `<th>${header.trim()}</th>`;
+        });
+        html += '</tr></thead>';
+        
+        // Body
+        html += '<tbody>';
+        for (let i = 2; i < lines.length; i++) {
+          const cells = lines[i].split('|').filter(cell => cell.trim());
+          html += '<tr>';
+          cells.forEach(cell => {
+            html += `<td>${cell.trim()}</td>`;
+          });
+          html += '</tr>';
+        }
+        html += '</tbody></table>';
+        
+        return html;
+      });
+    },
+
+    escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
     },
 
     formatTime(date) {
@@ -221,6 +320,15 @@ export default {
         const container = this.$refs.messagesContainer;
         if (container) {
           container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
+
+    setInput(text) {
+      this.inputMessage = text;
+      this.$nextTick(() => {
+        if (this.$refs.userInput) {
+          this.$refs.userInput.focus();
         }
       });
     },
@@ -258,8 +366,8 @@ export default {
 }
 
 .chat-window {
-  width: 380px;
-  height: 600px;
+  width: 640px;
+  height: 700px;
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -267,6 +375,13 @@ export default {
   flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .chat-window {
+    width: 380px;
+    height: 600px;
+  }
 }
 
 @keyframes slideUp {
@@ -278,6 +393,46 @@ export default {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Suggestion Chips */
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.suggestion-chips button {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-chips button:hover {
+  background: #ebf4ff;
+  border-color: #667eea;
+  color: #5a67d8;
+}
+
+/* Loading History */
+.loading-history {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.loading-history .typing-indicator {
+  margin-bottom: 8px;
 }
 
 .chat-header {
@@ -324,8 +479,8 @@ export default {
 }
 
 .header-actions button {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: white;
   width: 32px;
   height: 32px;
@@ -334,11 +489,14 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .header-actions button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 1);
+  color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .chat-messages {
@@ -527,5 +685,81 @@ export default {
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
+}
+
+/* Code Styling */
+.message-content code {
+  background: #f1f5f9;
+  color: #e11d48;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+}
+
+.message-content pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 8px 0;
+  border-left: 4px solid #667eea;
+}
+
+.message-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  display: block;
+}
+
+.message-content strong {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.message-content em {
+  font-style: italic;
+  color: #64748b;
+}
+
+/* Markdown Table Styling */
+.markdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 13px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.markdown-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.markdown-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.markdown-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.markdown-table tbody tr:hover {
+  background: #f7fafc;
+}
+
+.markdown-table tbody tr:last-child td {
+  border-bottom: none;
 }
 </style>

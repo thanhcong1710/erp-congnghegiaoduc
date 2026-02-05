@@ -27,6 +27,8 @@ class GeminiService
      */
     public function chat(array $messages, array $tools = [])
     {
+        set_time_limit(120); // Tăng thời gian thực thi PHP lên 120s
+
         try {
             // Convert messages sang format Gemini
             $contents = $this->formatMessages($messages);
@@ -58,6 +60,12 @@ class GeminiService
             }
 
             $result = $response->json();
+
+            // Debug: Log response để kiểm tra
+            Log::info('Gemini Response', [
+                'candidates_count' => count($result['candidates'] ?? []),
+                'first_candidate' => $result['candidates'][0] ?? null,
+            ]);
 
             // Parse response
             return $this->parseResponse($result);
@@ -106,22 +114,29 @@ class GeminiService
         }
 
         $content = $candidate['content'] ?? null;
-        $parts = $content['parts'][0] ?? null;
+        $parts = $content['parts'] ?? [];
 
-        // Kiểm tra có function call không
-        if (isset($parts['functionCall'])) {
+        // Kiểm tra có function call không (thường ở part đầu tiên)
+        if (isset($parts[0]['functionCall'])) {
             return [
                 'type' => 'function_call',
-                'function_name' => $parts['functionCall']['name'],
-                'arguments' => $parts['functionCall']['args'] ?? [],
+                'function_name' => $parts[0]['functionCall']['name'],
+                'arguments' => $parts[0]['functionCall']['args'] ?? [],
                 'usage' => $this->extractUsage($response),
             ];
         }
 
-        // Response thường
+        // Response thường: Ghép tất cả các parts lại
+        $fullText = '';
+        foreach ($parts as $part) {
+            if (isset($part['text'])) {
+                $fullText .= $part['text'];
+            }
+        }
+
         return [
             'type' => 'text',
-            'content' => $parts['text'] ?? '',
+            'content' => $fullText,
             'usage' => $this->extractUsage($response),
         ];
     }
