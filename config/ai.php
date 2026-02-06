@@ -137,6 +137,21 @@ return [
                 'class_id' => 'integer|required',
             ],
         ],
+        'get_users_list' => [
+            'description' => 'Lấy danh sách người dùng/nhân viên trong hệ thống',
+            'parameters' => [
+                'keyword' => 'string|nullable', // Tên hoặc mã nhân viên
+                'branch_name' => 'string|nullable', // Tên trung tâm/chi nhánh
+                'role_name' => 'string|nullable', // Vai trò (EC, CM, Teacher...)
+                'limit' => 'integer|nullable',
+            ],
+        ],
+        'get_user_detail' => [
+            'description' => 'Lấy thông tin chi tiết của 1 người dùng (vai trò, chi nhánh phụ trách...)',
+            'parameters' => [
+                'user_id' => 'integer|required',
+            ],
+        ],
         'search_knowledge' => [
             'description' => 'Tìm kiếm tài liệu hướng dẫn trong knowledge base',
             'parameters' => [

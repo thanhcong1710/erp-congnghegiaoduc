@@ -956,4 +956,142 @@ class FunctionExecutor
             ],
         ];
     }
+
+    /**
+     * Function: Lấy danh sách người dùng
+     */
+    protected function execute_get_users_list($args)
+    {
+        $keyword = $args['keyword'] ?? '';
+        $branchName = $args['branch_name'] ?? '';
+        $roleName = $args['role_name'] ?? '';
+        $limit = $args['limit'] ?? 20;
+
+        $cond = " 1=1 ";
+
+        // Tìm theo tên hoặc mã nhân viên
+        if ($keyword !== '') {
+            $cond .= " AND (u.name LIKE '%{$keyword}%' OR u.hrm_id LIKE '%{$keyword}%') ";
+        }
+
+        // Filter theo tên chi nhánh
+        if ($branchName !== '') {
+            $cond .= " AND EXISTS (
+                SELECT 1 FROM branch_has_user bhu
+                JOIN branches b ON b.id = bhu.branch_id
+                WHERE bhu.user_id = u.id 
+                AND b.name LIKE '%{$branchName}%'
+            ) ";
+        }
+
+        // Filter theo vai trò
+        if ($roleName !== '') {
+            $cond .= " AND EXISTS (
+                SELECT 1 FROM role_has_user rhu
+                JOIN roles r ON r.id = rhu.role_id
+                WHERE rhu.user_id = u.id 
+                AND r.name LIKE '%{$roleName}%'
+            ) ";
+        }
+
+        $users = DB::select("
+            SELECT u.*, 
+                IF(u.manager_id, (SELECT name FROM users WHERE id = u.manager_id), '') AS manager_name,
+                (SELECT GROUP_CONCAT(b.name SEPARATOR ', ') 
+                 FROM branch_has_user bhu 
+                 JOIN branches b ON b.id = bhu.branch_id 
+                 WHERE bhu.user_id = u.id) AS branches,
+                (SELECT GROUP_CONCAT(r.name SEPARATOR ', ') 
+                 FROM role_has_user rhu 
+                 JOIN roles r ON r.id = rhu.role_id 
+                 WHERE rhu.user_id = u.id) AS roles
+            FROM users AS u
+            WHERE {$cond}
+            ORDER BY u.id DESC
+            LIMIT {$limit}
+        ");
+
+        if (empty($users)) {
+            return [
+                'success' => false,
+                'message' => "❌ Không tìm thấy người dùng nào",
+            ];
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'total_found' => count($users),
+                'users' => $users,
+            ],
+        ];
+    }
+
+    /**
+     * Function: Lấy chi tiết người dùng
+     */
+    protected function execute_get_user_detail($args)
+    {
+        $userId = $args['user_id'] ?? 0;
+
+        // Lấy thông tin user
+        $user = DB::selectOne("
+            SELECT u.*,
+                IF(u.manager_id, (SELECT name FROM users WHERE id = u.manager_id), '') AS manager_name
+            FROM users AS u
+            WHERE u.id = ?
+        ", [$userId]);
+
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => "❌ Không tìm thấy người dùng ID {$userId}",
+            ];
+        }
+
+        // Lấy danh sách vai trò
+        $roles = DB::select("
+            SELECT r.id, r.name, r.description
+            FROM role_has_user AS rhu
+            JOIN roles AS r ON r.id = rhu.role_id
+            WHERE rhu.user_id = ?
+        ", [$userId]);
+
+        // Lấy danh sách chi nhánh phụ trách
+        $branches = DB::select("
+            SELECT b.id, b.name, b.address
+            FROM branch_has_user AS bhu
+            JOIN branches AS b ON b.id = bhu.branch_id
+            WHERE bhu.user_id = ?
+        ", [$userId]);
+
+        // Đếm số học sinh phụ trách (nếu là EC/CM)
+        $studentCount = DB::selectOne("
+            SELECT 
+                (SELECT COUNT(DISTINCT student_id) FROM term_student_user WHERE ec_id = ?) AS ec_students,
+                (SELECT COUNT(DISTINCT student_id) FROM term_student_user WHERE cm_id = ?) AS cm_students
+        ", [$userId, $userId]);
+
+        return [
+            'success' => true,
+            'data' => [
+                'user_info' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'hrm_id' => $user->hrm_id ?? '',
+                    'email' => $user->email ?? '',
+                    'phone' => $user->phone ?? '',
+                    'status' => $user->status == 1 ? 'Đang hoạt động' : 'Ngừng hoạt động',
+                    'manager' => $user->manager_name ?? '',
+                    'created_at' => date('d/m/Y', strtotime($user->created_at)),
+                ],
+                'roles' => $roles,
+                'branches' => $branches,
+                'statistics' => [
+                    'ec_students' => $studentCount->ec_students ?? 0,
+                    'cm_students' => $studentCount->cm_students ?? 0,
+                ],
+            ],
+        ];
+    }
 }
