@@ -44,11 +44,11 @@
         <div v-if="messages.length === 0 && !isLoading" class="welcome-message">
           <h3>👋 Xin chào!</h3>
           <p>Tôi là trợ lý ảo ERP. Bạn cần giúp gì hôm nay?</p>
-          <div class="suggestion-chips">
+          <!-- <div class="suggestion-chips">
             <button @click="setInput('Doanh thu tháng này thế nào?')">Doanh thu tháng này</button>
             <button @click="setInput('Danh sách học viên mới?')">Học viên mới</button>
             <button @click="setInput('Hướng dẫn tạo hợp đồng')">Tạo hợp đồng</button>
-          </div>
+          </div> -->
         </div>
 
         <!-- Loading History -->
