@@ -49,6 +49,12 @@ class ProcessDataScheduleHasStudent extends Command
     }
 
     private function processRunFee($class_date){
+        u::query("UPDATE schedule_has_student s SET s.status=3
+        WHERE EXISTS (
+            SELECT 1
+            FROM public_holiday p
+            WHERE FIND_IN_SET(s.branch_id, p.branch_id) > 0 AND FIND_IN_SET(s.product_id, p.products) > 0 AND s.class_date >= p.start_date AND s.class_date <= p.end_date
+        ) AND s.class_date = '$class_date' AND s.status=0");
         u::query("UPDATE schedule_has_student AS s SET s.status=1 WHERE s.class_date = '$class_date' AND s.status=0");
         return "ok";
     }
