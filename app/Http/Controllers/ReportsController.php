@@ -826,4 +826,150 @@ class ReportsController extends Controller
             'summary' => $total_summary
         ]);
     }
+
+    public function report17(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $school_year = isset($request->school_year) ? $request->school_year : '';
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0 và theo branch map
+        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $order_by = " ORDER BY a.id DESC ";
+
+        // Lọc session school year thông qua join để lấy giá trị động
+        $schedule_cond = " c.id = shs.contract_id AND shs.status = 1 ";
+        if ($school_year) {
+            // Lọc theo năm học từ format date, ví dụ lấy trong khoảng năm
+            $schedule_cond .= " AND YEAR(shs.class_date) = '" . $school_year . "' ";
+        }
+
+        // Query danh sách agreements (combo packages) có debt = 0 và lấy full fee_date (max charge_date)
+        $query = "SELECT 
+                a.id AS agreement_id,
+                a.must_charge AS combo_fee,
+                s.lms_code AS student_code,
+                s.name AS student_name,
+                t.name AS combo_name,
+                COUNT(DISTINCT c.id) AS total_courses,
+                MIN(c.enrolment_start_date) AS first_course_start_date,
+                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
+                SUM(c.summary_sessions) AS total_sessions,
+                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+            FROM agreements AS a
+                LEFT JOIN students AS s ON s.id = a.student_id
+                LEFT JOIN tuition_fee AS t ON t.id = a.tuition_fee_id
+                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+            WHERE $cond
+            GROUP BY a.id
+            $order_by $limitation";
+
+        $list = u::query($query);
+
+        $total_combo_fee = 0;
+        $total_used_value = 0;
+        $total_left_value = 0;
+        $total_sessions = 0;
+        $total_done_sessions = 0;
+        $total_left_sessions = 0;
+
+        foreach ($list as $k => $row) {
+            $row->total_sessions = (int) $row->total_sessions;
+            $row->done_sessions = (int) $row->done_sessions;
+            $row->left_sessions = max(0, $row->total_sessions - $row->done_sessions);
+            $row->combo_fee = (float) $row->combo_fee;
+
+            if ($row->total_sessions > 0) {
+                $row->used_value = round(($row->combo_fee * $row->done_sessions) / $row->total_sessions, 0);
+                $row->completion_rate = round(($row->done_sessions / $row->total_sessions) * 100, 2);
+            } else {
+                $row->used_value = 0;
+                $row->completion_rate = 0;
+            }
+
+            $row->left_value = max(0, $row->combo_fee - $row->used_value);
+
+            // Tích luỹ cho summary (chỉ tính trong data paginated, có thể cần query riêng cho tổng hợp số liệu filter)
+            $total_combo_fee += $row->combo_fee;
+            $total_used_value += $row->used_value;
+            $total_left_value += $row->left_value;
+            $total_sessions += $row->total_sessions;
+            $total_done_sessions += $row->done_sessions;
+            $total_left_sessions += $row->left_sessions;
+        }
+
+        // Tính tổng kết quả query (bỏ LIMIT)
+        $totalQuery = "SELECT COUNT(DISTINCT a.id) as total_count FROM agreements AS a LEFT JOIN students AS s ON s.id = a.student_id WHERE $cond";
+        $totalCount = u::first($totalQuery)->total_count;
+
+        // --- Tính Summary tổng hợp không phân trang ---
+        $summaryQuery = "SELECT 
+                a.id as agreement_id,
+                a.must_charge as total_combo_fee_all,
+                SUM(c.summary_sessions) as total_sessions_all,
+                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS total_done_sessions_all
+            FROM agreements AS a
+            LEFT JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+            WHERE $cond
+            GROUP BY a.id";
+
+        $summaryDataSql = u::query($summaryQuery);
+        $total_combo_fee_all = 0;
+        $total_sessions_all = 0;
+        $total_done_sessions_all = 0;
+        $total_used_value_all = 0;
+
+        foreach ($summaryDataSql as $sumRow) {
+            $total_combo_fee_all += (float) $sumRow->total_combo_fee_all;
+            $total_sessions_all += (int) $sumRow->total_sessions_all;
+            $done_sessions = (int) $sumRow->total_done_sessions_all;
+            $total_done_sessions_all += $done_sessions;
+
+            if ($sumRow->total_sessions_all > 0) {
+                $total_used_value_all += round(((float) $sumRow->total_combo_fee_all * $done_sessions) / (int) $sumRow->total_sessions_all, 0);
+            }
+        }
+
+        $total_left_value_all = max(0, $total_combo_fee_all - $total_used_value_all);
+        $total_left_sessions_all = max(0, $total_sessions_all - $total_done_sessions_all);
+
+        $summary = [
+            'total_combo_fee' => (float) $total_combo_fee_all,
+            'total_used_value' => (float) $total_used_value_all,
+            'total_left_value' => (float) $total_left_value_all,
+            'total_sessions' => (int) $total_sessions_all,
+            'total_done_sessions' => (int) $total_done_sessions_all,
+            'total_left_sessions' => (int) $total_left_sessions_all
+        ];
+
+        $data = u::makingPagination($list, $totalCount, $page, $limit);
+        $data->summary = $summary;
+
+        return response()->json($data);
+    }
 }

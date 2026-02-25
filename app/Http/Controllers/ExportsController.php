@@ -1000,6 +1000,222 @@ class ExportsController extends Controller
         }
     }
 
+    public function report17(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+        $params = array_combine($keys, $values);
+
+        $branch_id = [];
+        $school_year = '';
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'school_year' && isset($values[$k]) && $values[$k] != 'v') {
+                $school_year = $values[$k];
+            }
+            if ($key_name == 'keyword' && isset($values[$k]) && $values[$k] != 'v') {
+                $keyword = $values[$k];
+            }
+            if ($key_name == 'start_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $start_date = $values[$k];
+            }
+            if ($key_name == 'end_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $end_date = $values[$k];
+            }
+        }
+
+        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0 và theo branch map
+        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $order_by = " ORDER BY a.id DESC ";
+
+        // Lọc session school year thông qua join để lấy giá trị động
+        $schedule_cond = " c.id = shs.contract_id AND shs.status = 1 ";
+        if ($school_year) {
+            $schedule_cond .= " AND YEAR(shs.class_date) = '" . $school_year . "' ";
+        }
+
+        // Query danh sách agreements (combo packages) có debt = 0 và lấy full fee_date (max charge_date)
+        $query = "SELECT 
+                a.id AS agreement_id,
+                a.must_charge AS combo_fee,
+                s.lms_code AS student_code,
+                s.name AS student_name,
+                t.name AS combo_name,
+                COUNT(DISTINCT c.id) AS total_courses,
+                MIN(c.enrolment_start_date) AS first_course_start_date,
+                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
+                SUM(c.summary_sessions) AS total_sessions,
+                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+            FROM agreements AS a
+                LEFT JOIN students AS s ON s.id = a.student_id
+                LEFT JOIN tuition_fee AS t ON t.id = a.tuition_fee_id
+                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+            WHERE $cond
+            GROUP BY a.id, a.must_charge, s.lms_code, s.name, t.name, a.id
+            $order_by";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Mã HV');
+        $sheet->setCellValue('C1', 'Họ tên học viên');
+        $sheet->setCellValue('D1', 'Combo đăng ký');
+        $sheet->setCellValue('E1', 'Tổng số khóa');
+        $sheet->setCellValue('F1', 'Ngày bắt đầu khóa đầu tiên');
+        $sheet->setCellValue('G1', 'Ngày full fee');
+        $sheet->setCellValue('H1', 'Tổng số buổi combo');
+        $sheet->setCellValue('I1', 'Học phí combo (VNĐ)');
+        $sheet->setCellValue('J1', 'Số buổi đã học (1 năm)');
+        $sheet->setCellValue('K1', '% hoàn thành');
+        $sheet->setCellValue('L1', 'Số buổi còn lại');
+        $sheet->setCellValue('M1', 'Giá trị đã sử dụng (VNĐ)');
+        $sheet->setCellValue('N1', 'Giá trị còn lại (VNĐ)');
+
+        // Set column widths
+        $sheet->getColumnDimension("A")->setWidth(8);
+        $sheet->getColumnDimension("B")->setWidth(15);
+        $sheet->getColumnDimension("C")->setWidth(25);
+        $sheet->getColumnDimension("D")->setWidth(25);
+        $sheet->getColumnDimension("E")->setWidth(15);
+        $sheet->getColumnDimension("F")->setWidth(25);
+        $sheet->getColumnDimension("G")->setWidth(20);
+        $sheet->getColumnDimension("H")->setWidth(20);
+        $sheet->getColumnDimension("I")->setWidth(20);
+        $sheet->getColumnDimension("J")->setWidth(20);
+        $sheet->getColumnDimension("K")->setWidth(15);
+        $sheet->getColumnDimension("L")->setWidth(15);
+        $sheet->getColumnDimension("M")->setWidth(25);
+        $sheet->getColumnDimension("N")->setWidth(25);
+
+        // Style header row
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4']
+            ]
+        ];
+        $sheet->getStyle('A1:N1')->applyFromArray($headerStyle);
+
+        $total_combo_fee_all = 0;
+        $total_sessions_all = 0;
+        $total_done_sessions_all = 0;
+        $total_used_value_all = 0;
+        $total_left_value_all = 0;
+        $total_left_sessions_all = 0;
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 2;
+            $item = $list[$i];
+
+            $item->total_sessions = (int) $item->total_sessions;
+            $item->done_sessions = (int) $item->done_sessions;
+            $item->left_sessions = max(0, $item->total_sessions - $item->done_sessions);
+            $item->combo_fee = (float) $item->combo_fee;
+
+            if ($item->total_sessions > 0) {
+                $item->used_value = round(($item->combo_fee * $item->done_sessions) / $item->total_sessions, 0);
+                $item->completion_rate = round(($item->done_sessions / $item->total_sessions) * 100, 2);
+            } else {
+                $item->used_value = 0;
+                $item->completion_rate = 0;
+            }
+
+            $item->left_value = max(0, $item->combo_fee - $item->used_value);
+
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->student_code);
+            $sheet->setCellValue('C' . $x, $item->student_name);
+            $sheet->setCellValue('D' . $x, $item->combo_name);
+            $sheet->setCellValue('E' . $x, $item->total_courses);
+            $sheet->setCellValue('F' . $x, $item->first_course_start_date);
+            $sheet->setCellValue('G' . $x, $item->full_fee_date);
+            $sheet->setCellValue('H' . $x, $item->total_sessions);
+            $sheet->setCellValue('I' . $x, $item->combo_fee);
+            $sheet->setCellValue('J' . $x, $item->done_sessions);
+            $sheet->setCellValue('K' . $x, $item->completion_rate . '%');
+            $sheet->setCellValue('L' . $x, $item->left_sessions);
+            $sheet->setCellValue('M' . $x, $item->used_value);
+            $sheet->setCellValue('N' . $x, $item->left_value);
+
+            $total_combo_fee_all += $item->combo_fee;
+            $total_sessions_all += $item->total_sessions;
+            $total_done_sessions_all += $item->done_sessions;
+            $total_used_value_all += $item->used_value;
+            $total_left_value_all += $item->left_value;
+            $total_left_sessions_all += $item->left_sessions;
+
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+
+        // Add total row
+        $totalRow = count($list) + 2;
+        $sheet->setCellValue('A' . $totalRow, '');
+        $sheet->setCellValue('B' . $totalRow, '');
+        $sheet->setCellValue('C' . $totalRow, '');
+        $sheet->setCellValue('D' . $totalRow, 'TỔNG CỘNG:');
+        $sheet->setCellValue('E' . $totalRow, '');
+        $sheet->setCellValue('F' . $totalRow, '');
+        $sheet->setCellValue('G' . $totalRow, '');
+        $sheet->setCellValue('H' . $totalRow, $total_sessions_all);
+        $sheet->setCellValue('I' . $totalRow, $total_combo_fee_all);
+        $sheet->setCellValue('J' . $totalRow, $total_done_sessions_all);
+        $sheet->setCellValue('K' . $totalRow, '');
+        $sheet->setCellValue('L' . $totalRow, $total_left_sessions_all);
+        $sheet->setCellValue('M' . $totalRow, $total_used_value_all);
+        $sheet->setCellValue('N' . $totalRow, $total_left_value_all);
+
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E8F5E9']
+            ]
+        ];
+        $sheet->getStyle('H' . $totalRow . ':N' . $totalRow)->applyFromArray($totalStyle);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo (KT) tổng hợp tiến độ học sau 01 năm.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
     public function report16(Request $request, $key, $value)
     {
         set_time_limit(300);

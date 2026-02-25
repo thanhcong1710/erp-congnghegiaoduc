@@ -7,9 +7,7 @@
       @click="toggleChat"
       title="Trợ lý AI"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
+      <div class="ai-avatar-btn">🤖</div>
     </button>
 
     <!-- Chat window -->
@@ -17,7 +15,7 @@
       <!-- Header -->
       <div class="chat-header">
         <div class="header-content">
-          <div class="ai-avatar">🤖</div>
+          <div class="ai-avatar-header">🤖</div>
           <div>
             <h3>Trợ lý AI</h3>
             <p class="status">{{ isTyping ? 'Đang soạn tin...' : 'Trực tuyến' }}</p>
@@ -42,13 +40,9 @@
       <div class="chat-messages" ref="messagesContainer">
         <!-- Welcome Message -->
         <div v-if="messages.length === 0 && !isLoading" class="welcome-message">
+          <div class="welcome-icon">🤖</div>
           <h3>👋 Xin chào!</h3>
-          <p>Tôi là trợ lý ảo ERP. Bạn cần giúp gì hôm nay?</p>
-          <!-- <div class="suggestion-chips">
-            <button @click="setInput('Doanh thu tháng này thế nào?')">Doanh thu tháng này</button>
-            <button @click="setInput('Danh sách học viên mới?')">Học viên mới</button>
-            <button @click="setInput('Hướng dẫn tạo hợp đồng')">Tạo hợp đồng</button>
-          </div> -->
+          <p>Tôi là trợ lý AI ERP. Bạn cần giúp gì hôm nay?</p>
         </div>
 
         <!-- Loading History -->
@@ -67,8 +61,10 @@
 
         <!-- Typing Indicator -->
         <div v-if="isTyping" class="message assistant typing">
-          <div class="typing-indicator">
-            <span></span><span></span><span></span>
+          <div class="message-content">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
           </div>
         </div>
       </div>
@@ -83,7 +79,7 @@
             ref="userInput"
             v-model="inputMessage"
             @keydown.enter.exact.prevent="sendMessage"
-            placeholder="Nhập tin nhắn..."
+            placeholder="Nhập câu hỏi cho Trợ lý AI..."
             rows="1"
             :disabled="isTyping"
           ></textarea>
@@ -123,8 +119,6 @@ export default {
 
   mounted() {
     this.loadQuota();
-    
-    // Tự động load hội thoại gần nhất
     this.loadLastConversation();
   },
 
@@ -133,6 +127,11 @@ export default {
       this.isOpen = !this.isOpen;
       if (this.isOpen && this.messages.length === 0) {
         this.loadQuota();
+        this.$nextTick(() => {
+          if (this.$refs.userInput) {
+            this.$refs.userInput.focus();
+          }
+        });
       }
     },
 
@@ -153,7 +152,6 @@ export default {
       const userMessage = this.inputMessage.trim();
       this.inputMessage = '';
 
-      // Thêm tin nhắn user
       this.messages.push({
         role: 'user',
         content: userMessage,
@@ -172,14 +170,12 @@ export default {
         if (response.data.success) {
           this.sessionId = response.data.session_id;
           
-          // Thêm tin nhắn AI
           this.messages.push({
             role: 'assistant',
             content: response.data.message,
             created_at: new Date(),
           });
 
-          // Cập nhật quota
           this.loadQuota();
         } else {
           this.messages.push({
@@ -197,6 +193,11 @@ export default {
       } finally {
         this.isTyping = false;
         this.scrollToBottom();
+        this.$nextTick(() => {
+          if (this.$refs.userInput) {
+            this.$refs.userInput.focus();
+          }
+        });
       }
     },
 
@@ -204,27 +205,22 @@ export default {
       this.messages = [];
       this.sessionId = null;
       this.loadQuota();
-      
-      // Gọi API tạo session mới nếu cần, hoặc để chat tự tạo
-      // Nhưng tốt nhất là reset session ID client side là đủ
     },
 
     async loadLastConversation() {
       this.isLoading = true;
       try {
-        // 1. Lấy danh sách conversations
         const res = await axios.g('/api/ai/conversations');
         if (res.data.success && res.data.data.length > 0) {
           const lastConv = res.data.data[0];
           this.sessionId = lastConv.session_id;
 
-          // 2. Lấy chi tiết tin nhắn
           const detailRes = await axios.g(`/api/ai/conversations/${this.sessionId}`);
           if (detailRes.data.success) {
             this.messages = detailRes.data.data.messages.map(msg => ({
               role: msg.role,
               content: msg.content,
-              created_at: msg.created_at, // API trả về string format sẵn hoặc date object
+              created_at: msg.created_at,
             }));
             this.scrollToBottom();
           }
@@ -237,35 +233,20 @@ export default {
     },
 
     formatMessage(content) {
-      // Xử lý markdown tables trước
       content = this.parseMarkdownTable(content);
-
-      // Xử lý code blocks (```language\ncode\n```)
       content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
         const language = lang || 'text';
         return `<pre><code class="language-${language}">${this.escapeHtml(code.trim())}</code></pre>`;
       });
-
-      // Xử lý inline code (`code`)
       content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-      // Xử lý bold (**text**)
       content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-      // Xử lý italic (*text*)
       content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-      // Xử lý newline
       content = content.replace(/\n/g, '<br>');
-
-      // Xử lý list items
       content = content.replace(/- (.*?)(<br>|$)/g, '• $1$2');
-
       return content;
     },
 
     parseMarkdownTable(content) {
-      // Regex để tìm markdown table
       const tableRegex = /\|(.+)\|\n\|([:\-\s|]+)\|\n((\|.+\|\n?)+)/g;
       
       return content.replace(tableRegex, (match) => {
@@ -273,8 +254,6 @@ export default {
         if (lines.length < 3) return match;
 
         let html = '<table class="markdown-table">';
-        
-        // Header
         const headers = lines[0].split('|').filter(cell => cell.trim());
         html += '<thead><tr>';
         headers.forEach(header => {
@@ -282,7 +261,6 @@ export default {
         });
         html += '</tr></thead>';
         
-        // Body
         html += '<tbody>';
         for (let i = 2; i < lines.length; i++) {
           const cells = lines[i].split('|').filter(cell => cell.trim());
@@ -322,16 +300,7 @@ export default {
           container.scrollTop = container.scrollHeight;
         }
       });
-    },
-
-    setInput(text) {
-      this.inputMessage = text;
-      this.$nextTick(() => {
-        if (this.$refs.userInput) {
-          this.$refs.userInput.focus();
-        }
-      });
-    },
+    }
   },
 };
 </script>
@@ -339,38 +308,62 @@ export default {
 <style scoped>
 .ai-chatbot {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
+  bottom: 30px;
+  right: 30px;
+  z-index: 99999;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    transform: scale(1);
+  }
+}
+
 .chat-toggle-btn {
-  width: 60px;
-  height: 60px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: pulseGlow 2.5s infinite;
 }
 
 .chat-toggle-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  transform: scale(1.15) !important;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.7);
+  animation-play-state: paused;
+}
+
+.ai-avatar-btn {
+  font-size: 42px;
+  line-height: 1;
 }
 
 .chat-window {
-  width: 640px;
-  height: 700px;
+  width: 400px;
+  height: 600px;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;

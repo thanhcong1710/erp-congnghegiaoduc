@@ -746,6 +746,20 @@ export default {
         }
       },
       {
+        path: '/lms/reports/operate/report-17',
+        name: 'lms-report-operate-17',
+        component: () => import('@/views/lms/report/operate/report17.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Báo cáo (KT) tổng hợp tiến độ học sau 01 năm', active: true }
+          ],
+          pageTitle: 'Báo cáo (KT) tổng hợp tiến độ học sau 01 năm',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/reports/academic',
         name: 'lms-reports-academic',
         component: () => import('@/views/lms/report/academic/index.vue'),
