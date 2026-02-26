@@ -1,6 +1,5 @@
 <template>
   <div id="page-report-19">
-    <!-- Header -->
     <div class="rpt-header mb-5">
       <div class="rpt-header__icon"><i class="fas fa-users"></i></div>
       <div>
@@ -10,22 +9,14 @@
     </div>
 
     <vx-card no-shadow class="rpt-card">
-      <!-- Filters -->
       <div class="rpt-filter-grid mb-5">
-        <div class="rpt-filter-item">
+        <div>
           <label class="rpt-label">Trung tâm</label>
-          <multiselect
-            name="search_branch" placeholder="Chọn trung tâm"
-            v-model="searchData.arr_branch" :options="branch_list" label="name"
-            :close-on-select="false" :hide-selected="true" :multiple="true" :searchable="true"
-            track-by="id" selectedLabel="" selectLabel="" deselectLabel=""
-          ><span slot="noResult">Không tìm thấy</span></multiselect>
+          <multiselect name="search_branch" placeholder="Chọn trung tâm" v-model="searchData.arr_branch" :options="branch_list" label="name" :close-on-select="false" :hide-selected="true" :multiple="true" :searchable="true" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
         </div>
-        <div class="rpt-filter-item">
+        <div>
           <label class="rpt-label">Thời gian full fee</label>
-          <date-picker v-model="searchData.dateRange" format="YYYY-MM-DD" style="width:100%"
-            type="date" range :clearable="true" :lang="datepickerOptions.lang"
-            placeholder="Từ ngày — Đến ngày"></date-picker>
+          <date-picker v-model="searchData.dateRange" format="YYYY-MM-DD" style="width:100%" type="date" range :clearable="true" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></date-picker>
         </div>
       </div>
       <div class="rpt-actions mb-5">
@@ -34,23 +25,21 @@
         <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
       </div>
 
-      <!-- Summary pills -->
       <div class="rpt-summary mb-5" v-if="rows.length > 0">
-        <div class="rpt-pill rpt-pill--blue">
+        <div class="rpt-pill rpt-pill--indigo">
           <span class="rpt-pill__label">Tổng khóa</span>
           <span class="rpt-pill__value">{{ rows.length }}</span>
         </div>
-        <div class="rpt-pill rpt-pill--green">
+        <div class="rpt-pill rpt-pill--blue">
           <span class="rpt-pill__label">Tổng học viên</span>
           <span class="rpt-pill__value">{{ total_students | formatNumber }}</span>
         </div>
-        <div class="rpt-pill rpt-pill--orange">
+        <div class="rpt-pill rpt-pill--violet">
           <span class="rpt-pill__label">Tổng doanh thu</span>
           <span class="rpt-pill__value">{{ total_revenue | formatMoney }} ₫</span>
         </div>
       </div>
 
-      <!-- Table -->
       <div class="rpt-table-wrap">
         <table class="rpt-table">
           <thead>
@@ -59,14 +48,14 @@
               <th>Khóa học</th>
               <th style="width:130px" class="text-center">Số học viên</th>
               <th style="width:120px" class="text-center">Tỷ trọng %</th>
-              <th style="width:150px" class="text-center">Số buổi phải dạy</th>
+              <th style="width:160px" class="text-center">Số buổi phải dạy</th>
               <th style="width:170px" class="text-right">Doanh thu tương ứng</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(row, idx) in rows" :key="idx" class="rpt-row">
               <td class="text-center text-muted">{{ idx + 1 }}</td>
-              <td class="course-name">{{ row.course_name }}</td>
+              <td class="font-medium">{{ row.course_name }}</td>
               <td class="text-center">
                 <span class="student-badge">{{ row.student_count | formatNumber }}</span>
               </td>
@@ -79,7 +68,6 @@
               <td class="text-center num-cell">{{ row.sessions_total | formatNumber }}</td>
               <td class="text-right money-cell">{{ row.total_revenue | formatMoney }}</td>
             </tr>
-            <!-- Grand total -->
             <tr class="rpt-total" v-if="rows.length > 0">
               <td colspan="2" class="text-right">TỔNG CỘNG</td>
               <td class="text-center">{{ total_students | formatNumber }}</td>
@@ -90,10 +78,8 @@
         </table>
       </div>
 
-      <!-- Empty state -->
       <div class="rpt-empty" v-if="rows.length === 0 && !loading">
-        <i class="fas fa-inbox"></i>
-        <p>Không có dữ liệu</p>
+        <i class="fas fa-inbox"></i><p>Không có dữ liệu</p>
       </div>
     </vx-card>
   </div>
@@ -109,18 +95,9 @@
     components: { Multiselect, DatePicker },
     data() {
       return {
-        branch_list: [],
-        rows: [],
-        total_students: 0,
-        total_revenue: 0,
-        loading: false,
-        searchData: { arr_branch: '', branch_id: [], dateRange: '' },
-        datepickerOptions: {
-          lang: {
-            days: ['CN','T2','T3','T4','T5','T6','T7'],
-            months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12']
-          }
-        },
+        branch_list: [], rows: [], total_students: 0, total_revenue: 0, loading: false,
+        searchData: { arr_branch:'', branch_id:[], dateRange:'' },
+        datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
       }
     },
     created() {
@@ -128,39 +105,22 @@
       this.getData()
     },
     methods: {
-      reset() {
-        this.searchData = { arr_branch:'', branch_id:[], dateRange:'' }
-        this.getData()
-      },
+      reset() { this.searchData = { arr_branch:'', branch_id:[], dateRange:'' }; this.getData() },
       getData() {
         const branch_ids = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.forEach(i => branch_ids.push(i.id))
-        }
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => branch_ids.push(i.id))
         this.searchData.branch_id = branch_ids
         let start_date = '', end_date = ''
-        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) {
-          start_date = u.dateToString(this.searchData.dateRange[0])
-          end_date   = u.dateToString(this.searchData.dateRange[1])
-        }
+        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) { start_date = u.dateToString(this.searchData.dateRange[0]); end_date = u.dateToString(this.searchData.dateRange[1]) }
         this.loading = true
         this.$vs.loading()
         axios.p('/api/lms/reports/19', { branch_id: this.searchData.branch_id, start_date, end_date })
-          .then(res => {
-            this.$vs.loading.close()
-            this.loading        = false
-            this.rows           = res.data.list   || []
-            this.total_students = res.data.total_students || 0
-            this.total_revenue  = res.data.total_revenue  || 0
-          }).catch(e => { console.error(e); this.$vs.loading.close(); this.loading = false })
+          .then(res => { this.$vs.loading.close(); this.loading = false; this.rows = res.data.list || []; this.total_students = res.data.total_students || 0; this.total_revenue = res.data.total_revenue || 0 }).catch(e => { console.error(e); this.$vs.loading.close(); this.loading = false })
       },
       exportExcel() {
         let keys = [], values = []
         if (this.searchData.branch_id && this.searchData.branch_id.length > 0) { keys.push('branch_id'); values.push(this.searchData.branch_id.join('-')) }
-        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) {
-          keys.push('start_date'); values.push(u.dateToString(this.searchData.dateRange[0]))
-          keys.push('end_date');   values.push(u.dateToString(this.searchData.dateRange[1]))
-        }
+        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) { keys.push('start_date'); values.push(u.dateToString(this.searchData.dateRange[0])); keys.push('end_date'); values.push(u.dateToString(this.searchData.dateRange[1])) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report19/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       }
@@ -176,71 +136,48 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 #page-report-19 { font-family:'Inter',sans-serif; }
 
-/* Header gradient xanh lá - teal */
-.rpt-header {
-  display:flex; align-items:center; gap:16px;
-  background:linear-gradient(135deg, #059669 0%, #0ea5e9 100%);
-  color:white; padding:20px 24px; border-radius:12px;
-  box-shadow:0 4px 20px rgba(5,150,105,.3);
-}
-.rpt-header__icon { font-size:28px; width:52px; height:52px; background:rgba(255,255,255,.2);
-  border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rpt-header { display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; padding:20px 24px; border-radius:12px; box-shadow:0 4px 20px rgba(79,70,229,.3); }
+.rpt-header__icon { font-size:26px; width:50px; height:50px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .rpt-header__title { font-size:1.05rem; font-weight:700; margin:0; }
-.rpt-header__sub { font-size:.83rem; opacity:.8; margin:2px 0 0; }
+.rpt-header__sub { font-size:.82rem; opacity:.8; margin:3px 0 0; }
 
 .rpt-card { border-radius:12px !important; box-shadow:0 2px 16px rgba(0,0,0,.06) !important; }
-
 .rpt-filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
-.rpt-label { display:block; font-size:.78rem; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.rpt-label { display:block; font-size:.75rem; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
 .rpt-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 .rpt-btn { border-radius:8px !important; }
 
-/* Summary */
 .rpt-summary { display:flex; gap:12px; flex-wrap:wrap; }
-.rpt-pill { padding:14px 20px; border-radius:12px; display:flex; flex-direction:column; gap:4px; min-width:140px; }
-.rpt-pill__label { font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; opacity:.7; }
-.rpt-pill__value { font-size:1.15rem; font-weight:700; }
+.rpt-pill { padding:12px 18px; border-radius:10px; display:flex; flex-direction:column; gap:4px; min-width:130px; }
+.rpt-pill__label { font-size:.7rem; font-weight:600; text-transform:uppercase; opacity:.7; }
+.rpt-pill__value { font-size:1rem; font-weight:700; }
+.rpt-pill--indigo { background:#eef2ff; color:#4338ca; }
 .rpt-pill--blue   { background:#eff6ff; color:#1d4ed8; }
-.rpt-pill--green  { background:#f0fdf4; color:#15803d; }
-.rpt-pill--orange { background:#fff7ed; color:#c2410c; }
+.rpt-pill--violet { background:#f5f3ff; color:#6d28d9; }
 
-/* Table */
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; }
-.rpt-table thead tr { background:linear-gradient(135deg, #059669 0%, #0ea5e9 100%); }
+.rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 12px; white-space:nowrap; border:none; }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
-.rpt-row:hover { background:#f0fdf4; }
+.rpt-row:hover { background:#f8f7ff; }
 .rpt-row td { padding:10px 12px; vertical-align:middle; }
 
-.course-name { font-weight:500; color:#111827; }
+.font-medium { font-weight:500; }
+.student-badge { display:inline-block; background:#eef2ff; color:#4338ca; border-radius:20px; padding:3px 14px; font-weight:700; font-size:.88rem; }
 
-.student-badge {
-  display:inline-block; background:#dcfce7; color:#15803d;
-  border-radius:20px; padding:3px 14px; font-weight:700; font-size:.88rem;
-}
-
-/* Progress bar % */
-.pct-wrap { position:relative; background:#e5e7eb; border-radius:20px; height:20px; overflow:hidden; min-width:80px; }
-.pct-bar { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#059669,#0ea5e9); border-radius:20px; transition:width .4s; }
-.pct-text { position:relative; z-index:1; font-size:.78rem; font-weight:700; color:white; line-height:20px; display:block; text-align:center; mix-blend-mode:normal; text-shadow:0 1px 2px rgba(0,0,0,.3); }
+.pct-wrap { position:relative; background:#e5e7eb; border-radius:20px; height:22px; overflow:hidden; min-width:80px; }
+.pct-bar { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#4f46e5,#7c3aed); border-radius:20px; transition:width .4s; }
+.pct-text { position:relative; z-index:1; font-size:.8rem; font-weight:700; color:white; line-height:22px; display:block; text-align:center; text-shadow:0 1px 2px rgba(0,0,0,.4); }
 
 .num-cell  { font-weight:600; color:#374151; }
-.money-cell { font-weight:700; color:#065f46; }
+.money-cell { font-weight:700; color:#4338ca; }
+.text-muted { color:#9ca3af; }
 
-.rpt-total td {
-  background: #eef2ff;
-  font-weight: 700;
-  padding: 11px 10px;
-  font-size: .88rem;
-  border-top: 2px solid #4f46e5;
-  color: #1e1b4b;
-}
+.rpt-total td { background:#eef2ff; font-weight:700; padding:11px 12px; font-size:.88rem; border-top:2px solid #4f46e5; color:#1e1b4b; }
 
-/* Empty */
 .rpt-empty { text-align:center; padding:60px 0; color:#9ca3af; }
 .rpt-empty i { font-size:3rem; margin-bottom:12px; display:block; }
 .rpt-empty p { font-size:1rem; }
-
 .multiselect { z-index:999; }
 </style>
