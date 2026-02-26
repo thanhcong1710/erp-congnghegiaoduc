@@ -972,4 +972,125 @@ class ReportsController extends Controller
 
         return response()->json($data);
     }
+
+    public function report18(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $school_year = isset($request->school_year) ? $request->school_year : '';
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        // Điều kiện cơ bản
+        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $order_by = " ORDER BY a.id DESC ";
+
+        // Lấy danh sách agreements phân trang
+        $query = "SELECT 
+                a.id AS agreement_id,
+                a.must_charge AS combo_fee,
+                s.lms_code AS student_code,
+                s.name AS student_name,
+                (SELECT SUM(c2.summary_sessions) FROM contracts c2 WHERE c2.agreement_id = a.id AND c2.status NOT IN (0,1,7,8)) AS total_combo_sessions
+            FROM agreements AS a
+                LEFT JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+            $order_by $limitation";
+
+        $agreements = u::query($query);
+
+        $flat_list = [];
+        $grand_summary_sessions = 0;
+        $grand_done_sessions = 0;
+        $grand_left_sessions = 0;
+        $grand_left_value = 0;
+
+        if (!empty($agreements)) {
+            $agreement_ids = [];
+            foreach ($agreements as $agrm) {
+                $agreement_ids[] = $agrm->agreement_id;
+            }
+
+            // Lấy toàn bộ contracts của các agreements hiện tại
+            $str_ids = implode(',', $agreement_ids);
+            $contractsQuery = "SELECT 
+                    c.agreement_id, 
+                    p.name AS course_name, 
+                    c.summary_sessions, 
+                    (SELECT COUNT(shs.id) FROM schedule_has_student shs WHERE shs.contract_id = c.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+                FROM contracts c 
+                LEFT JOIN products p ON p.id = c.product_id 
+                WHERE c.agreement_id IN ($str_ids) AND c.status NOT IN (0,1,7,8)
+                ORDER BY c.id ASC";
+
+            $contracts = u::query($contractsQuery);
+            $contracts_by_agrm = [];
+            foreach ($contracts as $c) {
+                $contracts_by_agrm[$c->agreement_id][] = $c;
+            }
+
+            foreach ($agreements as $agrm) {
+                $agrm_contracts = isset($contracts_by_agrm[$agrm->agreement_id]) ? $contracts_by_agrm[$agrm->agreement_id] : [];
+                $session_price = $agrm->total_combo_sessions > 0 ? (float) $agrm->combo_fee / $agrm->total_combo_sessions : 0;
+
+                foreach ($agrm_contracts as $c) {
+                    $c->summary_sessions = (int) $c->summary_sessions;
+                    $c->done_sessions = (int) $c->done_sessions;
+                    $c->left_sessions = max(0, $c->summary_sessions - $c->done_sessions);
+                    $c->left_value = round($c->left_sessions * $session_price, 0);
+
+                    $grand_summary_sessions += $c->summary_sessions;
+                    $grand_done_sessions += $c->done_sessions;
+                    $grand_left_sessions += $c->left_sessions;
+                    $grand_left_value += $c->left_value;
+
+                    $flat_list[] = [
+                        'is_summary' => false,
+                        'student_code' => $agrm->student_code,
+                        'student_name' => $agrm->student_name,
+                        'course_name' => $c->course_name,
+                        'summary_sessions' => $c->summary_sessions,
+                        'done_sessions' => $c->done_sessions,
+                        'left_sessions' => $c->left_sessions,
+                        'left_value' => $c->left_value,
+                    ];
+                }
+            }
+        }
+
+        $totalQuery = "SELECT COUNT(DISTINCT a.id) as total_count FROM agreements AS a LEFT JOIN students AS s ON s.id = a.student_id WHERE $cond";
+        $totalCount = u::first($totalQuery)->total_count;
+
+        $data = u::makingPagination($flat_list, $totalCount, $page, $limit);
+        $data->summary = [
+            'total_summary_sessions' => $grand_summary_sessions,
+            'total_done_sessions' => $grand_done_sessions,
+            'total_left_sessions' => $grand_left_sessions,
+            'total_left_value' => $grand_left_value,
+        ];
+
+        return response()->json($data);
+    }
 }

@@ -1,942 +1,1069 @@
-
 export default {
   router: {
-    path: '/lms/students',
-    component: () => import('@/layouts/main/Main.vue'),
+    path: "/lms/students",
+    component: () => import("@/layouts/main/Main.vue"),
     children: [
       {
-        path: '/lms/checkin',
-        name: 'lms-checkin',
-        component: () => import('@/views/lms/checkin/index.vue'),
+        path: "/lms/checkin",
+        name: "lms-checkin",
+        component: () => import("@/views/lms/checkin/index.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách checkin', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách checkin", active: true },
           ],
-          pageTitle: 'Danh sách checkin',
-          rule: 'editor'
-        }
+          pageTitle: "Danh sách checkin",
+          rule: "editor",
+        },
       },
       {
-        path: '/lms/students',
-        name: 'lms-students',
-        component: () => import('@/views/lms/students/index.vue'),
+        path: "/lms/students",
+        name: "lms-students",
+        component: () => import("@/views/lms/students/index.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách học sinh', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách học sinh", active: true },
           ],
-          pageTitle: 'Danh sách học sinh',
-          rule: 'editor'
-        }
+          pageTitle: "Danh sách học sinh",
+          rule: "editor",
+        },
       },
       {
-        path: '/lms/students/:id/detail',
-        name: 'lms-students-detail',
-        component: () => import('@/views/lms/students/detail.vue'),
+        path: "/lms/students/:id/detail",
+        name: "lms-students-detail",
+        component: () => import("@/views/lms/students/detail.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách học sinh', url: '/lms/students' },
-            { title: 'Thông tin học sinh', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách học sinh", url: "/lms/students" },
+            { title: "Thông tin học sinh", active: true },
           ],
-          pageTitle: 'Thông tin học sinh',
-          rule: 'editor'
-        }
+          pageTitle: "Thông tin học sinh",
+          rule: "editor",
+        },
       },
 
       {
-        path: '/lms/agreements',
-        name: 'lms-agreements',
-        component: () => import('@/views/lms/agreements/index.vue'),
+        path: "/lms/agreements",
+        name: "lms-agreements",
+        component: () => import("@/views/lms/agreements/index.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhập học", active: true },
           ],
-          pageTitle: 'Danh sách nhập học',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/agreements/add',
-        name: 'lms-agreements-add',
-        component: () => import('@/views/lms/agreements/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Đăng ký lại', active: true }
-          ],
-          pageTitle: 'Đăng ký lại',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/agreements/add-with-new-student',
-        name: 'lms-agreements-add-with-new-student',
-        component: () => import('@/views/lms/agreements/addWithNewStudent.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Đăng ký mới', active: true }
-          ],
-          pageTitle: 'Đăng ký mới',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/agreements/:id/detail',
-        name: 'lms-agreements-detail',
-        component: () => import('@/views/lms/agreements/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Thông tin nhập học', active: true }
-          ],
-          pageTitle: 'Thông tin nhập học',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/agreements/:id/edit',
-        name: 'lms-agreements-edit',
-        component: () => import('@/views/lms/agreements/edit.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhập học', url: '/lms/agreements' },
-            { title: 'Cập nhật nhập học', active: true }
-          ],
-          pageTitle: 'Cập nhật nhập học',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/charges',
-        name: 'lms-charges',
-        component: () => import('@/views/lms/accounting/charges.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách đã thu phí', active: true }
-          ],
-          pageTitle: 'Danh sách đã thu phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharges',
-        name: 'lms-waitcharges',
-        component: () => import('@/views/lms/accounting/waitcharges.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí', active: true }
-          ],
-          pageTitle: 'Danh sách chờ đóng phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharge/:id/detail',
-        name: 'lms-waitcharges-detail',
-        component: () => import('@/views/lms/accounting/waitchargeDetail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí', url: '/lms/waitcharges' },
-            { title: 'Thêm mới phiếu thu', active: true }
-          ],
-          pageTitle: 'Thêm mới phiếu thu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharge-reserve/:id/detail',
-        name: 'lms-waitcharges-reserve-detail',
-        component: () => import('@/views/lms/accounting/waitchargeReserveDetail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ đóng phí bảo lưu', url: '/lms/waitcharges' },
-            { title: 'Thêm mới phiếu thu', active: true }
-          ],
-          pageTitle: 'Thêm mới phiếu thu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharge-approve',
-        name: 'lms-waitcharge-approve',
-        component: () => import('@/views/lms/accounting/waitchargeApprove.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', active: true }
-          ],
-          pageTitle: 'Danh sách chờ duyệt phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharge-approve-reserve/:id/detail',
-        name: 'lms-waitcharge-approve-reserve-detail',
-        component: () => import('@/views/lms/accounting/waitchargeApproveReserveDetail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve' },
-            { title: 'Thông tin phiếu thu chờ duyệt', active: true }
-          ],
-          pageTitle: 'Thông tin phiếu thu chờ duyệt',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/waitcharge-approve/:id/detail',
-        name: 'lms-waitcharge-approve-detail',
-        component: () => import('@/views/lms/accounting/waitchargeApproveDetail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chờ duyệt phí', url: '/lms/waitcharge-approve' },
-            { title: 'Thông tin phiếu thu chờ duyệt', active: true }
-          ],
-          pageTitle: 'Thông tin phiếu thu chờ duyệt',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/enrolments',
-        name: 'lms-enrolments',
-        component: () => import('@/views/lms/enrolments/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Xếp lớp', active: true }
-          ],
-          pageTitle: 'Xếp lớp',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reserves',
-        name: 'lms-reserves',
-        component: () => import('@/views/lms/reserves/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', active: true }
-          ],
-          pageTitle: 'Danh sách bảo lưu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reserves/add',
-        name: 'lms-reserves-add',
-        component: () => import('@/views/lms/reserves/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
-            { title: 'Thêm mới bảo lưu', active: true }
-          ],
-          pageTitle: 'Thêm mới bảo lưu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reserves/:id/detail',
-        name: 'lms-reserves-detail',
-        component: () => import('@/views/lms/reserves/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách bảo lưu', url: '/lms/reserves' },
-            { title: 'Thông tin bảo lưu', active: true }
-          ],
-          pageTitle: 'Thông tin bảo lưu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/class_transfers',
-        name: 'lms-class_transfers',
-        component: () => import('@/views/lms/class_transfers/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển lớp', active: true }
-          ],
-          pageTitle: 'Danh sách chuyển lớp',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/class_transfers/add',
-        name: 'lms-class_transfers-add',
-        component: () => import('@/views/lms/class_transfers/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers' },
-            { title: 'Thêm mới chuyển lớp', active: true }
-          ],
-          pageTitle: 'Thêm mới chuyển lớp',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/class_transfers/:id/detail',
-        name: 'lms-class_transfers-detail',
-        component: () => import('@/views/lms/class_transfers/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển lớp', url: '/lms/class_transfers' },
-            { title: 'Thông tin chuyển lớp', active: true }
-          ],
-          pageTitle: 'Thông tin chuyển lớp',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/branch_transfers',
-        name: 'lms-branch_transfers',
-        component: () => import('@/views/lms/branch_transfers/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển trung tâm', active: true }
-          ],
-          pageTitle: 'Danh sách chuyển trung tâm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/branch_transfers/add',
-        name: 'lms-branch_transfers-add',
-        component: () => import('@/views/lms/branch_transfers/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers' },
-            { title: 'Thêm mới chuyển trung tâm', active: true }
-          ],
-          pageTitle: 'Thêm mới chuyển trung tâm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/branch_transfers/:id/detail',
-        name: 'lms-branch_transfers-detail',
-        component: () => import('@/views/lms/branch_transfers/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển trung tâm', url: '/lms/branch_transfers' },
-            { title: 'Thông tin chuyển trung tâm', active: true }
-          ],
-          pageTitle: 'Thông tin chuyển trung tâm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/tuition_transfers',
-        name: 'lms-tuition_transfers',
-        component: () => import('@/views/lms/tuition_transfers/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển phí', active: true }
-          ],
-          pageTitle: 'Danh sách chuyển phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/tuition_transfers/add',
-        name: 'lms-tuition_transfers-add',
-        component: () => import('@/views/lms/tuition_transfers/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers' },
-            { title: 'Thêm mới chuyển phí', active: true }
-          ],
-          pageTitle: 'Thêm mới chuyển phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/tuition_transfers/:id/detail',
-        name: 'lms-tuition_transfers-detail',
-        component: () => import('@/views/lms/tuition_transfers/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách chuyển phí', url: '/lms/tuition_transfers' },
-            { title: 'Thông tin chuyển phí', active: true }
-          ],
-          pageTitle: 'Thông tin chuyển phí',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/exchange',
-        name: 'lms-exchange',
-        component: () => import('@/views/lms/exchange/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách quy đổi', active: true }
-          ],
-          pageTitle: 'Danh sách quy đổi',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/exchange/add',
-        name: 'lms-exchange-add',
-        component: () => import('@/views/lms/exchange/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách quy đổi', url: '/lms/exchange' },
-            { title: 'Thêm mới quy đổi', active: true }
-          ],
-          pageTitle: 'Thêm mới quy đổi',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/attendances',
-        name: 'lms-attendances',
-        component: () => import('@/views/lms/attendances/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Điểm danh', active: true }
-          ],
-          pageTitle: 'Điểm danh',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/assessments',
-        name: 'lms-assessments',
-        component: () => import('@/views/lms/assessments/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', active: true }
-          ],
-          pageTitle: 'Danh sách nhận xét & đánh giá',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/assessments/add',
-        name: 'lms-assessments-add',
-        component: () => import('@/views/lms/assessments/add.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
-            { title: 'Thêm mới nhận xét & đánh giá', active: true }
-          ],
-          pageTitle: 'Thêm mới nhận xét & đánh giá',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/assessments/edit/:id',
-        name: 'lms-assessments-edit',
-        component: () => import('@/views/lms/assessments/edit.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
-            { title: 'Cập nhật nhận xét & đánh giá', active: true }
-          ],
-          pageTitle: 'Cập nhật nhận xét & đánh giá',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/assessments/detail/:id',
-        name: 'lms-assessments-detail',
-        component: () => import('@/views/lms/assessments/detail.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách nhận xét & đánh giá', url: '/lms/assessments' },
-            { title: 'Thông tin nhận xét & đánh giá', active: true }
-          ],
-          pageTitle: 'Thông tin nhận xét & đánh giá',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/teachers',
-        name: 'lms-teachers',
-        component: () => import('@/views/lms/teachers/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách buổi dạy', active: true }
-          ],
-          pageTitle: 'Danh sách buổi dạy',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/teachers/edit/:id',
-        name: 'lms-teachers-edit',
-        component: () => import('@/views/lms/teachers/edit.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách buổi dạy', url: '/lms/teachers' },
-            { title: 'Cập nhật buổi dạy', active: true }
-          ],
-          pageTitle: 'Cập nhật buổi dạy',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate',
-        name: 'lms-reports-operate',
-        component: () => import('@/views/lms/report/operate/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', active: true },
-          ],
-          pageTitle: 'Báo cáo',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-01',
-        name: 'lms-report-operate-01',
-        component: () => import('@/views/lms/report/operate/report01.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo full fee active', active: true }
-          ],
-          pageTitle: 'Báo cáo full fee active',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-02a',
-        name: 'lms-report-02a',
-        component: () => import('@/views/lms/report/operate/report02a.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tái phí - chi tiết', active: true }
-          ],
-          pageTitle: 'Báo cáo tái phí - chi tiết',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-02b',
-        name: 'lms-report-operate-02b',
-        component: () => import('@/views/lms/report/operate/report02b.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tái phí - tổng hợp', active: true }
-          ],
-          pageTitle: 'Báo cáo tái phí - tổng hợp',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-02c',
-        name: 'lms-report-operate-02c',
-        component: () => import('@/views/lms/report/operate/report02c.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tái phí - AF', active: true }
-          ],
-          pageTitle: 'Báo cáo tái phí - AF',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-05',
-        name: 'lms-report-operate-05',
-        component: () => import('@/views/lms/report/operate/report05.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo học sinh pending', active: true }
-          ],
-          pageTitle: 'Báo cáo học sinh pending',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-06',
-        name: 'lms-report-operate-06',
-        component: () => import('@/views/lms/report/operate/report05.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo học sinh bảo lưu', active: true }
-          ],
-          pageTitle: 'Báo cáo học sinh bảo lưu',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-07',
-        name: 'lms-report-operate-07',
-        component: () => import('@/views/lms/report/operate/report07.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo lớp học', active: true }
-          ],
-          pageTitle: 'Báo cáo lớp học',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-08',
-        name: 'lms-report-operate-08',
-        component: () => import('@/views/lms/report/operate/report08.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Chỉ số vận hành ACS', active: true }
-          ],
-          pageTitle: 'Chỉ số vận hành ACS',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-09',
-        name: 'lms-report-operate-09',
-        component: () => import('@/views/lms/report/operate/report09.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tỷ lệ ACS của từng AF', active: true }
-          ],
-          pageTitle: 'Báo cáo tỷ lệ ACS của từng AF',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-10',
-        name: 'lms-report-operate-10',
-        component: () => import('@/views/lms/report/operate/report10.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tỷ lệ ACS của từng trung tâm', active: true }
-          ],
-          pageTitle: 'Báo cáo tỷ lệ ACS của từng trung tâm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-11',
-        name: 'lms-report-operate-11',
-        component: () => import('@/views/lms/report/operate/report11.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo học viên trial', active: true }
-          ],
-          pageTitle: 'Báo cáo học viên trial',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-12',
-        name: 'lms-report-operate-12',
-        component: () => import('@/views/lms/report/operate/report12.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo học viên đặt cọc', active: true }
-          ],
-          pageTitle: 'Báo cáo học viên đặt cọc',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-13',
-        name: 'lms-report-operate-13',
-        component: () => import('@/views/lms/report/operate/report13.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo doanh số chi tiết', active: true }
-          ],
-          pageTitle: 'Báo cáo doanh số chi tiết',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-14',
-        name: 'lms-report-operate-14',
-        component: () => import('@/views/lms/report/operate/report14.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo tổng quan doanh thu theo trung tâm', active: true }
-          ],
-          pageTitle: 'Báo cáo tổng quan doanh thu theo trung tâm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-15',
-        name: 'lms-report-operate-15',
-        component: () => import('@/views/lms/report/operate/report15.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo doanh thu chưa phân bổ theo học sinh', active: true }
-          ],
-          pageTitle: 'Báo cáo doanh thu chưa phân bổ theo học sinh',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-16',
-        name: 'lms-report-operate-16',
-        component: () => import('@/views/lms/report/operate/report16.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo doanh thu chưa phân bổ theo trung tâm', active: true }
-          ],
-          pageTitle: 'Báo cáo doanh thu chưa phân bổ theo học sinh',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/operate/report-17',
-        name: 'lms-report-operate-17',
-        component: () => import('@/views/lms/report/operate/report17.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
-            { title: 'Báo cáo (KT) tổng hợp tiến độ học sau 01 năm', active: true }
-          ],
-          pageTitle: 'Báo cáo (KT) tổng hợp tiến độ học sau 01 năm',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/academic',
-        name: 'lms-reports-academic',
-        component: () => import('@/views/lms/report/academic/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', active: true },
-          ],
-          pageTitle: 'Báo cáo',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/academic/report-01',
-        name: 'lms-report-academic-01',
-        component: () => import('@/views/lms/report/academic/report01.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic' },
-            { title: 'Giờ dạy trợ giảng', active: true }
-          ],
-          pageTitle: 'Giờ dạy trợ giảng',
-          rule: 'editor'
+          pageTitle: "Danh sách nhập học",
+          rule: "editor",
         },
       },
       {
-        path: '/lms/reports/academic/report-02',
-        name: 'lms-report-academic-02',
-        component: () => import('@/views/lms/report/academic/report02.vue'),
+        path: "/lms/agreements/add",
+        name: "lms-agreements-add",
+        component: () => import("@/views/lms/agreements/add.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo học thuật', url: '/lms/reports/academic' },
-            { title: 'Danh sách lớp test', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhập học", url: "/lms/agreements" },
+            { title: "Đăng ký lại", active: true },
           ],
-          pageTitle: 'Danh sách lớp test',
-          rule: 'editor'
+          pageTitle: "Đăng ký lại",
+          rule: "editor",
         },
       },
       {
-        path: '/lms/reports/teacher',
-        name: 'lms-reports-teacher',
-        component: () => import('@/views/lms/report/teacher/index.vue'),
+        path: "/lms/agreements/add-with-new-student",
+        name: "lms-agreements-add-with-new-student",
+        component: () => import("@/views/lms/agreements/addWithNewStudent.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo giáo viên', active: true },
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhập học", url: "/lms/agreements" },
+            { title: "Đăng ký mới", active: true },
           ],
-          pageTitle: 'Báo cáo',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/teacher/report-01',
-        name: 'lms-report-teacher-01',
-        component: () => import('@/views/lms/report/teacher/report01.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo giáo viên', url: '/lms/reports/teacher' },
-            { title: 'Báo cáo chi tiết giờ dạy của giáo viên', active: true }
-          ],
-          pageTitle: 'Báo cáo chi tiết giờ dạy của giáo viên',
-          rule: 'editor'
+          pageTitle: "Đăng ký mới",
+          rule: "editor",
         },
       },
       {
-        path: '/lms/reports/business',
-        name: 'lms-reports-business',
-        component: () => import('@/views/lms/report/business/index.vue'),
+        path: "/lms/agreements/:id/detail",
+        name: "lms-agreements-detail",
+        component: () => import("@/views/lms/agreements/detail.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo kinh doanh', active: true },
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhập học", url: "/lms/agreements" },
+            { title: "Thông tin nhập học", active: true },
           ],
-          pageTitle: 'Báo cáo',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/business/report-01',
-        name: 'lms-report-business-01',
-        component: () => import('@/views/lms/report/business/report01.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo kinh doanh', url: '/lms/reports/business' },
-            { title: 'Kết quả kinh doanh ngày', active: true }
-          ],
-          pageTitle: 'Kết quả kinh doanh ngày',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/finance',
-        name: 'lms-reports-finance',
-        component: () => import('@/views/lms/report/finance/index.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', active: true },
-          ],
-          pageTitle: 'Báo cáo',
-          rule: 'editor'
-        }
-      },
-      {
-        path: '/lms/reports/finance/report-01',
-        name: 'lms-report-finance-01',
-        component: () => import('@/views/lms/report/finance/report01.vue'),
-        meta: {
-          breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
-            { title: 'Báo cáo chi tiết doanh số', active: true }
-          ],
-          pageTitle: 'Báo cáo chi tiết doanh số',
-          rule: 'editor'
+          pageTitle: "Thông tin nhập học",
+          rule: "editor",
         },
       },
       {
-        path: '/lms/reports/finance/report-02',
-        name: 'lms-report-finance-02',
-        component: () => import('@/views/lms/report/finance/report02.vue'),
+        path: "/lms/agreements/:id/edit",
+        name: "lms-agreements-edit",
+        component: () => import("@/views/lms/agreements/edit.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
-            { title: 'Báo cáo doanh số theo trung tâm', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhập học", url: "/lms/agreements" },
+            { title: "Cập nhật nhập học", active: true },
           ],
-          pageTitle: 'Báo cáo doanh số theo trung tâm',
-          rule: 'editor'
-        }
+          pageTitle: "Cập nhật nhập học",
+          rule: "editor",
+        },
       },
       {
-        path: '/lms/reports/finance/report-03',
-        name: 'lms-report-finance-03',
-        component: () => import('@/views/lms/report/finance/report03.vue'),
+        path: "/lms/charges",
+        name: "lms-charges",
+        component: () => import("@/views/lms/accounting/charges.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
-            { title: 'Báo cáo doanh thu thực hiện', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách đã thu phí", active: true },
           ],
-          pageTitle: 'Báo cáo doanh thu thực hiện',
-          rule: 'editor'
-        }
+          pageTitle: "Danh sách đã thu phí",
+          rule: "editor",
+        },
       },
       {
-        path: '/lms/reports/finance/report-04',
-        name: 'lms-report-finance-04',
-        component: () => import('@/views/lms/report/finance/report04.vue'),
+        path: "/lms/waitcharges",
+        name: "lms-waitcharges",
+        component: () => import("@/views/lms/accounting/waitcharges.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
-            { title: 'Báo cáo doanh số theo nhân viên', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách chờ đóng phí", active: true },
           ],
-          pageTitle: 'Báo cáo doanh số theo nhân viên',
-          rule: 'editor'
-        }
+          pageTitle: "Danh sách chờ đóng phí",
+          rule: "editor",
+        },
       },
       {
-        path: '/lms/reports/finance/report-05',
-        name: 'lms-report-finance-05',
-        component: () => import('@/views/lms/report/finance/report05.vue'),
+        path: "/lms/waitcharge/:id/detail",
+        name: "lms-waitcharges-detail",
+        component: () => import("@/views/lms/accounting/waitchargeDetail.vue"),
         meta: {
           breadcrumb: [
-            { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo tài chính kế toán', url: '/lms/reports/finance' },
-            { title: 'Báo cáo chi tiết đơn hàng', active: true }
+            { title: "Home", url: "/" },
+            { title: "Danh sách chờ đóng phí", url: "/lms/waitcharges" },
+            { title: "Thêm mới phiếu thu", active: true },
           ],
-          pageTitle: 'Báo cáo chi tiết đơn hàng',
-          rule: 'editor'
-        }
+          pageTitle: "Thêm mới phiếu thu",
+          rule: "editor",
+        },
       },
-    ]
+      {
+        path: "/lms/waitcharge-reserve/:id/detail",
+        name: "lms-waitcharges-reserve-detail",
+        component: () =>
+          import("@/views/lms/accounting/waitchargeReserveDetail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách chờ đóng phí bảo lưu",
+              url: "/lms/waitcharges",
+            },
+            { title: "Thêm mới phiếu thu", active: true },
+          ],
+          pageTitle: "Thêm mới phiếu thu",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/waitcharge-approve",
+        name: "lms-waitcharge-approve",
+        component: () => import("@/views/lms/accounting/waitchargeApprove.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chờ duyệt phí", active: true },
+          ],
+          pageTitle: "Danh sách chờ duyệt phí",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/waitcharge-approve-reserve/:id/detail",
+        name: "lms-waitcharge-approve-reserve-detail",
+        component: () =>
+          import("@/views/lms/accounting/waitchargeApproveReserveDetail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách chờ duyệt phí",
+              url: "/lms/waitcharge-approve",
+            },
+            { title: "Thông tin phiếu thu chờ duyệt", active: true },
+          ],
+          pageTitle: "Thông tin phiếu thu chờ duyệt",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/waitcharge-approve/:id/detail",
+        name: "lms-waitcharge-approve-detail",
+        component: () =>
+          import("@/views/lms/accounting/waitchargeApproveDetail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách chờ duyệt phí",
+              url: "/lms/waitcharge-approve",
+            },
+            { title: "Thông tin phiếu thu chờ duyệt", active: true },
+          ],
+          pageTitle: "Thông tin phiếu thu chờ duyệt",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/enrolments",
+        name: "lms-enrolments",
+        component: () => import("@/views/lms/enrolments/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Xếp lớp", active: true },
+          ],
+          pageTitle: "Xếp lớp",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reserves",
+        name: "lms-reserves",
+        component: () => import("@/views/lms/reserves/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách bảo lưu", active: true },
+          ],
+          pageTitle: "Danh sách bảo lưu",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reserves/add",
+        name: "lms-reserves-add",
+        component: () => import("@/views/lms/reserves/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách bảo lưu", url: "/lms/reserves" },
+            { title: "Thêm mới bảo lưu", active: true },
+          ],
+          pageTitle: "Thêm mới bảo lưu",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reserves/:id/detail",
+        name: "lms-reserves-detail",
+        component: () => import("@/views/lms/reserves/detail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách bảo lưu", url: "/lms/reserves" },
+            { title: "Thông tin bảo lưu", active: true },
+          ],
+          pageTitle: "Thông tin bảo lưu",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/class_transfers",
+        name: "lms-class_transfers",
+        component: () => import("@/views/lms/class_transfers/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển lớp", active: true },
+          ],
+          pageTitle: "Danh sách chuyển lớp",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/class_transfers/add",
+        name: "lms-class_transfers-add",
+        component: () => import("@/views/lms/class_transfers/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển lớp", url: "/lms/class_transfers" },
+            { title: "Thêm mới chuyển lớp", active: true },
+          ],
+          pageTitle: "Thêm mới chuyển lớp",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/class_transfers/:id/detail",
+        name: "lms-class_transfers-detail",
+        component: () => import("@/views/lms/class_transfers/detail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển lớp", url: "/lms/class_transfers" },
+            { title: "Thông tin chuyển lớp", active: true },
+          ],
+          pageTitle: "Thông tin chuyển lớp",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/branch_transfers",
+        name: "lms-branch_transfers",
+        component: () => import("@/views/lms/branch_transfers/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển trung tâm", active: true },
+          ],
+          pageTitle: "Danh sách chuyển trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/branch_transfers/add",
+        name: "lms-branch_transfers-add",
+        component: () => import("@/views/lms/branch_transfers/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách chuyển trung tâm",
+              url: "/lms/branch_transfers",
+            },
+            { title: "Thêm mới chuyển trung tâm", active: true },
+          ],
+          pageTitle: "Thêm mới chuyển trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/branch_transfers/:id/detail",
+        name: "lms-branch_transfers-detail",
+        component: () => import("@/views/lms/branch_transfers/detail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách chuyển trung tâm",
+              url: "/lms/branch_transfers",
+            },
+            { title: "Thông tin chuyển trung tâm", active: true },
+          ],
+          pageTitle: "Thông tin chuyển trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/tuition_transfers",
+        name: "lms-tuition_transfers",
+        component: () => import("@/views/lms/tuition_transfers/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển phí", active: true },
+          ],
+          pageTitle: "Danh sách chuyển phí",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/tuition_transfers/add",
+        name: "lms-tuition_transfers-add",
+        component: () => import("@/views/lms/tuition_transfers/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển phí", url: "/lms/tuition_transfers" },
+            { title: "Thêm mới chuyển phí", active: true },
+          ],
+          pageTitle: "Thêm mới chuyển phí",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/tuition_transfers/:id/detail",
+        name: "lms-tuition_transfers-detail",
+        component: () => import("@/views/lms/tuition_transfers/detail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách chuyển phí", url: "/lms/tuition_transfers" },
+            { title: "Thông tin chuyển phí", active: true },
+          ],
+          pageTitle: "Thông tin chuyển phí",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/exchange",
+        name: "lms-exchange",
+        component: () => import("@/views/lms/exchange/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách quy đổi", active: true },
+          ],
+          pageTitle: "Danh sách quy đổi",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/exchange/add",
+        name: "lms-exchange-add",
+        component: () => import("@/views/lms/exchange/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách quy đổi", url: "/lms/exchange" },
+            { title: "Thêm mới quy đổi", active: true },
+          ],
+          pageTitle: "Thêm mới quy đổi",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/attendances",
+        name: "lms-attendances",
+        component: () => import("@/views/lms/attendances/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Điểm danh", active: true },
+          ],
+          pageTitle: "Điểm danh",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/assessments",
+        name: "lms-assessments",
+        component: () => import("@/views/lms/assessments/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhận xét & đánh giá", active: true },
+          ],
+          pageTitle: "Danh sách nhận xét & đánh giá",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/assessments/add",
+        name: "lms-assessments-add",
+        component: () => import("@/views/lms/assessments/add.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhận xét & đánh giá", url: "/lms/assessments" },
+            { title: "Thêm mới nhận xét & đánh giá", active: true },
+          ],
+          pageTitle: "Thêm mới nhận xét & đánh giá",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/assessments/edit/:id",
+        name: "lms-assessments-edit",
+        component: () => import("@/views/lms/assessments/edit.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhận xét & đánh giá", url: "/lms/assessments" },
+            { title: "Cập nhật nhận xét & đánh giá", active: true },
+          ],
+          pageTitle: "Cập nhật nhận xét & đánh giá",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/assessments/detail/:id",
+        name: "lms-assessments-detail",
+        component: () => import("@/views/lms/assessments/detail.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách nhận xét & đánh giá", url: "/lms/assessments" },
+            { title: "Thông tin nhận xét & đánh giá", active: true },
+          ],
+          pageTitle: "Thông tin nhận xét & đánh giá",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/teachers",
+        name: "lms-teachers",
+        component: () => import("@/views/lms/teachers/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách buổi dạy", active: true },
+          ],
+          pageTitle: "Danh sách buổi dạy",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/teachers/edit/:id",
+        name: "lms-teachers-edit",
+        component: () => import("@/views/lms/teachers/edit.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách buổi dạy", url: "/lms/teachers" },
+            { title: "Cập nhật buổi dạy", active: true },
+          ],
+          pageTitle: "Cập nhật buổi dạy",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate",
+        name: "lms-reports-operate",
+        component: () => import("@/views/lms/report/operate/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách báo cáo vận hành", active: true },
+          ],
+          pageTitle: "Báo cáo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-01",
+        name: "lms-report-operate-01",
+        component: () => import("@/views/lms/report/operate/report01.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo full fee active", active: true },
+          ],
+          pageTitle: "Báo cáo full fee active",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-02a",
+        name: "lms-report-02a",
+        component: () => import("@/views/lms/report/operate/report02a.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tái phí - chi tiết", active: true },
+          ],
+          pageTitle: "Báo cáo tái phí - chi tiết",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-02b",
+        name: "lms-report-operate-02b",
+        component: () => import("@/views/lms/report/operate/report02b.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tái phí - tổng hợp", active: true },
+          ],
+          pageTitle: "Báo cáo tái phí - tổng hợp",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-02c",
+        name: "lms-report-operate-02c",
+        component: () => import("@/views/lms/report/operate/report02c.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tái phí - AF", active: true },
+          ],
+          pageTitle: "Báo cáo tái phí - AF",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-05",
+        name: "lms-report-operate-05",
+        component: () => import("@/views/lms/report/operate/report05.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo học sinh pending", active: true },
+          ],
+          pageTitle: "Báo cáo học sinh pending",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-06",
+        name: "lms-report-operate-06",
+        component: () => import("@/views/lms/report/operate/report05.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo học sinh bảo lưu", active: true },
+          ],
+          pageTitle: "Báo cáo học sinh bảo lưu",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-07",
+        name: "lms-report-operate-07",
+        component: () => import("@/views/lms/report/operate/report07.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo lớp học", active: true },
+          ],
+          pageTitle: "Báo cáo lớp học",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-08",
+        name: "lms-report-operate-08",
+        component: () => import("@/views/lms/report/operate/report08.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Chỉ số vận hành ACS", active: true },
+          ],
+          pageTitle: "Chỉ số vận hành ACS",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-09",
+        name: "lms-report-operate-09",
+        component: () => import("@/views/lms/report/operate/report09.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tỷ lệ ACS của từng AF", active: true },
+          ],
+          pageTitle: "Báo cáo tỷ lệ ACS của từng AF",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-10",
+        name: "lms-report-operate-10",
+        component: () => import("@/views/lms/report/operate/report10.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tỷ lệ ACS của từng trung tâm", active: true },
+          ],
+          pageTitle: "Báo cáo tỷ lệ ACS của từng trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-11",
+        name: "lms-report-operate-11",
+        component: () => import("@/views/lms/report/operate/report11.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo học viên trial", active: true },
+          ],
+          pageTitle: "Báo cáo học viên trial",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-12",
+        name: "lms-report-operate-12",
+        component: () => import("@/views/lms/report/operate/report12.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo học viên đặt cọc", active: true },
+          ],
+          pageTitle: "Báo cáo học viên đặt cọc",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-13",
+        name: "lms-report-operate-13",
+        component: () => import("@/views/lms/report/operate/report13.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo doanh số chi tiết", active: true },
+          ],
+          pageTitle: "Báo cáo doanh số chi tiết",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-14",
+        name: "lms-report-operate-14",
+        component: () => import("@/views/lms/report/operate/report14.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            {
+              title: "Báo cáo tổng quan doanh thu theo trung tâm",
+              active: true,
+            },
+          ],
+          pageTitle: "Báo cáo tổng quan doanh thu theo trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-15",
+        name: "lms-report-operate-15",
+        component: () => import("@/views/lms/report/operate/report15.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            {
+              title: "Báo cáo doanh thu chưa phân bổ theo học sinh",
+              active: true,
+            },
+          ],
+          pageTitle: "Báo cáo doanh thu chưa phân bổ theo học sinh",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-16",
+        name: "lms-report-operate-16",
+        component: () => import("@/views/lms/report/operate/report16.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            {
+              title: "Báo cáo doanh thu chưa phân bổ theo trung tâm",
+              active: true,
+            },
+          ],
+          pageTitle: "Báo cáo doanh thu chưa phân bổ theo học sinh",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-17",
+        name: "lms-report-operate-17",
+        component: () => import("@/views/lms/report/operate/report17.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            {
+              title: "Báo cáo (KT) tổng hợp tiến độ học sau 01 năm",
+              active: true,
+            },
+          ],
+          pageTitle: "Báo cáo (KT) tổng hợp tiến độ học sau 01 năm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/operate/report-18",
+        name: "lms-report-operate-18",
+        component: () => import("@/views/lms/report/operate/report18.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            {
+              title: "Báo cáo chi tiết theo từng khóa trong combo",
+              active: true,
+            },
+          ],
+          pageTitle: "Báo cáo chi tiết theo từng khóa trong combo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/academic",
+        name: "lms-reports-academic",
+        component: () => import("@/views/lms/report/academic/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách báo cáo học thuật", active: true },
+          ],
+          pageTitle: "Báo cáo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/academic/report-01",
+        name: "lms-report-academic-01",
+        component: () => import("@/views/lms/report/academic/report01.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo học thuật",
+              url: "/lms/reports/academic",
+            },
+            { title: "Giờ dạy trợ giảng", active: true },
+          ],
+          pageTitle: "Giờ dạy trợ giảng",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/academic/report-02",
+        name: "lms-report-academic-02",
+        component: () => import("@/views/lms/report/academic/report02.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo học thuật",
+              url: "/lms/reports/academic",
+            },
+            { title: "Danh sách lớp test", active: true },
+          ],
+          pageTitle: "Danh sách lớp test",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/teacher",
+        name: "lms-reports-teacher",
+        component: () => import("@/views/lms/report/teacher/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách báo cáo giáo viên", active: true },
+          ],
+          pageTitle: "Báo cáo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/teacher/report-01",
+        name: "lms-report-teacher-01",
+        component: () => import("@/views/lms/report/teacher/report01.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo giáo viên",
+              url: "/lms/reports/teacher",
+            },
+            { title: "Báo cáo chi tiết giờ dạy của giáo viên", active: true },
+          ],
+          pageTitle: "Báo cáo chi tiết giờ dạy của giáo viên",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/business",
+        name: "lms-reports-business",
+        component: () => import("@/views/lms/report/business/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách báo cáo kinh doanh", active: true },
+          ],
+          pageTitle: "Báo cáo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/business/report-01",
+        name: "lms-report-business-01",
+        component: () => import("@/views/lms/report/business/report01.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo kinh doanh",
+              url: "/lms/reports/business",
+            },
+            { title: "Kết quả kinh doanh ngày", active: true },
+          ],
+          pageTitle: "Kết quả kinh doanh ngày",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance",
+        name: "lms-reports-finance",
+        component: () => import("@/views/lms/report/finance/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách báo cáo tài chính kế toán", active: true },
+          ],
+          pageTitle: "Báo cáo",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance/report-01",
+        name: "lms-report-finance-01",
+        component: () => import("@/views/lms/report/finance/report01.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo tài chính kế toán",
+              url: "/lms/reports/finance",
+            },
+            { title: "Báo cáo chi tiết doanh số", active: true },
+          ],
+          pageTitle: "Báo cáo chi tiết doanh số",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance/report-02",
+        name: "lms-report-finance-02",
+        component: () => import("@/views/lms/report/finance/report02.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo tài chính kế toán",
+              url: "/lms/reports/finance",
+            },
+            { title: "Báo cáo doanh số theo trung tâm", active: true },
+          ],
+          pageTitle: "Báo cáo doanh số theo trung tâm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance/report-03",
+        name: "lms-report-finance-03",
+        component: () => import("@/views/lms/report/finance/report03.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo tài chính kế toán",
+              url: "/lms/reports/finance",
+            },
+            { title: "Báo cáo doanh thu thực hiện", active: true },
+          ],
+          pageTitle: "Báo cáo doanh thu thực hiện",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance/report-04",
+        name: "lms-report-finance-04",
+        component: () => import("@/views/lms/report/finance/report04.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo tài chính kế toán",
+              url: "/lms/reports/finance",
+            },
+            { title: "Báo cáo doanh số theo nhân viên", active: true },
+          ],
+          pageTitle: "Báo cáo doanh số theo nhân viên",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/reports/finance/report-05",
+        name: "lms-report-finance-05",
+        component: () => import("@/views/lms/report/finance/report05.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo tài chính kế toán",
+              url: "/lms/reports/finance",
+            },
+            { title: "Báo cáo chi tiết đơn hàng", active: true },
+          ],
+          pageTitle: "Báo cáo chi tiết đơn hàng",
+          rule: "editor",
+        },
+      },
+    ],
   },
-}
+};

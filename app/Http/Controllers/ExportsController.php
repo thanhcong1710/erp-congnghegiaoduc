@@ -1385,5 +1385,231 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report18(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+        $params = array_combine($keys, $values);
+
+        $branch_id = [];
+        $school_year = '';
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'school_year' && isset($values[$k]) && $values[$k] != 'v') {
+                $school_year = $values[$k];
+            }
+            if ($key_name == 'keyword' && isset($values[$k]) && $values[$k] != 'v') {
+                $keyword = $values[$k];
+            }
+            if ($key_name == 'start_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $start_date = $values[$k];
+            }
+            if ($key_name == 'end_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $end_date = $values[$k];
+            }
+        }
+
+        // Điều kiện cơ bản
+        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $order_by = " ORDER BY a.id DESC ";
+
+        $query = "SELECT 
+                a.id AS agreement_id,
+                a.must_charge AS combo_fee,
+                s.lms_code AS student_code,
+                s.name AS student_name,
+                (SELECT SUM(c2.summary_sessions) FROM contracts c2 WHERE c2.agreement_id = a.id AND c2.status NOT IN (0,1,7,8)) AS total_combo_sessions
+            FROM agreements AS a
+                LEFT JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+            $order_by";
+
+        $agreements = u::query($query);
+        $flat_list = [];
+        $grand_summary_sessions = 0;
+        $grand_done_sessions = 0;
+        $grand_left_sessions = 0;
+        $grand_left_value = 0;
+
+        if (!empty($agreements)) {
+            $agreement_ids = [];
+            foreach ($agreements as $agrm) {
+                $agreement_ids[] = $agrm->agreement_id;
+            }
+
+            $str_ids = implode(',', $agreement_ids);
+            $contractsQuery = "SELECT 
+                    c.agreement_id, 
+                    p.name AS course_name, 
+                    c.summary_sessions, 
+                    (SELECT COUNT(shs.id) FROM schedule_has_student shs WHERE shs.contract_id = c.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+                FROM contracts c 
+                LEFT JOIN products p ON p.id = c.product_id 
+                WHERE c.agreement_id IN ($str_ids) AND c.status NOT IN (0,1,7,8)
+                ORDER BY c.id ASC";
+
+            $contracts = u::query($contractsQuery);
+            $contracts_by_agrm = [];
+            foreach ($contracts as $c) {
+                $contracts_by_agrm[$c->agreement_id][] = $c;
+            }
+
+            foreach ($agreements as $agrm) {
+                $agrm_contracts = isset($contracts_by_agrm[$agrm->agreement_id]) ? $contracts_by_agrm[$agrm->agreement_id] : [];
+                $session_price = $agrm->total_combo_sessions > 0 ? (float) $agrm->combo_fee / $agrm->total_combo_sessions : 0;
+
+                foreach ($agrm_contracts as $c) {
+                    $c->summary_sessions = (int) $c->summary_sessions;
+                    $c->done_sessions = (int) $c->done_sessions;
+                    $c->left_sessions = max(0, $c->summary_sessions - $c->done_sessions);
+                    $c->left_value = round($c->left_sessions * $session_price, 0);
+
+                    $grand_summary_sessions += $c->summary_sessions;
+                    $grand_done_sessions += $c->done_sessions;
+                    $grand_left_sessions += $c->left_sessions;
+                    $grand_left_value += $c->left_value;
+
+                    $flat_list[] = [
+                        'student_code' => $agrm->student_code,
+                        'student_name' => $agrm->student_name,
+                        'course_name' => $c->course_name,
+                        'summary_sessions' => $c->summary_sessions,
+                        'done_sessions' => $c->done_sessions,
+                        'left_sessions' => $c->left_sessions,
+                        'left_value' => $c->left_value,
+                    ];
+                }
+            }
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1', 'BÁO CÁO CHI TIẾT THEO TỪNG KHÓA TRONG COMBO');
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->setCellValue('A2', 'Mã HV');
+        $sheet->setCellValue('B2', 'Họ tên');
+        $sheet->setCellValue('C2', 'Tên khóa');
+        $sheet->setCellValue('D2', 'Số buổi khóa');
+        $sheet->setCellValue('E2', 'Đã học');
+        $sheet->setCellValue('F2', 'Còn lại');
+        $sheet->setCellValue('G2', 'Giá trị còn lại');
+
+        $sheet->getColumnDimension("A")->setWidth(15);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(25);
+        $sheet->getColumnDimension("D")->setWidth(15);
+        $sheet->getColumnDimension("E")->setWidth(15);
+        $sheet->getColumnDimension("F")->setWidth(15);
+        $sheet->getColumnDimension("G")->setWidth(20);
+
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => '000000']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ]
+        ];
+        $sheet->getStyle('A2:G2')->applyFromArray($headerStyle);
+
+        $yellowStyle = [
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'FFFF00']
+            ]
+        ];
+        $sheet->getStyle('C2')->applyFromArray($yellowStyle);
+
+        $borderStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+
+        $row_num = 3;
+        foreach ($flat_list as $row) {
+            $sheet->setCellValue('A' . $row_num, $row['student_code']);
+            $sheet->setCellValue('B' . $row_num, $row['student_name']);
+            $sheet->setCellValue('C' . $row_num, $row['course_name']);
+            $sheet->setCellValue('D' . $row_num, $row['summary_sessions']);
+            $sheet->setCellValue('E' . $row_num, $row['done_sessions']);
+            $sheet->setCellValue('F' . $row_num, $row['left_sessions']);
+            $sheet->setCellValue('G' . $row_num, $row['left_value']);
+
+            // $sheet->getStyle('C' . $row_num)->applyFromArray($yellowStyle);
+            $sheet->getStyle("D$row_num:F$row_num")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("A$row_num:G$row_num")->applyFromArray($borderStyle);
+            $row_num++;
+        }
+
+        // Dòng TỔNG CỘNG chung ở cuối bảng
+        $sheet->mergeCells("A$row_num:C$row_num");
+        $sheet->setCellValue('A' . $row_num, 'TỔNG CỘNG');
+        $sheet->setCellValue('D' . $row_num, $grand_summary_sessions);
+        $sheet->setCellValue('E' . $row_num, $grand_done_sessions);
+        $sheet->setCellValue('F' . $row_num, $grand_left_sessions);
+        $sheet->setCellValue('G' . $row_num, $grand_left_value);
+
+        $totalRowStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'FFF3CD']
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A$row_num:G$row_num")->applyFromArray($totalRowStyle);
+        $sheet->getStyle("G$row_num")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo cáo chi tiết khóa học trong combo.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 

@@ -39,6 +39,11 @@
                 <p>06. BÁO CÁO (KT) TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-18'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>07. BÁO CÁO CHI TIẾT THEO TỪNG KHÓA TRONG COMBO</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
