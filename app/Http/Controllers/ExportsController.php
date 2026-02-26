@@ -1611,5 +1611,164 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report19(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'start_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $start_date = $values[$k];
+            }
+            if ($key_name == 'end_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $end_date = $values[$k];
+            }
+        }
+
+        $agrm_cond = "a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $agrm_cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($start_date) {
+            $agrm_cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $agrm_cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $query = "SELECT
+                tf.id                                   AS tuition_fee_id,
+                tf.name                                 AS course_name,
+                COUNT(DISTINCT a.id)                    AS student_count,
+                IFNULL(SUM(a.must_charge), 0)           AS total_revenue,
+                (
+                    SELECT SUM(c2.summary_sessions)
+                    FROM contracts c2
+                    WHERE c2.agreement_id = (
+                        SELECT a3.id FROM agreements a3
+                        WHERE a3.tuition_fee_id = tf.id
+                          AND a3.debt_amount = 0
+                        LIMIT 1
+                    ) AND c2.status NOT IN (0,1,7,8)
+                ) AS sessions_per_student
+            FROM tuition_fee tf
+            LEFT JOIN agreements a ON a.tuition_fee_id = tf.id AND $agrm_cond
+            WHERE tf.status = 1
+            GROUP BY tf.id, tf.name
+            ORDER BY tf.name ASC";
+
+        $rows = u::query($query);
+
+        $total_students = 0;
+        $total_revenue = 0;
+        foreach ($rows as $row) {
+            $total_students += (int) $row->student_count;
+            $total_revenue += (float) $row->total_revenue;
+        }
+
+        $result = [];
+        foreach ($rows as $row) {
+            $count = (int) $row->student_count;
+            $sessions = (int) $row->sessions_per_student;
+            $percentage = $total_students > 0 ? round($count / $total_students * 100, 2) : 0;
+            $result[] = [
+                'course_name' => $row->course_name,
+                'student_count' => $count,
+                'percentage' => $percentage,
+                'sessions_total' => $count * $sessions,
+                'total_revenue' => (float) $row->total_revenue,
+            ];
+        }
+
+        // --- Excel ---
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Tiêu đề
+        $sheet->setCellValue('A1', 'SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA');
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        // Header
+        $headers = ['Khóa', 'Số học viên', 'Tỷ trọng %', 'Số buổi phải dạy', 'Doanh thu tương ứng'];
+        $cols = ['A', 'B', 'C', 'D', 'E'];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue($cols[$i] . '2', $h);
+        }
+        $sheet->getColumnDimension('A')->setWidth(40);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(15);
+        $sheet->getColumnDimension('D')->setWidth(20);
+        $sheet->getColumnDimension('E')->setWidth(20);
+
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9D9D9']],
+        ];
+        $sheet->getStyle('A2:E2')->applyFromArray($headerStyle);
+
+        $yellowFill = [
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFF2CC']],
+        ];
+        $borderStyle = [
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]],
+        ];
+
+        $row_num = 3;
+        foreach ($result as $row) {
+            $sheet->setCellValue('A' . $row_num, $row['course_name']);
+            $sheet->setCellValue('B' . $row_num, $row['student_count']);
+            $sheet->setCellValue('C' . $row_num, $row['percentage'] . '%');
+            $sheet->setCellValue('D' . $row_num, $row['sessions_total']);
+            $sheet->setCellValue('E' . $row_num, $row['total_revenue']);
+
+            $sheet->getStyle('A' . $row_num)->applyFromArray($yellowFill);
+            $sheet->getStyle('A' . $row_num)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("A$row_num:E$row_num")->applyFromArray($borderStyle);
+            $sheet->getStyle("B$row_num:D$row_num")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("E$row_num")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+            $row_num++;
+        }
+
+        // Dòng TỔNG CỘNG
+        $sheet->mergeCells("A$row_num:D$row_num");
+        $sheet->setCellValue('A' . $row_num, 'TỔNG CỘNG');
+        $sheet->setCellValue('E' . $row_num, $total_revenue);
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFF3CD']],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]],
+        ];
+        $sheet->getStyle("A$row_num:E$row_num")->applyFromArray($totalStyle);
+        $sheet->getStyle("E$row_num")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Số lượng học viên theo từng khóa.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
+
 

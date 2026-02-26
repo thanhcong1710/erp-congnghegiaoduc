@@ -1093,4 +1093,77 @@ class ReportsController extends Controller
 
         return response()->json($data);
     }
+
+    public function report19(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        // Điều kiện lọc agreements
+        $agrm_cond = "a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $agrm_cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($start_date) {
+            $agrm_cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+        }
+        if ($end_date) {
+            $agrm_cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+        }
+
+        $query = "SELECT
+                tf.id                                   AS tuition_fee_id,
+                tf.name                                 AS course_name,
+                COUNT(DISTINCT a.id)                    AS student_count,
+                IFNULL(SUM(a.must_charge), 0)           AS total_revenue,
+                (
+                    SELECT SUM(c2.summary_sessions)
+                    FROM contracts c2
+                    WHERE c2.agreement_id = (
+                        SELECT a3.id FROM agreements a3
+                        WHERE a3.tuition_fee_id = tf.id
+                          AND a3.debt_amount = 0
+                        LIMIT 1
+                    ) AND c2.status NOT IN (0,1,7,8)
+                ) AS sessions_per_student
+            FROM tuition_fee tf
+            LEFT JOIN agreements a ON a.tuition_fee_id = tf.id AND $agrm_cond
+            WHERE tf.status = 1
+            GROUP BY tf.id, tf.name
+            ORDER BY tf.name ASC";
+
+        $rows = u::query($query);
+
+        // Tính tổng học viên để tính tỷ trọng %
+        $total_students = 0;
+        $total_revenue = 0;
+        foreach ($rows as $row) {
+            $total_students += (int) $row->student_count;
+            $total_revenue += (float) $row->total_revenue;
+        }
+
+        $result = [];
+        foreach ($rows as $row) {
+            $count = (int) $row->student_count;
+            $sessions = (int) $row->sessions_per_student;
+            $percentage = $total_students > 0 ? round($count / $total_students * 100, 2) : 0;
+
+            $result[] = [
+                'course_name' => $row->course_name,
+                'student_count' => $count,
+                'percentage' => $percentage,
+                'sessions_per_student' => $sessions,
+                'sessions_total' => $count * $sessions,
+                'total_revenue' => (float) $row->total_revenue,
+            ];
+        }
+
+        return response()->json([
+            'list' => $result,
+            'total_students' => $total_students,
+            'total_revenue' => $total_revenue,
+        ]);
+    }
 }

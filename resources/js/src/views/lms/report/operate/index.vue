@@ -44,6 +44,11 @@
                 <p>07. BÁO CÁO CHI TIẾT THEO TỪNG KHÓA TRONG COMBO</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-19'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>08. SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

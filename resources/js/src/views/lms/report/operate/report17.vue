@@ -1,484 +1,336 @@
 <template>
-
   <div id="page-report-17">
-    <vx-card no-shadow class="mt-5">
-      <h5>BÁO CÁO (KT) TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM</h5>
-      <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
-      <div class="mb-5">
-        <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Năm học</label>
-            <multiselect
-                name="search_school_year"
-                placeholder="Chọn năm học"
-                v-model="searchData.school_year"
-                :options="schoolYearOptions"
-                label="label"
-                :close-on-select="true"
-                :hide-selected="true"
-                :multiple="false"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã HS, Tên HS" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian full fee</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM-DD" style="width: 100%" type="date" range
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian"></date-picker>
-          </div>
+    <!-- Header Card -->
+    <div class="rpt-header mb-5">
+      <div class="rpt-header__icon"><i class="fas fa-chart-line"></i></div>
+      <div>
+        <h3 class="rpt-header__title">BÁO CÁO TIẾN ĐỘ HỌC SAU 01 NĂM</h3>
+        <p class="rpt-header__sub">Tổng hợp học viên đã thanh toán đủ học phí combo</p>
+      </div>
+    </div>
+
+    <vx-card no-shadow class="rpt-card">
+      <!-- Filters -->
+      <div class="rpt-filter-grid mb-5">
+        <div class="rpt-filter-item">
+          <label class="rpt-label">Trung tâm</label>
+          <multiselect
+            name="search_branch"
+            placeholder="Chọn trung tâm"
+            v-model="searchData.arr_branch"
+            :options="branch_list"
+            label="name"
+            :close-on-select="false"
+            :hide-selected="true"
+            :multiple="true"
+            :searchable="true"
+            track-by="id"
+            selectedLabel="" selectLabel="" deselectLabel=""
+          ><span slot="noResult">Không tìm thấy dữ liệu</span></multiselect>
         </div>
-        <div class="vx-row mt-3">
-          <div class="vx-col w-full">
-            <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mr-3 mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
-            <vs-button color="success" class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button>
-          </div>
+        <div class="rpt-filter-item">
+          <label class="rpt-label">Năm học</label>
+          <multiselect
+            name="search_school_year"
+            placeholder="Chọn năm học"
+            v-model="searchData.school_year"
+            :options="schoolYearOptions"
+            label="label"
+            :close-on-select="true"
+            :multiple="false"
+            :searchable="false"
+            track-by="id"
+            selectedLabel="" selectLabel="" deselectLabel=""
+          ><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div class="rpt-filter-item">
+          <label class="rpt-label">Từ khóa</label>
+          <vs-input class="w-full" placeholder="Mã HS, Tên HS" v-model="searchData.keyword"></vs-input>
+        </div>
+        <div class="rpt-filter-item">
+          <label class="rpt-label">Thời gian full fee</label>
+          <date-picker name="item-date" v-model="searchData.dateRange" format="YYYY-MM-DD"
+            style="width:100%" type="date" range :clearable="true" :lang="datepickerOptions.lang"
+            placeholder="Từ ngày — Đến ngày"></date-picker>
+        </div>
+      </div>
+      <div class="rpt-actions mb-5">
+        <vs-button class="rpt-btn-search" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
+        <vs-button color="dark" type="border" class="rpt-btn-reset" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+        <vs-button color="success" class="rpt-btn-export" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
+      </div>
+
+      <!-- Summary Pills -->
+      <div class="rpt-summary mb-5">
+        <div class="rpt-pill rpt-pill--blue">
+          <span class="rpt-pill__label">Tổng combos</span>
+          <span class="rpt-pill__value">{{ pagination.total | formatNumber }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--indigo">
+          <span class="rpt-pill__label">Tổng học phí</span>
+          <span class="rpt-pill__value">{{ summary.total_combo_fee | formatMoney }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--green">
+          <span class="rpt-pill__label">Đã sử dụng</span>
+          <span class="rpt-pill__value">{{ summary.total_used_value | formatMoney }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--orange">
+          <span class="rpt-pill__label">Còn lại</span>
+          <span class="rpt-pill__value">{{ summary.total_left_value | formatMoney }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--gray">
+          <span class="rpt-pill__label">Tổng buổi</span>
+          <span class="rpt-pill__value">{{ summary.total_sessions | formatNumber }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--teal">
+          <span class="rpt-pill__label">Đã học</span>
+          <span class="rpt-pill__value">{{ summary.total_done_sessions | formatNumber }}</span>
+        </div>
+        <div class="rpt-pill rpt-pill--red">
+          <span class="rpt-pill__label">Chưa học</span>
+          <span class="rpt-pill__value">{{ summary.total_left_sessions | formatNumber }}</span>
         </div>
       </div>
 
-      <!-- Summary Section -->
-      <div class="summary-box mb-4">
-        <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Tổng học phí combo:</span>
-              <span class="summary-value text-primary">{{ summary.total_combo_fee | formatMoney }} VNĐ</span>
-            </div>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Giá trị đã sử dụng:</span>
-              <span class="summary-value text-success">{{ summary.total_used_value | formatMoney }} VNĐ</span>
-            </div>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Giá trị còn lại:</span>
-              <span class="summary-value text-danger">{{ summary.total_left_value | formatMoney }} VNĐ</span>
-            </div>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Tổng combos:</span>
-              <span class="summary-value">{{ pagination.total | formatNumber }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="vx-row">
-          <div class="vx-col sm:w-1/3 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Tổng số buổi combo:</span>
-              <span class="summary-value">{{ summary.total_sessions | formatNumber }} buổi</span>
-            </div>
-          </div>
-          <div class="vx-col sm:w-1/3 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Số buổi đã học (1 năm):</span>
-              <span class="summary-value">{{ summary.total_done_sessions | formatNumber }} buổi</span>
-            </div>
-          </div>
-          <div class="vx-col sm:w-1/3 w-full mb-2">
-            <div class="summary-item">
-              <span class="summary-label">Số buổi còn lại:</span>
-              <span class="summary-value">{{ summary.total_left_sessions | formatNumber }} buổi</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content" style="overflow-x: auto;">
-          <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table" style="min-width: 1200px">
-              <thead class="vs-table--thead">
-                <tr>
-                  <th class="text-center" style="width: 50px">STT</th>
-                  <vs-th class="vs-table-text" style="width: 100px;">Mã HV</vs-th>
-                  <vs-th class="vs-table-text" style="width: 200px;">Họ tên học viên</vs-th>
-                  <vs-th class="vs-table-text" style="width: 250px;">Combo đăng ký</vs-th>
-                  <vs-th class="vs-table-text" style="width: 150px;">Tổng số khóa</vs-th>
-                  <vs-th class="sort-th" style="width: 150px;">Ngày bắt đầu khóa đầu tiên</vs-th>
-                  <vs-th class="sort-th" style="width: 150px;">Ngày full fee</vs-th>
-                  <vs-th class="sort-th text-center" style="width: 150px;">Tổng số buổi combo</vs-th>
-                  <vs-th class="text-right" style="width: 150px;">Học phí combo</vs-th>
-                  <vs-th class="sort-th text-center" style="width: 150px;">Số buổi đã học (1 năm)</vs-th>
-                  <vs-th class="sort-th text-center" style="width: 150px;">% hoàn thành</vs-th>
-                  <vs-th class="sort-th text-center" style="width: 150px;">Số buổi còn lại</vs-th>
-                  <vs-th class="text-right" style="width: 150px;">Giá trị đã sử dụng</vs-th>
-                  <vs-th class="text-right" style="width: 150px;">Giá trị còn lại</vs-th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr :class="!!tr.is_summary ? 'tr-summary' : ''" :key="indextr" v-for="(tr, indextr) in contracts">
-                  <template v-if="!!tr.is_summary">
-                     <vs-td colspan="5" class="text-right">
-                      <strong>TỔNG CỘNG:</strong>
-                    </vs-td>
-                    <vs-td></vs-td>
-                    <vs-td></vs-td>
-                    <vs-td class="text-center">
-                      <strong>{{ tr.total_sessions | formatNumber }}</strong>
-                    </vs-td>
-                    <vs-td class="text-right">
-                      <strong>{{ tr.total_combo_fee | formatMoney }}</strong>
-                    </vs-td>
-                    <vs-td class="text-center">
-                      <strong>{{ tr.total_done_sessions | formatNumber }}</strong>
-                    </vs-td>
-                    <vs-td></vs-td>
-                    <vs-td class="text-center">
-                      <strong>{{ tr.total_left_sessions | formatNumber }}</strong>
-                    </vs-td>
-                    <vs-td class="text-right">
-                      <strong>{{ tr.total_used_value | formatMoney }}</strong>
-                    </vs-td>
-                    <vs-td class="text-right">
-                      <strong>{{ tr.total_left_value | formatMoney }}</strong>
-                    </vs-td>
-                  </template>
-                  <template v-else>
-                    <vs-td>{{ (pagination.cpage - 1) * pagination.limit + indextr + 1 }}</vs-td>
-                    <vs-td>{{ tr.student_code }}</vs-td>
-                    <vs-td>{{ tr.student_name }}</vs-td>
-                    <vs-td>{{ tr.combo_name }}</vs-td>
-                    <vs-td class="text-center">{{ tr.total_courses }}</vs-td>
-                    <vs-td>{{ tr.first_course_start_date | formatDateView }}</vs-td>
-                    <vs-td>{{ tr.full_fee_date | formatDateView }}</vs-td>
-                    <vs-td class="text-center">{{ tr.total_sessions }}</vs-td>
-                    <vs-td class="text-right">{{ tr.combo_fee | formatMoney }}</vs-td>
-                    <vs-td class="text-center">{{ tr.done_sessions }}</vs-td>
-                    <vs-td class="text-center">{{ tr.completion_rate }}%</vs-td>
-                    <vs-td class="text-center">{{ tr.left_sessions }}</vs-td>
-                    <vs-td class="text-right">{{ tr.used_value | formatMoney }}</vs-td>
-                    <vs-td class="text-right">{{ tr.left_value | formatMoney }}</vs-td>
-                  </template>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <!-- Table -->
+      <div class="rpt-table-wrap">
+        <table class="rpt-table">
+          <thead>
+            <tr>
+              <th style="width:44px">STT</th>
+              <th style="width:100px">Mã HV</th>
+              <th style="width:200px">Họ tên</th>
+              <th style="width:220px">Combo</th>
+              <th style="width:80px" class="text-center">Khóa</th>
+              <th style="width:130px">Bắt đầu</th>
+              <th style="width:130px">Full fee</th>
+              <th style="width:100px" class="text-center">Buổi</th>
+              <th style="width:130px" class="text-right">Học phí</th>
+              <th style="width:100px" class="text-center">Đã học</th>
+              <th style="width:80px" class="text-center">%</th>
+              <th style="width:100px" class="text-center">Còn lại</th>
+              <th style="width:130px" class="text-right">Đã dùng</th>
+              <th style="width:130px" class="text-right">Còn lại</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="(tr, idx) in contracts">
+              <tr v-if="!tr.is_summary" :key="'r-'+idx" class="rpt-table__row">
+                <td class="text-center text-muted">{{ (pagination.cpage - 1) * pagination.limit + idx + 1 }}</td>
+                <td><span class="badge-code">{{ tr.student_code }}</span></td>
+                <td class="font-medium">{{ tr.student_name }}</td>
+                <td>{{ tr.combo_name }}</td>
+                <td class="text-center">{{ tr.total_courses }}</td>
+                <td class="text-muted small">{{ tr.first_course_start_date | formatDateView }}</td>
+                <td class="text-muted small">{{ tr.full_fee_date | formatDateView }}</td>
+                <td class="text-center num-cell">{{ tr.total_sessions }}</td>
+                <td class="text-right money-cell">{{ tr.combo_fee | formatMoney }}</td>
+                <td class="text-center num-cell">{{ tr.done_sessions }}</td>
+                <td class="text-center">
+                  <span class="pct-badge" :class="percentClass(tr.completion_rate)">{{ tr.completion_rate }}%</span>
+                </td>
+                <td class="text-center num-cell">{{ tr.left_sessions }}</td>
+                <td class="text-right money-cell">{{ tr.used_value | formatMoney }}</td>
+                <td class="text-right money-cell highlight-left">{{ tr.left_value | formatMoney }}</td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
       </div>
 
       <!-- Pagination -->
-      <div class="flex flex-wrap items-center mt-5">
-        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
-          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-            <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
+      <div class="rpt-paging mt-4">
+        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4">
+          <div class="paging-limit-btn">
+            <span>{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} – {{ Math.min(pagination.cpage * pagination.limit, pagination.total) }} / {{ pagination.total }}</span>
             <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
           </div>
           <vs-dropdown-menu>
-            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="pagination.limit=item; getData()" >
-              <span>{{item}}</span>
-            </vs-dropdown-item>
+            <vs-dropdown-item v-for="item in limitSource" :key="item" @click="pagination.limit=item; getData()">{{ item }}</vs-dropdown-item>
           </vs-dropdown-menu>
         </vs-dropdown>
         <vs-pagination
-              style="width: calc(100% - 160px);"
-              v-if="Math.ceil(pagination.total / pagination.limit) > 1"
-              :total="Math.ceil(pagination.total / pagination.limit)"
-              :max="7"
-              v-model="pagination.cpage" @change="changePage()"/>
+          style="width: calc(100% - 180px);"
+          v-if="Math.ceil(pagination.total / pagination.limit) > 1"
+          :total="Math.ceil(pagination.total / pagination.limit)" :max="7"
+          v-model="pagination.cpage" @change="changePage()"/>
       </div>
     </vx-card>
   </div>
-
 </template>
 
 <script>
-
   import vSelect from 'vue-select'
   import axios from '../../../../http/axios.js'
-  import Multiselect from "vue-multiselect";
-  import DatePicker from "vue2-datepicker";
+  import Multiselect from 'vue-multiselect'
+  import DatePicker from 'vue2-datepicker'
   import u from '../../../../until/helper.js'
 
   export default {
-    components: { 
-      vSelect,
-      Multiselect,
-      DatePicker
-    },
+    components: { vSelect, Multiselect, DatePicker },
     data() {
       return {
         branch_list: [],
-        schoolYearOptions:[
-          {id:'2023',label:'Năm 2023'},
-          {id:'2024',label:'Năm 2024'},
-          {id:'2025',label:'Năm 2025'},
-          {id:'2026',label:'Năm 2026'},
+        schoolYearOptions: [
+          {id:'2023',label:'Năm 2023'},{id:'2024',label:'Năm 2024'},
+          {id:'2025',label:'Năm 2025'},{id:'2026',label:'Năm 2026'},
         ],
-        searchData: {
-          arr_branch: "",
-          branch_id: "",
-          school_year: "",
-          keyword: "",
-          dateRange: "",
-          pagination: this.pagination
-        },
+        searchData: { arr_branch: '', branch_id: '', school_year: '', keyword: '', dateRange: '' },
         datepickerOptions: {
-          closed: true,
-          value: "",
-          minDate: "",
           lang: {
-            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
-            months: [
-              "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
-              "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
-            ]
+            days: ['CN','T2','T3','T4','T5','T6','T7'],
+            months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12']
           }
         },
         contracts: [],
-        summary: {
-          total_left_value: 0,
-          total_used_value: 0,
-          total_combo_fee: 0,
-          total_sessions: 0,
-          total_done_sessions: 0,
-          total_left_sessions: 0,
-        },
+        summary: { total_left_value:0, total_used_value:0, total_combo_fee:0, total_sessions:0, total_done_sessions:0, total_left_sessions:0 },
         limitSource: [20, 50, 100, 500],
-        pagination: {
-          url: "/api/lms/reports/17",
-          id: "",
-          style: "line",
-          class: "",
-          spage: 1,
-          ppage: 1,
-          npage: 0,
-          lpage: 1,
-          cpage: 1,
-          total: 0,
-          limit: 20,
-          pages: [],
-          init: 0
-        },
+        pagination: { url:'/api/lms/reports/17', id:'', style:'line', class:'', spage:1, ppage:1, npage:0, lpage:1, cpage:1, total:0, limit:20, pages:[], init:0 },
       }
     },
     created() {
-      // Load branches
-      axios.g(`/api/system/branches-has-user`)
-        .then(response => {
-        this.branch_list = response.data
-      })
-
-      this.getData();
+      axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
+      this.getData()
     },
     methods: {
       reset() {
-        this.searchData.keyword = ""
-        this.searchData.arr_branch = ""
-        this.searchData.school_year = ""
-        this.searchData.branch_id = ""
-        this.searchData.dateRange = ""
-        this.searchData.pagination = this.pagination
-        this.getData();
+        this.searchData = { arr_branch:'', branch_id:'', school_year:'', keyword:'', dateRange:'' }
+        this.getData()
+      },
+      percentClass(v) {
+        if (v >= 80) return 'pct-high'
+        if (v >= 50) return 'pct-mid'
+        return 'pct-low'
       },
       getData() {
         const branch_ids = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.map(item => {
-            branch_ids.push(item.id)
-          })
+          this.searchData.arr_branch.forEach(i => branch_ids.push(i.id))
         }
         this.searchData.branch_id = branch_ids
-
-        let start_date = ''
-        let end_date = ''
-        if(this.searchData.dateRange && this.searchData.dateRange.length == 2){
-            start_date = u.dateToString(this.searchData.dateRange[0])
-            end_date = u.dateToString(this.searchData.dateRange[1])
+        let start_date = '', end_date = ''
+        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) {
+          start_date = u.dateToString(this.searchData.dateRange[0])
+          end_date   = u.dateToString(this.searchData.dateRange[1])
         }
-
         const data = {
-            branch_id: this.searchData.branch_id,
-            school_year: this.searchData.school_year ? this.searchData.school_year.id : "",
-            keyword: this.searchData.keyword,
-            start_date: start_date,
-            end_date: end_date,
-            pagination: this.pagination
-          }
-
+          branch_id: this.searchData.branch_id,
+          school_year: this.searchData.school_year ? this.searchData.school_year.id : '',
+          keyword: this.searchData.keyword, start_date, end_date, pagination: this.pagination
+        }
         this.$vs.loading()
         axios.p('/api/lms/reports/17', data)
-          .then((response) => {
+          .then(res => {
             this.$vs.loading.close()
-            this.contracts = response.data.list
-            this.summary = response.data.summary || {
-              total_left_value: 0,
-              total_used_value: 0,
-              total_combo_fee: 0,
-              total_sessions: 0,
-              total_done_sessions: 0,
-              total_left_sessions: 0,
-            }
-            this.pagination = response.data.paging;
-            setTimeout(() => {
-              this.pagination.init = 1;
-            }, 500)
-          })
-          .catch((error) => {
-            console.log(error);
-            this.$vs.loading.close();
-          })
+            this.contracts = res.data.list
+            this.summary   = res.data.summary || this.summary
+            this.pagination = res.data.paging
+            setTimeout(() => { this.pagination.init = 1 }, 500)
+          }).catch(e => { console.error(e); this.$vs.loading.close() })
       },
-      changePage() {
-        if (this.pagination.init) {
-          this.getData();
-        }
-      },
+      changePage() { if (this.pagination.init) this.getData() },
       exportExcel() {
-        let keys = []
-        let values = []
-        
-        // Branch IDs
-        if(this.searchData.branch_id && this.searchData.branch_id.length > 0){
-          keys.push('branch_id')
-          values.push(this.searchData.branch_id.join('-'))
+        let keys = [], values = []
+        if (this.searchData.branch_id && this.searchData.branch_id.length > 0) { keys.push('branch_id'); values.push(this.searchData.branch_id.join('-')) }
+        if (this.searchData.school_year && this.searchData.school_year.id) { keys.push('school_year'); values.push(this.searchData.school_year.id) }
+        if (this.searchData.keyword) { keys.push('keyword'); values.push(this.searchData.keyword) }
+        if (this.searchData.dateRange && this.searchData.dateRange.length === 2) {
+          keys.push('start_date'); values.push(u.dateToString(this.searchData.dateRange[0]))
+          keys.push('end_date');   values.push(u.dateToString(this.searchData.dateRange[1]))
         }
-
-        // School Year
-        if(this.searchData.school_year && this.searchData.school_year.id){
-          keys.push('school_year')
-          values.push(this.searchData.school_year.id)
-        }
-
-        // Keyword
-        if(this.searchData.keyword){
-          keys.push('keyword')
-          values.push(this.searchData.keyword)
-        }
-
-        // Date Range
-        if(this.searchData.dateRange && this.searchData.dateRange.length == 2){
-          keys.push('start_date')
-          values.push(u.dateToString(this.searchData.dateRange[0]))
-          keys.push('end_date')
-          values.push(u.dateToString(this.searchData.dateRange[1]))
-        }
-
-        if (keys.length == 0) {
-            keys.push('k')
-            values.push('v')
-        }
-
-        const link = `/api/lms/exports/report17/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem("accessToken")}`
-        window.open(link, '_blank')
+        if (keys.length === 0) { keys.push('k'); values.push('v') }
+        window.open(`/api/lms/exports/report17/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       }
     },
     filters: {
-      formatMoney(value) {
-        if (!value) return 0;
-        return Number(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-      },
-      formatNumber(value) {
-        if (!value) return 0;
-        return Number(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+      formatMoney(v) { if (!v) return '0'; return Number(v).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1,') },
+      formatNumber(v) { if (!v) return '0'; return Number(v).toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g,'$1,') },
+      formatDateView(v) {
+        if (!v) return ''
+        const d = new Date(v); if (isNaN(d.getTime())) return v
+        return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
       }
     }
   }
 </script>
 
 <style scoped>
-.summary-box {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-}
+#page-report-17 { font-family: 'Inter', sans-serif; }
 
-.summary-label {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 5px;
+/* Header */
+.rpt-header {
+  display: flex; align-items: center; gap: 16px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white; padding: 20px 24px; border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(79,70,229,.3);
 }
+.rpt-header__icon { font-size: 28px; width: 52px; height: 52px;
+  background: rgba(255,255,255,.2); border-radius: 12px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rpt-header__title { font-size: 1.1rem; font-weight: 700; margin: 0; }
+.rpt-header__sub { font-size: .85rem; opacity: .8; margin: 2px 0 0; }
 
-.summary-value {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-}
+/* Card */
+.rpt-card { border-radius: 12px !important; box-shadow: 0 2px 16px rgba(0,0,0,.06) !important; }
 
-.left-amount-box {
-  background: #e8f5e9;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  color: #2e7d32;
-}
+/* Filters */
+.rpt-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.rpt-label { display: block; font-size: .78rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.rpt-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.rpt-btn-search, .rpt-btn-reset, .rpt-btn-export { border-radius: 8px !important; }
 
-.text-primary {
-  color: #007bff !important;
+/* Summary pills */
+.rpt-summary { display: flex; flex-wrap: wrap; gap: 10px; }
+.rpt-pill {
+  flex: 1; min-width: 120px; padding: 12px 16px; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 4px;
 }
+.rpt-pill__label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; opacity: .75; }
+.rpt-pill__value { font-size: 1rem; font-weight: 700; }
+.rpt-pill--blue   { background: #eff6ff; color: #1d4ed8; }
+.rpt-pill--indigo { background: #eef2ff; color: #4338ca; }
+.rpt-pill--green  { background: #f0fdf4; color: #15803d; }
+.rpt-pill--orange { background: #fff7ed; color: #c2410c; }
+.rpt-pill--gray   { background: #f9fafb; color: #374151; }
+.rpt-pill--teal   { background: #f0fdfa; color: #0f766e; }
+.rpt-pill--red    { background: #fef2f2; color: #b91c1c; }
 
-.text-success {
-  color: #28a745 !important;
+/* Table */
+.rpt-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; }
+.rpt-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.rpt-table thead tr { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+.rpt-total td {
+  background: #eef2ff;
+  font-weight: 700;
+  padding: 11px 10px;
+  font-size: .88rem;
+  border-top: 2px solid #4f46e5;
+  color: #1e1b4b;
 }
+.rpt-table__row { border-bottom: 1px solid #f3f4f6; transition: background .15s; }
+.rpt-table__row:hover { background: #f8f7ff; }
+.rpt-table__row td { padding: 9px 10px; }
 
-.text-danger {
-  color: #dc3545 !important;
-}
+.badge-code { background: #eef2ff; color: #4338ca; border-radius: 6px; padding: 2px 8px; font-size: .78rem; font-weight: 600; }
+.num-cell { font-weight: 600; color: #374151; }
+.money-cell { font-weight: 600; color: #374151; }
+.highlight-left { color: #b91c1c; font-weight: 700; }
+.text-muted { color: #9ca3af; }
+.small { font-size: .8rem; }
 
-.text-info {
-  color: #17a2b8 !important;
-}
+.pct-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
+.pct-high { background: #dcfce7; color: #15803d; }
+.pct-mid  { background: #fef9c3; color: #a16207; }
+.pct-low  { background: #fee2e2; color: #b91c1c; }
 
-.text-warning {
-  color: #ffc107 !important;
-}
+/* Paging */
+.rpt-paging { display: flex; align-items: center; flex-wrap: wrap; }
+.paging-limit-btn {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer;
+  background: white; font-size:.85rem; font-weight:500; }
 
-.font-bold {
-  font-weight: bold;
-}
-
-@media only screen and (min-width: 600px) {
-  #page-report-17 .vs-table--search {
-    max-width: 360px;
-  }
-  #page-report-17 .vs-table--search-input{
-    width: 360px;
-  }
-}
-
-th .sort-th, th .vs-table-text{
-  display: contents;
-}
-
-.multiselect{
-  z-index: 999;
-}
-
-.td.vs-table--td{
-  vertical-align: top;
-}
+.multiselect { z-index: 999; }
 </style>
