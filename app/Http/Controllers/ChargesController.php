@@ -219,6 +219,7 @@ class ChargesController extends Controller
                         'status' => 3,
                         'total_charged' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($tmp_payment, 'charge_amount'),
                         'debt_amount' => 0,
+                        'full_fee_date' => data_get($tmp_payment, 'charge_date'),  // ← Ghi ngày thu đủ phí
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');

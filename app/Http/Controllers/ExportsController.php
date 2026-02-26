@@ -1746,6 +1746,160 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report20(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'start_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $start_date = $values[$k];
+            }
+            if ($key_name == 'end_date' && isset($values[$k]) && $values[$k] != 'v') {
+                $end_date = $values[$k];
+            }
+        }
+
+        $branchCond = " a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $branchCond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        $dateCond = '';
+        if ($start_date) {
+            $dateCond .= " AND a.full_fee_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $dateCond .= " AND a.full_fee_date <= '$end_date'";
+        }
+        $baseCond = "$branchCond AND a.debt_amount = 0 $dateCond";
+
+        $query = "
+            SELECT
+                tf.name                 AS tuition_fee_name,
+                tf.number_of_months      AS so_don_sau_tach,
+                tf.price                AS gia_khoa_hoc,
+                COUNT(a.id)             AS total_agreements,
+                SUM(
+                    CASE
+                        WHEN a.count_recharge = 0 THEN 1
+                        WHEN a.count_recharge > 0 THEN
+                            CASE
+                                WHEN (SELECT prev_a.id FROM agreements prev_a WHERE prev_a.student_id = a.student_id AND prev_a.tuition_fee_id = a.tuition_fee_id AND prev_a.count_recharge < a.count_recharge ORDER BY prev_a.count_recharge DESC LIMIT 1) IS NOT NULL
+                                AND a.full_fee_date < (SELECT shs2.class_date FROM schedule_has_student shs2 INNER JOIN contracts c2 ON c2.id = shs2.contract_id INNER JOIN agreements prev_a2 ON prev_a2.id = c2.agreement_id WHERE prev_a2.student_id = a.student_id AND prev_a2.tuition_fee_id = a.tuition_fee_id AND prev_a2.count_recharge < a.count_recharge AND shs2.student_id = a.student_id AND shs2.status IN (1, 2) ORDER BY prev_a2.count_recharge DESC, shs2.class_date ASC LIMIT 1 OFFSET 7)
+                                THEN 1 ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) AS count_new,
+                SUM(
+                    CASE
+                        WHEN a.count_recharge > 0 THEN
+                            CASE
+                                WHEN (SELECT prev_a.id FROM agreements prev_a WHERE prev_a.student_id = a.student_id AND prev_a.tuition_fee_id = a.tuition_fee_id AND prev_a.count_recharge < a.count_recharge ORDER BY prev_a.count_recharge DESC LIMIT 1) IS NOT NULL
+                                AND (a.full_fee_date IS NULL OR a.full_fee_date >= (SELECT shs2.class_date FROM schedule_has_student shs2 INNER JOIN contracts c2 ON c2.id = shs2.contract_id INNER JOIN agreements prev_a2 ON prev_a2.id = c2.agreement_id WHERE prev_a2.student_id = a.student_id AND prev_a2.tuition_fee_id = a.tuition_fee_id AND prev_a2.count_recharge < a.count_recharge AND shs2.student_id = a.student_id AND shs2.status IN (1, 2) ORDER BY prev_a2.count_recharge DESC, shs2.class_date ASC LIMIT 1 OFFSET 7))
+                                THEN 1 ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) AS count_uplevel
+            FROM agreements AS a
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $baseCond
+            GROUP BY tf.id, tf.name, tf.number_of_months, tf.price
+            ORDER BY total_agreements DESC, tf.name ASC
+        ";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        // Tiêu đề
+        $sheet->setCellValue('A1', 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC');
+        $sheet->mergeCells('A1:F1');
+        $sheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Header
+        $hData = ['A2' => 'STT', 'B2' => 'Khóa học đăng ký', 'C2' => 'Số đơn sau tách', 'D2' => 'Giá khóa học (VNĐ)', 'E2' => 'Mới', 'F2' => 'Up Level'];
+        foreach ($hData as $c => $l) {
+            $sheet->setCellValue($c, $l);
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(42);
+        $sheet->getColumnDimension('C')->setWidth(16);
+        $sheet->getColumnDimension('D')->setWidth(22);
+        $sheet->getColumnDimension('E')->setWidth(12);
+        $sheet->getColumnDimension('F')->setWidth(12);
+
+        $hStyle = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]]];
+        $sheet->getStyle('A2:F2')->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
+        $totalNew = 0;
+        $totalUplevel = 0;
+        $totalAll = 0;
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 3;
+            $item = $list[$i];
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->tuition_fee_name);
+            $sheet->setCellValue('C' . $x, $item->so_don_sau_tach);
+            $sheet->setCellValue('D' . $x, $item->gia_khoa_hoc);
+            $sheet->setCellValue('E' . $x, (int) $item->count_new);
+            $sheet->setCellValue('F' . $x, (int) $item->count_uplevel);
+
+            $sheet->getStyle("A$x:F$x")->applyFromArray($borderOnly);
+            $sheet->getStyle("A$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("C$x:F$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("D$x")->applyFromArray($rightAlign);
+            $sheet->getStyle("D$x")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getRowDimension($x)->setRowHeight(20);
+
+            $totalNew += (int) $item->count_new;
+            $totalUplevel += (int) $item->count_uplevel;
+            $totalAll += (int) $item->total_agreements;
+        }
+
+        // Tổng cộng
+        $tRow = count($list) + 3;
+        $sheet->mergeCells("A$tRow:C$tRow");
+        $sheet->setCellValue('A' . $tRow, 'TỔNG CỘNG');
+        $sheet->setCellValue('D' . $tRow, '');
+        $sheet->setCellValue('E' . $tRow, $totalNew);
+        $sheet->setCellValue('F' . $tRow, $totalUplevel);
+        $tStyle = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F0F0']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'AAAAAA']]]];
+        $sheet->getStyle("A$tRow:F$tRow")->applyFromArray($tStyle);
+        $sheet->getRowDimension($tRow)->setRowHeight(22);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao cao doanh so chi tiet theo khoa hoc.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 

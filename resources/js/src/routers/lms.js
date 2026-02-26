@@ -874,6 +874,20 @@ export default {
         }
       },
       {
+        path: '/lms/reports/operate/report-20',
+        name: 'lms-report-operate-20',
+        component: () => import('@/views/lms/report/operate/report20.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Doanh số chi tiết theo khóa học', active: true }
+          ],
+          pageTitle: 'Doanh số chi tiết theo khóa học',
+          rule: 'editor'
+        }
+      },
+      {
         path: "/lms/reports/academic",
         name: "lms-reports-academic",
         component: () => import("@/views/lms/report/academic/index.vue"),

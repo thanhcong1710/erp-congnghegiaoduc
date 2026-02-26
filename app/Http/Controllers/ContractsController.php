@@ -290,6 +290,10 @@ class ContractsController extends Controller
             $ec_id = data_get($ec_info, 'id');
             $ec_leader_id = data_get($ec_info, 'manager_id');
         }
+        // Tính count_recharge cho agreement: 0 nếu chưa có, MAX+1 nếu đã có
+        $prevAgreement = u::first("SELECT MAX(count_recharge) AS max_cr FROM agreements WHERE student_id = $student_id AND tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . " AND status > 0");
+        $count_recharge = ($prevAgreement && $prevAgreement->max_cr !== null) ? (int) $prevAgreement->max_cr + 1 : 0;
+
         $agreement_id = u::insertSimpleRow(array(
             'student_id' => $student_id,
             'branch_id' => data_get($request, 'branch_id'),
@@ -305,6 +309,7 @@ class ContractsController extends Controller
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
+            'count_recharge' => $count_recharge,   // ← tự động tính
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
@@ -518,6 +523,10 @@ class ContractsController extends Controller
             'status' => 1
         ), 'term_student_user');
 
+        // Tính count_recharge: 0 nếu HS chưa có agreement nào với tuition_fee này, MAX+1 nếu đã có
+        $prevAgreement2 = u::first("SELECT MAX(count_recharge) AS max_cr FROM agreements WHERE student_id = $student_id AND tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . " AND status > 0");
+        $count_recharge2 = ($prevAgreement2 && $prevAgreement2->max_cr !== null) ? (int) $prevAgreement2->max_cr + 1 : 0;
+
         // Tạo agreement
         $agreement_id = u::insertSimpleRow(array(
             'student_id' => $student_id,
@@ -534,6 +543,7 @@ class ContractsController extends Controller
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
+            'count_recharge' => $count_recharge2,  // ← tự động tính
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,

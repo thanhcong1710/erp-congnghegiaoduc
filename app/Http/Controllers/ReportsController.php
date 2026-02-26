@@ -1166,4 +1166,155 @@ class ReportsController extends Controller
             'total_revenue' => $total_revenue,
         ]);
     }
+
+    /**
+     * Report 20: Báo cáo doanh số chi tiết theo từng khóa học
+     * Phân loại Mới / Up Level dựa trên full_fee_date vs buổi học thứ 8
+     *
+     * Định nghĩa:
+     *  - Mới:       agreement có count_recharge = 0
+     *               HOẶC (count_recharge > 0 VÀ full_fee_date < ngày buổi học thứ 8 của HS đó trong agreement trước)
+     *  - Up Level:  agreement có count_recharge > 0 VÀ full_fee_date >= ngày buổi học thứ 8
+     */
+    public function report20(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $branchCond = " a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $branchCond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        // Lọc theo thời gian full fee
+        $dateCond = '';
+        if ($start_date) {
+            $dateCond .= " AND a.full_fee_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $dateCond .= " AND a.full_fee_date <= '$end_date'";
+        }
+
+        // Điều kiện cơ bản: agreement đã thu đủ phí (debt_amount = 0)
+        $baseCond = "$branchCond AND a.debt_amount = 0 $dateCond";
+
+        // Subquery lấy ngày buổi học thứ 8 của student trong một agreement cụ thể
+        // (tính theo tất cả contracts thuộc agreement đó, sắp xếp theo class_date ASC, lấy row thứ 8)
+        $session8Subquery = "
+            SELECT shs.class_date
+            FROM schedule_has_student shs
+            INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id
+            WHERE c_inner.agreement_id = prev_a.id
+              AND shs.student_id = a.student_id
+              AND shs.status IN (1, 2)
+            ORDER BY shs.class_date ASC
+            LIMIT 1 OFFSET 7
+        ";
+
+        // Query chính: group by tuition_fee để đếm Mới và Up Level
+        $query = "
+            SELECT
+                tf.id                   AS tuition_fee_id,
+                tf.name                 AS tuition_fee_name,
+                tf.number_of_months      AS so_don_sau_tach,
+                tf.price                AS gia_khoa_hoc,
+                COUNT(a.id)             AS total_agreements,
+
+                -- Mới: count_recharge=0 HOẶC full_fee_date < buổi học thứ 8 (với agreement có count_recharge>0)
+                SUM(
+                    CASE
+                        WHEN a.count_recharge = 0 THEN 1
+                        WHEN a.count_recharge > 0 THEN
+                            -- Tìm agreement trước đó của student (count_recharge nhỏ hơn)
+                            CASE
+                                WHEN (
+                                    SELECT prev_a.id FROM agreements prev_a
+                                    WHERE prev_a.student_id = a.student_id
+                                      AND prev_a.tuition_fee_id = a.tuition_fee_id
+                                      AND prev_a.count_recharge < a.count_recharge
+                                    ORDER BY prev_a.count_recharge DESC LIMIT 1
+                                ) IS NOT NULL
+                                AND a.full_fee_date < (
+                                    SELECT shs2.class_date
+                                    FROM schedule_has_student shs2
+                                    INNER JOIN contracts c2 ON c2.id = shs2.contract_id
+                                    INNER JOIN agreements prev_a2 ON prev_a2.id = c2.agreement_id
+                                    WHERE prev_a2.student_id = a.student_id
+                                      AND prev_a2.tuition_fee_id = a.tuition_fee_id
+                                      AND prev_a2.count_recharge < a.count_recharge
+                                      AND shs2.student_id = a.student_id
+                                      AND shs2.status IN (1, 2)
+                                    ORDER BY prev_a2.count_recharge DESC, shs2.class_date ASC
+                                    LIMIT 1 OFFSET 7
+                                )
+                                THEN 1
+                                ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) AS count_new,
+
+                -- Up Level: count_recharge>0 VÀ full_fee_date >= buổi học thứ 8
+                SUM(
+                    CASE
+                        WHEN a.count_recharge > 0 THEN
+                            CASE
+                                WHEN (
+                                    SELECT prev_a.id FROM agreements prev_a
+                                    WHERE prev_a.student_id = a.student_id
+                                      AND prev_a.tuition_fee_id = a.tuition_fee_id
+                                      AND prev_a.count_recharge < a.count_recharge
+                                    ORDER BY prev_a.count_recharge DESC LIMIT 1
+                                ) IS NOT NULL
+                                AND (
+                                    a.full_fee_date IS NULL
+                                    OR a.full_fee_date >= (
+                                        SELECT shs2.class_date
+                                        FROM schedule_has_student shs2
+                                        INNER JOIN contracts c2 ON c2.id = shs2.contract_id
+                                        INNER JOIN agreements prev_a2 ON prev_a2.id = c2.agreement_id
+                                        WHERE prev_a2.student_id = a.student_id
+                                          AND prev_a2.tuition_fee_id = a.tuition_fee_id
+                                          AND prev_a2.count_recharge < a.count_recharge
+                                          AND shs2.student_id = a.student_id
+                                          AND shs2.status IN (1, 2)
+                                        ORDER BY prev_a2.count_recharge DESC, shs2.class_date ASC
+                                        LIMIT 1 OFFSET 7
+                                    )
+                                )
+                                THEN 1
+                                ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) AS count_uplevel
+
+            FROM agreements AS a
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $baseCond
+            GROUP BY tf.id, tf.name, tf.number_of_months, tf.price
+            ORDER BY total_agreements DESC, tf.name ASC
+        ";
+
+        $list = u::query($query);
+
+        // Tính tổng
+        $totalAgreements = 0;
+        $totalNew = 0;
+        $totalUplevel = 0;
+
+        foreach ($list as $row) {
+            $totalAgreements += (int) $row->total_agreements;
+            $totalNew += (int) $row->count_new;
+            $totalUplevel += (int) $row->count_uplevel;
+        }
+
+        return response()->json([
+            'list' => $list,
+            'total_agreements' => $totalAgreements,
+            'total_new' => $totalNew,
+            'total_uplevel' => $totalUplevel,
+        ]);
+    }
 }
