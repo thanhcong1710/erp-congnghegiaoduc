@@ -54,6 +54,11 @@
                 <p>09. DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC (MỚI / UP LEVEL)</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-21'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>10. BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

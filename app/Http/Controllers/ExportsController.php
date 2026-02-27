@@ -1900,6 +1900,151 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report21(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $school_year = '';
+
+        foreach ($keys as $k => $key_name) {
+            if ($key_name == 'branch_id' && isset($values[$k]) && $values[$k] != 'v') {
+                $branch_id = explode('-', $values[$k]);
+            }
+            if ($key_name == 'school_year' && isset($values[$k]) && $values[$k] != 'v') {
+                $school_year = $values[$k];
+            }
+        }
+
+        $branchIds = Auth::user()->getBranchesHasUser();
+        $agCond = " a.debt_amount = 0 AND a.branch_id IN ($branchIds)";
+        if (!empty($branch_id)) {
+            $agCond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        // Queries (same as ReportsController@report21)
+        $agStats = u::first("SELECT COUNT(a.id) AS total_agreements, SUM(IF(a.type_fee=1,1,0)) AS total_le, SUM(IF(a.type_fee=2,1,0)) AS total_combo FROM agreements AS a WHERE $agCond");
+        $ctStats = u::first("SELECT COUNT(c.id) AS total_contracts, SUM(IF(a.type_fee=1,1,0)) AS total_le_ct, SUM(IF(a.type_fee=2,1,0)) AS total_combo_ct FROM contracts AS c INNER JOIN agreements AS a ON a.id=c.agreement_id WHERE $agCond AND c.status NOT IN (0,1,7,8)");
+        $finStats = u::first("
+            SELECT SUM(c.total_charged) AS total_charged_ct, SUM(c.summary_sessions) AS total_summary_sessions, SUM(c.done_sessions) AS total_done_sessions, SUM(c.left_sessions) AS total_left_sessions,
+                SUM(CASE WHEN c.summary_sessions>0 THEN ROUND(c.total_charged*c.done_sessions/c.summary_sessions,0) ELSE 0 END) AS revenue_done,
+                SUM(CASE WHEN c.summary_sessions>0 THEN ROUND(c.total_charged*c.left_sessions/c.summary_sessions,0) ELSE 0 END) AS revenue_left
+            FROM contracts AS c INNER JOIN agreements AS a ON a.id=c.agreement_id WHERE $agCond AND c.status NOT IN (0,1,7,8)");
+
+        $totalSummary = (int) ($finStats->total_summary_sessions ?? 0);
+        $totalDone = (int) ($finStats->total_done_sessions ?? 0);
+        $pct_done = $totalSummary > 0 ? round($totalDone / $totalSummary * 100, 2) : 0;
+        $totalCharged = (float) ($finStats->total_charged_ct ?? 0);
+        $revenueDone = (float) ($finStats->revenue_done ?? 0);
+        $revenueLeft = (float) ($finStats->revenue_left ?? 0);
+        $leftSessions = (int) ($finStats->total_left_sessions ?? 0);
+
+        $val_total = (int) ($agStats->total_agreements ?? 0);
+        $val_le = (int) ($agStats->total_le ?? 0);
+        $val_combo = (int) ($agStats->total_combo ?? 0);
+        $sach_total = (int) ($ctStats->total_contracts ?? 0);
+        $sach_le = (int) ($ctStats->total_le_ct ?? 0);
+        $sach_combo = (int) ($ctStats->total_combo_ct ?? 0);
+
+        // Rows: [label, value, value_split, is_bold, is_money]
+        $rows = [
+            ['Tổng số học viên', $val_total, $sach_total, true, false],
+            ['Số học viên đăng ký khóa lẻ', $val_le, $sach_le, false, false],
+            ['Số học viên đăng ký combo', $val_combo, $sach_combo, false, false],
+            ['Tổng doanh thu đã thu', $totalCharged, $totalCharged, false, true],
+            ['Doanh thu đã thực hiện', $revenueDone, $revenueDone, false, true],
+            ['Doanh thu chưa thực hiện (còn lại)', $revenueLeft, $revenueLeft, false, true],
+            ['Số buổi đã dạy', $totalDone, $totalDone, false, false],
+            ['Số buổi còn lại phải dạy', $leftSessions, $leftSessions, false, false],
+            ['% hoàn thành trung bình', $pct_done . '%', $pct_done . '%', false, false],
+        ];
+
+        $yearLabel = $school_year ?: date('Y');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        // Tiêu đề
+        $sheet->setCellValue('A1', 'BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM ' . $yearLabel);
+        $sheet->mergeCells('A1:C1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(32);
+
+        // Dòng trống
+        $sheet->getRowDimension(2)->setRowHeight(10);
+
+        // Header cột
+        $hStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->setCellValue('A3', 'Chỉ số');
+        $sheet->setCellValue('B3', 'Giá trị');
+        $sheet->setCellValue('C3', 'Giá trị khóa học sau tách');
+        $sheet->getStyle('A3:C3')->applyFromArray($hStyle);
+        $sheet->getRowDimension(3)->setRowHeight(28);
+
+        $sheet->getColumnDimension('A')->setWidth(38);
+        $sheet->getColumnDimension('B')->setWidth(24);
+        $sheet->getColumnDimension('C')->setWidth(28);
+
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $moneyFmt = '#,##0';
+        $leftAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
+        foreach ($rows as $i => $row) {
+            $x = $i + 4;
+            [$label, $val, $split, $bold, $money] = $row;
+
+            $sheet->setCellValue('A' . $x, $label);
+            $sheet->setCellValue('B' . $x, $val);
+            $sheet->setCellValue('C' . $x, $split);
+
+            // Áp style chung
+            $sheet->getStyle("A$x:C$x")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$x")->applyFromArray($leftAlign);  // Chỉ số → căn trái
+            $sheet->getRowDimension($x)->setRowHeight(22);
+
+            if ($bold) {
+                // Dòng tổng số học viên: in đậm, số căn phải
+                $sheet->getStyle("A$x:C$x")->getFont()->setBold(true);
+                $sheet->getStyle("B$x")->applyFromArray($rightAlign);
+                $sheet->getStyle("C$x")->applyFromArray($rightAlign);
+            } elseif ($money) {
+                // Dòng tiền tệ: căn phải + format tiền
+                $sheet->getStyle("B$x")->applyFromArray($rightAlign);
+                $sheet->getStyle("C$x")->applyFromArray($rightAlign);
+                $sheet->getStyle("B$x")->getNumberFormat()->setFormatCode($moneyFmt);
+                $sheet->getStyle("C$x")->getNumberFormat()->setFormatCode($moneyFmt);
+            } else {
+                // Số thường (buổi học, %) → đều căn phải
+                $sheet->getStyle("B$x")->applyFromArray($rightAlign);
+                $sheet->getStyle("C$x")->applyFromArray($rightAlign);
+            }
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bang tong quan hoc sinh nam ' . $yearLabel . '.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 

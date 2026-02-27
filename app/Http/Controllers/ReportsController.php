@@ -1317,4 +1317,141 @@ class ReportsController extends Controller
             'total_uplevel' => $totalUplevel,
         ]);
     }
+
+    /**
+     * Report 21: Bảng tổng quan quản lý học sinh năm
+     * KPI dạng pivot: Chỉ số | Giá trị (agreements) | Giá trị sau tách (contracts)
+     * Chỉ lấy agreements đã thu đủ phí (debt_amount = 0)
+     */
+    public function report21(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $school_year = isset($request->school_year) ? $request->school_year : '';
+
+        $branchIds = Auth::user()->getBranchesHasUser();
+
+        // Điều kiện cho agreements
+        $agCond = " a.debt_amount = 0 AND a.branch_id IN ($branchIds)";
+        if (!empty($branch_id)) {
+            $agCond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        // Điều kiện năm học cho schedule_has_student
+        $yearCond = $school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "";
+
+        // --- 1. Số lượng agreements (cột Giá trị) ---
+        $agStats = u::first("
+            SELECT
+                COUNT(a.id)                             AS total_agreements,
+                SUM(IF(a.type_fee = 1, 1, 0))           AS total_le,
+                SUM(IF(a.type_fee = 2, 1, 0))           AS total_combo,
+                SUM(a.total_charged)                    AS total_charged
+            FROM agreements AS a
+            WHERE $agCond
+        ");
+
+        // --- 2. Số lượng contracts (cột Sau tách) ---
+        $ctStats = u::first("
+            SELECT
+                COUNT(c.id)                             AS total_contracts,
+                SUM(IF(a.type_fee = 1, 1, 0))           AS total_le_ct,
+                SUM(IF(a.type_fee = 2, 1, 0))           AS total_combo_ct
+            FROM contracts AS c
+            INNER JOIN agreements AS a ON a.id = c.agreement_id
+            WHERE $agCond AND c.status NOT IN (0, 1, 7, 8)
+        ");
+
+        // --- 3. Doanh thu & Số buổi (tính từ contracts, lọc theo năm học nếu có) ---
+        // Số buổi đã dạy trong năm học (lọc theo schedule_has_student)
+        if ($school_year) {
+            $sessionStats = u::first("
+                SELECT
+                    COUNT(DISTINCT shs.id)          AS done_sessions_year
+                FROM schedule_has_student AS shs
+                INNER JOIN contracts AS c ON c.id = shs.contract_id
+                INNER JOIN agreements AS a ON a.id = c.agreement_id
+                WHERE $agCond
+                  AND c.status NOT IN (0, 1, 7, 8)
+                  AND shs.status IN (1, 2)
+                  AND YEAR(shs.class_date) = '$school_year'
+            ");
+            $done_sessions = (int) ($sessionStats->done_sessions_year ?? 0);
+        } else {
+            $sessionStats = u::first("
+                SELECT SUM(c.done_sessions) AS done_sessions_all
+                FROM contracts AS c
+                INNER JOIN agreements AS a ON a.id = c.agreement_id
+                WHERE $agCond AND c.status NOT IN (0, 1, 7, 8)
+            ");
+            $done_sessions = (int) ($sessionStats->done_sessions_all ?? 0);
+        }
+
+        // Doanh thu và số buổi tổng hợp từ contracts
+        $finStats = u::first("
+            SELECT
+                SUM(c.total_charged)        AS total_charged_ct,
+                SUM(c.summary_sessions)     AS total_summary_sessions,
+                SUM(c.done_sessions)        AS total_done_sessions,
+                SUM(c.left_sessions)        AS total_left_sessions,
+                SUM(
+                    CASE WHEN c.summary_sessions > 0
+                        THEN ROUND(c.total_charged * c.done_sessions / c.summary_sessions, 0)
+                        ELSE 0
+                    END
+                ) AS revenue_done,
+                SUM(
+                    CASE WHEN c.summary_sessions > 0
+                        THEN ROUND(c.total_charged * c.left_sessions / c.summary_sessions, 0)
+                        ELSE 0
+                    END
+                ) AS revenue_left
+            FROM contracts AS c
+            INNER JOIN agreements AS a ON a.id = c.agreement_id
+            WHERE $agCond AND c.status NOT IN (0, 1, 7, 8)
+        ");
+
+        // Tổng số học sinh duy nhất
+        $studentCount = u::first("
+            SELECT COUNT(DISTINCT a.student_id) AS total_students
+            FROM agreements AS a
+            WHERE $agCond
+        ");
+
+        // % hoàn thành trung bình
+        $totalSummary = (int) ($finStats->total_summary_sessions ?? 0);
+        $totalDone = (int) ($finStats->total_done_sessions ?? 0);
+        $pct_done = $totalSummary > 0 ? round($totalDone / $totalSummary * 100, 2) : 0;
+
+        $totalCharged = (float) ($finStats->total_charged_ct ?? 0);
+        $revenueDone = (float) ($finStats->revenue_done ?? 0);
+        $revenueLeft = (float) ($finStats->revenue_left ?? 0);
+        $leftSessions = (int) ($finStats->total_left_sessions ?? 0);
+
+        // Giá trị cột (agreements)
+        $val_total = (int) ($agStats->total_agreements ?? 0);
+        $val_le = (int) ($agStats->total_le ?? 0);
+        $val_combo = (int) ($agStats->total_combo ?? 0);
+
+        // Giá trị sau tách (contracts)
+        $sach_total = (int) ($ctStats->total_contracts ?? 0);
+        $sach_le = (int) ($ctStats->total_le_ct ?? 0);
+        $sach_combo = (int) ($ctStats->total_combo_ct ?? 0);
+
+        $rows = [
+            ['label' => 'Tổng số học viên', 'value' => $val_total, 'value_split' => $sach_total, 'is_bold' => true],
+            ['label' => 'Số học viên đăng ký khóa lẻ', 'value' => $val_le, 'value_split' => $sach_le, 'is_bold' => false],
+            ['label' => 'Số học viên đăng ký combo', 'value' => $val_combo, 'value_split' => $sach_combo, 'is_bold' => false],
+            ['label' => 'Tổng doanh thu đã thu', 'value' => $totalCharged, 'value_split' => $totalCharged, 'is_bold' => false, 'is_money' => true],
+            ['label' => 'Doanh thu đã thực hiện', 'value' => $revenueDone, 'value_split' => $revenueDone, 'is_bold' => false, 'is_money' => true],
+            ['label' => 'Doanh thu chưa thực hiện (còn lại)', 'value' => $revenueLeft, 'value_split' => $revenueLeft, 'is_bold' => false, 'is_money' => true],
+            ['label' => 'Số buổi đã dạy', 'value' => $totalDone, 'value_split' => $totalDone, 'is_bold' => false],
+            ['label' => 'Số buổi còn lại phải dạy', 'value' => $leftSessions, 'value_split' => $leftSessions, 'is_bold' => false],
+            ['label' => '% hoàn thành trung bình', 'value' => $pct_done . '%', 'value_split' => $pct_done . '%', 'is_bold' => false],
+        ];
+
+        return response()->json([
+            'rows' => $rows,
+            'school_year' => $school_year ?: date('Y'),
+        ]);
+    }
 }
