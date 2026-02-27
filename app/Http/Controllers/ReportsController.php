@@ -1604,4 +1604,90 @@ class ReportsController extends Controller
 
         return response()->json($data);
     }
+
+    /**
+     * Report 23: Thống kê doanh thu theo Team sale
+     *
+     * Columns: Team, Mới (count_recharge=0), Up LV (count_recharge>0),
+     *          Doanh thu, Lương sale = Mới*10% + UpLV*6%
+     *
+     * Filter: branch_id, khoảng thời gian full_fee_date
+     */
+    public function report23(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        // ---- Điều kiện cơ bản ----
+        $cond = " a.status > 0
+                  AND a.total_charged > 0
+                  AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($start_date) {
+            $cond .= " AND a.full_fee_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.full_fee_date <= '$end_date'";
+        }
+
+        // ---- Main query: group theo team ----
+        $query = "
+            SELECT
+                COALESCE(a.ec_leader_id, a.ec_id)                      AS team_user_id,
+                ANY_VALUE(
+                    CASE
+                        WHEN a.ec_leader_id IS NOT NULL
+                            THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                        ELSE
+                            (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                    END
+                )                                                       AS team_name,
+                COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
+                COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
+                SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
+                SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
+                SUM(a.must_charge)                                      AS total_revenue
+            FROM agreements AS a
+            WHERE $cond
+            GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
+            ORDER BY team_name ASC
+        ";
+
+        $rows = u::query($query);
+
+        $result = [];
+        $sum = ['new_count' => 0, 'uplv_count' => 0, 'new_revenue' => 0.0, 'uplv_revenue' => 0.0, 'total_revenue' => 0.0, 'salary' => 0.0];
+
+        foreach ($rows as $row) {
+            $new_rev = (float) $row->new_revenue;
+            $uplv_rev = (float) $row->uplv_revenue;
+            $salary = round($new_rev * 0.10 + $uplv_rev * 0.06);
+
+            $result[] = [
+                'team_user_id' => $row->team_user_id,
+                'team_name' => $row->team_name ?: '—',
+                'new_count' => (int) $row->new_count,
+                'uplv_count' => (int) $row->uplv_count,
+                'new_revenue' => $new_rev,
+                'uplv_revenue' => $uplv_rev,
+                'total_revenue' => (float) $row->total_revenue,
+                'salary' => $salary,
+            ];
+            $sum['new_count'] += (int) $row->new_count;
+            $sum['uplv_count'] += (int) $row->uplv_count;
+            $sum['new_revenue'] += $new_rev;
+            $sum['uplv_revenue'] += $uplv_rev;
+            $sum['total_revenue'] += (float) $row->total_revenue;
+            $sum['salary'] += $salary;
+        }
+
+        return response()->json([
+            'rows' => $result,
+            'summary' => $sum,
+        ]);
+    }
 }

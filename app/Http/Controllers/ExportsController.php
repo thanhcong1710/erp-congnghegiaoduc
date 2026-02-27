@@ -2255,6 +2255,182 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report23(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $start_date = '';
+        $end_date = '';
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v')
+                $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'start_date':
+                    $start_date = $v;
+                    break;
+                case 'end_date':
+                    $end_date = $v;
+                    break;
+            }
+        }
+
+        $cond = " a.status > 0 AND a.total_charged > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($start_date) {
+            $cond .= " AND a.full_fee_date >= '$start_date'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.full_fee_date <= '$end_date'";
+        }
+
+        $rows = u::query("
+            SELECT
+                COALESCE(a.ec_leader_id, a.ec_id) AS team_user_id,
+                ANY_VALUE(
+                    CASE WHEN a.ec_leader_id IS NOT NULL
+                        THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                        ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                    END
+                ) AS team_name,
+                COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
+                COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
+                SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
+                SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
+                SUM(a.must_charge) AS total_revenue
+            FROM agreements AS a
+            WHERE $cond
+            GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
+            ORDER BY team_name ASC
+        ");
+
+        // ---- Build Excel ----
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+        $period = ($start_date ? $start_date : '...') . ' – ' . ($end_date ? $end_date : '...');
+        $title = 'THỐNG KÊ DOANH THU THEO TEAM SALE  |  Full fee: ' . $period;
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(26);
+        $sheet->getRowDimension(2)->setRowHeight(5);
+
+        // Row 3: merged group header
+        $sheet->setCellValue('C3', 'DOANH SỐ');
+        $sheet->mergeCells('C3:D3');
+        $sheet->getStyle('C3')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '16A34A']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+
+        // Row 4: column headers
+        $headers = ['STT', 'TEAM', 'MỚI', 'UP LV', 'DOANH THU', 'LƯƠNG SALE'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+        $hBgColor = ['A' => '4F46E5', 'B' => '4F46E5', 'C' => '16A34A', 'D' => '16A34A', 'E' => 'EA580C', 'F' => 'EA580C'];
+        foreach ($headers as $i => $h) {
+            $c = $cols[$i];
+            $sheet->setCellValue($c . '4', $h);
+            $sheet->getStyle($c . '4')->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => $hBgColor[$c]]],
+                'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
+            ]);
+        }
+        $sheet->getRowDimension(3)->setRowHeight(20);
+        $sheet->getRowDimension(4)->setRowHeight(22);
+
+        // Column widths
+        $widths = ['A' => 8, 'B' => 28, 'C' => 12, 'D' => 12, 'E' => 18, 'F' => 18];
+        foreach ($widths as $c => $w) {
+            $sheet->getColumnDimension($c)->setWidth($w);
+        }
+
+        $moneyFmt = '#,##0';
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E0E0E0']]]];
+        $center = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $right = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+        $left = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+
+        $sumNew = 0;
+        $sumUplv = 0;
+        $sumRevenue = 0.0;
+        $sumSalary = 0.0;
+        $row = 5;
+        foreach ($rows as $idx => $item) {
+            $new_rev = (float) $item->new_revenue;
+            $uplv_rev = (float) $item->uplv_revenue;
+            $salary = round($new_rev * 0.10 + $uplv_rev * 0.06);
+            $total = (float) $item->total_revenue;
+
+            $sheet->setCellValue('A' . $row, $idx + 1);
+            $sheet->setCellValue('B' . $row, $item->team_name ?? '—');
+            $sheet->setCellValue('C' . $row, (int) $item->new_count);
+            $sheet->setCellValue('D' . $row, (int) $item->uplv_count);
+            $sheet->setCellValue('E' . $row, $total);
+            $sheet->setCellValue('F' . $row, $salary);
+
+            $sheet->getStyle("A$row:F$row")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$row")->applyFromArray($center);
+            $sheet->getStyle("B$row")->applyFromArray($left);
+            $sheet->getStyle("C$row:D$row")->applyFromArray($center);
+            $sheet->getStyle("E$row:F$row")->applyFromArray($right);
+            $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getRowDimension($row)->setRowHeight(18);
+
+            $sumNew += (int) $item->new_count;
+            $sumUplv += (int) $item->uplv_count;
+            $sumRevenue += $total;
+            $sumSalary += $salary;
+            $row++;
+        }
+
+        // Dòng tổng
+        $sheet->mergeCells("A$row:B$row");
+        $sheet->setCellValue('A' . $row, 'TỔNG');
+        $sheet->setCellValue('C' . $row, $sumNew);
+        $sheet->setCellValue('D' . $row, $sumUplv);
+        $sheet->setCellValue('E' . $row, $sumRevenue);
+        $sheet->setCellValue('F' . $row, $sumSalary);
+        $totalStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
+        ];
+        $sheet->getStyle("A$row:F$row")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("B$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("C$row:D$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getRowDimension($row)->setRowHeight(22);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Thong ke doanh thu team sale.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 
