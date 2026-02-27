@@ -203,4 +203,43 @@ class SystemController extends Controller
     {
         return response()->json(config('crm.call_statuses'));
     }
+
+    /**
+     * GET /api/system/users?role_id=69
+     * Lấy danh sách users theo role_id, lọc theo branch của user hiện tại
+     */
+    public function getUsersByRole(Request $request)
+    {
+        $role_id = (int) data_get($request, 'role_id', 0);
+        $branch_id = (int) data_get($request, 'branch_id', 0);
+
+        if (!$role_id) {
+            return response()->json([]);
+        }
+
+        $branchCond = '';
+        if ($branch_id > 0) {
+            $branchCond = " AND b.branch_id = $branch_id";
+        } else {
+            $branchIds = Auth::user()->getBranchesHasUser();
+            $branchCond = " AND (b.branch_id IN ($branchIds) OR b.branch_id IS NULL)";
+        }
+
+        $data = u::query("
+            SELECT DISTINCT
+                u.id,
+                u.name,
+                u.hrm_id,
+                CONCAT(u.name, ' - ', u.hrm_id) AS label
+            FROM role_has_user AS ru
+                LEFT JOIN users AS u ON u.id = ru.user_id
+                LEFT JOIN branch_has_user AS b ON b.user_id = ru.user_id
+            WHERE ru.role_id = $role_id
+              AND u.status = 1
+              $branchCond
+            ORDER BY u.name ASC
+        ");
+
+        return response()->json($data);
+    }
 }

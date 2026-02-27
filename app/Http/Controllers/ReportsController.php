@@ -1454,4 +1454,154 @@ class ReportsController extends Controller
             'school_year' => $school_year ?: date('Y'),
         ]);
     }
+
+    /**
+     * Report 22: Báo cáo chi tiết công nợ theo khách hàng
+     * Columns: Mã HV, Họ tên, Chương trình, Team KD, Thành viên sale,
+     *          Tổng học phí, Đã thu, Còn phải thu, Hạn thanh toán, Ngày thu gần nhất
+     *
+     * Hạn thanh toán = ngày buổi học thứ 8 (tính từ enrolment_start_date của contract đầu tiên)
+     * Chỉ lấy agreements đã đặt cọc: total_charged > 0 (và thường debt_amount > 0 = còn nợ)
+     */
+    public function report22(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;   // ec_leader_id (role 69)
+        $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;   // ec_id (role 68)
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $due_start = isset($request->due_start) ? $request->due_start : '';  // khoảng hạn TT
+        $due_end = isset($request->due_end) ? $request->due_end : '';
+        $pay_start = isset($request->pay_start) ? $request->pay_start : '';  // khoảng ngày thu gần nhất
+        $pay_end = isset($request->pay_end) ? $request->pay_end : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        // ---- Điều kiện cơ bản ----
+        $cond = " a.total_charged > 0
+                  AND a.status > 0
+                  AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            // Team KD = ec_leader_id (nếu có), hoặc ec_id chính là leader (ec_leader_id IS NULL)
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        // Filter theo hạn thanh toán (buổi 8)
+        if ($due_start) {
+            $cond .= " AND (
+                SELECT shs.class_date
+                FROM schedule_has_student shs
+                INNER JOIN contracts c2 ON c2.id = shs.contract_id
+                WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
+                ORDER BY shs.class_date ASC
+                LIMIT 7, 1
+            ) >= '$due_start'";
+        }
+        if ($due_end) {
+            $cond .= " AND (
+                SELECT shs.class_date
+                FROM schedule_has_student shs
+                INNER JOIN contracts c2 ON c2.id = shs.contract_id
+                WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
+                ORDER BY shs.class_date ASC
+                LIMIT 7, 1
+            ) <= '$due_end'";
+        }
+        // Filter theo ngày thu gần nhất
+        if ($pay_start) {
+            $cond .= " AND (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start'";
+        }
+        if ($pay_end) {
+            $cond .= " AND (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end'";
+        }
+
+        // ---- Count ----
+        $totalRow = u::first("
+            SELECT COUNT(a.id) AS total
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ");
+        $totalCount = (int) ($totalRow->total ?? 0);
+
+        // ---- Main query ----
+        $query = "
+            SELECT
+                s.lms_code,
+                s.name                          AS student_name,
+                s.gud_mobile1                   AS phone,
+                tf.name                         AS course_name,
+                -- Team KD: ec_leader_id nếu có, ngược lại chính ec_id là leader
+                CASE
+                    WHEN a.ec_leader_id IS NOT NULL
+                        THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE
+                        (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END                             AS team_name,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                a.must_charge,
+                a.total_charged,
+                a.debt_amount,
+                -- Ngày thu gần nhất
+                (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                -- Hạn thanh toán = buổi học thứ 8 (offset 7, 0-indexed) từ khi xếp lớp
+                -- Chỉ có giá trị khi đã xếp lớp (enrolment_start_date IS NOT NULL)
+                (
+                    SELECT shs.class_date
+                    FROM schedule_has_student shs
+                    INNER JOIN contracts c2 ON c2.id = shs.contract_id
+                    WHERE c2.agreement_id = a.id
+                      AND c2.enrolment_start_date IS NOT NULL
+                    ORDER BY shs.class_date ASC
+                    LIMIT 7, 1
+                )                               AS due_date,
+                a.branch_id,
+                (SELECT name FROM branches WHERE id = a.branch_id) AS branch_name,
+                a.id                            AS agreement_id,
+                a.created_at
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY a.id DESC
+            $limitation
+        ";
+
+        $list = u::query($query);
+
+        // ---- Summary (không phân trang) ----
+        $sumRow = u::first("
+            SELECT
+                SUM(a.must_charge)   AS total_must,
+                SUM(a.total_charged) AS total_charged,
+                SUM(a.debt_amount)   AS total_debt
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ");
+
+        $summary = [
+            'total_must' => (float) ($sumRow->total_must ?? 0),
+            'total_charged' => (float) ($sumRow->total_charged ?? 0),
+            'total_debt' => (float) ($sumRow->total_debt ?? 0),
+        ];
+
+        $data = u::makingPagination($list, $totalCount, $page, $limit);
+        $data->summary = $summary;
+
+        return response()->json($data);
+    }
 }

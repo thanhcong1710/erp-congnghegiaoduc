@@ -902,6 +902,20 @@ export default {
         }
       },
       {
+        path: '/lms/reports/operate/report-22',
+        name: 'lms-report-operate-22',
+        component: () => import('@/views/lms/report/operate/report22.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'Công nợ chi tiết theo khách hàng', active: true }
+          ],
+          pageTitle: 'Công nợ chi tiết theo khách hàng',
+          rule: 'editor'
+        }
+      },
+      {
         path: "/lms/reports/academic",
         name: "lms-reports-academic",
         component: () => import("@/views/lms/report/academic/index.vue"),

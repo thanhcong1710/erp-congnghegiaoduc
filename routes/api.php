@@ -55,6 +55,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('get-class-by-cm/{cm_id}', 'SystemController@getClassByCM');
             Route::get('customer-statuses', 'SystemController@getCustomerStatuses');
             Route::get('call-statuses', 'SystemController@getCallStatuses');
+            Route::get('users', 'SystemController@getUsersByRole');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');
@@ -240,6 +241,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('19', 'ReportsController@report19');
                 Route::post('20', 'ReportsController@report20');
                 Route::post('21', 'ReportsController@report21');
+                Route::post('22', 'ReportsController@report22');
             });
             Route::prefix('exports')->group(function () {
                 Route::get('report01/{key}/{value}', 'ExportsController@report01');
@@ -255,6 +257,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('report19/{key}/{value}', 'ExportsController@report19');
                 Route::get('report20/{key}/{value}', 'ExportsController@report20');
                 Route::get('report21/{key}/{value}', 'ExportsController@report21');
+                Route::get('report22/{key}/{value}', 'ExportsController@report22');
                 Route::get('active-classes/{key}/{value}', 'ExportsController@reportActiveClasses');
             });
         });

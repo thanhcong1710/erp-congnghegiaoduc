@@ -2045,6 +2045,216 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report22(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $team_id = 0;
+        $ec_id = 0;
+        $keyword = '';
+        $due_start = '';
+        $due_end = '';
+        $pay_start = '';
+        $pay_end = '';
+
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v')
+                $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'team_id':
+                    $team_id = (int) $v;
+                    break;
+                case 'ec_id':
+                    $ec_id = (int) $v;
+                    break;
+                case 'keyword':
+                    $keyword = urldecode($v);
+                    break;
+                case 'due_start':
+                    $due_start = $v;
+                    break;
+                case 'due_end':
+                    $due_end = $v;
+                    break;
+                case 'pay_start':
+                    $pay_start = $v;
+                    break;
+                case 'pay_end':
+                    $pay_end = $v;
+                    break;
+            }
+        }
+
+        $cond = " a.total_charged > 0 AND a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($due_start) {
+            $cond .= " AND (SELECT shs.class_date FROM schedule_has_student shs INNER JOIN contracts c2 ON c2.id=shs.contract_id WHERE c2.agreement_id=a.id AND c2.enrolment_start_date IS NOT NULL ORDER BY shs.class_date ASC LIMIT 7,1) >= '$due_start'";
+        }
+        if ($due_end) {
+            $cond .= " AND (SELECT shs.class_date FROM schedule_has_student shs INNER JOIN contracts c2 ON c2.id=shs.contract_id WHERE c2.agreement_id=a.id AND c2.enrolment_start_date IS NOT NULL ORDER BY shs.class_date ASC LIMIT 7,1) <= '$due_end'";
+        }
+        if ($pay_start) {
+            $cond .= " AND (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id=a.id) >= '$pay_start'";
+        }
+        if ($pay_end) {
+            $cond .= " AND (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id=a.id) <= '$pay_end'";
+        }
+
+        $list = u::query("
+            SELECT
+                s.lms_code,
+                s.name AS student_name,
+                tf.name AS course_name,
+                CASE WHEN a.ec_leader_id IS NOT NULL
+                    THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS team_name,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                a.must_charge, a.total_charged, a.debt_amount,
+                (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                (SELECT shs.class_date FROM schedule_has_student shs
+                    INNER JOIN contracts c2 ON c2.id = shs.contract_id
+                    WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
+                    ORDER BY shs.class_date ASC LIMIT 7, 1) AS due_date
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY a.id DESC
+        ");
+
+        // Build Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+        // Title
+        $title = 'BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG';
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:J1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 13],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+        $sheet->getRowDimension(2)->setRowHeight(6);
+
+        // Headers
+        $headers = ['Mã HV', 'Họ tên', 'Chương trình', 'Team KD', 'Thành viên sale', 'Tổng học phí', 'Đã thu', 'Còn phải thu', 'Hạn thanh toán', 'Ngày thu gần nhất'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        $hStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
+        ];
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue($cols[$i] . '3', $h);
+        }
+        $sheet->getStyle('A3:J3')->applyFromArray($hStyle);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+
+        // Column widths
+        $widths = [12, 22, 22, 16, 16, 16, 14, 14, 16, 16];
+        foreach ($cols as $i => $c) {
+            $sheet->getColumnDimension($c)->setWidth($widths[$i]);
+        }
+
+        $moneyFmt = '#,##0';
+        $leftAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E0E0E0']]]];
+
+        $totalMust = 0;
+        $totalCharged = 0;
+        $totalDebt = 0;
+        $row = 4;
+        foreach ($list as $item) {
+            $sheet->setCellValue('A' . $row, $item->lms_code);
+            $sheet->setCellValue('B' . $row, $item->student_name);
+            $sheet->setCellValue('C' . $row, $item->course_name ?? '');
+            $sheet->setCellValue('D' . $row, $item->team_name ?? '');
+            $sheet->setCellValue('E' . $row, $item->ec_name ?? '');
+            $sheet->setCellValue('F' . $row, (float) $item->must_charge);
+            $sheet->setCellValue('G' . $row, (float) $item->total_charged);
+            $sheet->setCellValue('H' . $row, (float) $item->debt_amount);
+            $sheet->setCellValue('I' . $row, $item->due_date ?? '');
+            $sheet->setCellValue('J' . $row, $item->last_pay_date ?? '');
+
+            $sheet->getStyle("A$row:J$row")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$row")->applyFromArray($centerAlign);
+            $sheet->getStyle("B$row:E$row")->applyFromArray($leftAlign);
+            $sheet->getStyle("F$row:H$row")->applyFromArray($rightAlign);
+            $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("H$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("I$row:J$row")->applyFromArray($centerAlign);
+            $sheet->getRowDimension($row)->setRowHeight(18);
+
+            // Tô màu dòng nợ cao
+            if ((float) $item->debt_amount > 0) {
+                $sheet->getStyle("H$row")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+            }
+
+            $totalMust += (float) $item->must_charge;
+            $totalCharged += (float) $item->total_charged;
+            $totalDebt += (float) $item->debt_amount;
+            $row++;
+        }
+
+        // Dòng tổng cộng
+        $sheet->mergeCells("A$row:E$row");
+        $sheet->setCellValue('A' . $row, 'TỔNG CỘNG');
+        $sheet->setCellValue('F' . $row, $totalMust);
+        $sheet->setCellValue('G' . $row, $totalCharged);
+        $sheet->setCellValue('H' . $row, $totalDebt);
+
+        $totalStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EEF2FF']],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->getStyle("A$row:J$row")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("F$row:H$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("H$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getRowDimension($row)->setRowHeight(22);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao cao cong no chi tiet.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 

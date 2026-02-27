@@ -59,6 +59,11 @@
                 <p>10. BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-22'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>11. BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
