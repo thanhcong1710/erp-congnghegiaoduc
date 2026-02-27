@@ -41,32 +41,32 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-18'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>07. BÁO CÁO CHI TIẾT THEO TỪNG KHÓA TRONG COMBO</p>
+                <p>07. BÁO CÁO (KT) CHI TIẾT THEO TỪNG KHÓA TRONG COMBO</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-19'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>08. SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</p>
+                <p>08. BÁO CÁO (KT) SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-20'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>09. DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC (MỚI / UP LEVEL)</p>
+                <p>09. BÁO CÁO (KT) DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC (MỚI / UP LEVEL)</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-21'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>10. BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM</p>
+                <p>10. BÁO CÁO (KT) BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-22'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>11. BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG</p>
+                <p>11. BÁO CÁO (KT) BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-23'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>12. THỐNG KÊ DOANH THU THEO TEAM SALE</p>
+                <p>12. BÁO CÁO (KT) THỐNG KÊ DOANH THU THEO TEAM SALE</p>
               </router-link>
             </div>
           </div>
