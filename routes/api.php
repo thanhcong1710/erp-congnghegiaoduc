@@ -156,6 +156,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');
             Route::post('accounting/charges/add', 'ChargesController@add');
             Route::post('accounting/charges/update', 'ChargesController@update');
+            Route::post('accounting/charges/apply-discount', 'ChargesController@applyDiscount');
             Route::post('accounting/waitcharge-approve/list', 'ChargesController@waitchargeApproveList');
             Route::get('accounting/waitcharge-approve/{id}', 'ChargesController@getWaitchargeApproveInfo');
             Route::post('accounting/waitcharge-approve/update', 'ChargesController@approve');

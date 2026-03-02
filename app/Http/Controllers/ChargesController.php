@@ -195,6 +195,30 @@ class ChargesController extends Controller
         if (data_get($request, 'status') == 1) {
             if (data_get($tmp_payment, 'type') == 1) {
                 $agreement_info = u::getObject(array('id' => data_get($tmp_payment, 'agreement_id')), 'agreements');
+
+                $must_charge = (int) data_get($agreement_info, 'must_charge');
+                $total_charged = (int) data_get($agreement_info, 'total_charged');
+                $charge_amount = (int) data_get($tmp_payment, 'charge_amount');
+                $discount_amount = (int) data_get($agreement_info, 'discount_amount');
+
+                // ---- Validate cân bằng ----
+                // must_charge = total_charged + charge_amount + debt_after + discount_amount
+                $debt_after = $must_charge - $total_charged - $charge_amount - $discount_amount;
+                $balance = $total_charged + $charge_amount + max(0, $debt_after) + $discount_amount;
+                if ($balance !== $must_charge) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Số liệu không cân bằng: '
+                            . 'Đã thu ' . number_format($total_charged)
+                            . ' + Thu ' . number_format($charge_amount)
+                            . ' + Giảm trừ ' . number_format($discount_amount)
+                            . ' + Công nợ ' . number_format(max(0, $debt_after))
+                            . ' = ' . number_format($balance)
+                            . ' ≠ Phải đóng ' . number_format($must_charge)
+                    ], 422);
+                }
+
+                // ---- Ghi payments ----
                 u::insertSimpleRow(array(
                     'agreement_id' => data_get($agreement_info, 'id'),
                     'student_id' => data_get($agreement_info, 'student_id'),
@@ -202,10 +226,10 @@ class ChargesController extends Controller
                     'cm_id' => data_get($agreement_info, 'cm_id'),
                     'ec_id' => data_get($agreement_info, 'ec_id'),
                     'method' => data_get($tmp_payment, 'method'),
-                    'must_charge' => data_get($agreement_info, 'must_charge'),
-                    'amount' => data_get($tmp_payment, 'charge_amount'),
-                    'total' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($tmp_payment, 'charge_amount'),
-                    'debt' => (int) data_get($agreement_info, 'must_charge') - (int) data_get($agreement_info, 'total_charged') - (int) data_get($tmp_payment, 'charge_amount'),
+                    'must_charge' => $must_charge,
+                    'amount' => $charge_amount,
+                    'total' => $total_charged + $charge_amount,
+                    'debt' => max(0, $debt_after),
                     'charge_date' => data_get($tmp_payment, 'charge_date'),
                     'note' => data_get($tmp_payment, 'note'),
                     'created_at' => date('Y-m-d H:i:s'),
@@ -213,13 +237,14 @@ class ChargesController extends Controller
                     'type' => 1
                 ), 'payments');
 
-                $debt_amount = (int) data_get($agreement_info, 'must_charge') - (int) data_get($agreement_info, 'total_charged') - (int) data_get($tmp_payment, 'charge_amount');
-                if ($debt_amount == 0) {
+                // ---- Cập nhật agreements ----
+                $new_total_charged = $total_charged + $charge_amount;
+                if ($debt_after <= 0) {
                     u::updateSimpleRow(array(
                         'status' => 3,
-                        'total_charged' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($tmp_payment, 'charge_amount'),
+                        'total_charged' => $new_total_charged,
                         'debt_amount' => 0,
-                        'full_fee_date' => data_get($tmp_payment, 'charge_date'),  // ← Ghi ngày thu đủ phí
+                        'full_fee_date' => data_get($tmp_payment, 'charge_date'),
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
@@ -227,12 +252,12 @@ class ChargesController extends Controller
                 } else {
                     u::updateSimpleRow(array(
                         'status' => 2,
-                        'total_charged' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($tmp_payment, 'charge_amount'),
-                        'debt_amount' => $debt_amount,
+                        'total_charged' => $new_total_charged,
+                        'debt_amount' => $debt_after,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
-                    LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Đặt cọc ' . u::formatCurrency(data_get($tmp_payment, 'charge_amount')) . ' cho hợp đồng - ' . data_get($agreement_info, 'code'), Auth::user()->id);
+                    LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Đặt cọc ' . u::formatCurrency($charge_amount) . ' cho hợp đồng - ' . data_get($agreement_info, 'code'), Auth::user()->id);
                 }
 
                 u::addLogAgreements(data_get($agreement_info, 'id'));
@@ -653,6 +678,115 @@ class ChargesController extends Controller
 
         return response()->json([
             'payment_info' => $data,
+        ]);
+    }
+
+    /**
+     * Kế toán áp dụng giảm trừ (discount) trước khi phê duyệt phiếu thu.
+     *
+     * Công thức: must_charge = total_charged + debt_amount + discount_amount
+     * → debt_amount = must_charge - total_charged - discount_amount
+     * must_charge KHÔNG thay đổi.
+     *
+     * Với combo (nhiều contracts): phân bổ discount_amount theo tỷ lệ must_charge của từng contract.
+     */
+    public function applyDiscount(Request $request)
+    {
+        $agreement_id = (int) $request->agreement_id;
+        $discount_amount = (int) $request->discount_amount;
+        $discount_note = trim($request->discount_note ?? '');
+
+        if ($agreement_id <= 0) {
+            return response()->json(['status' => 0, 'message' => 'Thiếu agreement_id.'], 422);
+        }
+        if ($discount_amount < 0) {
+            return response()->json(['status' => 0, 'message' => 'Số tiền giảm trừ không được âm.'], 422);
+        }
+
+        $agreement = u::getObject(['id' => $agreement_id], 'agreements');
+        if (!$agreement) {
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy hợp đồng.'], 404);
+        }
+
+        $must_charge = (int) data_get($agreement, 'must_charge');
+        $total_charged = (int) data_get($agreement, 'total_charged');
+
+        // Validate: discount không được vượt quá phần còn nợ
+        $max_discount = $must_charge - $total_charged;
+        if ($discount_amount > $max_discount) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Giảm trừ (' . number_format($discount_amount) . ') vượt quá công nợ hiện tại (' . number_format($max_discount) . ').'
+            ], 422);
+        }
+
+        $new_debt_amount = $must_charge - $total_charged - $discount_amount;
+
+        // ---- 1. Cập nhật agreements ----
+        u::updateSimpleRow([
+            'discount_amount' => $discount_amount,
+            'discount_note' => $discount_note,
+            'debt_amount' => $new_debt_amount,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $agreement_id], 'agreements');
+
+        // ---- 2. Log agreements ----
+        u::addLogAgreements($agreement_id);
+
+        // ---- 3. Phân bổ discount_amount cho các contracts trong combo ----
+        $contracts = u::query("
+            SELECT id, must_charge, total_charged, debt_amount, discount_amount
+            FROM contracts
+            WHERE agreement_id = $agreement_id AND status > 0
+            ORDER BY id ASC
+        ");
+
+        if ($contracts && count($contracts) > 0) {
+            // Tổng must_charge của các contracts để tính tỷ lệ
+            $total_contract_must = array_sum(array_map(function ($c) {
+                return (int) $c->must_charge;
+            }, $contracts));
+
+            $allocated = 0;
+            $contractCount = count($contracts);
+
+            foreach ($contracts as $i => $contract) {
+                $cid = (int) $contract->id;
+                $cMust = (int) $contract->must_charge;
+                $cTotalCharged = (int) $contract->total_charged;
+
+                // Phần cuối: lấy phần dư để tránh sai số làm tròn
+                if ($i === $contractCount - 1) {
+                    $cDiscount = $discount_amount - $allocated;
+                } else {
+                    $cDiscount = $total_contract_must > 0
+                        ? (int) round($discount_amount * ($cMust / $total_contract_must))
+                        : 0;
+                }
+                $allocated += $cDiscount;
+
+                $cDebt = $cMust - $cTotalCharged - $cDiscount;
+
+                u::updateSimpleRow([
+                    'discount_amount' => $cDiscount,
+                    'discount_note' => $discount_note,
+                    'debt_amount' => max(0, $cDebt),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ], ['id' => $cid], 'contracts');
+
+                // Log contract
+                u::addLogContracts($cid);
+            }
+        }
+
+        $updatedAgreement = u::getObject(['id' => $agreement_id], 'agreements');
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Áp dụng giảm trừ thành công.',
+            'debt_amount' => $new_debt_amount,
+            'agreement' => $updatedAgreement,
         ]);
     }
 }

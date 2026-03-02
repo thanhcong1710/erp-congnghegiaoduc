@@ -154,11 +154,50 @@
             <input
               class="vs-inputx vs-input--input normal"
               type="text"
-              name="title"
               :value="agreement_info.debt_amount | formatNumber"
               disabled="true"
             />
           </div>
+          <!-- ======= GIẢM TRỪ ======= -->
+          <div class="vx-col w-full mb-2" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <vs-divider />
+            <h6 class="mb-3" style="color:#7c3aed"><i class="fas fa-tag mr-1"></i> Giảm trừ (Discount)</h6>
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <label>Số tiền giảm trừ</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="number"
+              min="0"
+              v-model.number="discountAmount"
+              placeholder="Nhập số tiền giảm trừ"
+            />
+          </div>
+          <div class="vx-col md:w-2/4 w-full mb-4" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <label>Lý do giảm trừ</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              v-model="discountNote"
+              placeholder="Nhập lý do giảm trừ"
+            />
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4 flex items-end" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <vs-button color="warning" type="filled" @click="applyDiscount" icon-pack="feather" icon="icon-scissors">
+              Áp dụng giảm trừ
+            </vs-button>
+          </div>
+          <!-- Hiển thị discount đã áp dụng -->
+          <div class="vx-col w-full mb-4" v-if="agreement_info.discount_amount > 0">
+            <vs-alert color="warning" active="true">
+              <span><strong>Đã giảm trừ: {{ agreement_info.discount_amount | formatNumber }} đ</strong></span>
+              <span v-if="agreement_info.discount_note"> — {{ agreement_info.discount_note }}</span>
+            </vs-alert>
+          </div>
+          <div class="vx-col w-full mb-2" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <vs-divider />
+          </div>
+          <!-- ======================== -->
           <div class="vx-col md:w-1/4 w-full mb-4">
             <label>Phương thức đóng phí</label>
             <select class="vs-inputx vs-input--input normal" v-model="payment.method" :disabled="payment.status!=0 || !checkPermission('approve_add_fee')">
@@ -304,6 +343,8 @@
         },
         amount:'',
         status:'',
+        discountAmount: 0,
+        discountNote: '',
         selectedFiles: [],
         existingAttachments: []
       }
@@ -314,17 +355,24 @@
     watch: {
       amount: function (val) {
         if (this.agreement_info.must_charge) {
-          const value = u.fmc(val)
-          const suma = value.n + parseInt(this.agreement_info.total_charged)
-          const debt = parseInt(this.agreement_info.must_charge) - parseInt(suma)
-          if (suma > parseInt(this.agreement_info.must_charge)) {
-            this.amount = parseInt(this.agreement_info.must_charge, 10) - parseInt(this.agreement_info.total_charged, 10)
-            this.amount = this.amount > 1000 && this.amount % 1000 > 0 ? ((this.amount / 1000) + 1) * 1000 : this.amount
+          const value     = u.fmc(val)
+          const must      = parseInt(this.agreement_info.must_charge)    || 0
+          const charged   = parseInt(this.agreement_info.total_charged)  || 0
+          const discount  = parseInt(this.agreement_info.discount_amount)|| 0
+          // Số tiền tối đa có thể thu = phần còn lại sau khi trừ giảm trừ
+          const maxAmount = must - charged - discount
+          const suma      = value.n + charged
+          if (value.n > maxAmount) {
+            // Không cho vượt quá
+            this.amount = maxAmount > 0 ? maxAmount : 0
+            this.payment.amount = maxAmount > 0 ? maxAmount : 0
+            this.agreement_info.debt_amount = 0
           } else {
-            this.agreement_info.debt_amount = debt
+            // debt = must - charged - amount - discount
+            this.agreement_info.debt_amount = must - suma - discount
             this.amount = value.s
+            this.payment.amount = value.n
           }
-          this.payment.amount = value.n
         }
       }
     },
@@ -382,6 +430,9 @@
           this.payment = response.data.payment_info
           this.agreement_info = response.data.agreement_info
           this.amount = this.payment.charge_amount
+          // Load discount đã lưu
+          this.discountAmount = this.agreement_info.discount_amount || 0
+          this.discountNote   = this.agreement_info.discount_note   || ''
           
           // Load existing attachments
           if (this.payment.attachments) {
@@ -398,19 +449,42 @@
         })
       },
       save() {
-        let mess = "";
+        let mess = '';
         let resp = true;
-        if (this.payment.amount == "") {
-          mess += " - Số tiền thu không được để trống<br/>";
+
+        const must     = parseInt(this.agreement_info.must_charge)    || 0
+        const charged  = parseInt(this.agreement_info.total_charged)  || 0
+        const amount   = parseInt(this.payment.amount)                || 0
+        const debt     = parseInt(this.agreement_info.debt_amount)    || 0
+        const discount = parseInt(this.agreement_info.discount_amount)|| 0
+
+        if (!amount) {
+          mess += ' - Số tiền thu không được để trống<br/>';
           resp = false;
         }
-        if (this.payment.charge_date == "") {
-          mess += " - Ngày thu phí không được để trống<br/>";
+        if (!this.payment.charge_date) {
+          mess += ' - Ngày thu phí không được để trống<br/>';
           resp = false;
         }
+
+        // Kiểm tra cân bằng: phải đóng = đã thu + số tiền thu + công nợ + giảm trừ
+        if (resp) {
+          const balance = charged + amount + debt + discount
+          if (balance !== must) {
+            mess += ` - Số liệu không cân bằng:<br/>`
+              + `&nbsp;&nbsp;Đã thu: <b>${charged.toLocaleString('vi-VN')}</b>`
+              + ` + Thu: <b>${amount.toLocaleString('vi-VN')}</b>`
+              + ` + Công nợ: <b>${debt.toLocaleString('vi-VN')}</b>`
+              + ` + Giảm trừ: <b>${discount.toLocaleString('vi-VN')}</b>`
+              + ` = <b>${balance.toLocaleString('vi-VN')}</b>`
+              + ` ≠ phải đóng <b>${must.toLocaleString('vi-VN')}</b><br/>`
+            resp = false;
+          }
+        }
+
         if (!resp) {
           this.alert.color = 'danger'
-          this.alert.body = mess;
+          this.alert.body  = mess;
           this.alert.active = true;
           return false;
         }
@@ -458,6 +532,41 @@
           this.loadDetail();  
         })
       },
+      applyDiscount() {
+        if (!this.discountAmount || this.discountAmount <= 0) {
+          this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng nhập số tiền giảm trừ > 0', color: 'warning' })
+          return
+        }
+        if (!this.discountNote.trim()) {
+          this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng nhập lý do giảm trừ', color: 'warning' })
+          return
+        }
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'warning',
+          title: 'Xác nhận giảm trừ',
+          text: `Áp dụng giảm trừ ${this.discountAmount.toLocaleString('vi-VN')} đ với lý do: "${this.discountNote}"?`,
+          accept: () => {
+            this.$vs.loading()
+            axios.p('/api/lms/accounting/charges/apply-discount', {
+              agreement_id:    this.agreement_info.id,
+              discount_amount: this.discountAmount,
+              discount_note:   this.discountNote,
+            }).then(res => {
+              this.$vs.loading.close()
+              this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success', icon: 'icon-check', iconPack: 'feather' })
+              this.loadDetail()
+            }).catch(err => {
+              this.$vs.loading.close()
+              const msg = err.response && err.response.data && err.response.data.message
+                ? err.response.data.message : 'Có lỗi xảy ra'
+              this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' })
+            })
+          },
+          acceptText: 'Áp dụng',
+          cancelText: 'Hủy'
+        })
+      },
       approve(status){
         this.status = status;
         this.$vs.dialog({
@@ -476,7 +585,7 @@
           status: this.status
         };
         this.$vs.loading();
-        axios.p(`/api/lms/accounting/waitcharge-approve/update`,data)
+        axios.p(`/api/lms/accounting/waitcharge-approve/update`, data)
         .then((response) => {
           this.$vs.loading.close();
           this.$vs.notify({
@@ -487,6 +596,16 @@
             icon: 'icon-check'
           })
           this.$router.push('/lms/waitcharge-approve')
+        })
+        .catch((err) => {
+          this.$vs.loading.close();
+          const msg = err.response && err.response.data && err.response.data.message
+            ? err.response.data.message : 'Có lỗi xảy ra khi duyệt phiếu thu'
+          this.alert.color  = 'danger'
+          this.alert.body   = '⚠️ ' + msg
+          this.alert.active = true
+          // scroll lên alert
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
         })
       }
     },
