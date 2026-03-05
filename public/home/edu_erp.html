@@ -81,7 +81,7 @@
     }
     .hero::before {
       content: '';
-      position: absolute; inset: 0;
+      position: absolute; inset: 0; pointer-events: none;
       background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
     .hero-badge {
@@ -339,13 +339,109 @@
     .footer-links a { color: #475569; text-decoration: none; font-size: .85rem; transition: color .2s; }
     .footer-links a:hover { color: #94a3b8; }
 
-    /* ── RESPONSIVE ── */
+
+    /* ── STICKY MOBILE CTA ── */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 998;
+      background: rgba(15,23,42,.95); backdrop-filter: blur(12px);
+      padding: .875rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+    }
+    .mobile-sticky-cta a {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      background: linear-gradient(135deg,#2563eb,#06b6d4);
+      color: white; text-decoration: none;
+      padding: .875rem; border-radius: 12px;
+      font-weight: 700; font-size: .95rem;
+      box-shadow: 0 4px 20px rgba(37,99,235,.4);
+      transition: opacity .2s;
+    }
+    .mobile-sticky-cta a:active { opacity: .88; }
     @media (max-width: 768px) {
+      .mobile-sticky-cta { display: block; }
+      /* Thêm padding bottom body để không che content */
+      body { padding-bottom: 80px; }
+    }
+
+    /* ── RESPONSIVE ── */
+
+    /* Hamburger menu */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px; cursor: pointer;
+      background: none; border: none; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: white; border-radius: 2px; transition: all .3s;
+    }
+    .mobile-menu {
+      display: none; position: fixed; top: 68px; left: 0; right: 0;
+      background: rgba(15,23,42,.98); backdrop-filter: blur(20px);
+      padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,.08);
+      z-index: 999; flex-direction: column; gap: 1.25rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: #cbd5e1; text-decoration: none; font-size: 1rem; font-weight: 500;
+      padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .mobile-menu a:last-child { border-bottom: none; }
+
+    @media (max-width: 768px) {
+      /* Header */
       nav { display: none; }
+      .btn-demo { display: none; }
+      .hamburger { display: flex; }
+
+      /* Hero */
+      .hero { padding: 100px 1.25rem 60px; }
+      .hero h1 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+      .hero p { font-size: 1rem; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .hero-actions a { width: 100%; text-align: center; justify-content: center; }
+      .hero-stats { gap: 1.25rem; padding-top: 2rem; margin-top: 2.5rem; }
+      .stat-number { font-size: 1.75rem; }
+      .stat-item { min-width: 80px; }
+
+      /* Sections */
+      section { padding: 60px 1.25rem; }
+      .section-title { font-size: 1.5rem; }
+
+      /* Problems grid - 1 col */
+      .problems-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+      /* Modules grid - 1 col */
+      .modules-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+
+      /* Values grid */
+      .values-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+      /* Departments */
       .dept-content.active { grid-template-columns: 1fr; }
       .dept-visual { display: none; }
-      .hero-stats { gap: 1.5rem; }
-      .stat-number { font-size: 1.75rem; }
+      .dept-tabs { gap: .5rem; }
+      .dept-tab { font-size: .8rem; padding: .5rem .875rem; }
+
+      /* Testimonials - 1 col */
+      .testimonials-grid { grid-template-columns: 1fr; }
+
+      /* AI section */
+      .ai-layout { grid-template-columns: 1fr !important; gap: 2rem; }
+      .ai-visual-wrap { display: none; }
+
+      /* Header inner */
+      .header-inner { padding: 0; }
+
+      /* Footer */
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .hero { padding: 90px 1rem 50px; }
+      .values-grid { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; }
     }
 
     /* ── ANIMATIONS ── */
@@ -523,11 +619,25 @@
       <a href="#contact">Liên hệ</a>
     </nav>
     <a href="https://erp.congnghegiaoduc.com" target="_blank" class="btn-demo">Dùng thử miễn phí</a>
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#ai" onclick="closeMobileMenu()">✨ AI</a>
+  <a href="#modules" onclick="closeMobileMenu()">Tính năng</a>
+  <a href="#departments" onclick="closeMobileMenu()">Phòng ban</a>
+  <a href="#values" onclick="closeMobileMenu()">Giá trị</a>
+  <a href="#testimonials" onclick="closeMobileMenu()">Khách hàng</a>
+  <a href="#contact" onclick="closeMobileMenu()">Liên hệ</a>
+  <a href="https://erp.congnghegiaoduc.com" target="_blank" style="background:linear-gradient(135deg,#2563eb,#06b6d4);color:white;padding:.75rem 1rem;border-radius:8px;text-align:center;font-weight:600;">Dùng thử miễn phí</a>
+</div>
 
 <!-- HERO -->
 <section class="hero" id="home">
+  <div style="position:relative;z-index:1">
   <div class="hero-badge">
     <span></span>
     Nền tảng EdTech #1 dành cho trung tâm giáo dục
@@ -565,6 +675,7 @@
       <div class="stat-number">24/7</div>
       <div class="stat-label">Hỗ trợ kỹ thuật</div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -1196,5 +1307,12 @@
 
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 </script>
+<!-- STICKY MOBILE CTA -->
+<div class="mobile-sticky-cta">
+  <a href="https://erp.congnghegiaoduc.com" target="_blank">
+    🚀 Trải nghiệm Edu-ERP miễn phí
+  </a>
+</div>
+
 </body>
 </html>
