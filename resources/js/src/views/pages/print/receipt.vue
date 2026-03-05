@@ -10,8 +10,8 @@
                                 <span class="logo"><img src="/images/logo.png" /></span>
                             </div>
                             <div class="h-right" style="border:none">
-                                <h4>CÔNG TY CỔ PHẦN GIÁO DỤC LAPO ENGLISH</h4>
-                                <p><i class="fa fa-map-marker"></i> Số 11, Ngõ 72 Đình Quán, Phúc Diễn, Bắc Từ Liêm, Hà Nội</p>
+                                <h4>CÔNG TY CÔNG NGHỆ GIÁO DỤC</h4>
+                                <p><i class="fa fa-map-marker"></i> 199 Hồ Tùng Mậu, Nam Từ Liêm, Hà Nội</p>
                             </div>
                             <div class="h-right" style="border:none; text-align:center;width: 35%">
                                 <p><b>Mẫu số 01 - TT</b></p>
