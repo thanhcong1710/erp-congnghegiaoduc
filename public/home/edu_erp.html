@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu-ERP – Hệ Thống Quản Lý Giáo Dục Toàn Diện | Công Nghệ Giáo Dục</title>
+  <meta name="description" content="Edu-ERP cung cấp giải pháp quản lý giáo dục toàn diện: CRM, LMS, Marketing, Kế toán học phí, Báo cáo thống kê cho trung tâm ngoại ngữ và cơ sở đào tạo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --accent: #06b6d4;
+      --accent2: #8b5cf6;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --dark: #0f172a;
+      --dark2: #1e293b;
+      --gray: #64748b;
+      --gray-light: #f1f5f9;
+      --white: #ffffff;
+      --border: #e2e8f0;
+      --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #1e40af 100%);
+      --gradient-primary: linear-gradient(135deg, #2563eb, #06b6d4);
+      --gradient-accent: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.12);
+      --shadow-md: 0 4px 20px rgba(0,0,0,.1);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,.15);
+      --shadow-blue: 0 8px 40px rgba(37,99,235,.25);
+      --radius: 16px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; color: var(--dark); background: var(--white); overflow-x: hidden; }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(15,23,42,.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      padding: 0 2rem;
+    }
+    .header-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+    }
+    .logo { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+    .logo-icon {
+      width: 40px; height: 40px; background: var(--gradient-primary);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 900; color: white; letter-spacing: -1px;
+    }
+    .logo-text { font-size: 1.25rem; font-weight: 800; color: white; }
+    .logo-sub { font-size: .7rem; color: #94a3b8; font-weight: 400; display: block; }
+    nav { display: flex; align-items: center; gap: 2rem; }
+    nav a {
+      color: #cbd5e1; text-decoration: none; font-size: .875rem; font-weight: 500;
+      transition: color .2s;
+    }
+    nav a:hover { color: white; }
+    .btn-demo {
+      background: var(--gradient-primary); color: white; border: none;
+      padding: .6rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: .875rem;
+      cursor: pointer; text-decoration: none; transition: opacity .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-demo:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--gradient-hero);
+      padding: 140px 2rem 100px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(37,99,235,.2); border: 1px solid rgba(37,99,235,.4);
+      color: #93c5fd; padding: .375rem 1rem; border-radius: 100px;
+      font-size: .8rem; font-weight: 600; margin-bottom: 1.5rem;
+    }
+    .hero-badge span { width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 900; color: white;
+      line-height: 1.15; margin-bottom: 1.5rem; max-width: 900px; margin-left: auto; margin-right: auto;
+    }
+    .hero h1 .highlight {
+      background: var(--gradient-primary); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero p {
+      font-size: 1.125rem; color: #94a3b8; max-width: 640px;
+      margin: 0 auto 2.5rem; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--gradient-primary); color: white;
+      padding: .875rem 2rem; border-radius: 10px; font-weight: 700; font-size: 1rem;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+      box-shadow: var(--shadow-blue); transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 50px rgba(37,99,235,.4); }
+    .btn-outline {
+      background: transparent; color: white;
+      border: 1.5px solid rgba(255,255,255,.3);
+      padding: .875rem 2rem; border-radius: 10px; font-weight: 600; font-size: 1rem;
+      text-decoration: none; display: inline-flex; align-items: center; gap: .5rem;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-outline:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.5); }
+
+    /* Stats row */
+    .hero-stats {
+      display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+      margin-top: 4rem; padding-top: 3rem; border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 2.25rem; font-weight: 900; color: white; }
+    .stat-label { font-size: .8rem; color: #64748b; margin-top: .25rem; font-weight: 500; }
+
+    /* ── SECTION BASE ── */
+    section { padding: 100px 2rem; }
+    .section-inner { max-width: 1200px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block; background: var(--primary-light); color: var(--primary);
+      padding: .3rem .875rem; border-radius: 100px; font-size: .75rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: 800;
+      line-height: 1.2; margin-bottom: 1rem;
+    }
+    .section-desc { font-size: 1.05rem; color: var(--gray); max-width: 560px; line-height: 1.7; }
+
+    /* ── PROBLEMS ── */
+    .problems { background: var(--gray-light); }
+    .problems-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem; margin-top: 3.5rem;
+    }
+    .problem-card {
+      background: white; border-radius: var(--radius); padding: 2rem;
+      border: 1px solid var(--border); transition: box-shadow .2s, transform .2s;
+    }
+    .problem-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    .problem-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .problem-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .5rem; }
+    .problem-card p { font-size: .875rem; color: var(--gray); line-height: 1.6; }
+
+    /* ── MODULES ── */
+    .modules-header { text-align: center; margin-bottom: 4rem; }
+    .modules-header .section-desc { margin: 0 auto; }
+    .modules-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+    .module-card {
+      background: white; border-radius: var(--radius); border: 1px solid var(--border);
+      overflow: hidden; transition: box-shadow .25s, transform .25s;
+    }
+    .module-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-5px); }
+    .module-header {
+      padding: 2rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .module-icon-wrap {
+      width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.75rem;
+    }
+    .module-header h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: .3rem; }
+    .module-header p { font-size: .825rem; color: var(--gray); line-height: 1.5; }
+    .module-features { padding: 1.5rem 2rem; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .5rem 0; border-bottom: 1px solid var(--border);
+    }
+    .feature-item:last-child { border-bottom: none; }
+    .feature-check {
+      width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; margin-top: 1px;
+      font-size: .7rem; color: white; font-weight: 700;
+    }
+    .feature-item span { font-size: .85rem; color: var(--dark2); line-height: 1.5; }
+
+    /* color variants */
+    .blue { background: linear-gradient(135deg,#dbeafe,#bfdbfe); color: var(--primary); }
+    .cyan { background: linear-gradient(135deg,#cffafe,#a5f3fc); color: #0891b2; }
+    .purple { background: linear-gradient(135deg,#ede9fe,#ddd6fe); color: #7c3aed; }
+    .green { background: linear-gradient(135deg,#dcfce7,#bbf7d0); color: #059669; }
+    .orange { background: linear-gradient(135deg,#ffedd5,#fed7aa); color: #ea580c; }
+    .pink { background: linear-gradient(135deg,#fce7f3,#fbcfe8); color: #db2777; }
+    .indigo { background: linear-gradient(135deg,#e0e7ff,#c7d2fe); color: #4338ca; }
+
+    .check-blue { background: var(--primary); }
+    .check-cyan { background: #0891b2; }
+    .check-purple { background: #7c3aed; }
+    .check-green { background: #059669; }
+    .check-orange { background: #ea580c; }
+    .check-pink { background: #db2777; }
+    .check-indigo { background: #4338ca; }
+
+    /* ── VALUE PROPS ── */
+    .values { background: var(--dark); position: relative; overflow: hidden; }
+    .values::before {
+      content: ''; position: absolute;
+      top: -200px; right: -200px; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(37,99,235,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .values .section-title { color: white; }
+    .values .section-desc { color: #94a3b8; }
+    .values-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem; margin-top: 3.5rem;
+    }
+    .value-card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); padding: 2rem; text-align: center;
+      transition: background .2s, border-color .2s;
+    }
+    .value-card:hover { background: rgba(255,255,255,.07); border-color: rgba(37,99,235,.4); }
+    .value-number {
+      font-size: 2.75rem; font-weight: 900; margin-bottom: .5rem;
+      background: var(--gradient-primary); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .value-label { font-size: .9rem; color: #94a3b8; line-height: 1.5; }
+
+    /* ── DEPARTMENTS ── */
+    .dept-tabs { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .dept-tab {
+      padding: .6rem 1.25rem; border-radius: 8px; font-size: .875rem; font-weight: 600;
+      cursor: pointer; border: 1.5px solid var(--border); background: white;
+      color: var(--gray); transition: all .2s;
+    }
+    .dept-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .dept-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+    .dept-content { display: none; }
+    .dept-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .dept-text h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; }
+    .dept-text p { color: var(--gray); line-height: 1.7; margin-bottom: 1.5rem; }
+    .dept-list { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .dept-list li {
+      display: flex; align-items: flex-start; gap: .75rem;
+      font-size: .9rem; color: var(--dark2); line-height: 1.5;
+    }
+    .dept-list li::before {
+      content: '✓'; background: var(--success); color: white;
+      width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: .65rem; font-weight: 900; flex-shrink: 0; margin-top: 1px;
+    }
+    .dept-visual {
+      background: var(--gray-light); border-radius: var(--radius); padding: 2rem;
+      border: 1px solid var(--border); min-height: 260px;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .dept-stat-row { display: flex; gap: 1rem; }
+    .dept-stat {
+      flex: 1; background: white; border-radius: 12px; padding: 1.25rem;
+      border: 1px solid var(--border); text-align: center;
+    }
+    .dept-stat-val { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+    .dept-stat-label { font-size: .75rem; color: var(--gray); margin-top: .2rem; }
+    .dept-bar-label { font-size: .8rem; font-weight: 600; margin-bottom: .4rem; }
+    .dept-bar { background: #e2e8f0; border-radius: 100px; height: 8px; overflow: hidden; }
+    .dept-bar-fill { height: 100%; border-radius: 100px; background: var(--gradient-primary); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { background: var(--gray-light); }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; margin-top: 3.5rem;
+    }
+    .testimonial-card {
+      background: white; border-radius: var(--radius); padding: 2rem;
+      border: 1px solid var(--border);
+    }
+    .stars { color: #f59e0b; font-size: 1rem; margin-bottom: 1rem; }
+    .testimonial-card blockquote {
+      font-size: .9rem; color: var(--dark2); line-height: 1.7; margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: .75rem; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-weight: 700; font-size: .9rem; color: white;
+    }
+    .testimonial-author h4 { font-size: .9rem; font-weight: 700; }
+    .testimonial-author span { font-size: .8rem; color: var(--gray); }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: var(--gradient-hero); text-align: center; padding: 100px 2rem;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::after {
+      content: '';
+      position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(6,182,212,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: white;
+      margin-bottom: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;
+    }
+    .cta-section p { color: #94a3b8; font-size: 1.1rem; margin-bottom: 2.5rem; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .contact-grid {
+      display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem;
+    }
+    .contact-item { display: flex; align-items: center; gap: .75rem; color: #94a3b8; font-size: .9rem; }
+    .contact-item a { color: #93c5fd; text-decoration: none; hover: underline; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--dark); border-top: 1px solid rgba(255,255,255,.06); padding: 3rem 2rem; }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;
+    }
+    .footer-inner p { color: #475569; font-size: .85rem; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { color: #475569; text-decoration: none; font-size: .85rem; transition: color .2s; }
+    .footer-links a:hover { color: #94a3b8; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .dept-content.active { grid-template-columns: 1fr; }
+      .dept-visual { display: none; }
+      .hero-stats { gap: 1.5rem; }
+      .stat-number { font-size: 1.75rem; }
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-up {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: none; }
+
+    /* ── AI SECTION ── */
+    .ai-section {
+      background: linear-gradient(135deg, #0a0a1a 0%, #0d1117 40%, #0a0f1e 100%);
+      position: relative; overflow: hidden; padding: 100px 2rem;
+    }
+    .ai-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 50%, rgba(139,92,246,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 30%, rgba(6,182,212,.1) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 80%, rgba(37,99,235,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    /* Animated grid */
+    .ai-grid-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(139,92,246,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,.05) 1px, transparent 1px);
+      background-size: 50px 50px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: linear-gradient(135deg, rgba(139,92,246,.2), rgba(6,182,212,.2));
+      border: 1px solid rgba(139,92,246,.4); color: #c4b5fd;
+      padding: .4rem 1.1rem; border-radius: 100px;
+      font-size: .8rem; font-weight: 700; margin-bottom: 1.5rem;
+      letter-spacing: .03em; text-transform: uppercase;
+    }
+    .ai-badge .ai-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg,#8b5cf6,#06b6d4);
+      animation: ai-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes ai-pulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,.7); }
+      50% { box-shadow: 0 0 0 6px rgba(139,92,246,0); }
+    }
+    .ai-section .section-title { color: white; font-size: clamp(2rem, 3.5vw, 3rem); }
+    .ai-section .section-desc { color: #94a3b8; max-width: 620px; }
+    .ai-highlight {
+      background: linear-gradient(135deg, #a78bfa, #06b6d4, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .ai-layout {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center; margin-top: 4rem;
+    }
+    /* AI Feature pills */
+    .ai-features-list { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+    .ai-feature {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      transition: background .25s, border-color .25s, transform .25s;
+    }
+    .ai-feature:hover {
+      background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.3);
+      transform: translateX(6px);
+    }
+    .ai-feature-icon {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+    }
+    .ai-feature-icon.v { background: linear-gradient(135deg,rgba(139,92,246,.3),rgba(139,92,246,.1)); }
+    .ai-feature-icon.c { background: linear-gradient(135deg,rgba(6,182,212,.3),rgba(6,182,212,.1)); }
+    .ai-feature-icon.s { background: linear-gradient(135deg,rgba(16,185,129,.3),rgba(16,185,129,.1)); }
+    .ai-feature-icon.r { background: linear-gradient(135deg,rgba(245,158,11,.3),rgba(245,158,11,.1)); }
+    .ai-feature h4 { font-size: .95rem; font-weight: 700; color: white; margin-bottom: .25rem; }
+    .ai-feature p { font-size: .825rem; color: #94a3b8; line-height: 1.5; }
+    /* AI Visual Card */
+    .ai-visual-wrap { position: relative; }
+    .ai-card {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(139,92,246,.2);
+      border-radius: 24px; padding: 2rem; position: relative; overflow: hidden;
+    }
+    .ai-card::before {
+      content: ''; position: absolute;
+      top: -60px; right: -60px; width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(139,92,246,.2) 0%, transparent 70%);
+    }
+    .ai-card-header {
+      display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem;
+    }
+    .ai-avatar {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg,#8b5cf6,#06b6d4);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .ai-card-header h4 { color: white; font-size: .95rem; font-weight: 700; }
+    .ai-card-header span { color: #64748b; font-size: .75rem; }
+    /* Chat bubbles */
+    .ai-chat { display: flex; flex-direction: column; gap: 1rem; }
+    .ai-bubble {
+      max-width: 85%; padding: .875rem 1.1rem; border-radius: 14px;
+      font-size: .825rem; line-height: 1.6;
+    }
+    .ai-bubble.user {
+      background: rgba(37,99,235,.2); border: 1px solid rgba(37,99,235,.3);
+      color: #93c5fd; align-self: flex-end; border-bottom-right-radius: 4px;
+    }
+    .ai-bubble.bot {
+      background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.2);
+      color: #e2e8f0; align-self: flex-start; border-bottom-left-radius: 4px;
+    }
+    .ai-bubble.bot strong { color: #a78bfa; }
+    /* Typing animation */
+    .ai-typing { display: flex; gap: .3rem; align-items: center; padding: .6rem .9rem; }
+    .ai-typing span {
+      width: 7px; height: 7px; background: #8b5cf6; border-radius: 50%;
+      animation: typing 1.2s ease-in-out infinite;
+    }
+    .ai-typing span:nth-child(2) { animation-delay: .2s; }
+    .ai-typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typing { 0%,60%,100% { transform: translateY(0); opacity:.4; } 30% { transform: translateY(-8px); opacity:1; } }
+    /* AI metrics strip */
+    .ai-metrics {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1rem; margin-top: 1.5rem;
+    }
+    .ai-metric {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px; padding: 1rem; text-align: center;
+    }
+    .ai-metric-val {
+      font-size: 1.4rem; font-weight: 900;
+      background: linear-gradient(135deg,#a78bfa,#06b6d4);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .ai-metric-label { font-size: .7rem; color: #64748b; margin-top: .2rem; }
+    /* Floating orbs */
+    .orb {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      filter: blur(60px); opacity: .15; animation: orb-float 8s ease-in-out infinite;
+    }
+    .orb-1 { width:300px; height:300px; background:#8b5cf6; top:-100px; right:-80px; }
+    .orb-2 { width:200px; height:200px; background:#06b6d4; bottom:-60px; left:-60px; animation-delay:3s; }
+    @keyframes orb-float {
+      0%,100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-30px) scale(1.05); }
+    }
+    @media(max-width:768px){ .ai-layout { grid-template-columns:1fr; } }
+
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">E</div>
+      <div>
+        <div class="logo-text">Edu-ERP</div>
+        <span class="logo-sub">Công Nghệ Giáo Dục</span>
+      </div>
+    </a>
+    <nav>
+      <a href="#modules">Tính năng</a>
+      <a href="#ai">✨ AI</a>
+      <a href="#departments">Phòng ban</a>
+      <a href="#values">Giá trị</a>
+      <a href="#testimonials">Khách hàng</a>
+      <a href="#contact">Liên hệ</a>
+    </nav>
+    <a href="https://erp.congnghegiaoduc.com" target="_blank" class="btn-demo">Dùng thử miễn phí</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-badge">
+    <span></span>
+    Nền tảng EdTech #1 dành cho trung tâm giáo dục
+  </div>
+  <h1>
+    Quản lý trung tâm giáo dục<br/>
+    <span class="highlight">thông minh & toàn diện</span>
+  </h1>
+  <p>
+    Edu-ERP giúp tự động hóa vận hành, kết nối mọi phòng ban — từ tuyển sinh, giáo vụ,
+    kế toán đến chăm sóc học viên — trên một hệ thống duy nhất.
+  </p>
+  <div class="hero-actions">
+    <a href="https://erp.congnghegiaoduc.com" target="_blank" class="btn-primary">
+      🚀 Trải nghiệm ngay
+    </a>
+    <a href="#contact" class="btn-outline">
+      📞 Tư vấn miễn phí
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-number">2.000+</div>
+      <div class="stat-label">Giáo viên & trung tâm</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">85%</div>
+      <div class="stat-label">Giảm công việc thủ công</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">7+</div>
+      <div class="stat-label">Module quản lý</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">24/7</div>
+      <div class="stat-label">Hỗ trợ kỹ thuật</div>
+    </div>
+  </div>
+</section>
+
+<!-- AI INTEGRATION -->
+<section class="ai-section" id="ai">
+  <div class="ai-grid-bg"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="section-inner" style="position:relative;z-index:1">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center" class="ai-layout">
+
+      <!-- Left: text -->
+      <div class="fade-up">
+        <div class="ai-badge"><div class="ai-dot"></div> Tích hợp Trí tuệ nhân tạo</div>
+        <h2 class="section-title">Edu-ERP<br/><span class="ai-highlight">được trang bị AI</span></h2>
+        <p class="section-desc" style="margin-top:1rem">
+          Không chỉ là phần mềm quản lý — Edu-ERP tích hợp AI thế hệ mới giúp tự động phân tích,
+          dự đoán và gợi ý hành động thông minh cho toàn bộ vận hành trung tâm.
+        </p>
+        <div class="ai-features-list">
+          <div class="ai-feature">
+            <div class="ai-feature-icon v">🤖</div>
+            <div>
+              <h4>AI Tư vấn viên ảo 24/7</h4>
+              <p>Chatbot AI tự động trả lời câu hỏi học viên, thu thập thông tin lead và phân loại mức độ quan tâm theo thời gian thực.</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon c">📈</div>
+            <div>
+              <h4>Dự đoán tỷ lệ bỏ học</h4>
+              <p>Phân tích hành vi học viên — chuyên cần, điểm số, tương tác — để cảnh báo sớm nguy cơ bỏ học và đề xuất can thiệp kịp thời.</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon s">✨</div>
+            <div>
+              <h4>Gợi ý lộ trình học cá nhân hóa</h4>
+              <p>AI phân tích năng lực từng học viên để tự động đề xuất lộ trình học phù hợp, tối ưu hiệu quả và tỷ lệ hoàn thành khóa học.</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon r">📊</div>
+            <div>
+              <h4>Báo cáo thông minh tự động</h4>
+              <p>AI tự tổng hợp, phân tích xu hướng và tạo báo cáo tóm tắt hàng ngày gửi đến ban lãnh đạo — không cần thao tác thủ công.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: AI Chat demo card -->
+      <div class="ai-visual-wrap fade-up">
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <div class="ai-avatar">🤖</div>
+            <div>
+              <h4>EduBot AI</h4>
+              <span>Trợ lý thông minh · Đang hoạt động</span>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:.4rem">
+              <span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:block;box-shadow:0 0 6px #10b981"></span>
+              <span style="font-size:.7rem;color:#10b981;font-weight:600">Live</span>
+            </div>
+          </div>
+          <div class="ai-chat">
+            <div class="ai-bubble user">Tôi muốn xem báo cáo học viên có nguy cơ bỏ học tháng này?</div>
+            <div class="ai-bubble bot">
+              <strong>Phân tích hoàn tất ✅</strong><br/>
+              Tôi đã xác định <strong style="color:#f87171">12 học viên</strong> có nguy cơ cao dựa trên:<br/>
+              • Vắng &gt;3 buổi liên tiếp (8 HV)<br/>
+              • Điểm kiểm tra giảm &gt;20% (4 HV)<br/><br/>
+              Tôi đã lên lịch <strong>nhắc nhở tự động</strong> và thông báo đến CSKH. Bạn có muốn xem chi tiết không?
+            </div>
+            <div class="ai-bubble bot ai-typing" style="padding:.7rem 1rem">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="ai-metrics">
+            <div class="ai-metric">
+              <div class="ai-metric-val">94%</div>
+              <div class="ai-metric-label">Độ chính xác dự đoán</div>
+            </div>
+            <div class="ai-metric">
+              <div class="ai-metric-val">2.4s</div>
+              <div class="ai-metric-label">Phản hồi trung bình</div>
+            </div>
+            <div class="ai-metric">
+              <div class="ai-metric-val">24/7</div>
+              <div class="ai-metric-label">Luôn hoạt động</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS -->
+<section class="problems" id="problems">
+  <div class="section-inner">
+    <div class="fade-up">
+      <div class="section-tag">Bài toán thực tế</div>
+      <h2 class="section-title">Những vấn đề trung tâm<br/>đang gặp phải?</h2>
+      <p class="section-desc">Edu-ERP ra đời để giải quyết những điểm đau phổ biến mà hầu hết trung tâm giáo dục đang đối mặt.</p>
+    </div>
+    <div class="problems-grid fade-up">
+      <div class="problem-card">
+        <div class="problem-icon" style="background:linear-gradient(135deg,#fee2e2,#fecaca)">⚠️</div>
+        <h3>Thất thoát data, thông tin rời rạc</h3>
+        <p>Dữ liệu học viên, lịch học, học phí nằm rải rác ở nhiều nơi, khó kiểm soát và đồng bộ.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">📊</div>
+        <h3>Báo cáo mất nhiều thời gian</h3>
+        <p>Tổng hợp số liệu thủ công, mất nhiều giờ mà vẫn thiếu chính xác và đầy đủ.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe)">💸</div>
+        <h3>Tỷ lệ chuyển đổi thấp</h3>
+        <p>Không phân loại được mức độ quan tâm của học viên tiềm năng, dẫn đến tỷ lệ chốt thấp.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">🔗</div>
+        <h3>Phòng ban thiếu liên kết</h3>
+        <p>Marketing, Sales, Giáo vụ, CSKH hoạt động rời rạc, thiếu thông tin để phối hợp hiệu quả.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section id="modules">
+  <div class="section-inner">
+    <div class="modules-header fade-up">
+      <div class="section-tag">Tính năng hệ thống</div>
+      <h2 class="section-title">7 Module quản lý<br/>toàn diện</h2>
+      <p class="section-desc">Mỗi module được thiết kế chuyên biệt, liên kết chặt chẽ để tạo nên một hệ sinh thái quản lý hoàn chỉnh.</p>
+    </div>
+    <div class="modules-grid">
+
+      <!-- CRM -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap blue">👥</div>
+          <div>
+            <h3>CRM – Quản lý Học viên</h3>
+            <p>Quản lý toàn bộ hành trình từ lead đến học viên trung thành</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-blue">✓</div>
+            <span>Quản lý học viên & phụ huynh, hồ sơ đầy đủ</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-blue">✓</div>
+            <span>Phân loại tiềm năng cao / trung / thấp tự động</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-blue">✓</div>
+            <span>Lịch sử chăm sóc và nhắc lịch hẹn tự động</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-blue">✓</div>
+            <span>Import/Export dữ liệu học viên hàng loạt</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- LMS Lớp học -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap cyan">🏫</div>
+          <div>
+            <h3>LMS – Quản lý Lớp học & Học tập</h3>
+            <p>Hệ thống quản lý học tập toàn diện cho giáo viên và học viên</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-cyan">✓</div>
+            <span>Quản lý lớp học, lịch học, phòng học theo thời gian biểu</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-cyan">✓</div>
+            <span>Điểm danh học viên, cảnh báo nghỉ quá số buổi</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-cyan">✓</div>
+            <span>Bảng điểm, đề thi, chấm điểm trực tuyến</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-cyan">✓</div>
+            <span>Chương trình học – Khóa học – Giáo trình liên kết</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kế toán học phí -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap green">💰</div>
+          <div>
+            <h3>Kế toán – Học phí & Hợp đồng</h3>
+            <p>Quản lý tài chính minh bạch, tự động hóa thu học phí</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-green">✓</div>
+            <span>Hợp đồng học viên, tiến độ đóng học phí</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-green">✓</div>
+            <span>Phiếu thu, công nợ, nhắc nợ tự động qua SMS</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-green">✓</div>
+            <span>Quản lý chuyển lớp, chuyển chi nhánh, tạm dừng học</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-green">✓</div>
+            <span>Discount codes, phí khuyến mãi tự động</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketing -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap orange">📣</div>
+          <div>
+            <h3>Marketing – Chiến dịch & B2B/C2C</h3>
+            <p>Công cụ marketing tích hợp, tăng tỷ lệ chuyển đổi</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-orange">✓</div>
+            <span>Quản lý chiến dịch marketing đa kênh</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-orange">✓</div>
+            <span>Chương trình B2B – Hợp tác doanh nghiệp</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-orange">✓</div>
+            <span>C2C – Chương trình giới thiệu giữa học viên</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-orange">✓</div>
+            <span>Mã coupon, khuyến mãi theo nhóm đối tượng</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Giáo viên -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap purple">👨‍🏫</div>
+          <div>
+            <h3>Quản lý Giáo viên & Nhân sự</h3>
+            <p>Tối ưu lịch dạy, đánh giá và quản lý giáo viên</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-purple">✓</div>
+            <span>Hồ sơ giáo viên: chuyên môn, kinh nghiệm, lịch trống</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-purple">✓</div>
+            <span>Xếp lịch dạy tự động theo ca/phòng/chuyên môn</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-purple">✓</div>
+            <span>Đánh giá kết quả giảng dạy toàn diện</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-purple">✓</div>
+            <span>Quản lý phản hồi học viên về giáo viên</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Báo cáo -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap pink">📊</div>
+          <div>
+            <h3>Báo cáo & Thống kê</h3>
+            <p>Dashboard trực quan, báo cáo đa chiều theo thời gian thực</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-pink">✓</div>
+            <span>Dashboard tổng quan doanh thu, học viên, lớp học</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-pink">✓</div>
+            <span>Báo cáo tuyển sinh, chuyển đổi theo kênh</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-pink">✓</div>
+            <span>Phân tích hiệu suất giáo viên, phòng ban</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-pink">✓</div>
+            <span>Export Excel/PDF, lập lịch báo cáo tự động</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cài đặt & Phân quyền -->
+      <div class="module-card fade-up">
+        <div class="module-header">
+          <div class="module-icon-wrap indigo">⚙️</div>
+          <div>
+            <h3>Hệ thống & Phân quyền</h3>
+            <p>Quản lý chi nhánh, phân quyền người dùng linh hoạt</p>
+          </div>
+        </div>
+        <div class="module-features">
+          <div class="feature-item">
+            <div class="feature-check check-indigo">✓</div>
+            <span>Quản lý đa chi nhánh trên một tài khoản</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-indigo">✓</div>
+            <span>Phân quyền theo vai trò: Admin, Giáo vụ, Kế toán...</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-indigo">✓</div>
+            <span>Cấu hình sản phẩm, ca học, ngày nghỉ lễ</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-check check-indigo">✓</div>
+            <span>Tích hợp Zoom, Google Meet dạy trực tuyến</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values" id="values">
+  <div class="section-inner">
+    <div class="fade-up">
+      <div class="section-tag" style="background:rgba(37,99,235,.2);color:#93c5fd">Giá trị đo lường được</div>
+      <h2 class="section-title">Con số nói lên tất cả</h2>
+      <p class="section-desc">Hơn 2.000 giáo viên và trung tâm đã tự động hóa quy trình và tối ưu chi phí thành công.</p>
+    </div>
+    <div class="values-grid fade-up">
+      <div class="value-card">
+        <div class="value-number">85%</div>
+        <div class="value-label">Giảm công việc thủ công, trùng lặp</div>
+      </div>
+      <div class="value-card">
+        <div class="value-number">3×</div>
+        <div class="value-label">Tăng tốc độ chốt học viên tiềm năng</div>
+      </div>
+      <div class="value-card">
+        <div class="value-number">60%</div>
+        <div class="value-label">Tiết kiệm thời gian lập lịch & báo cáo</div>
+      </div>
+      <div class="value-card">
+        <div class="value-number">2.000+</div>
+        <div class="value-label">Giáo viên & trung tâm tin dùng</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPARTMENTS -->
+<section id="departments">
+  <div class="section-inner">
+    <div class="fade-up">
+      <div class="section-tag">Phù hợp từng phòng ban</div>
+      <h2 class="section-title">Mọi bộ phận đều được<br/>hỗ trợ tối đa</h2>
+      <p class="section-desc">Edu-ERP thiết kế luồng làm việc riêng cho từng phòng ban, đảm bảo phối hợp chặt chẽ trên một hệ thống.</p>
+    </div>
+    <div style="margin-top:3rem">
+      <div class="dept-tabs fade-up">
+        <button class="dept-tab active" onclick="switchDept(this,'sales')">🎯 Tuyển sinh</button>
+        <button class="dept-tab" onclick="switchDept(this,'cskh')">💬 CSKH</button>
+        <button class="dept-tab" onclick="switchDept(this,'academic')">📚 Giáo vụ</button>
+        <button class="dept-tab" onclick="switchDept(this,'director')">👔 Ban Giám đốc</button>
+      </div>
+
+      <div class="dept-content active" id="dept-sales">
+        <div class="dept-text">
+          <h3>Bộ phận Tuyển sinh</h3>
+          <p>Không bỏ lỡ một lead nào. Chăm sóc liền mạch từ lúc nhận thông tin đến khi chốt thành công nhờ quy trình tự động hóa thông minh.</p>
+          <ul class="dept-list">
+            <li>Cập nhật lead trực tiếp trên hệ thống, không sót học viên tiềm năng</li>
+            <li>Phân cấp học viên: tiềm năng cao / trung / thấp tự động</li>
+            <li>Nhắc lịch hẹn, lưu lịch sử chăm sóc từng học viên</li>
+            <li>Theo dõi học viên đang ở giai đoạn nào trong quy trình</li>
+            <li>Tổng hợp nguồn lead theo kênh tuyển sinh</li>
+          </ul>
+        </div>
+        <div class="dept-visual">
+          <div class="dept-stat-row">
+            <div class="dept-stat">
+              <div class="dept-stat-val">68%</div>
+              <div class="dept-stat-label">Tỷ lệ chốt TB</div>
+            </div>
+            <div class="dept-stat">
+              <div class="dept-stat-val">245</div>
+              <div class="dept-stat-label">Lead tháng này</div>
+            </div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Tiến độ chốt lead tháng 3</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:68%"></div></div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Lead tiềm năng cao</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:45%;background:linear-gradient(135deg,#10b981,#06b6d4)"></div></div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Đã chốt thành công</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:68%;background:linear-gradient(135deg,#8b5cf6,#2563eb)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dept-content" id="dept-cskh">
+        <div class="dept-text">
+          <h3>Bộ phận CSKH</h3>
+          <p>Chăm sóc học viên toàn diện suốt quá trình học, từ ngày đầu đến khi hoàn thành khóa học và tái đăng ký.</p>
+          <ul class="dept-list">
+            <li>Truy xuất hồ sơ học viên nhanh chóng</li>
+            <li>Theo dõi tiến độ đóng học phí, nhắc nợ tự động qua SMS</li>
+            <li>SMS chúc mừng sinh nhật, khai giảng tự động</li>
+            <li>Cảnh báo học viên vắng quá số buổi quy định</li>
+            <li>Lưu trữ hồ sơ học viên đầy đủ, vô thời hạn</li>
+          </ul>
+        </div>
+        <div class="dept-visual">
+          <div class="dept-stat-row">
+            <div class="dept-stat">
+              <div class="dept-stat-val">1,240</div>
+              <div class="dept-stat-label">Học viên đang học</div>
+            </div>
+            <div class="dept-stat">
+              <div class="dept-stat-val">98%</div>
+              <div class="dept-stat-label">Hài lòng dịch vụ</div>
+            </div>
+          </div>
+          <div>
+            <div class="dept-bar-label">SMS đã gửi tháng này</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:82%"></div></div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Học viên tái đăng ký</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:75%;background:linear-gradient(135deg,#10b981,#06b6d4)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dept-content" id="dept-academic">
+        <div class="dept-text">
+          <h3>Bộ phận Giáo vụ</h3>
+          <p>Quản lý đa nhiệm hiệu quả: lớp học, phòng học, giáo viên, bảng điểm — tất cả trên một màn hình.</p>
+          <ul class="dept-list">
+            <li>Quản lý lịch học theo phòng/ca/giáo viên bằng thời gian biểu trực quan</li>
+            <li>Điểm danh từng buổi học, theo dõi chuyên cần</li>
+            <li>Giáo viên upload đề thi, chấm điểm nhanh chóng</li>
+            <li>Quản lý bảng điểm, tiến bộ học sinh liên tục</li>
+            <li>Nắm bắt phản hồi học viên về giáo viên, xử lý kịp thời</li>
+          </ul>
+        </div>
+        <div class="dept-visual">
+          <div class="dept-stat-row">
+            <div class="dept-stat">
+              <div class="dept-stat-val">48</div>
+              <div class="dept-stat-label">Lớp đang hoạt động</div>
+            </div>
+            <div class="dept-stat">
+              <div class="dept-stat-val">25</div>
+              <div class="dept-stat-label">Giáo viên</div>
+            </div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Tỷ lệ chuyên cần TB</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:88%"></div></div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Điểm TB học viên</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:76%;background:linear-gradient(135deg,#8b5cf6,#06b6d4)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dept-content" id="dept-director">
+        <div class="dept-text">
+          <h3>Ban Giám đốc</h3>
+          <p>Toàn cảnh hoạt động trong tầm tay. Đưa ra quyết định nhanh chóng dựa trên dữ liệu thực tế, cập nhật liên tục.</p>
+          <ul class="dept-list">
+            <li>Dashboard tổng quan doanh thu, học viên, hiệu suất</li>
+            <li>Quản lý phân quyền theo cấp nhân viên & phòng ban</li>
+            <li>Thống kê báo cáo doanh số cập nhật theo thời gian thực</li>
+            <li>Nắm hiệu suất từng nhân viên, từng chi nhánh</li>
+            <li>Hỗ trợ mở rộng đa chi nhánh dễ dàng</li>
+          </ul>
+        </div>
+        <div class="dept-visual">
+          <div class="dept-stat-row">
+            <div class="dept-stat">
+              <div class="dept-stat-val">↑32%</div>
+              <div class="dept-stat-label">Doanh thu vs tháng trước</div>
+            </div>
+            <div class="dept-stat">
+              <div class="dept-stat-val">5</div>
+              <div class="dept-stat-label">Chi nhánh đang hoạt động</div>
+            </div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Hiệu suất tổng thể</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:91%"></div></div>
+          </div>
+          <div>
+            <div class="dept-bar-label">Mục tiêu doanh thu tháng</div>
+            <div class="dept-bar"><div class="dept-bar-fill" style="width:78%;background:linear-gradient(135deg,#f59e0b,#ef4444)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials">
+  <div class="section-inner">
+    <div class="modules-header fade-up">
+      <div class="section-tag">Khách hàng nói gì?</div>
+      <h2 class="section-title">Hơn 2.000 trung tâm tin dùng</h2>
+      <p class="section-desc">Lời chia sẻ từ những người đã trải nghiệm sự thay đổi thật sự.</p>
+    </div>
+    <div class="testimonials-grid fade-up">
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Edu-ERP đã thực sự làm thay đổi cách quản lý trung tâm đào tạo của chúng tôi. Phần mềm này đã tối ưu hóa quy trình làm việc và cải thiện hiệu suất làm việc tổng thể một cách đáng kể."</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#2563eb,#06b6d4)">LD</div>
+          <div>
+            <h4>Linh Đặng</h4>
+            <span>Founder & CEO – BZ English</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Bảng công tự động và tính năng đánh giá kết quả giảng dạy toàn diện đã giúp chúng tôi tiết kiệm rất nhiều thời gian và nâng cao hiệu suất làm việc của đội ngũ giáo viên."</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">VM</div>
+          <div>
+            <h4>Võ Mai Thương</h4>
+            <span>Founder & CEO – MoyArt</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Với Edu-ERP, chúng tôi có thể dễ dàng quản lý việc đăng ký học viên, lịch học và tài liệu đào tạo trên cùng một platform. Tiết kiệm được ít nhất 3 giờ mỗi ngày cho công việc thủ công."</blockquote>
+        <div class="testimonial-author">
+          <div class="avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">MT</div>
+          <div>
+            <h4>Minh Thúy</h4>
+            <span>Giám đốc – Trung tâm AVID</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <h2>Sẵn sàng tự động hóa<br/>trung tâm của bạn?</h2>
+  <p>Đăng ký dùng thử miễn phí ngay hôm nay — không cần thẻ tín dụng.</p>
+  <div class="cta-actions">
+    <a href="https://erp.congnghegiaoduc.com" target="_blank" class="btn-primary">
+      🚀 Dùng thử ngay
+    </a>
+    <a href="tel:0389941902" class="btn-outline">📞 Gọi tư vấn</a>
+  </div>
+  <div class="contact-grid">
+    <div class="contact-item">🌐 <span><a href="https://congnghegiaoduc.com" target="_blank">congnghegiaoduc.com</a></span></div>
+    <div class="contact-item">📧 <span><a href="mailto:info.congnghegiaoduc@gmail.com">info.congnghegiaoduc@gmail.com</a></span></div>
+    <div class="contact-item">📞 <span><a href="tel:0389941902">038 9941 902</a></span></div>
+    <div class="contact-item">📍 <span>199 Hồ Tùng Mậu, Nam Từ Liêm, Hà Nội</span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <p>© 2025 Công ty Công Nghệ Giáo Dục. Bảo lưu mọi quyền.</p>
+    <div class="footer-links">
+      <a href="https://congnghegiaoduc.com">Trang chủ</a>
+      <a href="https://erp.congnghegiaoduc.com">Edu-ERP</a>
+      <a href="mailto:info.congnghegiaoduc@gmail.com">Liên hệ</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Dept tabs
+  function switchDept(el, id) {
+    document.querySelectorAll('.dept-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dept-content').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('dept-' + id).classList.add('active');
+  }
+
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

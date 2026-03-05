@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Công Nghệ Giáo Dục – Giải Pháp Phần Mềm EdTech · FinTech · CRM</title>
+  <meta name="description" content="Chúng tôi cung cấp giải pháp phần mềm toàn diện cho lĩnh vực Giáo dục (EduERP), Tài chính (FinTech) và Quản lý Khách hàng (CRM). Đối tác công nghệ tin cậy của hơn 200 doanh nghiệp."/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232563eb'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='50%25' y='72%25' text-anchor='middle' font-family='Space Grotesk,Inter,sans-serif' font-size='20' font-weight='800' fill='white'%3EC%3C/text%3E%3C/svg%3E"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --dark:#0d1424;--dark2:#111d35;--dark3:#141e32;
+      --edu:#2563eb;--edu-light:#dbeafe;
+      --fin:#059669;--fin-light:#d1fae5;
+      --crm:#7c3aed;--crm-light:#ede9fe;
+      --accent:#06b6d4;--gold:#f59e0b;
+      --white:#fff;--gray:#64748b;--border:rgba(255,255,255,.08);
+      --font-display:'Space Grotesk',sans-serif;
+      --font-body:'Inter',sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-body);background:var(--dark);color:#e2e8f0;overflow-x:hidden}
+
+    /* ─── NAVBAR ─── */
+    nav.navbar{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      padding:0 2.5rem;
+      background:rgba(8,12,20,.85);backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{
+      max-width:1280px;margin:0 auto;
+      display:flex;align-items:center;justify-content:space-between;
+      height:72px;
+    }
+    .nav-logo{display:flex;align-items:center;gap:.875rem;text-decoration:none}
+    .nav-logo-mark{
+      width:44px;height:44px;border-radius:12px;
+      background:linear-gradient(135deg,#2563eb,#06b6d4);
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:white;
+    }
+    .nav-logo-txt{font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:white;line-height:1.2}
+    .nav-logo-sub{font-size:.7rem;color:#64748b;font-weight:400;font-family:var(--font-body)}
+    .nav-links{display:flex;align-items:center;gap:2rem}
+    .nav-links a{color:#a8b8cc;text-decoration:none;font-size:.875rem;font-weight:500;transition:color .2s}
+    .nav-links a:hover{color:white}
+    .nav-cta{
+      background:linear-gradient(135deg,#2563eb,#06b6d4);
+      color:white;padding:.6rem 1.4rem;border-radius:8px;
+      font-weight:600;font-size:.875rem;text-decoration:none;
+      transition:opacity .2s,transform .15s;
+    }
+    .nav-cta:hover{opacity:.88;transform:translateY(-1px)}
+
+    /* ─── HERO ─── */
+        .hero{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      padding:120px 2.5rem 80px;
+      background:radial-gradient(ellipse 150% 90% at 50% -5%, #1a3a7a 0%, #0d1a3a 45%, var(--dark) 75%);
+      position:relative;overflow:hidden;
+    }
+    /* Animated particles */
+    .hero-particles{position:absolute;inset:0;pointer-events:none}
+    .particle{
+      position:absolute;border-radius:50%;
+      animation:float-particle linear infinite;
+      opacity:0; filter:blur(1px);
+    }
+    @keyframes float-particle{
+      0%{transform:translateY(100vh) scale(0);opacity:0}
+      10%{opacity:.6}
+      90%{opacity:.3}
+      100%{transform:translateY(-20vh) scale(1.5);opacity:0}
+    }
+    /* Grid lines */
+    .hero::before{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background-image:
+        linear-gradient(rgba(37,99,235,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(37,99,235,.06) 1px,transparent 1px);
+      background-size:80px 80px;
+    }
+    /* Glow orbs */
+    .hero::after{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background:
+        radial-gradient(ellipse 60% 50% at 15% 60%, rgba(124,58,237,.22) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 60% at 85% 25%, rgba(6,182,212,.2) 0%,transparent 60%),
+        radial-gradient(ellipse 70% 50% at 50% 110%, rgba(37,99,235,.18) 0%,transparent 60%);
+    }
+    .hero-inner{position:relative;z-index:1;max-width:900px}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.625rem;
+      background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.3);
+      color:#93c5fd;padding:.45rem 1.1rem;border-radius:100px;
+      font-size:.8rem;font-weight:600;margin-bottom:2rem;letter-spacing:.04em;
+    }
+    .hero-badge-dot{
+      width:7px;height:7px;border-radius:50%;
+      background:linear-gradient(135deg,#60a5fa,#06b6d4);
+      animation:pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+    .hero h1{
+      font-family:var(--font-display);
+      font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;
+      color:white;line-height:1.1;margin-bottom:1.5rem;letter-spacing:-.02em;
+    }
+    .hero h1 em{
+      font-style:normal;
+      background:linear-gradient(135deg,#60a5fa 0%,#06b6d4 40%,#a78bfa 80%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .hero-desc{
+      font-size:1.15rem;color:#b0bdd0;max-width:680px;
+      margin:0 auto 3rem;line-height:1.8;
+    }
+    .hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .btn-hero{
+      background:linear-gradient(135deg,#2563eb,#06b6d4);color:white;
+      padding:1rem 2.25rem;border-radius:12px;font-weight:700;font-size:1rem;
+      text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;
+      box-shadow:0 8px 40px rgba(37,99,235,.3);transition:transform .2s,box-shadow .2s;
+    }
+    .btn-hero:hover{transform:translateY(-3px);box-shadow:0 16px 60px rgba(37,99,235,.45)}
+    .btn-ghost{
+      background:rgba(255,255,255,.05);color:white;
+      border:1px solid rgba(255,255,255,.15);
+      padding:1rem 2.25rem;border-radius:12px;font-weight:600;font-size:1rem;
+      text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;
+      transition:background .2s,border-color .2s;
+    }
+    .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+    /* Scroll indicator */
+    .scroll-hint{
+      position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+      display:flex;flex-direction:column;align-items:center;gap:.5rem;
+      color:#475569;font-size:.75rem;font-weight:500;
+    }
+    .scroll-arrow{
+      width:24px;height:24px;border-right:2px solid #475569;border-bottom:2px solid #475569;
+      transform:rotate(45deg);animation:bounce .8s ease-in-out infinite alternate;margin-top:.25rem;
+    }
+    @keyframes bounce{0%{transform:rotate(45deg) translateY(0)}100%{transform:rotate(45deg) translateY(6px)}}
+
+    /* ─── SECTION BASE ─── */
+    section{padding:100px 2rem}
+    .inner{max-width:1280px;margin:0 auto}
+    .tag{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.35rem .9rem;border-radius:100px;
+      font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      margin-bottom:1.25rem;
+    }
+    .tag-blue{background:rgba(37,99,235,.15);color:#60a5fa;border:1px solid rgba(37,99,235,.25)}
+    .tag-green{background:rgba(5,150,105,.15);color:#34d399;border:1px solid rgba(5,150,105,.25)}
+    .tag-purple{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.25)}
+    .tag-white{background:rgba(255,255,255,.08);color:#94a3b8;border:1px solid rgba(255,255,255,.12)}
+    h2.section-title{
+      font-family:var(--font-display);
+      font-size:clamp(1.875rem,3vw,2.75rem);font-weight:800;
+      color:white;line-height:1.2;margin-bottom:1rem;letter-spacing:-.01em;
+    }
+    p.section-desc{font-size:1.05rem;color:#8a9ab0;line-height:1.75;max-width:560px}
+    .text-center{text-align:center}
+    .text-center .section-desc{margin:0 auto}
+
+    /* Fade up animation */
+    .fade-up{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+    .fade-up.vis{opacity:1;transform:none}
+
+    /* ─── CLIENTS STRIP ─── */
+    .clients-strip{
+      padding:40px 2rem;
+      border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,.015);
+    }
+    .clients-inner{
+      max-width:1280px;margin:0 auto;
+      display:flex;flex-direction:column;align-items:center;gap:1.5rem;
+    }
+    .clients-label{font-size:.75rem;font-weight:600;color:#475569;letter-spacing:.1em;text-transform:uppercase}
+    .clients-logos{
+      display:flex;align-items:center;gap:3rem;flex-wrap:wrap;justify-content:center;
+    }
+    .client-logo{
+      font-weight:700;font-size:.9rem;color:#475569;
+      padding:.5rem 1.25rem;border:1px solid rgba(255,255,255,.06);
+      border-radius:8px;transition:color .2s,border-color .2s;white-space:nowrap;
+    }
+    .client-logo:hover{color:#94a3b8;border-color:rgba(255,255,255,.15)}
+
+    /* ─── SOLUTIONS ─── */
+    .solutions{background:var(--dark)}
+    .solutions-header{text-align:center;margin-bottom:4rem}
+    .solutions-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+    }
+    .sol-card{
+      background:#182035;border-radius:24px;
+      border:1px solid rgba(255,255,255,.07);
+      overflow:hidden;position:relative;
+      transition:transform .3s,border-color .3s,box-shadow .3s;
+    }
+    .sol-card:hover{transform:translateY(-8px)}
+    .sol-card.edu:hover{border-color:rgba(37,99,235,.4);box-shadow:0 30px 80px rgba(37,99,235,.12)}
+    .sol-card.fin:hover{border-color:rgba(5,150,105,.4);box-shadow:0 30px 80px rgba(5,150,105,.12)}
+    .sol-card.crm:hover{border-color:rgba(124,58,237,.4);box-shadow:0 30px 80px rgba(124,58,237,.12)}
+    /* Top color strip */
+    .sol-strip{height:4px;width:100%}
+    .sol-strip.edu{background:linear-gradient(90deg,#2563eb,#06b6d4)}
+    .sol-strip.fin{background:linear-gradient(90deg,#059669,#10b981)}
+    .sol-strip.crm{background:linear-gradient(90deg,#7c3aed,#ec4899)}
+    .sol-body{padding:2.25rem}
+    .sol-icon{
+      width:64px;height:64px;border-radius:18px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:2rem;margin-bottom:1.5rem;
+    }
+    .sol-icon.edu{background:linear-gradient(135deg,rgba(37,99,235,.25),rgba(6,182,212,.15))}
+    .sol-icon.fin{background:linear-gradient(135deg,rgba(5,150,105,.25),rgba(16,185,129,.15))}
+    .sol-icon.crm{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(236,72,153,.15))}
+    .sol-card h3{font-family:var(--font-display);font-size:1.35rem;font-weight:700;color:white;margin-bottom:.5rem}
+    .sol-subtitle{font-size:.85rem;font-weight:600;margin-bottom:1rem}
+    .sol-subtitle.edu{color:#60a5fa}
+    .sol-subtitle.fin{color:#34d399}
+    .sol-subtitle.crm{color:#a78bfa}
+    .sol-card p{font-size:.875rem;color:#8a9aae;line-height:1.7;margin-bottom:1.5rem}
+    .sol-features{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-bottom:2rem}
+    .sol-features li{
+      display:flex;align-items:center;gap:.625rem;
+      font-size:.825rem;color:#94a3b8;
+    }
+    .sol-features li::before{
+      content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0;
+    }
+    .sol-features.edu li::before{background:#2563eb}
+    .sol-features.fin li::before{background:#059669}
+    .sol-features.crm li::before{background:#7c3aed}
+    .sol-btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      padding:.75rem 1.5rem;border-radius:10px;font-size:.875rem;font-weight:600;
+      text-decoration:none;transition:all .2s;width:100%;justify-content:center;
+    }
+    .sol-btn.edu{background:rgba(37,99,235,.15);color:#60a5fa;border:1px solid rgba(37,99,235,.25)}
+    .sol-btn.edu:hover{background:#2563eb;color:white;border-color:#2563eb}
+    .sol-btn.fin{background:rgba(5,150,105,.15);color:#34d399;border:1px solid rgba(5,150,105,.25)}
+    .sol-btn.fin:hover{background:#059669;color:white;border-color:#059669}
+    .sol-btn.crm{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.25)}
+    .sol-btn.crm:hover{background:#7c3aed;color:white;border-color:#7c3aed}
+    /* Big number badge */
+    .sol-badge{
+      position:absolute;top:1.5rem;right:1.5rem;
+      font-family:var(--font-display);font-size:4rem;font-weight:900;
+      opacity:.04;color:white;line-height:1;pointer-events:none;
+    }
+
+    /* ─── WHY US ─── */
+    .why{background:linear-gradient(180deg,var(--dark) 0%,#060a14 100%)}
+    .why-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:4rem;
+    }
+    .why-feature{
+      display:flex;align-items:flex-start;gap:1.25rem;padding:1.5rem 0;
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .why-feature:last-child{border-bottom:none}
+    .why-icon{
+      width:50px;height:50px;border-radius:14px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    }
+    .why-feature h4{font-family:var(--font-display);font-size:1rem;font-weight:700;color:white;margin-bottom:.375rem}
+    .why-feature p{font-size:.85rem;color:#64748b;line-height:1.6}
+    /* Right side: Stats mosaic */
+    .why-stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .stat-box{
+      border-radius:20px;padding:2rem;
+      background:#182035;border:1px solid rgba(255,255,255,.07);
+      transition:border-color .2s;
+    }
+    .stat-box:hover{border-color:rgba(37,99,235,.3)}
+    .stat-box.large{grid-column:1/-1}
+    .stat-box.accent-blue{background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(6,182,212,.05));border-color:rgba(37,99,235,.2)}
+    .stat-val{
+      font-family:var(--font-display);font-size:2.75rem;font-weight:900;
+      background:linear-gradient(135deg,#60a5fa,#06b6d4);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      line-height:1;margin-bottom:.5rem;
+    }
+    .stat-val.green{background:linear-gradient(135deg,#34d399,#06b6d4);-webkit-background-clip:text;background-clip:text}
+    .stat-val.purple{background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;background-clip:text}
+    .stat-val.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;background-clip:text}
+    .stat-lbl{font-size:.85rem;color:#7a8fa8;line-height:1.5}
+
+    /* ─── PROCESS ─── */
+    .process{background:#060a14}
+    .process-steps{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+      margin-top:4rem;position:relative;
+    }
+    .process-steps::before{
+      content:'';position:absolute;top:40px;left:12.5%;right:12.5%;height:1px;
+      background:linear-gradient(90deg,transparent,rgba(37,99,235,.4),rgba(6,182,212,.4),rgba(124,58,237,.4),transparent);
+    }
+    .process-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 1.5rem}
+    .step-num{
+      width:80px;height:80px;border-radius:50%;margin-bottom:1.5rem;
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:white;
+      position:relative;z-index:1;border:2px solid;
+    }
+    .step-num.s1{background:rgba(37,99,235,.2);border-color:rgba(37,99,235,.5)}
+    .step-num.s2{background:rgba(6,182,212,.15);border-color:rgba(6,182,212,.4)}
+    .step-num.s3{background:rgba(124,58,237,.15);border-color:rgba(124,58,237,.4)}
+    .step-num.s4{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4)}
+    .process-step h4{font-family:var(--font-display);font-size:1rem;font-weight:700;color:white;margin-bottom:.5rem}
+    .process-step p{font-size:.825rem;color:#64748b;line-height:1.6}
+
+    /* ─── TESTIMONIALS ─── */
+    .testimonials{background:var(--dark)}
+    .testimonials-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3.5rem;
+    }
+    .testi-card{
+      background:#182035;border-radius:20px;padding:2rem;
+      border:1px solid rgba(255,255,255,.07);
+      transition:border-color .25s,transform .25s;
+    }
+    .testi-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15)}
+    .testi-stars{color:#f59e0b;margin-bottom:1.25rem;font-size:1rem;letter-spacing:.1em}
+    .testi-quote{
+      font-size:.875rem;color:#94a3b8;line-height:1.75;
+      margin-bottom:1.5rem;font-style:italic;position:relative;
+    }
+    .testi-quote::before{
+      content:'"';position:absolute;top:-.5rem;left:-.25rem;
+      font-size:3rem;color:rgba(37,99,235,.2);font-family:Georgia,serif;line-height:1;
+    }
+    .testi-author{display:flex;align-items:center;gap:.875rem}
+    .testi-ava{
+      width:44px;height:44px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;font-size:.875rem;color:white;flex-shrink:0;
+    }
+    .testi-author h4{font-size:.9rem;font-weight:700;color:white}
+    .testi-author span{font-size:.775rem;color:#475569}
+    .testi-tag-pill{
+      display:inline-flex;align-items:center;gap:.35rem;
+      padding:.2rem .6rem;border-radius:100px;font-size:.7rem;font-weight:600;
+      margin-left:auto;flex-shrink:0;
+    }
+
+    /* ─── CTA ─── */
+    .cta-wrap{
+      background:radial-gradient(ellipse 80% 60% at 50% 50%, #0f2050 0%, var(--dark) 80%);
+      text-align:center;padding:120px 2rem;position:relative;overflow:hidden;
+    }
+    .cta-wrap::before{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(37,99,235,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(37,99,235,.04) 1px,transparent 1px);
+      background-size:60px 60px;
+    }
+    .cta-wrap h2{
+      font-family:var(--font-display);
+      font-size:clamp(2rem,4vw,3.25rem);font-weight:800;
+      color:white;margin-bottom:1rem;max-width:720px;margin-left:auto;margin-right:auto;
+    }
+    .cta-wrap p{color:#64748b;font-size:1.1rem;margin-bottom:3rem;max-width:520px;margin-left:auto;margin-right:auto}
+    .cta-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .cta-contacts{
+      display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap;
+      margin-top:3rem;padding-top:2.5rem;border-top:1px solid rgba(255,255,255,.06);
+    }
+    .cta-contact-item{display:flex;align-items:center;gap:.625rem;font-size:.875rem;color:#475569}
+    .cta-contact-item a{color:#60a5fa;text-decoration:none}
+    .cta-contact-item a:hover{text-decoration:underline}
+
+    /* ─── FOOTER ─── */
+    footer{
+      background:#040710;
+      border-top:1px solid rgba(255,255,255,.05);
+      padding:4rem 2rem 2rem;
+    }
+    .footer-grid{
+      max-width:1280px;margin:0 auto;
+      display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;
+      padding-bottom:3rem;border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .footer-brand .nav-logo{display:flex;margin-bottom:1.25rem}
+    .footer-brand p{font-size:.85rem;color:#475569;line-height:1.7;max-width:280px;margin-bottom:1.5rem}
+    .footer-social{display:flex;gap:.75rem}
+    .social-btn{
+      width:36px;height:36px;border-radius:8px;
+      background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.875rem;color:#475569;text-decoration:none;transition:all .2s;
+    }
+    .social-btn:hover{background:rgba(37,99,235,.2);border-color:rgba(37,99,235,.4);color:#60a5fa}
+    .footer-col h4{font-size:.875rem;font-weight:700;color:#94a3b8;margin-bottom:1.25rem;letter-spacing:.06em;text-transform:uppercase}
+    .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+    .footer-col ul li a{font-size:.85rem;color:#475569;text-decoration:none;transition:color .2s}
+    .footer-col ul li a:hover{color:#94a3b8}
+    .footer-bottom{
+      max-width:1280px;margin:2rem auto 0;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+    }
+    .footer-bottom p{font-size:.8rem;color:#1e293b}
+    .footer-bottom-links{display:flex;gap:1.5rem}
+    .footer-bottom-links a{font-size:.8rem;color:#1e293b;text-decoration:none;transition:color .2s}
+    .footer-bottom-links a:hover{color:#475569}
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width:1024px){
+      .solutions-grid{grid-template-columns:1fr 1fr}
+      .why-grid{grid-template-columns:1fr;gap:3rem}
+      .process-steps{grid-template-columns:1fr 1fr;gap:2.5rem}
+      .process-steps::before{display:none}
+      .footer-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:768px){
+      .nav-links,.nav-cta{display:none}
+      .solutions-grid{grid-template-columns:1fr}
+      .testimonials-grid{grid-template-columns:1fr}
+      .process-steps{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAVBAR ── -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">C</div>
+      <div>
+        <div class="nav-logo-txt">Công Nghệ Giáo Dục</div>
+        <span class="nav-logo-sub">Software Solutions</span>
+      </div>
+    </a>
+    <div class="nav-links">
+      <a href="#solutions">Giải pháp</a>
+      <a href="#why">Về chúng tôi</a>
+      <a href="#process">Quy trình</a>
+      <a href="#testimonials">Khách hàng</a>
+      <a href="#contact">Liên hệ</a>
+    </div>
+    <a href="#contact" class="nav-cta">Tư vấn miễn phí →</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-inner" style="position:relative;z-index:1;max-width:860px;margin:0 auto;text-align:center">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Đối tác công nghệ tin cậy · Hơn 200 doanh nghiệp
+    </div>
+    <h1>Giải pháp phần mềm<br/><em>thế hệ mới</em> cho doanh nghiệp</h1>
+    <p class="hero-desc">
+      Chúng tôi xây dựng nền tảng phần mềm mạnh mẽ, tích hợp AI —
+      từ quản lý giáo dục, tài chính đến CRM — giúp doanh nghiệp
+      vận hành thông minh hơn, tăng trưởng nhanh hơn.
+    </p>
+    <div class="hero-actions" style="justify-content:center">
+      <a href="#solutions" class="btn-hero">🚀 Khám phá giải pháp</a>
+      <a href="#contact" class="btn-ghost">💬 Liên hệ tư vấn</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── SOLUTIONS ── -->
+<section class="solutions" id="solutions">
+  <div class="inner">
+    <div class="solutions-header fade-up">
+      <div class="tag tag-white">Lĩnh vực hoạt động</div>
+      <h2 class="section-title">Ba trụ cột giải pháp<br/>của chúng tôi</h2>
+      <p class="section-desc" style="margin:0 auto">Mỗi sản phẩm được thiết kế chuyên biệt cho từng ngành, tích hợp AI để tối ưu vận hành và tăng trưởng bền vững.</p>
+    </div>
+    <div class="solutions-grid" style="margin-top:3.5rem">
+
+      <!-- EDU -->
+      <div class="sol-card edu fade-up">
+        <div class="sol-strip edu"></div>
+        <div class="sol-badge">01</div>
+        <div class="sol-body">
+          <div class="sol-icon edu">🎓</div>
+          <div class="tag tag-blue" style="margin-bottom:.75rem">EdTech</div>
+          <h3>Edu-ERP</h3>
+          <p class="sol-subtitle edu">Hệ thống quản lý giáo dục toàn diện</p>
+          <p>Nền tảng quản lý toàn diện dành cho trung tâm đào tạo, trường học. Tự động hóa tuyển sinh, giảng dạy, kế toán học phí và CSKH trên một hệ thống duy nhất.</p>
+          <ul class="sol-features edu">
+            <li>CRM tuyển sinh & chăm sóc học viên</li>
+            <li>LMS lớp học, điểm danh, bảng điểm</li>
+            <li>Kế toán học phí & hợp đồng tự động</li>
+            <li>AI dự đoán nguy cơ bỏ học</li>
+            <li>Dashboard báo cáo thời gian thực</li>
+          </ul>
+          <a href="../edu_erp.html" target="_blank" class="sol-btn edu">Xem chi tiết Edu-ERP →</a>
+        </div>
+      </div>
+
+      <!-- FINTECH -->
+      <div class="sol-card fin fade-up">
+        <div class="sol-strip fin"></div>
+        <div class="sol-badge">02</div>
+        <div class="sol-body">
+          <div class="sol-icon fin">💳</div>
+          <div class="tag tag-green" style="margin-bottom:.75rem">FinTech</div>
+          <h3>Fin-Suite</h3>
+          <p class="sol-subtitle fin">Giải pháp tài chính & thanh toán số</p>
+          <p>Hệ thống quản lý tài chính, thanh toán và phân tích dòng tiền thông minh. Tích hợp cổng thanh toán, quản lý công nợ và báo cáo tài chính tự động hóa.</p>
+          <ul class="sol-features fin">
+            <li>Quản lý công nợ & thu hồi tự động</li>
+            <li>Tích hợp đa cổng thanh toán</li>
+            <li>Phân tích dòng tiền & dự báo tài chính</li>
+            <li>Báo cáo tuân thủ & kiểm toán</li>
+            <li>AI phát hiện gian lận giao dịch</li>
+          </ul>
+          <a href="https://9pay.vn/" target="_blank" class="sol-btn fin">Tư vấn Fin-Suite →</a>
+        </div>
+      </div>
+
+      <!-- CRM -->
+      <div class="sol-card crm fade-up">
+        <div class="sol-strip crm"></div>
+        <div class="sol-badge">03</div>
+        <div class="sol-body">
+          <div class="sol-icon crm">🤝</div>
+          <div class="tag tag-purple" style="margin-bottom:.75rem">CRM</div>
+          <h3>Smart-CRM</h3>
+          <p class="sol-subtitle crm">Quản lý khách hàng thế hệ AI</p>
+          <p>Nền tảng CRM tích hợp AI giúp doanh nghiệp nắm bắt toàn bộ hành trình khách hàng, tự động hóa sales pipeline và tối ưu chuyển đổi theo từng phân khúc.</p>
+          <ul class="sol-features crm">
+            <li>Pipeline bán hàng & chốt deal tự động</li>
+            <li>AI phân loại & score khách hàng</li>
+            <li>Tự động hóa email, SMS marketing</li>
+            <li>Quản lý đội ngũ sales & KPI</li>
+            <li>Tích hợp Zalo, Facebook, Hotline</li>
+          </ul>
+          <a href="#contact" class="sol-btn crm">Tư vấn Smart-CRM →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── WHY US ── -->
+<section class="why" id="why">
+  <div class="inner">
+    <div class="why-grid">
+      <div>
+        <div class="tag tag-blue fade-up">Tại sao chọn chúng tôi?</div>
+        <h2 class="section-title fade-up">Công nghệ dẫn đầu,<br/>đồng hành tận tâm</h2>
+        <div class="fade-up" style="margin-top:2rem">
+          <div class="why-feature">
+            <div class="why-icon">🧠</div>
+            <div>
+              <h4>Tích hợp AI ngay trong sản phẩm</h4>
+              <p>Không phải AI thêm vào sau — AI được thiết kế sâu trong lõi hệ thống, giúp tự động phân tích, dự đoán và gợi ý quyết định thông minh.</p>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-icon">⚡</div>
+            <div>
+              <h4>Triển khai nhanh, đào tạo tận nơi</h4>
+              <p>Onboarding trong vòng 7 ngày, đào tạo đội ngũ trực tiếp, hỗ trợ kỹ thuật 24/7 — đảm bảo bạn khai thác tối đa sản phẩm ngay từ ngày đầu.</p>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-icon">🔧</div>
+            <div>
+              <h4>Phát triển may đo theo yêu cầu</h4>
+              <p>Mỗi doanh nghiệp có đặc thù riêng. Chúng tôi tùy chỉnh và phát triển các tính năng chuyên biệt theo đúng quy trình và yêu cầu của bạn.</p>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="why-icon">🔒</div>
+            <div>
+              <h4>Bảo mật & tuân thủ tiêu chuẩn</h4>
+              <p>Dữ liệu được mã hóa đầu cuối, phân quyền chi tiết, log toàn bộ thao tác. Đáp ứng tiêu chuẩn bảo mật dữ liệu trong giáo dục và tài chính.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up">
+        <div class="why-stats">
+          <div class="stat-box accent-blue">
+            <div class="stat-val">2.000+</div>
+            <div class="stat-lbl">Khách hàng &amp; đối tác trên toàn quốc</div>
+          </div>
+          <div class="stat-box" style="text-align:center">
+            <div class="stat-val green">85%</div>
+            <div class="stat-lbl">Giảm công việc thủ công</div>
+          </div>
+          <div class="stat-box" style="text-align:center">
+            <div class="stat-val purple">3×</div>
+            <div class="stat-lbl">Tăng tốc chuyển đổi khách hàng</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val gold">7 ngày</div>
+            <div class="stat-lbl">Thời gian onboarding trung bình</div>
+          </div>
+          <div class="stat-box large" style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(6,182,212,.06));border-color:rgba(124,58,237,.2)">
+            <div style="display:flex;align-items:center;gap:1rem">
+              <div style="font-size:2.5rem">🤖</div>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;color:white;margin-bottom:.25rem">Powered by AI</div>
+                <div style="font-size:.825rem;color:#64748b;line-height:1.5">Tất cả sản phẩm đều tích hợp AI — từ phân tích dữ liệu, dự đoán hành vi đến tự động hóa quy trình.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROCESS ── -->
+<section class="process" id="process">
+  <div class="inner">
+    <div class="text-center fade-up">
+      <div class="tag tag-white">Quy trình làm việc</div>
+      <h2 class="section-title">Từ ý tưởng đến vận hành<br/>chỉ trong 4 bước</h2>
+    </div>
+    <div class="process-steps fade-up">
+      <div class="process-step">
+        <div class="step-num s1">01</div>
+        <h4>Khảo sát & Tư vấn</h4>
+        <p>Tìm hiểu quy trình thực tế, xác định bài toán, đề xuất giải pháp phù hợp nhất với ngân sách và mục tiêu.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num s2">02</div>
+        <h4>Thiết kế & Tùy chỉnh</h4>
+        <p>Cấu hình và phát triển các tính năng đặc thù theo yêu cầu, demo với khách hàng để căn chỉnh hoàn hảo.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num s3">03</div>
+        <h4>Triển khai & Đào tạo</h4>
+        <p>Cài đặt, migrate dữ liệu, đào tạo toàn bộ đội ngũ sử dụng thành thạo — thực hiện tại chỗ hoặc online.</p>
+      </div>
+      <div class="process-step">
+        <div class="step-num s4">04</div>
+        <h4>Vận hành & Hỗ trợ</h4>
+        <p>Theo dõi, tối ưu liên tục sau khi go-live. Hỗ trợ kỹ thuật 24/7 và cập nhật tính năng miễn phí.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="testimonials" id="testimonials">
+  <div class="inner">
+    <div class="text-center fade-up">
+      <div class="tag tag-white">Khách hàng nói gì</div>
+      <h2 class="section-title">Được tin dùng bởi<br/>hàng nghìn doanh nghiệp</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testi-card fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">Edu-ERP đã thực sự làm thay đổi cách quản lý trung tâm của chúng tôi. Tối ưu hóa toàn bộ quy trình từ tuyển sinh đến kế toán, tiết kiệm hơn 3 giờ mỗi ngày.</p>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:linear-gradient(135deg,#2563eb,#06b6d4)">LD</div>
+          <div>
+            <h4>Linh Đặng</h4>
+            <span>CEO – BZ English Center</span>
+          </div>
+          <div class="testi-tag-pill" style="background:rgba(37,99,235,.15);color:#60a5fa;border:1px solid rgba(37,99,235,.2)">🎓 Edu</div>
+        </div>
+      </div>
+      <div class="testi-card fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">Hệ thống CRM giúp đội sales của chúng tôi tăng tỷ lệ chốt deal lên 40%. Pipeline trực quan, AI gợi ý follow-up đúng thời điểm — thực sự ấn tượng.</p>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:linear-gradient(135deg,#7c3aed,#ec4899)">TH</div>
+          <div>
+            <h4>Trần Hoàng</h4>
+            <span>Sales Director – TechCorp Vietnam</span>
+          </div>
+          <div class="testi-tag-pill" style="background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.2)">🤝 CRM</div>
+        </div>
+      </div>
+      <div class="testi-card fade-up">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">Giải pháp FinTech của họ tích hợp hoàn hảo với quy trình quản lý học phí. Công nợ được theo dõi tự động, không còn học viên nợ học phí mà không hay biết.</p>
+        <div class="testi-author">
+          <div class="testi-ava" style="background:linear-gradient(135deg,#059669,#06b6d4)">VM</div>
+          <div>
+            <h4>Võ Mai Thương</h4>
+            <span>CEO – MoyArt Academy</span>
+          </div>
+          <div class="testi-tag-pill" style="background:rgba(5,150,105,.15);color:#34d399;border:1px solid rgba(5,150,105,.2)">💳 FinTech</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-wrap" id="contact">
+  <div style="position:relative;z-index:1">
+    <div class="tag tag-white" style="margin-bottom:1.5rem">Bắt đầu ngay hôm nay</div>
+    <h2>Sẵn sàng nâng cấp<br/>doanh nghiệp của bạn?</h2>
+    <p>Nhận tư vấn miễn phí từ chuyên gia của chúng tôi. Chúng tôi sẽ giúp bạn xác định giải pháp phù hợp nhất trong vòng 24 giờ.</p>
+    <div class="cta-actions">
+      <a href="mailto:info.congnghegiaoduc@gmail.com" class="btn-hero">✉️ Gửi yêu cầu tư vấn</a>
+      <a href="tel:0389941902" class="btn-ghost">📞 Gọi ngay: 038 9941 902</a>
+    </div>
+    <div class="cta-contacts">
+      <div class="cta-contact-item">🌐 <a href="https://congnghegiaoduc.com" target="_blank">congnghegiaoduc.com</a></div>
+      <div class="cta-contact-item">📧 <a href="mailto:info.congnghegiaoduc@gmail.com">info.congnghegiaoduc@gmail.com</a></div>
+      <div class="cta-contact-item">📞 <a href="tel:0389941902">038 9941 902</a></div>
+      <div class="cta-contact-item">📍 199 Hồ Tùng Mậu, Nam Từ Liêm, Hà Nội</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo">
+        <div class="nav-logo-mark">C</div>
+        <div>
+          <div class="nav-logo-txt">Công Nghệ Giáo Dục</div>
+          <span class="nav-logo-sub">Software Solutions</span>
+        </div>
+      </a>
+      <p>Chúng tôi xây dựng phần mềm thế hệ mới tích hợp AI cho lĩnh vực Giáo dục, Tài chính và Quản lý Khách hàng.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn">fb</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">yt</a>
+        <a href="mailto:info.congnghegiaoduc@gmail.com" class="social-btn">✉</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Giải pháp</h4>
+      <ul>
+        <li><a href="../profile/index.html">Edu-ERP</a></li>
+        <li><a href="#solutions">Fin-Suite</a></li>
+        <li><a href="#solutions">Smart-CRM</a></li>
+        <li><a href="#contact">Phát triển riêng</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Công ty</h4>
+      <ul>
+        <li><a href="#why">Về chúng tôi</a></li>
+        <li><a href="#process">Quy trình</a></li>
+        <li><a href="#testimonials">Khách hàng</a></li>
+        <li><a href="#contact">Tuyển dụng</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Liên hệ</h4>
+      <ul>
+        <li><a href="tel:0389941902">038 9941 902</a></li>
+        <li><a href="mailto:info.congnghegiaoduc@gmail.com">info@congnghegiaoduc</a></li>
+        <li><a href="#">199 Hồ Tùng Mậu</a></li>
+        <li><a href="#">Nam Từ Liêm, Hà Nội</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Công Nghệ Giáo Dục. Bảo lưu mọi quyền.</p>
+    <div class="footer-bottom-links">
+      <a href="#">Chính sách bảo mật</a>
+      <a href="#">Điều khoản sử dụng</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ── Particle generator ──
+  (function(){
+    var wrap = document.getElementById('particles');
+    var colors = ['#2563eb','#06b6d4','#8b5cf6','#10b981','#f59e0b'];
+    for(var i=0;i<40;i++){
+      var p = document.createElement('div');
+      p.className = 'particle';
+      var size = Math.random()*18+8;
+      p.style.cssText = [
+        'width:'+size+'px','height:'+size+'px',
+        'left:'+Math.random()*100+'%',
+        'background:'+colors[Math.floor(Math.random()*colors.length)],
+        'border-radius:50%',
+        'animation-duration:'+(Math.random()*15+10)+'s',
+        'animation-delay:'+(Math.random()*10)+'s'
+      ].join(';');
+      wrap.appendChild(p);
+    }
+  })();
+
+  // ── Scroll fade-up ──
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('vis'); }
+    });
+  }, {threshold:0.1, rootMargin:'0px 0px -60px 0px'});
+  document.querySelectorAll('.fade-up').forEach(function(el){ io.observe(el); });
+
+  // ── Active nav highlight ──
+  var sections = document.querySelectorAll('section[id]');
+  var navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', function(){
+    var scrollY = window.scrollY;
+    sections.forEach(function(sec){
+      if(scrollY >= sec.offsetTop - 120){
+        navLinks.forEach(function(a){ a.style.color=''; });
+        var active = document.querySelector('.nav-links a[href="#'+sec.id+'"]');
+        if(active) active.style.color = 'white';
+      }
+    });
+  });
+</script>
+</body>
+</html>
