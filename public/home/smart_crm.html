@@ -218,11 +218,31 @@
     .footer-bottom { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,.05); text-align: center; }
     .footer-bottom p { color: #334155; font-size: .875rem; }
 
+    /* ── STICKY MOBILE CTA ── */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 998;
+      background: rgba(15,23,42,.95); backdrop-filter: blur(12px);
+      padding: .875rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 -4px 20px rgba(0,0,0,.3);
+    }
+    .mobile-sticky-cta a {
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      background: var(--gradient-primary);
+      color: white; text-decoration: none;
+      padding: .875rem; border-radius: 12px;
+      font-weight: 700; font-size: .95rem;
+      box-shadow: 0 4px 20px rgba(124,58,237,.3);
+    }
+
     @media (max-width: 768px) {
       .header-inner nav, .btn-header { display: none; }
       .ai-card { grid-template-columns: 1fr; gap: 2.5rem; }
       .footer-inner { grid-template-columns: 1fr; gap: 3rem; }
       .hero-stats { gap: 2rem; }
+      .mobile-sticky-cta { display: block; }
+      body { padding-bottom: 80px; }
     }
 
     /* Animations */
@@ -444,5 +464,12 @@
 
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
   </script>
+
+  <!-- STICKY MOBILE CTA -->
+  <div class="mobile-sticky-cta">
+    <a href="https://crm.congnghegiaoduc.com" target="_blank">
+      🚀 Trải nghiệm Smart-CRM miễn phí
+    </a>
+  </div>
 </body>
 </html>
