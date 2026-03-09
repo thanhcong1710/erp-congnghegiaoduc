@@ -326,7 +326,8 @@
       display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem;
     }
     .contact-item { display: flex; align-items: center; gap: .75rem; color: #94a3b8; font-size: .9rem; }
-    .contact-item a { color: #93c5fd; text-decoration: none; hover: underline; }
+    .contact-item a { color: #93c5fd; text-decoration: none; transition: opacity .2s; }
+    .contact-item a:hover { text-decoration: underline; opacity: 0.8; }
 
     /* ── FOOTER ── */
     footer { background: var(--dark); border-top: 1px solid rgba(255,255,255,.06); padding: 3rem 2rem; }
@@ -1282,8 +1283,9 @@
   <div class="footer-inner">
     <p>© 2025 Công ty Công Nghệ Giáo Dục. Bảo lưu mọi quyền.</p>
     <div class="footer-links">
-      <a href="https://congnghegiaoduc.com">Trang chủ</a>
-      <a href="https://erp.congnghegiaoduc.com">Edu-ERP</a>
+      <a href="./index.html">Trang chủ</a>
+      <a href="./edu_erp.html">Edu-ERP</a>
+      <a href="./smart_crm.html">Smart-CRM</a>
       <a href="mailto:info.congnghegiaoduc@gmail.com">Liên hệ</a>
     </div>
   </div>
