@@ -10,12 +10,28 @@ class GeminiService
     protected $apiKey;
     protected $apiUrl;
     protected $model;
+    protected $httpProxy;
 
     public function __construct()
     {
         $this->apiKey = config('ai.gemini.api_key');
         $this->apiUrl = config('ai.gemini.api_url');
         $this->model = config('ai.gemini.model');
+        $this->httpProxy = config('ai.gemini.http_proxy');
+    }
+
+    /**
+     * Gửi request generate content đơn giản tới Gemini
+     *
+     * @param string $prompt Nội dung câu hỏi
+     * @return string
+     */
+    public function generateContent(string $prompt)
+    {
+        $response = $this->chat([
+            ['role' => 'user', 'content' => $prompt]
+        ]);
+        return $response['content'] ?? '';
     }
 
     /**
@@ -52,8 +68,13 @@ class GeminiService
             // Gọi API
             $url = "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
 
-            $response = Http::timeout(config('ai.limits.request_timeout'))
-                ->post($url, $payload);
+            $http = Http::timeout(config('ai.limits.request_timeout'));
+
+            if (!empty($this->httpProxy)) {
+                $http = $http->withOptions(['proxy' => $this->httpProxy]);
+            }
+
+            $response = $http->post($url, $payload);
 
             if (!$response->successful()) {
                 throw new \Exception("Gemini API Error: " . $response->body());
