@@ -21,6 +21,7 @@ return [
         'api_key' => env('GEMINI_API_KEY', ''),
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'), // gemini-2.5-flash | gemini-2.5-pro
         'api_url' => env('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta'),
+        'proxy_key' => env('GEMINI_PROXY_KEY', null),
         'http_proxy' => env('GEMINI_HTTP_PROXY', null), // Ví dụ: 'http://username:password@ip:port'
         'max_tokens' => 8192,
         'temperature' => 0.7, // 0.0 - 1.0 (càng cao càng sáng tạo)

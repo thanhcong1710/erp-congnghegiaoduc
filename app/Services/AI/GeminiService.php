@@ -11,6 +11,7 @@ class GeminiService
     protected $apiUrl;
     protected $model;
     protected $httpProxy;
+    protected $proxyKey;
 
     public function __construct()
     {
@@ -18,6 +19,7 @@ class GeminiService
         $this->apiUrl = config('ai.gemini.api_url');
         $this->model = config('ai.gemini.model');
         $this->httpProxy = config('ai.gemini.http_proxy');
+        $this->proxyKey = config('ai.gemini.proxy_key');
     }
 
     /**
@@ -68,10 +70,17 @@ class GeminiService
             // Gọi API
             $url = "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
 
+            $headers = [
+                'x-goog-api-key' => $this->apiKey
+            ];
+
+            // Nếu dùng Proxy yêu cầu Bearer Token riêng (như Vercel Proxy)
+            if (!empty($this->proxyKey)) {
+                $headers['Authorization'] = "Bearer {$this->proxyKey}";
+            }
+
             $http = Http::timeout(config('ai.limits.request_timeout'))
-                ->withHeaders([
-                    'x-goog-api-key' => $this->apiKey
-                ]);
+                ->withHeaders($headers);
 
             if (!empty($this->httpProxy)) {
                 $http = $http->withOptions(['proxy' => $this->httpProxy]);
