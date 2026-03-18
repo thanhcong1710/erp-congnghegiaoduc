@@ -70,7 +70,6 @@ class GeminiService
 
             $http = Http::timeout(config('ai.limits.request_timeout'))
                 ->withHeaders([
-                    'Authorization' => "Bearer {$this->apiKey}",
                     'x-goog-api-key' => $this->apiKey
                 ]);
 
@@ -81,6 +80,12 @@ class GeminiService
             $response = $http->post($url, $payload);
 
             if (!$response->successful()) {
+                Log::error('Gemini API Error Detailed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'headers' => $response->headers(),
+                    'url' => str_replace($this->apiKey, '***', $url),
+                ]);
                 throw new \Exception("Gemini API Error: " . $response->body());
             }
 
@@ -88,6 +93,7 @@ class GeminiService
 
             // Debug: Log response để kiểm tra
             Log::info('Gemini Response', [
+                'status' => $response->status(),
                 'candidates_count' => count($result['candidates'] ?? []),
                 'first_candidate' => $result['candidates'][0] ?? null,
             ]);
@@ -96,7 +102,7 @@ class GeminiService
             return $this->parseResponse($result);
 
         } catch (\Exception $e) {
-            Log::error('Gemini API Error: ' . $e->getMessage());
+            Log::error('Gemini API Exception: ' . $e->getMessage());
             throw $e;
         }
     }
