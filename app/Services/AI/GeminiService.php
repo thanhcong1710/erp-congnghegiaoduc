@@ -68,7 +68,11 @@ class GeminiService
             // Gọi API
             $url = "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
 
-            $http = Http::timeout(config('ai.limits.request_timeout'));
+            $http = Http::timeout(config('ai.limits.request_timeout'))
+                ->withHeaders([
+                    'Authorization' => "Bearer {$this->apiKey}",
+                    'x-goog-api-key' => $this->apiKey
+                ]);
 
             if (!empty($this->httpProxy)) {
                 $http = $http->withOptions(['proxy' => $this->httpProxy]);
