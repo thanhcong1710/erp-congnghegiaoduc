@@ -24,10 +24,25 @@ $tests = [
     "Test 5: x-goog-api-key header (standard)" => ['x-goog-api-key' => $apiKey],
 ];
 
+// Thêm các test với URL params
+$url_code = $url . "&code=" . urlencode($proxyKey);
+$url_proxy = $url . "&proxy_key=" . urlencode($proxyKey);
+
+echo "<h3>Tests with URL Parameters:</h3>";
+echo "Testing Test 6: URL param ?code=...<br>";
+run_test("Test 6", $url_code, []);
+
+echo "Testing Test 7: URL param ?proxy_key=...<br>";
+run_test("Test 7", $url_proxy, []);
+
 foreach ($tests as $name => $headers) {
     echo "<h3>Trying $name...</h3>";
+    run_test($name, $url, $headers);
+}
+
+function run_test($name, $targetUrl, $headers) {
     try {
-        $response = Http::withHeaders($headers)->timeout(30)->post($url, [
+        $response = Http::withHeaders($headers)->timeout(30)->post($targetUrl, [
             'contents' => [['parts' => [['text' => 'Hi']]]]
         ]);
         $status = $response->status();
