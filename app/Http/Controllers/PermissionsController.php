@@ -15,11 +15,11 @@ class PermissionsController extends Controller
     public function list(Request $request)
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
-        $group_id = isset($request->group_id) ? (int) $request->group_id : 0;
+        $group_id = isset($request->group_id) ? (int)$request->group_id : 0;
 
-        $pagination = (object) $request->pagination;
-        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
-        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int)$pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int)$pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
@@ -70,8 +70,8 @@ class PermissionsController extends Controller
     {
         $name = trim(data_get($request, 'name'));
         $description = trim(data_get($request, 'description'));
-        $group_id = (int) data_get($request, 'group_id');
-        $display_order = (int) data_get($request, 'display_order', 0);
+        $group_id = (int)data_get($request, 'group_id');
+        $display_order = (int)data_get($request, 'display_order', 0);
 
         // Validate
         if (empty($name)) {
@@ -98,9 +98,7 @@ class PermissionsController extends Controller
             'description' => $description,
             'group_id' => $group_id,
             'display_order' => $display_order,
-            'status' => 1,
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
+            'status' => 1
         ], 'permissions');
 
         return response()->json([
@@ -115,11 +113,11 @@ class PermissionsController extends Controller
      */
     public function update(Request $request)
     {
-        $id = (int) data_get($request, 'id');
+        $id = (int)data_get($request, 'id');
         $name = trim(data_get($request, 'name'));
         $description = trim(data_get($request, 'description'));
-        $group_id = (int) data_get($request, 'group_id');
-        $display_order = (int) data_get($request, 'display_order', 0);
+        $group_id = (int)data_get($request, 'group_id');
+        $display_order = (int)data_get($request, 'display_order', 0);
 
         // Validate
         if ($id <= 0) {
@@ -155,9 +153,7 @@ class PermissionsController extends Controller
             'name' => $name,
             'description' => $description,
             'group_id' => $group_id,
-            'display_order' => $display_order,
-            'updated_at' => date('Y-m-d H:i:s'),
-            'updator_id' => Auth::user()->id,
+            'display_order' => $display_order
         ], ['id' => $id], 'permissions');
 
         return response()->json([
@@ -171,7 +167,7 @@ class PermissionsController extends Controller
      */
     public function delete(Request $request)
     {
-        $id = (int) data_get($request, 'id');
+        $id = (int)data_get($request, 'id');
 
         if ($id <= 0) {
             return response()->json(['message' => 'ID không hợp lệ'], 400);
@@ -191,9 +187,7 @@ class PermissionsController extends Controller
 
         // Soft delete
         u::updateSimpleRow([
-            'status' => 0,
-            'updated_at' => date('Y-m-d H:i:s'),
-            'updator_id' => Auth::user()->id,
+            'status' => 0
         ], ['id' => $id], 'permissions');
 
         return response()->json([
