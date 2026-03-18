@@ -107,7 +107,7 @@ class UserController extends Controller
         $user_id = u::insertSimpleRow(array(
             'name' => $request->name,
             'phone' => $request->phone,
-            'email' => $request->email,
+            'email' => $request->email ?: null,
             'hrm_id' => $request->hrm_id,
             'password' => Hash::make($request->password),
             'status' => $request->status,
@@ -194,7 +194,7 @@ class UserController extends Controller
         u::updateSimpleRow(array(
             'name' => $request->name,
             'phone' => $request->phone,
-            'email' => $request->email,
+            'email' => $request->email ?: null,
             'hrm_id' => $request->hrm_id,
             'status' => $request->status,
             'manager_hrm_id' => $request->manager_hrm_id,

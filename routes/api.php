@@ -120,6 +120,12 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('ticket/update', 'ParentsController@updateTicket');
             Route::post('parents/upload-avatar', 'ParentsController@uploadAvatar');
             Route::get('parents/get_vouchers/{parent_id}', 'ParentsController@getVouchers');
+            Route::prefix('staff')->group(function () {
+                Route::post('list', 'CrmStaffController@list');
+                Route::post('add', 'CrmStaffController@add');
+                Route::get('show/{id}', 'CrmStaffController@show');
+                Route::post('update/{id}', 'CrmStaffController@update');
+            });
         });
 
         Route::prefix('lms')->group(function () {

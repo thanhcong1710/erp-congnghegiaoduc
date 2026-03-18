@@ -72,6 +72,47 @@ export default {
           rule: 'editor'
         }
       },
+      {
+        path: '/crm/staff',
+        name: 'crm-staff',
+        component: () => import('@/views/crm/staff/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhân viên kinh doanh', active: true }
+          ],
+          pageTitle: 'Danh sách nhân viên',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/crm/staff/add',
+        name: 'crm-staff-add',
+        component: () => import('@/views/crm/staff/add.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhân viên kinh doanh', url: '/crm/staff' },
+            { title: 'Thêm mới', active: true }
+          ],
+          pageTitle: 'Thêm mới nhân viên',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/crm/staff/edit/:id',
+        name: 'crm-staff-edit',
+        component: () => import('@/views/crm/staff/edit.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhân viên kinh doanh', url: '/crm/staff' },
+            { title: 'Chỉnh sửa', active: true }
+          ],
+          pageTitle: 'Chỉnh sửa nhân viên',
+          rule: 'editor'
+        }
+      },
     ]
   },
 }

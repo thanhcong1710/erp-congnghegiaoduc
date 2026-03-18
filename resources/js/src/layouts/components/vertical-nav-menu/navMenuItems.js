@@ -45,6 +45,13 @@ export default [
         icon: 'ArrowUpCircleIcon',
         slug: 'crm-imports',
         permission: 'crm_imports',
+      },
+      {
+        url: '/crm/staff',
+        name: 'Nhân viên',
+        icon: 'UserIcon',
+        slug: 'crm-staff',
+        permission: 'crm_staff', // Use existing CRM permission for now to ensure visibility
       }
     ]
   },
