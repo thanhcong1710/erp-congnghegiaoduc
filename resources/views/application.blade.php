@@ -10,10 +10,10 @@
     <title>LAPO</title>
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset(mix('css/main.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/iconfont.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/material-icons/material-icons.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/vuesax.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/prism-tomorrow.css') }}">
+    <link rel="stylesheet" href="{{ asset(mix('css/iconfont.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('css/material-icons/material-icons.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('css/vuesax.css')) }}">
+    <link rel="stylesheet" href="{{ asset(mix('css/prism-tomorrow.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('css/app.css')) }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
