@@ -150,7 +150,7 @@ class BulkAddClasses extends Command
                 'creator_id' => 1,
                 'status' => 1,
                 'type' => 1,
-                'is_online' => 0,
+                'is_online' => data_get($c, 'is_online', 0),
             ], 'classes');
 
             // Insert Sessions
