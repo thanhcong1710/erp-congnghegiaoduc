@@ -685,6 +685,13 @@ class ContractsController extends Controller
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " c.status > 0 ";
         $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        
+        // Filter by ec_id for Sales and Sale Leader (role_id 68, 69)
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+        }
 
         if (!empty($branch_id)) {
             $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
