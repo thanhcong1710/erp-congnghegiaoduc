@@ -80,13 +80,18 @@
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Thông tin bảo lưu
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Ngày bắt đầu
                       <!---->
                     </div>
                   </th>
-                  <th colspan="1" rowspan="1">
-                    <div class="vs-table-text">Thời gian bảo lưu
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Ngày dự kiến đi học lại
+                      <!---->
+                    </div>
+                  </th>
+                  <th colspan="1" rowspan="1" class="text-center">
+                    <div class="vs-table-text">Ngày kết thúc
                       <!---->
                     </div>
                   </th>
@@ -114,12 +119,14 @@
                   <p>Lớp: {{item.class_name}}</p>
                   <p>{{item.branch_name}}</p>
                 </td>
-                <td class="td vs-table--td">
-                  <p>Số buổi: <strong>{{item.session}}</strong></p>
-                  <p>Loại:{{item.is_reserved ? ' Bảo lưu giữ chỗ' : ' Bảo lưu không giữ chỗ'}}</p>
+                 <td class="td vs-table--td text-center">
+                  <p>{{ item.start_date | formatDateView}}</p>
                 </td>
-                 <td class="td vs-table--td">
-                  <p>{{ item.start_date | formatDateView}} - {{ item.end_date | formatDateView}}</p>
+                <td class="td vs-table--td text-center">
+                  <p>{{ item.expected_end_date | formatDateView}}</p>
+                </td>
+                 <td class="td vs-table--td text-center">
+                  <p>{{ item.end_date | formatDateView}}</p>
                 </td>
                 <td class="td vs-table--td text-center">
                   <p>{{item.status | getStatusName}}</p>

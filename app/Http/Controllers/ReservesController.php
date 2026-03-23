@@ -43,7 +43,7 @@ class ReservesController extends Controller
         $list = u::query("SELECT r.id, s.name, s.lms_code,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
-                r.session, r.start_date, r.end_date, r.is_reserved, r.status
+                r.session, r.start_date, r.end_date, r.expected_end_date, r.is_reserved, r.status
             FROM reserves AS r 
                 LEFT JOIN students AS s ON s.id=r.student_id
             WHERE $cond $order_by $limitation");
@@ -71,22 +71,20 @@ class ReservesController extends Controller
     public function add(Request $request){
         $is_reserved = data_get($request,'reserve.is_reserved');
         $contract_id= data_get($request,'reserve.contract_id');
-        $reserve_session = data_get($request,'reserve.session'); 
+        $reserve_session = 0; 
         $start_date =  data_get($request,'reserve.start_date'); 
+        $expected_end_date = data_get($request,'reserve.expected_end_date');
         $contract_info = u::first("SELECT id, reserved_sessions, reservable_sessions,student_id, 
                 product_id, program_id, class_id, branch_id   
             FROM contracts WHERE id=$contract_id");
         $class_info = u::first("SELECT class_day FROM classes WHERE id = ".(int)data_get($contract_info,'class_id'));
         $left_reserve_session = (int)data_get($contract_info,'reservable_sessions') - (int)data_get($contract_info,'reserved_sessions');
         $required_approve = 0;
-        if($is_reserved == 0 || $reserve_session > $left_reserve_session){
+        if($is_reserved == 0){
             $required_approve = 1;
         }
 
-        $holidays = u::getPublicHolidays(data_get($contract_info,'branch_id'), data_get($contract_info,'product_id'));
-        $arr_day = explode(",",data_get($class_info, 'class_day'));
-        $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $reserve_session, $holidays, $arr_day);
-        $end_date = data_get($data_sessions,'end_date');
+        $end_date = date('Y-m-d', strtotime($start_date . ' + 90 days'));
 
         $reverse_exit = u::first("SELECT id FROM reserves WHERE contract_id=$contract_id AND status IN (1,2) AND
             ((start_date >='$start_date' AND start_date<='$end_date') OR (end_date >='$start_date' AND end_date<='$end_date'))");
@@ -102,7 +100,8 @@ class ReservesController extends Controller
             'student_id' => data_get($contract_info,'student_id'),
             'type'=> 1 ,
             'start_date' => $start_date,
-            'session'=> $reserve_session,
+            'session'=> 0,
+            'expected_end_date' => $expected_end_date,
             'end_date' => $end_date,
             'status' => 2,
             'creator_id' => Auth::user()->id,
@@ -293,7 +292,7 @@ class ReservesController extends Controller
     }
 
     public function getLogsByStudent(Request $request, $student_id){
-        $data = u::query("SELECT r.id, r.created_at, r.type, r.session, r.start_date, r.is_reserved,r.approved_at, r.status,
+        $data = u::query("SELECT r.id, r.created_at, r.type, r.session, r.start_date, r.end_date, r.expected_end_date, r.is_reserved,r.approved_at, r.status,
                 (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name,
                 (SELECT cls_name FROM classes WHERE id=r.class_id) AS class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=r.creator_id) AS creator_name,

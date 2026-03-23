@@ -37,6 +37,26 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>SĐT</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="phone"
+                v-model="reserve_info.gud_mobile1"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Địa chỉ</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="address"
+                v-model="reserve_info.address"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -107,17 +127,17 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.reserve.start_date"
+                v-model="reserve_info.start_date"
                 disabled="true"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi bảo lưu dự kiến</label>
+              <label>Ngày dự kiến đi học lại</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                 v-model="reserve_info.meta_data.reserve.session"
+                 v-model="reserve_info.expected_end_date"
                 disabled="true"
               />
             </div>
@@ -127,12 +147,12 @@
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
-                v-model="reserve_info.meta_data.reserve.end_date"
+                v-model="reserve_info.end_date"
                 disabled="true"
               />
             </div>
             <div class="vx-col w-full mb-4">
-              <label>Ghi chú</label>
+              <label>Lý do bảo lưu</label>
               <textarea class="vs-inputx vs-input--input normal" disabled="true" v-model="reserve_info.meta_data.reserve.note"></textarea>
             </div>
             <vs-divider/>
@@ -232,8 +252,9 @@
                       <p>{{item.branch_name}}</p>
                     </td>
                     <td class="td vs-table--td">
-                      <p>Số buổi: <strong>{{item.session}}</strong></p>
                       <p>Ngày bắt đầu: {{item.start_date}}</p>
+                      <p>Ngày dự kiến đi học lại: {{item.expected_end_date}}</p>
+                      <p>Ngày kết thúc: {{item.end_date}}</p>
                       <p>Loại: {{item.is_reserved ? 'Giữ chỗ' : 'Không giữ chỗ'}}</p>
                     </td>
                     <td class="td vs-table--td">

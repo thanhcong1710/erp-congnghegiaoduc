@@ -47,6 +47,26 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>SĐT</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="phone"
+                v-model="student_info.gud_mobile1"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Địa chỉ</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                name="address"
+                v-model="student_info.address"
+                disabled="true"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Khóa học</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -124,14 +144,13 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số buổi bảo lưu dự kiến <span class="text-danger"> (*)</span></label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="number"
-                name="title"
-                v-model="reserve.session"
+              <label>Ngày dự kiến đi học lại <span class="text-danger"> (*)</span></label>
+              <datepicker class="w-full"
+                v-model="reserve.expected_end_date"
+                placeholder="Chọn ngày dự kiến đi học lại"
+                :lang="datepickerOptions.lang"
                 :disabled="input_disabled"
-                @change="getEndDate()"
+                @change="selectExpectedDate"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -145,7 +164,7 @@
               />
             </div>
             <div class="vx-col w-full mb-4">
-              <label>Ghi chú</label>
+              <label>Lý do bảo lưu</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="reserve.note"></textarea>
             </div>
             <vs-divider/>
@@ -238,7 +257,8 @@
           note:'',
           start_date:'',
           end_date:'',
-          session:'',
+          expected_end_date: '',
+          session: 0,
           is_reserved: 0,
           total_amount_reserve: 0,
         },
@@ -310,22 +330,16 @@
           this.getEndDate()
         }
       },
+      selectExpectedDate(date) {
+        if (date) {
+          this.reserve.expected_end_date = moment(date).format("YYYY-MM-DD");
+        } else {
+          this.reserve.expected_end_date = '';
+        }
+      },
       getEndDate(){
-        if(this.reserve.start_date && this.reserve.session){
-          this.$vs.loading()
-          axios.p("/api/system/get-enddate-in-class",{
-            session: this.reserve.session,
-            start_date: this.reserve.start_date,
-            class_id: this.student_info.class_id
-          })
-          .then((response) => {
-            this.reserve.end_date = response.data
-            this.$vs.loading.close();
-          })
-          .catch((e) => {
-            console.log(e);
-            this.$vs.loading.close();
-          });
+        if(this.reserve.start_date){
+          this.reserve.end_date = moment(this.reserve.start_date).add(90, 'days').format("YYYY-MM-DD");
         }else{
           this.reserve.end_date = ''
         }
@@ -341,8 +355,8 @@
           mess += " - Học sinh không được để trống<br/>";
           resp = false;
         }
-        if (this.reserve.session == "") {
-          mess += " - Số buổi bảo lưu không được để trống<br/>";
+        if (!this.reserve.expected_end_date) {
+          mess += " - Ngày dự kiến đi học lại không được để trống<br/>";
           resp = false;
         }
         if (this.reserve.start_date == "") {
