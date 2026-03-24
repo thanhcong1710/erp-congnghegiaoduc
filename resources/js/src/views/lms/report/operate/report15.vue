@@ -73,6 +73,7 @@
               <th style="width:180px">Học sinh</th>
               <th style="width:200px">Contract</th>
               <th style="width:180px">Trung tâm / SP</th>
+              <th style="width:150px">EC / EC Leader</th>
               <th style="width:120px" class="text-center">Số buổi</th>
               <th style="width:150px" class="text-right">Tài chính</th>
               <th style="width:140px" class="text-right">Còn lại</th>
@@ -95,7 +96,10 @@
               <td>
                 <p class="small">{{ item.branch_name }}</p>
                 <p class="text-muted small">{{ item.product_name }}</p>
-                <p class="text-muted small">EC: {{ item.ec_name }}</p>
+              </td>
+              <td>
+                <p class="small">EC: {{ item.ec_name || '---' }}</p>
+                <p class="text-muted small">Lead: {{ item.ec_leader_name || '---' }}</p>
               </td>
               <td class="text-center">
                 <div>

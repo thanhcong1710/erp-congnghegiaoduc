@@ -87,6 +87,15 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Điểm đầu vào TOEIC</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                placeholder="Nhập điểm TOEIC"
+                v-model="agreement.point_toeic"
+              />
+            </div>
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
@@ -484,6 +493,7 @@
           contract_receive_obj: null,
           group_type: 0,
           group_type_obj: null,
+          point_toeic: '',
         },
         student_info:{
 

@@ -239,6 +239,13 @@ class ContractsController extends Controller
     public function add(Request $request)
     {
         $parent_info = u::getObject(['id' => data_get($request, 'parent_id')], 'crm_parents');
+        if ($parent_info && $request->has('point_toeic')) {
+            u::updateSimpleRow(
+                ['point_toeic' => $request->point_toeic],
+                ['id' => $parent_info->id],
+                'crm_parents'
+            );
+        }
         if (!data_get($parent_info, 'student_id')) {
             $arr_name = u::explodeName(data_get($parent_info, 'name'));
             $student_id = u::insertSimpleRow(array(
@@ -749,7 +756,7 @@ class ContractsController extends Controller
 
     public function show(Request $request, $agreement_id)
     {
-        $data = u::first("SELECT c.*,c.id AS agreement_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1,
+        $data = u::first("SELECT c.*,c.id AS agreement_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1, p.point_toeic,
             (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
@@ -758,7 +765,9 @@ class ContractsController extends Controller
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
             '' AS contracts, c.total_charged, 0 AS total_left_amount
         FROM agreements AS c 
-            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$agreement_id");
+            LEFT JOIN students AS s ON s.id=c.student_id 
+            LEFT JOIN crm_parents AS p ON p.student_id = s.id
+            WHERE c.id=$agreement_id");
         $total_left_amount = 0;
         $dataContracts = u::query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id
@@ -780,6 +789,13 @@ class ContractsController extends Controller
         $agreement_id = data_get($request, 'id');
         $agreementInfo = u::getObject(['id' => data_get($request, 'id')], 'agreements');
         if ($agreementInfo) {
+            if ($request->has('point_toeic')) {
+                u::updateSimpleRow(
+                    ['point_toeic' => $request->point_toeic],
+                    ['student_id' => $agreementInfo->student_id],
+                    'crm_parents'
+                );
+            }
             if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')) {
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),

@@ -274,7 +274,7 @@ class StudentsController extends Controller
     {
         $keyword = $request->keyword;
         $data = u::query("SELECT p.name, p.mobile_1 AS gud_mobile1, p.email AS gud_email1, p.address, 
-                p.id AS parent_id, CONCAT(p.name, ' - ', p.mobile_1) AS label,
+                p.id AS parent_id, CONCAT(p.name, ' - ', p.mobile_1) AS label, p.point_toeic,
                 CONCAT(u.name,' - ', u.hrm_id) AS ec_name,
                 (SELECT CONCAT(name,' - ', hrm_id) FROM users WHERE id = u.manager_id ) AS ec_leader_name,
                 IF(t.branch_id IS NULL ,0, t.branch_id) AS branch_id, s.lms_code

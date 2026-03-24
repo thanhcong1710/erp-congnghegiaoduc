@@ -882,6 +882,7 @@ class ExportsController extends Controller
                 cl.cls_name AS class_name,
                 t.name AS tuition_fee_name,
                 CONCAT(u_ec.name, ' - ', u_ec.hrm_id) AS ec_name,
+                CONCAT(u_ecl.name, ' - ', u_ecl.hrm_id) AS ec_leader_name,
                 CONCAT(u_cm.name, ' - ', u_cm.hrm_id) AS cm_name,
                 CASE 
                     WHEN c.summary_sessions > 0 THEN 
@@ -895,6 +896,7 @@ class ExportsController extends Controller
                 LEFT JOIN classes AS cl ON cl.id = c.class_id
                 LEFT JOIN tuition_fee AS t ON t.id = c.tuition_fee_id
                 LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+                LEFT JOIN users AS u_ecl ON u_ecl.id = c.ec_leader_id
                 LEFT JOIN users AS u_cm ON u_cm.id = c.cm_id
             WHERE $cond
             $order_by";
@@ -906,16 +908,16 @@ class ExportsController extends Controller
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
 
         $sheet->setCellValue('A1', 'BÁO CÁO DOANH THU CHƪa PHÂN BỔ THEO HỌC SINH');
-        $sheet->mergeCells('A1:S1');
+        $sheet->mergeCells('A1:T1');
         $sheet->getStyle('A1')->applyFromArray(['font' => ['bold' => true, 'size' => 14], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]]);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
-        $hCols = ['A2' => 'STT', 'B2' => 'Mã HS', 'C2' => 'Tên HS', 'D2' => 'SĐT', 'E2' => 'Mã Contract', 'F2' => 'Trạng thái', 'G2' => 'Trung tâm', 'H2' => 'Sản phẩm', 'I2' => 'Lớp học', 'J2' => 'Gói phí', 'K2' => 'EC', 'L2' => 'CM', 'M2' => 'Tổng buổi', 'N2' => 'Đã học', 'O2' => 'Còn lại', 'P2' => 'Phải đóng', 'Q2' => 'Đã đóng', 'R2' => 'Nợ', 'S2' => 'Số tiền còn lại'];
+        $hCols = ['A2' => 'STT', 'B2' => 'Mã HS', 'C2' => 'Tên HS', 'D2' => 'SĐT', 'E2' => 'Mã Contract', 'F2' => 'Trạng thái', 'G2' => 'Trung tâm', 'H2' => 'Sản phẩm', 'I2' => 'Lớp học', 'J2' => 'Gói phí', 'K2' => 'EC', 'L2' => 'EC Leader', 'M2' => 'CM', 'N2' => 'Tổng buổi', 'O2' => 'Đã học', 'P2' => 'Còn lại', 'Q2' => 'Phải đóng', 'R2' => 'Đã đóng', 'S2' => 'Nợ', 'T2' => 'Số tiền còn lại'];
         foreach ($hCols as $c => $l) {
             $sheet->setCellValue($c, $l);
         }
 
-        $widths = ['A' => 8, 'B' => 14, 'C' => 24, 'D' => 14, 'E' => 14, 'F' => 14, 'G' => 22, 'H' => 18, 'I' => 22, 'J' => 22, 'K' => 22, 'L' => 22, 'M' => 11, 'N' => 11, 'O' => 11, 'P' => 16, 'Q' => 16, 'R' => 16, 'S' => 18];
+        $widths = ['A' => 8, 'B' => 14, 'C' => 24, 'D' => 14, 'E' => 14, 'F' => 14, 'G' => 22, 'H' => 18, 'I' => 22, 'J' => 22, 'K' => 22, 'L' => 22, 'M' => 22, 'N' => 11, 'O' => 11, 'P' => 11, 'Q' => 16, 'R' => 16, 'S' => 16, 'T' => 18];
         foreach ($widths as $col => $w) {
             $sheet->getColumnDimension($col)->setWidth($w);
         }
@@ -951,14 +953,15 @@ class ExportsController extends Controller
             $sheet->setCellValue('I' . $x, $item->class_name ?: 'Chưa xếp lớp');
             $sheet->setCellValue('J' . $x, $item->tuition_fee_name);
             $sheet->setCellValue('K' . $x, $item->ec_name);
-            $sheet->setCellValue('L' . $x, $item->cm_name);
-            $sheet->setCellValue('M' . $x, $item->summary_sessions);
-            $sheet->setCellValue('N' . $x, $item->done_sessions);
-            $sheet->setCellValue('O' . $x, $item->left_sessions);
-            $sheet->setCellValue('P' . $x, $item->must_charge);
-            $sheet->setCellValue('Q' . $x, $item->total_charged);
-            $sheet->setCellValue('R' . $x, $item->debt_amount);
-            $sheet->setCellValue('S' . $x, $item->left_amount);
+            $sheet->setCellValue('L' . $x, $item->ec_leader_name);
+            $sheet->setCellValue('M' . $x, $item->cm_name);
+            $sheet->setCellValue('N' . $x, $item->summary_sessions);
+            $sheet->setCellValue('O' . $x, $item->done_sessions);
+            $sheet->setCellValue('P' . $x, $item->left_sessions);
+            $sheet->setCellValue('Q' . $x, $item->must_charge);
+            $sheet->setCellValue('R' . $x, $item->total_charged);
+            $sheet->setCellValue('S' . $x, $item->debt_amount);
+            $sheet->setCellValue('T' . $x, $item->left_amount);
 
             $totalLeftAmount += $item->left_amount;
             $totalCharged += $item->total_charged;
@@ -967,29 +970,29 @@ class ExportsController extends Controller
             $totalLeftSessions += $item->left_sessions;
             $totalSummarySessions += $item->summary_sessions;
 
-            $sheet->getStyle("A$x:S$x")->applyFromArray($borderOnly);
-            $sheet->getStyle("A$x,M$x:O$x")->applyFromArray($centerAlign);
-            $sheet->getStyle("P$x:S$x")->applyFromArray($rightAlign);
-            foreach (['P', 'Q', 'R', 'S'] as $mc) {
+            $sheet->getStyle("A$x:T$x")->applyFromArray($borderOnly);
+            $sheet->getStyle("A$x,N$x:P$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("Q$x:T$x")->applyFromArray($rightAlign);
+            foreach (['Q', 'R', 'S', 'T'] as $mc) {
                 $sheet->getStyle("$mc$x")->getNumberFormat()->setFormatCode('#,##0');
             }
             $sheet->getRowDimension($x)->setRowHeight(20);
         }
 
         $tRow = count($list) + 3;
-        $sheet->mergeCells("A$tRow:L$tRow");
+        $sheet->mergeCells("A$tRow:M$tRow");
         $sheet->setCellValue('A' . $tRow, 'TỔNG CỘNG');
-        $sheet->setCellValue('M' . $tRow, $totalSummarySessions);
-        $sheet->setCellValue('N' . $tRow, '');
-        $sheet->setCellValue('O' . $tRow, $totalLeftSessions);
-        $sheet->setCellValue('P' . $tRow, $totalMustCharge);
-        $sheet->setCellValue('Q' . $tRow, $totalCharged);
-        $sheet->setCellValue('R' . $tRow, $totalDebt);
-        $sheet->setCellValue('S' . $tRow, $totalLeftAmount);
+        $sheet->setCellValue('N' . $tRow, $totalSummarySessions);
+        $sheet->setCellValue('O' . $tRow, '');
+        $sheet->setCellValue('P' . $tRow, $totalLeftSessions);
+        $sheet->setCellValue('Q' . $tRow, $totalMustCharge);
+        $sheet->setCellValue('R' . $tRow, $totalCharged);
+        $sheet->setCellValue('S' . $tRow, $totalDebt);
+        $sheet->setCellValue('T' . $tRow, $totalLeftAmount);
         $tStyle = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F0F0']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'AAAAAA']]]];
-        $sheet->getStyle("A$tRow:S$tRow")->applyFromArray($tStyle);
-        $sheet->getStyle("P$tRow:S$tRow")->applyFromArray($rightAlign);
-        foreach (['P', 'Q', 'R', 'S'] as $mc) {
+        $sheet->getStyle("A$tRow:T$tRow")->applyFromArray($tStyle);
+        $sheet->getStyle("Q$tRow:T$tRow")->applyFromArray($rightAlign);
+        foreach (['Q', 'R', 'S', 'T'] as $mc) {
             $sheet->getStyle("$mc$tRow")->getNumberFormat()->setFormatCode('#,##0');
         }
         $sheet->getRowDimension($tRow)->setRowHeight(22);

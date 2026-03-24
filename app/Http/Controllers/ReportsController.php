@@ -686,6 +686,7 @@ class ReportsController extends Controller
                 cl.cls_name AS class_name,
                 t.name AS tuition_fee_name,
                 CONCAT(u_ec.name, ' - ', u_ec.hrm_id) AS ec_name,
+                CONCAT(u_ecl.name, ' - ', u_ecl.hrm_id) AS ec_leader_name,
                 CONCAT(u_cm.name, ' - ', u_cm.hrm_id) AS cm_name,
                 -- Tính số tiền còn lại
                 CASE 
@@ -700,6 +701,7 @@ class ReportsController extends Controller
                 LEFT JOIN classes AS cl ON cl.id = c.class_id
                 LEFT JOIN tuition_fee AS t ON t.id = c.tuition_fee_id
                 LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+                LEFT JOIN users AS u_ecl ON u_ecl.id = c.ec_leader_id
                 LEFT JOIN users AS u_cm ON u_cm.id = c.cm_id
             WHERE $cond
             $order_by $limitation";

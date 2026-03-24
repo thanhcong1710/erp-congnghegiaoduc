@@ -99,6 +99,15 @@
                 disabled="true"
               />
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Điểm đầu vào TOEIC</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                placeholder="Nhập điểm TOEIC"
+                v-model="agreement.point_toeic"
+              />
+            </div>
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
@@ -408,6 +417,7 @@
           group_type: 0,
           group_type_obj: null,
           class_id: '',
+          point_toeic: '',
         },
         classInfo: null,
         student_info:{
@@ -452,6 +462,7 @@
       selectStudent(student) {
         this.student_info = student
         this.agreement.parent_id = student.parent_id
+        this.agreement.point_toeic = student.point_toeic
         if (student.branch_id){
           this.disabled_branch = true
           this.html.branches.item = this.html.branches.list.filter(item => item.id == student.branch_id)[0]
