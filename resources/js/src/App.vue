@@ -12,8 +12,8 @@
   <div id="app" :class="vueAppClasses">
     <router-view @setAppClasses="setAppClasses" />
     
-    <!-- AI Chatbot - Hiển thị ở mọi trang -->
-    <ai-chatbot v-if="isLoggedIn"></ai-chatbot>
+    <!-- AI Chatbot - Hiển thị ở mọi trang trừ login và print -->
+    <ai-chatbot v-if="isLoggedIn && shouldShowAiChat"></ai-chatbot>
   </div>
 </template>
 
@@ -34,6 +34,10 @@ export default {
   computed: {
     isLoggedIn() {
       return this.$store.state.auth.isUserLoggedIn()
+    },
+    shouldShowAiChat() {
+      const excludedPaths = ['/pages/login', '/pages/print/'];
+      return !excludedPaths.some(path => this.$route.path.startsWith(path));
     }
   },
   watch: {
