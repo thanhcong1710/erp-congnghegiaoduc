@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- <link rel="icon" href="<%= BASE_URL %>favicon.ico"> -->
 
-    <title>LAPO</title>
+    <title>CHAM TOEIC</title>
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset(mix('css/main.css')) }}">
     <link rel="stylesheet" href="{{ asset(mix('css/iconfont.css')) }}">
@@ -20,7 +20,7 @@
     <script src="https://unpkg.com/vue-multiselect@2.1.6"></script>
     <link rel="stylesheet" href="https://unpkg.com/vue-multiselect@2.1.6/dist/vue-multiselect.min.css">
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('images/logo/logo-lapo.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo/logo.png') }}">
   </head>
   <body>
     <noscript>
