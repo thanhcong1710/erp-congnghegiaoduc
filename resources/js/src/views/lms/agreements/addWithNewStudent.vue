@@ -380,9 +380,83 @@
             <div class="vx-col md:w-2/3 w-full mb-4">
               <div  class="invoice-total-wrapper">
                   <div  class="invoice-total-item" style="font-weight: bold;">
-                      <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
-                      <p  class="invoice-total-amount"> {{ agreement.total_amount | formatMoney}} </p>
+                      <p  class="invoice-total-title" style="font-size: 1.2rem; color: #1e293b;"> Tổng tiền phải đóng: </p>
+                      <p  class="invoice-total-amount" style="font-size: 1.5rem; color: #ef4444;"> {{ agreement.total_amount | formatMoney}} </p>
                   </div>
+              </div>
+            </div>
+
+            <div class="vx-col w-full mb-2">
+              <vs-button type="flat" icon-pack="feather" :icon="showPayment ? 'icon-chevron-down' : 'icon-chevron-right'" @click="showPayment = !showPayment" class="p-0 mb-4" style="font-size: 1.1rem; font-weight: 600;">
+                <i class="fa-solid fa-money-bill-wave mr-2"></i> THÔNG TIN THU PHÍ (Click để mở rộng)
+              </vs-button>
+            </div>
+
+            <div v-if="showPayment" class="vx-col w-full">
+              <div class="vx-row p-4 border rounded bg-gray-50 mb-6">
+                <div class="vx-col md:w-1/3 w-full mb-4">
+                  <label>Số tiền thu <span class="text-danger">(*)</span></label>
+                  <input
+                    class="vs-inputx vs-input--input normal"
+                    type="text"
+                    v-model="paymentAmountText"
+                    placeholder="Nhập số tiền thu"
+                  />
+                </div>
+                <div class="vx-col md:w-1/3 w-full mb-4">
+                  <label>Phương thức đóng phí <span class="text-danger">(*)</span></label>
+                  <select class="vs-inputx vs-input--input normal" v-model="payment.method">
+                    <option value="0">Tiền mặt</option>
+                    <option value="1">Chuyển khoản</option>
+                    <option value="2">Thẻ tín dụng</option>
+                  </select>
+                </div>
+                <div class="vx-col md:w-1/3 w-full mb-4">
+                  <label>Ngày thu phí <span class="text-danger">(*)</span></label>
+                  <datepicker class="w-full"
+                    v-model="payment.charge_date"
+                    placeholder="Chọn ngày thu phí"
+                    :lang="datepickerOptions.lang"
+                    @change="selectChargeDate"
+                  />
+                </div>
+                <div class="vx-col md:w-1/2 w-full mb-4">
+                  <label>Ghi chú thu phí</label>
+                  <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" rows="3" placeholder="Ghi chú cho phiếu thu"></textarea>
+                </div>
+                <div class="vx-col md:w-1/2 w-full mb-4">
+                  <label>Đính kèm ảnh chuyển khoản</label>
+                  <input 
+                    type="file" 
+                    ref="fileInput"
+                    @change="handleFileUpload" 
+                    multiple 
+                    accept="image/*"
+                    class="vs-inputx vs-input--input normal"
+                  />
+                  <small class="text-muted">Có thể chọn nhiều ảnh</small>
+                  <div v-if="selectedFiles.length > 0" class="mt-3">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div v-for="(file, index) in selectedFiles" :key="index" class="relative">
+                        <img 
+                          :src="file.preview" 
+                          class="w-full h-24 object-cover rounded border border-gray-300 cursor-pointer" 
+                          @click="viewImagePreview(file.preview)"
+                        />
+                        <vs-button 
+                          size="small" 
+                          color="danger" 
+                          type="filled" 
+                          icon-pack="feather" 
+                          icon="icon-trash" 
+                          class="absolute top-1 right-1"
+                          style="padding: 4px; min-width: 24px;"
+                          @click="removeFile(index)"
+                        ></vs-button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -520,7 +594,16 @@
           active: false,
           body: '',
           color:'',
-        }
+        },
+        showPayment: false,
+        payment: {
+          amount: 0,
+          method: 1,
+          charge_date: moment().format('YYYY-MM-DD'),
+          note: ''
+        },
+        paymentAmountText: '',
+        selectedFiles: []
       }
     },
     created() {
@@ -537,6 +620,25 @@
         this.html.source.list = response.data
       })
       this.loadECList();
+    },
+    watch: {
+      paymentAmountText: function (val) {
+        if (this.agreement.total_amount) {
+          const value = u.fmc(val)
+          if (value.n > parseInt(this.agreement.total_amount)) {
+            const maxVal = u.fmc(this.agreement.total_amount)
+            this.paymentAmountText = maxVal.s
+            this.payment.amount = maxVal.n
+          } else {
+            this.paymentAmountText = value.s
+            this.payment.amount = value.n
+          }
+        } else {
+          const value = u.fmc(val)
+          this.paymentAmountText = value.s
+          this.payment.amount = value.n
+        }
+      }
     },
     methods: {
       loadECList(){
@@ -821,6 +923,17 @@
           mess += " - Ngày dự kiến học không được để trống<br/>";
           resp = false;
         }
+        if (this.showPayment) {
+          if (this.payment.amount <= 0) {
+            mess += " - Số tiền thu không được để trống khi chọn thu phí<br/>";
+            resp = false;
+          }
+          if (this.payment.charge_date == "") {
+            mess += " - Ngày thu phí không được để trống khi chọn thu phí<br/>";
+            resp = false;
+          }
+        }
+
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
@@ -858,15 +971,32 @@
         this.$vs.loading()
         axios.p("/api/lms/agreements/add-with-new-student", data)
         .then((response) => {
-          this.$vs.loading.close();
-          this.$vs.notify({
-            title: 'Thành Công',
-            text: response.data.message + ' - Mã HS: ' + response.data.lms_code,
-            color: 'success',
-            iconPack: 'feather',
-            icon: 'icon-check'
-          })
-          this.$router.push('/lms/agreements')
+          if (response.data.status == 1) {
+            const agreementId = response.data.agreement_id;
+            const lmsCode = response.data.lms_code;
+            if (this.showPayment) {
+              this.processPayment(agreementId, lmsCode, response.data.message);
+            } else {
+              this.$vs.loading.close();
+              this.$vs.notify({
+                title: 'Thành Công',
+                text: response.data.message + ' - Mã HS: ' + lmsCode,
+                color: 'success',
+                iconPack: 'feather',
+                icon: 'icon-check'
+              })
+              this.$router.push('/lms/agreements')
+            }
+          } else {
+            this.$vs.loading.close();
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: response.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-triangle'
+            })
+          }
         })
         .catch((e) => {
           console.log(e);

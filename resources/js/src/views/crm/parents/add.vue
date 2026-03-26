@@ -59,6 +59,22 @@
               />
             </div>
             <div class="vx-col w-full mb-4">
+              <label >Địa chỉ</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="parent.address"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label >Điểm đầu vào Toeic</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="number"
+                v-model="parent.point_toeic"
+              />
+            </div>
+            <div class="vx-col w-full mb-4">
               <label >Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="parent.note"></textarea>
             </div>
@@ -271,6 +287,7 @@
           address:"",
           owner_id:"",
           c2c_mobile:"",
+          point_toeic:"",
         },
         users_manager:[],
         c2c_info:"",

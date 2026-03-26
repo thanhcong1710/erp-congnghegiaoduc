@@ -232,6 +232,7 @@ class ParentsController extends Controller
             'owner_id' => $request->owner_id,
             'status' => $request->status,
             'c2c_mobile' => $request->c2c_mobile,
+            'point_toeic' => $request->point_toeic,
         ), 'crm_parents');
         u::updateBranchIDParents();
         LogParents::logAdd($id, 'Khởi tạo khách hàng thủ công', Auth::user()->id);
@@ -279,8 +280,20 @@ class ParentsController extends Controller
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
             'c2c_mobile' => $request->c2c_mobile,
+            'point_toeic' => $request->point_toeic,
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_parents');
+        if ($pre_parent_info->student_id) {
+            u::updateSimpleRow(array(
+                'gud_name1' => $request->name,
+                'gud_mobile1' => $request->mobile_1,
+                'gud_email1' => $request->email,
+                'address' => $request->address,
+                'province_id' => $request->province_id,
+                'district_id' => $request->district_id,
+                'point_toeic' => $request->point_toeic,
+            ), array('id' => $pre_parent_info->student_id), 'students');
+        }
         LogParents::logUpdateInfo($pre_parent_info, $data_update, Auth::user()->id);
         $result = (object) array(
             'status' => 1,

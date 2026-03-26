@@ -30,7 +30,17 @@
             type="text"
             name="title"
             v-model="student_info.gud_mobile1"
-            disabled="true"
+            :disabled="disabled_edit"
+            @change="validatePhone"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Điểm đầu vào Toeic </label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="number"
+            v-model="student_info.point_toeic"
+            :disabled="disabled_edit"
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -266,6 +276,32 @@
       selectDate(date) {
         if (date) {
           this.student_info.date_of_birth = moment(date).format("YYYY-MM-DD");
+        }
+      },
+      validatePhone(){
+        if(this.student_info.gud_mobile1){
+          const data = {
+            phone: this.student_info.gud_mobile1,
+            parent_id: this.student_info.parent_id
+          };
+          this.$vs.loading()
+          axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
+            this.$vs.loading.close();
+            if(response.data.status==0){
+              this.student_info.gud_mobile1 ="";
+              this.alert.color = "warning";
+              this.alert.body = response.data.message;
+              this.alert.active = true;
+            }else if(response.data.status==2){
+               this.$vs.notify({
+                title: 'Cảnh báo',
+                text: response.data.message,
+                color: 'warning',
+                iconPack: 'feather',
+                icon: 'icon-alert-circle'
+              })
+            }
+          })
         }
       },
       selectDateGudBirthDay1(date){

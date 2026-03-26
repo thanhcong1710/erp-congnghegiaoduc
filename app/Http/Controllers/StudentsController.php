@@ -213,6 +213,7 @@ class StudentsController extends Controller
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
+                (SELECT id FROM crm_parents WHERE student_id = s.id LIMIT 1) AS parent_id,
                 '' AS left_amount
             FROM students AS s 
                 LEFT JOIN contracts AS c ON c.student_id=s.id 
@@ -258,10 +259,21 @@ class StudentsController extends Controller
             'note' => $request->note,
             'aspiration' => $request->aspiration,
             'gud_job2' => $request->gud_job2,
+            'gud_mobile1' => $request->gud_mobile1,
+            'point_toeic' => $request->point_toeic,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         );
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
+        u::query("UPDATE crm_parents SET 
+            name = '".addslashes($request->gud_name1)."',
+            mobile_1 = '$request->gud_mobile1',
+            email = '$request->gud_email1',
+            address = '".addslashes($request->address)."',
+            province_id = '$request->province_id',
+            district_id = '$request->district_id',
+            point_toeic = '$request->point_toeic'
+            WHERE student_id = $request->id");
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
         $result = (object) array(
             'status' => 1,

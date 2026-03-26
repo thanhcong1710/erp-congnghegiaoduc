@@ -432,7 +432,8 @@ class ContractsController extends Controller
 
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới nhập học thành công'
+            'message' => 'Thêm mới nhập học thành công',
+            'agreement_id' => $agreement_id
         );
         return response()->json($result);
     }
@@ -672,7 +673,8 @@ class ContractsController extends Controller
             'status' => 1,
             'message' => 'Thêm mới học sinh và nhập học thành công',
             'student_id' => $student_id,
-            'lms_code' => $lms_code
+            'lms_code' => $lms_code,
+            'agreement_id' => $agreement_id
         );
         return response()->json($result);
     }
