@@ -70,6 +70,10 @@ class UserController extends Controller
         if ($branch_id) {
             $cond .= " AND EXISTS (SELECT id FROM branch_has_user WHERE user_id=u.id AND branch_id = $branch_id) ";
         }
+        $role_id = isset($request->role_id) && $request->role_id ? (int) $request->role_id : '';
+        if ($role_id) {
+            $cond .= " AND EXISTS (SELECT id FROM role_has_user WHERE user_id=u.id AND role_id = $role_id) ";
+        }
         $total = u::first("SELECT count(u.id) AS total FROM users AS u WHERE $cond ");
         $list = u::query("SELECT u.*, IF(u.manager_id, (SELECT name FROM users WHERE id=u.manager_id), '') AS manager_name
             FROM users AS u 

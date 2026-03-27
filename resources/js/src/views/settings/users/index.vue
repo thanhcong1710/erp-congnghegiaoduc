@@ -17,6 +17,17 @@
           <span slot="no-options">Không có dữ liệu</span>
         </v-select>
       </div>
+      <div class="w-64 ml-3">
+        <v-select 
+          :options="roles" 
+          :reduce="role => role.id" 
+          label="description" 
+          v-model="searchQuery.role_id"
+          placeholder="Chọn vai trò"
+          @input="getData()">
+          <span slot="no-options">Không có dữ liệu</span>
+        </v-select>
+      </div>
       <div class="con-input-search vs-table--search">
         <input type="text" class="input-search vs-table--search-input" style="padding:14px 35px; font-size:14px;" placeholder="Mã, tên nhân viên" v-model="searchQuery.keyword" @input="getData()">
         <i class="vs-icon notranslate icon-scale material-icons null" style="font-size:24px;">search</i>
@@ -98,8 +109,10 @@
         searchQuery: {
           keyword: '',
           branch_id: '',
+          role_id: '',
         },
         branches: [],
+        roles: [],
 
         users: [],
         limitSource: [10, 20, 30, 40, 50],
@@ -168,6 +181,7 @@
         axios.p('/api/users/list', {
             keyword: this.searchQuery.keyword,
             branch_id: this.searchQuery.branch_id,
+            role_id: this.searchQuery.role_id,
             pagination: this.pagination
           })
           .then((response) => {
@@ -197,6 +211,9 @@
     created() {
       axios.g('/api/system/branches').then(response => {
         this.branches = response.data
+      })
+      axios.g('/api/system/roles').then(response => {
+        this.roles = response.data
       })
       this.getData();
     },
