@@ -411,6 +411,9 @@
           b2b_bonus_session:'',
           tuition_fee_relation:[],
           tuition_fee_type:'',
+          class_id: null,
+          class_name: '',
+          class_start_date: ''
         },
         student_info:{
 

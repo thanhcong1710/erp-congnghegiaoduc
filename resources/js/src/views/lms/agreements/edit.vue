@@ -546,6 +546,9 @@
           group_type: 0,
           group_type_obj: null,
           point_toeic: '',
+          class_id: null,
+          class_name: '',
+          class_start_date: '',
         },
         student_info:{
 
@@ -660,6 +663,9 @@
           this.agreement.tuition_fee_session = response.data.init_tuition_fee_session
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.agreement.contracts = response.data.contracts
+          this.agreement.class_id = response.data.class_id
+          this.agreement.class_name = response.data.class_name
+          this.agreement.class_start_date = response.data.class_start_date
           
           // Load các trường mới
           this.agreement.book_receive = response.data.book_receive || 0
@@ -856,13 +862,14 @@
             branch_id: this.agreement.branch_id,
             tuition_fee_id: this.agreement.tuition_fee_id,
             tuition_fee_type: this.agreement.tuition_fee_type,
-            current_class_id: this.agreement.class_id
+            current_class_id: this.agreement.class_id || 0
           }).then((response) => {
             this.html.classes.list = response.data || []
             if (this.agreement.class_id) {
-               this.html.classes.item = this.html.classes.list.find(c => c.id == this.agreement.class_id)
-               if (this.html.classes.item) {
-                  this.classInfo = this.html.classes.item
+               const item = this.html.classes.list.find(c => Number(c.id) === Number(this.agreement.class_id))
+               if (item) {
+                  this.html.classes.item = item
+                  this.classInfo = item
                }
             }
           }).catch(e => console.log(e))
