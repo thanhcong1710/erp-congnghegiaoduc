@@ -233,11 +233,6 @@
                             {{ classInfo.availability_text || 'Còn chỗ' }}
                          </span>
                       </div>
-                      <div class="vx-col w-full">
-                         <vs-button type="flat" size="small" class="p-0" @click="viewClassDetail(agreement.class_id)">
-                            <i class="fa-solid fa-circle-info mr-1"></i> Xem chi tiết lớp học
-                         </vs-button>
-                      </div>
                    </div>
                 </div>
                 <!-- TRƯỜNG HỢP CHƯA LOAD XONG CHI TIẾT -->
