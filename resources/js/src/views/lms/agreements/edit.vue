@@ -162,7 +162,7 @@
             
             <!-- CHỌN LỚP ĐANG XẾP -->
             <div class="vx-col w-full mb-4">
-              <label>Lớp học xếp ngay <span class="text-danger">(*)</span></label>
+              <label>Lớp học</label>
               <vue-select
                     label="label"
                     placeholder="Chọn lớp để xếp lớp ngay"

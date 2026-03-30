@@ -218,7 +218,7 @@
               </div>
             </div>
             <div class="vx-col w-full mb-4">
-              <label>Chọn lớp để xếp lớp ngay <span class="text-danger">(*)</span></label>
+              <label>Chọn lớp để xếp lớp ngay</label>
               <vue-select
                     label="label"
                     placeholder="Chọn lớp (chỉ hiện lớp chưa khai giảng)"

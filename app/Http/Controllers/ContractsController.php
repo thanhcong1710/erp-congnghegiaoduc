@@ -715,6 +715,13 @@ class ContractsController extends Controller
         if ($start_date !== '') {
             $cond .= " AND c.created_at > '$start_date 00:00:00'";
         }
+        
+        $is_class = data_get($request, 'is_class', -1);
+        if ($is_class == 1) {
+            $cond .= " AND EXISTS (SELECT 1 FROM contracts ct WHERE ct.agreement_id = c.id AND ct.class_id > 0 AND ct.status > 0) ";
+        } elseif ($is_class == 0) {
+            $cond .= " AND NOT EXISTS (SELECT 1 FROM contracts ct WHERE ct.agreement_id = c.id AND ct.class_id > 0 AND ct.status > 0) ";
+        }
 
         $order_by = " ORDER BY c.id DESC ";
 

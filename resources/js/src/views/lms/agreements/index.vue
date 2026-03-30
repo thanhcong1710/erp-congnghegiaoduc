@@ -33,6 +33,16 @@
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái xếp lớp</label>
+            <v-select
+                v-model="searchData.is_class"
+                :options="isClassOptions"
+                placeholder="Chọn trạng thái"
+                :reduce="label => label.value"
+                label="label"
+            />
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -147,7 +157,13 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          is_class: -1,
         },
+        isClassOptions: [
+          { label: "Tất cả", value: -1 },
+          { label: "Đã xếp lớp", value: 1 },
+          { label: "Chưa xếp lớp", value: 0 },
+        ],
         datepickerOptions: {
           closed: true,
           value: "",
@@ -204,6 +220,7 @@
         this.searchData.branch_id= ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
+        this.searchData.is_class= -1
         this.getData();
       },
       getData() {
@@ -222,6 +239,7 @@
             branch_id: this.searchData.branch_id,
             start_date:startDate,
             end_date:endDate,
+            is_class: this.searchData.is_class,
             pagination:this.pagination,
           }
 
