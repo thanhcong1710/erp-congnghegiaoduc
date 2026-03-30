@@ -49,6 +49,9 @@ class ContractsController extends Controller
             return response()->json([]);
         }
 
+        $current_class_id = (int) data_get($request, 'current_class_id', 0);
+        $where_date = "AND (c.cls_startdate > CURRENT_DATE" . ($current_class_id > 0 ? " OR c.id = $current_class_id" : "") . ")";
+
         $classes = u::query("SELECT c.id, c.cls_name AS label,
                 c.cls_startdate, c.cls_enddate, c.max_students,
                 (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) AS enrolled_students,
@@ -69,9 +72,8 @@ class ContractsController extends Controller
             WHERE c.status = 1
                 AND c.branch_id = $branch_id
                 AND c.product_id = $product_id
-                AND c.cls_startdate >= CURRENT_DATE
-                AND c.cls_enddate >= CURRENT_DATE
-            ORDER BY c.cls_name");
+                $where_date
+            ORDER BY c.cls_startdate ASC, c.cls_name ASC");
 
         return response()->json($classes);
     }
@@ -765,6 +767,9 @@ class ContractsController extends Controller
             (SELECT name FROM products WHERE id =c.product_id) AS product_name,
             (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
+            (SELECT cl.id FROM contracts ct LEFT JOIN classes cl ON cl.id = ct.class_id WHERE ct.agreement_id = c.id AND ct.status > 0 AND ct.class_id IS NOT NULL LIMIT 1) AS class_id,
+            (SELECT cl.cls_name FROM contracts ct LEFT JOIN classes cl ON cl.id = ct.class_id WHERE ct.agreement_id = c.id AND ct.status > 0 AND ct.class_id IS NOT NULL LIMIT 1) AS class_name,
+            (SELECT cl.cls_startdate FROM contracts ct LEFT JOIN classes cl ON cl.id = ct.class_id WHERE ct.agreement_id = c.id AND ct.status > 0 AND ct.class_id IS NOT NULL LIMIT 1) AS class_start_date,
             '' AS contracts, c.total_charged, 0 AS total_left_amount
         FROM agreements AS c 
             LEFT JOIN students AS s ON s.id=c.student_id 
@@ -777,7 +782,7 @@ class ContractsController extends Controller
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'),  c.count_recharge ASC");
         foreach ($dataContracts as $k => $contract) {
-            $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status, 1);
+            $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status);
             $dataContracts[$k]->left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : $contract->total_charged;
             $total_left_amount = $total_left_amount + $dataContracts[$k]->left_amount;
         }
@@ -968,6 +973,36 @@ class ContractsController extends Controller
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
                 u::addLogAgreements($agreement_id);
+            }
+
+            // Xếp lớp ngay khi nhập học (nếu chọn)
+            $class_id = (int) data_get($request, 'class_id', 0);
+            if ($class_id > 0) {
+                // Kiểm tra xem đã được xếp lớp này chưa
+                $already_enrolled = u::first("SELECT id FROM contracts WHERE agreement_id = $agreement_id AND class_id = $class_id AND status > 0");
+                if (!$already_enrolled) {
+                    // Lấy danh sách contracts hiện tại
+                    $contracts = u::query("SELECT id, product_id FROM contracts 
+                        WHERE agreement_id = $agreement_id AND status > 0 
+                        ORDER BY count_recharge ASC, id ASC");
+
+                    if (count($contracts) > 0) {
+                        // Chọn contract đầu tiên để xếp lớp (phù hợp với logic của add/addWithNewStudent)
+                        $enrol_contract = $contracts[0];
+                        $enrol_contract_id = (int) $enrol_contract->id;
+                        $product_id = (int) $enrol_contract->product_id;
+                        $start_date_enrol = date('Y-m-d');
+
+                        $this->enrolContractToClass(
+                            $enrol_contract_id,
+                            $agreementInfo->student_id,
+                            $class_id,
+                            (int) $agreementInfo->branch_id,
+                            $product_id,
+                            $start_date_enrol
+                        );
+                    }
+                }
             }
 
         }

@@ -202,6 +202,34 @@
               <label>Ghi chú</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"  disabled="true"></textarea>
             </div>
+
+            <!-- Hiển thị thông tin lớp học đã xếp -->
+            <div class="vx-col w-full mb-4" v-if="agreement.class_id">
+              <div class="border border-gray-300 rounded shadow-sm overflow-hidden mt-2">
+                <div class="bg-gray-100 px-4 py-3 border-b border-gray-300 flex items-center">
+                  <h6 class="font-bold flex items-center text-primary mb-0">
+                    <i class="fa-solid fa-school-flag mr-2"></i> THÔNG TIN LỚP HỌC ĐÃ XẾP
+                  </h6>
+                </div>
+                <div class="p-4 bg-white">
+                  <div class="vx-row">
+                    <div class="vx-col sm:w-1/2 w-full mb-3">
+                      <span class="text-gray-600 font-medium">Lớp học:</span>
+                      <span class="ml-2 font-bold">{{ agreement.class_name }}</span>
+                    </div>
+                    <div class="vx-col sm:w-1/2 w-full mb-3">
+                      <span class="text-gray-600 font-medium">Ngày khai giảng:</span>
+                      <span class="ml-2">{{ formatDate(agreement.class_start_date) }}</span>
+                    </div>
+                    <div class="vx-col w-full">
+                       <vs-button type="flat" size="small" class="p-0" @click="viewClassDetail(agreement.class_id)">
+                          <i class="fa-solid fa-circle-info mr-1"></i> Xem chi tiết lớp học
+                       </vs-button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <vs-divider/>
             <div class="vx-col md:w-1/3 w-full mb-4">
             </div>
@@ -498,7 +526,12 @@
         };
         return labels[value] || 'Không';
       },
-      
+      formatDate(date) {
+        return date ? moment(date).format('DD/MM/YYYY') : '---';
+      },
+      viewClassDetail(class_id) {
+        this.$router.push(`/lms/classes/${class_id}/detail`);
+      }
     },
   }
 </script>

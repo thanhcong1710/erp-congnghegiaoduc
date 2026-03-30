@@ -159,6 +159,54 @@
                 disabled="true"
               />
             </div>
+            
+            <!-- CHỌN LỚP ĐANG XẾP -->
+            <div class="vx-col w-full mb-4">
+              <label>Lớp học xếp ngay <span class="text-danger">(*)</span></label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn lớp để xếp lớp ngay"
+                    :options="html.classes.list"
+                    v-model="html.classes.item"
+                    :searchable="true"
+                    @input="saveClass"
+                    :disabled="isClassEditDisabled"
+                ></vue-select>
+                <div v-if="isClassEditDisabled" class="mt-1">
+                   <small class="text-danger"><i class="fa-solid fa-lock mr-1"></i> Lớp học đã khai giảng nên không thể sửa đổi tại đây.</small>
+                </div>
+            </div>
+
+            <!-- HIỂN THỊ CHI TIẾT LỚP HỌC -->
+            <div class="vx-col w-full mb-4" v-if="classInfo">
+              <div class="border border-gray-300 rounded shadow-sm">
+                <div class="bg-gray-100 px-3 py-2 border-b border-gray-300">
+                  <h6 class="font-bold flex items-center text-sm mb-0">
+                    <i class="fa-solid fa-circle-info mr-2"></i> CHI TIẾT LỚP HỌC
+                  </h6>
+                </div>
+                <div class="p-3 bg-white text-sm">
+                   <div class="vx-row">
+                      <div class="vx-col sm:w-1/2 w-full mb-2">
+                         <span class="text-gray-500">Giáo viên:</span> <span class="font-medium">{{ classInfo.teacher_name || '---' }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-2">
+                         <span class="text-gray-500">CM:</span> <span class="font-medium">{{ classInfo.cm_name || '---' }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-2">
+                         <span class="text-gray-500">Thời gian:</span> <span class="font-medium">{{ formatDate(classInfo.cls_startdate) }} - {{ formatDate(classInfo.cls_enddate) }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-2">
+                         <span class="text-gray-500">Sĩ số:</span> 
+                         <span class="font-bold ml-1">{{ classInfo.enrolled_students }}/{{ classInfo.max_students }}</span>
+                         <span class="ml-2 py-0.5 px-2 rounded-lg text-xs" :class="classInfo.enrolled_students >= classInfo.max_students ? 'bg-danger text-white' : 'bg-success text-white'">
+                            {{ classInfo.availability_text }}
+                         </span>
+                      </div>
+                   </div>
+                </div>
+              </div>
+            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
               <datepicker class="w-full"
@@ -458,6 +506,10 @@
           b2b_campaign:{
             item: '',
             list: []
+          },
+          classes: {
+            item: '',
+            list: []
           }
         },
         agreement:{
@@ -505,6 +557,7 @@
         },
         tmp_tuition_fee_id:'',
         tmp_discount_code_id:'',
+        classInfo: null,
       }
     },
     async created() {
@@ -586,6 +639,11 @@
         return total > this.totalTransferAmount
           ? total - this.totalTransferAmount
           : 0
+      },
+      isClassEditDisabled() {
+        if (!this.agreement.class_id) return false;
+        if (!this.agreement.class_start_date) return false;
+        return moment(this.agreement.class_start_date).isBefore(moment(), 'day');
       }
     },
 
@@ -624,6 +682,7 @@
           }
           
           this.loadTuitionFee(response.data.tuition_fee_id);
+          this.loadClassesForEnrolment();
         })
       },
       resetTuitionFee(){
@@ -644,6 +703,7 @@
           this.agreement.tuition_fee_relation = data.tuition_fee_relation
           this.agreement.total_amount = data.price
           this.calculatorLeftAmountWhenChangeTuitionFee();
+          this.loadClassesForEnrolment();
         }else{
           this.agreement.tuition_fee_id = ""
         }
@@ -789,6 +849,36 @@
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      loadClassesForEnrolment() {
+        if (this.agreement.branch_id && this.agreement.tuition_fee_id && this.agreement.tuition_fee_type) {
+          axios.p(`/api/lms/agreements/load-classes-for-enrolment`, {
+            branch_id: this.agreement.branch_id,
+            tuition_fee_id: this.agreement.tuition_fee_id,
+            tuition_fee_type: this.agreement.tuition_fee_type,
+            current_class_id: this.agreement.class_id
+          }).then((response) => {
+            this.html.classes.list = response.data || []
+            if (this.agreement.class_id) {
+               this.html.classes.item = this.html.classes.list.find(c => c.id == this.agreement.class_id)
+               if (this.html.classes.item) {
+                  this.classInfo = this.html.classes.item
+               }
+            }
+          }).catch(e => console.log(e))
+        }
+      },
+      saveClass(data = null) {
+        if (data && typeof data === 'object') {
+          this.agreement.class_id = data.id
+          this.classInfo = data
+        } else {
+          this.agreement.class_id = ''
+          this.classInfo = null
+        }
+      },
+      formatDate(date) {
+        return date ? moment(date).format('DD/MM/YYYY') : '---';
       }
     },
   }
