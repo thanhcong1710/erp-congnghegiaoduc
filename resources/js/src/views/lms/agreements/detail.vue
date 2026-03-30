@@ -211,22 +211,38 @@
                     <i class="fa-solid fa-school-flag mr-2"></i> THÔNG TIN LỚP HỌC ĐÃ XẾP
                   </h6>
                 </div>
-                <div class="p-4 bg-white">
-                  <div class="vx-row">
-                    <div class="vx-col sm:w-1/2 w-full mb-3">
-                      <span class="text-gray-600 font-medium">Lớp học:</span>
-                      <span class="ml-2 font-bold">{{ agreement.class_name }}</span>
-                    </div>
-                    <div class="vx-col sm:w-1/2 w-full mb-3">
-                      <span class="text-gray-600 font-medium">Ngày khai giảng:</span>
-                      <span class="ml-2">{{ formatDate(agreement.class_start_date) }}</span>
-                    </div>
-                    <div class="vx-col w-full">
-                       <vs-button type="flat" size="small" class="p-0" @click="viewClassDetail(agreement.class_id)">
-                          <i class="fa-solid fa-circle-info mr-1"></i> Xem chi tiết lớp học
-                       </vs-button>
-                    </div>
-                  </div>
+                <!-- HIỂN THỊ CHI TIẾT LỚP HỌC -->
+                <div class="p-4 bg-white" v-if="classInfo">
+                   <div class="vx-row">
+                      <div class="vx-col sm:w-1/2 w-full mb-3 text-sm">
+                         <span class="text-gray-500 font-medium">Lớp học:</span> <span class="ml-2 font-bold">{{ agreement.class_name }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3 text-sm">
+                         <span class="text-gray-500 font-medium">Giáo viên:</span> <span class="ml-2 font-medium">{{ classInfo.teacher_name || '---' }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3 text-sm">
+                         <span class="text-gray-500 font-medium">CM:</span> <span class="ml-2 font-medium">{{ classInfo.cm_name || '---' }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3 text-sm">
+                         <span class="text-gray-500 font-medium">Thời gian học:</span> <span class="ml-2 font-medium">{{ formatDate(agreement.class_start_date) }} - {{ formatDate(classInfo.cls_enddate) }}</span>
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3 text-sm">
+                         <span class="text-gray-500 font-medium">Sĩ số:</span> 
+                         <span class="font-bold ml-2">{{ classInfo.enrolled_students || 0 }}/{{ classInfo.max_students || 0 }}</span>
+                         <span class="ml-2 py-0.5 px-2 rounded-lg text-xs" :class="classInfo.enrolled_students >= classInfo.max_students ? 'bg-danger text-white' : 'bg-success text-white'">
+                            {{ classInfo.availability_text || 'Còn chỗ' }}
+                         </span>
+                      </div>
+                      <div class="vx-col w-full">
+                         <vs-button type="flat" size="small" class="p-0" @click="viewClassDetail(agreement.class_id)">
+                            <i class="fa-solid fa-circle-info mr-1"></i> Xem chi tiết lớp học
+                         </vs-button>
+                      </div>
+                   </div>
+                </div>
+                <!-- TRƯỜNG HỢP CHƯA LOAD XONG CHI TIẾT -->
+                <div class="p-6 bg-white text-center" v-else>
+                   <p class="text-gray-500 text-sm mb-0 italic">Đang tải chi tiết lớp học...</p>
                 </div>
               </div>
             </div>
@@ -415,6 +431,7 @@
           class_name: '',
           class_start_date: ''
         },
+        classInfo: null,
         student_info:{
 
         },
@@ -452,6 +469,9 @@
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.agreement.contracts = response.data.contracts
           this.loadTuitionFee(response.data.tuition_fee_id);
+          if (this.agreement.class_id) {
+             this.loadClassInfo(this.agreement.class_id)
+          }
         })
       },
       resetTuitionFee(){
@@ -534,6 +554,15 @@
       },
       viewClassDetail(class_id) {
         this.$router.push(`/lms/classes/${class_id}/detail`);
+      },
+      loadClassInfo(classId) {
+        axios.p(`/api/lms/class-info`, {
+          class_id: classId
+        }).then(response => {
+           if (response.data.status == 1) {
+             this.classInfo = response.data.data
+           }
+        }).catch(e => console.log(e))
       }
     },
   }

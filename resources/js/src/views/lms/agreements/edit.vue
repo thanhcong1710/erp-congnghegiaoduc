@@ -661,6 +661,7 @@
           this.agreement.total_session = response.data.total_sessions
           this.agreement.tuition_fee_amount = response.data.init_tuition_fee_amount
           this.agreement.tuition_fee_session = response.data.init_tuition_fee_session
+          this.agreement.tuition_fee_type = response.data.type_fee
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.agreement.contracts = response.data.contracts
           this.agreement.class_id = response.data.class_id

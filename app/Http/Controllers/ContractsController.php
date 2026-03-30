@@ -94,9 +94,6 @@ class ContractsController extends Controller
         if ((int) data_get($class_info, 'product_id') !== (int) $product_id) {
             return;
         }
-        if (data_get($class_info, 'cls_startdate') && data_get($class_info, 'cls_startdate') > date('Y-m-d')) {
-            return;
-        }
 
         $cm_id = data_get($class_info, 'cm_id', null);
         $teacher_id = data_get($class_info, 'teacher_id', null);
