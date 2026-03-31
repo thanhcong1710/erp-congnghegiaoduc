@@ -68,6 +68,21 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('list', 'RolesController@list');
             Route::post('permissions', 'RolesController@permissions');
         });
+        Route::prefix('permissions')->group(function () {
+            Route::post('list', 'PermissionsController@list');
+            Route::get('show/{id}', 'PermissionsController@show');
+            Route::post('add', 'PermissionsController@add');
+            Route::post('update', 'PermissionsController@update');
+            Route::post('delete', 'PermissionsController@delete');
+            Route::get('groups', 'PermissionsController@getGroups');
+        });
+        Route::prefix('permission-groups')->group(function () {
+            Route::post('list', 'PermissionGroupsController@list');
+            Route::get('show/{id}', 'PermissionGroupsController@show');
+            Route::post('add', 'PermissionGroupsController@add');
+            Route::post('update', 'PermissionGroupsController@update');
+            Route::post('delete', 'PermissionGroupsController@delete');
+        });
         Route::prefix('users')->group(function () {
             Route::post('list', 'UserController@list');
             Route::post('add', 'UserController@add');
@@ -398,6 +413,28 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('18', 'DashboardController@dashboard18');
             Route::post('19', 'DashboardController@dashboard19');
             Route::post('20', 'DashboardController@dashboard20');
+        });
+
+        // AI Chatbot Routes
+        Route::prefix('ai')->group(function () {
+            Route::post('chat', 'AI\ChatController@chat');
+            Route::post('new-conversation', 'AI\ChatController@newConversation');
+            Route::get('conversations', 'AI\ChatController@getConversations');
+            Route::get('conversations/{sessionId}', 'AI\ChatController@getConversation');
+            Route::delete('conversations/{sessionId}', 'AI\ChatController@deleteConversation');
+            Route::get('quota', 'AI\ChatController@getQuota');
+
+            // Admin routes
+            Route::prefix('admin')->group(function () {
+                Route::get('users', 'AI\AdminController@getUsers');
+                Route::post('users/{userId}/permission', 'AI\AdminController@updateUserPermission');
+                Route::get('statistics', 'AI\AdminController@getStatistics');
+
+                Route::get('knowledge', 'AI\AdminController@getKnowledge');
+                Route::post('knowledge', 'AI\AdminController@createKnowledge');
+                Route::put('knowledge/{id}', 'AI\AdminController@updateKnowledge');
+                Route::delete('knowledge/{id}', 'AI\AdminController@deleteKnowledge');
+            });
         });
     });
 });

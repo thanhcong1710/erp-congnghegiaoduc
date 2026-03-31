@@ -65,6 +65,19 @@ const router = new Router({
             rule: 'editor'
           }
         },
+        {
+          path: '/ai-admin',
+          name: 'ai-admin',
+          component: () => import('@/components/AiAdminPanel.vue'),
+          meta: {
+            rule: 'editor',
+            breadcrumb: [
+              { title: 'Home', url: '/' },
+              { title: 'Quản lý AI', active: true }
+            ],
+            pageTitle: 'Quản lý AI Chatbot'
+          }
+        },
        
         
         // =============================================================================

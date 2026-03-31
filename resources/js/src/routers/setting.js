@@ -466,6 +466,32 @@ export default {
           pageTitle: 'Cập nhật mã chiết khấu',
           rule: 'editor'
         }
+      },
+      {
+        path: '/settings/permissions',
+        name: 'setting-permissions',
+        component: () => import('@/views/settings/permissions/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý Permissions', active: true }
+          ],
+          pageTitle: 'Quản lý Permissions',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/settings/permission-groups',
+        name: 'setting-permission-groups',
+        component: () => import('@/views/settings/permission_groups/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Quản lý Nhóm Permissions', active: true }
+          ],
+          pageTitle: 'Quản lý Nhóm Permissions',
+          rule: 'editor'
+        }
       }
     ]
   },

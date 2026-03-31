@@ -352,8 +352,28 @@ export default [
         slug: 'settings-roles',
         permission:'settings_roles',
       },
-      
+      {
+        url: '/settings/permissions',
+        name: 'Quản lý Permissions',
+        icon: 'KeyIcon',
+        slug: 'settings-permissions',
+        permission: 'settings_permissions',
+      },
+      {
+        url: '/settings/permission-groups',
+        name: 'Quản lý Nhóm Permissions',
+        icon: 'LayersIcon',
+        slug: 'settings-permission-groups',
+        permission: 'settings_permission_groups',
+      },
     ]
+  },
+  {
+    url: '/ai-admin',
+    name: 'Quản lý AI',
+    icon: 'CpuIcon',
+    slug: 'ai-admin',
+    permission: 'ai_admin',
   },
 ]
 
