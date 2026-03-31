@@ -717,7 +717,7 @@ class LMSController extends Controller
     //Student Call LMS
     public function addOrUpdateStudent($student_id = null)
     {
-        if(config('app.env') !== 'product'){
+        if(config('app.env') !== 'product' || 1==1){
             return "ok";
         }
         $studentInfo = u::first("SELECT s.*,
@@ -817,7 +817,7 @@ class LMSController extends Controller
 
     public function addStudentToClass($student_id , $is_trans_semester=false)
     { 
-        if(config('app.env') !== 'product'){
+        if(config('app.env') !== 'product' || 1==1){
             return "ok";
         }
         $cond = "";
@@ -877,7 +877,7 @@ class LMSController extends Controller
 
     public function studentWithdraw($student_id)
     {
-        if(config('app.env') !== 'product'){
+        if(config('app.env') !== 'product' || 1==1){
             return "ok";
         }
         $cond = "";
@@ -965,7 +965,7 @@ class LMSController extends Controller
 
     public function deleteStudentByClass($std_id, $cls_id)
     {
-        if(config('app.env') !== 'product'){
+        if(config('app.env') !== 'product' || 1==1){
             return "ok";
         }
         $listClassLMS = self::getListClassByStudent($std_id);
@@ -1001,7 +1001,7 @@ class LMSController extends Controller
 
     public function studentWithdrawContract($contract_id)
     {
-        if(config('app.env') !== 'product'){
+        if(config('app.env') !== 'product' || 1==1){
             return "ok";
         }
         $cond = "";
