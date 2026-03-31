@@ -126,4 +126,12 @@ class User extends Authenticatable implements JWTSubject
         
         return empty($user_role) ? false : true;
     }
+
+    /**
+     * AI Permission relationship
+     */
+    public function aiPermission()
+    {
+        return $this->hasOne('App\Models\AiUserPermission', 'user_id');
+    }
 }

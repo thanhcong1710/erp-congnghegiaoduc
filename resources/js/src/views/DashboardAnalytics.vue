@@ -45,7 +45,7 @@
             </template>
           </vx-input-group>
       </div>
-      <!-- <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
+      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
         <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
@@ -322,7 +322,7 @@
             </div>
           </div>
         </vx-card>
-      </div> -->
+      </div>
 
       <!-- Revenue Table Section - Dashboard 17 -->
       <div class="vx-col w-full mb-base">
@@ -1347,6 +1347,42 @@ export default {
       })
     },
     loadData(){
+      if(this.checkPermission('dashboard_01')){
+        this.loadDataDashboard01();
+      }
+      if(this.checkPermission('dashboard_02')){
+        this.loadDataDashboard02();
+      }
+      if(this.checkPermission('dashboard_03')){
+        this.loadDataDashboard03();
+      }
+      if(this.checkPermission('dashboard_04')){
+        this.loadDataDashboard04();
+      }
+      if(this.checkPermission('dashboard_05')){
+        this.loadDataDashboard05();
+      }
+      if(this.checkPermission('dashboard_06')){
+        this.loadDataDashboard06();
+      }
+      if(this.checkPermission('dashboard_07')){
+        this.loadDataDashboard07();
+      }
+      if(this.checkPermission('dashboard_08')){
+        this.loadDataDashboard08();
+      }
+      if(this.checkPermission('dashboard_09')){
+        this.loadDataDashboard09();
+      }
+      if(this.checkPermission('dashboard_10')){
+        this.loadDataDashboard10();
+      }
+      if(this.checkPermission('dashboard_11')){
+        this.loadDataDashboard11();
+      }
+      if(this.checkPermission('dashboard_12')){
+        this.loadDataDashboard12();
+      }
       this.loadDataDashboard17();
       this.loadDataDashboard18();
       this.loadDataDashboard19();
