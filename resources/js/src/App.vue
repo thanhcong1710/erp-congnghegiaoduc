@@ -11,17 +11,29 @@
 <template>
   <div id="app" :class="vueAppClasses">
     <router-view @setAppClasses="setAppClasses" />
+    
+    <!-- AI Chatbot - Hiển thị ở mọi trang -->
+    <ai-chatbot v-if="isLoggedIn"></ai-chatbot>
   </div>
 </template>
 
 <script>
 import themeConfig from '@/../themeConfig.js'
 import jwt         from '@/http/requests/auth/jwt/index.js'
+import AiChatbot   from '@/components/AiChatbot.vue'
 
 export default {
+  components: {
+    AiChatbot
+  },
   data () {
     return {
       vueAppClasses: []
+    }
+  },
+  computed: {
+    isLoggedIn() {
+      return this.$store.state.auth.isUserLoggedIn()
     }
   },
   watch: {
