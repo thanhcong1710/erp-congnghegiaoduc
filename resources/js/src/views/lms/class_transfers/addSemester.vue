@@ -3,7 +3,7 @@
   <div id="page-enrolments-list">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
-        <div class="vx-col md:w-1/3 mb-4">
+        <div class="vx-col md:w-1/4 mb-4">
           <label>Trung tâm <span class="text-danger"> (*)</span></label>
           <vue-select
               label="name"
@@ -15,21 +15,33 @@
               @input="saveBranch"
           ></vue-select>
         </div>
-        <div class="vx-col md:w-1/3 mb-4">
-          <label >Khóa học</label>
+        <div class="vx-col md:w-1/4 mb-4">
+          <label >Khóa chuyển</label>
           <vue-select
                 label="name"
-                placeholder="Chọn khóa học"
+                placeholder="Chọn khóa chuyển"
                 :options="html.products.list"
-                v-model="html.products.item"
+                v-model="html.products.item_from"
                 :searchable="true"
                 language="tv-VN"
-                @input="saveProduct"
+                @input="saveProductFrom"
             ></vue-select>
         </div>
-        <div class="vx-col md:w-1/3 mb-4">
+        <div class="vx-col md:w-1/4 mb-4">
+          <label >Khóa nhận</label>
+          <vue-select
+                label="name"
+                placeholder="Chọn khóa nhận"
+                :options="html.products.list"
+                v-model="html.products.item_to"
+                :searchable="true"
+                language="tv-VN"
+                @input="saveProductTo"
+            ></vue-select>
+        </div>
+        <div class="vx-col md:w-1/4 mb-4">
               <label >Loại</label>
-              <select class="vs-inputx vs-input--input normal" @change="loadClasses" v-model="select_type" >
+              <select class="vs-inputx vs-input--input normal" @change="onChangeSelectType" v-model="select_type" >
                 <option value="0">Tất cả các lớp</option>
                 <option value="1">Lớp đang học</option>
                 <option value="2">Lớp đã kết thúc</option>
@@ -226,7 +238,8 @@
             list: []
           },
           products: {
-            item: '',
+            item_from: '',
+            item_to: '',
             list: []
           },
           tuition_fee:{
@@ -240,7 +253,8 @@
         },
         enrol:{
           branch_id:'',
-          product_id:''
+          product_id_from:'',
+          product_id_to: ''
         },
         class_info:{
           class_id:'',
@@ -301,38 +315,61 @@
         }else{
           this.enrol.branch_id = ""
         }
-        this.loadClasses();
+        this.loadClassesFrom();
+        this.loadClassesTo();
       },
-      saveProduct(data = null){
+      saveProductFrom(data = null){
         if (data && typeof data === 'object') {
-          const product_id = data.id
-          this.enrol.product_id = product_id
+          this.enrol.product_id_from = data.id
         }else{
-          this.enrol.product_id = ""
+          this.enrol.product_id_from = ""
         }
-        this.loadClasses();
+        this.loadClassesFrom();
       },
-      loadClasses(){
-        if(this.enrol.branch_id && this.enrol.product_id){
+      saveProductTo(data = null){
+        if (data && typeof data === 'object') {
+          this.enrol.product_id_to = data.id
+        }else{
+          this.enrol.product_id_to = ""
+        }
+        this.loadClassesTo();
+      },
+      onChangeSelectType() {
+        this.loadClassesFrom();
+        this.loadClassesTo();
+      },
+      loadClassesFrom(){
+        if(this.enrol.branch_id && this.enrol.product_id_from){
           this.$vs.loading();
           axios.p(`/api/lms/enrolments/load-classes`, {
             branch_id: this.enrol.branch_id,
-            product_id: this.enrol.product_id,
+            product_id: this.enrol.product_id_from,
             select_type: this.select_type
           })
             .then(response => {
             this.$vs.loading.close();
-            // this.classes = response.data
-            // this.classesTo = response.data
-            const rawData = response.data;
-            this.classes = JSON.parse(JSON.stringify(rawData));
-            this.classesTo = JSON.parse(JSON.stringify(rawData));
-          })
+            this.classes = JSON.parse(JSON.stringify(response.data));
+          }).catch(e => { this.$vs.loading.close(); })
         }else{
-          this.classes =[]
+          this.classes = []
+        }
+        this.students = [];
+        this.from_class_id = "";
+      },
+      loadClassesTo(){
+        if(this.enrol.branch_id && this.enrol.product_id_to){
+          axios.p(`/api/lms/enrolments/load-classes`, {
+            branch_id: this.enrol.branch_id,
+            product_id: this.enrol.product_id_to,
+            select_type: this.select_type
+          })
+            .then(response => {
+            this.classesTo = JSON.parse(JSON.stringify(response.data));
+          }).catch(e => { })
+        }else{
           this.classesTo = []
         }
-        this.students= [];
+        this.to_class_id = "";
       },
       selectClass(selected_class) {
         if (selected_class.model.item_type === 'class') {
