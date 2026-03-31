@@ -74,9 +74,9 @@ export default {
       resendActive: false,
       testAccounts: [
         { role: 'admin', label: 'Admin',       icon: '👑', color: 'danger',  hrm_id: 'Admin', password: 'abcd1234',  bg: '#fef2f2', border: '#fca5a5', text: '#dc2626' },
-        { role: 'cskh',  label: 'CSKH',        icon: '💬', color: 'primary', hrm_id: 'CSKH',  password: '@12345678', bg: '#eff6ff', border: '#93c5fd', text: '#2563eb' },
-        { role: 'sale',  label: 'Sale',        icon: '🎯', color: 'success', hrm_id: 'SALE',  password: '@12345678', bg: '#f0fdf4', border: '#86efac', text: '#16a34a' },
-        { role: 'gdtt',  label: 'Giám đốc TT', icon: '🏫', color: 'warning', hrm_id: 'GDTT',  password: '@12345678', bg: '#fffbeb', border: '#fcd34d', text: '#b45309' }
+        { role: 'cskh',  label: 'CSKH',        icon: '💬', color: 'primary', hrm_id: 'TH004',  password: '@12345678', bg: '#eff6ff', border: '#93c5fd', text: '#2563eb' },
+        { role: 'sale',  label: 'Sale',        icon: '🎯', color: 'success', hrm_id: 'HD002',  password: '@12345678', bg: '#f0fdf4', border: '#86efac', text: '#16a34a' },
+        { role: 'gdtt',  label: 'Giám đốc TT', icon: '🏫', color: 'warning', hrm_id: 'HD001',  password: '@12345678', bg: '#fffbeb', border: '#fcd34d', text: '#b45309' }
       ]
     }
   },
