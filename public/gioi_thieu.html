@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTech ERP - Bản Thuyết Trình</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            padding: 40px 20px; 
+            min-height: 100vh;
+        }
+        
+        .markdown-body { 
+            box-sizing: border-box; 
+            min-width: 200px; 
+            max-width: 980px; 
+            margin: 0 auto; 
+            padding: 50px 60px; 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); 
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        /* Modern Typography enhancements */
+        .markdown-body h1 { 
+            background: linear-gradient(45deg, #1d4ed8, #7e22ce); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-size: 2.8em; 
+            text-align: center; 
+            border: none; 
+            margin-bottom: 0.5em; 
+        }
+        
+        .markdown-body h2 { 
+            color: #1e3a8a; 
+            border-bottom: 2px solid #e2e8f0; 
+            padding-bottom: 0.5em; 
+            margin-top: 1.5em; 
+        }
+        
+        .markdown-body blockquote { 
+            background: #eff6ff; 
+            border-left: 5px solid #3b82f6; 
+            color: #1e40af; 
+            padding: 1rem 1.5rem; 
+            border-radius: 0 8px 8px 0; 
+            font-style: italic; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .markdown-body table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5em 0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .markdown-body table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .markdown-body code:not([class*="language-"]) {
+            background: #f1f5f9;
+            color: #ef4444;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+
+        .print-btn { 
+            position: fixed; top: 20px; right: 20px; 
+            background: linear-gradient(135deg, #3b82f6, #2563eb); 
+            color: white; padding: 12px 24px; border-radius: 50px; 
+            font-weight: 600; cursor: pointer; 
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); 
+            transition: all 0.3s ease; 
+            border: none; z-index: 100;
+        }
+        
+        .print-btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 15px 20px -3px rgba(37, 99, 235, 0.4); 
+        }
+
+        @media print { 
+            .print-btn { display: none; } 
+            body { background: white; padding: 0; } 
+            .markdown-body { box-shadow: none; border: none; padding: 0; max-width: 100%; } 
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-btn"><i class="fas fa-print mr-2"></i> In PDF (Gửi Khách Hàng)</button>
+    <article class="markdown-body" id="content">Đang tải giao diện...</article>
+
+    <script type="text/markdown" id="md-source">
+# 🎓 EduTech ERP — Nền Tảng Quản Trị Giáo Dục Thông Minh
+
+## Bản Thuyết Trình Demo Sản Phẩm
+
+> **"Từ Lead đầu tiên đến Học viên tốt nghiệp — Một hệ sinh thái số hoàn chỉnh."**
+
+---
+
+## 📋 MỤC LỤC
+
+1. [Tổng Quan Giải Pháp](#1-tổng-quan-giải-pháp)
+2. [Kiến Trúc Hệ Thống](#2-kiến-trúc-hệ-thống)
+3. [PHẦN 1: CRM — Quản Lý Khách Hàng](#3-phần-1-crm--quản-lý-khách-hàng)
+4. [PHẦN 2: LMS — Vận Hành Lớp Học](#4-phần-2-lms--vận-hành-lớp-học)
+5. [PHẦN 3: AI Chatbot — Trợ Lý Thông Minh](#5-phần-3-ai-chatbot--trợ-lý-thông-minh)
+6. [Dashboard & Báo Cáo](#6-dashboard--báo-cáo)
+7. [Hệ Thống Marketing Tích Hợp](#7-hệ-thống-marketing-tích-hợp)
+8. [Lộ Trình Phát Triển](#8-lộ-trình-phát-triển)
+
+---
+
+## 1. TỔNG QUAN GIẢI PHÁP
+
+### 🎯 Vấn đề mà thị trường đang gặp phải
+
+| Thách thức | Hậu quả |
+|---|---|
+| Quản lý khách hàng phân tán (Excel, sổ tay) | Mất lead, chồng chéo chăm sóc, không đo lường được hiệu quả |
+| Vận hành lớp học thủ công | Lỗi xếp lớp, thiếu/thừa học sinh, sai sót điểm danh |
+| Không có dữ liệu realtime | Ra quyết định chậm, không tối ưu được tỉ lệ tái phí |
+| Hệ thống rời rạc, không liên thông | Nhập liệu trùng lặp, mất thời gian đối chiếu |
+
+### 💡 Giải pháp: EduTech ERP — All-in-One Platform
+
+```mermaid
+graph LR
+    A[📱 CRM<br/>Quản lý Lead] --> B[👨🎓 LMS<br/>Vận hành lớp]
+    B --> C[💰 Kế Toán<br/>Thu phí & Báo cáo]
+    C --> D[📊 Dashboard<br/>BI & Analytics]
+    D --> E[🤖 AI Assistant<br/>Chatbot thông minh]
+    E --> A
+```
+
+### 🏆 Điểm nổi bật
+
+- **🔗 Liên thông hoàn toàn** — CRM → LMS → Kế toán → Báo cáo trên cùng 1 nền tảng
+- **🏢 Multi-Branch** — Quản lý đồng thời nhiều trung tâm, phân quyền chi tiết theo vai trò
+- **🤖 AI-Powered** — Chatbot AI Gemini 2.5 tích hợp trực tiếp vào nghiệp vụ, truy vấn dữ liệu bằng ngôn ngữ tự nhiên
+- **📱 Responsive** — Giao diện SPA (Vue.js) mượt mà trên mọi thiết bị
+- **🔐 Phân quyền đa tầng** — Role-based + Permission-based (Admin, CEO, EC, CM, Teacher, TA, Kế toán...)
+
+---
+
+## 2. KIẾN TRÚC HỆ THỐNG
+
+```mermaid
+graph TB
+    subgraph Frontend["🖥️ Frontend - Vue.js SPA"]
+        VUE[Vue 2 + Vuesax UI]
+        ROUTER[Vue Router]
+        AXIOS[Axios HTTP Client]
+    end
+    
+    subgraph Backend["⚙️ Backend - Laravel PHP"]
+        API[RESTful API]
+        AUTH[JWT Authentication]
+        RBAC[Role & Permission System]
+        SERVICES[Business Services]
+    end
+    
+    subgraph AI["🤖 AI Engine"]
+        GEMINI[Google Gemini 2.5 Flash/Pro]
+        TOOLS[Function Calling Tools]
+        KB[Knowledge Base]
+    end
+    
+    subgraph Database["🗄️ Database"]
+        MYSQL[(MySQL)]
+    end
+    
+    VUE --> AXIOS --> API
+    API --> AUTH --> RBAC --> SERVICES
+    SERVICES --> MYSQL
+    SERVICES --> AI
+    GEMINI --> TOOLS --> SERVICES
+```
+
+**Công nghệ sử dụng:**
+
+| Layer | Công nghệ | Mô tả |
+|---|---|---|
+| Frontend | Vue.js 2, Vuesax, ApexCharts | Giao diện SPA hiện đại, biểu đồ trực quan |
+| Backend | Laravel 7+, PHP 8.2 | Framework PHP mạnh mẽ, RESTful API |
+| Auth | JWT Token | Bảo mật, hỗ trợ multi-device login |
+| AI | Google Gemini 2.5 | Function Calling, Natural Language Query |
+| Database | MySQL | RDBMS tin cậy, quan hệ chặt chẽ |
+| Infra | Docker | Containerized, dễ triển khai, scale |
+
+---
+
+## 3. PHẦN 1: CRM — QUẢN LÝ KHÁCH HÀNG
+
+### 🌊 Tổng Quan Luồng CRM
+
+```mermaid
+flowchart LR
+    subgraph NHẬP_LIỆU["📥 Thu Thập Lead"]
+        A1[Thêm thủ công]
+        A2[Import Excel]
+        A3[Marketing B2B/C2C]
+    end
+    
+    subgraph CHĂM_SÓC["💬 Chăm Sóc"]
+        B1[Gọi điện]
+        B2[SMS]
+        B3[Lên lịch hẹn]
+        B4[Ticket/Khiếu nại]
+    end
+    
+    subgraph CHUYỂN_ĐỔI["🔄 Chuyển Đổi"]
+        C1[Tạo học sinh]
+        C2[Check-in trung tâm]
+        C3[Học thử]
+    end
+    
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    B1 --> B3
+    B2 --> B3
+    B3 --> C1
+    B4 --> B3
+    C1 --> C2
+    C2 --> C3
+
+    style NHẬP_LIỆU fill:#e8f5e9
+    style CHĂM_SÓC fill:#e3f2fd
+    style CHUYỂN_ĐỔI fill:#fff3e0
+```
+
+---
+
+### 📌 BƯỚC 1: Thêm Mới Khách Hàng (Lead)
+
+> **Menu:** `CRM → Khách hàng → Thêm mới`
+
+#### Khả năng nhập liệu
+
+| Trường thông tin | Mô tả |
+|---|---|
+| **Họ tên phụ huynh** | Bắt buộc — người liên hệ chính |
+| **Số điện thoại 1 & 2** | Hệ thống tự động **kiểm tra trùng lặp (duplicate)** real-time |
+| **Email, Địa chỉ** | Thông tin liên lạc bổ sung |
+| **Tỉnh/Thành, Quận/Huyện** | Dữ liệu địa lý, hỗ trợ phân vùng Marketing |
+| **Nguồn (Source)** | Facebook, Google, Tờ rơi, Giới thiệu... — theo dõi kênh hiệu quả |
+| **Chi tiết nguồn (Source Detail)** | Tổ chức theo chi nhánh, giúp phân bổ ngân sách Marketing |
+| **Nghề nghiệp PH** | Phân khúc khách hàng tiềm năng |
+| **Học sinh** | Thêm trực tiếp 1 hoặc nhiều con trong cùng 1 form |
+| **SĐT người giới thiệu (C2C)** | Liên kết chương trình giới thiệu, tự động validate |
+
+#### 🔒 Cơ chế Chống Trùng Thông Minh
+
+Khi nhập SĐT, hệ thống xử lý 3 trường hợp:
+
+```mermaid
+flowchart TD
+    A[Nhập SĐT] --> B{Kiểm tra trùng?}
+    B -->|Không trùng| C[✅ Cho phép tạo mới]
+    B -->|Trùng, đang bị khóa| D["🔒 Thông báo: KH đang thuộc NV XYZ<br/>+ Thời gian còn lại để ghi đè"]
+    B -->|Trùng, không khóa| E["⚠️ Hỏi: KH đã tồn tại, bạn muốn chăm sóc?<br/>→ Ghi đè quyền quản lý"]
+```
+
+> **Quy tắc Lock 15 ngày:** Sau khi được assigned, nhân viên có 15 ngày độc quyền chăm sóc lead. Quá thời hạn mà không chăm sóc → hệ thống tự động mở khóa để nhân viên khác có thể tiếp nhận.
+
+---
+
+### 📌 BƯỚC 2: Chăm Sóc Khách Hàng
+
+> **Menu:** `CRM → Khách hàng → Chi tiết → Tab Chăm sóc`
+
+#### Dashboard Chăm sóc thông minh
+
+Trang danh sách khách hàng hiển thị **5 tab thông minh tự động phân loại**:
+
+| Tab | Ý nghĩa | Giá trị kinh doanh |
+|---|---|---|
+| **🟢 Tất cả** | Toàn bộ KH thuộc quyền quản lý | Tổng quan chung |
+| **🔴 Chưa chăm sóc** | KH mới, chưa có lần chăm sóc nào | Ưu tiên cao nhất |
+| **🟡 Hôm nay** | Lịch chăm sóc đúng ngày hôm nay | Nhắc nhở hành động ngay |
+| **🟠 Quá hạn** | Đã quá ngày hẹn chăm sóc | Cảnh báo — cần xử lý gấp |
+| **🔵 Ticket đang mở** | KH có khiếu nại/yêu cầu chưa giải quyết | Nâng cao trải nghiệm KH |
+
+#### Các hình thức chăm sóc
+
+- **📞 Ghi nhận cuộc gọi** — Lưu nội dung trao đổi, kết quả cuộc gọi
+- **💬 Gửi SMS** — Gửi tin nhắn trực tiếp từ hệ thống
+- **📅 Lên lịch hẹn** — Đặt lịch chăm sóc tiếp theo (`next_care_date`)
+- **🎫 Ticket** — Tạo yêu cầu/khiếu nại, theo dõi trạng thái (Mới → Đang xử lý → Hoàn thành → Đóng)
+- **📝 Lịch sử Log** — Toàn bộ thay đổi được ghi lại chi tiết (ai làm, lúc nào, nội dung gì)
+
+#### Import Data Hàng Loạt
+
+> **Menu:** `CRM → Import`
+
+- Upload file Excel danh sách khách hàng
+- Hệ thống tự validate, loại bỏ trùng
+- **Hỗ trợ Assign tự động** — Chia đều lead cho nhân viên kinh doanh theo round-robin
+
+---
+
+### 📌 BƯỚC 3: Tạo Học Sinh (CRM Student)
+
+> **Menu:** `CRM → Chi tiết khách hàng → Tab Học sinh → Thêm mới`
+
+Tại đây, nhân viên tạo hồ sơ học sinh con từ hồ sơ phụ huynh:
+
+| Thông tin | Chi tiết |
+|---|---|
+| Họ tên học sinh | Tên đầy đủ |
+| Giới tính, Ngày sinh | Thông tin cá nhân |
+| Cấp học, Trường | Lớp mấy, học ở đâu |
+| Ghi chú | Nhu cầu đặc biệt, sở thích |
+
+> ✅ **Liên kết tự động:** Khi học sinh được nhập học chính thức (LMS), hệ thống tự đồng bộ dữ liệu giữa CRM Student và LMS Student.
+
+---
+
+### 📌 BƯỚC 4: Check-in Trung Tâm
+
+> **Menu:** `LMS → Học sinh → Checkin`
+
+Quy trình Check-in theo dõi học sinh đến thử tại trung tâm:
+
+```mermaid
+flowchart LR
+    A[KH hẹn đến TT] --> B[Nhân viên checkin trên hệ thống]
+    B --> C{Kết quả}
+    C -->|Quan tâm| D[✅ Checked - Đã đến]
+    C -->|Đăng ký| E[🎉 Upgrade - Chuyển sang nhập học]
+    C -->|Từ chối| F[❌ Không đến / Không quan tâm]
+```
+
+**3 trạng thái Checkin:**
+- **Checked (Đã đến)** — GĐ xác nhận khách đã đến trung tâm
+- **Upgrade (Nâng cấp)** — Khách hàng đồng ý đăng ký → Tự động chuyển sang quy trình nhập học
+- **Cancelled** — Khách không đến hoặc không quan tâm
+
+---
+
+## 4. PHẦN 2: LMS — VẬN HÀNH LỚP HỌC
+
+### 🌊 Tổng Quan Luồng LMS
+
+```mermaid
+flowchart LR
+    subgraph NHẬP_HỌC["📋 Nhập Học"]
+        D1[Tạo hợp đồng]
+        D2[Chọn gói phí]
+        D3[Áp dụng chiết khấu]
+    end
+    
+    subgraph THU_PHÍ["💰 Đóng Phí"]
+        E1[Tạo phiếu thu]
+        E2[Xác nhận thanh toán]
+        E3[In phiếu thu]
+    end
+    
+    subgraph VẬN_HÀNH["⚙️ Vận Hành"]
+        F1[Xếp lớp]
+        F2[Điểm danh]
+        F3[Nhận xét & Đánh giá]
+    end
+    
+    subgraph NGHIỆP_VỤ["🔄 Nghiệp Vụ"]
+        G1[Chuyển lớp]
+        G2[Chuyển trung tâm]
+        G3[Chuyển phí / Quy đổi]
+        G4[Bảo lưu]
+        G5[Tái phí]
+    end
+    
+    D1 --> D2 --> D3 --> E1
+    E1 --> E2 --> E3 --> F1
+    F1 --> F2 --> F3
+    F2 --> G1
+    F2 --> G2
+    F2 --> G3
+    F2 --> G4
+    F3 --> G5
+
+    style NHẬP_HỌC fill:#e8f5e9
+    style THU_PHÍ fill:#fff9c4
+    style VẬN_HÀNH fill:#e3f2fd
+    style NGHIỆP_VỤ fill:#fce4ec
+```
+
+---
+
+### 📌 BƯỚC 5: Nhập Học (Tạo Hợp Đồng)
+
+> **Menu:** `LMS → Vận hành → Nhập học`
+
+Quy trình nhập học bao gồm tạo hợp đồng (Contract) cho học sinh:
+
+| Thao tác | Chi tiết |
+|---|---|
+| **Chọn học sinh** | Tìm kiếm từ CRM hoặc tạo mới |
+| **Chọn trung tâm** | Trung tâm nào sẽ theo học |
+| **Chọn khóa học (Product)** | IELTS, TOEIC, Tiếng Anh Giao Tiếp... |
+| **Chọn gói phí (Tuition Fee)** | Gói 3 tháng, 6 tháng, 12 tháng... |
+| **Áp mã chiết khấu** | Mã giảm giá nội bộ, voucher C2C |
+| **Áp Coupon** | Mã khuyến mãi từ chiến dịch Marketing |
+
+#### Hệ thống gói phí thông minh
+
+```mermaid
+graph TD
+    A[Gói Phí] --> B[Gói Lẻ]
+    A --> C[Gói Combo]
+    
+    B --> B1["IELTS 6T - 72 buổi<br/>18,000,000 VNĐ"]
+    B --> B2["TOEIC 3T - 36 buổi<br/>9,500,000 VNĐ"]
+    
+    C --> C1["Combo IELTS+TOEIC 9T<br/>25,000,000 VNĐ<br/>(tiết kiệm 2,500,000)"]
+    
+    B1 --> D[Áp dụng theo trung tâm]
+    B2 --> D
+    C1 --> D
+    D --> E[Thời hạn hiệu lực]
+    E --> F[New / Renew]
+```
+
+> ✅ **Đặc biệt:** Gói phí được cấu hình áp dụng cho từng trung tâm cụ thể, có ngày hiệu lực/hết hạn, phân biệt New (đăng ký mới) và Renew (tái phí).
+
+---
+
+### 📌 BƯỚC 6: Đóng Phí (Kế Toán)
+
+> **Menu:** `LMS → Kế toán → Chờ thu phí / Đã thu phí`
+
+#### Luồng thu phí 2 bước an toàn
+
+```mermaid
+flowchart LR
+    A["💳 EC tạo phiếu chờ thu"] --> B["🏦 Kế toán xác nhận<br/>đã nhận tiền"]
+    B --> C["🧾 In phiếu thu"]
+    C --> D["✅ Hợp đồng active"]
+```
+
+| Chức năng | Mô tả |
+|---|---|
+| **Chờ thu phí** | Danh sách hợp đồng chờ thanh toán, hiển thị số tiền cần thu, công nợ |
+| **Đã thu phí** | Lịch sử thu phí, lọc theo trung tâm/ngày/nhân viên |
+| **In phiếu thu** | Template phiếu thu, in trực tiếp từ hệ thống |
+| **Đóng phí từng phần** | Hỗ trợ đặt cọc trước, thu nốt sau |
+
+---
+
+### 📌 BƯỚC 7: Xếp Lớp
+
+> **Menu:** `LMS → Vận hành → Xếp lớp`
+
+Giao diện xếp lớp trực quan cho phép:
+
+- **Chọn lớp theo Trung tâm + Khóa học** → Hiển thị danh sách lớp đang hoạt động
+- **Xem thông tin lớp chi tiết:** Sĩ số hiện tại / Sĩ số tối đa, lịch học, phòng học, giáo viên
+- **Tìm kiếm học sinh** chờ xếp lớp → Kéo thả hoặc thêm vào lớp
+- **Cảnh báo tự động** khi lớp đã đủ/vượt sĩ số
+
+> ✅ **Tự động tính ngày kết thúc:** Dựa trên lịch học của lớp, số buổi trong gói phí, và ngày nghỉ lễ → hệ thống tự động tính `enrolment_last_date` chính xác.
+
+---
+
+### 📌 BƯỚC 8: Điểm Danh
+
+> **Menu:** `LMS → Vận hành → Điểm danh`
+
+#### Giao diện điểm danh ma trận
+
+Giao diện hiển thị dạng bảng ma trận: **Hàng = Học sinh**, **Cột = Buổi học** theo tháng
+
+| Trạng thái | Ý nghĩa | Hành động tiếp theo |
+|---|---|---|
+| **Chưa điểm danh** | Buổi học chưa diễn ra hoặc chưa ghi nhận | — |
+| **Đi học** ✅ | Học sinh đã đến lớp | Tự động trừ buổi |
+| **Học bù** 🔄 | Nghỉ buổi này, đăng ký học bù lớp khác | Mở popup chọn lớp + buổi bù |
+| **Đã học bù** ✅ | Đã hoàn thành buổi học bù | Tự động ghi nhận |
+
+---
+
+### 📌 BƯỚC 9: Nghiệp Vụ Vận Hành
+
+#### 🔄 Chuyển Lớp (`LMS → Vận hành → Chuyển lớp`)
+
+- Tìm học sinh → Chọn hợp đồng đang active
+- Chọn lớp mới (cùng khóa học, cùng hoặc khác trung tâm)
+- Hệ thống tự tính số buổi còn lại → chuyển qua lớp mới
+- Lưu lịch sử log đầy đủ
+
+#### 🏢 Chuyển Trung Tâm (`LMS → Vận hành → Chuyển trung tâm`)
+
+- Phê duyệt 2 bước: EC yêu cầu → Quản lý phê duyệt
+- Tự động cập nhật `branch_id` trên hợp đồng
+- Giữ nguyên số buổi còn lại
+
+#### 💸 Chuyển Phí (`LMS → Vận hành → Chuyển phí`)
+
+- Chuyển quyền sử dụng phí từ học sinh A sang học sinh B (anh chị em)
+- Tính toán số tiền tương ứng với số buổi còn lại
+- Tạo hợp đồng mới cho người nhận
+
+#### 🔁 Quy Đổi (`LMS → Vận hành → Quy đổi`)
+
+- Đổi từ gói phí này sang gói phí khác (VD: IELTS → TOEIC)
+- Tự động tính chênh lệch giá
+- Hỗ trợ quy đổi giữa các gói lẻ và combo
+
+#### ⏸️ Bảo Lưu (`LMS → Vận hành → Bảo lưu`)
+
+- Bảo lưu đơn lẻ hoặc **bảo lưu cả lớp** (tính năng đặc biệt)
+- Phê duyệt 2 bước
+- Freeze số buổi còn lại, không trừ trong thời gian bảo lưu
+- In phiếu bảo lưu
+
+#### 🔄 Tái Phí (`LMS → Vận hành → Tái phí`)
+
+- Khi học sinh hoàn thành gói phí cũ → tạo hợp đồng mới
+- Áp dụng gói phí Renew riêng biệt (giá ưu đãi cho HS cũ)
+- Tự động liên kết với hợp đồng trước đó (`count_recharge`)
+
+---
+
+### 📌 Các tính năng LMS bổ trợ
+
+| Tính năng | Menu | Mô tả |
+|---|---|---|
+| **Nhận xét & Đánh giá** | `LMS → Nhận xét & đánh giá` | Giáo viên đánh giá học sinh theo buổi/tháng |
+| **Giáo viên & Trợ giảng** | `LMS → Giáo viên & trợ giảng` | Quản lý lịch dạy, phân công GV/TA theo lớp |
+| **In Hợp đồng** | `LMS → Nhập học → In` | Template hợp đồng nhập học, in PDF |
+
+---
+
+## 5. PHẦN 3: AI CHATBOT — TRỢ LÝ THÔNG MINH
+
+### 🤖 Tổng Quan
+
+> **"Hỏi gì cũng trả lời — Từ thông tin học sinh đến công thức nấu phở."**
+
+EduTech ERP tích hợp AI Chatbot sử dụng **Google Gemini 2.5** với khả năng:
+
+```mermaid
+graph TD
+    subgraph AI_CAPABILITIES["🧠 Khả Năng AI"]
+        A[🔍 Truy vấn dữ liệu ERP<br/>bằng ngôn ngữ tự nhiên]
+        B[📊 Tạo báo cáo Excel<br/>tự động]
+        C[💡 Trả lời kiến thức chung<br/>Code, Marketing, Viết lách...]
+        D[📚 Tìm kiếm Knowledge Base<br/>Nội bộ]
+    end
+    
+    subgraph TOOLS["🔧 12+ AI Functions"]
+        T1[search_students]
+        T2[get_student_info]
+        T3[search_branches]
+        T4[get_revenue_report]
+        T5[get_classes_list]
+        T6[get_users_list]
+        T7[count_students_by_status]
+        T8["... và nhiều hơn nữa"]
+    end
+    
+    AI_CAPABILITIES --> TOOLS
+```
+
+### 🎯 Các Use Case Thực Tế
+
+#### Use Case 1: Tra cứu thông tin học sinh
+
+```
+👤 User: "Tìm học sinh tên Nguyễn Văn An"
+
+🤖 AI: Tìm thấy 5 học sinh phù hợp. Xin vui lòng chọn:
+
+1. Nguyễn Văn An (ID: 1234) — TT Cầu Giấy — 0901.xxx.xxx
+2. Nguyễn Văn An (ID: 2345) — TT Hà Đông — 0912.xxx.xxx  
+3. Nguyễn Thị Vân An (ID: 3456) — TT Thanh Xuân — 0987.xxx.xxx
+4. Nguyễn Văn An (ID: 4567) — TT Long Biên — 0976.xxx.xxx
+5. Nguyễn Văn Anh (ID: 5678) — TT Hoàng Mai — 0965.xxx.xxx
+```
+
+> ✅ **Highlight:** Khi có nhiều kết quả trùng tên, AI tự động liệt kê 5-8 bản ghi kèm ID, chi nhánh, SĐT để người dùng chọn chính xác — thay vì tự đoán.
+
+#### Use Case 2: Báo cáo doanh thu
+
+```
+👤 User: "Doanh thu tháng 3 năm 2026?"
+
+🤖 AI: 📊 BÁO CÁO DOANH THU - Tháng 3/2026
+
+💰 Tổng doanh thu: 2,450,000,000 VNĐ
+📝 Tổng số phiếu thu: 187
+
+📈 Chi tiết theo ngày:
+- 01/03: 125,000,000 VNĐ (8 phiếu)
+- 02/03: 98,000,000 VNĐ (5 phiếu)
+...
+```
+
+#### Use Case 3: Tìm trung tâm
+
+```
+👤 User: "Danh sách trung tâm ở Hà Đông?"
+
+🤖 AI: 🏢 Tìm thấy 2 trung tâm phù hợp:
+
+1. TT Hà Đông 1 — 123 Quang Trung, Hà Đông — Hotline: 024.xxxx
+2. TT Hà Đông 2 — 456 Nguyễn Trãi, Hà Đông — Hotline: 024.xxxx
+```
+
+#### Use Case 4: Kiến thức chung
+
+```
+👤 User: "Viết cho tôi đoạn email mời phụ huynh đến tham quan trung tâm"
+
+🤖 AI: 📧 Dạ, đây là mẫu email:
+
+Kính gửi Anh/Chị [Tên],
+
+Trung tâm Ngoại Ngữ XYZ trân trọng kính mời Anh/Chị 
+cùng con đến tham quan cơ sở vật chất và trải nghiệm 
+buổi học thử MIỄN PHÍ...
+```
+
+### 🏗️ Kiến Trúc AI Function Calling
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Frontend as Vue.js Chat UI
+    participant Backend as Laravel API
+    participant AI as Gemini 2.5
+    participant DB as MySQL
+    
+    User->>Frontend: "Tìm HS tên Minh"
+    Frontend->>Backend: POST /api/ai/chat
+    Backend->>AI: System Prompt + User Message + Tools
+    AI->>AI: Phân tích intent → Chọn tool search_students
+    AI->>Backend: Function Call: search_students(keyword="Minh")
+    Backend->>DB: SQL Query (LIKE '%Minh%')
+    DB->>Backend: 7 kết quả
+    Backend->>AI: Trả kết quả 7 HS
+    AI->>AI: Format câu trả lời dạng danh sách
+    AI->>Backend: Response dạng Markdown
+    Backend->>Frontend: JSON response
+    Frontend->>User: Hiển thị danh sách 7 HS cho chọn
+```
+
+### 🔐 Quản Trị AI
+
+> **Menu:** `Quản lý AI`
+
+Trang Admin AI cho phép:
+
+| Chức năng | Mô tả |
+|---|---|
+| **Quản lý quyền AI** | Bật/tắt quyền sử dụng AI cho từng user |
+| **Knowledge Base** | Thêm/sửa/xóa tài liệu hướng dẫn để AI tham chiếu |
+| **Thống kê sử dụng** | Số lượt chat, token tiêu thụ, user active |
+| **Quản lý Session** | Xem lịch sử hội thoại, xóa session |
+
+---
+
+## 6. DASHBOARD & BÁO CÁO
+
+### 📊 Dashboard Tổng Quan (20+ widgets)
+
+```mermaid
+graph TD
+    subgraph ROW1["💰 Doanh Thu"]
+        D1["Doanh thu tuần<br/>(triệu VNĐ)"]
+        D2["Doanh thu tháng<br/>(triệu VNĐ)"]
+    end
+    
+    subgraph ROW2["👨🎓 Học Sinh"]
+        D3["Tổng HS đang học"]
+        D4["Tổng lớp hoạt động"]
+    end
+    
+    subgraph CHARTS["📈 Biểu Đồ"]
+        D5["Biểu đồ tròn:<br/>HS Active / Trial / Pending / Withdraw"]
+        D6["Biểu đồ tròn:<br/>Phân bổ theo Khóa học"]
+        D7["Biểu đồ tròn:<br/>Full Fee / Deposit / Init / Withdraw"]
+    end
+    
+    subgraph TRENDS["📉 Xu Hướng"]
+        D8["Line Chart:<br/>Doanh thu 6 tháng theo TT"]
+        D9["Line Chart:<br/>Doanh thu tái phí theo TT"]
+        D10["Line Chart:<br/>Tỉ lệ tái phí theo TT"]
+        D11["Line Chart:<br/>Doanh thu theo EC"]
+    end
+    
+    subgraph TABLES["📋 Bảng Chi Tiết"]
+        D12["HS học thử trong lớp"]
+        D13["HS đang nợ phí"]
+        D14["HS chờ xếp lớp"]
+        D15["HS hết phí chưa lớp"]
+        D16["Bảng doanh thu theo TT"]
+        D17["Bảng checkin/đăng ký/ACS"]
+        D18["Bảng tỉ lệ tái phí CM"]
+        D19["Bảng dự báo tái phí T+3"]
+        D20["HS hết phí trong tháng"]
+    end
+```
+
+### 📑 Hệ Thống Báo Cáo (16+ báo cáo)
+
+| Nhóm | Mã | Tên | Xuất Excel |
+|---|---|---|---|
+| **Kinh doanh** | 01 | Báo cáo doanh thu tổng hợp | ✅ |
+| | 02a | Doanh thu chi tiết New | ✅ |
+| | 02b | Doanh thu chi tiết Renew | ✅ |
+| | 02c | Doanh thu chi tiết Trial | ✅ |
+| | 05 | Báo cáo chiết khấu | ✅ |
+| | 06 | Báo cáo hợp đồng | ✅ |
+| **Tài chính** | 07 | Thu chi tổng hợp | ✅ |
+| | 08 | Công nợ học viên | ✅ |
+| | 09 | Hoàn phí | ✅ |
+| | 10 | Bảo lưu | ✅ |
+| | 11 | Chuyển phí | ✅ |
+| **Vận hành** | 101 | Sĩ số lớp học | ✅ |
+| | 102 | Lịch sử điểm danh | ✅ |
+| | 103 | Báo cáo giáo viên | ✅ |
+| | 104 | Báo cáo học bù | ✅ |
+| | 202 | Khách hàng quá hạn (chi tiết) | ✅ |
+| | 203 | Khách hàng quá hạn (theo NV) | ✅ |
+
+> ✅ **Tất cả báo cáo đều hỗ trợ xuất Excel** với bộ lọc linh hoạt: Trung tâm, Thời gian, Nhân viên, Khóa học...
+
+---
+
+## 7. HỆ THỐNG MARKETING TÍCH HỢP
+
+### 📢 Module Marketing
+
+| Chức năng | Mô tả |
+|---|---|
+| **Chiến dịch (Campaigns)** | Tạo & quản lý các chiến dịch Marketing, theo dõi nguồn lead |
+| **B2B Sources** | Quản lý đối tác giới thiệu doanh nghiệp |
+| **B2B Campaigns** | Chính sách hoa hồng cho đối tác B2B |
+| **C2C Campaigns** | Chương trình "Giới thiệu bạn bè" — Khách giới thiệu khách |
+| **Voucher (Coupons)** | Quản lý mã giảm giá, voucher khuyến mãi |
+
+### 🤝 Liên kết CRM ↔ Marketing
+
+```mermaid
+flowchart LR
+    A[Chiến dịch Facebook] --> B[Nguồn: FB_T3_2026]
+    B --> C[Lead vào CRM]
+    C --> D[Đăng ký → Hợp đồng]
+    D --> E[Báo cáo: ROI theo nguồn]
+    
+    F[KH cũ giới thiệu] --> G[Nhập SĐT C2C]
+    G --> H[Tạo Coupon tự động]
+    H --> I[Áp dụng giảm giá khi nhập học]
+```
+
+---
+
+## 8. LỘ TRÌNH PHÁT TRIỂN & TẦM NHÌN AI
+
+### 🔮 Tầm Nhìn: AI-First ERP
+
+```mermaid
+timeline
+    title Lộ Trình AI Hóa EduTech ERP
+    section Giai đoạn 1 (Hiện tại)
+        AI Chatbot truy vấn dữ liệu : Tìm kiếm HS, TT, Doanh thu
+        Function Calling 12+ tools : search_students, get_revenue_report...
+        Knowledge Base nội bộ : Tìm kiếm tài liệu hướng dẫn
+    section Giai đoạn 2 (Q3/2026)
+        AI Predictive Analytics : Dự đoán tỉ lệ tái phí
+        AI Auto-Assignment : Tự động phân lead cho EC phù hợp
+        AI Content Generator : Soạn email/SMS marketing tự động
+    section Giai đoạn 3 (Q1/2027)
+        AI Teaching Assistant : Gợi ý nội dung học cho từng HS
+        Voice AI Support : Trợ lý voice cho Telesales
+        AI Dashboard Insights : Phân tích bất thường tự động
+```
+
+### 🚀 Các Tính Năng AI Sắp Triển Khai
+
+| Tính năng | Mô tả | Giá trị |
+|---|---|---|
+| **🎯 AI Lead Scoring** | Chấm điểm lead tự động dựa trên hành vi (số lần chăm sóc, phản hồi, nguồn) | Tập trung vào lead chất lượng cao |
+| **📈 Dự Đoán Tái Phí** | Phân tích pattern HS sắp hết phí → dự đoán % tái phí | Chủ động chăm sóc trước khi hết phí |
+| **🤖 Auto Follow-up** | AI tự gợi ý script chăm sóc dựa trên lịch sử tương tác | Cá nhân hóa trải nghiệm KH |
+| **📊 Anomaly Detection** | Phát hiện bất thường: doanh thu giảm đột ngột, HS nghỉ liên tục | Cảnh báo sớm cho quản lý |
+| **🗣️ NLP Report** | "Cho tôi biết top 5 TT có doanh thu cao nhất Q1" → AI tổng hợp báo cáo | Không cần mở 5 trang report |
+| **📋 Smart Scheduling** | AI gợi ý xếp lớp tối ưu dựa trên sĩ số, lịch GV, phòng trống | Tối ưu tài nguyên |
+
+---
+
+## 🎬 TỔNG KẾT
+
+### So sánh với giải pháp hiện tại trên thị trường
+
+| Tiêu chí | Excel/Google Sheet | CRM riêng + LMS riêng | **EduTech ERP** |
+|---|---|---|---|
+| Liên thông dữ liệu | ❌ Không | ⚠️ Phải tích hợp API | ✅ Native |
+| Phân quyền | ❌ Không | ⚠️ Giới hạn | ✅ Multi-role, Multi-branch |
+| AI Assistant | ❌ Không | ❌ Không | ✅ Gemini 2.5 |
+| Báo cáo real-time | ❌ Phải làm thủ công | ⚠️ Giới hạn | ✅ 20+ Dashboard + 16+ Report |
+| Chi phí | 🟢 Thấp | 🔴 Cao (2 hệ thống) | 🟡 Hợp lý (1 hệ thống) |
+| Mở rộng | ❌ Rất khó | ⚠️ Trung bình | ✅ Modular, Custom được |
+
+### 💎 Thông Điệp Chốt
+
+> **EduTech ERP** không chỉ là phần mềm quản lý — đây là **Digital Transformation Platform** cho ngành giáo dục. 
+> 
+> Với sự tích hợp AI sâu rộng, hệ thống không chỉ giúp bạn **quản lý** mà còn giúp bạn **ra quyết định thông minh hơn**, **phục vụ học viên tốt hơn**, và **tăng trưởng bền vững hơn**.
+
+---
+
+> 📌 **Thông tin liên hệ :** congnghegiaoduc.com
+> 
+> 📅 **Phiên bản:** v2.0 — Cập nhật 01/01/2026
+
+    </script>
+
+    <script>
+        document.getElementById('content').innerHTML = marked.parse(document.getElementById('md-source').textContent);
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+        
+        document.querySelectorAll('code.language-mermaid').forEach((block) => {
+            const container = document.createElement('div');
+            container.className = 'mermaid';
+            container.textContent = block.textContent;
+            if(block.parentNode.tagName === 'PRE') {
+                block.parentNode.replaceWith(container);
+            } else {
+                block.replaceWith(container);
+            }
+        });
+        mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+    </script>
+</body>
+</html>
