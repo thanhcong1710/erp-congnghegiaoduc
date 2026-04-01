@@ -3,7 +3,7 @@
   <div id="page-attendances">
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Trung tâm <span class="text-danger"> (*)</span></label>
           <vue-select
               label="name"
@@ -15,7 +15,7 @@
               @input="saveBranch"
           ></vue-select>
         </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/4 w-full mb-4">
           <label >Khóa học</label>
           <vue-select
                 label="name"
@@ -27,19 +27,7 @@
                 @input="saveProduct"
             ></vue-select>
         </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Chương trình học</label>
-          <vue-select
-                label="name"
-                placeholder="Chọn khóa học"
-                :options="html.programs.list"
-                v-model="html.programs.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveProgram"
-            ></vue-select>
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Lớp học</label>
           <vue-select
                 label="cls_name"
@@ -51,7 +39,7 @@
                 @input="saveClass"
             ></vue-select>
         </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Chọn tháng</label>
            <datepicker class="w-full"
                 v-model="att.date_select"
@@ -307,10 +295,6 @@
             item: '',
             list: []
           },
-          programs:{
-            item: '',
-            list: []
-          },
           classes:{
             item: '',
             list: []
@@ -327,7 +311,6 @@
         att:{
           branch_id:'',
           product_id:'',
-          program_id:'',
           class_id:'',
           date_select:moment(new Date()).format('YYYY-MM')
         },
@@ -361,19 +344,10 @@
         if (data && typeof data === 'object') {
           const product_id = data.id
           this.att.product_id = product_id
-          this.loadPrograms();
-        }else{
-          this.att.product_id = ""
-          this.html.programs.list =[]
-        }
-      },
-      saveProgram(data = null){
-        if (data && typeof data === 'object') {
-          const program_id = data.id
-          this.att.program_id = program_id
           this.loadClasses();
         }else{
-          this.att.program_id = ""
+          this.att.product_id = ""
+          this.html.classes.list =[]
         }
       },
       saveClass(data = null){
@@ -385,22 +359,12 @@
           this.att.class_id = ""
         }
       },
-      loadPrograms(){
-        if(this.att.product_id){
-          axios.g(`/api/system/programs/${this.att.product_id}`)
-            .then(response => {
-            this.html.programs.list = response.data
-          })
-        }else{
-          this.html.programs.list =[]
-        }
-      },
       loadClasses(){
-        if(this.att.branch_id && this.att.program_id){
+        if(this.att.branch_id && this.att.product_id){
           this.$vs.loading();
           axios.p(`/api/lms/attendances/load-classes`, {
             branch_id: this.att.branch_id,
-            program_id: this.att.program_id
+            product_id: this.att.product_id
           })
             .then(response => {
             this.$vs.loading.close();
