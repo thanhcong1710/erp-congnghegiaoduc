@@ -277,6 +277,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('update-schedule', 'ClassesController@updateSchedule');
             });
             Route::prefix('tuition-fees')->group(function () {
+                Route::get('create', 'TuitionFeesController@create');
                 Route::post('add', 'TuitionFeesController@add');
                 Route::post('list', 'TuitionFeesController@list');
                 Route::post('delete', 'TuitionFeesController@delete');

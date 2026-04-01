@@ -39,6 +39,26 @@ class TuitionFeesController extends Controller
         if (!empty($status)) {
             $cond .= " AND t.status IN (".implode(",",$status).")";
         }
+
+        $is_ceo = Auth::user()->checkRole(686868);
+        if ($is_ceo) {
+            $user_branches = Auth::user()->getBranchesHasUser();
+            if ($user_branches) {
+                $arrUBranches = explode(',', $user_branches);
+                $tmpUser = "";
+                foreach($arrUBranches as $b) {
+                    if(trim($b) != '') {
+                        $tmpUser .= $tmpUser ? " OR ( t.branch_id LIKE '$b,%' OR t.branch_id LIKE '%,$b,%' OR t.branch_id LIKE '%,$b' OR t.branch_id = '$b') " : " ( t.branch_id LIKE '$b,%' OR t.branch_id LIKE '%,$b,%' OR t.branch_id LIKE '%,$b' OR t.branch_id = '$b' ) ";
+                    }
+                }
+                if ($tmpUser) {
+                    $cond .= " AND ($tmpUser) ";
+                }
+            } else {
+                // If they manage no branches but are CEO, they see nothing
+                $cond .= " AND 1=0 ";
+            }
+        }
         
         $order_by = " ORDER BY t.id DESC ";
 
@@ -110,6 +130,32 @@ class TuitionFeesController extends Controller
         return response()->json($result);
     } 
 
+    public function create(Request $request)
+    {
+        $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
+        $is_ceo = Auth::user()->checkRole(686868);
+        $user_branches = Auth::user()->getBranchesHasUser();
+        $arrUBranches = $user_branches ? explode(',', $user_branches) : [];
+
+        foreach($branches  AS $k => $row){
+            if ($is_ceo) {
+                $branches[$k]->disabled = true;
+                if (in_array($row->id, $arrUBranches)) {
+                    $branches[$k]->selected = true;
+                } else {
+                    $branches[$k]->selected = false;
+                }
+            } else {
+                $branches[$k]->selected = false;
+                $branches[$k]->disabled = false;
+            }
+        }
+        
+        return response()->json([
+            'branches' => $branches
+        ]);
+    }
+
     public function show(Request $request,$id)
     {
         $tuition_fee = u::first("SELECT * FROM tuition_fee WHERE id = $id");
@@ -117,11 +163,22 @@ class TuitionFeesController extends Controller
             FROM tuition_fee_relation AS r LEFT JOIN tuition_fee AS t ON t.id=r.exchange_tuition_fee_id 
             WHERE r.tuition_fee_id=$id AND r.status=1");
         $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
+        
+        $is_ceo = Auth::user()->checkRole(686868);
+        $user_branches = Auth::user()->getBranchesHasUser();
+        $arrUBranches = $user_branches ? explode(',', $user_branches) : [];
+
         foreach($branches  AS $k => $row){
             if(in_array($row->id, explode(',', data_get($tuition_fee, 'branch_id')))){
                 $branches[$k]->selected = true;
             }else{
                 $branches[$k]->selected = false;
+            }
+
+            if ($is_ceo) {
+                $branches[$k]->disabled = true;
+            } else {
+                $branches[$k]->disabled = false;
             }
         }
         $data = array(

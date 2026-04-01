@@ -103,7 +103,7 @@
             <label><strong>Trung tâm áp dụng</strong></label>
             <div class=w-full>
               <div v-for="(item, index) in branches" :key="index" class="w-full pl-8">
-                <vs-checkbox v-model="item.selected" class="mt-1">{{item.name}}</vs-checkbox>
+                <vs-checkbox v-model="item.selected" :disabled="item.disabled" class="mt-1">{{item.name}}</vs-checkbox>
               </div>
             </div>
           </div>
@@ -257,9 +257,9 @@
         .then(response => {
         this.html.products.list = response.data
       })
-      axios.g(`/api/system/branches`)
+      axios.g(`/api/settings/tuition-fees/create`)
       .then(response => {
-        this.branches = response.data
+        this.branches = response.data.branches
       })
       axios.g(`/api/system/tuition-fees?status=1`)
       .then(response => {
