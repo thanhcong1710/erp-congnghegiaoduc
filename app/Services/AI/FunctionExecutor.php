@@ -1094,4 +1094,43 @@ class FunctionExecutor
             ],
         ];
     }
+
+    /**
+     * Function: Lấy danh sách chi nhánh (trung tâm)
+     */
+    protected function execute_search_branches($args)
+    {
+        $keyword = $args['keyword'] ?? '';
+        $limit = $args['limit'] ?? 8; // default to 8 records
+
+        $cond = " status = 1 "; // Chỉ lấy các branch active
+
+        if ($keyword !== '') {
+            $cond .= " AND (name LIKE '%{$keyword}%' OR address LIKE '%{$keyword}%') ";
+        }
+
+        $branches = DB::select("
+            SELECT id, name, address, hotline 
+            FROM branches
+            WHERE {$cond}
+            ORDER BY id ASC
+            LIMIT {$limit}
+        ");
+
+        if (empty($branches)) {
+            return [
+                'success' => false,
+                'message' => "❌ Không tìm thấy trung tâm nào phù hợp với từ khóa '{$keyword}'",
+            ];
+        }
+
+        return [
+            'success' => true,
+            'data' => [
+                'total_found' => count($branches),
+                'keyword' => $keyword,
+                'branches' => $branches,
+            ],
+        ];
+    }
 }

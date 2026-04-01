@@ -71,16 +71,23 @@ return [
     */
     'functions' => [
         'get_student_info' => [
-            'description' => 'Lấy thông tin CHI TIẾT của 1 học viên cụ thể (khi biết chính xác tên)',
+            'description' => 'Lấy thông tin CHI TIẾT của 1 học viên cụ thể. CHỈ dùng hàm này khi bạn đã biết chắc chắn học viên nào (ví dụ user vừa chọn từ danh sách hoặc truyền kèm ID/mã học viên). Còn nếu người dùng chỉ mới nhập Tên chung chung, hãy dùng search_students trước!',
             'parameters' => [
                 'student_name' => 'string|required',
             ],
         ],
         'search_students' => [
-            'description' => 'Tìm kiếm học sinh theo từ khóa (tên, email, SĐT). Dùng khi cần tìm NHIỀU học sinh hoặc tìm tương đối',
+            'description' => 'Tìm kiếm học sinh theo từ khóa (tên, email, SĐT). Khi người dùng chỉ nhập tên học sinh và bảng dữ liệu trả về NHIỀU học sinh trùng tên, ĐẢM BẢO AI liệt kê danh sách rút gọn 5-8 học sinh (kèm ID, chi nhánh, SĐT) để người dùng chọn thay vì tự động chọn 1 người.',
             'parameters' => [
                 'keyword' => 'string|required',
                 'status' => 'string|nullable', // active, pending, reserve...
+                'limit' => 'integer|nullable',
+            ],
+        ],
+        'search_branches' => [
+            'description' => 'Tìm kiếm danh sách các trung tâm (chi nhánh) bằng tên, nếu có nhiều kết quả thì hệ thống sẽ trả về và AI cần liệt kê 5-8 kết quả để người dùng chọn.',
+            'parameters' => [
+                'keyword' => 'string|required',
                 'limit' => 'integer|nullable',
             ],
         ],
