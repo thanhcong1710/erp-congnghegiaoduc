@@ -221,7 +221,7 @@
               <label>Chọn lớp để xếp lớp ngay</label>
               <vue-select
                     label="label"
-                    placeholder="Chọn lớp (chỉ hiện lớp chưa khai giảng)"
+                    placeholder="Chờ xếp lớp"
                     :options="html.classes.list"
                     v-model="html.classes.item"
                     :searchable="true"
@@ -309,18 +309,12 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
-              <!-- <datepicker class="w-full"
+              <datepicker class="w-full"
                 v-model="agreement.start_date"
                 placeholder="Chọn ngày dự kiến học"
                 :lang="datepickerOptions.lang"
                 @change="selectDate"
-              /> -->
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="agreement.start_date"
-                disabled="true"
+                :disabled="agreement.class_id !== '' && agreement.class_id !== null"
               />
             </div>
             
@@ -625,10 +619,13 @@
       paymentAmountText: function (val) {
         if (this.agreement.total_amount) {
           const value = u.fmc(val)
-          if (value.n > parseInt(this.agreement.total_amount)) {
-            const maxVal = u.fmc(this.agreement.total_amount)
-            this.paymentAmountText = maxVal.s
-            this.payment.amount = maxVal.n
+          let maxVal = parseInt(this.agreement.total_amount, 10)
+          maxVal = maxVal > 1000 && maxVal % 1000 > 0 ? (parseInt(maxVal / 1000) + 1) * 1000 : maxVal
+          
+          if (value.n > maxVal) {
+            const maxFmc = u.fmc(maxVal)
+            this.paymentAmountText = maxFmc.s
+            this.payment.amount = maxFmc.n
           } else {
             this.paymentAmountText = value.s
             this.payment.amount = value.n
@@ -879,6 +876,11 @@
           this.agreement.start_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      selectChargeDate(date){
+        if (date) {
+          this.payment.charge_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
       selectBirthday(date){
         if (date) {
           this.student.birthday_formatted = moment(date).format("YYYY-MM-DD");
@@ -1046,6 +1048,66 @@
         if (ratio >= 0.8) return 'bg-yellow-500'
         return 'bg-green-500'
       },
+      handleFileUpload(event) {
+        const files = Array.from(event.target.files);
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.selectedFiles.push({
+              file: file,
+              name: file.name,
+              preview: e.target.result
+            });
+          };
+          reader.readAsDataURL(file);
+        });
+      },
+      removeFile(index) {
+        this.selectedFiles.splice(index, 1);
+        if (this.selectedFiles.length === 0 && this.$refs.fileInput) {
+          this.$refs.fileInput.value = '';
+        }
+      },
+      viewImagePreview(url) {
+        window.open(url, '_blank');
+      },
+      processPayment(agreementId, agreementMessage) {
+        const formData = new FormData();
+        formData.append('agreement_id', agreementId);
+        formData.append('note', this.payment.note);
+        formData.append('charge_date', this.payment.charge_date);
+        formData.append('amount', this.payment.amount);
+        formData.append('method', this.payment.method);
+        formData.append('type', 1); // Agreement payment
+        
+        this.selectedFiles.forEach((fileObj, index) => {
+          formData.append(`attachments[${index}]`, fileObj.file);
+        });
+
+        axios.p(`/api/lms/accounting/charges/add`, formData)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thành Công',
+            text: agreementMessage + ' và ' + response.data.message.toLowerCase(),
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          })
+          this.$router.push('/lms/agreements')
+        })
+        .catch(e => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Thông báo',
+            text: agreementMessage + ' nhưng không thể tạo phiếu thu. Vui lòng tạo phiếu thu thủ công.',
+            color: 'warning',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+          this.$router.push('/lms/agreements')
+        })
+      }
     },
   }
 

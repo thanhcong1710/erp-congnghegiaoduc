@@ -175,7 +175,7 @@
               <label>Chọn lớp để xếp lớp ngay</label>
               <vue-select
                     label="label"
-                    placeholder="Chọn lớp (chỉ hiện lớp chưa khai giảng)"
+                    placeholder="Chờ xếp lớp"
                     :options="html.classes.list"
                     v-model="html.classes.item"
                     :searchable="true"
@@ -243,12 +243,12 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Ngày dự kiến học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
+              <datepicker class="w-full"
                 v-model="agreement.start_date"
-                disabled="true"
+                placeholder="Chọn ngày dự kiến học"
+                :lang="datepickerOptions.lang"
+                @change="selectDate"
+                :disabled="agreement.class_id !== '' && agreement.class_id !== null"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -511,6 +511,28 @@
         },
         paymentAmountText: '',
         selectedFiles: []
+      }
+    },
+    watch: {
+      paymentAmountText: function (val) {
+        if (this.agreement.total_amount) {
+          const value = u.fmc(val)
+          let maxVal = parseInt(this.agreement.total_amount, 10)
+          maxVal = maxVal > 1000 && maxVal % 1000 > 0 ? (parseInt(maxVal / 1000) + 1) * 1000 : maxVal
+          
+          if (value.n > maxVal) {
+            const maxFmc = u.fmc(maxVal)
+            this.paymentAmountText = maxFmc.s
+            this.payment.amount = maxFmc.n
+          } else {
+            this.paymentAmountText = value.s
+            this.payment.amount = value.n
+          }
+        } else {
+          const value = u.fmc(val)
+          this.paymentAmountText = value.s
+          this.payment.amount = value.n
+        }
       }
     },
     created() {
