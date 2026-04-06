@@ -435,7 +435,11 @@ class ContractsController extends Controller
 
     public static function exitDepost (Request $request){
         $contract_info = u::getObject(array('id'=>data_get($request, 'contract_id')), 'contracts');
-        $active_session = floor(data_get($contract_info, 'total_charged')/500000);
+        if (data_get($contract_info, 'branch_id') == 12) {
+            $active_session = floor(data_get($contract_info, 'total_charged') * data_get($contract_info, 'total_session')/data_get($contract_info, 'must_charged'));
+        } else {
+            $active_session = floor(data_get($contract_info, 'total_charged')/500000);
+        }
         u::updateSimpleRow(array(
             'status' => 3,
             'summary_sessions' => $active_session, 
@@ -443,6 +447,7 @@ class ContractsController extends Controller
             'updated_at'=>date('Y-m-d H:i:s'),
             'updator_id'=>Auth::user()->id,
         ), array('id'=>data_get($request, 'contract_id')), 'contracts');
+
         LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Quy đổi cọc cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
         u::addLogContracts(data_get($contract_info, 'id'));
         return response()->json('ok');
