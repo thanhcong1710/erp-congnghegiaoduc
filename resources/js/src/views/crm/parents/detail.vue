@@ -161,7 +161,7 @@
                           title="Mở Facebook"
                           style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #1877f2; border-radius: 6px; color: #fff; text-decoration: none; flex-shrink: 0;"
                         >
-                          <i class="fa fa-facebook-f" style="font-size: 14px;"></i>
+                          <i class="fa-brands fa-facebook-f" style="font-size: 14px;"></i>
                         </a>
                       </div>
                     </div>
