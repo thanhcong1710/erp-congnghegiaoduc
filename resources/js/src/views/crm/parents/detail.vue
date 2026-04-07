@@ -143,14 +143,27 @@
                       />
                     </div>
                     <div class="vx-col w-full mb-4">
-                      <label  >Link Facebook</label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.link_facebook"
-                        :disabled="disabled_edit"
-                      />
+                      <label>Link Facebook</label>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <input
+                          class="vs-inputx vs-input--input normal"
+                          type="text"
+                          name="title"
+                          v-model="parent.link_facebook"
+                          :disabled="disabled_edit"
+                          style="flex: 1;"
+                        />
+                        <a
+                          v-if="parent.link_facebook"
+                          :href="parent.link_facebook"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Mở Facebook"
+                          style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: #1877f2; border-radius: 6px; color: #fff; text-decoration: none; flex-shrink: 0;"
+                        >
+                          <i class="fa fa-facebook-f" style="font-size: 14px;"></i>
+                        </a>
+                      </div>
                     </div>
                     <div class="vx-col w-full mb-4">
                       <label >Địa chỉ</label>
