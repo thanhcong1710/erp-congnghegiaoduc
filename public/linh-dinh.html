@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ths. Luật sư Linh Đinh | Công ty Luật TNHH Hợp Phúc</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome cho icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a365d;    /* Navy đậm sang trọng */
+            --primary-light: #2c5282;
+            --secondary: #c5a880;  /* Vàng đồng quyền lực */
+            --secondary-dark: #b09571;
+            --text-dark: #2d3748;
+            --text-gray: #718096;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--white);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Nút Bấm Khối Nổi */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn i { margin-right: 10px; }
+
+        .btn-primary {
+            background-color: var(--secondary);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(197, 168, 128, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(197, 168, 128, 0.4);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--white);
+            border: 1px solid var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+
+        /* HEADER & NAVBAR */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i { color: var(--secondary); }
+        .logo span { font-size: 14px; display: block; font-family: 'Inter', sans-serif; font-weight: 400; color: var(--text-gray); letter-spacing: 1px;}
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--secondary);
+            transition: var(--transition);
+        }
+
+        .nav-menu a:hover::after { width: 100%; }
+        .nav-menu a:hover { color: var(--secondary); }
+
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background-color: var(--primary);
+            color: var(--white);
+            padding-top: 80px; /* offset for header */
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.15;
+            z-index: 1;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .hero-content {
+            flex: 1;
+        }
+
+        .hero-content .label {
+            display: inline-block;
+            color: var(--secondary);
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .hero-content h1 {
+            color: var(--white);
+            font-size: 64px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero-content h1 span {
+            color: var(--secondary);
+            font-style: italic;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+            max-width: 80%;
+            line-height: 1.8;
+        }
+
+        .hero-features {
+            display: flex;
+            gap: 30px;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 30px;
+        }
+
+        .h-feature { display: flex; align-items: center; gap: 15px; }
+        .h-feature i { font-size: 30px; color: var(--secondary); }
+        .h-feature div { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; line-height: 1.2; }
+        .h-feature span { display: block; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 400; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;}
+
+        .hero-image {
+            flex: 0 0 450px;
+            position: relative;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border-bottom: 5px solid var(--secondary);
+        }
+
+        /* GIỚI THIỆU SECTION */
+        .about-section {
+            padding: 120px 0;
+            background-color: var(--bg-light);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-header .subtitle {
+            color: var(--secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .section-header h2 {
+            font-size: 42px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            font-size: 32px;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .about-text p {
+            margin-bottom: 20px;
+            color: var(--text-gray);
+            font-size: 17px;
+            text-align: justify;
+        }
+
+        .about-text .highlight {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-box {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-top: 40px;
+        }
+
+        .info-box ul { list-style: none; }
+        .info-box li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        .info-box li:last-child { margin-bottom: 0; }
+        .info-box li::before {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 2px;
+            color: var(--secondary);
+        }
+
+        .about-image { position: relative; }
+        .about-image img { width: 100%; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .about-image::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 50%;
+            height: 50%;
+            border-top: 4px solid var(--secondary);
+            border-left: 4px solid var(--secondary);
+            z-index: -1;
+        }
+
+        /* LĨNH VỰC HOẠT ĐỘNG (SERVICES) */
+        .services-section {
+            padding: 120px 0;
+            background-color: var(--white);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .service-card {
+            background-color: var(--bg-light);
+            padding: 50px 40px;
+            border-radius: 8px;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #edf2f7;
+            z-index: 1;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background-color: var(--primary);
+            transition: var(--transition);
+            z-index: -1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(26,54,93,0.1);
+        }
+
+        .service-card:hover::before { height: 100%; }
+
+        .service-icon {
+            font-size: 50px;
+            color: var(--secondary);
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .service-card h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .service-card p {
+            color: var(--text-gray);
+            transition: var(--transition);
+        }
+
+        .service-card:hover h3,
+        .service-card:hover p {
+            color: var(--white);
+        }
+
+        /* LIÊN HỆ & CTA SECTION */
+        .contact-section {
+            padding: 120px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            position: relative;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+        }
+
+        .contact-info-block h2 {
+            color: var(--white);
+            font-size: 42px;
+            margin-bottom: 30px;
+        }
+
+        .contact-info-block p {
+            font-size: 18px;
+            margin-bottom: 40px;
+            color: #cbd5e1;
+        }
+
+        .contact-list { list-style: none; }
+        .contact-list li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        .c-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(197, 168, 128, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-size: 20px;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .contact-list h4 { color: var(--secondary); font-size: 16px; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .contact-list a { color: var(--white); text-decoration: none; transition: var(--transition); }
+        .contact-list a:hover { color: var(--secondary); }
+
+        .contact-cta {
+            background-color: var(--white);
+            padding: 60px 40px;
+            border-radius: 10px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cta-pulse-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e6f6ec;
+            color: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 25px;
+            animation: pulse-green 2s infinite;
+        }
+
+        .contact-cta h3 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .contact-cta p {
+            color: var(--text-gray);
+            margin-bottom: 35px;
+            font-size: 17px;
+        }
+
+        .btn-call-now {
+            background-color: #28a745;
+            color: white;
+            font-size: 22px;
+            padding: 16px 40px;
+            border-radius: 50px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-call-now:hover {
+            background-color: #218838;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Nút Cuộc Gọi Nổi Trên Màn Hình (Floating Call Button) */
+        .floating-call {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #28a745; 
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+            z-index: 9999;
+            animation: pulse-green 2.5s infinite;
+            transition: transform 0.3s ease;
+        }
+
+        .floating-call:hover {
+            transform: scale(1.1);
+            color: white;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #0f2038;
+            color: #94a3b8;
+            padding: 40px 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        footer p { margin-bottom: 10px; }
+        footer .logo { justify-content: center; color: var(--white); margin-bottom: 20px; }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .hero .container, .about-grid, .contact-grid {
+                flex-direction: column;
+                grid-template-columns: 1fr;
+            }
+            .hero-content h1 { font-size: 48px; }
+            .hero-content p { max-width: 100%; }
+            .hero-image { flex: 0 0 auto; width: 100%; display: none; } /* Ẩn ảnh hero trên mobile lấy space */
+            .services-grid { grid-template-columns: 1fr; }
+            .nav-menu { display: none; } /* Simple hiding for mobile, có thể làm hamburger icon sau */
+            
+            .floating-call {
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <div>
+                    Hợp Phúc
+                    <span>Law Firm</span>
+                </div>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#trang-chu">Trang chủ</a></li>
+                <li><a href="#ve-toi">Giới thiệu</a></li>
+                <li><a href="#dich-vu">Lĩnh vực hành nghề</a></li>
+                <li><a href="#lien-he">Liên hệ</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- Hero Landing Section -->
+    <section id="trang-chu" class="hero">
+        <div class="hero-bg"></div>
+        <div class="container">
+            <div class="hero-content">
+                <span class="label">Bảo vệ Quyền lợi — Kiến tạo Niềm tin</span>
+                <h1>Ths. Luật Sư<br><span>Linh Đinh</span></h1>
+                <p>Nhiều năm kinh nghiệm tư vấn pháp lý chiến lược và tham gia tố tụng cho các cá nhân, tổ chức. Chúng tôi tận tâm mang đến giải pháp pháp lý an toàn, tối ưu và thấu đáo cho từng khách hàng.</p>
+                
+                <div>
+                    <a href="#lien-he" class="btn btn-primary"><i class="fa-regular fa-calendar-check"></i> Đặt lịch tư vấn</a>
+                    <a href="#ve-toi" class="btn btn-outline" style="margin-left: 15px;">Tìm hiểu thêm</a>
+                </div>
+
+                <div class="hero-features">
+                    <div class="h-feature">
+                        <i class="fa-solid fa-award"></i>
+                        <div>10+ <span>Năm kinh nghiệm</span></div>
+                    </div>
+                    <div class="h-feature">
+                        <i class="fa-solid fa-handshake"></i>
+                        <div>500+ <span>Khách hàng tin tưởng</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <!-- Fallback to professional placeholder if local image is missing -->
+                <img src="./luat_su_linh_dinh.png" onerror="this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'" alt="Luật sư Linh Đinh">
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="ve-toi" class="about-section">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1589829085413-56de8ae18c73?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Văn phòng Công ty Luật TNHH Hợp Phúc">
+                </div>
+                <div class="about-text">
+                    <span class="subtitle">Giới thiệu chung</span>
+                    <h3>Thạc sĩ, Luật sư Linh Đinh<br>& Công ty Luật TNHH Hợp Phúc</h3>
+                    <p>Chào mừng quý khách đến với không gian pháp lý của <span class="highlight">Ths. Luật sư Linh Đinh</span> và <span class="highlight">Công ty Luật TNHH Hợp Phúc</span>. Với niềm đam mê cháy bỏng bảo vệ công lý và bề dày chuyên môn cao, chúng tôi đồng hành cùng khách hàng vượt qua mọi rào cản pháp lý khó khăn nhất.</p>
+                    <p>Tại Hợp Phúc, mọi vụ việc đều được phân tích dưới góc nhìn đa chiều, tuân theo tôn chỉ: "Bảo mật - Chuyên nghiệp - Hiệu quả". Không chỉ là người bào chữa, chúng tôi là đối tác đáng tin cậy chia sẻ gánh nặng pháp lý của bạn.</p>
+                    
+                    <div class="info-box">
+                        <ul>
+                            <li>Giải quyết tranh chấp dân sự, thương mại</li>
+                            <li>Tư vấn cấu trúc pháp lý doanh nghiệp</li>
+                            <li>Hỗ trợ đàm phán và soạn thảo Hợp đồng</li>
+                            <li>Đại diện pháp luật tố tụng tại Tòa án</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="dich-vu" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="subtitle">Lĩnh vực hành nghề</span>
+                <h2>Sự Chuyên Nghiệp Mang Tới Thành Công</h2>
+            </div>
+            
+            <div class="services-grid">
+                <!-- Service 1 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-briefcase"></i></div>
+                    <h3>Tư Vấn Doanh Nghiệp</h3>
+                    <p>Tư vấn thành lập pháp nhân, đăng ký kinh doanh, cấu trúc lại công ty, tư vấn M&A và soát xét tuân thủ pháp luật nội bộ để giảm thiểu rủi ro kinh doanh.</p>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-gavel"></i></div>
+                    <h3>Tranh Tụng Tại Tòa</h3>
+                    <p>Đại diện tham gia bào chữa tại các cấp Tòa án giải quyết các vụ án dân sự, hình sự, kinh doanh thương mại và lao động để bảo vệ quyền lợi tối đa.</p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-file-contract"></i></div>
+                    <h3>Tư Vấn Hợp Đồng</h3>
+                    <p>Thẩm định, rà soát và soạn thảo các biên bản thỏa thuận, hợp đồng hợp tác đầu tư quốc tế và nội địa, đảm bảo chặt chẽ và phòng trừ mọi tranh chấp pháp lý.</p>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-house-chimney"></i></div>
+                    <h3>Nhà Đất & BĐS</h3>
+                    <p>Xử lý cấp giấy chứng nhận quyền sử dụng đất, chuyển nhượng tài sản, tham gia xử lý các tranh chấp về chia di sản thừa kế bất động sản.</p>
+                </div>
+
+                <!-- Service 5 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-users"></i></div>
+                    <h3>Hôn Nhân & Gia Đình</h3>
+                    <p>Tư vấn ly hôn, tranh chấp quyền nuôi con, tài sản chung. Đảm bảo quy trình được giải quyết nhanh gọn, tôn trọng quyền riêng tư của khách hàng.</p>
+                </div>
+
+                <!-- Service 6 -->
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-regular fa-lightbulb"></i></div>
+                    <h3>Sở Hữu Trí Tuệ</h3>
+                    <p>Đăng ký bảo hộ bản quyền, nhãn hiệu, kiểu dáng công nghiệp. Xử lý chuyên sâu các vụ vi phạm cạnh tranh không lành mạnh và bản quyền.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="lien-he" class="contact-section">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info-block">
+                    <h2>Liên Hệ Với Chúng Tôi</h2>
+                    <p>Nếu bạn đang đối diện với bất kỳ vấn đề pháp lý nào cần tháo gỡ, đừng ngần ngại liên hệ để nhận tư vấn bước đầu từ đội ngũ Chuyên gia tại Công ty Luật TNHH Hợp Phúc.</p>
+                    
+                    <ul class="contact-list">
+                        <li>
+                            <div class="c-icon"><i class="fa-solid fa-location-dot"></i></div>
+                            <div>
+                                <h4>Địa chỉ văn phòng</h4>
+                                Phố: 6A ngõ 24 Võ Chí Công<br>
+                                Nghĩa Đô, Cầu Giấy, Hà Nội
+                            </div>
+                        </li>
+                        <li>
+                            <div class="c-icon"><i class="fa-solid fa-phone"></i></div>
+                            <div>
+                                <h4>Hotline Trực tiếp</h4>
+                                <a href="tel:0962812111">0962 812 111</a>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="c-icon"><i class="fa-solid fa-envelope"></i></div>
+                            <div>
+                                <h4>Email Cá nhân</h4>
+                                <a href="mailto:luatsulinhdinh@gmail.com">luatsulinhdinh@gmail.com</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="contact-cta">
+                    <div class="cta-pulse-icon">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+                    <h3>Luật sư chuyên môn đang sẵn sàng lắng nghe</h3>
+                    <p>Hãy gọi điện trực tiếp để được Ths. Luật sư Linh Đinh giải đáp thấu đáo và định hướng giải pháp pháp lý an toàn nhất cho vấn đề của bạn.</p>
+                    <a href="tel:0962812111" class="btn btn-call-now">Gọi Ngay: 0962 812 111</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="logo">
+                <i class="fa-solid fa-scale-balanced" style="font-size: 24px;"></i>
+                <div style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; margin-left: 10px; display: inline-block;">
+                    Hợp Phúc Law
+                </div>
+            </div>
+            <p>&copy; 2026 Công ty Luật TNHH Hợp Phúc. Tất cả các quyền được bảo hộ.</p>
+            <p>Bản quyền Website thuộc về Ths. Luật sư Linh Đinh.</p>
+        </div>
+    </footer>
+
+    <!-- Nút Gọi Nổi Chạy Theo Màn Hình Mobile/Desktop -->
+    <a href="tel:0962812111" class="floating-call" aria-label="Gọi ngay để tư vấn">
+        <i class="fa-solid fa-phone"></i>
+    </a>
+
+</body>
+</html>
