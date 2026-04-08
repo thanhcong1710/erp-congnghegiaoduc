@@ -187,7 +187,7 @@ class StudentsController extends Controller
     public function show(Request $request,$student_id)
     {
         $data = u::first("SELECT s.*, c.init_total_charged, c.type AS contract_type, c.status AS contract_status,
-                c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,c.lats_done_sessions,
+                c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,c.last_done_sessions,
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name, t.ec_id, t.cm_id,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
