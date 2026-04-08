@@ -51,9 +51,9 @@
             <div class="box-item-process" v-if="student_info.done_sessions">
               <div class="w-200">
                 <span class="fw-semibold fs-6 text-gray-400">Đã học</span>
-                <span class="fw-bold fs-6" style="float:right" >{{Math.round((student_info.done_sessions + student_info.last_done_sessions)* 100 /(student_info.summary_sessions++ student_info.last_done_sessions))}}%</span>
+                <span class="fw-bold fs-6" style="float:right" >{{Math.round((student_info.done_sessions + student_info.last_done_sessions)* 100 /(student_info.summary_sessions +student_info.last_done_sessions))}}%</span>
               </div>
-              <vs-progress :height="8" :percent="Math.round((student_info.done_sessions+student_info.last_done_sessions)* 100 /(student_info.summary_sessions++ student_info.last_done_sessions))" color="success"></vs-progress>
+              <vs-progress :height="8" :percent="Math.round((student_info.done_sessions+student_info.last_done_sessions)* 100 /(student_info.summary_sessions+ student_info.last_done_sessions))" color="success"></vs-progress>
             </div>
           </div>
         </div>
