@@ -691,17 +691,17 @@ class UtilityServiceProvider extends ServiceProvider
                 }
                 $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
                 $arr_day = explode(",", data_get($class_info, 'class_day'));
-                $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
+                $left_sessions = $contract_info->summary_sessions - $done_sessions->total + $contract_info->last_done_sessions;
                 $data_sessions = self::calculatorSessionsByNumberOfSessions(date('Y-m-d'), $left_sessions, $holidays, $arr_day);
                 self::updateSimpleRow(array(
                     'enrolment_last_date' => data_get($data_sessions, 'end_date'),
-                    'done_sessions' => $done_sessions->total,
+                    'done_sessions' => $done_sessions->total - $contract_info->last_done_sessions,
                     'left_sessions' => $left_sessions
                 ), array('id' => $contract_id), 'contracts');
             } else {
-                $left_sessions = $contract_info->summary_sessions - $done_sessions->total;
+                $left_sessions = $contract_info->summary_sessions - $done_sessions->total + $contract_info->last_done_sessions;
                 self::updateSimpleRow(array(
-                    'done_sessions' => $done_sessions->total,
+                    'done_sessions' => $done_sessions->total - $contract_info->last_done_sessions,
                     'left_sessions' => $left_sessions
                 ), array('id' => $contract_id), 'contracts');
             }
