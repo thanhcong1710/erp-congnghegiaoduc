@@ -1,32 +1,51 @@
 <template>
-  <div class="student-detail-sessions mt-5" v-if="contract_info.id">
-    <div class="vx-row">
-      <div class="vx-col md:w-1/4 w-full mb-4">
-        <label>Tổng số buổi: <strong>{{contract_info.summary_sessions}}</strong></label>
-      </div>
-      <div class="vx-col md:w-1/4 w-full mb-4">
-        <label>Số buổi đã học: <strong>{{contract_info.done_sessions}}</strong></label>
+  <div class="student-detail-sessions mt-5">
+    <div class="vx-row mb-5">
+      <div class="vx-col md:w-1/2 w-full">
+        <label>Chọn gói phí</label>
+        <vue-select
+            label="title"
+            :options="list_contracts"
+            v-model="contract_id"
+            :reduce="item => item.contract_id"
+            placeholder="Chọn gói phí"
+            @input="getSessions"
+            :clearable="false"
+        ></vue-select>
       </div>
     </div>
-    <div>
-      <div class="flex flex-wrap mt-5">
-        <div :class="item.status ==2 || item.status ==3 ? 'box-info' : (item.attendance_status ==1 || item.attendance_status ==3 ? 'box-active' : 'box-danger')" v-for="(item, index) in done_sessions" :key="index">
-          <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1">
-              <div class="label-box-schedule text-center">{{item.cls_name}}</div>
-              <div class="text-date-box-schedule text-center">Buổi {{index+1}} - {{item.class_date | formatDateViewDay}}</div>
-              <div class="text-center">
-                <span class="box-status">{{item.status ==2 || item.status ==3 ? (item.status ==3 ? 'Nghỉ lễ' : 'Bảo lưu') : (item.attendance_status ==1 ? 'Đã học' : (item.attendance_status ==3 ? 'Đã học bù' : 'Đã chạy phí'))}}</span>
-              </div>
-          </div>
+    <div v-if="contract_info && contract_info.id">
+      <div class="vx-row">
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label>Tổng số buổi: <strong>{{contract_info.summary_sessions}}</strong></label>
         </div>
-        <div v-for="(item, index) in next_sessions" :key="index">
-          <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1">
-              <div class="label-box-schedule text-center">{{item.cls_name}}</div>
-              <div class="text-date-box-schedule text-center">Buổi {{index+1 + done_sessions.length}} - {{item.class_date | formatDateViewDay}}</div>
-              <div class="text-center"><span class="box-status">Sắp học</span></div>
+        <div class="vx-col md:w-1/4 w-full mb-4">
+          <label>Số buổi đã học: <strong>{{contract_info.done_sessions}}</strong></label>
+        </div>
+      </div>
+      <div>
+        <div class="flex flex-wrap mt-5">
+          <div :class="item.status ==2 || item.status ==3 ? 'box-info' : (item.attendance_status ==1 || item.attendance_status ==3 ? 'box-active' : 'box-danger')" v-for="(item, index) in done_sessions" :key="'done_'+index">
+            <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1">
+                <div class="label-box-schedule text-center">{{item.cls_name}}</div>
+                <div class="text-date-box-schedule text-center">Buổi {{index+1}} - {{item.class_date | formatDateViewDay}}</div>
+                <div class="text-center">
+                  <span class="box-status">{{item.status ==2 || item.status ==3 ? (item.status ==3 ? 'Nghỉ lễ' : 'Bảo lưu') : (item.attendance_status ==1 ? 'Đã học' : (item.attendance_status ==3 ? 'Đã học bù' : 'Đã chạy phí'))}}</span>
+                </div>
+            </div>
+          </div>
+          <div v-for="(item, index) in next_sessions" :key="'next_'+index">
+            <div class="box-item-student border border-gray-300 rounded min-w-125px py-3 px-5 me-6 mb-3 mr-1 ml-1">
+                <div class="label-box-schedule text-center">{{item.cls_name}}</div>
+                <div class="text-date-box-schedule text-center">Buổi {{index+1 + done_sessions.length}} - {{item.class_date | formatDateViewDay}}</div>
+                <div class="text-center"><span class="box-status">Sắp học</span></div>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p>Không có dữ liệu buổi học.</p>
     </div>
   </div>
 </template>
@@ -52,24 +71,46 @@
       return {
         done_sessions:[],
         next_sessions:[],
-        contract_info:{}
+        contract_info:{},
+        list_contracts: [],
+        contract_id: ''
       }
     },
     async created() {
+      await this.getContracts();
       this.getSessions();
     },
     methods: {
+      getContracts(){
+        const data = {
+          student_id: this.student_info.id,
+        }
+        return axios.p('/api/lms/students/contracts', data)
+          .then((response) => {
+             response.data.forEach(item => {
+                 item.title = `Mã: ${item.code} - Gói: ${item.tuition_fee_name || item.product_name}`;
+             });
+             this.list_contracts = response.data;
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+      },
       getSessions(){
         const data = {
           student_id: this.student_info.id,
+          contract_id: this.contract_id
         }
         this.$vs.loading()
         axios.p('/api/lms/students/sessions', data)
           .then((response) => {
             this.$vs.loading.close()
             this.contract_info = response.data.contract_info
-            this.done_sessions = response.data.done_sessions
-            this.next_sessions = response.data.next_sessions
+            if(this.contract_info) {
+              this.contract_id = this.contract_info.id
+            }
+            this.done_sessions = response.data.done_sessions || []
+            this.next_sessions = response.data.next_sessions || []
           })
           .catch((error) => {
             console.log(error);

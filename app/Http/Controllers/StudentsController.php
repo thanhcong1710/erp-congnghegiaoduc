@@ -345,12 +345,20 @@ class StudentsController extends Controller
     public function sessions(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
-        $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
-            FROM contracts AS c 
-            WHERE c.count_recharge = 
-                IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
-                    (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
-                    (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
+        $contract_id = isset($request->contract_id) ? (int)$request->contract_id : 0;
+        
+        if ($contract_id) {
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+                FROM contracts AS c 
+                WHERE c.id = $contract_id AND c.student_id=$student_id");
+        } else {
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+                FROM contracts AS c 
+                WHERE c.count_recharge = 
+                    IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
+                        (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
+                        (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
+        }
         if($contract_active){
             $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.status, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
                 WHERE s.contract_id = $contract_active->id");
