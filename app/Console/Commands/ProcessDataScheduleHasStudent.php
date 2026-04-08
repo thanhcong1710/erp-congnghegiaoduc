@@ -66,7 +66,7 @@ class ProcessDataScheduleHasStudent extends Command
     }
 
     private function updateContractDoneSessions(){
-        u::query("UPDATE contracts AS c SET c.done_sessions = (SELECT count(id) FROM schedule_has_student WHERE contract_id=c.id AND status=1) - c.last_done_session WHERE c.status!=7");
+        u::query("UPDATE contracts AS c SET c.done_sessions = (SELECT count(id) FROM schedule_has_student WHERE contract_id=c.id AND status=1) - c.last_done_sessions WHERE c.status!=7");
         u::query("UPDATE contracts AS c SET c.left_sessions = c.summary_sessions - c.done_sessions WHERE c.status!=7");
         return "ok";
     }
