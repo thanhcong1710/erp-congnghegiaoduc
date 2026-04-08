@@ -17,10 +17,10 @@
     <div v-if="contract_info && contract_info.id">
       <div class="vx-row">
         <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Tổng số buổi: <strong>{{contract_info.summary_sessions}}</strong></label>
+          <label>Tổng số buổi: <strong>{{contract_info.summary_sessions + contract_info.last_done_sessions}}</strong></label>
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Số buổi đã học: <strong>{{contract_info.done_sessions}}</strong></label>
+          <label>Số buổi đã học: <strong>{{contract_info.done_sessions + contract_info.last_done_sessions}}</strong></label>
         </div>
       </div>
       <div>

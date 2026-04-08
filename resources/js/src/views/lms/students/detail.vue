@@ -43,7 +43,7 @@
                   <div class="fs-2 fw-bold counted">
                     <span class="text-success" v-if="student_info.left_sessions > 5">{{student_info.left_sessions}}</span> 
                     <span class="text-danger" v-else>{{student_info.left_sessions}}</span>
-                    <span style="font-size: 16px;">/ {{student_info.summary_sessions}}</span>
+                    <span style="font-size: 16px;">/ {{student_info.summary_sessions + student_info.last_done_sessions}}</span>
                   </div>
                 </div>
               </div>
@@ -51,9 +51,9 @@
             <div class="box-item-process" v-if="student_info.done_sessions">
               <div class="w-200">
                 <span class="fw-semibold fs-6 text-gray-400">Đã học</span>
-                <span class="fw-bold fs-6" style="float:right" >{{Math.round(student_info.done_sessions* 100 /student_info.summary_sessions)}}%</span>
+                <span class="fw-bold fs-6" style="float:right" >{{Math.round((student_info.done_sessions + student_info.last_done_sessions)* 100 /(student_info.summary_sessions++ student_info.last_done_sessions))}}%</span>
               </div>
-              <vs-progress :height="8" :percent="Math.round(student_info.done_sessions* 100 /student_info.summary_sessions)" color="success"></vs-progress>
+              <vs-progress :height="8" :percent="Math.round((student_info.done_sessions+student_info.last_done_sessions)* 100 /(student_info.summary_sessions++ student_info.last_done_sessions))" color="success"></vs-progress>
             </div>
           </div>
         </div>

@@ -187,7 +187,7 @@ class StudentsController extends Controller
     public function show(Request $request,$student_id)
     {
         $data = u::first("SELECT s.*, c.init_total_charged, c.type AS contract_type, c.status AS contract_status,
-                c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,
+                c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,c.lats_done_sessions,
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name, t.ec_id, t.cm_id,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
@@ -324,7 +324,7 @@ class StudentsController extends Controller
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, c.id AS contract_id, 
-                c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type, c.total_charged, c.summary_sessions,
+                c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type, c.total_charged, c.summary_sessions, c.last_done_sessions, c.init_total_charged,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
@@ -348,11 +348,11 @@ class StudentsController extends Controller
         $contract_id = isset($request->contract_id) ? (int)$request->contract_id : 0;
         
         if ($contract_id) {
-            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions
                 FROM contracts AS c 
                 WHERE c.id = $contract_id AND c.student_id=$student_id");
         } else {
-            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions
                 FROM contracts AS c 
                 WHERE c.count_recharge = 
                     IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,

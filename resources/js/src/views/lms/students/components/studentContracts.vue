@@ -29,14 +29,14 @@
                 <p>Mã: <strong>{{item.code}}</strong></p>
                 <p>Khóa học: {{item.product_name}}</p>
                 <p>Gói phí: {{item.tuition_fee_name}}</p>
-                <p>Số buổi: {{item.debt_amount ==0 ? item.summary_sessions : item.total_sessions}} ({{item.bonus_sessions ? item.bonus_sessions : 0}} học bổng)</p>
+                <p>Số buổi: {{item.debt_amount ==0 ? (item.summary_sessions + item.last_done_sessions) : item.total_sessions}} ({{item.bonus_sessions ? item.bonus_sessions : 0}} học bổng)</p>
                 <p>Số buổi bảo lưu: {{ item.reserved_sessions + '/' +item.reservable_sessions }} buổi</p>
               </td>
               <td class="td vs-table--td">
                 <p>Giá gốc: {{item.init_tuition_fee_amount | formatMoney}}</p>
                 <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                 <p>Công nợ: {{item.debt_amount | formatMoney}}</p>
-                <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
+                <p>Đã đóng: {{item.init_total_charged | formatMoney}}</p>
                 <vs-button v-if="item.debt_amount>0 && item.total_charged && item.status==2" class="mr-3 mb-2" @click="confirmExitDepost(item.contract_id)">Quy đổi cọc</vs-button>
               </td>
               <td class="td vs-table--td">
