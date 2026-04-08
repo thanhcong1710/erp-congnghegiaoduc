@@ -168,7 +168,7 @@ class StudentsController extends Controller
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
-                (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
+                (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.last_done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
             FROM students AS s
             LEFT JOIN contracts AS c ON c.student_id=s.id AND c.status!=0
             WHERE (c.count_recharge = 
