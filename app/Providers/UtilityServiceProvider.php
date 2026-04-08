@@ -697,7 +697,7 @@ class UtilityServiceProvider extends ServiceProvider
     public static function updateDoneSessions($contract_id)
     {
         $done_sessions = self::first("SELECT count(id) AS total FROM schedule_has_student WHERE contract_id = $contract_id AND status=1 ");
-        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code FROM contracts WHERE id=$contract_id");
+        $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code, last_done_sessions FROM contracts WHERE id=$contract_id");
         if ($contract_info->status == 6) {
             $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
             $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
