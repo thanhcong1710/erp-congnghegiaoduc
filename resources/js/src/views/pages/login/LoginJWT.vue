@@ -15,7 +15,7 @@
     <vs-input
         @keyup.enter="loginJWT"
         data-vv-validate-on="blur"
-        v-validate="'required|min:6|max:10'"
+        v-validate="'required|min:6'"
         type="password"
         name="password"
         icon-no-border
@@ -38,29 +38,6 @@
     <div class="flex flex-wrap justify-between mt-10 text-center" v-if="resendActive">
       Tài khoản chưa được kích hoạt, <router-link to="/pages/forgot-password">gửi lại mã kích hoạt</router-link>
     </div>
-
-    <!-- QUICK LOGIN TEST ACCOUNTS -->
-    <div style="margin-top: 20px; border-top: 1.5px dashed #e2e8f0; padding-top: 16px;">
-      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;">
-        🔑 Tài khoản test nhanh
-      </p>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 7px;">
-        <button
-          v-for="acc in testAccounts"
-          :key="acc.role"
-          @click="quickLogin(acc)"
-          :style="{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-            padding: '9px 10px', borderRadius: '10px', border: '1.5px solid',
-            borderColor: acc.border, background: acc.bg,
-            color: acc.text, fontWeight: '600', fontSize: '12px',
-            cursor: 'pointer', transition: 'all .15s'
-          }"
-        >
-          <span>{{ acc.icon }}</span> {{ acc.label }}
-        </button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -71,13 +48,7 @@ export default {
       hrm_id: '',
       password: '',
       checkbox_remember_me: false,
-      resendActive: false,
-      testAccounts: [
-        { role: 'admin', label: 'Admin',       icon: '👑', color: 'danger',  hrm_id: 'Admin', password: 'abcd1234',  bg: '#fef2f2', border: '#fca5a5', text: '#dc2626' },
-        { role: 'cskh',  label: 'CSKH',        icon: '💬', color: 'primary', hrm_id: 'TH004',  password: '@12345678', bg: '#eff6ff', border: '#93c5fd', text: '#2563eb' },
-        { role: 'sale',  label: 'Sale',        icon: '🎯', color: 'success', hrm_id: 'HD002',  password: '@12345678', bg: '#f0fdf4', border: '#86efac', text: '#16a34a' },
-        { role: 'gdtt',  label: 'Giám đốc TT', icon: '🏫', color: 'warning', hrm_id: 'HD001',  password: '@12345678', bg: '#fffbeb', border: '#fcd34d', text: '#b45309' }
-      ]
+      resendActive: false
     }
   },
   computed: {
@@ -141,14 +112,8 @@ export default {
     registerUser () {
       if (!this.checkLogin()) return
       this.$router.push('/pages/register').catch(() => {})
-    },
-    quickLogin (acc) {
-      this.hrm_id = acc.hrm_id
-      this.password = acc.password
-      this.$nextTick(() => { this.loginJWT() })
     }
   }
 }
 
 </script>
-

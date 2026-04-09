@@ -31,20 +31,10 @@
 
           <!-- Logo -->
           <router-link tag="div" class="vx-logo cursor-pointer flex items-center" to="/">
-            <!-- Logo E gradient -->
-            <div style="
-              width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-              background: linear-gradient(135deg, #2563eb, #06b6d4);
-              display: flex; align-items: center; justify-content: center;
-              font-size: 22px; font-weight: 900; color: white;
-              font-family: 'Arial Black', Arial, sans-serif;
-              box-shadow: 0 4px 14px rgba(37,99,235,.4);
-              margin-right: 10px;
-            ">E</div>
-            <div v-show="isMouseEnter || !reduce">
-              <div style="font-size: 20px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; line-height: 1.2;">Edu-ERP</div>
-              <div style="font-size: 10px; color: #94a3b8; font-weight: 500; letter-spacing: 0.03em;">Công Nghệ Giáo Dục</div>
-            </div>
+            <!-- <logo class="w-10 mr-4 fill-current text-primary" />
+            <span class="vx-logo-text text-primary" v-show="isMouseEnter || !reduce" v-if="title">{{ title }}</span> -->
+            <img src="@assets/images/logo/logo.png" alt="Logo" style="height: 56px; margin-right: 10px;">
+            <!-- <h2 class="brand-text" style="color: #014CCC; font-family: serif; font-weight: normal; letter-spacing: 0.01rem; font-size: 36px;"> CHAM TOEIC </h2> -->
           </router-link>
           <!-- /Logo -->
 
