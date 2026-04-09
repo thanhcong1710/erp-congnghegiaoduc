@@ -277,7 +277,6 @@ class ImportsController extends Controller
         $import_id = $request->import_id;
         $list_data = u::query("SELECT * FROM crm_import_parents WHERE import_id=$import_id AND status=1");
         $this->addItemDataParent($list_data,$arr_owner,$source_id,$request->user()->id, $source_detail_id, $branch_id);
-        $this->processDataParentBranch($import_id);
         $list_data_overwirte = u::query("SELECT i.* FROM crm_import_parents AS i  WHERE i.import_id=$import_id AND i.status=4 AND i.is_lock=0");
         $this->OverwirteItemDataParent($list_data_overwirte,$arr_owner,$source_id,$request->user()->id, $source_detail_id, $branch_id);
 
