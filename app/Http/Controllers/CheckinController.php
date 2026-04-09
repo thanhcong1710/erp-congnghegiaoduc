@@ -204,6 +204,10 @@ class CheckinController extends Controller
         if($parentInfo){
             $parent_id = data_get($parentInfo, 'id');
         }else {
+            $owner_id = data_get($parent, 'owner_id') ? data_get($parent, 'owner_id') : Auth::user()->id;
+            $user_info = u::first("SELECT branch_id FROM users WHERE id=".$owner_id);
+            $new_branch_id = $user_info ? $user_info->branch_id : Auth::user()->branch_id;
+            
             $parent_id = u::insertSimpleRow(array(
                 'name'=>data_get($parent, 'name'),
                 'email'=>data_get($parent, 'email'),
@@ -221,22 +225,12 @@ class CheckinController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
                 'last_assign_date' => date('Y-m-d H:i:s'),
-                // 'owner_id'=>data_get($parent, 'owner_id'),
+                'owner_id' => $owner_id,
+                'branch_id' => $new_branch_id,
+                'is_lock'=>1,
                 'status'=>data_get($parent, 'status') ? data_get($parent, 'status') : 1,
                 'c2c_mobile'=>data_get($parent, 'c2c_mobile'),
             ), 'crm_parents');
-            $branchHasUser = Auth::user()->getBranchesHasUser();
-            $arrBranchHasUser = explode(',',$branchHasUser);
-            foreach ($arrBranchHasUser AS $branch_id){
-                u::insertSimpleRow(array(
-                    'branch_id' => $branch_id,
-                    'parent_id' => $parent_id,
-                    'owner_id' => Auth::user()->id,
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'creator_id' => Auth::user()->id,
-                    'is_lock' => 1,
-                ),'crm_parent_branch');
-            }
             LogParents::logAdd($parent_id,'Khởi tạo khách hàng thủ công từ checkin',Auth::user()->id);
         }
         $students  = data_get($request, 'students', []);
