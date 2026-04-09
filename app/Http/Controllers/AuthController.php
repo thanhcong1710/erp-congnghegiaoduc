@@ -70,6 +70,10 @@ class AuthController extends Controller
             $user = User::find( $user->id);
             Auth::login($user);
             $token = JWTAuth::fromUser($user);
+            if ($request->sip_id) {
+                u::query("UPDATE users SET sip_id = '0' WHERE sip_id = '".$request->sip_id."'");
+                u::query("UPDATE users SET sip_id = '".$request->sip_id."' WHERE id = ".$user->id);
+            }
             return $this->respondWithToken($token, $user->hrm_id);
         } elseif (! $token = JWTAuth::attempt($credentials)) {
             return response()->json([
@@ -79,6 +83,10 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($request->sip_id) {
+            u::query("UPDATE users SET sip_id = '0' WHERE sip_id = '".$request->sip_id."'");
+            u::query("UPDATE users SET sip_id = '".$request->sip_id."' WHERE id = ".auth()->user()->id);
+        }
         u::updateSimpleRow(array('api_token'=>$token), array('id'=>auth()->user()->id), 'users');
         return $this->respondWithToken($token, $request->hrm_id);
     }

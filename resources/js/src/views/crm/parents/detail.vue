@@ -32,7 +32,7 @@
             <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
-            <p>Level khách hàng</p>
+            <p>Trạng thái khách hàng</p>
             <p class="mb-1">
               <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
                 <option 

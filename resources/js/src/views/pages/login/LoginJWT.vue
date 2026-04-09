@@ -26,6 +26,16 @@
         class="w-full mt-6" />
     <span class="text-danger text-sm">{{ errors.first('password') }}</span>
 
+    <vs-input
+        @keyup.enter="loginJWT"
+        name="sip_id"
+        icon-no-border
+        icon="icon icon-phone"
+        icon-pack="feather"
+        label-placeholder="Số nội bộ / Đầu số SIP (Tùy chọn)"
+        v-model="sip_id"
+        class="w-full mt-6" />
+
     <div class="flex flex-wrap justify-between my-5">
         <vs-checkbox v-model="checkbox_remember_me" class="mb-3">Lưu mật khẩu</vs-checkbox>
         <router-link to="/pages/forgot-password">Quên mật khẩu?</router-link>
@@ -47,6 +57,7 @@ export default {
     return {
       hrm_id: '',
       password: '',
+      sip_id: '',
       checkbox_remember_me: false,
       resendActive: false
     }
@@ -88,7 +99,8 @@ export default {
         checkbox_remember_me: this.checkbox_remember_me,
         userDetails: {
           hrm_id: this.hrm_id,
-          password: this.password
+          password: this.password,
+          sip_id: this.sip_id
         },
         redirect_url :  '/admin/dashboard'
       }

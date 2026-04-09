@@ -150,7 +150,7 @@
             
             <div class="vx-col md:w-1/2 w-full mb-4">
               <div class="form-group col-sm-6">
-                <label >Level khách hàng</label>
+                <label >Trạng thái khách hàng</label>
                 <select class="vs-inputx vs-input--input normal" v-model="parent.status">
                   <option 
                     v-for="option in levelOptionsParent" 

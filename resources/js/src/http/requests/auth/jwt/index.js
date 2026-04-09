@@ -44,10 +44,11 @@ export default {
       return Promise.reject(error)
     })
   },
-  login (hrm_id, pwd) {
+  login (hrm_id, pwd, sip_id) {
     return axios.post('/api/auth/login', {
       hrm_id,
-      password: pwd
+      password: pwd,
+      sip_id: sip_id
     })
   },
   registerUser (name, email, pwd, pwd_cf) {

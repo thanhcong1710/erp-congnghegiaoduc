@@ -165,16 +165,18 @@ const statusOptionsCare = [
   {id:13,label:'Danh sách đen'}
 ]
 const levelOptionsParent = [
-  {id:1,label:'C3 rác'},
-  {id:2,label:'C3'},
-  {id:3,label:'L1'},
-  {id:4,label:'L2'},
-  {id:5,label:'L3'},
-  {id:6,label:'L4'},
-  {id:7,label:'L5'},
-  {id:8,label:'L6'},
-  {id:9,label:'L6 renew'},
-  {id:10,label:'BL'},
+  {id:1,label:'KH mới'},
+  {id:2,label:'KH Không nghe máy'},
+  {id:3,label:'KH Thuê bao / Không đúng số'},
+  {id:4,label:'Không đúng đối tượng / vùng LGL không có cơ sở'},
+  {id:5,label:'KH Bận, gọi lại sau'},
+  {id:6,label:'KH Không có nhu cầu'},
+  {id:7,label:'KH Tiếp tục chăm sóc (Quan tâm, cần follow)'},
+  {id:8,label:'KH Hẹn lịch Checkin'},
+  {id:9,label:'KH Đã đến Checkin'},
+  {id:10,label:'KH Đã mua gói phí'},
+  {id:11,label:'KH Đến hạn tái tục'},
+  {id:12,label:'KH Danh sách đen'},
 ]
 
 export default {

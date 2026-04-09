@@ -27,7 +27,7 @@
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Level khách hàng</label>
+            <label for="" class="vs-input--label">Trạng thái khách hàng</label>
             <multiselect
                 name="search_status"
                 placeholder="Chọn trạng thái"
