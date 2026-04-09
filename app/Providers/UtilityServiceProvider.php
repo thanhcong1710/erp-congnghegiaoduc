@@ -244,7 +244,7 @@ class UtilityServiceProvider extends ServiceProvider
             '13'=>'Danh sách đen',
             '14'=>'Khác',
         );
-        return $arr_status_care['call_status'] ?? '';
+        return $arr_status_care[$call_status] ?? '';
     }
 
     public static function genStatusByCallStatus($call_status, $call_status_sub)
