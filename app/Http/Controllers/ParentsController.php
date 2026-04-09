@@ -418,6 +418,19 @@ class ParentsController extends Controller
         return response()->json($result);
     }
 
+    public function makeToCall(Request $request,$parent_id){
+        $parent_info = u::first("SELECT * FROM crm_parents WHERE id='$parent_id'");
+        $phone = $request->phone ? $request->phone :$parent_info->mobile_1;
+        if($request->user()->sip_id && $parent_info){
+            $sip_id = $request->user()->sip_id;
+            $voip = new VoipController();
+            $result = $voip->makeToCall($phone, $sip_id);
+            return response()->json($result);
+        }else{
+            return response()->json(['status'=>0, 'message'=>'Vui lòng đăng nhập lại và nhập đúng đầu số điện thoại để gọi!']);
+        }
+    }
+
     public function assignList(Request $request)
     {
         $cond = implode(",",$request->parents);

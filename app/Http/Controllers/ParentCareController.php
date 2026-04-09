@@ -56,6 +56,7 @@ class ParentCareController extends Controller
             'next_care_date' =>  data_get($dataRequest, 'next_care_date' )?  date('Y-m-d H:i:s',strtotime(data_get($dataRequest, 'next_care_date' ))) : null,
             'call_status' => data_get($dataRequest, 'call_status' ),
             'call_status_sub' => data_get($dataRequest, 'call_status_sub' ),
+            'data_id' => data_get($dataRequest, 'data_id' ),
         ), 'crm_customer_care');
         u::updateSimpleRow(array('care_date'=>date('Y-m-d H:i:s')), array('id'=>$request->parent_id), 'crm_parents');
         $data = (object)[

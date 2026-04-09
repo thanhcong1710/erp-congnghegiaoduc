@@ -329,14 +329,14 @@
                         <td class="td vs-table--td text-center">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
                         <td class="td vs-table--td text-center">{{ item.call_status_label }}</td>
                         <td class="td vs-table--td">
-                          <p v-if="item.link_record">
-                            <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
-                              <source :src="item.link_record" type="audio/x-wav">
-                            </audio>
-                          </p>
                           <p v-html="item.note"></p>
-                          <p v-if="item.attached_file">
+                          <p v-if="item.attached_file && !item.data_id">
                             <a :href="item.attached_file" target="blank">File đính kèm</a>
+                          </p>
+                          <p v-if="item.attached_file && item.data_id">
+                            <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
+                              <source :src="item.attached_file" type="audio/x-wav">
+                            </audio>
                           </p>
                         </td>
                       </tr>
@@ -642,7 +642,7 @@
           }
         },
         check_list: [],
-        active_tab: 3,
+        active_tab: 2,
         alert:{
           active: false,
           body: '',
@@ -1443,19 +1443,31 @@
         }
       },
       callPhone(phone){
-        this.phone.show = true
-        this.phone.status = 0
-        this.phone.select_note = ""
-        this.phone.show_input_note = false
-        this.phone.css_class= 'alert alert-success'
-        this.phone.title = "Đang thực hiện cuộc gọi đi đến SĐT - "+phone+" ..."
-        this.phone.care_id = ''
-        this.phone.note=''
-        this.phone.select_note_status='',
-        this.phone.select_note_status_sub='',
-        this.phone.next_care_date='',
-        this.phone.alert.body=''
-        this.phone.alert.color=''
+        this.$vs.loading();
+        axios.g(`/api/crm/parents/make_to_call/${this.$route.params.id}?phone=${phone}`)
+        .then((response) => {
+          this.$vs.loading.close();
+          if(response.data.status == 0){
+            alert(response.data.message);
+          }else{
+            this.phone.show = true
+            this.phone.status = 0
+            this.phone.select_note = ""
+            this.phone.show_input_note = false
+            this.phone.css_class= 'alert alert-success'
+            this.phone.title = "Đang thực hiện cuộc gọi đi đến SĐT - "+phone+" ..."
+            this.phone.care_id = response.data.call_id
+            this.phone.note=''
+            this.phone.select_note_status=''
+            this.phone.select_note_status_sub=''
+            this.phone.next_care_date=''
+            this.phone.alert.body=''
+            this.phone.alert.color=''
+          }
+        })
+        .catch((e) => {
+          this.$vs.loading.close();
+        });
       },
       updateNotePhone(){
         let mess = "";
@@ -1487,7 +1499,8 @@
           file_name:"",
           care_date:"",
           call_status_sub:this.phone.select_note_status_sub,
-          call_status:this.phone.select_note_status
+          call_status:this.phone.select_note_status,
+          data_id: this.phone.care_id,
         };
         this.$vs.loading();
         axios.p(`/api/crm/care/add`,data)

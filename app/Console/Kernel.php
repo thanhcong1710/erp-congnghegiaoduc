@@ -9,6 +9,7 @@ use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
 use App\Console\Commands\SyncLMS;
 use App\Console\Commands\UpdateEnrolmentLastDate;
+use App\Console\Commands\JobsDownloadCdrPA;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -27,6 +28,7 @@ class Kernel extends ConsoleKernel
         UpdateEnrolmentLastDate::class,
         JobsProcessLockParent::class,
         AutoWithdraw::class,
+        JobsDownloadCdrPA::class,
     ];
 
     /**
@@ -44,6 +46,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('processdata:command')->dailyAt('2:00'); 
         $schedule->command('jobsProcessLockParent:command')->cron('0 0 * * *');
         $schedule->command('autoWithdraw:command')->dailyAt('3:00'); 
+        $schedule->command('jobsDownloadCdrPA:command')->cron('*/15 * * * *');
     }
 
     /**

@@ -96,6 +96,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('imports/upload', 'ImportsController@upload');
             Route::post('imports/assign', 'ImportsController@assign');
             Route::post('parents/list', 'ParentsController@list');
+            Route::get('parents/make_to_call/{parent_id}', 'ParentsController@makeToCall');
             Route::post('parents/validate_phone', 'ParentsController@validatePhone');
             Route::post('parents/overwrite', 'ParentsController@overwrite');
             Route::post('parents/validate_c2c_phone', 'ParentsController@validateC2CPhone');
