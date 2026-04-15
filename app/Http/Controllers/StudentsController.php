@@ -99,6 +99,11 @@ class StudentsController extends Controller
         if (!empty($branch_id)) {
             $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
         }
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+        }
 
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
@@ -151,7 +156,7 @@ class StudentsController extends Controller
         $order_by = " ORDER BY s.id DESC ";
 
         // Đếm tổng số học sinh
-        $total = u::first("SELECT count(s.id) AS total FROM students AS s WHERE $cond");
+        $total = u::first("SELECT count(s.id) AS total FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
         $total_count = $total->total;
 
         // Query danh sách học sinh với pagination
@@ -159,6 +164,7 @@ class StudentsController extends Controller
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 (SELECT name FROM branches WHERE id = s.branch_id) AS branch_name
             FROM students AS s
+                LEFT JOIN term_student_user AS t ON t.student_id=s.id 
             WHERE $cond $order_by $limitation");
 
         // Thêm thông tin contract và status cho mỗi học sinh
