@@ -661,10 +661,10 @@
           mess += " - Ca học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.room_id == "") {
-          mess += " - Phòng học không được để trống<br/>";
-          resp = false;
-        }
+        // if (this.config.room_id == "") {
+        //   mess += " - Phòng học không được để trống<br/>";
+        //   resp = false;
+        // }
         if (this.config.cm_id == "") {
           mess += " - Quản lý lớp học không được để trống<br/>";
           resp = false;
