@@ -276,9 +276,9 @@ class StudentsController extends Controller
             mobile_1 = '$request->gud_mobile1',
             email = '$request->gud_email1',
             address = '".addslashes($request->address)."',
-            province_id = '$request->province_id',
-            district_id = '$request->district_id',
-            point_toeic = '$request->point_toeic'
+            province_id = '".(int)$request->province_id."',
+            district_id = '".(int)$request->district_id."',
+            point_toeic = '".(int)$request->point_toeic."'
             WHERE student_id = $request->id");
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
         $result = (object) array(
