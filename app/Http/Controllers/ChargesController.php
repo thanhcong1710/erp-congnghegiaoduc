@@ -33,6 +33,11 @@ class ChargesController extends Controller
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
             }
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
 
             $order_by = " ORDER BY c.id DESC ";
 
@@ -57,17 +62,24 @@ class ChargesController extends Controller
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
             }
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
 
             $order_by = " ORDER BY c.id DESC ";
 
             $total = u::first("SELECT count(c.id) AS total 
-                FROM reserves AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+                FROM reserves AS c LEFT JOIN students AS s ON s.id=c.student_id 
+                LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS reserve_id,c.id AS agreement_id, s.name, s.lms_code, 
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
                     c.must_charge, c.debt_amount, c.status
                 FROM reserves AS c 
                     LEFT JOIN students AS s ON s.id=c.student_id
+                    LEFT JOIN term_student_user AS t ON t.student_id=s.id 
                 WHERE $cond $order_by $limitation");
         }
 
@@ -431,6 +443,11 @@ class ChargesController extends Controller
             if ($start_date !== '') {
                 $cond .= " AND p.charge_date >= '$start_date'";
             }
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
 
             $order_by = " ORDER BY p.id DESC ";
 
@@ -463,13 +480,19 @@ class ChargesController extends Controller
             if ($start_date !== '') {
                 $cond .= " AND p.charge_date >= '$start_date'";
             }
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
 
             $order_by = " ORDER BY p.id DESC ";
 
             $total = u::first("SELECT count(p.id) AS total 
                     FROM payments AS p
                         LEFT JOIN reserves AS c ON c.id=p.agreement_id 
-                        LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+                        LEFT JOIN students AS s ON s.id=c.student_id 
+                        LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
@@ -477,6 +500,7 @@ class ChargesController extends Controller
                 FROM payments AS p
                     LEFT JOIN reserves AS c ON c.id=p.agreement_id
                     LEFT JOIN students AS s ON s.id=c.student_id
+                    LEFT JOIN term_student_user AS t ON t.student_id=s.id 
                 WHERE $cond $order_by $limitation");
         }
 
@@ -578,7 +602,11 @@ class ChargesController extends Controller
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
             }
-
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
             $order_by = " ORDER BY tp.id DESC ";
 
             $total = u::first("SELECT count(c.id) AS total 
@@ -605,13 +633,19 @@ class ChargesController extends Controller
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
             }
+            $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            if (in_array(68, $roles) || in_array(69, $roles)) {
+                $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            }
 
             $order_by = " ORDER BY tp.id DESC ";
 
             $total = u::first("SELECT count(c.id) AS total 
                 FROM tmp_payments AS tp 
                     LEFT JOIN reserves AS c ON c.id = tp.agreement_id
-                    LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+                    LEFT JOIN students AS s ON s.id=c.student_id 
+                     LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
@@ -620,6 +654,7 @@ class ChargesController extends Controller
                 FROM tmp_payments AS tp 
                     LEFT JOIN reserves AS c ON c.id = tp.agreement_id
                     LEFT JOIN students AS s ON s.id=c.student_id
+                    LEFT JOIN term_student_user AS t ON t.student_id=s.id
                 WHERE $cond $order_by $limitation");
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
