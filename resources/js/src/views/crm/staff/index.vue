@@ -2,9 +2,18 @@
   <div id="page-staff-list">
     <div class="flex flex-wrap items-center">
       <vs-button class="p-3" color="success" type="border" @click="addNewData"><i class="fa-solid fa-plus mr-2"></i> Thêm mới Sale</vs-button>
-      <div class="con-input-search vs-table--search ml-auto">
-        <input type="text" class="input-search vs-table--search-input" style="padding:14px 35px; font-size:14px;" placeholder="Mã, tên nhân viên" v-model="searchQuery.keyword" @input="getData()">
-        <i class="vs-icon notranslate icon-scale material-icons null" style="font-size:24px;">search</i>
+      <div class="flex items-center ml-auto">
+        <div class="mr-3" style="min-width: 180px;">
+          <select v-model="searchQuery.status" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 12px; font-size: 14px;" @change="filterByStatus">
+            <option value="1">Đang kích hoạt</option>
+            <option value="0">Không kích hoạt</option>
+            <option value="all">Tất cả</option>
+          </select>
+        </div>
+        <div class="con-input-search vs-table--search">
+          <input type="text" class="input-search vs-table--search-input" style="padding:14px 35px; font-size:14px;" placeholder="Mã, tên nhân viên" v-model="searchQuery.keyword" @input="getData()">
+          <i class="vs-icon notranslate icon-scale material-icons null" style="font-size:24px;">search</i>
+        </div>
       </div>
     </div>
     <vx-card no-shadow class="mt-5">
@@ -15,11 +24,12 @@
               <thead class="vs-table--thead">
                 <tr>
                   <th width="5%" class="text-center">STT</th>
-                  <th width="15%">Mã nhân viên</th>
-                  <th width="30%">Họ tên</th>
-                  <th width="20%">Điện thoại</th>
-                  <th width="20%">Email</th>
-                  <th width="10%" class="text-center">Thao tác</th>
+                  <th width="12%">Mã nhân viên</th>
+                  <th width="25%">Họ tên</th>
+                  <th width="15%">Điện thoại</th>
+                  <th width="18%">Email</th>
+                  <th width="13%" class="text-center">Trạng thái</th>
+                  <th width="12%" class="text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -29,12 +39,15 @@
                   <td>{{ item.name }}</td>
                   <td>{{ item.phone }}</td>
                   <td>{{ item.email || '-' }}</td>
+                  <td class="text-center">
+                    <vs-switch v-model="item.status" color="success" style="margin:auto" @change="toggleStatus(item)"/>
+                  </td>
                   <td class="text-center list-action">
                     <vs-button size="small" color="success" @click="editData(item)" title="Chỉnh sửa"><i class="fa-solid fa-edit"></i></vs-button>
                   </td>
                 </tr>
                 <tr v-if="!staffList.length">
-                  <td colspan="6" class="text-center p-4">Không có dữ liệu nhân viên cấp dưới</td>
+                  <td colspan="7" class="text-center p-4">Không có dữ liệu nhân viên cấp dưới</td>
                 </tr>
               </tbody>
             </table>
@@ -56,7 +69,7 @@ import axios from '../../../http/axios.js'
 export default {
   data() {
     return {
-      searchQuery: { keyword: '' },
+      searchQuery: { keyword: '', status: '1' },
       staffList: [],
       pagination: { cpage: 1, limit: 20, total: 0, init: 0 }
     }
@@ -64,19 +77,46 @@ export default {
   methods: {
     addNewData() { this.$router.push('/crm/staff/add') },
     editData(item) { this.$router.push(`/crm/staff/edit/${item.id}`) },
+    filterByStatus() {
+      this.pagination.cpage = 1
+      this.getData()
+    },
     getData() {
       this.$vs.loading()
       axios.p('/api/crm/staff/list', {
         keyword: this.searchQuery.keyword,
+        status: this.searchQuery.status,
         pagination: this.pagination
       }).then((response) => {
-        this.staffList = response.data.list
+        this.staffList = response.data.list.map(item => {
+          item.status = item.status == 1 ? true : false
+          return item
+        })
         this.pagination = response.data.paging
         this.$vs.loading.close()
         this.pagination.init = 1
       }).catch((e) => { 
         console.log(e);
         this.$vs.loading.close() 
+      })
+    },
+    toggleStatus(item) {
+      const newStatus = item.status ? 1 : 0
+      axios.p(`/api/crm/staff/toggle-status/${item.id}`, {
+        status: newStatus
+      }).then((response) => {
+        if (response.data.status) {
+          this.$vs.notify({ title: 'Thành Công', text: response.data.message, color: 'success', iconPack: 'feather', icon: 'icon-check' })
+        } else {
+          // Revert switch nếu thất bại
+          item.status = !item.status
+          this.$vs.notify({ title: 'Lỗi', text: response.data.message, color: 'danger', iconPack: 'feather', icon: 'icon-alert-circle' })
+        }
+      }).catch((e) => {
+        console.log(e)
+        // Revert switch nếu lỗi
+        item.status = !item.status
+        this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra, vui lòng thử lại', color: 'danger' })
       })
     },
     changePage() { if (this.pagination.init) this.getData() }

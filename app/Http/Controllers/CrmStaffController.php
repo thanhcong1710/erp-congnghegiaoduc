@@ -18,10 +18,16 @@ class CrmStaffController extends Controller
     public function list(Request $request)
     {
         $keyword = $request->keyword ?? '';
+        $status = $request->status;
+
         // Chỉ lấy nhân viên do người đang đăng nhập quản lý
         $cond = " u.manager_id = " . Auth::user()->id . " AND u.deleted_at IS NULL ";
         if ($keyword !== '') {
             $cond .= " AND (u.name LIKE '%$keyword%' OR u.hrm_id LIKE '%$keyword%')";
+        }
+        // Filter theo trạng thái (mặc định chỉ lấy đang kích hoạt)
+        if ($status !== '' && $status !== null && $status !== 'all') {
+            $cond .= " AND u.status = " . (int)$status;
         }
         
         $pagination = (object)$request->pagination;
@@ -150,5 +156,27 @@ class CrmStaffController extends Controller
             ]);
         }
         return response()->json(['status' => 0, 'message' => 'Dữ liệu không tồn tại hoặc bạn không có quyền xem.']);
+    }
+
+    /**
+     * Kích hoạt / Bỏ kích hoạt nhân viên
+     */
+    public function toggleStatus(Request $request, $id)
+    {
+        // Đảm bảo chỉ được thao tác nhân viên do mình quản lý
+        $check = DB::table('users')->where('id', $id)->where('manager_id', Auth::user()->id)->exists();
+        if (!$check) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền thao tác nhân viên này.']);
+        }
+
+        $newStatus = (int)$request->status;
+        u::updateSimpleRow([
+            'status' => $newStatus,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id
+        ], ['id' => $id], 'users');
+
+        $statusText = $newStatus ? 'kích hoạt' : 'bỏ kích hoạt';
+        return response()->json(['status' => 1, 'message' => 'Đã ' . $statusText . ' nhân viên thành công']);
     }
 }

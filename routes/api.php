@@ -125,6 +125,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'CrmStaffController@add');
                 Route::get('show/{id}', 'CrmStaffController@show');
                 Route::post('update/{id}', 'CrmStaffController@update');
+                Route::post('toggle-status/{id}', 'CrmStaffController@toggleStatus');
             });
         });
 
