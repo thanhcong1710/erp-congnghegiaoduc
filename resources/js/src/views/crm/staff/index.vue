@@ -71,7 +71,8 @@ export default {
     return {
       searchQuery: { keyword: '', status: '1' },
       staffList: [],
-      pagination: { cpage: 1, limit: 20, total: 0, init: 0 }
+      pagination: { cpage: 1, limit: 20, total: 0, init: 0 },
+      isProcessing: false
     }
   },
   methods: {
@@ -101,20 +102,23 @@ export default {
       })
     },
     toggleStatus(item) {
+      if (this.isProcessing) return
+      this.isProcessing = true
       const newStatus = item.status ? 1 : 0
       axios.p(`/api/crm/staff/toggle-status/${item.id}`, {
         status: newStatus
       }).then((response) => {
+        this.isProcessing = false
         if (response.data.status) {
           this.$vs.notify({ title: 'Thành Công', text: response.data.message, color: 'success', iconPack: 'feather', icon: 'icon-check' })
+          this.getData()
         } else {
-          // Revert switch nếu thất bại
           item.status = !item.status
           this.$vs.notify({ title: 'Lỗi', text: response.data.message, color: 'danger', iconPack: 'feather', icon: 'icon-alert-circle' })
         }
       }).catch((e) => {
+        this.isProcessing = false
         console.log(e)
-        // Revert switch nếu lỗi
         item.status = !item.status
         this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra, vui lòng thử lại', color: 'danger' })
       })
