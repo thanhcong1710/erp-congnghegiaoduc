@@ -30,9 +30,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('jobsSendEmail:command')->cron('* * * * *');
-        $schedule->command('scheduleHasStudent:process')->dailyAt('00:05')->withoutOverlapping();
-        $schedule->command('scheduleHasStudent:add')->dailyAt('01:00')->withoutOverlapping();
-        $schedule->command('processdata:command')->dailyAt('2:00'); 
+        // $schedule->command('scheduleHasStudent:process')->dailyAt('00:05')->withoutOverlapping();
+        // $schedule->command('scheduleHasStudent:add')->dailyAt('01:00')->withoutOverlapping();
+        // $schedule->command('processdata:command')->dailyAt('2:00'); 
         $schedule->command('jobsProcessLockParent:command')->dailyAt('3:00'); 
     }
 

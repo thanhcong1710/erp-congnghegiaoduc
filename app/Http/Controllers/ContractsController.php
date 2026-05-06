@@ -126,7 +126,7 @@ class ContractsController extends Controller
             'class_id' => data_get($class_info, 'id', null),
             'enrolment_start_date' => $start_date,
             'enrolment_last_date' => data_get($data_sessions, 'end_date'),
-            'status' => 6,
+            // 'status' => 6,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ], ['id' => $contract_id], 'contracts');
@@ -807,6 +807,7 @@ class ContractsController extends Controller
                     'crm_parents'
                 );
             }
+            $updateChargesFee = false;
             if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')) {
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
@@ -962,9 +963,7 @@ class ContractsController extends Controller
                         }
                     }
                 }
-                $chargesController = new ChargesController();
-                $chargesController->processContractsByAgreement($agreement_id);
-
+                $updateChargesFee = true;
             } else {
                 u::updateSimpleRow(array(
                     'start_date' => data_get($request, 'start_date'),
@@ -1007,6 +1006,10 @@ class ContractsController extends Controller
                         );
                     }
                 }
+            }
+            if ($updateChargesFee){
+                $chargesController = new ChargesController();
+                $chargesController->processContractsByAgreement($agreement_id);
             }
 
         }

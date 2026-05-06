@@ -716,14 +716,14 @@ class UtilityServiceProvider extends ServiceProvider
                 'left_sessions' => $left_sessions
             ), array('id' => $contract_id), 'contracts');
         }
-        if ($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info, 'summary_sessions') > 0) {
-            self::updateSimpleRow(array(
-                'status' => 7,
-                'action' => 'Tự động withdraw do hết phí'
-            ), array('id' => $contract_id), 'contracts');
-            self::addLogContracts($contract_id);
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " . data_get($contract_info, 'code') . " hết phí", 0);
-        }
+        // if ($contract_info->status != 7 && $left_sessions == 0 && data_get($contract_info, 'summary_sessions') > 0) {
+        //     self::updateSimpleRow(array(
+        //         'status' => 7,
+        //         'action' => 'Tự động withdraw do hết phí'
+        //     ), array('id' => $contract_id), 'contracts');
+        //     self::addLogContracts($contract_id);
+        //     LogStudents::logAdd(data_get($contract_info, 'student_id'), "Tự động withdraw học sinh khỏi lớp do hợp đồng " . data_get($contract_info, 'code') . " hết phí", 0);
+        // }
         return true;
     }
 
