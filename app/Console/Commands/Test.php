@@ -44,8 +44,13 @@ class Test extends Command
      */
     public function handle(Request $request)
     {
-        u::processDataContractsPast(711,'2026-04-10');
-        echo "ok";
+        $list = u::query("SELECT id,enrolment_start_date FROM contracts WHERE enrolment_start_date < '2026-05-07'  AND `status`=6 AND debt_amount=0");
+        foreach($list AS $row){
+            u::processDataContractsPast(data_get($row, 'id'),data_get($row, 'enrolment_start_date'));
+
+            echo data_get($row, 'id')."/";
+        }
+        
         return "ok";
     }
     
