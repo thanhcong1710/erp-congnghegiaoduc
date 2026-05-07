@@ -44,8 +44,7 @@ class Test extends Command
      */
     public function handle(Request $request)
     {
-        $ChargesController = new ChargesController();
-        $ChargesController->processContractsByAgreement(7);
+        u::processDataContractsPast(711,'2026-04-10');
         echo "ok";
         return "ok";
     }
