@@ -50,7 +50,7 @@ class ContractsController extends Controller
         }
 
         $current_class_id = (int) data_get($request, 'current_class_id', 0);
-        $where_date = "AND (c.cls_startdate > CURRENT_DATE" . ($current_class_id > 0 ? " OR c.id = $current_class_id" : "") . ")";
+        $where_date = "AND (c.cls_startdate >= CURRENT_DATE " . ($current_class_id > 0 ? " OR c.id = $current_class_id" : "") . ")";
 
         $classes = u::query("SELECT c.id, c.cls_name AS label,
                 c.cls_startdate, c.cls_enddate, c.max_students,

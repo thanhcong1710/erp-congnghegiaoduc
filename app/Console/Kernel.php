@@ -2,7 +2,9 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AddScheduleClass;
 use App\Console\Commands\AddScheduleHasStudent;
+use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
 use Illuminate\Console\Scheduling\Schedule;
@@ -18,7 +20,9 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         ProcessDataScheduleHasStudent::class,
         AddScheduleHasStudent::class,
+        AddScheduleClass::class,
         JobsSendEmail::class,
+        JobsProcessLockParent::class
     ];
 
     /**

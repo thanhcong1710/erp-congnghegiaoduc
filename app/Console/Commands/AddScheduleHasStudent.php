@@ -62,7 +62,7 @@ class AddScheduleHasStudent extends Command
             LEFT JOIN classes AS cl ON cl.id = c.class_id
             LEFT JOIN schedules AS s ON s.class_id=cl.id
         WHERE c.status=6 AND s.status=1 AND s.class_date = '$class_date' 
-            AND enrolment_start_date <= '$class_date' AND enrolment_last_date >= '$class_date'
+            AND enrolment_start_date <= '$class_date' 
             AND (SELECT count(id) FROM schedule_has_student WHERE contract_id=c.id AND class_date = '$class_date') =0 ");
         self::addItem($list_student, $class_date);
         return "ok";
