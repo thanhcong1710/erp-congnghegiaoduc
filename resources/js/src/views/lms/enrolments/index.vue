@@ -123,9 +123,20 @@
                 <div class="vs-con-tbody vs-table--tbody ">
                   <table class="vs-table vs-table--tbody-table">
                     <thead class="vs-table--thead">
-                      <tr>
+                     <tr>
                         <th colspan="1" rowspan="1" class="text-center">STT</th>
-                        <th colspan="1" rowspan="1">Học sinh</th>
+                        <th colspan="1" rowspan="1">
+                          Học sinh
+                          <vs-button
+                            size="small"
+                            type="flat"
+                            color="primary"
+                            style="padding:2px 6px; font-size:11px; margin-left:6px;"
+                            title="Copy tất cả link Facebook của học sinh trong lớp"
+                            @click.native="copyAllFacebookLinks()"
+                          ><i class="fa fa-copy"></i> Copy FB
+                          </vs-button>
+                        </th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
@@ -133,11 +144,17 @@
                       </tr>
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
-                      <td class="td vs-table--td">{{index+1}}</td> 
+                      <td class="td vs-table--td">{{index+1}}</td>
                       <td class="td vs-table--td">
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
-                      </td> 
+                        <div v-if="item.link_facebook" style="margin-top:4px;">
+                          <a :href="item.link_facebook" target="_blank" rel="noopener noreferrer"
+                            style="font-size:12px; color:#1877f2; word-break:break-all;"
+                            :title="item.link_facebook"
+                          ><i class="fa-brands fa-facebook mr-1"></i>Facebook</a>
+                        </div>
+                      </td>
                       <td class="td vs-table--td">
                         <p>Mã: <strong>{{item.contract_code}}</strong></p>
                         <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
@@ -151,7 +168,6 @@
                       <td class="td vs-table--td">
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                        <!-- <p>Trạng thái: <strong></strong></p> -->
                       </td>
                       <td class="td vs-table--td text-center">
                         <vs-button 
@@ -553,6 +569,83 @@
             icon: 'icon-alert-circle'
           })
         })
+      },
+      copyFacebookLink(link) {
+        if (!link) return;
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(link).then(() => {
+            this.$vs.notify({
+              title: 'Đã copy',
+              text: 'Đã sao chép link Facebook vào clipboard',
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-copy'
+            })
+          }).catch(() => {
+            this.fallbackCopy(link)
+          })
+        } else {
+          this.fallbackCopy(link)
+        }
+      },
+      copyAllFacebookLinks() {
+        const links = this.students
+          .map(s => s.link_facebook)
+          .filter(l => !!l)
+        if (links.length === 0) {
+          this.$vs.notify({
+            title: 'Thông báo',
+            text: 'Không có học sinh nào có link Facebook',
+            color: 'warning',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+          return
+        }
+        const text = links.join('\n')
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => {
+            this.$vs.notify({
+              title: 'Đã copy',
+              text: `Đã sao chép ${links.length} link Facebook vào clipboard`,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-copy'
+            })
+          }).catch(() => {
+            this.fallbackCopy(text)
+          })
+        } else {
+          this.fallbackCopy(text)
+        }
+      },
+      fallbackCopy(text) {
+        const el = document.createElement('textarea')
+        el.value = text
+        el.style.position = 'fixed'
+        el.style.opacity = '0'
+        document.body.appendChild(el)
+        el.focus()
+        el.select()
+        try {
+          document.execCommand('copy')
+          this.$vs.notify({
+            title: 'Đã copy',
+            text: 'Đã sao chép link Facebook vào clipboard',
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-copy'
+          })
+        } catch (e) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Không thể copy, vui lòng copy thủ công',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+        }
+        document.body.removeChild(el)
       }
     },
   }
