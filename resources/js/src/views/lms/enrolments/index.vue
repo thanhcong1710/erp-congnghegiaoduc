@@ -117,6 +117,7 @@
             </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
+            <vs-button style="float: right" class="mb-3" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
             <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
             <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
@@ -125,18 +126,7 @@
                     <thead class="vs-table--thead">
                      <tr>
                         <th colspan="1" rowspan="1" class="text-center">STT</th>
-                        <th colspan="1" rowspan="1">
-                          Học sinh
-                          <vs-button
-                            size="small"
-                            type="flat"
-                            color="primary"
-                            style="padding:2px 6px; font-size:11px; margin-left:6px;"
-                            title="Copy tất cả link Facebook của học sinh trong lớp"
-                            @click.native="copyAllFacebookLinks()"
-                          ><i class="fa fa-copy"></i> Copy FB
-                          </vs-button>
-                        </th>
+                        <th colspan="1" rowspan="1">Học sinh</th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
@@ -152,7 +142,7 @@
                           <a :href="item.link_facebook" target="_blank" rel="noopener noreferrer"
                             style="font-size:12px; color:#1877f2; word-break:break-all;"
                             :title="item.link_facebook"
-                          ><i class="fa-brands fa-facebook mr-1"></i>Facebook</a>
+                          ><i class="fa-brands fa-facebook mr-1"></i>{{ item.link_facebook }}</a>
                         </div>
                       </td>
                       <td class="td vs-table--td">
