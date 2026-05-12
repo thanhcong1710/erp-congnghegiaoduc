@@ -81,7 +81,7 @@ class EnrolmentsController extends Controller
                 p.link_facebook
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id
-                LEFT JOIN crm_parents AS p ON p.student_code = s.lms_code
+                LEFT JOIN crm_parents AS p ON p.student_id = s.id
             WHERE c.status!=7 AND c.class_id =$class_id");
         $class_info->num_students = count($students);
         $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 AND class_date >= CURRENT_DATE ORDER BY class_date");
