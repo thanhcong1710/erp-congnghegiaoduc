@@ -528,6 +528,11 @@
       axios.g(`/api/system/sources`)
         .then(response => {
         this.html.source.list = response.data
+        const defaultSource = response.data.find(item => item.id === 7)
+        if (defaultSource) {
+          this.parent.source = defaultSource
+          this.parent.source_id = defaultSource.id
+        }
       })
     },
   }
