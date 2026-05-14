@@ -29,7 +29,7 @@ class EnrolmentsController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c 
-        WHERE c.branch_id =$branch_id AND c.product_id = $product_id AND c.status = 1 AND  c.cls_enddate >= CURDATE() ORDER BY text ";
+        WHERE c.branch_id =$branch_id AND c.product_id = $product_id AND c.status = 1 AND  c.cls_enddate >= CURDATE() ORDER BY text DESC ";
         $class = u::query($query);
         if (count($class)) {
             foreach ($class as $item) {

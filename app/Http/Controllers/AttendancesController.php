@@ -14,7 +14,7 @@ class AttendancesController extends Controller
     public function loadClasses(Request $request){
         $product_id = data_get($request, 'product_id');
         $branch_id = data_get($request, 'branch_id');
-        $data= u::query("SELECT id, cls_name FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id ");
+        $data= u::query("SELECT id, cls_name FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id ORDER BY cls_name DESC");
         return response()->json($data);
     }
 

@@ -73,7 +73,7 @@ class ContractsController extends Controller
                 AND c.branch_id = $branch_id
                 AND c.product_id = $product_id
                 $where_date
-            ORDER BY c.cls_startdate ASC, c.cls_name ASC");
+            ORDER BY c.cls_startdate DESC, c.cls_name DESC");
 
         return response()->json($classes);
     }
