@@ -47,6 +47,7 @@
                 type="text"
                 v-model="student.email"
                 placeholder="Nhập email"
+                @blur="validateEmail"
               />
             </div>
 
@@ -649,8 +650,23 @@
           this.html.ec.list = response.data
         })
       },
+      validateEmail(){
+        if(this.student.email && !u.vld.email(this.student.email)){
+          this.alert.color = "warning";
+          this.alert.body = "Email không đúng định dạng";
+          this.alert.active = true;
+          this.student.email = "";
+        }
+      },
       validatePhone(){
         if(this.student.phone){
+          if (!u.vld.phone(this.student.phone)) {
+            this.alert.color = "warning";
+            this.alert.body = "Số điện thoại không đúng định dạng";
+            this.alert.active = true;
+            this.student.phone = "";
+            return false;
+          }
           const data = {
             phone: this.student.phone,
           };
@@ -908,6 +924,13 @@
         }
         if (this.student.phone == "") {
           mess += " - Số điện thoại không được để trống<br/>";
+          resp = false;
+        } else if (!u.vld.phone(this.student.phone)) {
+          mess += " - Số điện thoại không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (this.student.email != "" && !u.vld.email(this.student.email)) {
+          mess += " - Email không đúng định dạng<br/>";
           resp = false;
         }
         if (this.agreement.ec_id == "") {

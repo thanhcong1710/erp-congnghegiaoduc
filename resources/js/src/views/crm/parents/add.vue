@@ -38,6 +38,7 @@
                 type="text"
                 name="title"
                 v-model="parent.email"
+                @blur="validateEmail"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -302,6 +303,14 @@
           this.parent.birthday = moment(date).format("YYYY-MM-DD");
         }
       },
+      validateEmail(){
+        if(this.parent.email && !u.vld.email(this.parent.email)){
+          this.alert.color = "warning";
+          this.alert.body = "Email không đúng định dạng";
+          this.alert.active = true;
+          this.parent.email = "";
+        }
+      },
       validatePhone(){
         if(this.parent.mobile_1){
           const data = {
@@ -467,6 +476,10 @@
         }
         if (this.parent.mobile_1 != "" && !u.vld.phone(this.parent.mobile_1)) {
           mess += " - Số điện thoại không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (this.parent.email != "" && !u.vld.email(this.parent.email)) {
+          mess += " - Email không đúng định dạng<br/>";
           resp = false;
         }
         if (this.parent.owner_id == "") {

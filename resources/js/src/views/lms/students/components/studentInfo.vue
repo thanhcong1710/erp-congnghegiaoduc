@@ -32,6 +32,7 @@
             v-model="student_info.gud_mobile1"
             :disabled="disabled_edit"
             @change="validatePhone"
+            @blur="validatePhoneFormat"
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -51,6 +52,7 @@
             name="title"
             v-model="student_info.gud_email1"
             :disabled="disabled_edit"
+            @blur="validateEmailStudent"
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
@@ -278,6 +280,22 @@
           this.student_info.date_of_birth = moment(date).format("YYYY-MM-DD");
         }
       },
+      validatePhoneFormat(){
+        if(this.student_info.gud_mobile1 && !u.vld.phone(this.student_info.gud_mobile1)){
+          this.alert.color = "warning";
+          this.alert.body = "Số điện thoại không đúng định dạng";
+          this.alert.active = true;
+          this.student_info.gud_mobile1 = "";
+        }
+      },
+      validateEmailStudent(){
+        if(this.student_info.gud_email1 && !u.vld.email(this.student_info.gud_email1)){
+          this.alert.color = "warning";
+          this.alert.body = "Email không đúng định dạng";
+          this.alert.active = true;
+          this.student_info.gud_email1 = "";
+        }
+      },
       validatePhone(){
         if(this.student_info.gud_mobile1){
           const data = {
@@ -380,6 +398,14 @@
         }
         if (this.student_info.name == "") {
           mess += " - Họ tên không được để trống<br/>";
+          resp = false;
+        }
+        if (this.student_info.gud_mobile1 != "" && !u.vld.phone(this.student_info.gud_mobile1)) {
+          mess += " - Số điện thoại không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (this.student_info.gud_email1 != "" && !u.vld.email(this.student_info.gud_email1)) {
+          mess += " - Email không đúng định dạng<br/>";
           resp = false;
         }
         if (!resp) {
