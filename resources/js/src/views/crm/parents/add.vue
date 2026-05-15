@@ -28,8 +28,10 @@
                 type="text"
                 name="title"
                 v-model="parent.mobile_1"
+                @blur="validatePhoneFormat"
                 @change="validatePhone"
               />
+              <span class="text-danger text-sm" v-if="errors.mobile_1">{{ errors.mobile_1 }}</span>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
                <label >Email</label>
@@ -40,6 +42,7 @@
                 v-model="parent.email"
                 @blur="validateEmail"
               />
+              <span class="text-danger text-sm" v-if="errors.email">{{ errors.email }}</span>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label >Ngày sinh </label>
@@ -144,8 +147,10 @@
                 type="text"
                 name="title"
                 v-model="parent.c2c_mobile"
+                @blur="validatePhoneC2CFormat"
                 @change="validatePhoneC2C"
               />
+              <span class="text-danger text-sm" v-if="errors.c2c_mobile">{{ errors.c2c_mobile }}</span>
             </div>
             <div class="vx-col w-full mb-4" v-if="parent.source_id==3">
                <p><i>{{c2c_info}}</i></p>
@@ -266,6 +271,12 @@
             list: []
           },
         },
+        errors: {
+          email: '',
+          mobile_1: '',
+          mobile_2: '',
+          c2c_mobile: '',
+        },
         parent: {
           gender: "",
           name: "",
@@ -305,10 +316,16 @@
       },
       validateEmail(){
         if(this.parent.email && !u.vld.email(this.parent.email)){
-          this.alert.color = "warning";
-          this.alert.body = "Email không đúng định dạng";
-          this.alert.active = true;
-          this.parent.email = "";
+          this.errors.email = "Email không đúng định dạng";
+        } else {
+          this.errors.email = "";
+        }
+      },
+      validatePhoneFormat(){
+        if(this.parent.mobile_1 && !u.vld.phone(this.parent.mobile_1)){
+          this.errors.mobile_1 = "Số điện thoại không đúng định dạng";
+        } else {
+          this.errors.mobile_1 = "";
         }
       },
       validatePhone(){
@@ -321,10 +338,7 @@
             this.$vs.loading.close();
             if(response.data.status==0){
               this.change_source_parent_id = response.data.dup_parent_id
-              this.parent.mobile_1 ="";
-              this.modal.color = "warning";
-              this.modal.body = response.data.message;
-              this.modal.show = true;
+              this.errors.mobile_1 = response.data.message;
             }else if(response.data.status==2){
               this.modal_overwrite.show = true;
               this.modal.color = "info";
@@ -342,10 +356,7 @@
           this.$vs.loading.close();
           if(response.data.status==0){
             this.change_source_parent_id = response.data.dup_parent_id
-            this.parent.mobile_2 ="";
-            this.modal.color = "warning";
-            this.modal.body = response.data.message;
-            this.modal.show = true;
+            this.errors.mobile_2 = response.data.message;
           }else if(response.data.status==2){
             this.modal_overwrite.show = true;
             this.modal.color = "info";
@@ -416,8 +427,14 @@
           this.parent.source_detail_id = ""
         }
       },
+      validatePhoneC2CFormat(){
+        if(this.parent.c2c_mobile && !u.vld.phone(this.parent.c2c_mobile)){
+          this.errors.c2c_mobile = "Số điện thoại không đúng định dạng";
+        } else {
+          this.errors.c2c_mobile = "";
+        }
+      },
       validatePhoneC2C(){
-        this.c2c_info=""
         if(this.parent.c2c_mobile){
           const data = {
             phone: this.parent.c2c_mobile,
@@ -426,11 +443,9 @@
           axios.p(`/api/crm/parents/validate_c2c_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
-              this.parent.c2c_mobile ="";
-              this.modal.color = "warning";
-              this.modal.body = response.data.message;
-              this.modal.show = true;
-            }else{
+              this.errors.c2c_mobile = response.data.message;
+            }else if(response.data.status==1){
+              this.errors.c2c_mobile = "";
               this.c2c_info = response.data.message
             }
           })

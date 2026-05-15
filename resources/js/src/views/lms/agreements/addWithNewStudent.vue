@@ -38,6 +38,7 @@
                 placeholder="Nhập số điện thoại"
                 @blur="validatePhone"
               />
+              <span class="text-danger text-sm" v-if="errors.phone">{{ errors.phone }}</span>
             </div>
 
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -49,6 +50,7 @@
                 placeholder="Nhập email"
                 @blur="validateEmail"
               />
+              <span class="text-danger text-sm" v-if="errors.email">{{ errors.email }}</span>
             </div>
 
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -542,6 +544,10 @@
             list: []
           },
         },
+        errors: {
+          phone: '',
+          email: '',
+        },
         student:{
           name: '',
           phone: '',
@@ -652,20 +658,18 @@
       },
       validateEmail(){
         if(this.student.email && !u.vld.email(this.student.email)){
-          this.alert.color = "warning";
-          this.alert.body = "Email không đúng định dạng";
-          this.alert.active = true;
-          this.student.email = "";
+          this.errors.email = "Email không đúng định dạng";
+        } else {
+          this.errors.email = "";
         }
       },
       validatePhone(){
         if(this.student.phone){
           if (!u.vld.phone(this.student.phone)) {
-            this.alert.color = "warning";
-            this.alert.body = "Số điện thoại không đúng định dạng";
-            this.alert.active = true;
-            this.student.phone = "";
+            this.errors.phone = "Số điện thoại không đúng định dạng";
             return false;
+          } else {
+            this.errors.phone = "";
           }
           const data = {
             phone: this.student.phone,
@@ -674,15 +678,7 @@
           axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
-              this.student.phone ="";
-              this.$vs.notify({
-                title: 'Cảnh báo',
-                text: 'Số điện thoại đã tồn tại, vui lòng chọn form đăng ký lại',
-                color: 'danger',
-                iconPack: 'feather',
-                icon: 'icon-alert-triangle',
-                time: 5000
-              })
+              this.errors.phone = 'Số điện thoại đã tồn tại, vui lòng chọn form đăng ký lại';
               return false;
             }
           })

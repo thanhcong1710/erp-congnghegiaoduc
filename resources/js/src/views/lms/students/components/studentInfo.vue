@@ -34,6 +34,7 @@
             @change="validatePhone"
             @blur="validatePhoneFormat"
           />
+          <span class="text-danger text-sm" v-if="errors.gud_mobile1">{{ errors.gud_mobile1 }}</span>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Điểm đầu vào Toeic </label>
@@ -54,6 +55,7 @@
             :disabled="disabled_edit"
             @blur="validateEmailStudent"
           />
+          <span class="text-danger text-sm" v-if="errors.gud_email1">{{ errors.gud_email1 }}</span>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Ngày sinh <span class="text-danger"> (*)</span></label>
@@ -213,6 +215,10 @@
     },
     data() {
       return {
+        errors: {
+          gud_mobile1: '',
+          gud_email1: ''
+        },
         datepickerOptions: {
           closed: true,
           value: "",
@@ -282,18 +288,16 @@
       },
       validatePhoneFormat(){
         if(this.student_info.gud_mobile1 && !u.vld.phone(this.student_info.gud_mobile1)){
-          this.alert.color = "warning";
-          this.alert.body = "Số điện thoại không đúng định dạng";
-          this.alert.active = true;
-          this.student_info.gud_mobile1 = "";
+          this.errors.gud_mobile1 = "Số điện thoại không đúng định dạng";
+        } else {
+          this.errors.gud_mobile1 = "";
         }
       },
       validateEmailStudent(){
         if(this.student_info.gud_email1 && !u.vld.email(this.student_info.gud_email1)){
-          this.alert.color = "warning";
-          this.alert.body = "Email không đúng định dạng";
-          this.alert.active = true;
-          this.student_info.gud_email1 = "";
+          this.errors.gud_email1 = "Email không đúng định dạng";
+        } else {
+          this.errors.gud_email1 = "";
         }
       },
       validatePhone(){
@@ -306,10 +310,7 @@
           axios.p(`/api/crm/parents/validate_phone`,data).then(response => {
             this.$vs.loading.close();
             if(response.data.status==0){
-              this.student_info.gud_mobile1 ="";
-              this.alert.color = "warning";
-              this.alert.body = response.data.message;
-              this.alert.active = true;
+              this.errors.gud_mobile1 = response.data.message;
             }else if(response.data.status==2){
                this.$vs.notify({
                 title: 'Cảnh báo',
