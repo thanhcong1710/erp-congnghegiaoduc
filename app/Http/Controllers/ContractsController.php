@@ -117,7 +117,8 @@ class ContractsController extends Controller
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
+        $discount_other = data_get($request, 'discount_other') ? data_get($request, 'discount_other') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount + (int)$discount_other;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND status > 0 ORDER BY count_recharge DESC LIMIT 1");
         $count_recharge = data_get($request, 'type') ==0 ? -1 : ($last_contract ? $last_contract->count_recharge + 1 : 0);
@@ -164,6 +165,7 @@ class ContractsController extends Controller
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
            'sibling_discount' => $sibling_discount,
+           'discount_other' => $discount_other,
         ), 'contracts');
 
         if(data_get($request,'coupon_code_check') == 1){
@@ -282,7 +284,7 @@ class ContractsController extends Controller
             (SELECT name FROM discount_codes WHERE id=c.discount_code_id) AS discount_code_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
             (SELECT title FROM b2b_campaigns WHERE id= c.b2b_campaign_id) AS b2b_campaign_title,
-            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session,
+            c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session, c.discount_other,
             (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
@@ -296,7 +298,8 @@ class ContractsController extends Controller
         $contract_id = data_get($request, 'id');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
+        $discount_other = data_get($request, 'discount_other') ? data_get($request, 'discount_other') : 0;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount + (int)$discount_other;
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
         $total_amount = data_get($payment, 'total', 0);
@@ -347,6 +350,7 @@ class ContractsController extends Controller
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
            'sibling_discount' => $sibling_discount,
+           'discount_other' => $discount_other,
         ), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
