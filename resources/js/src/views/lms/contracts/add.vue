@@ -317,7 +317,7 @@
                   type="number"
                   name="title"
                   v-model="contract.discount_other"
-                  @change="caculatorSession"
+                  @input="caculatorSession"
                 />
               </div>
             <vs-divider/>

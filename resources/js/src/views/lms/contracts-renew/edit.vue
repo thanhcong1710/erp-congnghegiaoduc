@@ -306,7 +306,7 @@
                   type="number"
                   name="title"
                   v-model="contract.discount_other"
-                  @change="caculatorSession"
+                  @input="caculatorSession"
                 />
               </div>
             <vs-divider/>
@@ -518,16 +518,17 @@
         axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.contract = response.data
-          this.contract.total_amount = response.data.must_charge
-          this.contract.total_session = response.data.total_sessions
-          this.contract.tuition_fee_amount = response.data.init_tuition_fee_amount
-          this.contract.tuition_fee_session = response.data.init_tuition_fee_session
-          this.contract.tuition_fee_receivable = response.data.init_tuition_fee_receivable
-          this.contract.sibling = response.data.sibling_discount > 0 ? true : false;
-          if(this.contract.coupon_code){
-            this.contract.coupon_code_check=1
+          let newContract = Object.assign({}, this.contract, response.data)
+          newContract.total_amount = response.data.must_charge
+          newContract.total_session = response.data.total_sessions
+          newContract.tuition_fee_amount = response.data.init_tuition_fee_amount
+          newContract.tuition_fee_session = response.data.init_tuition_fee_session
+          newContract.tuition_fee_receivable = response.data.init_tuition_fee_receivable
+          newContract.sibling = response.data.sibling_discount > 0 ? true : false;
+          if(newContract.coupon_code){
+            newContract.coupon_code_check=1
           }
+          this.contract = newContract
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.tmp_discount_code_id = response.data.discount_code_id
           this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
