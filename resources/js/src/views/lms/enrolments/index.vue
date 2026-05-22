@@ -127,6 +127,7 @@
                      <tr>
                         <th colspan="1" rowspan="1" class="text-center">STT</th>
                         <th colspan="1" rowspan="1">Học sinh</th>
+                        <th colspan="1" rowspan="1">Add lớp</th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
@@ -135,7 +136,7 @@
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td>
-                      <td class="td vs-table--td">
+                      <td class="td vs-table--td" style="max-width:250px;">
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
                         <div v-if="item.link_facebook" style="margin-top:4px;">
@@ -144,6 +145,20 @@
                             :title="item.link_facebook"
                           ><i class="fa-brands fa-facebook mr-1"></i>{{ item.link_facebook }}</a>
                         </div>
+                      </td>
+                      <td class="td vs-table--td">
+                         <select
+                           v-model="item.add_class_status"
+                           class="vs-inputx vs-input--input normal"
+                           style="width:160px; padding:5px !important;"
+                           @change="updateAddClassStatus(item)"
+                         >
+                           <option :value="0">-- Chưa chọn --</option>
+                           <option :value="1">Đã gửi tin nhắn</option>
+                           <option :value="2">LỖI LINK FB</option>
+                           <option :value="3">Chờ feedback</option>
+                           <option :value="4">DONE</option>
+                         </select>
                       </td>
                       <td class="td vs-table--td">
                         <p>Mã: <strong>{{item.contract_code}}</strong></p>
@@ -636,6 +651,21 @@
           })
         }
         document.body.removeChild(el)
+      },
+      updateAddClassStatus(item) {
+        axios.p('/api/lms/enrolments/update-add-class-status', {
+          contract_id: item.contract_id,
+          add_class_status: item.add_class_status
+        }).catch((e) => {
+          console.log(e)
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Cập nhật trạng thái thất bại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+        })
       }
     },
   }

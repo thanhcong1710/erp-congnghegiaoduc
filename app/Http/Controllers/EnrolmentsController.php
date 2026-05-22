@@ -76,7 +76,7 @@ class EnrolmentsController extends Controller
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
-                c.must_charge, c.total_charged, c.done_sessions,
+                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name,
                 p.link_facebook
             FROM contracts AS c
@@ -247,5 +247,23 @@ class EnrolmentsController extends Controller
             'status' => 1,
             'message' => 'Xóa học sinh khỏi lớp thành công'
         ]);
+    }
+
+    public function updateAddClassStatus(Request $request)
+    {
+        $contract_id = (int) data_get($request, 'contract_id');
+        $status = (int) data_get($request, 'add_class_status');
+
+        if (!$contract_id) {
+            return response()->json(['status' => 0, 'message' => 'Thiếu contract_id'], 400);
+        }
+
+        u::updateSimpleRow(
+            ['add_class_status' => $status, 'updated_at' => date('Y-m-d H:i:s')],
+            ['id' => $contract_id],
+            'contracts'
+        );
+
+        return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
     }
 }
