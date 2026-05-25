@@ -119,7 +119,7 @@ class EnrolmentsController extends Controller
         $cond .= " AND c.product_id = $product_id  AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0";
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
         if (data_get($class_info, 'is_online') == 1) {
             $cond .= " AND t.type IN(0,2) ";
