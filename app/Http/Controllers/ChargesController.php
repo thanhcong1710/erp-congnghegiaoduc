@@ -31,7 +31,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
@@ -60,7 +60,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
@@ -440,7 +440,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             if ($end_date !== '') {
                 $cond .= " AND p.charge_date <= '$end_date'";
@@ -477,7 +477,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             if ($end_date !== '') {
                 $cond .= " AND p.charge_date <= '$end_date'";
@@ -605,7 +605,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
@@ -636,7 +636,7 @@ class ChargesController extends Controller
             }
 
             if ($keyword !== '') {
-                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);

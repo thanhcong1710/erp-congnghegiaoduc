@@ -29,7 +29,7 @@ class ClassTransfersController extends Controller
             $cond .= " AND (t.from_branch_id IN (".implode(",",$branch_id).") OR t.to_branch_id IN (".implode(",",$branch_id)."))";
         }
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
         
         $order_by = " ORDER BY t.id DESC ";
@@ -61,7 +61,7 @@ class ClassTransfersController extends Controller
                 c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date ,
                 c.done_sessions, c.left_sessions 
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
-                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')
                 AND c.status=6 AND c.enrolment_last_date >= CURRENT_DATE ");
         return response()->json($data);
     }  

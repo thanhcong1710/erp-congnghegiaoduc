@@ -55,7 +55,7 @@ class AssessmentsController extends Controller
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date 
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
-                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')
                 AND c.status=6 AND c.enrolment_last_date >= CURRENT_DATE ");
         return response()->json($data);
     }

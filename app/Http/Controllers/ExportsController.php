@@ -850,7 +850,7 @@ class ExportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
 
         if ($start_date) {
@@ -1049,7 +1049,7 @@ class ExportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
 
         if ($start_date) {
@@ -1408,7 +1408,7 @@ class ExportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
 
         if ($start_date) {

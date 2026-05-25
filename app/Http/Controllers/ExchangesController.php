@@ -28,7 +28,7 @@ class ExchangesController extends Controller
             $cond .= " AND e.branch_id IN (".implode(",",$branch_id).") ";
         }
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
         
         $order_by = " ORDER BY e.id DESC ";
@@ -62,7 +62,7 @@ class ExchangesController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.ec_id) AS ec_name
             FROM students AS s 
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')
                 AND s.status>0 ");
         return response()->json($data);
     }  

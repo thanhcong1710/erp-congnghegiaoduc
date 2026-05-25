@@ -32,7 +32,7 @@ class ReservesController extends Controller
             $cond .= " AND r.status IN (".implode(",",$status).")";
         }
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
         
         $order_by = " ORDER BY r.id DESC ";
@@ -63,7 +63,7 @@ class ReservesController extends Controller
                 c.total_charged, c.summary_sessions, c.bonus_sessions, c.real_sessions, c.reservable_sessions, c.done_sessions,
                 c.reserved_sessions , c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date  
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
-                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')
                 AND c.status=6 AND c.enrolment_last_date >= CURRENT_DATE ");
         return response()->json($data);
     }  

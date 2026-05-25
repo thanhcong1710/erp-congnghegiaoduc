@@ -30,7 +30,7 @@ class TuitionTransfersController extends Controller
             $cond .= " AND (t.from_branch_id IN (".implode(",",$branch_id).") OR t.to_branch_id IN (".implode(",",$branch_id)."))";
         }
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s1.lms_code LIKE '%$keyword%' OR s1.name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s1.lms_code LIKE '%$keyword%' OR s1.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
         if (!empty($status)) {
             $cond .= " AND t.status IN (".implode(",",$status).")";
@@ -64,7 +64,7 @@ class TuitionTransfersController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.ec_id) AS ec_name
             FROM students AS s 
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')
                 AND s.status>0 ");
         return response()->json($data);
     }  
