@@ -477,7 +477,7 @@
         const resp = []
         if (start_dates.length) {
           start_dates.map(item => {
-            if (moment(item.class_date).isSameOrAfter(student.start_date)) {
+            if (1==1  || moment(item.class_date).isSameOrAfter(student.start_date)) {
               resp.push(item)
             }
             return item
