@@ -74,7 +74,7 @@
             v-if="numDashStudent.analyticsData"
             icon="UsersIcon"
             :statistic="numDashStudent.analyticsData.data | formatNumber"
-            statisticTitle="Học viên đang học"
+            statisticTitle="Học viên đang học."
             :chartData="numDashStudent.series"
             type="area" />
       </div>
