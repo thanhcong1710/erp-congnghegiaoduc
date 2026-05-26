@@ -294,6 +294,7 @@
         }
       },
       validateEmailStudent(){
+        console.log(this.student_info.gud_email1)
         if(this.student_info.gud_email1 && !u.vld.email(this.student_info.gud_email1)){
           this.errors.gud_email1 = "Email không đúng định dạng";
         } else {
@@ -405,7 +406,7 @@
           mess += " - Số điện thoại không đúng định dạng<br/>";
           resp = false;
         }
-        if (this.student_info.gud_email1 != "" && !u.vld.email(this.student_info.gud_email1)) {
+        if (this.student_info.gud_email1 != "" && this.student_info.gud_email1 != null && !u.vld.email(this.student_info.gud_email1)) {
           mess += " - Email không đúng định dạng<br/>";
           resp = false;
         }

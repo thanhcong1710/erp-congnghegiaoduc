@@ -960,7 +960,7 @@
         this.modal_status.show =true
       },
       validateEmail(){
-        if(this.parent.email && !u.vld.email(this.parent.email)){
+        if(this.parent.email && this.parent.email != null && !u.vld.email(this.parent.email)){
           this.errors.email = "Email không đúng định dạng";
         } else {
           this.errors.email = "";
