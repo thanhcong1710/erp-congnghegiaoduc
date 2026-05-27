@@ -624,6 +624,7 @@
           this.agreement.ec_id = ''
           this.html.ec.item = ''
         }
+        this.student_info.ec_leader_name = ''
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
