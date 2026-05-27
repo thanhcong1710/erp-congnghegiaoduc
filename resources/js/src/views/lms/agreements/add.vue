@@ -80,22 +80,23 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>EC</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="student_info.ec_name"
-                disabled="true"
-              />
+              <label>EC (Sale) <span class="text-danger">(*)</span></label>
+              <vue-select
+                    label="label_name"
+                    placeholder="Chọn EC"
+                    :options="html.ec.list"
+                    v-model="html.ec.item"
+                    :searchable="true"
+                    @input="saveEC"
+                ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC Leader</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
-                name="title"
                 v-model="student_info.ec_leader_name"
+                placeholder="Tự động lấy khi chọn EC"
                 disabled="true"
               />
             </div>
@@ -456,6 +457,10 @@
           }
         },
         html:{
+          ec: {
+            item: '',
+            list: []
+          },
           branches: {
             item: '',
             list: []
@@ -470,6 +475,7 @@
           },
         },
         agreement:{
+          ec_id: '',
           branch_id:'',
           parent_id: '',
           type:'',
@@ -544,8 +550,36 @@
         .then(response => {
         this.html.products.list = response.data
       })
+      this.loadECList()
     },
     methods: {
+      loadECList(){
+        axios.g(`/api/users/get-data/users-manager`)
+          .then(response => {
+          this.html.ec.list = response.data
+        })
+      },
+      saveEC(data = null){
+        if (data && typeof data === 'object') {
+          this.agreement.ec_id = data.id
+          
+          // Lấy EC Leader
+          axios.p('/api/lms/agreements/get-ec-leader', {
+            ec_id: data.id
+          }).then(response => {
+            if (response.data.status == 1 && response.data.data) {
+              this.student_info.ec_leader_id = response.data.data.id;
+              this.student_info.ec_leader_name = response.data.data.name;
+            }
+          }).catch(e => {
+            console.log(e);
+          });
+        }else{
+          this.agreement.ec_id = ""
+          this.student_info.ec_leader_id = ""
+          this.student_info.ec_leader_name = ""
+        }
+      },
       searchSuggestStudent(keyword) {
         if (keyword && keyword.length >= 3 && this.calling === false) {
           this.calling = true
@@ -577,7 +611,19 @@
           this.disabled_branch = false
         }
         
-        
+        if (student.ec_id) {
+          this.agreement.ec_id = student.ec_id
+          this.html.ec.item = this.html.ec.list.find(item => item.id == student.ec_id)
+        } else if (student.ec_name) {
+          // Fallback if ec_id is not directly returned but ec_name is
+          this.html.ec.item = this.html.ec.list.find(item => item.label_name == student.ec_name || item.name == student.ec_name)
+          if (this.html.ec.item) {
+            this.agreement.ec_id = this.html.ec.item.id
+          }
+        } else {
+          this.agreement.ec_id = ''
+          this.html.ec.item = ''
+        }
       },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
@@ -770,6 +816,10 @@
         }
         if (this.agreement.parent_id == "") {
           mess += " - Học sinh không được để trống<br/>";
+          resp = false;
+        }
+        if (this.agreement.ec_id == "") {
+          mess += " - EC (Sale) không được để trống<br/>";
           resp = false;
         }
         if (this.agreement.tuition_fee_id == "") {

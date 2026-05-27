@@ -276,9 +276,12 @@ class ContractsController extends Controller
                 LEFT JOIN roles AS r ON r.id = ru.role_id
                 LEFT JOIN users AS u ON u.id = ru.user_id
                 WHERE u.status=1 AND r.code ='" . SystemCode::ROLE_CEO_BRANCH . "'");
-            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int) data_get($parent_info, 'owner_id'));
+            
+            $input_ec_id = data_get($request, 'ec_id') ? (int) data_get($request, 'ec_id') : (int) data_get($parent_info, 'owner_id');
+            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $input_ec_id);
             $ec_id = data_get($ec_info, 'id');
             $ec_leader_id = data_get($ec_info, 'manager_id');
+            
             u::insertSimpleRow(array(
                 'student_id' => $student_id,
                 'ec_id' => $ec_id,
@@ -292,7 +295,8 @@ class ContractsController extends Controller
             u::updateSimpleRow(array('student_id' => $student_id), array('id' => data_get($request, 'parent_id')), 'crm_parents');
         } else {
             $student_id = data_get($parent_info, 'student_id');
-            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int) data_get($parent_info, 'owner_id'));
+            $input_ec_id = data_get($request, 'ec_id') ? (int) data_get($request, 'ec_id') : (int) data_get($parent_info, 'owner_id');
+            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $input_ec_id);
             $ec_id = data_get($ec_info, 'id');
             $ec_leader_id = data_get($ec_info, 'manager_id');
         }
