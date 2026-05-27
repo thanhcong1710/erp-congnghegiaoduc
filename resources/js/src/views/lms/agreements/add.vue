@@ -556,7 +556,11 @@
       loadECList(){
         axios.g(`/api/users/get-data/users-manager`)
           .then(response => {
-          this.html.ec.list = response.data
+          this.html.ec.list = response.data;
+          if (this.html.ec.list.length === 1) {
+            this.html.ec.item = this.html.ec.list[0];
+            this.saveEC(this.html.ec.item);
+          }
         })
       },
       saveEC(data = null){
@@ -611,7 +615,10 @@
           this.disabled_branch = false
         }
         
-        if (student.ec_id) {
+        if (this.html.ec.list.length === 1) {
+          this.html.ec.item = this.html.ec.list[0];
+          this.saveEC(this.html.ec.item);
+        } else if (student.ec_id) {
           this.agreement.ec_id = student.ec_id
           this.html.ec.item = this.html.ec.list.find(item => item.id == student.ec_id)
         } else if (student.ec_name) {

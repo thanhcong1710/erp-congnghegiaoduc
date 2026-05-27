@@ -653,7 +653,11 @@
       loadECList(){
         axios.g(`/api/users/get-data/users-manager`)
           .then(response => {
-          this.html.ec.list = response.data
+          this.html.ec.list = response.data;
+          if (this.html.ec.list.length === 1) {
+            this.html.ec.item = this.html.ec.list[0];
+            this.saveEC(this.html.ec.item);
+          }
         })
       },
       validateEmail(){
