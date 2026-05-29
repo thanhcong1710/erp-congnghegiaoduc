@@ -207,7 +207,7 @@ class EnrolmentsController extends Controller
     public function withdraw(Request $request){
         $contract_id = data_get($request,'contract_id');
         $contract_info =  u::getObject(['id'=>$contract_id], 'contracts');
-        if($contract_info->left_sessions == 0){
+        if($contract_info->left_sessions <= 0){
             $lmsController = new LMSController();
             $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
             u::updateSimpleRow(array(
