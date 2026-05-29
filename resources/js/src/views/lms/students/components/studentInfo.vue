@@ -287,6 +287,9 @@
         }
       },
       validatePhoneFormat(){
+        if(this.student_info.gud_mobile1){
+          this.student_info.gud_mobile1 = this.student_info.gud_mobile1.replace(/\s+/g, '');
+        }
         if(this.student_info.gud_mobile1 && !u.vld.phone(this.student_info.gud_mobile1)){
           this.errors.gud_mobile1 = "Số điện thoại không đúng định dạng";
         } else {
@@ -295,6 +298,9 @@
       },
       validateEmailStudent(){
         console.log(this.student_info.gud_email1)
+        if(this.student_info.gud_email1){
+          this.student_info.gud_email1 = this.student_info.gud_email1.replace(/\s+/g, '');
+        }
         if(this.student_info.gud_email1 && !u.vld.email(this.student_info.gud_email1)){
           this.errors.gud_email1 = "Email không đúng định dạng";
         } else {
@@ -303,6 +309,7 @@
       },
       validatePhone(){
         if(this.student_info.gud_mobile1){
+          this.student_info.gud_mobile1 = this.student_info.gud_mobile1.replace(/\s+/g, '');
           const data = {
             phone: this.student_info.gud_mobile1,
             parent_id: this.student_info.parent_id

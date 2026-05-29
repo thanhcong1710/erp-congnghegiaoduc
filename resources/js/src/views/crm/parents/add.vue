@@ -315,6 +315,9 @@
         }
       },
       validateEmail(){
+        if(this.parent.email){
+          this.parent.email = this.parent.email.replace(/\s+/g, '');
+        }
         if(this.parent.email && !u.vld.email(this.parent.email)){
           this.errors.email = "Email không đúng định dạng";
         } else {
@@ -322,6 +325,9 @@
         }
       },
       validatePhoneFormat(){
+        if(this.parent.mobile_1){
+          this.parent.mobile_1 = this.parent.mobile_1.replace(/\s+/g, '');
+        }
         if(this.parent.mobile_1 && !u.vld.phone(this.parent.mobile_1)){
           this.errors.mobile_1 = "Số điện thoại không đúng định dạng";
         } else {
@@ -330,6 +336,7 @@
       },
       validatePhone(){
         if(this.parent.mobile_1){
+          this.parent.mobile_1 = this.parent.mobile_1.replace(/\s+/g, '');
           const data = {
             phone: this.parent.mobile_1,
           };
@@ -348,6 +355,9 @@
         }
       },
       validatePhone2(){
+        if(this.parent.mobile_2){
+          this.parent.mobile_2 = this.parent.mobile_2.replace(/\s+/g, '');
+        }
         const data = {
           phone: this.parent.mobile_2,
         };
@@ -428,6 +438,9 @@
         }
       },
       validatePhoneC2CFormat(){
+        if(this.parent.c2c_mobile){
+          this.parent.c2c_mobile = this.parent.c2c_mobile.replace(/\s+/g, '');
+        }
         if(this.parent.c2c_mobile && !u.vld.phone(this.parent.c2c_mobile)){
           this.errors.c2c_mobile = "Số điện thoại không đúng định dạng";
         } else {
@@ -436,6 +449,7 @@
       },
       validatePhoneC2C(){
         if(this.parent.c2c_mobile){
+          this.parent.c2c_mobile = this.parent.c2c_mobile.replace(/\s+/g, '');
           const data = {
             phone: this.parent.c2c_mobile,
           };

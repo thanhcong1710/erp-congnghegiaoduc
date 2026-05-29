@@ -661,6 +661,9 @@
         })
       },
       validateEmail(){
+        if(this.student.email){
+          this.student.email = this.student.email.replace(/\s+/g, '');
+        }
         if(this.student.email && !u.vld.email(this.student.email)){
           this.errors.email = "Email không đúng định dạng";
         } else {
@@ -669,6 +672,7 @@
       },
       validatePhone(){
         if(this.student.phone){
+          this.student.phone = this.student.phone.replace(/\s+/g, '');
           if (!u.vld.phone(this.student.phone)) {
             this.errors.phone = "Số điện thoại không đúng định dạng";
             return false;
