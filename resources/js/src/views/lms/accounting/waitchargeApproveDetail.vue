@@ -302,7 +302,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              v-model="amount"
+               :value="payment.charge_amount | formatNumber"
               :disabled="true"
             />
           </div>
