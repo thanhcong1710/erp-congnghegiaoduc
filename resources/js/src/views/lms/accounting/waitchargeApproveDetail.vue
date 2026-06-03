@@ -116,7 +116,7 @@
           </div>
       </div>
       <vs-divider/>
-
+      <div  v-if="payment.status==0">
       <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/4 w-full mb-4">
@@ -272,6 +272,135 @@
             </div>
           </div>
         </div>
+      </div>
+      <div v-else>
+        <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
+        <div class="vx-row">
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Số tiền phải đóng</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              :value="agreement_info.must_charge | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Tổng tiền đã thu</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              :value="(payment.total_charged - payment.charge_amount) | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Số tiền thu</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              v-model="amount"
+              :disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Công nợ</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              :value="payment.debt_amount | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <!-- Hiển thị discount đã áp dụng -->
+          <div class="vx-col w-full mb-4" v-if="agreement_info.discount_amount > 0">
+            <vs-alert color="warning" active="true">
+              <span><strong>Đã giảm trừ: {{ agreement_info.discount_amount | formatNumber }} đ</strong></span>
+              <span v-if="agreement_info.discount_note"> — {{ agreement_info.discount_note }}</span>
+            </vs-alert>
+          </div>
+          <div class="vx-col w-full mb-2" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <vs-divider />
+          </div>
+          <!-- ======================== -->
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Phương thức đóng phí</label>
+            <select class="vs-inputx vs-input--input normal" v-model="payment.method" :disabled="true">
+              <option value="0">Tiền mặt</option>
+              <option value="1">Chuyển khoản</option>
+              <option value="2">Thẻ tín dụng</option>
+            </select>
+          </div>
+          <div class="vx-col md:w-1/4 w-full mb-4">
+            <label>Ngày thu phí</label>
+            <datepicker class="w-full"
+              v-model="payment.charge_date"
+              placeholder="Chọn ngày thu phí"
+              :lang="datepickerOptions.lang"
+              @change="selectDate"
+              :disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Ghi chú</label>
+            <textarea class="vs-inputx vs-input--input normal" v-model="payment.note" :disabled="true"></textarea>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4" v-if="payment.status==0 && checkPermission('approve_add_fee')">
+            <label>Đính kèm thêm ảnh chuyển khoản</label>
+            <input 
+              type="file" 
+              ref="fileInput"
+              @change="handleFileUpload" 
+              multiple 
+              accept="image/*"
+              class="vs-inputx vs-input--input normal"
+            />
+            <small class="text-muted">Có thể chọn nhiều ảnh</small>
+            <div v-if="selectedFiles.length > 0" class="mt-3">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div v-for="(file, index) in selectedFiles" :key="index" class="relative">
+                  <img 
+                    :src="file.preview" 
+                    class="w-full h-32 object-cover rounded border-2 border-gray-300 cursor-pointer" 
+                    @click="viewImagePreview(file.preview)"
+                  />
+                  <vs-button 
+                    size="small" 
+                    color="danger" 
+                    type="filled" 
+                    icon-pack="feather" 
+                    icon="icon-trash" 
+                    class="absolute top-1 right-1"
+                    @click="removeNewFile(index)"
+                  ></vs-button>
+                  <div class="text-xs mt-1 truncate" :title="file.name">{{ file.name }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="vx-col w-full mb-4" v-if="existingAttachments.length > 0">
+            <label>Ảnh đã đính kèm</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+              <div v-for="(attachment, index) in existingAttachments" :key="index" class="relative">
+                <img :src="getAttachmentUrl(attachment)" class="w-full h-32 object-cover rounded cursor-pointer" @click="viewImage(getAttachmentUrl(attachment))"/>
+                <vs-button 
+                  v-if="payment.status==0 && checkPermission('approve_add_fee')"
+                  size="small" 
+                  color="danger" 
+                  type="filled" 
+                  icon-pack="feather" 
+                  icon="icon-trash" 
+                  class="absolute top-1 right-1"
+                  @click="removeExistingFile(index)"
+                ></vs-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
         <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="alert.body"></div>
           </vs-alert>
