@@ -487,7 +487,7 @@
           const value     = u.fmc(val)
           const must      = parseInt(this.agreement_info.must_charge)    || 0
           const charged   = parseInt(this.agreement_info.total_charged)  || 0
-          const discount  = parseInt(this.agreement_info.discount_amount)|| 0
+          const discount  = parseInt(this.discountAmount)                || 0
           // Số tiền tối đa có thể thu = phần còn lại sau khi trừ giảm trừ
           const maxAmount = must - charged - discount
           const suma      = value.n + charged
@@ -501,6 +501,23 @@
             this.agreement_info.debt_amount = must - suma - discount
             this.amount = value.s
             this.payment.amount = value.n
+          }
+        }
+      },
+      discountAmount: function (val) {
+        if (this.agreement_info.must_charge) {
+          const must      = parseInt(this.agreement_info.must_charge)    || 0
+          const charged   = parseInt(this.agreement_info.total_charged)  || 0
+          const amount    = parseInt(this.payment.amount)                || 0
+          const discount  = parseInt(val)                                || 0
+          
+          const maxAmount = must - charged - discount
+          if (amount > maxAmount) {
+            this.amount = maxAmount > 0 ? maxAmount : 0
+            this.payment.amount = maxAmount > 0 ? maxAmount : 0
+            this.agreement_info.debt_amount = 0
+          } else {
+            this.agreement_info.debt_amount = must - charged - amount - discount
           }
         }
       }
@@ -593,6 +610,12 @@
         }
         if (!this.payment.charge_date) {
           mess += ' - Ngày thu phí không được để trống<br/>';
+          resp = false;
+        }
+
+        const inputDiscount = parseInt(this.discountAmount) || 0;
+        if (inputDiscount !== discount) {
+          mess += ' - Bạn đã thay đổi số tiền giảm trừ nhưng chưa ấn "Áp dụng giảm trừ". Vui lòng ấn "Áp dụng giảm trừ" trước khi lưu phiếu thu.<br/>';
           resp = false;
         }
 
