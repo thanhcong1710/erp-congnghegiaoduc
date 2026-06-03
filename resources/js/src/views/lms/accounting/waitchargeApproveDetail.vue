@@ -125,7 +125,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="payment_info.must_charge | formatNumber"
+              :value="agreement_info.must_charge | formatNumber"
               disabled="true"
             />
           </div>
