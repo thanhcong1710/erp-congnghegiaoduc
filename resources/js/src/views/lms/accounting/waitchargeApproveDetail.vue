@@ -125,7 +125,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.must_charge | formatNumber"
+              :value="payment_info.must_charge | formatNumber"
               disabled="true"
             />
           </div>
@@ -135,7 +135,7 @@
               class="vs-inputx vs-input--input normal"
               type="text"
               name="title"
-              :value="agreement_info.total_charged | formatNumber"
+              :value="payment_info.total_charged- payment_info.charge_amount | formatNumber"
               disabled="true"
             />
           </div>
@@ -154,7 +154,7 @@
             <input
               class="vs-inputx vs-input--input normal"
               type="text"
-              :value="agreement_info.debt_amount | formatNumber"
+              :value="payment_info.debt_amount | formatNumber"
               disabled="true"
             />
           </div>
