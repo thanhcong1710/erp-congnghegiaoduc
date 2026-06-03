@@ -310,7 +310,7 @@
             <label>Công nợ</label>
             <input
               class="vs-inputx vs-input--input normal"
-              type="text"
+              type="text"debt_amount
               :value="payment.debt_amount | formatNumber"
               disabled="true"
             />
@@ -685,8 +685,8 @@
         })
       },
       applyDiscount() {
-        if (!this.discountAmount || this.discountAmount <= 0) {
-          this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng nhập số tiền giảm trừ > 0', color: 'warning' })
+        if ( this.discountAmount < 0) {
+          this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng nhập số tiền giảm trừ >= 0', color: 'warning' })
           return
         }
         if (!this.discountNote.trim()) {
