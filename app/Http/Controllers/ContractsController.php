@@ -440,7 +440,7 @@ class ContractsController extends Controller
     public static function exitDepost (Request $request){
         $contract_info = u::getObject(array('id'=>data_get($request, 'contract_id')), 'contracts');
         if (data_get($contract_info, 'branch_id') == 12 || data_get($contract_info, 'branch_id') ==28) {
-            $active_session = floor(data_get($contract_info, 'total_charged') * data_get($contract_info, 'total_session')/data_get($contract_info, 'must_charge'));
+            $active_session = floor(data_get($contract_info, 'total_charged') * data_get($contract_info, 'total_sessions')/data_get($contract_info, 'must_charge'));
         } else {
             $active_session = floor(data_get($contract_info, 'total_charged')/500000);
         }
