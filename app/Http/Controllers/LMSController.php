@@ -822,7 +822,7 @@ class LMSController extends Controller
         }
         $cond = "";
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
-                cl.lms_id AS lms_class_id, c.enrolment_last_date,
+                cl.lms_id AS lms_class_id, c.enrolment_last_date,cl.cls_startdate,
                 (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id = c.student_id 
@@ -853,7 +853,7 @@ class LMSController extends Controller
                             "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') && !$is_trans_semester ? "transfer" : "add",
                             "coun_cls_id" => data_get($studentInfo, 'lms_class_id'),
                             "coun_std_id" => (string)data_get($studentInfo, 'lms_id'),
-                            "coun_registration_date" => data_get($studentInfo, 'enrolment_start_date'),
+                            "coun_registration_date" => data_get($studentInfo, 'cls_startdate'),
                             "coun_from_cstd_id" => 0,
                             "coun_syl_id" => data_get($studentInfo, 'syl_id'),
                             "coun_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
