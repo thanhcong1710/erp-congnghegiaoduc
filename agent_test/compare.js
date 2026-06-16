@@ -6,24 +6,25 @@ dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ==========================================
-// ĐỊNH NGHĨA KỸ NĂNG (SKILL)
+// 1. ĐỊNH NGHĨA TOOL (CÔNG CỤ)
 // ==========================================
-function getStudentInfo(studentId) {
-    const erpDatabase = {
-        "SV001": { name: "Nguyễn Văn A", class: "10A1", status: "Đang học", tuition_paid: true },
-        "SV002": { name: "Trần Thị B", class: "11B2", status: "Bảo lưu", tuition_paid: false },
+// Tool là các hàm/chức năng (Function Calling) giúp LLM giao tiếp với hệ thống bên ngoài.
+function lookupStudentDB(studentId) {
+    const db = {
+        "SV001": { name: "Nguyễn Văn A", class: "10A1", tuition_status: "Chưa đóng", debt_amount: "5,000,000 VND" },
+        "SV002": { name: "Trần Thị B", class: "11B2", tuition_status: "Đã đóng", debt_amount: "0 VND" },
     };
-    return erpDatabase[studentId] || { error: "Không tìm thấy học sinh" };
+    return db[studentId] || { error: "Không tìm thấy học sinh" };
 }
 
-const getStudentInfoTool = {
+const dbLookupTool = {
     functionDeclarations: [{
-        name: "getStudentInfo",
-        description: "Truy xuất thông tin của học sinh từ hệ thống ERP dựa vào mã học sinh.",
+        name: "lookupStudentDB",
+        description: "Truy xuất thông tin học phí của học sinh từ cơ sở dữ liệu.",
         parameters: {
             type: SchemaType.OBJECT,
             properties: { 
-                studentId: { type: SchemaType.STRING, description: "Mã học sinh" } 
+                studentId: { type: SchemaType.STRING, description: "Mã học sinh (VD: SV001)" } 
             },
             required: ["studentId"],
         },
@@ -31,70 +32,112 @@ const getStudentInfoTool = {
 };
 
 // ==========================================
-// KHỞI TẠO 2 MODEL ĐỂ SO SÁNH
+// 2. ĐỊNH NGHĨA SKILL (KỸ NĂNG)
 // ==========================================
-// 1. Model "Chay" (Chỉ là LLM bình thường, không có khả năng tương tác với hệ thống)
-const modelWithoutSkill = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+// Skill là một năng lực cụ thể của Agent. Ở đây ta dùng System Instruction 
+// để trang bị Kỹ năng "Tư vấn và Chăm sóc khách hàng" chuyên nghiệp.
+const advisingSkillInstruction = "Bạn là một chuyên gia tư vấn học vụ xuất sắc của trường học. Kỹ năng của bạn là: giao tiếp lịch sự, khéo léo thông báo học phí, và luôn đề xuất giải pháp hỗ trợ phụ huynh. Luôn xưng 'em' và gọi khách hàng là 'Quý Phụ Huynh'.";
 
-// 2. Model "Agent" (Được trang bị thêm Skill)
+// ==========================================
+// KHỞI TẠO CÁC MODEL CHO 4 TRƯỜNG HỢP
+// ==========================================
+
+// 1. Thuần LLM
+const modelPureLLM = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+
+// 2. Chỉ dùng Tool (Có khả năng lấy dữ liệu, nhưng trả lời máy móc)
+const modelWithTool = genAI.getGenerativeModel({ 
+    model: "gemini-3.5-flash",
+    tools: [dbLookupTool]
+});
+
+// 3. Chỉ có Skill (Ăn nói khéo léo, nhưng không có công cụ lấy dữ liệu)
 const modelWithSkill = genAI.getGenerativeModel({ 
-    model: "gemini-flash-latest",
-    tools: [getStudentInfoTool] 
+    model: "gemini-3.5-flash",
+    systemInstruction: advisingSkillInstruction
+});
+
+// 4. Có Skill kết hợp Tool (Agent Hoàn Chỉnh)
+const modelAgent = genAI.getGenerativeModel({ 
+    model: "gemini-3.5-flash",
+    systemInstruction: advisingSkillInstruction,
+    tools: [dbLookupTool]
 });
 
 // ==========================================
-// CHẠY THỬ NGHIỆM SO SÁNH
+// HÀM HỖ TRỢ XỬ LÝ TOOL CALL
+// ==========================================
+async function handleChatWithTool(chat, prompt) {
+    const result = await chat.sendMessage(prompt);
+    const call = result.response.functionCalls();
+
+    if (call && call.length > 0) {
+        const functionCall = call[0];
+        console.log(`   [⚙️ Tool Call] LLM yêu cầu gọi hàm: ${functionCall.name}(${JSON.stringify(functionCall.args)})`);
+        
+        // Chạy hàm thực tế
+        const data = lookupStudentDB(functionCall.args.studentId);
+        console.log(`   [📦 Data] Kết quả từ Database:`, data);
+
+        // Gửi lại dữ liệu cho LLM
+        const finalResult = await chat.sendMessage([{
+            functionResponse: { name: functionCall.name, response: data }
+        }]);
+        return finalResult.response.text().trim();
+    } else {
+        return result.response.text().trim();
+    }
+}
+
+// ==========================================
+// CHẠY THỬ NGHIỆM
 // ==========================================
 async function runComparison() {
-    const prompt = "Kiểm tra giúp tôi học sinh mã SV001 đã đóng học phí chưa?";
+    const prompt = "Hãy kiểm tra xem học sinh SV001 đã đóng học phí chưa và phản hồi lại cho phụ huynh giúp tôi.";
+    
     console.log("===============================================================");
-    console.log(`👤 CÂU HỎI CỦA BẠN: "${prompt}"`);
+    console.log(`👤 YÊU CẦU CỦA BẠN: "${prompt}"`);
     console.log("===============================================================\n");
 
-    // ---------------------------------------------------------
-    // TRƯỜNG HỢP 1: KHÔNG DÙNG SKILL
-    // ---------------------------------------------------------
-    console.log("🔴 TRƯỜNG HỢP 1: CHATBOT BÌNH THƯỜNG (KHÔNG CÓ SKILL)");
-    console.log("   -> Model chỉ dựa vào kiến thức có sẵn từ lúc được huấn luyện...");
+    // --- CASE 1: THUẦN LLM ---
+    console.log("🔴 1. THUẦN LLM (Pure LLM)");
+    console.log("   -> Không có Tool (không biết SV001 là ai), Không có Skill tư vấn.");
     try {
-        const result1 = await modelWithoutSkill.generateContent(prompt);
-        console.log(`\n🤖 TRẢ LỜI: "${result1.response.text().trim()}"`);
-    } catch (e) {
-        console.log("Lỗi:", e.message);
-    }
-    console.log("\n---------------------------------------------------------------\n");
+        const result1 = await modelPureLLM.generateContent(prompt);
+        console.log(`\n🤖 TRẢ LỜI: "${result1.response.text().trim()}"\n`);
+    } catch (e) { console.log("Lỗi:", e.message); }
 
-    // ---------------------------------------------------------
-    // TRƯỜNG HỢP 2: CÓ DÙNG SKILL
-    // ---------------------------------------------------------
-    console.log("🟢 TRƯỜNG HỢP 2: AGENT THÔNG MINH (CÓ SKILL getStudentInfo)");
-    console.log("   -> Agent có thể tự động tìm kiếm và lấy dữ liệu thật từ ERP...");
+    // --- CASE 2: CHỈ CÓ TOOL ---
+    console.log("---------------------------------------------------------------");
+    console.log("🟡 2. CHỈ CÓ TOOL (Using Tool)");
+    console.log("   -> Biết cách gọi DB lấy dữ liệu thật, nhưng trả lời theo bản năng gốc.");
     try {
-        const chat = modelWithSkill.startChat();
-        const result2 = await chat.sendMessage(prompt);
-        const call = result2.response.functionCalls();
+        const chat2 = modelWithTool.startChat();
+        const response2 = await handleChatWithTool(chat2, prompt);
+        console.log(`\n🤖 TRẢ LỜI: "${response2}"\n`);
+    } catch (e) { console.log("Lỗi:", e.message); }
 
-        if (call && call.length > 0) {
-            const functionCall = call[0];
-            console.log(`\n   [🧠 Tư duy] Agent nhận ra cần dùng skill: ${functionCall.name} với tham số: ${JSON.stringify(functionCall.args)}`);
-            
-            // Code thực thi việc gọi vào Database/API
-            console.log(`   [⚙️ Hành động] Đang chạy code truy vấn Database...`);
-            const data = getStudentInfo(functionCall.args.studentId);
-            console.log(`   [📦 Kết quả] Lấy được dữ liệu:`, data);
+    // --- CASE 3: CHỈ CÓ SKILL ---
+    console.log("---------------------------------------------------------------");
+    console.log("🔵 3. CHỈ CÓ SKILL (Using Skill)");
+    console.log("   -> Có kỹ năng giao tiếp cực kỳ khéo léo, nhưng không có công cụ lấy data thực (buộc phải bịa hoặc từ chối).");
+    try {
+        const result3 = await modelWithSkill.generateContent(prompt);
+        console.log(`\n🤖 TRẢ LỜI: "${result3.response.text().trim()}"\n`);
+    } catch (e) { console.log("Lỗi:", e.message); }
 
-            // Gửi dữ liệu về lại cho Agent để nó dịch ra tiếng người
-            const finalResult = await chat.sendMessage([{
-                functionResponse: { name: functionCall.name, response: data }
-            }]);
-            console.log(`\n🤖 TRẢ LỜI: "${finalResult.response.text().trim()}"`);
-        } else {
-            console.log(`\n🤖 TRẢ LỜI: "${result2.response.text()}"`);
-        }
-    } catch (e) {
-         console.log("Lỗi:", e.message);
-    }
-    console.log("\n===============================================================\n");
+    // --- CASE 4: SKILL + TOOL ---
+    console.log("---------------------------------------------------------------");
+    console.log("🟢 4. SKILL + TOOL (Agent Hoàn chỉnh)");
+    console.log("   -> Vừa lấy được data chính xác (Tool), vừa phản hồi siêu khéo léo (Skill).");
+    try {
+        const chat4 = modelAgent.startChat();
+        const response4 = await handleChatWithTool(chat4, prompt);
+        console.log(`\n🤖 TRẢ LỜI: "${response4}"\n`);
+    } catch (e) { console.log("Lỗi:", e.message); }
+
+    console.log("===============================================================\n");
 }
 
 runComparison();
+
