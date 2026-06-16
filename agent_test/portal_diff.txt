@@ -1,0 +1,635 @@
+diff --git a/app/Http/Middleware/VerifyCsrfToken.php b/app/Http/Middleware/VerifyCsrfToken.php
+index 495502a8f..6f8ecc1bb 100644
+--- a/app/Http/Middleware/VerifyCsrfToken.php
++++ b/app/Http/Middleware/VerifyCsrfToken.php
+@@ -32,6 +32,7 @@ class VerifyCsrfToken extends Middleware
+         '*/new/*',
+         '*/ipn/*',
+         '*/pob/ipn*',
++        'pos/merchant/*',
+         '/refunds/create',
+         'card_token/*',
+         'wallet/napas/*',
+diff --git a/domain/Share/Enums/ErrorCode.php b/domain/Share/Enums/ErrorCode.php
+index 9aebbeab0..46565c4d6 100644
+--- a/domain/Share/Enums/ErrorCode.php
++++ b/domain/Share/Enums/ErrorCode.php
+@@ -118,4 +118,5 @@ class ErrorCode
+     public const MH_INVALID_REQUEST = '666';
+     public const NOT_FIND_VALID_ORDER = '615';
+     public const MH_INVALID_BANK_CODE = '1006';
++    public const DUPLICATE_REQUEST_ID = '611';
+ }
+diff --git a/domain/User/Enums/PaymentStatus.php b/domain/User/Enums/PaymentStatus.php
+index a29ad4199..6a218f81e 100644
+--- a/domain/User/Enums/PaymentStatus.php
++++ b/domain/User/Enums/PaymentStatus.php
+@@ -25,9 +25,50 @@ class PaymentStatus
+     public const TIME_OUT = 15;
+     public const RECEIVED_MONEY = 16;
+ 
+-    public const CORE_PROCESSING = 1;
++    public const WAITING_FOR_SETTLEMENT = 17;
++
++    public const CORE_UNKNOWN = -99;
++    public const CORE_REJECTED = -3;
++    public const CORE_CANCELLED = -2;
+     public const CORE_ERROR = -1;
++    public const CORE_FAILED = -1;
++    public const CORE_CREATED = 0;
++    public const CORE_PROCESSING = 1;
++    public const CORE_TRANSACTION_CREATED = 2;
++    public const CORE_UNDER_REVIEW = 3;
++    public const CORE_AUTHORIZATION_SUCCESS = 4;
+     public const CORE_COMPLETED = 5;
+-    public const CORE_CANCELLED = -2;
+     public const CORE_RECEIVED_MONEY = 6;
++    public const CORE_REVERSAL = 7;
++    public const CORE_WAITING_FOR_SETTLEMENT = 8;
++
++    /**
++     * Convert Core status → Merchant POS facing status.
++     */
++    public static function convertCoreToMerchantPos(int $coreStatus): int
++    {
++        switch ($coreStatus) {
++            case self::CORE_CREATED:
++            case self::CORE_TRANSACTION_CREATED:
++            case self::CORE_PROCESSING:
++                return self::PROCESSING;
++            case self::CORE_FAILED:
++            case self::CORE_REJECTED:
++                return self::FAILED;
++            case self::CORE_CANCELLED:
++                return self::CANCELLED;
++            case self::CORE_UNDER_REVIEW:
++                return self::UNDER_REVIEW;
++            case self::CORE_COMPLETED:
++                return self::COMPLETED;
++            case self::CORE_RECEIVED_MONEY:
++                return self::RECEIVED_MONEY;
++            case self::CORE_REVERSAL:
++                return self::REVERSED;
++            case self::CORE_WAITING_FOR_SETTLEMENT:
++                return self::WAITING_FOR_SETTLEMENT;
++            default:
++                return $coreStatus;
++        }
++    }
+ }
+diff --git a/domain/V2/Controllers/Api/TransactionController.php b/domain/V2/Controllers/Api/TransactionController.php
+index 40646bb58..44336a63e 100644
+--- a/domain/V2/Controllers/Api/TransactionController.php
++++ b/domain/V2/Controllers/Api/TransactionController.php
+@@ -149,12 +149,14 @@ class TransactionController extends Controller
+ 
+     private function getMerchantIdByPosTidMid($posTid, $posMid)
+     {
+-        return $this->cache_service->getPosMerchantCache($posTid, $posMid);
++        $deviceCache = $this->cache_service->getMerchantByTidMid($posTid, $posMid);
++        return data_get($deviceCache, 'merchant_id');
+     }
+ 
+     private function getMerchantIdByPosSerialNumber($posSerialNumber)
+     {
+-        return $this->cache_service->getPosMerchantBySerialNumberCache($posSerialNumber);
++        $deviceCache = $this->cache_service->getMerchantBySerialNumber($posSerialNumber);
++        return data_get($deviceCache, 'merchant_id');
+     }
+ 
+     private function getMerchantSoundboxById(int $merchant_id) {
+@@ -764,6 +766,7 @@ class TransactionController extends Controller
+                 'pos_tid'           => data_get($input, 'pos_tid'),
+                 'pos_mid'           => data_get($input, 'pos_mid'),
+                 'pos_serial_number' => data_get($input, 'pos_serial_number'),
++                'pcpos_txn_id'      => data_get($input, 'pcpos_txn_id'),
+             ]),
+         ]);
+     }
+@@ -829,11 +832,14 @@ class TransactionController extends Controller
+             }
+             $checkSoundbox = true;
+         }
++        $hasOrder = false;
++
+         Log::debug('TransactionController input create', ['input' => $this->maskCardInfo($input)]);
+         $client_ip = $request->getClientIp();
+         // Xử lý riêng cho MC POS
+         if ($isPosRequest) {
+             $posInfo = $extra['pos_info'];
++            $orderCode = $posInfo['pcpos_txn_id'] ?? null;
+             if (!empty($posInfo['pos_tid']) && !empty($posInfo['pos_mid'])) {
+                 $merchant_id = $this->getMerchantIdByPosTidMid($posInfo['pos_tid'], $posInfo['pos_mid']);
+             } elseif (!empty($posInfo['pos_serial_number'])) {
+@@ -842,19 +848,30 @@ class TransactionController extends Controller
+             if (empty($merchant_id)) {
+                 return response()->json(['status' => Status::ERROR, 'message' => 'Merchant not found']);
+             }
++
++            $hasOrder = !empty($orderCode);
+         }
+ 
+         $merchant = $this->getMerchantById($merchant_id);
+ 
+-        $data_create_order = $this->dto_service->dataCreateOrder($input, $client_ip, $merchant_id, $merchant);
++        if (!$hasOrder) {
++            $data_create_order = $this->dto_service->dataCreateOrder($input, $client_ip, $merchant_id, $merchant);
+ 
+-        $data_create_order['channel'] = Channel::PAYMENT_OFF_LINE;
++            $data_create_order['channel'] = Channel::PAYMENT_OFF_LINE;
+ 
+-        if ($isPosRequest) {
+-            $data_create_order['channel'] = Channel::POS;
+-        }
++            if ($isPosRequest) {
++                $data_create_order['channel'] = Channel::POS;
++            }
+ 
+-        $result = $this->transaction_service->merchantCreateOrder($data_create_order);
++            $result = $this->transaction_service->merchantCreateOrder($data_create_order);
++        } else {
++            $result = [
++                'status' => Status::SUCCESS,
++                'data' => [
++                    'order_code' => $orderCode ?? null,
++                ]
++            ];
++        }
+ 
+         $status = data_get($result, 'status');
+         if ($status === Status::SUCCESS) {
+@@ -973,6 +990,7 @@ class TransactionController extends Controller
+                 }
+             }else{
+                 $core_error_code = data_get($result_create_transaction, 'core_error_code') ? data_get($result_create_transaction, 'core_error_code') : data_get($result_create_transaction, 'error_code');
++                $errorMessage = '';
+                 if($core_error_code){
+                     $errorCodes = $this->getErrorCode();
+                     $errorMessage = isset($errorCodes[$core_error_code]) ? $errorCodes[$core_error_code]['content_'.app('session')->get('app_locale')] :'';
+diff --git a/domain/V2/Controllers/IpnController.php b/domain/V2/Controllers/IpnController.php
+index 8f069583a..018be6823 100644
+--- a/domain/V2/Controllers/IpnController.php
++++ b/domain/V2/Controllers/IpnController.php
+@@ -3,6 +3,7 @@
+ namespace Domain\V2\Controllers;
+ 
+ use App\Http\Controllers\Controller;
++use Domain\Share\Enums\ResponseStatus;
+ use Domain\V2\Services\Integration\IntegrationCoreService;
+ use Illuminate\Http\JsonResponse;
+ use Illuminate\Http\Request;
+@@ -78,12 +79,12 @@ class IpnController extends Controller
+     {
+         $input = $request->all();
+         $input['client_ip'] = $request->getClientIp();
+-        Log::debug('V2 POS IPN params', ['input' => $input, 'headers' => $request->headers->all()]);
++        Log::debug('[POS][IPN] Request', ['input' => $input, 'headers' => $request->headers->all()]);
+ 
+         $result = $this->integration_core_service->posIpn($provider, $input, $request->headers->all());
+ 
+         // Nếu có lỗi trong quá trình gọi API sang integrate thì trả về 500 để đối tác retry
+-        $httpCode = isset($result['status']) && $result['status'] === 'error' ? 500 : 200;
++        $httpCode = isset($result['status']) && $result['status'] === ResponseStatus::ERROR ? 500 : 200;
+ 
+         return response()->json($result, $httpCode);
+     }
+diff --git a/domain/V2/Controllers/PosController.php b/domain/V2/Controllers/PosController.php
+new file mode 100644
+index 000000000..0ab158518
+--- /dev/null
++++ b/domain/V2/Controllers/PosController.php
+@@ -0,0 +1,172 @@
++<?php
++
++namespace Domain\V2\Controllers;
++
++use App\Http\Controllers\Controller;
++use Domain\Share\Enums\ErrorCode;
++use Domain\Share\Enums\ResponseStatus;
++use Domain\User\Enums\PaymentStatus;
++use Domain\V2\Request\Pos\CancelPosTransactionRequest;
++use Domain\V2\Request\Pos\CreatePosTransactionRequest;
++use Domain\V2\Services\Integration\IntegrationCoreService;
++use GuzzleHttp\Exception\GuzzleException;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
++use Illuminate\Support\Facades\Cache;
++use Illuminate\Support\Facades\Log;
++use Illuminate\Support\Facades\Validator;
++
++/**
++ * Controller: PosController
++ * @package Domain\V2\Controllers
++ */
++class PosController extends Controller
++{
++
++    /**
++     * @var IntegrationCoreService
++     */
++    private $integration_core_service;
++
++    /**
++     * PosController constructor.
++     * @param IntegrationCoreService $integration_core_service
++     */
++    public function __construct(IntegrationCoreService $integration_core_service)
++    {
++        $this->integration_core_service = $integration_core_service;
++    }
++
++    /**
++     * @param Request $request
++     * @return JsonResponse
++     * @throws GuzzleException
++     */
++    public function merchantCreateTransaction(Request $request): JsonResponse
++    {
++        $input = $request->all();
++
++        Log::debug('[POS][CREATE] Request', ['input' => $input, 'headers' => $request->headers->all()]);
++
++        $requestId = data_get($input, 'request_id');
++
++        $validator = Validator::make($input, CreatePosTransactionRequest::rules(), CreatePosTransactionRequest::messages());
++        if ($validator->fails()) {
++            return response()->json($this->_buildErrorResponse(
++                ErrorCode::FIELDS_CONTAIN_INVALID_DATA,
++                $requestId,
++                $validator->errors()->first()
++            ));
++        }
++
++        if (!Cache::add('pos_create_req_' . $requestId, true, now()->addMinutes(5))) {
++            return response()->json($this->_buildErrorResponse(
++                ErrorCode::DUPLICATE_REQUEST_ID,
++                $requestId,
++                'Duplicate request_id'
++            ));
++        }
++
++        $result = $this->integration_core_service->posMerchantCreateTransaction($input);
++
++        return response()->json($this->_transformResponse($result, $requestId));
++    }
++
++    /**
++     * @param Request $request
++     * @return JsonResponse
++     */
++    public function merchantCancelTransaction(Request $request): JsonResponse
++    {
++        $input = $request->all();
++
++        Log::debug('[POS][CANCEL] Request', ['input' => $input, 'headers' => $request->headers->all()]);
++
++        $requestId = data_get($input, 'request_id');
++
++        $validator = Validator::make($input, CancelPosTransactionRequest::rules(), CancelPosTransactionRequest::messages());
++        if ($validator->fails()) {
++            return response()->json($this->_buildErrorResponse(
++                ErrorCode::FIELDS_CONTAIN_INVALID_DATA,
++                $requestId,
++                $validator->errors()->first()
++            ));
++        }
++
++        if (!Cache::add('pos_cancel_req_' . $requestId, true, now()->addMinutes(5))) {
++            return response()->json($this->_buildErrorResponse(
++                ErrorCode::DUPLICATE_REQUEST_ID,
++                $requestId,
++                'Duplicate request_id'
++            ));
++        }
++
++        $result = $this->integration_core_service->posMerchantCancelTransaction($input);
++
++        return response()->json($this->_transformResponse($result, $requestId));
++    }
++
++    /**
++     * Transform gate-integrate internal response {status, error_code, data} to merchant-facing format.
++     */
++    private function _transformResponse(?array $result, ?string $invoiceNo): array
++    {
++        $errorCode = data_get($result, 'error_code', ErrorCode::SYSTEM_ERROR_PAYGATE);
++
++        if (data_get($result, 'status') === ResponseStatus::SUCCESS && $errorCode === ErrorCode::APPROVED) {
++            $coreStatus = (int) data_get($result, 'data.core_status');
++            $merchantStatus = PaymentStatus::convertCoreToMerchantPos($coreStatus);
++
++            return [
++                'invoice_no' => $invoiceNo,
++                'payment_no' => data_get($result, 'data.payment_no'),
++                'status'     => $merchantStatus,
++                'error_code' => $errorCode,
++            ];
++        }
++
++        return $this->_buildErrorResponse(
++            $errorCode,
++            $invoiceNo,
++            data_get($result, 'message')
++        );
++    }
++
++    /**
++     * @throws GuzzleException
++     */
++    private function _buildErrorResponse(string $errorCode, ?string $invoiceNo, ?string $failureReason = null): array
++    {
++        if (empty($failureReason)) {
++            $errorCodes = $this->_getErrorCodes();
++            $failureReason = data_get($errorCodes, "$errorCode.content_en", 'Internal Server Error');
++        }
++
++        return [
++            'invoice_no'     => $invoiceNo,
++            'error_code'     => $errorCode,
++            'failure_reason' => $failureReason,
++        ];
++    }
++
++    /**
++     * @return array|mixed
++     * @throws GuzzleException
++     */
++    private function _getErrorCodes()
++    {
++        $this->_switchCache('');
++        $result = Cache::get('PAYGATE:error_codes');
++        if ($result) {
++            return $result;
++        }
++
++        return $this->integration_core_service->getErrorCode();
++    }
++
++    private function _switchCache(string $cacheKey): void
++    {
++        config()->set('cache.prefix', $cacheKey);
++        app('cache')->forgetDriver(config('cache.default'));
++    }
++}
+diff --git a/domain/V2/Enums/CachePathName.php b/domain/V2/Enums/CachePathName.php
+index e656d8921..2d5b863f1 100644
+--- a/domain/V2/Enums/CachePathName.php
++++ b/domain/V2/Enums/CachePathName.php
+@@ -10,8 +10,6 @@ class CachePathName
+     public const BANKS = 'get-banks';
+     public const MERCHANTS = 'get-merchant';
+     public const MERCHANT_BY_ID = 'get-merchant-by-id';
+-    public const MERCHANT_POS_BY_TID_MID = 'get-merchant-pos-by-tid-mid';
+-    public const MERCHANT_POS_BY_SERIAL_NUMBER = 'get-merchant-pos-by-serial-number';
+     public const MERCHANT_BY_CLIENT_ID = 'get-merchant-by-client-id';
+     public const MERCHANT_CAREER = 'get-merchant-career';
+     public const ALLOW_MERCHANTS = 'get-allow-merchant';
+diff --git a/domain/V2/Enums/PosTransactionType.php b/domain/V2/Enums/PosTransactionType.php
+new file mode 100644
+index 000000000..9d7df89b9
+--- /dev/null
++++ b/domain/V2/Enums/PosTransactionType.php
+@@ -0,0 +1,14 @@
++<?php
++
++namespace Domain\V2\Enums;
++
++class PosTransactionType
++{
++    const CARD = 'CARD';
++    const QR = 'QR';
++
++    const VALID_TYPES = [
++        self::CARD,
++        self::QR,
++    ];
++}
+diff --git a/domain/V2/Request/Pos/CancelPosTransactionRequest.php b/domain/V2/Request/Pos/CancelPosTransactionRequest.php
+new file mode 100644
+index 000000000..47caa2f9e
+--- /dev/null
++++ b/domain/V2/Request/Pos/CancelPosTransactionRequest.php
+@@ -0,0 +1,25 @@
++<?php
++
++namespace Domain\V2\Request\Pos;
++
++class CancelPosTransactionRequest
++{
++    public static function rules(): array
++    {
++        return [
++            'request_id'  => 'required|string|max:30|regex:/^[a-zA-Z0-9]+$/',
++            'payment_no'  => 'required|string|max:255',
++            'description' => 'nullable|string|max:255',
++        ];
++    }
++
++    public static function messages(): array
++    {
++        return [
++            'request_id.required' => 'Request ID is required',
++            'request_id.max'      => 'Request ID must not exceed 30 characters',
++            'request_id.regex'    => 'Request ID must contain only alphanumeric characters',
++            'payment_no.required' => 'Payment number is required',
++        ];
++    }
++}
+diff --git a/domain/V2/Request/Pos/CreatePosTransactionRequest.php b/domain/V2/Request/Pos/CreatePosTransactionRequest.php
+new file mode 100644
+index 000000000..64f185d2f
+--- /dev/null
++++ b/domain/V2/Request/Pos/CreatePosTransactionRequest.php
+@@ -0,0 +1,47 @@
++<?php
++
++namespace Domain\V2\Request\Pos;
++
++use Domain\V2\Enums\PosTransactionType;
++
++class CreatePosTransactionRequest
++{
++
++    public static function rules(): array
++    {
++        return [
++            'request_id'    => 'required|string|max:30|regex:/^[a-zA-Z0-9]+$/',
++            'currency'      => 'required|string|in:VND',
++            'amount'        => [
++                'required',
++                'integer',
++                'min:1',
++                function ($attribute, $value, $fail) {
++                    if (!is_int($value)) {
++                        $fail('Amount must be strictly an integer type');
++                    }
++                },
++            ],
++            'method'        => 'required|string|in:' . implode(',', PosTransactionType::VALID_TYPES),
++            'description'   => 'nullable|string|max:255',
++            'serial_number' => 'required|string|max:255',
++        ];
++    }
++
++    public static function messages(): array
++    {
++        return [
++            'request_id.required'    => 'Request ID is required',
++            'request_id.max'         => 'Request ID must not exceed 30 characters',
++            'request_id.regex'       => 'Request ID must contain only alphanumeric characters',
++            'currency.required'      => 'Currency is required',
++            'currency.in'            => 'Currency must be VND',
++            'amount.required'        => 'Amount is required',
++            'amount.integer'         => 'Amount must be a number',
++            'amount.min'             => 'Amount must be greater than 0',
++            'method.required'        => 'Payment method is required',
++            'method.in'              => 'Payment method must be one of: ' . implode(', ', PosTransactionType::VALID_TYPES),
++            'serial_number.required' => 'Serial number is required',
++        ];
++    }
++}
+diff --git a/domain/V2/Services/Common/CacheService.php b/domain/V2/Services/Common/CacheService.php
+index a9dcce2e7..11c8b2da4 100644
+--- a/domain/V2/Services/Common/CacheService.php
++++ b/domain/V2/Services/Common/CacheService.php
+@@ -31,32 +31,6 @@ class CacheService
+         return $this->integration_core_service->getMerchantById($merchant_id);
+     }
+ 
+-    public function getPosMerchantCache($posTid, $posMid)
+-    {
+-        $this->switchCache('');
+-        $key = "PAYGATE:MERCHANT_DEVICE:{$posTid}:{$posMid}";
+-        $cache = Cache::get($key);
+-
+-        if (!empty($cache)) {
+-            return $cache;
+-        }
+-
+-        return $this->integration_core_service->getPosMerchantByTidMid($posTid, $posMid);
+-    }
+-
+-    public function getPosMerchantBySerialNumberCache($posSerialNumber)
+-    {
+-        $this->switchCache('');
+-        $key = "PAYGATE:MERCHANT_DEVICE_SERIAL:{$posSerialNumber}";
+-        $cache = Cache::get($key);
+-
+-        if (!empty($cache)) {
+-            return $cache;
+-        }
+-
+-        return $this->integration_core_service->getPosMerchantBySerialNumber($posSerialNumber);
+-    }
+-
+     public function getMerchantSoundboxCache(int $merchant_id)
+     {
+         $this->switchCache('');
+diff --git a/domain/V2/Services/Common/ValidateService.php b/domain/V2/Services/Common/ValidateService.php
+index c4b454a3f..fbd4e67a5 100644
+--- a/domain/V2/Services/Common/ValidateService.php
++++ b/domain/V2/Services/Common/ValidateService.php
+@@ -2378,6 +2378,11 @@ class ValidateService
+                 'string',
+                 'max:50',
+             ],
++            'pcpos_txn_id' => [
++                'nullable',
++                'string',
++                'max:100',
++            ],
+         ], [
+             'pos_tid.required_without'               => trans('v2_common.merchant_hosted.validate.pos_tid_required_without'),
+             'pos_tid.string'                         => trans('v2_common.merchant_hosted.validate.pos_tid_string'),
+diff --git a/domain/V2/Services/Integration/IntegrationCoreService.php b/domain/V2/Services/Integration/IntegrationCoreService.php
+index 281eed1d1..3b6e8d75a 100644
+--- a/domain/V2/Services/Integration/IntegrationCoreService.php
++++ b/domain/V2/Services/Integration/IntegrationCoreService.php
+@@ -688,18 +688,6 @@ class IntegrationCoreService
+         return $this->getCacheFromConnector($route_name);
+     }
+ 
+-    public function getPosMerchantByTidMid($posTid, $posMid)
+-    {
+-        $route_name = CachePathName::MERCHANT_POS_BY_TID_MID . '/' . $posTid . '/' . $posMid;
+-        return $this->getCacheFromConnector($route_name);
+-    }
+-
+-    public function getPosMerchantBySerialNumber($posSerialNumber)
+-    {
+-        $route_name = CachePathName::MERCHANT_POS_BY_SERIAL_NUMBER . '/' . $posSerialNumber;
+-        return $this->getCacheFromConnector($route_name);
+-    }
+-
+     /**
+      * @return array|mixed
+      * @throws GuzzleException
+@@ -1665,6 +1653,46 @@ class IntegrationCoreService
+         }
+     }
+ 
++    public function posMerchantCreateTransaction(array $params)
++    {
++        $url = sprintf('%s/v2/pos/merchant/create-transaction', env('INTEGRATION_CORE'));
++        try {
++            $response = $this->client->request('POST', $url, [
++                'verify' => false,
++                'form_params' => $params,
++            ]);
++
++            return json_decode($response->getBody()->getContents(), true);
++
++        } catch (RequestException $exception) {
++            Log::warning('IntegrationCoreService posMerchantCreateTransaction RequestException', ['message' => $exception->getMessage(), 'params' => $params, 'url' => $url]);
++            return ['status' => 'error', 'message' => 'Lỗi xảy ra.'];
++        } catch (GuzzleException $e) {
++            Log::warning('IntegrationCoreService posMerchantCreateTransaction GuzzleException', ['message' => $e->getMessage(), 'params' => $params, 'url' => $url]);
++            return ['status' => 'error', 'message' => 'Lỗi xảy ra.'];
++        }
++    }
++
++    public function posMerchantCancelTransaction(array $params)
++    {
++        $url = sprintf('%s/v2/pos/merchant/cancel-transaction', env('INTEGRATION_CORE'));
++        try {
++            $response = $this->client->request('POST', $url, [
++                'verify' => false,
++                'form_params' => $params,
++            ]);
++
++            return json_decode($response->getBody()->getContents(), true);
++
++        } catch (RequestException $exception) {
++            Log::warning('IntegrationCoreService posMerchantCancelTransaction RequestException', ['message' => $exception->getMessage(), 'params' => $params, 'url' => $url]);
++            return ['status' => 'error', 'message' => 'Lỗi xảy ra.'];
++        } catch (GuzzleException $e) {
++            Log::warning('IntegrationCoreService posMerchantCancelTransaction GuzzleException', ['message' => $e->getMessage(), 'params' => $params, 'url' => $url]);
++            return ['status' => 'error', 'message' => 'Lỗi xảy ra.'];
++        }
++    }
++
+     public function decryptorApplePay( array $params)
+     {
+         $url = '';
+diff --git a/routes/user_v2.php b/routes/user_v2.php
+index 8a22a76c5..d32d5fee2 100644
+--- a/routes/user_v2.php
++++ b/routes/user_v2.php
+@@ -4,7 +4,16 @@
+ Route::post('/ipn/{provider}', [\Domain\V2\Controllers\IpnController::class, 'ipn']);
+ Route::post('/ipn/refund/{provider}', [\Domain\V2\Controllers\IpnController::class, 'ipnRefund']);
+ Route::post('/pob/ipn', [\Domain\V2\Controllers\IpnController::class, 'pobIpn9s']);
+-Route::post('/pos/ipn/{provider}', [\Domain\V2\Controllers\IpnController::class, 'posIpn']);
++Route::group(['prefix' => 'pos'], function () {
++    // ipn
++    Route::post('/ipn/{provider}', [\Domain\V2\Controllers\IpnController::class, 'posIpn']);
++
++    // merchant
++    Route::group(['prefix' => 'merchant', 'middleware' => ['auth.api.v2.portal', 'locale.v2']], function () {
++        Route::post('/create-transaction', [\Domain\V2\Controllers\PosController::class, 'merchantCreateTransaction']);
++        Route::post('/cancel-transaction', [\Domain\V2\Controllers\PosController::class, 'merchantCancelTransaction']);
++    });
++});
+ // redirect when map invoice with merchant alive
+ Route::get('/invoice/v1/{invoice_no}', [\Domain\V2\Controllers\RedirectController::class, 'redirectInvoice']);
+ Route::post('/hash-info', [\Domain\V2\Controllers\PaymentMethodController::class, 'updatePaymentInfo'])->name('update-payment-info')->middleware(['auth.v2.portal', 'locale.v2']);
