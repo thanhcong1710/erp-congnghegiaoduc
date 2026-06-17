@@ -7,17 +7,20 @@ use App\Models\AiMessage;
 use App\Models\AiUserPermission;
 use App\Models\AiTokenUsage;
 use App\Models\AiGeneratedReport;
+use App\Services\AI\Skills\BaseSkill;
 use Illuminate\Support\Facades\Log;
 
 class AiAgentService
 {
     protected $gemini;
     protected $executor;
+    protected $skillRouter;
 
     public function __construct()
     {
         $this->gemini = new GeminiService();
         $this->executor = new FunctionExecutor();
+        $this->skillRouter = new SkillRouter();
     }
 
     /**
@@ -52,25 +55,36 @@ class AiAgentService
             // 4. Lưu tin nhắn user
             $this->saveMessage($conversation->id, 'user', $message);
 
-            // 5. Chuẩn bị context (lịch sử chat + system prompt)
-            $messages = $this->prepareMessages($conversation);
+            // 5. Phát hiện Skill phù hợp từ nội dung tin nhắn
+            $skill = $this->skillRouter->detect($message);
+            if ($skill) {
+                Log::info('AI Skill detected: ' . $skill->getName());
+            }
 
-            // 6. Chuẩn bị tools (functions)
-            $tools = $this->prepareTools($permission);
+            // 6. Chuẩn bị context (lịch sử chat + system prompt + skill instruction)
+            $messages = $this->prepareMessages($conversation, $skill);
 
-            // 7. Gọi AI
+            // 7. Chuẩn bị tools (functions, lọc theo skill nếu có)
+            $tools = $this->prepareTools($permission, $skill);
+
+            // 8. Gọi AI
             $response = $this->gemini->chat($messages, $tools);
 
-            // 8. Xử lý response
+            // 9. Xử lý response
             $result = $this->handleResponse($response, $conversation, $permission);
 
-            // 9. Ghi nhận token usage
+            // 10. Ghi nhận token usage
             $this->recordTokenUsage(
                 $userId,
                 $conversation->id,
                 $response['usage']['input_tokens'],
                 $response['usage']['output_tokens']
             );
+
+            // Đính kèm tên skill vào result để frontend có thể hiển thị
+            if ($skill && isset($result['success']) && $result['success']) {
+                $result['skill_used'] = $skill->getName();
+            }
 
             return $result;
 
@@ -116,16 +130,23 @@ class AiAgentService
     }
 
     /**
-     * Chuẩn bị messages (system prompt + lịch sử)
+     * Chuẩn bị messages (system prompt + skill instruction + lịch sử)
      */
-    protected function prepareMessages($conversation)
+    protected function prepareMessages($conversation, ?BaseSkill $skill = null)
     {
         $messages = [];
 
-        // System prompt
+        // System prompt gốc
+        $systemContent = config('ai.system_prompt');
+
+        // Nếu có Skill → APPEND skill instruction vào system prompt
+        if ($skill) {
+            $systemContent .= "\n\n" . $skill->getInstruction();
+        }
+
         $messages[] = [
             'role' => 'system',
-            'content' => config('ai.system_prompt'),
+            'content' => $systemContent,
         ];
 
         // Lịch sử chat (10 tin nhắn gần nhất)
@@ -136,24 +157,29 @@ class AiAgentService
     }
 
     /**
-     * Chuẩn bị tools (functions)
+     * Chuẩn bị tools (functions, lọc theo permission + skill)
      */
-    protected function prepareTools($permission)
+    protected function prepareTools($permission, ?BaseSkill $skill = null)
     {
         $allFunctions = config('ai.functions');
         $allowedFunctions = $permission->allowed_functions;
 
-        // Nếu allowed_functions null = cho phép tất cả
-        if (empty($allowedFunctions)) {
-            return GeminiService::formatFunctions($allFunctions);
+        // Bước 1: Lọc theo quyền của user
+        if (!empty($allowedFunctions)) {
+            $allFunctions = array_filter($allFunctions, function ($key) use ($allowedFunctions) {
+                return in_array($key, $allowedFunctions);
+            }, ARRAY_FILTER_USE_KEY);
         }
 
-        // Lọc chỉ lấy functions được phép
-        $filtered = array_filter($allFunctions, function ($key) use ($allowedFunctions) {
-            return in_array($key, $allowedFunctions);
-        }, ARRAY_FILTER_USE_KEY);
+        // Bước 2: Lọc thêm theo Skill (nếu Skill chỉ định tools cụ thể)
+        if ($skill && !empty($skill->getAllowedTools())) {
+            $skillTools = $skill->getAllowedTools();
+            $allFunctions = array_filter($allFunctions, function ($key) use ($skillTools) {
+                return in_array($key, $skillTools);
+            }, ARRAY_FILTER_USE_KEY);
+        }
 
-        return GeminiService::formatFunctions($filtered);
+        return GeminiService::formatFunctions($allFunctions);
     }
 
     /**
