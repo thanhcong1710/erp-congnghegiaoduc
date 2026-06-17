@@ -45,16 +45,18 @@ class TestCallLms extends Command
      */
     public function handle(Request $request)
     {
-        $list = u::query("SELECT * FROM students WHERE id >1801 AND id < 1809");
-        foreach ($list as $row) {
-            $lms = new LMSController();
-            // $lms->addOrUpdateStudent(data_get($row, 'id'));
-            $lms->addStudentToClass(data_get($row, 'id'));
-            echo data_get($row, 'id') . "/";
-        }
+        // $list = u::query("SELECT * FROM students WHERE id >1801 AND id < 1809");
+        // foreach ($list as $row) {
+        //     $lms = new LMSController();
+        //     // $lms->addOrUpdateStudent(data_get($row, 'id'));
+        //     $lms->addStudentToClass(data_get($row, 'id'));
+        //     echo data_get($row, 'id') . "/";
+        // }
         // $lms->studentWithdrawContract(2091);
         // $lms->studentWithdrawContract(2040);
-
+        $lms = new LMSController();
+        // $lms->addOrUpdateStudent(1997);
+        $lms->addStudentToClass(1997);
         return "ok";
     }
 }
