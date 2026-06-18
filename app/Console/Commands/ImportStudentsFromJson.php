@@ -219,7 +219,12 @@ class ImportStudentsFromJson extends Command
         $address   = trim($row['address']    ?? '');
         $classCode = strtoupper(trim($row['class_code'] ?? ''));
         $startDate = $row['start_date'] ?? null;
-        $price     = (int) ($row['price']    ?? 0) * 1000;
+        $rawPrice  = (int) ($row['price'] ?? 0);
+        // Sanity check: prevent integer overflow if Excel has junk data (e.g. 6962400000000001)
+        if ($rawPrice > 1000000) {
+            $rawPrice = 0;
+        }
+        $price     = $rawPrice * 1000;
         $rawStatus = $row['raw_status']      ?? '4';
         $excelRow  = $row['excel_row']       ?? 0;
         $course    = $row['course']          ?? '';
@@ -291,7 +296,7 @@ class ImportStudentsFromJson extends Command
                     'cls_name'      => $classCode,
                     'cls_startdate' => $startDate,
                     'product_id'    => $this->getProductIdFromClassCode($classCode),
-                    'branch_id'     => 4,
+                    'branch_id'     => 9,
                     'status'        => 1,
                     'created_at'    => now()->toDateTimeString(),
                     'updated_at'    => now()->toDateTimeString(),
@@ -392,39 +397,78 @@ class ImportStudentsFromJson extends Command
     private function flush(): void
     {
         DB::transaction(function () {
-            // 1. Students – insert rồi sinh lms_code = prefix + id pad 6 chữ số
-            $studTempMap   = [];
-            $lmsPrefix     = config('app.prefix_student_code', 'LAPO');
+            // 1. Students – batch insert
+            $studBatch   = [];
+            $phones      = [];
             foreach ($this->newStudents as $s) {
-                $tempId = $s['__temp_id'];
-                unset($s['__temp_id']);
-                $realId  = DB::table('students')->insertGetId($s);
-                $lmsCode = $lmsPrefix . str_pad((string) $realId, 6, '0', STR_PAD_LEFT);
-                DB::table('students')->where('id', $realId)->update(['lms_code' => $lmsCode]);
-                $studTempMap[$tempId] = $realId;
+                unset($s['__temp_id'], $s['lms_code']);
+                $studBatch[] = $s;
+                $phones[]    = $s['gud_mobile1'];
+            }
+            
+            $studTempMap = [];
+            if ($studBatch) {
+                foreach (array_chunk($studBatch, 500) as $chunk) {
+                    DB::table('students')->insert($chunk);
+                }
+                
+                $realStudents = DB::table('students')->whereIn('gud_mobile1', $phones)->pluck('id', 'gud_mobile1');
+                
+                foreach ($this->newStudents as $s) {
+                    $phone = $s['gud_mobile1'];
+                    if (isset($realStudents[$phone])) {
+                        $studTempMap[$s['__temp_id']] = $realStudents[$phone];
+                    }
+                }
+                
+                $ids = $realStudents->values()->toArray();
+                if ($ids) {
+                    foreach (array_chunk($ids, 1000) as $idChunk) {
+                        $idStr = implode(',', $idChunk);
+                        $lmsPrefix = config('app.prefix_student_code', 'LAPO');
+                        DB::update("UPDATE students SET lms_code = CONCAT(?, LPAD(id, 6, '0')) WHERE id IN ($idStr)", [$lmsPrefix]);
+                    }
+                }
             }
             $this->info(sprintf('   ✔ Students inserted: %d (lms_code generated)', count($this->newStudents)));
 
             // 1b. CRM Parents
-            $insertedCrmParents = 0;
+            $crmBatch = [];
             foreach ($this->newCrmParents as $cp) {
                 $studentId = $studTempMap[$cp['__student_key']] ?? $cp['__student_key'];
                 unset($cp['__student_key']);
                 if ($studentId && is_numeric($studentId)) {
                     $cp['student_id'] = $studentId;
-                    DB::table('crm_parents')->insert($cp);
-                    $insertedCrmParents++;
+                    $crmBatch[] = $cp;
                 }
             }
-            $this->info(sprintf('   ✔ CRM Parents inserted: %d', $insertedCrmParents));
+            if ($crmBatch) {
+                foreach (array_chunk($crmBatch, 500) as $chunk) {
+                    DB::table('crm_parents')->insert($chunk);
+                }
+            }
+            $this->info(sprintf('   ✔ CRM Parents inserted: %d', count($crmBatch)));
 
             // 2. Classes
-            $clsTempMap = [];
+            $clsBatch = [];
+            $clsCodes = [];
             foreach ($this->newClasses as $c) {
-                $tempId = $c['__temp_id'];
                 unset($c['__temp_id']);
-                $realId = DB::table('classes')->insertGetId($c);
-                $clsTempMap[$tempId] = $realId;
+                $clsBatch[] = $c;
+                $clsCodes[] = $c['code'];
+            }
+            $clsTempMap = [];
+            if ($clsBatch) {
+                foreach (array_chunk($clsBatch, 500) as $chunk) {
+                    DB::table('classes')->insert($chunk);
+                }
+                $realClasses = DB::table('classes')->whereIn('code', $clsCodes)->pluck('id', 'code');
+                foreach ($this->newClasses as $c) {
+                    $code = $c['code'];
+                    if (isset($realClasses[$code])) {
+                        $clsTempMap[$c['__temp_id']] = $realClasses[$code];
+                    }
+                }
             }
             $this->info(sprintf('   ✔ Classes inserted: %d', count($this->newClasses)));
 
@@ -439,27 +483,47 @@ class ImportStudentsFromJson extends Command
             $resCls   = fn($k) => str_starts_with((string)$k, 'new_c_') ? ($clsTempMap[$k]   ?? null) : $k;
 
             // 3. Agreements
-            $agreTempMap = [];
+            $agreBatch = [];
+            $agreStuIds = [];
             foreach ($this->newAgreements as $a) {
-                $tempId    = $a['__temp_id'];
                 $studentId = $studTempMap[$a['__student_key']] ?? $a['__student_key'];
-
                 unset($a['__temp_id'], $a['__student_key']);
-                $a['student_id'] = $studentId;
-
-                $realId = DB::table('agreements')->insertGetId($a);
-                $code   = str_pad((string)$realId, 6, '0', STR_PAD_LEFT);
-                DB::table('agreements')->where('id', $realId)->update(['code' => $code]);
-
-                $agreTempMap[$tempId]               = $realId;
-                $this->agreementsByStud[$studentId] = $realId;
+                if ($studentId && is_numeric($studentId)) {
+                    $a['student_id'] = $studentId;
+                    $agreBatch[] = $a;
+                    $agreStuIds[] = $studentId;
+                }
             }
-            $this->info(sprintf('   ✔ Agreements inserted: %d (code generated)', count($this->newAgreements)));
+            $agreTempMap = [];
+            if ($agreBatch) {
+                foreach (array_chunk($agreBatch, 500) as $chunk) {
+                    DB::table('agreements')->insert($chunk);
+                }
+                
+                $realAgreements = DB::table('agreements')->whereIn('student_id', $agreStuIds)->pluck('id', 'student_id');
+                foreach ($this->newAgreements as $a) {
+                    $studentId = $studTempMap[$a['__student_key']] ?? $a['__student_key'];
+                    if (isset($realAgreements[$studentId])) {
+                        $agreTempMap[$a['__temp_id']] = $realAgreements[$studentId];
+                        $this->agreementsByStud[$studentId] = $realAgreements[$studentId];
+                    }
+                }
+                
+                $ids = $realAgreements->values()->toArray();
+                if ($ids) {
+                    foreach (array_chunk($ids, 1000) as $idChunk) {
+                        $idStr = implode(',', $idChunk);
+                        DB::update("UPDATE agreements SET code = LPAD(id, 6, '0') WHERE id IN ($idStr)");
+                    }
+                }
+            }
+            $this->info(sprintf('   ✔ Agreements inserted: %d (code generated)', count($agreBatch)));
 
             $resAgre  = fn($k) => str_starts_with((string)$k, 'new_a_') ? ($agreTempMap[$k]  ?? null) : $k;
 
-            // 4. Contracts  (1 per Excel row – each has its own dedup_key stored in note)
-            $inserted = 0;
+            // 4. Contracts
+            $contBatch = [];
+            $contStuIds = [];
             foreach ($this->newContracts as $ct) {
                 $agreementId = $resAgre($ct['__agreement_key']);
                 $studentId   = $resStud($ct['__student_key']);
@@ -479,17 +543,28 @@ class ImportStudentsFromJson extends Command
                 $ct['agreement_id'] = $agreementId;
                 $ct['student_id']   = $studentId;
                 $ct['class_id']     = $classId;
-                // Store dedup key + excel row + extra note
+                
                 $prefix = $dedupKey ? "import_key:{$dedupKey} excel_row:{$excelRow}" : "excel_row:{$excelRow}";
                 $ct['note'] = $prefix . " | " . $extraNote;
 
-                $realId = DB::table('contracts')->insertGetId($ct);
-                $code   = 'C' . str_pad((string)$realId, 6, '0', STR_PAD_LEFT);
-                DB::table('contracts')->where('id', $realId)->update(['code' => $code]);
-
-                $inserted++;
+                $contBatch[] = $ct;
+                $contStuIds[] = $studentId;
             }
-            $this->info(sprintf('   ✔ Contracts inserted: %d (code generated)', $inserted));
+            
+            if ($contBatch) {
+                foreach (array_chunk($contBatch, 500) as $chunk) {
+                    DB::table('contracts')->insert($chunk);
+                }
+                
+                $contStuIds = array_unique($contStuIds);
+                if ($contStuIds) {
+                    foreach (array_chunk($contStuIds, 500) as $stuChunk) {
+                        $stuIdsStr = implode(',', $stuChunk);
+                        DB::update("UPDATE contracts SET code = CONCAT('C', LPAD(id, 6, '0')) WHERE code IS NULL AND student_id IN ($stuIdsStr)");
+                    }
+                }
+            }
+            $this->info(sprintf('   ✔ Contracts inserted: %d (code generated)', count($contBatch)));
 
             // 5. Contract updates (status 4→7 etc.)
             foreach ($this->updContracts as $u) {
