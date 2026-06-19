@@ -150,19 +150,16 @@ class ImportStudentsFromJson extends Command
                 }
             });
 
-        // Classes: code → {id, cls_startdate}
-        DB::table('classes')
-            ->whereNotNull('code')
-            ->select('id', 'code', 'cls_startdate')
-            ->orderBy('id')
-            ->chunk(2000, function ($rows) {
-                foreach ($rows as $r) {
-                    $this->classesByCode[strtoupper($r->code)] = [
-                        'id'            => $r->id,
-                        'cls_startdate' => $r->cls_startdate,
-                    ];
-                }
-            });
+        // Classes: code → {id, cls_startdate, cls_enddate}
+        DB::table('classes')->select('id', 'code', 'cls_startdate', 'cls_enddate')->get()->each(function ($c) {
+            if ($c->code) {
+                $this->classesByCode[strtoupper($c->code)] = [
+                    'id'            => $c->id,
+                    'cls_startdate' => $c->cls_startdate,
+                    'cls_enddate'   => $c->cls_enddate,
+                ];
+            }
+        });
 
         // Agreements: student_id → agreement_id (first/lowest per student)
         DB::table('agreements')
@@ -255,9 +252,9 @@ class ImportStudentsFromJson extends Command
                 '__temp_id'   => $tempId,
                 'lms_code'    => '',           // sẽ được cập nhật sau khi insert
                 'name'        => mb_substr($name, 0, 50),
-                'firstname'   => $nameParts['firstname'],
-                'midname'     => $nameParts['midname'],
-                'lastname'    => $nameParts['lastname'],
+                'firstname'   => mb_substr($nameParts['firstname'], 0, 255),
+                'midname'     => mb_substr($nameParts['midname'], 0, 255),
+                'lastname'    => mb_substr($nameParts['lastname'], 0, 255),
                 'gud_mobile1' => $phone,
                 'gud_name1'   => mb_substr($name, 0, 50),
                 'gud_email1'  => mb_substr($email, 0, 100),
@@ -342,21 +339,34 @@ class ImportStudentsFromJson extends Command
 
         $totalSes = $realSes = $sumSes = $doneSes = 0;
 
-        if ($rawStatus === '3') {
-            $finalStatus    = 3;
-            $finalStartDate = null;
-            $finalClassId   = null;
-        } elseif ($startDate) {
-            $finalStatus    = 7;
+        $clsEnddate = null;
+        if ($classCode && isset($this->classesByCode[$classCode])) {
+            $clsEnddate = $this->classesByCode[$classCode]['cls_enddate'] ?? null;
+        }
+
+        $nowDate = date('Y-m-d');
+        if ($clsEnddate && $clsEnddate > $nowDate) {
+            $finalStatus    = 6;
             $finalStartDate = $startDate;
             $finalClassId   = $classId;
             $totalSes = $realSes = $sumSes = $doneSes = $numSessions;
         } else {
-            $finalStatus    = 4;
-            $finalStartDate = null;
-            $finalClassId   = $classId;
-            $totalSes = $realSes = $sumSes = $numSessions;
-            $doneSes = 0;
+            if ($rawStatus === '3') {
+                $finalStatus    = 3;
+                $finalStartDate = null;
+                $finalClassId   = null;
+            } elseif ($startDate) {
+                $finalStatus    = 7;
+                $finalStartDate = $startDate;
+                $finalClassId   = $classId;
+                $totalSes = $realSes = $sumSes = $doneSes = $numSessions;
+            } else {
+                $finalStatus    = 4;
+                $finalStartDate = null;
+                $finalClassId   = $classId;
+                $totalSes = $realSes = $sumSes = $numSessions;
+                $doneSes = 0;
+            }
         }
 
         $extraNote = sprintf("Team: %s | Sale: %s | Ghi chú: %s",

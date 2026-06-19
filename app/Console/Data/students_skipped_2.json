@@ -1,0 +1,127 @@
+[
+  {
+    "excel_row": 2325,
+    "reason": "invalid_phone",
+    "raw_phone": "#VALUE!"
+  },
+  {
+    "excel_row": 3647,
+    "reason": "invalid_phone",
+    "raw_phone": "y4"
+  },
+  {
+    "excel_row": 5833,
+    "reason": "invalid_phone",
+    "raw_phone": " "
+  },
+  {
+    "excel_row": 6108,
+    "reason": "invalid_phone",
+    "raw_phone": "k có (Ở bên Hàn)"
+  },
+  {
+    "excel_row": 6912,
+    "reason": "invalid_phone",
+    "raw_phone": "k có (Ở bên Hàn)"
+  },
+  {
+    "excel_row": 7070,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7071,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7072,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7073,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7074,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7075,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7076,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7077,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7078,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7079,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7080,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7081,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7082,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7083,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7084,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7085,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7086,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7087,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7088,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  },
+  {
+    "excel_row": 7089,
+    "reason": "invalid_phone",
+    "raw_phone": "None"
+  }
+]

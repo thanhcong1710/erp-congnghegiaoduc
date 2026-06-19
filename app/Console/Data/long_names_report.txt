@@ -1,0 +1,334 @@
+File: students_normalized.json | Row: 61 | Phone: 0342575428 | Name: Nguyễn Bảo Yến
+Chuyển nhượng S cho em trai học PT Nguyễn Lâm Hùng
+File: students_normalized.json | Row: 370 | Phone: 0964416373 | Name: Nguyễn Thị Diệu Huyền
+T151 bảo lưu b11. Quay lại học T175
+File: students_normalized.json | Row: 377 | Phone: 0362664287 | Name: Nguyễn Thị Nhung
+VIP60 bảo lưu b1. Quay lại học VIP65
+File: students_normalized.json | Row: 428 | Phone: 0865321398 | Name: Cao Thị Thùy Linh
+T169 bảo lưu b1 do trùng T2. Quay lại học T173
+File: students_normalized.json | Row: 531 | Phone: 0819609803 | Name: Nguyễn Thị Thanh Tuyền
+Chuyển nhượng 379512182 Ngọc Ánh
+File: students_normalized.json | Row: 612 | Phone: 0979927513 | Name: Nguyễn Trường.
+OT8 bảo lưu b3 về quê chuyển sang học online. Huy báo. Học T180
+File: students_normalized.json | Row: 648 | Phone: 0985944818 | Name: Trịnh Gia Hân - đã nộp 300K 31/05/2024
+T184 bảo lưu b1. Quay lại T201
+File: students_normalized.json | Row: 883 | Phone: 0377393029 | Name: Nguyễn Tiến Hào
+T179 Yến Meca báo bạn bảo lưu b1 do trùng lịch học trên trường.
+File: students_normalized.json | Row: 898 | Phone: 0878915855 | Name: Phạm Thị Phượng. Đã gửi FULL sách E3, T, VIP 27/11/23 sđt mẹ 377940811
+T160 bảo lưu b14. Quay lại học T192 b10.
+Học T192 nghỉ 3 buổi cuối và không làm bài kiểm tra cuối khoá. Bạn đã mất cam kết đầu ra.
+File: students_normalized.json | Row: 985 | Phone: 0368088294 | Name: Bùi Thị Hải Linh.
+OT6 bảo lưu b8 trùng lịch học. Học T179
+File: students_normalized.json | Row: 1050 | Phone: 0964541017 | Name: Bùi Thị Hoà -nick Angela Den
+đổi VIP học T. Bớt NÓI hoặc VIẾT do học T 2 lần
+File: students_normalized.json | Row: 1256 | Phone: 0866793316 | Name: Nguyễn Hồng Trang - Chuyển nhượng
+Nguyễn Khánh Linh 326646383
+File: students_normalized.json | Row: 1265 | Phone: 0789197704 | Name: Nông Thị Bích Hảo 0866124056. Đã nộp 300K chuyển nhượng 11/12/2023
+File: students_normalized.json | Row: 1447 | Phone: 0342575428 | Name: Nguyễn Bảo Yến
+Chuyển nhượng S cho em trai học PT Nguyễn Lâm Hùng
+File: students_normalized.json | Row: 1459 | Phone: 0785735449 | Name: Đạo Thị Kim Phương
+T168 ko đạt đầu ra. Học lại T185 buổi 7
+File: students_normalized.json | Row: 1572 | Phone: 0395896296 | Name: Nguyễn Thu Phương - chuyển nhượng đã nộp 300K 9/4/25
+Trần Mạnh Hưng
+File: students_normalized.json | Row: 1967 | Phone: 0865489236 | Name: Trịnh Quốc Triệu - mua lại Toeic 2. Đã nộp 300K 24/03/24
+Nguyễn Thùy Linh Chi
+File: students_normalized.json | Row: 1980 | Phone: 0865489236 | Name: Trịnh Quốc Triệu - mua lại Toeic 2. Đã nộp 300K 24/03/24
+Nguyễn Thùy Linh Chi
+File: students_normalized.json | Row: 1981 | Phone: 0969705315 | Name: Trần Thị Thiên Thiên - Học của chị Trang 865265463
+Trần Thị Trang
+File: students_normalized.json | Row: 1986 | Phone: 0967838216 | Name: Nguyễn Văn Đoàn - KO đạt đầu ra
+Học lại miễn phí. HV nói
+File: students_normalized.json | Row: 2135 | Phone: 0912526137 | Name: Nguyễn Trần Nam Phương OVIP10 học 17 buôi
+Sang VIP91 miễn phí
+File: students_normalized.json | Row: 2145 | Phone: 0382082289 | Name: Đỗ Quang Vinh - học lại miễn phí ko đạt đầu ra
+Đã nộp 300K 26/04/2024
+File: students_normalized.json | Row: 2170 | Phone: 0383294297 | Name: Nguyễn Hồng Ngọc - nhận chuyển nhượng
+Đỗ Xuân Hoàng Anh -335997728 Đã chuyển nhượng
+File: students_normalized.json | Row: 2194 | Phone: 0399990528 | Name: Nguyễn Trường Sơn - PT70 nghỉ ngang buổi 7 
+Lý do: hỏng máy tính - nghỉ không phép từ B7-B10
+Giáo viên và bộ phận sale nhắn tin hỗ trợ nhưng không thiện chí trả lời
+File: students_normalized.json | Row: 2287 | Phone: 0329307661 | Name: Khổng Thị Thu Thảo - nhận học Đã nộp 600K, bảo lưu + chuyển nhượng 14/01/2026
+Vũ Huy Hoàng
+File: students_normalized.json | Row: 2320 | Phone: 0869846310 | Name: Nguyễn Văn Sơn - nhận học đã nộp 300K 30/05/24
+Nguyễn Thị Huệ 353574283
+File: students_normalized.json | Row: 2325 | Phone: 0386217760 | Name: Nguyễn Thị Bưởi - rút VIP93, học viên xin lại học phí
+Hà Việt Chiến
+File: students_normalized.json | Row: 2332 | Phone: 0325968416 | Name: Nguyễn Thế Tuấn - nhận học, đã nộp 300K 10/10/2024
+Vương Thị Lan
+File: students_normalized.json | Row: 2459 | Phone: 0379519775 | Name: Nguyễn Thị Thơm - đổi E3 học PT. số cũ 869922051
+Thừa 3,455K
+File: students_normalized.json | Row: 2467 | Phone: 0774851847 | Name: Trịnh Thanh Hậu - nick Hạt Đậu - nhận học
+Xuân Anh 866048028 đã ck 300K 14/07/24
+File: students_normalized.json | Row: 2528 | Phone: 0337896160 | Name: Trần Thị Phương Anh
+T129 bảo lưu báo trợ giảng. Nhài ko đc ai báo
+File: students_normalized.json | Row: 2560 | Phone: 0985895505 | Name: Nguyễn Thị Ngọc Huyền - Đã nộp 300K 10/02/2025
+OVIP12 bảo lưu b5 trùng lịch học.Học OVIP17 b1
+OVIP17 bảo lưu b6. Học OVIP21
+File: students_normalized.json | Row: 2771 | Phone: 0379512182 | Name: Vũ Ngọc Ánh - nhận học. Chưa nộp 300K
+Nguyễn Thị Thanh Tuyền 819609803
+File: students_normalized.json | Row: 2838 | Phone: 0964541017 | Name: Bùi Thị Hoà -nick Angela Den
+đổi VIP học T. Bớt NÓI hoặc VIẾT do học T 2 lần
+File: students_normalized.json | Row: 2882 | Phone: 0383294297 | Name: Nguyễn Hồng Ngọc - nhận chuyển nhượng
+Đỗ Xuân Hoàng Anh -335997728 Đã chuyển nhượng
+File: students_normalized.json | Row: 3264 | Phone: 0971630765 | Name: Nguyễn Thị Lan Anh - học thay đã nộp 300K 23/09/24
+Hoàng Lan Anh
+File: students_normalized.json | Row: 3276 | Phone: 0399303134 | Name: Diễm Quỳnh - đổi E3 sang T1 - đã nộp 613K 26/09/24
+Phạm Tiến Bình 968437905
+File: students_normalized.json | Row: 3281 | Phone: 0876910277 | Name: Tạ Minh Thư. Đã nộp 300K 20/01/25
+T247 bảo lưu b6. Học T283 b4
+File: students_normalized.json | Row: 3806 | Phone: 0815309006 | Name: Trần Thị Thùy Dương - nhận học. Nick: Bánh Bơ Sữa OPT44
+Nguyễn Thị Yến Nhi 352384273
+File: students_normalized.json | Row: 3815 | Phone: 0396299926 | Name: Lê Toàn Đức - C197 đã học 10 -11 buổi
+Đổi 14 buổi sang PT
+File: students_normalized.json | Row: 3883 | Phone: 0774851847 | Name: Trịnh Thanh Hậu - nick Hạt Đậu - nhận học
+Xuân Anh 866048028 đã ck 300K 14/07/24
+File: students_normalized.json | Row: 3917 | Phone: 0326646383 | Name: Nguyễn Khánh Linh - nhận học
+Nguyễn Hồng Trang 866793316
+File: students_normalized.json | Row: 4170 | Phone: 0904141856 | Name: Trương Vũ Ngọc Đức PT109 học 1 buổi
+Đã nộp 300K 18/08/2024
+File: students_normalized.json | Row: 4263 | Phone: 0388070606 | Name: Kim Ngọc Tú - Kim Hoang Tung
+ĐÃ chuyển nhượng S, W nộp 300K 29/05/2026
+Đoàn Việt Anh 0936935984
+File: students_normalized.json | Row: 4735 | Phone: 0329835829 | Name: Phạm Thị Thu Chang
+VIP119 phá lớp b17. Học VIP121 b16
+File: students_normalized.json | Row: 4956 | Phone: 0344686100 | Name: Lê Ngọc Hà - nhận học. Đã nộp 300K 22/09/2024
+Nguyễn Thị Chi
+File: students_normalized.json | Row: 4987 | Phone: 0869230365 | Name: Bùi Ánh Nguyệt OPT33, OPT28
+OPT28 buổi 4. Xin sang OPT33 miễn phí
+File: students_normalized.json | Row: 5038 | Phone: 0335418692 | Name: Lý Nhật Linh -Linh Cừu đã nộp 300K 16/12/24
+OPT40 bảo lưu b12. Học PT180 nghỉ ngang b1
+Học OPT98 b1. Đã nộp 100k mua sách PT
+File: students_normalized.json | Row: 5232 | Phone: 0889732445 | Name: Phạm Thị Thúy Diễm - Chưa nộp 300K
+T277 bảo lưu b18. Học T297 buổi 16
+File: students_normalized.json | Row: 5387 | Phone: 0356083351 | Name: Hà Thị Lan Anh - nhận học thay
+Đào Ngọc Huyền 976025832
+File: students_normalized.json | Row: 5392 | Phone: 0366258394 | Name: Đinh Thị Thanh Huyền - nhận học. Đã nộp 300K 23/12/24
+Nguyễn Ngọc Lụa 387551528 - PT126 rút khi đã học
+File: students_normalized.json | Row: 5718 | Phone: 0329980113 | Name: Nguyễn Mai Linh - đã chuyển nhượng. Thế Anh chat
+Phạm Quốc Huy 0334201335
+File: students_normalized.json | Row: 5755 | Phone: 0828621914 | Name: Hoàng Mai Trang - đã nộp 300K 18/08/2025
+VIP130 bảo lưu b21. Học VIP170 buổi 18
+File: students_normalized.json | Row: 5918 | Phone: 0963662981 | Name: Nguyễn Vũ Minh - học lại miễn phí VIP126 từ b5
+Bảo lưu từ b11 VIP126 do trùng lịch
+File: students_normalized.json | Row: 5965 | Phone: 0376485290 | Name: Nguyễn Hữu Thăng - Chuyển nhượng đã nộp 300K 03/04/25
+Phạm Văn Đông
+File: students_normalized.json | Row: 6089 | Phone: 0769427056 | Name: Nguyễn Như Bình -Đã nộp 300K 03/08/2025
+OVIP23 bảo lưu b21. Học VIP168 b19
+File: students_normalized.json | Row: 6123 | Phone: 0976315889 | Name: Nguyễn Ngọc Anh. KO học nữa, chuẩn bị thi chứng chỉ
+File: students_normalized.json | Row: 6164 | Phone: 0869699831 | Name: Nguyễn Thị Thu Yến - Selina Nguyễn
+sđt ít dùng 0945675397
+File: students_normalized.json | Row: 6189 | Phone: 0325968416 | Name: Nguyễn Thế Tuấn - nhận học, đã nộp 300K 10/10/2024
+Vương Thị Lan
+File: students_normalized.json | Row: 6324 | Phone: 0354425207 | Name: Lê Thị Thanh Thảo 354425207 - nhận học
+Nguyễn Văn Hường - chuyển nhượng
+Đã nộp 300K 04/03/2025
+File: students_normalized.json | Row: 6434 | Phone: 0911207358 | Name: Nguyễn Nhật Minh 366523155 số zalo. Đã nộp 300K 27/05/25
+VIP144 bảo lưu b15. Học VIP145 b17
+File: students_normalized.json | Row: 6448 | Phone: 0366670337 | Name: Nguyễn Thị Ly - nhận học. Đã nộp 300K 10/03/2025
+Nguyễn Thị Yến
+File: students_normalized.json | Row: 6451 | Phone: 0865013950 | Name: Lưu Cẩm Anh - nhận học. Toàn nộp 300K 11/02/2025
+Nguyễn Văn Toàn
+File: students_normalized.json | Row: 6466 | Phone: 0868191219 | Name: Nguyễn Đức Mạnh - VIP158 rút sắp KG - Đã nộp 300K 02/12/25
+VIP161 bảo lưu b14. Học VIP206 b14
+File: students_normalized.json | Row: 6644 | Phone: 0878915855 | Name: Phạm Thị Phượng. Đã gửi FULL sách E3, T, VIP 27/11/23 sđt mẹ
+File: students_normalized.json | Row: 6688 | Phone: 0968208165 | Name: Nguyễn Phúc Thiên Ân 968208169 số cũ
+VIP145 bảo lưu b10. Cường báo. Học VIP189 b1
+Đã nộp 300K bảo lưu 25/08/2025
+File: students_normalized.json | Row: 6699 | Phone: 0866974902 | Name: Nguyễn Minh Trí - ? học lại miễn phí
+SĐT nhận sách 0968058734
+File: students_normalized.json | Row: 6712 | Phone: 0971355790 | Name: Nguyễn Đức Long - đổi E3 học T. Đã nộp 300K 06/06/25
+Nguyễn Việt Tuấn
+File: students_normalized.json | Row: 6744 | Phone: 0363676298 | Name: Dương Như Nhung. Đã nộp 300K 04/08/2025
+VIP157 bảo lưu b13. Học OVIP44 b8
+File: students_normalized.json | Row: 6786 | Phone: 0379512182 | Name: Vũ Ngọc Ánh - nhận học. Chưa nộp 300K
+Nguyễn Thị Thanh Tuyền 819609803
+File: students_normalized.json | Row: 6880 | Phone: 0344686100 | Name: Lê Ngọc Hà - nhận học. Đã nộp 300K 22/09/2024
+Nguyễn Thị Chi
+File: students_normalized.json | Row: 6981 | Phone: 0971630765 | Name: Nguyễn Thị Lan Anh - học thay đã nộp 300K 05/05/25
+Hoàng Lan Anh
+File: students_normalized.json | Row: 6983 | Phone: 0833593325 | Name: Nguyễn Trần Hải Sơn - nhận học
+Đỗ Thu Hiền 867449896
+File: students_normalized.json | Row: 6993 | Phone: 0789169879 | Name: Nguyễn Khánh Linh -Linh Hípp  OPT40 rút phút 89
+OPT59 bảo lưu b1.Học PT180 b1. Đã nộp 300K 28/02/2025
+File: students_normalized_2.json | Row: 39 | Phone: 0366607520 | Name: Lê Minh Khôi- Gà Rừng - 586360123. Đã nộp 300K 28/06/2025
+OPT64 bảo lưu b1, Học OPT71 b1
+File: students_normalized_2.json | Row: 189 | Phone: 0365158954 | Name: Triệu Thị Nga - Chuyển nhượng VIP, S,W đã nộp 300K 31/05/2025
+Nguyễn Đỗ Hải Đăng
+File: students_normalized_2.json | Row: 239 | Phone: 0369894808 | Name: Nguyễn Văn Khu 
+Đã trả lại tiền thừa 1 triệu 22/04/2025
+File: students_normalized_2.json | Row: 275 | Phone: 0155605521 | Name: Nguyễn Thị Hạnh - nhận hoc. Đã nộp 300K 28/04/2025
+Nguyễn Thị Như Quỳnh
+File: students_normalized_2.json | Row: 337 | Phone: 0366670337 | Name: Nguyễn Thị Ly - nhận học. Đã nộp 300K 10/03/2025
+Nguyễn Thị Yến
+File: students_normalized_2.json | Row: 627 | Phone: 0914972570 | Name: Nguyễn Thị Nhật Trang - nhận học - đã nộp 300K 20/05/2025
+Học OVIP39 2 buổi xin đổi lớp miễn phí. Học online VIP166 b2
+Trịnh Gia Hân
+File: students_normalized_2.json | Row: 652 | Phone: 0379512182 | Name: Vũ Ngọc Ánh - nhận học. Chưa nộp 300K
+Nguyễn Thị Thanh Tuyền 819609803
+File: students_normalized_2.json | Row: 693 | Phone: 0984933163 | Name: Ngô Hương Giang 0975908583 sđt mẹ nhận sách
+VIP168 bảo lưu b10. Học VIP193 buổi 3. Đã nộp 300K
+File: students_normalized_2.json | Row: 711 | Phone: 0342173069 | Name: Phạm Hữu Hưng - nhận học. Dương chat
+Phạm Ngọc Huyền 378732556
+File: students_normalized_2.json | Row: 728 | Phone: 0854565731 | Name: Nguyễn Việt Tuấn - nhận học. Đã nộp 300K 06/06/25
+Nguyễn Đức Long
+File: students_normalized_2.json | Row: 862 | Phone: 0334201335 | Name: Phạm Quốc Huy - nhận học.Thế Anh chat
+Nguyễn Mai Linh
+File: students_normalized_2.json | Row: 863 | Phone: 0342173069 | Name: Phạm Hữu Hưng - nhận học. Dương chat
+Phạm Ngọc Huyền 378732556
+File: students_normalized_2.json | Row: 864 | Phone: 0342173069 | Name: Phạm Hữu Hưng - nhận học. Dương chat
+Phạm Ngọc Huyền 378732556
+File: students_normalized_2.json | Row: 869 | Phone: 0965157112 | Name: Trần Mạnh Hưng- nhận học. Nộp 300K 09/04/25
+Nguyễn Thu Phương
+File: students_normalized_2.json | Row: 893 | Phone: 0964541017 | Name: Bùi Thị Hoà -nick Angela Den
+đổi VIP học T. Bớt NÓI hoặc VIẾT do học T 2 lần
+File: students_normalized_2.json | Row: 905 | Phone: 0334235705 | Name: Thân Thị Thúy Linh - Đã nộp 300K 27/02/2026
+VIP173 bảo lưu b1. Học VIP252 b1. Đã nộp 300K 24/02/2026
+VIP252 bảo lưu b16. Học VIP269 b16
+File: students_normalized_2.json | Row: 1048 | Phone: 0394248471 | Name: Nguyễn Tiến Hiệu - nhận học. T319 bảo lưu b15. Học T328 b14
+Trịnh Đức Hùng
+File: students_normalized_2.json | Row: 1098 | Phone: 0978926816 | Name: Nguyễn Thu Phương - Đã nộp 300K 14/12/2025
+T338 bảo lưu b17. Học T386 b18
+File: students_normalized_2.json | Row: 1211 | Phone: 0388070606 | Name: Kim Ngọc Tú - Kim Hoang Tung - Chưa nộp 300K
+T300 bảo lưu b1. Học T320 b1 rút trước KG
+OT79 tự rời nhóm trước ngày KG
+ĐÃ chuyển nhượng S, W nộp 300K 29/05/2026
+Đoàn Việt Anh 0936935984
+File: students_normalized_2.json | Row: 1232 | Phone: 0386788257 | Name: Nguyễn Ngọc Tôn - 7,150K -3,968K đã học T
+Còn dư: 3,182K đòi học phí 23/07/2025
+File: students_normalized_2.json | Row: 1345 | Phone: 0969705315 | Name: Trần Thị Thiên Thiên - nhận học. Đã nộp 300K 01/08/2025
+Nguyễn Hương Giang 365102439
+File: students_normalized_2.json | Row: 1809 | Phone: 0357728018 | Name: Nguyễn Thị Khánh Linh - Chuyển nhượng 4 khóa T, VIP, S, W
+Lương Thảo Nhi
+File: students_normalized_2.json | Row: 2005 | Phone: 0393152217 | Name: Nguyễn Lâm Hùng - Nhận học. Đã nộp 300K 03/09/2025 - nick FB:Nghỉ Hè
+Nguyễn Bảo Yến
+File: students_normalized_2.json | Row: 2024 | Phone: 0586723391 | Name: Nguyễn Thanh Thủy 
+Đã  chuyển nhượng S, W 26/03/2026
+File: students_normalized_2.json | Row: 2290 | Phone: 0337623275 | Name: Nguyễn Thu Trang - PT203 - PT204 khai giảng 1b báo rút
+File: students_normalized_2.json | Row: 2418 | Phone: 0974604045 | Name: Chu Thị Như Lan - PT220 - hợp đồng
+PT223 học viên thứ 10 chưa học phí
+File: students_normalized_2.json | Row: 2596 | Phone: 0813527987 | Name: Lương Thị Hoa
+T355 bảo lưu b21 Huyền chat. Bạn nói đã qua level 1
+File: students_normalized_2.json | Row: 2615 | Phone: 0984494140 | Name: Trần Tuyết Nhi - T363 Chuyển nhượng đã nộp 300K 03/11/2025
+Nguyễn Thị Thanh Huyền 0869775529
+File: students_normalized_2.json | Row: 2730 | Phone: 0813375655 | Name: Bùi Quang Huy -Đã nộp 300K 25/02/2025
+VIP197 bảo lưu b16. Học VIP245 b3
+File: students_normalized_2.json | Row: 2749 | Phone: 0332318625 | Name: Nguyễn Thị Như
+Đã chuyển nhượng VIP, S, W 16/12/2025 cho Khải
+File: students_normalized_2.json | Row: 2767 | Phone: 0325830560 | Name: Lương Thảo Nhi - Nhận học
+Nguyễn Thị Khánh Linh 357728018
+File: students_normalized_2.json | Row: 2917 | Phone: 0394248471 | Name: Nguyễn Tiến Hiệu - nhận học. VIP206. Đã trừ 300K chuyển nhượng vào học phí
+Trịnh Đức Hùng
+File: students_normalized_2.json | Row: 3073 | Phone: 0334201335 | Name: Phạm Quốc Huy - VIP207 - nhận học.Thế Anh chat
+Nguyễn Mai Linh
+File: students_normalized_2.json | Row: 3076 | Phone: 0372148847 | Name: Võ Đức Tuấn Anh - nhận học. Đã nộp 300K 14/10/2025. 
+Lê Thị Thanh Hiền 867039636
+File: students_normalized_2.json | Row: 3175 | Phone: 0367559482 | Name: Dương Thị Trà - OPT70 đã học 3 buổi đuối ko theo đc lớp.
+Quân báo ra chờ chờ bổ trợ 8 buổi riêng xong học lớp khác
+Ko thu 300K. Bạn này trước học cô Lan Anh 4 buổi, nhưng đuối quá, nên anh kèm thêm 8 buổi 1-1, bạn học được cách học, tuy nhiên học chậm và khả năng ghi nhớ kém, bạn cũng chăm và quyết tâm. Sau đó bạn được xếp lại học vào lớp OPT74 được 4 buổi, anh hỏi thăm mấy buổi đầu, bạn bảo là hiểu bài, xong đột ngột GV báo là bạn báo ko học tiếp nữa.
+File: students_normalized_2.json | Row: 3247 | Phone: 0399882317 | Name: Lê Quang Trung - hợp đồng  TRẢ lại 532k ngày 25/9/25
+File: students_normalized_2.json | Row: 3547 | Phone: 0388174028 | Name: Trần Trung Kiên - chuyển nhượng
+Nguyễn Phương Trúc 899136490
+File: students_normalized_2.json | Row: 3836 | Phone: 0585574010 | Name: Nguyễn Thị Thanh Huyền 0869775529 số bạn cùng phòng - nhận học
+Trần Tuyết Nhi 984494140
+File: students_normalized_2.json | Row: 4004 | Phone: 0386884393 | Name: Phan Ngọc Hải Linh - hợp đồng - PT217, PT347 chưa học phí
+PT350 hv thứ 15
+File: students_normalized_2.json | Row: 4026 | Phone: 0973144138 | Name: Nguyễn Minh Huyền. Đã nộp 300K 20/09/2025
+OPT78 bảo lưu b3. Học PT348 b4.
+File: students_normalized_2.json | Row: 4028 | Phone: 0854611208 | Name: Hà Quỳnh Hương - nhận học. Đã nộp 300K 23/09/2025
+Hà Quỳnh Chi
+File: students_normalized_2.json | Row: 4077 | Phone: 0327897800 | Name: Nguyễn Tuấn Anh - PT345. Đã nộp 300K 18/11/25
+PT350 bảo lưu b6. Học PT382 b2 xin sang OPT97 b5
+File: students_normalized_2.json | Row: 4293 | Phone: 0986994832 | Name: Nguyễn Thuỳ Dung - hợp đồng -Đã nộp 300K 12/01/26
+T384 bảo lưu b22. Học T425 b22
+File: students_normalized_2.json | Row: 4398 | Phone: 0342551792 | Name: Chu Văn Trường - Nhận học, học lại T tính 50%học phí, 100K mua sách, 300K chuyển nhượng. Tổng 2,484K
+Nguyễn Xuân Minh 356370161 - PT374
+File: students_normalized_2.json | Row: 4490 | Phone: 0867577115 | Name: Nguyễn Hồ Hoàng Lộc
+Tạo đk Sale chuyển nhượng cho bạn 355478461 Hoa
+File: students_normalized_2.json | Row: 4777 | Phone: 0847562969 | Name: Vũ Phùng Quang Huy. Đã nộp 300K 19/03/2026
+OW13 bảo lưu b0. Học W63 b1 - 0777765945 sđt nhận sách
+File: students_normalized_2.json | Row: 4790 | Phone: 0363027535 | Name: Đặng Quỳnh Chi -VIP243 rút sát giờ KG. Đã nộp 300K 18/05/2026
+File: students_normalized_2.json | Row: 4834 | Phone: 0356186428 | Name: Đoàn Ánh Nhật - học lại nộp 50% học phí
+Đã nộp 2,084K 02/12/2025
+File: students_normalized_2.json | Row: 4940 | Phone: 0899136490 | Name: Nguyễn Phương Trúc - nhận học. Đã nộp 300K 06/10/2025
+Trần Trung Kiên 388174028
+File: students_normalized_2.json | Row: 5012 | Phone: 0586723391 | Name: Nguyễn Thanh Thủy 
+Đã  chuyển nhượng S, W 26/03/2026
+File: students_normalized_2.json | Row: 5268 | Phone: 0585574010 | Name: Nguyễn Thị Thanh Huyền 0869775529 số bạn cùng phòng
+File: students_normalized_2.json | Row: 5402 | Phone: 0355478461 | Name: Hà Thị Hoa - nhận học. Đã trừ 500K vào học phí trả lại
+Nguyễn Hồ Hoàng Lộc
+File: students_normalized_2.json | Row: 5494 | Phone: 0378222071 | Name: Bùi Chí Khải - nhận học. Đã nộp 300K 16/12/2025
+Nguyễn Thị Như
+File: students_normalized_2.json | Row: 5673 | Phone: 0335528802 | Name: Nguyễn Thị Mai Anh - 50% học phí học lại
+Đã nộp 2.084K 03/12/2025, T413
+File: students_normalized_2.json | Row: 5677 | Phone: 0528415008 | Name: Bùi Hoàng Cương - Nhận học đã nộp 300K 31/03/2026
+Trịnh Ngọc Châu Uyên 911483141
+File: students_normalized_2.json | Row: 5680 | Phone: 0373419127 | Name: Trần Văn Hóa - nhận học. Trừ 300K chuyển nhượng vào học phí - hợp đồng. PT374
+Nguyễn Thị Thùy Dung 394227770
+File: students_normalized_2.json | Row: 5747 | Phone: 0969705315 | Name: Trần Thị Thiên Thiên - nhận học. Đã nộp 300K 01/08/2025
+Nguyễn Hương Giang 365102439
+File: students_normalized_2.json | Row: 5794 | Phone: 0913178103 | Name: Bùi Hoàng Cương nhận học VIP, S, W. Đã nộp 300K 27/12/24
+Phùng Đức Hà 824115993
+File: students_normalized_2.json | Row: 5846 | Phone: 0964621185 | Name: Đặng Vũ Khoa - nhận học S, W. Đã nộp 300K 08/01/2026
+Nguyễn Minh Duy 978417349
+File: students_normalized_2.json | Row: 5848 | Phone: 0373419127 | Name: Trần Văn Hóa - nhận học. Trừ 300K chuyển nhượng vào học phí - hợp đồng. PT374
+Nguyễn Thị Thùy Dung 394227770
+File: students_normalized_2.json | Row: 6165 | Phone: 0949357752 | Name: Phạm Thị Phương Linh
+T311 bạn phương linh bạn ý cứ chỉ xem record thôi ý ạ k làm các hoạt động khác như test đầu giờ và nộp bài tập về nhà ạ
+File: students_normalized_2.json | Row: 6377 | Phone: 0342173069 | Name: Phạm Hữu Hưng - nhận học. Dương chat
+Phạm Ngọc Huyền 378732556
+File: students_normalized_2.json | Row: 6508 | Phone: 0366629737 | Name: Nguyễn Đoàn Quang Minh . Đã nộp 1,013K học lại + bảo lưu + mua sách 29/05/2026. VIP251 bảo lưu b6 học VIP291 b1
+sdt dùng zalo:
+File: students_normalized_2.json | Row: 6547 | Phone: 0339252206 | Name: Quàng Thị Phương Thảo
+VIP252 học 2 buổi nói ko hợp. Đổi lớp miễn phí
+File: students_normalized_2.json | Row: 6706 | Phone: 0344912499 | Name: Nguyễn Đình Lộc - nhận học, Chưa nộp 300K
+Nguyễn Phương Thảo
+File: students_normalized_2.json | Row: 6746 | Phone: 0973684070 | Name: Bùi Nhật Quang - nhận học. Đã nộp 300K 27/01/2026
+Bùi Nhật Tân - hợp đồng 982802838
+File: students_normalized_2.json | Row: 7029 | Phone: 0775943872 | Name: Trần Thị Ánh Dương - Nhận học
+Trần QuangVinh 856945266
+File: students_normalized_2.json | Row: 7059 | Phone: 0899136490 | Name: Nguyễn Phương Trúc - nhận học. Đã nộp 300K 06/10/2025
+Trần Trung Kiên 388174028
+File: students_normalized_3.json | Row: 51 | Phone: 0859843262 | Name: Mai Thị Minh Nguyệt - Nhận học Đã nộp 300K 26/03/26
+Nguyễn Thanh Thủy 586723391
+File: students_normalized_3.json | Row: 95 | Phone: 0377461077 | Name: Nguyễn Thị Thu Trang -OVIP84  đổi 2 khóa E2 và ST học toeic
+File: students_normalized_3.json | Row: 155 | Phone: 0366522285 | Name: Nguyễn Thị Thuỳ Dương - nhận học
+Nguyễn Quang  Hiếu 909592133
+File: students_normalized_3.json | Row: 274 | Phone: 0372914852 | Name: Nguyễn Thị Uyên - Nhận học. Mai nộp 300K 23/03/2026. OW18
+Đỗ Thị Mai 866925396
+File: students_normalized_3.json | Row: 430 | Phone: 0812507296 | Name: Nguyễn Lan Anh - Nhận học
+Nguyễn Phương Trúc 899136490
+File: students_normalized_3.json | Row: 567 | Phone: 0961975830 | Name: Nguyễn Thị Thu Hòa - Nhận học. Đã nộp 300K 11/04/2026 - Tái Hoà Nhập
+Nguyễn Thuỳ Linh 387979724
+File: students_normalized_3.json | Row: 684 | Phone: 0325830560 | Name: Lương Thảo Nhi - Nhận học
+Nguyễn Thị Khánh Linh 357728018
+File: students_normalized_3.json | Row: 694 | Phone: 0967581416 | Name: Lê Thị Thuỳ Anh - Nhận học
+Ngô Trần Huyền Trang 977459607
+File: students_normalized_3.json | Row: 708 | Phone: 0354479939 | Name: Nguyễn Thị Hải Anh - Nhận học. Đã nộp 917K học lại 7 buổi 19/04/2026
+Phùng Việt Trung 399192089
+File: students_normalized_3.json | Row: 766 | Phone: 0329307661 | Name: Khổng Thị Thu Thảo - nhận học Đã nộp 600K, bảo lưu + chuyển nhượng 14/01/2026
+Vũ Huy Hoàng
+File: students_normalized_3.json | Row: 773 | Phone: 0387979724 | Name: Nguyễn Thuỳ Linh - Chuyển nhượng T, VIP
+Nguyễn Thị Thu Hòa
+File: students_normalized_3.json | Row: 1006 | Phone: 0399545288 | Name: Từ Nam Định - Nhận học. Đã nộp 300K 25/04/2026
+Nguyễn Ngọc Minh Châu 349148755
+File: students_normalized_3.json | Row: 1019 | Phone: 0585574010 | Name: Nguyễn Thị Thanh Huyền 0869775529 số bạn cùng phòng - nhận học
+Trần Tuyết Nhi 984494140
+File: students_normalized_3.json | Row: 1037 | Phone: 0862320263 | Name: Hoàng Mỹ Duyên  - Nhận học. Đã nộp 900K 02/04/2026, 
+Nguyễn Văn Mạnh 989263507
+File: students_normalized_3.json | Row: 1413 | Phone: 0936935984 | Name: Đoàn Việt Anh 0936935984 - nhận học S, W
+Kim Ngọc Tú 388070606
+File: students_normalized_3.json | Row: 1569 | Phone: 0373419127 | Name: Trần Văn Hóa - nhận học. Trừ 300K chuyển nhượng vào học phí - hợp đồng. PT374
+Nguyễn Thị Thùy Dung 394227770
+File: students_normalized_4.json | Row: 90 | Phone: 0856980565 | Name: Nông Hà Linh PT136
+PT131 tự rời nhóm 30' trước giờ học
+File: students_normalized_4.json | Row: 152 | Phone: 0847468885 | Name: Bùi Trung Nguyên - VIP163 - Chưa học phí -Thainguyen Bui 
+Đến ngày KG gọi điện ko nghe, chat trước đó nhiều ko đc
+File: students_normalized_4.json | Row: 201 | Phone: 0336847146 | Name: Đoàn Thị Thanh Huyền - hợp đồng. Chưa nộp 300K
+T328 bảo lưu b2. Sĩ số lệch nên hỏi GV. Học T476 b1
+File: students_normalized_4.json | Row: 276 | Phone: 0396887217 | Name: Vũ Thảo Nguyên - T343 tự rời nhóm, OT83, T366 - hợp đồng
+16/09/2025 lên trung tâm nhận sách
+File: students_normalized_4.json | Row: 530 | Phone: 0975109384 | Name: Lê Nguyên Tùng Lâm - PT391 rút sát giờ KG, tự rời nhóm lớp
+File: students_normalized_4.json | Row: 586 | Phone: 0333692716 | Name: Trần Nguyễn Tường Vy - 0374729592 
+sđt phụ huynh nhận sách
+File: students_normalized_4.json | Row: 1413 | Phone: 0585355666 | Name: Kiều Huyền Trang - 0363380783 sđt nhận sách - 
+May Bay Bay
