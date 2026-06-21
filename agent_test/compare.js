@@ -43,23 +43,23 @@ const advisingSkillInstruction = "Bạn là một chuyên gia tư vấn học v�
 // ==========================================
 
 // 1. Thuần LLM
-const modelPureLLM = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+const modelPureLLM = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // 2. Chỉ dùng Tool (Có khả năng lấy dữ liệu, nhưng trả lời máy móc)
 const modelWithTool = genAI.getGenerativeModel({ 
-    model: "gemini-3.5-flash",
+    model: "gemini-2.5-flash",
     tools: [dbLookupTool]
 });
 
 // 3. Chỉ có Skill (Ăn nói khéo léo, nhưng không có công cụ lấy dữ liệu)
 const modelWithSkill = genAI.getGenerativeModel({ 
-    model: "gemini-3.5-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: advisingSkillInstruction
 });
 
 // 4. Có Skill kết hợp Tool (Agent Hoàn Chỉnh)
 const modelAgent = genAI.getGenerativeModel({ 
-    model: "gemini-3.5-flash",
+    model: "gemini-2.5-flash",
     systemInstruction: advisingSkillInstruction,
     tools: [dbLookupTool]
 });
