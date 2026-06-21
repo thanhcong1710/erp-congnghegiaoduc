@@ -128,7 +128,17 @@ class GeminiService
      */
     protected function callApi(array $payload, int $attempt = 1): array
     {
-        $url = "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
+        // Khi dùng proxy: KHÔNG đưa key vào URL query string để tránh bị Vercel logs ghi lại
+        // Key chỉ truyền qua HTTPS header (an toàn hơn)
+        $isUsingProxy = $this->apiUrl !== 'https://generativelanguage.googleapis.com/v1beta';
+
+        if ($isUsingProxy) {
+            // Proxy URL: key chỉ trong header, không trong URL
+            $url = "{$this->apiUrl}/models/{$this->model}:generateContent";
+        } else {
+            // Direct Google API: key trong URL (theo chuẩn của Google)
+            $url = "{$this->apiUrl}/models/{$this->model}:generateContent?key={$this->apiKey}";
+        }
 
         $headers = ['x-goog-api-key' => $this->apiKey];
 
