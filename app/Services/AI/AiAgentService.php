@@ -67,6 +67,7 @@ class AiAgentService
             // 7. Chuẩn bị tools (functions, lọc theo skill nếu có)
             $tools = $this->prepareTools($permission, $skill);
 
+            Log::info('AiAgentService chat', ["messages" =>$messages, 'tool' => $tools]);
             // 8. Gọi AI
             $response = $this->gemini->chat($messages, $tools);
 
