@@ -1,0 +1,5 @@
+{
+  "setting_1": "Giá trị mặc định 1",
+  "enable_feature_x": true,
+  "description": "Lưu trữ cấu hình người dùng cho lần chạy đầu tiên. Agent có thể đọc file này để biết tuỳ chọn của người dùng."
+}
