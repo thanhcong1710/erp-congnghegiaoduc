@@ -280,7 +280,7 @@ class ContractsController extends Controller
             $input_ec_id = data_get($request, 'ec_id') ? (int) data_get($request, 'ec_id') : (int) data_get($parent_info, 'owner_id');
             $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $input_ec_id);
             $ec_id = data_get($ec_info, 'id');
-            $ec_leader_id = data_get($ec_info, 'manager_id');
+            $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id'): $ec_id;
             
             u::insertSimpleRow(array(
                 'student_id' => $student_id,
@@ -298,7 +298,7 @@ class ContractsController extends Controller
             $input_ec_id = data_get($request, 'ec_id') ? (int) data_get($request, 'ec_id') : (int) data_get($parent_info, 'owner_id');
             $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $input_ec_id);
             $ec_id = data_get($ec_info, 'id');
-            $ec_leader_id = data_get($ec_info, 'manager_id');
+            $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id'): $ec_id;
         }
         // Tính count_recharge cho agreement: 0 nếu chưa có, MAX+1 nếu đã có
         $prevAgreement = u::first("SELECT MAX(count_recharge) AS max_cr FROM agreements WHERE student_id = $student_id AND tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . " AND status > 0");
@@ -515,7 +515,7 @@ class ContractsController extends Controller
         // Lấy thông tin EC
         $ec_id = data_get($request, 'ec_id');
         $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int) $ec_id);
-        $ec_leader_id = data_get($ec_info, 'manager_id');
+        $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id'): $ec_id;
 
         $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
             LEFT JOIN roles AS r ON r.id = ru.role_id
