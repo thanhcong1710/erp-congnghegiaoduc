@@ -34,6 +34,12 @@
           </multiselect>
         </div>
         <div>
+          <label class="rpt-label">Trạng thái công nợ</label>
+          <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Hoàn thành (công nợ = 0)'}, {id:0, name:'Chưa hoàn thành'}]" label="name" track-by="id"
+            placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
+          </multiselect>
+        </div>
+        <div>
           <label class="rpt-label">Tìm kiếm học sinh</label>
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
         </div>
@@ -86,6 +92,7 @@
               <th style="width:130px" class="text-right">Tổng học phí</th>
               <th style="width:110px" class="text-right">Đã thu</th>
               <th style="width:120px" class="text-right">Còn phải thu</th>
+              <th style="width:120px" class="text-center">Trạng thái</th>
               <th style="width:110px" class="text-center">Hạn TT</th>
               <th style="width:120px" class="text-center">Thu gần nhất</th>
             </tr>
@@ -106,13 +113,16 @@
               <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
                 {{ fmtMoney(row.debt_amount) }}
               </td>
+              <td class="text-center" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
+                {{ row.debt_amount > 0 ? 'Chưa hoàn thành' : 'Hoàn thành' }}
+              </td>
               <td class="text-center date-cell" :class="isDue(row.due_date) ? 'overdue' : ''">
                 {{ row.due_date || '—' }}
               </td>
               <td class="text-center date-cell">{{ row.last_pay_date || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="11" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="12" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -157,7 +167,7 @@
         pagination: { cpage: 1, total: 0, limit: 20, init: 0 },
         searchData: {
           arr_branch: [], branch_id: [],
-          team_obj: null, ec_obj: null,
+          team_obj: null, ec_obj: null, completion_status_obj: null,
           keyword: '',
           due_range: '', pay_range: '',
         },
@@ -170,12 +180,12 @@
     created() {
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
       axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
-      axios.g('/api/system/users?role_id=68').then(r => { this.ec_list = r.data || [] })
+      axios.g('/api/system/users?role_id=68&exclude_role_id=69').then(r => { this.ec_list = r.data || [] })
       this.getData()
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, keyword: '', due_range: '', pay_range: '' }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', due_range: '', pay_range: '' }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -212,6 +222,7 @@
           branch_id,
           team_id:   this.searchData.team_obj ? this.searchData.team_obj.id : 0,
           ec_id:     this.searchData.ec_obj   ? this.searchData.ec_obj.id   : 0,
+          completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           keyword:   this.searchData.keyword  || '',
           due_start, due_end, pay_start, pay_end,
           pagination: this.pagination,
@@ -242,6 +253,7 @@
         if (p.branch_id && p.branch_id.length)  { keys.push('branch_id');  values.push(p.branch_id.join('-')) }
         if (p.team_id  > 0)  { keys.push('team_id');  values.push(p.team_id) }
         if (p.ec_id    > 0)  { keys.push('ec_id');    values.push(p.ec_id) }
+        if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
         if (p.due_start)     { keys.push('due_start'); values.push(p.due_start) }
         if (p.due_end)       { keys.push('due_end');   values.push(p.due_end) }

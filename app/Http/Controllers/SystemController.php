@@ -213,6 +213,8 @@ class SystemController extends Controller
         $role_id = (int) data_get($request, 'role_id', 0);
         $branch_id = (int) data_get($request, 'branch_id', 0);
 
+        $exclude_role_id = (int) data_get($request, 'exclude_role_id', 0);
+
         if (!$role_id) {
             return response()->json([]);
         }
@@ -223,6 +225,11 @@ class SystemController extends Controller
         } else {
             $branchIds = Auth::user()->getBranchesHasUser();
             $branchCond = " AND (b.branch_id IN ($branchIds) OR b.branch_id IS NULL)";
+        }
+
+        $excludeCond = '';
+        if ($exclude_role_id > 0) {
+            $excludeCond = " AND u.id NOT IN (SELECT user_id FROM role_has_user WHERE role_id = $exclude_role_id) ";
         }
 
         $data = u::query("
@@ -237,6 +244,7 @@ class SystemController extends Controller
             WHERE ru.role_id = $role_id
               AND u.status = 1
               $branchCond
+              $excludeCond
             ORDER BY u.name ASC
         ");
 

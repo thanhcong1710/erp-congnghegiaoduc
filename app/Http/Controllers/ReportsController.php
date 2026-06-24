@@ -1476,6 +1476,22 @@ class ReportsController extends Controller
         $pay_start = isset($request->pay_start) ? $request->pay_start : '';  // khoảng ngày thu gần nhất
         $pay_end = isset($request->pay_end) ? $request->pay_end : '';
 
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1; // 1: hoàn thành (debt_amount=0), 0: chưa hoàn thành (debt_amount>0)
+
+        // Phân quyền dữ liệu
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -1500,6 +1516,12 @@ class ReportsController extends Controller
         if ($keyword !== '') {
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
         }
         // Filter theo hạn thanh toán (buổi 8)
         if ($due_start) {

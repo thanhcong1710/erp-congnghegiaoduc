@@ -2065,6 +2065,7 @@ class ExportsController extends Controller
         $due_end = '';
         $pay_start = '';
         $pay_end = '';
+        $completion_status = -1;
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
@@ -2095,7 +2096,24 @@ class ExportsController extends Controller
                 case 'pay_end':
                     $pay_end = $v;
                     break;
+                case 'completion_status':
+                    $completion_status = (int) $v;
+                    break;
             }
+        }
+
+        // Phân quyền dữ liệu
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
         }
 
         $cond = " a.total_charged > 0 AND a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
@@ -2111,6 +2129,11 @@ class ExportsController extends Controller
         if ($keyword !== '') {
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
         }
         if ($due_start) {
             $cond .= " AND (SELECT shs.class_date FROM schedule_has_student shs INNER JOIN contracts c2 ON c2.id=shs.contract_id WHERE c2.agreement_id=a.id AND c2.enrolment_start_date IS NOT NULL ORDER BY shs.class_date ASC LIMIT 7,1) >= '$due_start'";
@@ -2165,8 +2188,8 @@ class ExportsController extends Controller
         $sheet->getRowDimension(2)->setRowHeight(6);
 
         // Headers
-        $headers = ['Mã HV', 'Họ tên', 'Chương trình', 'Team KD', 'Thành viên sale', 'Tổng học phí', 'Đã thu', 'Còn phải thu', 'Hạn thanh toán', 'Ngày thu gần nhất'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        $headers = ['Mã HV', 'Họ tên', 'Chương trình', 'Team KD', 'Thành viên sale', 'Tổng học phí', 'Đã thu', 'Còn phải thu', 'Trạng thái', 'Hạn thanh toán', 'Ngày thu gần nhất'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
@@ -2180,7 +2203,7 @@ class ExportsController extends Controller
         $sheet->getRowDimension(3)->setRowHeight(24);
 
         // Column widths
-        $widths = [12, 22, 22, 16, 16, 16, 14, 14, 16, 16];
+        $widths = [12, 22, 22, 16, 16, 16, 14, 14, 16, 16, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2204,17 +2227,18 @@ class ExportsController extends Controller
             $sheet->setCellValue('F' . $row, (float) $item->must_charge);
             $sheet->setCellValue('G' . $row, (float) $item->total_charged);
             $sheet->setCellValue('H' . $row, (float) $item->debt_amount);
-            $sheet->setCellValue('I' . $row, $item->due_date ?? '');
-            $sheet->setCellValue('J' . $row, $item->last_pay_date ?? '');
+            $sheet->setCellValue('I' . $row, ((float) $item->debt_amount > 0 ? 'Chưa hoàn thành' : 'Hoàn thành'));
+            $sheet->setCellValue('J' . $row, $item->due_date ?? '');
+            $sheet->setCellValue('K' . $row, $item->last_pay_date ?? '');
 
-            $sheet->getStyle("A$row:J$row")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$row:K$row")->applyFromArray($borderStyle);
             $sheet->getStyle("A$row")->applyFromArray($centerAlign);
             $sheet->getStyle("B$row:E$row")->applyFromArray($leftAlign);
             $sheet->getStyle("F$row:H$row")->applyFromArray($rightAlign);
             $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("H$row")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("I$row:J$row")->applyFromArray($centerAlign);
+            $sheet->getStyle("I$row:K$row")->applyFromArray($centerAlign);
             $sheet->getRowDimension($row)->setRowHeight(18);
 
             // Tô màu dòng nợ cao
@@ -2240,7 +2264,7 @@ class ExportsController extends Controller
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EEF2FF']],
             'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
         ];
-        $sheet->getStyle("A$row:J$row")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$row:K$row")->applyFromArray($totalStyle);
         $sheet->getStyle("A$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle("F$row:H$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
