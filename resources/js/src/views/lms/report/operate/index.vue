@@ -69,6 +69,11 @@
                 <p>12. BÁO CÁO (KT) THỐNG KÊ DOANH THU THEO TEAM SALE</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-24'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>13. BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

@@ -19,10 +19,13 @@ class StudentDataTransformer
     public static function cleanName(string $raw): string
     {
         // Loại bỏ mọi thứ từ các dấu ngoặc hoặc gạch nối (cả gạch nối ascii và gạch ngang unicode) trở đi
-        $clean = preg_replace('/\s*[\(\-\[–—_].*$/u', '', $raw);
+        $clean = preg_replace('/\s*[\(\-\[–—_].*$/us', '', $raw);
         
         // Loại bỏ thêm nếu họ viết liền số điện thoại phía sau mà không có dấu gạch (vd: "Nguyễn Văn A 0981234567")
-        $clean = preg_replace('/\s+\d{6,}.*$/', '', $clean);
+        $clean = preg_replace('/\s+\d{6,}.*$/us', '', $clean);
+        
+        // Xóa các ký tự xuống dòng nếu còn sót
+        $clean = str_replace(["\r", "\n"], ' ', $clean);
 
         return trim($clean);
     }
