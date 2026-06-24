@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * Import học sinh / lớp / hợp đồng từ JSON chuẩn hóa vào ERP.
@@ -44,6 +45,8 @@ class ImportStudentsFromJson extends Command
     private array $dedupKeys        = []; // dedup_key       → true  (already imported)
     private array $productsById     = []; // product_id      → num_sessions
     private array $tuitionFeeProductId = []; // tuition_fee_id → product_id
+    private array $usersByTmpName   = []; // tmp_name      → {id, manager_id}
+    private array $importedPaymentsAgreements = []; // agreement_id → true
 
     // ── Pending flush buffers ────────────────────────────────────────────────
     private array $newStudents   = [];
@@ -51,14 +54,19 @@ class ImportStudentsFromJson extends Command
     private array $newClasses    = [];
     private array $newAgreements = [];
     private array $newContracts  = [];
+    private array $newPayments   = [];
     private array $updContracts  = []; // [{id, data}]
     private array $updClasses    = []; // [{id, cls_startdate}]
+    private array $updStudents   = []; 
+    private array $updCrmParents = [];
+    private array $updAgreements = [];
 
     // ── Counters ─────────────────────────────────────────────────────────────
     private int $cntStudNew  = 0;
     private int $cntClsNew   = 0;
     private int $cntAgreNew  = 0;
     private int $cntContNew  = 0;
+    private int $cntPayNew   = 0;
     private int $cntContUpd  = 0;
     private int $cntSkipDup  = 0;
     private int $cntSkipInv  = 0;
@@ -66,6 +74,9 @@ class ImportStudentsFromJson extends Command
     // ─────────────────────────────────────────────────────────────────────────
     public function handle(): int
     {
+        $this->info('🗑  Resetting system cache...');
+        Artisan::call('cache:clear');
+        
         $jsonPath = $this->argument('json');
         $this->dry = (bool) $this->option('dry-run');
         $limit     = (int) $this->option('limit');
@@ -124,6 +135,7 @@ class ImportStudentsFromJson extends Command
             ['Classes created',       $this->cntClsNew],
             ['Agreements created',    $this->cntAgreNew],
             ['Contracts created',     $this->cntContNew],
+            ['Payments created',      $this->cntPayNew],
             ['Contracts updated',     $this->cntContUpd],
             ['Skipped (duplicate)',   $this->cntSkipDup],
             ['Skipped (invalid row)', $this->cntSkipInv],
@@ -197,13 +209,33 @@ class ImportStudentsFromJson extends Command
             $this->tuitionFeeProductId[$t->id] = $t->product_id;
         });
 
+        // Users mapping
+        DB::table('users')->whereNotNull('tmp_name')->select('id', 'manager_id', 'tmp_name')->get()->each(function ($u) {
+            $this->usersByTmpName[trim($u->tmp_name)] = [
+                'id' => $u->id,
+                'manager_id' => $u->manager_id,
+            ];
+        });
+
+        // Imported Payments Agreements
+        DB::table('payments')
+            ->where('is_import', 1)
+            ->select('agreement_id')
+            ->distinct()
+            ->get()
+            ->each(function($p) {
+                $this->importedPaymentsAgreements[$p->agreement_id] = true;
+            });
+
         $this->info(sprintf(
-            '   ↳ %d students | %d classes | %d agreements | %d dedup-keys loaded | %d products loaded',
+            '   ↳ %d students | %d classes | %d agreements | %d dedup-keys | %d products | %d users | %d imported payments',
             count($this->studentsByPhone),
             count($this->classesByCode),
             count($this->agreementsByStud),
             count($this->dedupKeys),
-            count($this->productsById)
+            count($this->productsById),
+            count($this->usersByTmpName),
+            count($this->importedPaymentsAgreements)
         ));
     }
 
@@ -214,7 +246,7 @@ class ImportStudentsFromJson extends Command
         $phone     = $this->normalizePhone($row['phone'] ?? '');
         $name      = trim($row['name']       ?? '');
         $address   = trim($row['address']    ?? '');
-        $classCode = strtoupper(trim($row['class_code'] ?? ''));
+        $classCode = strtoupper(trim($row['class_name'] ?? ($row['class_code'] ?? '')));
         $startDate = $row['start_date'] ?? null;
         $rawPrice  = (int) ($row['price'] ?? 0);
         // Sanity check: prevent integer overflow if Excel has junk data (e.g. 6962400000000001)
@@ -231,6 +263,19 @@ class ImportStudentsFromJson extends Command
         $saleTeam  = trim($row['sale_team'] ?? '');
         $saleMem   = trim($row['sale_member'] ?? '');
         $shipNote  = trim($row['shipping_note'] ?? '');
+        
+        $teamKinhDoanh = trim($row['team_kinh_doanh'] ?? '');
+        $pay1Amount = (float)($row['payment_1_amount'] ?? 0) * 1000;
+        $pay1Date   = $row['payment_1_date'] ?? null;
+        $pay2Amount = (float)($row['payment_2_amount'] ?? 0) * 1000;
+        $pay2Date   = $row['payment_2_date'] ?? null;
+
+        $ecId = null;
+        $ecLeaderId = null;
+        if ($teamKinhDoanh && isset($this->usersByTmpName[$teamKinhDoanh])) {
+            $ecId = $this->usersByTmpName[$teamKinhDoanh]['id'];
+            $ecLeaderId = $this->usersByTmpName[$teamKinhDoanh]['manager_id'];
+        }
 
         // ── Validate ─────────────────────────────────────────────────────────
         if (!$phone || !$name) {
@@ -279,6 +324,19 @@ class ImportStudentsFromJson extends Command
             
             $this->studentsByPhone[$phone] = $tempId;
             $this->cntStudNew++;
+        } else {
+            $studentId = $this->studentsByPhone[$phone];
+            if (is_numeric($studentId)) {
+                if ($email) {
+                    $this->updStudents[$studentId] = ['gud_email1' => mb_substr($email, 0, 100), 'updated_at' => now()->toDateTimeString()];
+                    if (!isset($this->updCrmParents[$studentId])) $this->updCrmParents[$studentId] = ['updated_at' => now()->toDateTimeString()];
+                    $this->updCrmParents[$studentId]['email'] = mb_substr($email, 0, 100);
+                }
+                if ($linkFb) {
+                    if (!isset($this->updCrmParents[$studentId])) $this->updCrmParents[$studentId] = ['updated_at' => now()->toDateTimeString()];
+                    $this->updCrmParents[$studentId]['link_facebook'] = mb_substr($linkFb, 0, 255);
+                }
+            }
         }
         $studentId = $this->studentsByPhone[$phone];
 
@@ -307,6 +365,10 @@ class ImportStudentsFromJson extends Command
             $classId = $this->classesByCode[$classCode]['id'];
         }
 
+        $extraNote = sprintf("Team: %s | Sale: %s | Ghi chú: %s",
+            $saleTeam, $saleMem, $shipNote
+        );
+
         // ── 3. Agreement (1 per Student) ──────────────────────────────────────
         if (!isset($this->agreementsByStud[$studentId])) {
             $tempId = 'new_a_' . count($this->newAgreements);
@@ -319,9 +381,12 @@ class ImportStudentsFromJson extends Command
                 '__student_key' => $studentId,
                 'tuition_fee_id'=> $agrTuitionFeeId,
                 'product_id'    => $agrProductId,
+                'ec_id'         => $ecId,
+                'ec_leader_id'  => $ecLeaderId,
                 'must_charge'   => $price,
                 'total_charged' => $price,
                 'debt_amount'   => 0,
+                'note'          => $extraNote,
                 'branch_id'     => 9,
                 'status'        => 1,
                 'created_at'    => now()->toDateTimeString(),
@@ -329,6 +394,11 @@ class ImportStudentsFromJson extends Command
             ];
             $this->agreementsByStud[$studentId] = $tempId;
             $this->cntAgreNew++;
+        } else {
+            $agreementId = $this->agreementsByStud[$studentId];
+            if (is_numeric($agreementId)) {
+                $this->updAgreements[$agreementId] = ['note' => $extraNote, 'updated_at' => now()->toDateTimeString()];
+            }
         }
         $agreementId = $this->agreementsByStud[$studentId];
 
@@ -369,9 +439,7 @@ class ImportStudentsFromJson extends Command
             }
         }
 
-        $extraNote = sprintf("Team: %s | Sale: %s | Ghi chú: %s",
-            $saleTeam, $saleMem, $shipNote
-        );
+
 
         // ── 5. Contract (1 per Excel row) ─────────────────────────────────────
         $this->newContracts[] = [
@@ -383,6 +451,8 @@ class ImportStudentsFromJson extends Command
             '__extra_note'    => $extraNote,
             'product_id'      => $productId,
             'tuition_fee_id'  => $tuitionFeeId,
+            'ec_id'           => $ecId,
+            'ec_leader_id'    => $ecLeaderId,
             'must_charge'     => $price,
             'total_charged'   => $price,
             'debt_amount'     => 0,
@@ -401,6 +471,46 @@ class ImportStudentsFromJson extends Command
             $this->dedupKeys[$dedupKey] = true;
         }
         $this->cntContNew++;
+
+        // ── 6. Payments (Phân đợt) ───────────────────────────────────────────
+        if ($pay1Amount > 0) {
+            $this->newPayments[] = [
+                '__agreement_key' => $agreementId,
+                '__student_key'   => $studentId,
+                '__phase'         => 1,
+                'amount'          => $pay1Amount,
+                'must_charge'     => $pay1Amount,
+                'total'           => $pay1Amount,
+                'debt'            => 0,
+                'count'           => 1,
+                'type'            => 1,
+                'charge_date'     => $pay1Date ?: now()->format('Y-m-d'),
+                'method'          => 2, // Chuyển khoản (default guess)
+                'is_import'       => 1,
+                'note'            => 'Import đợt 1',
+                'branch_id'       => 9,
+                'created_at'      => now()->toDateTimeString(),
+            ];
+        }
+        if ($pay2Amount > 0) {
+            $this->newPayments[] = [
+                '__agreement_key' => $agreementId,
+                '__student_key'   => $studentId,
+                '__phase'         => 2,
+                'amount'          => $pay2Amount,
+                'must_charge'     => $pay2Amount,
+                'total'           => $pay2Amount,
+                'debt'            => 0,
+                'count'           => 2,
+                'type'            => 1,
+                'charge_date'     => $pay2Date ?: now()->format('Y-m-d'),
+                'method'          => 2,
+                'is_import'       => 1,
+                'note'            => 'Import đợt 2',
+                'branch_id'       => 9,
+                'created_at'      => now()->toDateTimeString(),
+            ];
+        }
     }
 
     // ── Flush to DB (single transaction) ─────────────────────────────────────
@@ -584,10 +694,96 @@ class ImportStudentsFromJson extends Command
             if (count($this->updContracts)) {
                 $this->info(sprintf('   ✔ Contracts updated: %d', count($this->updContracts)));
             }
+
+            // Updates for existing records (students, parents, agreements) - Optimized with CASE WHEN
+            $this->info("   ⏳ Bulk updating existing records (Students, Crm Parents, Agreements)...");
+            
+            $this->bulkUpdate('students', 'id', $this->updStudents);
+            $this->bulkUpdate('crm_parents', 'student_id', $this->updCrmParents);
+            $this->bulkUpdate('agreements', 'id', $this->updAgreements);
+
+            if (count($this->updStudents) > 0) $this->info(sprintf('   ✔ Existing students updated (email): %d', count($this->updStudents)));
+            if (count($this->updCrmParents) > 0) $this->info(sprintf('   ✔ Existing crm_parents updated (fb/email): %d', count($this->updCrmParents)));
+            if (count($this->updAgreements) > 0) $this->info(sprintf('   ✔ Existing agreements updated (note): %d', count($this->updAgreements)));
+
+            // 6. Payments
+            $payBatch = [];
+            $inRunPaymentCheck = []; // agreementId_phase -> true
+            foreach ($this->newPayments as $p) {
+                $agreementId = $resAgre($p['__agreement_key']);
+                $studentId   = $resStud($p['__student_key']);
+                $phase       = $p['__phase'];
+
+                unset($p['__agreement_key'], $p['__student_key'], $p['__phase']);
+
+                if (!$agreementId || !$studentId) continue;
+                if (isset($this->importedPaymentsAgreements[$agreementId])) continue; // DB already has imports for this agreement
+                
+                $checkKey = "{$agreementId}_{$phase}";
+                if (isset($inRunPaymentCheck[$checkKey])) continue; // Deduplicate in same run
+                $inRunPaymentCheck[$checkKey] = true;
+
+                $p['agreement_id'] = $agreementId;
+                $p['student_id']   = $studentId;
+                $payBatch[] = $p;
+            }
+
+            if ($payBatch) {
+                foreach (array_chunk($payBatch, 500) as $chunk) {
+                    DB::table('payments')->insert($chunk);
+                }
+                $this->cntPayNew = count($payBatch);
+                $this->info(sprintf('   ✔ Payments inserted: %d', count($payBatch)));
+            }
         });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Executes an optimized bulk UPDATE using CASE WHEN statements.
+     * Dramatically faster than executing thousands of single updates in a loop.
+     */
+    private function bulkUpdate(string $table, string $idColumn, array $updates): void
+    {
+        if (empty($updates)) return;
+
+        // Ensure all items in the array have the exact same keys
+        $allKeys = [];
+        foreach ($updates as $data) {
+            foreach (array_keys($data) as $k) {
+                $allKeys[$k] = true;
+            }
+        }
+        $allKeys = array_keys($allKeys);
+
+        foreach (array_chunk($updates, 1000, true) as $chunk) {
+            $ids = array_keys($chunk);
+            $bindings = [];
+            $sql = "UPDATE {$table} SET ";
+            
+            foreach ($allKeys as $field) {
+                $sql .= "`{$field}` = CASE `{$idColumn}` ";
+                foreach ($chunk as $id => $data) {
+                    if (array_key_exists($field, $data)) {
+                        $sql .= "WHEN ? THEN ? ";
+                        $bindings[] = $id;
+                        $bindings[] = $data[$field];
+                    }
+                }
+                $sql .= "ELSE `{$field}` END, ";
+            }
+            
+            $sql = rtrim($sql, ", ");
+            $sql .= " WHERE `{$idColumn}` IN (" . implode(',', array_fill(0, count($ids), '?')) . ")";
+            
+            foreach ($ids as $id) {
+                $bindings[] = $id;
+            }
+            
+            DB::update($sql, $bindings);
+        }
+    }
 
     private function getTuitionFeeIdFromProductId(?int $productId): ?int
     {
