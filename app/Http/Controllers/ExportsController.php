@@ -2111,9 +2111,9 @@ class ExportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $cond = " a.total_charged > 0 AND a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
@@ -2121,7 +2121,7 @@ class ExportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id =0) AND a.ec_id = $team_id))";
         }
         if ($ec_id > 0) {
             $cond .= " AND a.ec_id = $ec_id";
