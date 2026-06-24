@@ -83,9 +83,13 @@ class StudentDataTransformer
         $email = $row['email'] ?? '';
         $saleMem = $row['thanh_vien_sale'] ?? ($row['sale_member'] ?? ($row['sale'] ?? ''));
         $shipNote = $row['ghi_chu_van_don'] ?? ($row['shipping_note'] ?? '');
+        $discountRaw = $row['giảm trừ'] ?? ($row['giam_tru'] ?? 0);
+        $debtRaw = $row['công nợ'] ?? ($row['cong_no'] ?? 0);
 
         $pay1Amount = floatval(str_replace([',', ' '], '', $pay1AmountRaw));
         $pay2Amount = floatval(str_replace([',', ' '], '', $pay2AmountRaw));
+        $discountAmount = floatval(str_replace([',', ' '], '', $discountRaw));
+        $debtAmount = floatval(str_replace([',', ' '], '', $debtRaw));
 
         $name = self::cleanName((string) $rawName);
         $className = self::cleanClassName((string) $rawClass);
@@ -110,6 +114,8 @@ class StudentDataTransformer
             'payment_1_date'   => self::safeParseDate($pay1Date),
             'payment_2_amount' => $pay2Amount,
             'payment_2_date'   => self::safeParseDate($pay2Date),
+            'discount_amount'  => $discountAmount,
+            'debt_amount_raw'  => $debtAmount,
             'raw_start_date'   => $startDate,
         ];
     }
@@ -132,9 +138,19 @@ class StudentDataTransformer
                 return Carbon::instance(Date::excelToDateTimeObject($dateStr))->format('Y-m-d');
             }
             
-            // Check for common Vietnamese format DD/MM/YYYY
+            // Check for common Vietnamese format DD/MM/YYYY or MM/DD/YYYY
             if (preg_match('/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/', $dateStr, $m)) {
-                return Carbon::createFromDate($m[3], $m[2], $m[1])->format('Y-m-d');
+                $p1 = (int)$m[1];
+                $p2 = (int)$m[2];
+                $year = (int)$m[3];
+                
+                if ($p2 > 12) {
+                    // Must be MM/DD/YYYY
+                    return Carbon::createFromDate($year, $p1, $p2)->format('Y-m-d');
+                } else {
+                    // Default to DD/MM/YYYY
+                    return Carbon::createFromDate($year, $p2, $p1)->format('Y-m-d');
+                }
             }
             
             return Carbon::parse($dateStr)->format('Y-m-d');

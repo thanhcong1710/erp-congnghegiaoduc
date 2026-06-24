@@ -7,7 +7,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv1",
         "raw_status": "4",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Dương Meca",
         "sale_team": "Dương Meca",
         "sale_member": "Dương",
@@ -15,9 +15,11 @@
         "link_fb": "https:\/\/www.facebook.com\/profile.php?id=100093554755534&mibextid=LQQJ4d",
         "email": "Chưa có",
         "payment_1_amount": 5736,
-        "payment_1_date": "2025-07-07",
+        "payment_1_date": "2023-07-31",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": " "
     },
     {
@@ -39,6 +41,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 45236
     },
     {
@@ -60,6 +64,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 45222
     },
     {
@@ -81,6 +87,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 45456
     },
     {
@@ -102,6 +110,8 @@
         "payment_1_date": "2024-12-12",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 45659
     },
     {
@@ -120,9 +130,11 @@
         "link_fb": "https:\/\/www.facebook.com\/profile.php?id=100046598621305",
         "email": "Không có",
         "payment_1_amount": 12000,
-        "payment_1_date": "2025-04-09",
+        "payment_1_date": "2024-09-16",
         "payment_2_amount": 3836,
-        "payment_2_date": "2025-04-09",
+        "payment_2_date": "2024-09-16",
+        "discount_amount": 100,
+        "debt_amount_raw": 0,
         "raw_start_date": 45726
     },
     {
@@ -144,6 +156,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46197
     },
     {
@@ -165,6 +179,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46197
     },
     {
@@ -186,6 +202,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46197
     },
     {
@@ -207,6 +225,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46197
     },
     {
@@ -228,6 +248,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46197
     },
     {
@@ -249,6 +271,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -270,6 +294,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -291,6 +317,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -312,6 +340,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -333,6 +363,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -354,6 +386,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -375,6 +409,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -396,6 +432,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -417,6 +455,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -438,6 +478,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -459,6 +501,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -480,6 +524,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -501,6 +547,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -522,6 +570,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46198
     },
     {
@@ -543,6 +593,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -564,6 +616,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -585,6 +639,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -606,6 +662,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -627,6 +685,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -648,6 +708,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -669,6 +731,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -690,6 +754,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -711,6 +777,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -732,6 +800,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -753,6 +823,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -774,6 +846,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -795,6 +869,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -816,6 +892,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -837,6 +915,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -858,6 +938,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -879,6 +961,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -900,6 +984,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -921,6 +1007,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -942,6 +1030,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -963,6 +1053,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -984,6 +1076,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1005,6 +1099,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1026,6 +1122,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1047,6 +1145,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1068,6 +1168,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1089,6 +1191,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1110,6 +1214,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1131,6 +1237,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1152,6 +1260,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1173,6 +1283,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1194,6 +1306,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1215,6 +1329,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46206
     },
     {
@@ -1236,6 +1352,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1257,6 +1375,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1278,6 +1398,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1299,6 +1421,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1320,6 +1444,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1341,6 +1467,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1362,6 +1490,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46203
     },
     {
@@ -1383,6 +1513,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1404,6 +1536,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1425,6 +1559,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1446,6 +1582,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1467,6 +1605,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1488,6 +1628,8 @@
         "payment_1_date": null,
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": 46196
     },
     {
@@ -1498,7 +1640,7 @@
         "class_name": "Chờ",
         "course": "Toeic Lv2",
         "raw_status": "4",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "PAGE",
         "sale_team": "PAGE",
         "sale_member": "Dương",
@@ -1509,6 +1651,8 @@
         "payment_1_date": "2024-03-09",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 0,
         "raw_start_date": " "
     },
     {
@@ -1519,7 +1663,7 @@
         "class_name": "Ko",
         "course": "Combo Toeic Lv(1+2) + Toeic (S + W) + tặng 2 khóa Ôn thi",
         "raw_status": "4",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hồng Anh Meca",
         "sale_team": "Hồng Anh Meca",
         "sale_member": "Thu Hiền",
@@ -1527,9 +1671,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/15RCKioGsk\/",
         "email": "theochoi21062007@gmail.com",
         "payment_1_amount": 200,
-        "payment_1_date": "2026-07-06",
+        "payment_1_date": "2025-06-19",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14772,
         "raw_start_date": " "
     },
     {
@@ -1540,7 +1686,7 @@
         "class_name": "Lớp",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W) + tặng 02 khóa ôn thi",
         "raw_status": "4",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hồng Anh Meca",
         "sale_team": "Hồng Anh Meca",
         "sale_member": "Như Băng",
@@ -1548,9 +1694,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1GdNpZQ3Mz\/?mibextid=wwXIfr",
         "email": "tngan0318@gmail.com",
         "payment_1_amount": 200,
-        "payment_1_date": "2026-04-07",
+        "payment_1_date": "2025-07-16",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16740,
         "raw_start_date": " "
     },
     {
@@ -1561,7 +1709,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hồng Anh Meca",
         "sale_team": "Hồng Anh Meca",
         "sale_member": "Như Ý",
@@ -1569,9 +1717,11 @@
         "link_fb": "https:\/\/www.facebook.com\/bao.ngoc.865708#",
         "email": "dangthihonganhmaihai1966@gmail.com",
         "payment_1_amount": 200,
-        "payment_1_date": "2027-10-04",
+        "payment_1_date": "2026-04-22",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16740,
         "raw_start_date": " "
     },
     {
@@ -1582,7 +1732,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Thu Hà Meca",
         "sale_team": "Thu Hà Meca",
         "sale_member": "Hiệu",
@@ -1590,9 +1740,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1BmSjD2Gqo\/",
         "email": ".",
         "payment_1_amount": 100,
-        "payment_1_date": "2028-06-04",
+        "payment_1_date": "2026-04-30",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16840,
         "raw_start_date": " "
     },
     {
@@ -1603,7 +1755,7 @@
         "class_name": "Chờ",
         "course": "Combo Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hương Trúc Meca",
         "sale_team": "Hương Trúc Meca",
         "sale_member": "Phương Nga",
@@ -1614,6 +1766,8 @@
         "payment_1_date": "2026-04-05",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14922,
         "raw_start_date": " "
     },
     {
@@ -1624,7 +1778,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Thu Hà Meca",
         "sale_team": "Thu Hà Meca",
         "sale_member": "Vỹ",
@@ -1635,6 +1789,8 @@
         "payment_1_date": "2026-11-05",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16740,
         "raw_start_date": " "
     },
     {
@@ -1645,7 +1801,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hồng Anh Meca",
         "sale_team": "Hồng Anh Meca",
         "sale_member": "Yến Nhi",
@@ -1656,6 +1812,8 @@
         "payment_1_date": "2026-12-05",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16740,
         "raw_start_date": " "
     },
     {
@@ -1666,7 +1824,7 @@
         "class_name": "Chờ",
         "course": "Combo Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Hương Trúc Meca",
         "sale_team": "Hương Trúc Meca",
         "sale_member": "Phương Nga",
@@ -1674,9 +1832,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1B8FDc9F1m\/",
         "email": "ko có",
         "payment_1_amount": 200,
-        "payment_1_date": "2027-04-05",
+        "payment_1_date": "2026-05-16",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14772,
         "raw_start_date": " "
     },
     {
@@ -1687,7 +1847,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Thu Hà Meca",
         "sale_team": "Thu Hà Meca",
         "sale_member": "Huế",
@@ -1695,9 +1855,11 @@
         "link_fb": "https:\/\/www.facebook.com\/tuan.dat.281108",
         "email": ".",
         "payment_1_amount": 50,
-        "payment_1_date": "2027-05-05",
+        "payment_1_date": "2026-05-17",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16890,
         "raw_start_date": " "
     },
     {
@@ -1708,7 +1870,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Thu Phương Meca",
         "sale_team": "Thu Phương Meca",
         "sale_member": "Hằng",
@@ -1716,9 +1878,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1B1sDwRT5h\/?mibextid=wwXIfr",
         "email": ".",
         "payment_1_amount": 17,
-        "payment_1_date": "2027-11-04",
+        "payment_1_date": "2026-04-23",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16923,
         "raw_start_date": " "
     },
     {
@@ -1737,9 +1901,11 @@
         "link_fb": "https:\/\/www.facebook.com\/vuu.thi.thom.2025?mibextid=wwXIfr&rdid=r4upzfZ5tQEneHtr&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F17a42VRXmN%2F%3Fmibextid%3DwwXIfr",
         "email": "ko",
         "payment_1_amount": 100,
-        "payment_1_date": "2028-02-05",
+        "payment_1_date": "2026-05-26",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16840,
         "raw_start_date": 46197
     },
     {
@@ -1758,9 +1924,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1C8w5qJkji\/?mibextid=wwXIfr",
         "email": "kc",
         "payment_1_amount": 50,
-        "payment_1_date": "2028-04-05",
+        "payment_1_date": "2026-05-28",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14922,
         "raw_start_date": 46197
     },
     {
@@ -1771,7 +1939,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2)",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Thu Hiền Meca",
         "sale_team": "Thu Hiền Meca",
         "sale_member": "Ly",
@@ -1779,9 +1947,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1BFBjk6xYG\/",
         "email": "kc",
         "payment_1_amount": 100,
-        "payment_1_date": "2028-06-05",
+        "payment_1_date": "2026-05-30",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 9604,
         "raw_start_date": " "
     },
     {
@@ -1800,9 +1970,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1aNz4jU9WS\/?mibextid=wwXIfr",
         "email": "kc",
         "payment_1_amount": 100,
-        "payment_1_date": "2028-07-05",
+        "payment_1_date": "2026-05-31",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14872,
         "raw_start_date": 46198
     },
     {
@@ -1813,7 +1985,7 @@
         "class_name": "Chờ",
         "course": "Combo Pre_Toeic + Toeic Lv(1+2) + Toeic (S + W) + tặng 02 khóa ôn thi",
         "raw_status": "3",
-        "start_date": "2026-06-24",
+        "start_date": "2026-06-25",
         "team_kinh_doanh": "Quang Huy Meca",
         "sale_team": "Quang Huy Meca",
         "sale_member": "Khánh Vân",
@@ -1824,6 +1996,8 @@
         "payment_1_date": "2026-08-06",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 16890,
         "raw_start_date": " "
     },
     {
@@ -1842,9 +2016,11 @@
         "link_fb": "https:\/\/www.facebook.com\/pthao142005",
         "email": "1405pthao@gmail.com",
         "payment_1_amount": 150,
-        "payment_1_date": "2027-01-06",
+        "payment_1_date": "2026-06-13",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 9554,
         "raw_start_date": 46219
     },
     {
@@ -1863,9 +2039,11 @@
         "link_fb": "https:\/\/www.facebook.com\/share\/1D5nCoRHYQ\/?mibextid=wwXIfr",
         "email": "kc",
         "payment_1_amount": 50,
-        "payment_1_date": "2027-03-06",
+        "payment_1_date": "2026-06-15",
         "payment_2_amount": 0,
         "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": 14922,
         "raw_start_date": 46197
     }
 ]

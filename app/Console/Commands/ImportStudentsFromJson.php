@@ -46,6 +46,7 @@ class ImportStudentsFromJson extends Command
     private array $dedupKeys        = []; // dedup_key       → true  (already imported)
     private array $productsById     = []; // product_id      → num_sessions
     private array $tuitionFeeProductId = []; // tuition_fee_id → product_id
+    private array $tuitionFeePrice  = []; // tuition_fee_id → price
     private array $usersByTmpName   = []; // tmp_name      → {id, manager_id}
     private array $importedPaymentsAgreements = []; // agreement_id → true
     private array $newContractsKeys = []; // agreementId_productId → true (for in-memory deduplication)
@@ -221,8 +222,9 @@ class ImportStudentsFromJson extends Command
         });
 
         // Tuition Fee mapping
-        DB::table('tuition_fee')->select('id', 'product_id')->get()->each(function ($t) {
+        DB::table('tuition_fee')->select('id', 'product_id', 'price')->get()->each(function ($t) {
             $this->tuitionFeeProductId[$t->id] = $t->product_id;
+            $this->tuitionFeePrice[$t->id] = (float) $t->price;
         });
 
         // Users mapping
@@ -285,8 +287,17 @@ class ImportStudentsFromJson extends Command
         $pay1Date   = $row['payment_1_date'] ?? null;
         $pay2Amount = (float)($row['payment_2_amount'] ?? 0) * 1000;
         $pay2Date   = $row['payment_2_date'] ?? null;
+        $discountAmount = (float)($row['discount_amount'] ?? 0) * 1000;
+        $debtAmountRaw  = (float)($row['debt_amount_raw'] ?? 0) * 1000;
 
         $createdAt  = $pay1Date ? ($pay1Date . ' 00:00:00') : now()->toDateTimeString();
+
+        $finalTotalCharged = $price;
+        $finalDebtAmount = 0;
+        if ($debtAmountRaw > 0) {
+            $finalDebtAmount = $debtAmountRaw;
+            $finalTotalCharged = $pay1Amount + $pay2Amount;
+        }
 
         $ecId = null;
         $ecLeaderId = null;
@@ -407,8 +418,9 @@ class ImportStudentsFromJson extends Command
                     'ec_id'         => $ecId,
                     'ec_leader_id'  => $ecLeaderId,
                     'must_charge'   => $price,
-                    'total_charged' => $price,
-                    'debt_amount'   => 0,
+                    'discount_amount'=> $discountAmount,
+                    'total_charged' => $finalTotalCharged,
+                    'debt_amount'   => $finalDebtAmount,
                     'note'          => $extraNote,
                     'branch_id'     => 9,
                     'status'        => 1,
@@ -512,9 +524,10 @@ class ImportStudentsFromJson extends Command
                         'tuition_fee_id'  => $tuitionFeeId,
                         'ec_id'           => $ecId,
                         'ec_leader_id'    => $ecLeaderId,
-                        'must_charge'     => $price,
-                        'total_charged'   => $price,
-                        'debt_amount'     => 0,
+                        'must_charge'     => $tuitionFeeId ? ($this->tuitionFeePrice[$tuitionFeeId] ?? $price) : $price,
+                        'discount_amount' => $discountAmount,
+                        'total_charged'   => 0, // Will be calculated by processContractsByAgreement
+                        'debt_amount'     => 0, // Will be calculated by processContractsByAgreement
                         'total_sessions'  => $totalSes,
                         'real_sessions'   => $realSes,
                         'summary_sessions'=> $sumSes,
@@ -586,7 +599,9 @@ class ImportStudentsFromJson extends Command
     // ── Flush to DB (single transaction) ─────────────────────────────────────
     private function flush(): void
     {
-        DB::transaction(function () {
+        $processedAgreementIds = [];
+
+        DB::transaction(function () use (&$processedAgreementIds) {
             // 1. Students – batch insert
             $studBatch   = [];
             $phones      = [];
@@ -729,6 +744,8 @@ class ImportStudentsFromJson extends Command
                 );
 
                 if (!$agreementId || !$studentId) continue;
+
+                $processedAgreementIds[] = $agreementId;
 
                 $ct['agreement_id'] = $agreementId;
                 $ct['student_id']   = $studentId;

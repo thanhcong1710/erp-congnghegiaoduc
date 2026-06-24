@@ -1796,7 +1796,7 @@ class ReportsController extends Controller
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
                 '' AS img_bill,
-                0 AS discount,
+                a.discount_amount AS discount,
                 a.debt_amount
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
