@@ -210,14 +210,21 @@ class SystemController extends Controller
      */
     public function getUsersByRole(Request $request)
     {
-        $role_id = (int) data_get($request, 'role_id', 0);
+        $role_id_input = data_get($request, 'role_id', '');
         $branch_id = (int) data_get($request, 'branch_id', 0);
 
         $exclude_role_id = (int) data_get($request, 'exclude_role_id', 0);
 
-        if (!$role_id) {
+        if (!$role_id_input) {
             return response()->json([]);
         }
+
+        $role_ids = array_map('intval', explode(',', $role_id_input));
+        $role_ids = array_filter($role_ids);
+        if (empty($role_ids)) {
+            return response()->json([]);
+        }
+        $role_ids_str = implode(',', $role_ids);
 
         $branchCond = '';
         if ($branch_id > 0) {
@@ -241,7 +248,7 @@ class SystemController extends Controller
             FROM role_has_user AS ru
                 LEFT JOIN users AS u ON u.id = ru.user_id
                 LEFT JOIN branch_has_user AS b ON b.user_id = ru.user_id
-            WHERE ru.role_id = $role_id
+            WHERE ru.role_id IN ($role_ids_str)
               AND u.status = 1
               $branchCond
               $excludeCond

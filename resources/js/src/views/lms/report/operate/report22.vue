@@ -180,7 +180,7 @@
     created() {
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
       axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
-      axios.g('/api/system/users?role_id=68&exclude_role_id=69').then(r => { this.ec_list = r.data || [] })
+      axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
       this.getData()
     },
     methods: {
