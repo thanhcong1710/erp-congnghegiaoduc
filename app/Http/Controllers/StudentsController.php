@@ -477,7 +477,7 @@ class StudentsController extends Controller
         $agreements = u::query("SELECT c.id AS agreement_id,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
                     c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                    c.must_charge, c.debt_amount, c.status, c.created_at
+                    c.must_charge, c.debt_amount, c.status, c.created_at, c.total_charged
                 FROM agreements AS c 
                 WHERE c.student_id =$student_id AND c.status > 0  AND c.must_charge > 0 AND c.debt_amount > 0 ");
         $reserves = u::query("SELECT c.id AS reserve_id,

@@ -47,6 +47,7 @@ class ImportStudentsFromJson extends Command
     private array $productsById     = []; // product_id      → num_sessions
     private array $tuitionFeeProductId = []; // tuition_fee_id → product_id
     private array $tuitionFeePrice  = []; // tuition_fee_id → price
+    private array $tuitionFeeSession= []; // tuition_fee_id → session
     private array $usersByTmpName   = []; // tmp_name      → {id, manager_id}
     private array $importedPaymentsAgreements = []; // agreement_id → true
     private array $newContractsKeys = []; // agreementId_productId → true (for in-memory deduplication)
@@ -222,9 +223,10 @@ class ImportStudentsFromJson extends Command
         });
 
         // Tuition Fee mapping
-        DB::table('tuition_fee')->select('id', 'product_id', 'price')->get()->each(function ($t) {
+        DB::table('tuition_fee')->select('id', 'product_id', 'price', 'session')->get()->each(function ($t) {
             $this->tuitionFeeProductId[$t->id] = $t->product_id;
             $this->tuitionFeePrice[$t->id] = (float) $t->price;
+            $this->tuitionFeeSession[$t->id] = (int) $t->session;
         });
 
         // Users mapping
@@ -520,6 +522,7 @@ class ImportStudentsFromJson extends Command
                         '__dedup_key'     => $dedupKey,
                         '__excel_row'     => $excelRow,
                         '__extra_note'    => $extraNote,
+                        '__agr_total_charged' => $finalTotalCharged,
                         'product_id'      => $productId,
                         'tuition_fee_id'  => $tuitionFeeId,
                         'ec_id'           => $ecId,
@@ -557,9 +560,9 @@ class ImportStudentsFromJson extends Command
                         '__student_key'   => $studentId,
                         '__phase'         => 1,
                         'amount'          => $pay1Amount,
-                        'must_charge'     => $pay1Amount,
+                        'must_charge'     => $price,
                         'total'           => $pay1Amount,
-                        'debt'            => 0,
+                        'debt'            => max(0, $price - $pay1Amount),
                         'count'           => 1,
                         'type'            => 1,
                         'charge_date'     => $pay1Date ?: now()->format('Y-m-d'),
@@ -576,9 +579,9 @@ class ImportStudentsFromJson extends Command
                         '__student_key'   => $studentId,
                         '__phase'         => 2,
                         'amount'          => $pay2Amount,
-                        'must_charge'     => $pay2Amount,
-                        'total'           => $pay2Amount,
-                        'debt'            => 0,
+                        'must_charge'     => $price,
+                        'total'           => $pay1Amount + $pay2Amount,
+                        'debt'            => max(0, $price - ($pay1Amount + $pay2Amount)),
                         'count'           => 2,
                         'type'            => 1,
                         'charge_date'     => $pay2Date ?: now()->format('Y-m-d'),
@@ -737,15 +740,15 @@ class ImportStudentsFromJson extends Command
                 $excelRow    = $ct['__excel_row'];
                 $extraNote   = $ct['__extra_note'];
 
+                $agrTotal = $ct['__agr_total_charged'];
                 unset(
                     $ct['__agreement_key'], $ct['__student_key'],
                     $ct['__class_key'],     $ct['__dedup_key'],
-                    $ct['__excel_row'],     $ct['__extra_note']
+                    $ct['__excel_row'],     $ct['__extra_note'],
+                    $ct['__agr_total_charged']
                 );
 
                 if (!$agreementId || !$studentId) continue;
-
-                $processedAgreementIds[] = $agreementId;
 
                 $ct['agreement_id'] = $agreementId;
                 $ct['student_id']   = $studentId;
@@ -754,8 +757,48 @@ class ImportStudentsFromJson extends Command
                 $prefix = $dedupKey ? "import_key:{$dedupKey} excel_row:{$excelRow}" : "excel_row:{$excelRow}";
                 $ct['note'] = $prefix . " | " . $extraNote;
 
-                $contBatch[] = $ct;
-                $contStuIds[] = $studentId;
+                if (!isset($contractsByAgr[$agreementId])) {
+                    $contractsByAgr[$agreementId] = [
+                        'remain' => $agrTotal,
+                        'contracts' => []
+                    ];
+                }
+                $contractsByAgr[$agreementId]['contracts'][] = $ct;
+            }
+
+            foreach ($contractsByAgr as $agrId => $grp) {
+                $remain = $grp['remain'];
+                $cts = &$grp['contracts'];
+                // Not strictly sorting by count_recharge since they are all new (count_recharge=0)
+                
+                foreach ($cts as &$c) {
+                    $mustCharge = $c['must_charge'];
+                    $paid = ($remain <= 0) ? 0 : min($mustCharge, $remain);
+                    $remain -= $paid;
+                    
+                    $c['total_charged'] = $paid;
+                    $c['debt_amount'] = $mustCharge - $paid;
+                    $c['init_total_charged'] = $paid;
+                    
+                    $tfSession = $this->tuitionFeeSession[$c['tuition_fee_id']] ?? $c['total_sessions'];
+                    $availableSession = 0;
+                    if ($tfSession > 0 && $mustCharge > 0) {
+                        $availableSession = round($paid / ($mustCharge / $tfSession));
+                    }
+                    
+                    $c['real_sessions'] = $availableSession;
+                    $c['summary_sessions'] = $availableSession;
+                    $c['left_sessions'] = $availableSession - ($c['done_sessions'] ?? 0);
+                    
+                    if ($c['class_id'] && $availableSession > 0) {
+                        $c['status'] = 6;
+                    } else {
+                        $c['status'] = ($paid >= $mustCharge) ? (($c['status'] > 3) ? $c['status'] : 3) : 2;
+                    }
+                    
+                    $contBatch[] = $c;
+                    $contStuIds[] = $c['student_id'];
+                }
             }
             
             if ($contBatch) {
@@ -828,6 +871,8 @@ class ImportStudentsFromJson extends Command
                 $this->cntPayNew = count($payBatch);
                 $this->info(sprintf('   ✔ Payments inserted: %d', count($payBatch)));
             }
+
+            // No post-processing needed anymore, calculated in memory.
         });
     }
 
