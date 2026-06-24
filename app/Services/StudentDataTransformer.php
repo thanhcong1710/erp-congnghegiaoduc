@@ -75,6 +75,7 @@ class StudentDataTransformer
         $pay2AmountRaw = $row['học phí đã nộp đợt 2'] ?? ($row['hoc_phi_da_nop_dot_2'] ?? 0);
         $pay2Date = $row['ngày_ck_đợt_2'] ?? ($row['ngay_ck_dot_2'] ?? null);
 
+        $course = $row['khóa học đăng kí'] ?? ($row['khoa_hoc_dang_ki'] ?? '');
         $linkFb = $row['link_fb'] ?? '';
         $email = $row['email'] ?? '';
         $saleMem = $row['thanh_vien_sale'] ?? ($row['sale_member'] ?? ($row['sale'] ?? ''));
@@ -93,6 +94,7 @@ class StudentDataTransformer
             'address'          => $address,
             'name'             => $name,
             'class_name'       => $className,
+            'course'           => trim((string)$course),
             'raw_status'       => $statusWhenNoStart,
             'start_date'       => self::safeParseDate($startDate),
             'team_kinh_doanh'  => trim($teamKinhDoanh),

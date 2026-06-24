@@ -41,12 +41,14 @@ class ImportStudentsFromJson extends Command
     // ── In-memory lookup maps (built once from DB) ───────────────────────────
     private array $studentsByPhone  = []; // normalizedPhone → student_id
     private array $classesByCode    = []; // classCode       → {id, cls_startdate}
-    private array $agreementsByStud = []; // student_id      → agreement_id
+    private array $agreementsByStud = []; // student_id_tuitionFeeId → agreement_id
+    private array $contractsByAgrProd = []; // agreement_id_productId → contract_id
     private array $dedupKeys        = []; // dedup_key       → true  (already imported)
     private array $productsById     = []; // product_id      → num_sessions
     private array $tuitionFeeProductId = []; // tuition_fee_id → product_id
     private array $usersByTmpName   = []; // tmp_name      → {id, manager_id}
     private array $importedPaymentsAgreements = []; // agreement_id → true
+    private array $newContractsKeys = []; // agreementId_productId → true (for in-memory deduplication)
 
     // ── Pending flush buffers ────────────────────────────────────────────────
     private array $newStudents   = [];
@@ -173,14 +175,28 @@ class ImportStudentsFromJson extends Command
             }
         });
 
-        // Agreements: student_id → agreement_id (first/lowest per student)
+        // Agreements: student_id_tuitionFeeId → agreement_id
         DB::table('agreements')
-            ->select('id', 'student_id')
+            ->select('id', 'student_id', 'tuition_fee_id')
             ->orderBy('id')
             ->chunk(5000, function ($rows) {
                 foreach ($rows as $r) {
-                    if (!isset($this->agreementsByStud[$r->student_id])) {
-                        $this->agreementsByStud[$r->student_id] = $r->id;
+                    $key = $r->student_id . '_' . $r->tuition_fee_id;
+                    if (!isset($this->agreementsByStud[$key])) {
+                        $this->agreementsByStud[$key] = $r->id;
+                    }
+                }
+            });
+
+        // Contracts: agreementId_productId → contract_id
+        DB::table('contracts')
+            ->select('id', 'agreement_id', 'product_id')
+            ->orderBy('id')
+            ->chunk(5000, function ($rows) {
+                foreach ($rows as $r) {
+                    if ($r->product_id) {
+                        $key = $r->agreement_id . '_' . $r->product_id;
+                        $this->contractsByAgrProd[$key] = $r->id;
                     }
                 }
             });
@@ -270,6 +286,8 @@ class ImportStudentsFromJson extends Command
         $pay2Amount = (float)($row['payment_2_amount'] ?? 0) * 1000;
         $pay2Date   = $row['payment_2_date'] ?? null;
 
+        $createdAt  = $pay1Date ? ($pay1Date . ' 00:00:00') : now()->toDateTimeString();
+
         $ecId = null;
         $ecLeaderId = null;
         if ($teamKinhDoanh && isset($this->usersByTmpName[$teamKinhDoanh])) {
@@ -306,8 +324,8 @@ class ImportStudentsFromJson extends Command
                 'address'     => mb_substr($address, 0, 255),
                 'branch_id'   => 9,
                 'status'      => 1,
-                'created_at'  => now()->toDateTimeString(),
-                'updated_at'  => now()->toDateTimeString(),
+                'created_at'  => $createdAt,
+                'updated_at'  => $createdAt,
             ];
             
             $this->newCrmParents[] = [
@@ -318,8 +336,8 @@ class ImportStudentsFromJson extends Command
                 'link_facebook' => mb_substr($linkFb, 0, 255),
                 'branch_id'     => 9,
                 'status'        => 3, // based on standard crm_parents status
-                'created_at'    => now()->toDateTimeString(),
-                'updated_at'    => now()->toDateTimeString(),
+                'created_at'    => $createdAt,
+                'updated_at'    => $createdAt,
             ];
             
             $this->studentsByPhone[$phone] = $tempId;
@@ -353,8 +371,8 @@ class ImportStudentsFromJson extends Command
                     'product_id'    => $this->getProductIdFromClassCode($classCode),
                     'branch_id'     => 9,
                     'status'        => 1,
-                    'created_at'    => now()->toDateTimeString(),
-                    'updated_at'    => now()->toDateTimeString(),
+                    'created_at'    => $createdAt,
+                    'updated_at'    => $createdAt,
                 ];
                 $this->classesByCode[$classCode] = ['id' => $tempId, 'cls_startdate' => $startDate];
                 $this->cntClsNew++;
@@ -369,38 +387,45 @@ class ImportStudentsFromJson extends Command
             $saleTeam, $saleMem, $shipNote
         );
 
-        // ── 3. Agreement (1 per Student) ──────────────────────────────────────
-        if (!isset($this->agreementsByStud[$studentId])) {
-            $tempId = 'new_a_' . count($this->newAgreements);
-            
-            $agrTuitionFeeId = $this->getTuitionFeeIdFromCourse($course);
-            $agrProductId    = $agrTuitionFeeId ? ($this->tuitionFeeProductId[$agrTuitionFeeId] ?? null) : null;
+        // ── 3. Agreement ──────────────────────────────────────────────────────
+        $agrTuitionFeeId = $this->getTuitionFeeIdFromCourse($course);
+        $agreementId = null;
+        $isAgreementNew = false;
 
-            $this->newAgreements[] = [
-                '__temp_id'     => $tempId,
-                '__student_key' => $studentId,
-                'tuition_fee_id'=> $agrTuitionFeeId,
-                'product_id'    => $agrProductId,
-                'ec_id'         => $ecId,
-                'ec_leader_id'  => $ecLeaderId,
-                'must_charge'   => $price,
-                'total_charged' => $price,
-                'debt_amount'   => 0,
-                'note'          => $extraNote,
-                'branch_id'     => 9,
-                'status'        => 1,
-                'created_at'    => now()->toDateTimeString(),
-                'updated_at'    => now()->toDateTimeString(),
-            ];
-            $this->agreementsByStud[$studentId] = $tempId;
-            $this->cntAgreNew++;
-        } else {
-            $agreementId = $this->agreementsByStud[$studentId];
-            if (is_numeric($agreementId)) {
-                $this->updAgreements[$agreementId] = ['note' => $extraNote, 'updated_at' => now()->toDateTimeString()];
+        if ($agrTuitionFeeId !== null) {
+            $agrKey = $studentId . '_' . $agrTuitionFeeId;
+            if (!isset($this->agreementsByStud[$agrKey])) {
+                $tempId = 'new_a_' . count($this->newAgreements);
+                
+                $agrProductId    = $agrTuitionFeeId ? ($this->tuitionFeeProductId[$agrTuitionFeeId] ?? null) : null;
+
+                $this->newAgreements[] = [
+                    '__temp_id'     => $tempId,
+                    '__student_key' => $studentId,
+                    'tuition_fee_id'=> $agrTuitionFeeId,
+                    'product_id'    => $agrProductId,
+                    'ec_id'         => $ecId,
+                    'ec_leader_id'  => $ecLeaderId,
+                    'must_charge'   => $price,
+                    'total_charged' => $price,
+                    'debt_amount'   => 0,
+                    'note'          => $extraNote,
+                    'branch_id'     => 9,
+                    'status'        => 1,
+                    'created_at'    => $createdAt,
+                    'updated_at'    => $createdAt,
+                ];
+                $this->agreementsByStud[$agrKey] = $tempId;
+                $this->cntAgreNew++;
+                $isAgreementNew = true;
+            } else {
+                $agreementId = $this->agreementsByStud[$agrKey];
+                if (is_numeric($agreementId)) {
+                    $this->updAgreements[$agreementId] = ['note' => $extraNote, 'updated_at' => now()->toDateTimeString()];
+                }
             }
+            $agreementId = $this->agreementsByStud[$agrKey];
         }
-        $agreementId = $this->agreementsByStud[$studentId];
 
         // ── 4. Contract status & sessions ─────────────────────────────────────
         $productId    = $this->getProductIdFromClassCode($classCode);
@@ -415,101 +440,146 @@ class ImportStudentsFromJson extends Command
         }
 
         $nowDate = date('Y-m-d');
-        if ($clsEnddate && $clsEnddate > $nowDate) {
+        
+        if ($rawStatus === '3') {
+            $finalStatus    = 3;
+            $finalStartDate = null;
+            $finalClassId   = null;
+            $totalSes = $realSes = $sumSes = $numSessions;
+            $doneSes = 0;
+        } elseif ($startDate && $startDate > $nowDate) {
             $finalStatus    = 6;
+            $finalStartDate = $startDate;
+            $finalClassId   = $classId;
+            $totalSes = $realSes = $sumSes = $numSessions;
+            $doneSes = 0;
+        } elseif ($rawStatus === '7') {
+            $finalStatus    = 7;
+            $finalStartDate = $startDate;
+            $finalClassId   = $classId;
+            $totalSes = $realSes = $sumSes = $doneSes = $numSessions;
+        } elseif ($startDate) {
+            $finalStatus    = 7;
             $finalStartDate = $startDate;
             $finalClassId   = $classId;
             $totalSes = $realSes = $sumSes = $doneSes = $numSessions;
         } else {
-            if ($rawStatus === '3') {
-                $finalStatus    = 3;
-                $finalStartDate = null;
-                $finalClassId   = null;
-            } elseif ($startDate) {
-                $finalStatus    = 7;
-                $finalStartDate = $startDate;
-                $finalClassId   = $classId;
-                $totalSes = $realSes = $sumSes = $doneSes = $numSessions;
-            } else {
-                $finalStatus    = 4;
-                $finalStartDate = null;
-                $finalClassId   = $classId;
-                $totalSes = $realSes = $sumSes = $numSessions;
-                $doneSes = 0;
-            }
+            $finalStatus    = 4;
+            $finalStartDate = null;
+            $finalClassId   = $classId;
+            $totalSes = $realSes = $sumSes = $numSessions;
+            $doneSes = 0;
         }
-
-
 
         // ── 5. Contract (1 per Excel row) ─────────────────────────────────────
-        $this->newContracts[] = [
-            '__agreement_key' => $agreementId,
-            '__student_key'   => $studentId,
-            '__class_key'     => $finalClassId,
-            '__dedup_key'     => $dedupKey,
-            '__excel_row'     => $excelRow,
-            '__extra_note'    => $extraNote,
-            'product_id'      => $productId,
-            'tuition_fee_id'  => $tuitionFeeId,
-            'ec_id'           => $ecId,
-            'ec_leader_id'    => $ecLeaderId,
-            'must_charge'     => $price,
-            'total_charged'   => $price,
-            'debt_amount'     => 0,
-            'total_sessions'  => $totalSes,
-            'real_sessions'   => $realSes,
-            'summary_sessions'=> $sumSes,
-            'done_sessions'   => $doneSes,
-            'start_date'      => $finalStartDate,
-            'status'          => $finalStatus,
-            'branch_id'       => 9,
-            'created_at'      => now()->toDateTimeString(),
-            'updated_at'      => now()->toDateTimeString(),
-        ];
-        // Mark dedup key as used in-memory (prevent duplicate in same run)
-        if ($dedupKey) {
-            $this->dedupKeys[$dedupKey] = true;
-        }
-        $this->cntContNew++;
+        if ($agrTuitionFeeId !== null && $agreementId !== null) {
+            
+            $contractKey = $agreementId . '_' . $productId;
+            $contractExistsInDb = false;
+            $existingContractId = null;
+            
+            if (is_numeric($agreementId) && isset($this->contractsByAgrProd[$contractKey])) {
+                $contractExistsInDb = true;
+                $existingContractId = $this->contractsByAgrProd[$contractKey];
+            }
 
-        // ── 6. Payments (Phân đợt) ───────────────────────────────────────────
-        if ($pay1Amount > 0) {
-            $this->newPayments[] = [
-                '__agreement_key' => $agreementId,
-                '__student_key'   => $studentId,
-                '__phase'         => 1,
-                'amount'          => $pay1Amount,
-                'must_charge'     => $pay1Amount,
-                'total'           => $pay1Amount,
-                'debt'            => 0,
-                'count'           => 1,
-                'type'            => 1,
-                'charge_date'     => $pay1Date ?: now()->format('Y-m-d'),
-                'method'          => 2, // Chuyển khoản (default guess)
-                'is_import'       => 1,
-                'note'            => 'Import đợt 1',
-                'branch_id'       => 9,
-                'created_at'      => now()->toDateTimeString(),
-            ];
-        }
-        if ($pay2Amount > 0) {
-            $this->newPayments[] = [
-                '__agreement_key' => $agreementId,
-                '__student_key'   => $studentId,
-                '__phase'         => 2,
-                'amount'          => $pay2Amount,
-                'must_charge'     => $pay2Amount,
-                'total'           => $pay2Amount,
-                'debt'            => 0,
-                'count'           => 2,
-                'type'            => 1,
-                'charge_date'     => $pay2Date ?: now()->format('Y-m-d'),
-                'method'          => 2,
-                'is_import'       => 1,
-                'note'            => 'Import đợt 2',
-                'branch_id'       => 9,
-                'created_at'      => now()->toDateTimeString(),
-            ];
+            if ($contractExistsInDb) {
+                // Update existing contract with class_id, status, dates
+                $this->updContracts[] = [
+                    'id'   => $existingContractId,
+                    'data' => [
+                        'class_id'        => $finalClassId,
+                        'start_date'      => $finalStartDate,
+                        'status'          => $finalStatus,
+                        'total_sessions'  => $totalSes,
+                        'real_sessions'   => $realSes,
+                        'summary_sessions'=> $sumSes,
+                        'done_sessions'   => $doneSes,
+                        'updated_at'      => now()->toDateTimeString(),
+                    ]
+                ];
+            } else {
+                // Prevent creating duplicates in the same run if multiple rows map to the same product under this agreement
+                if (!isset($this->newContractsKeys[$contractKey])) {
+                    $this->newContracts[] = [
+                        '__agreement_key' => $agreementId,
+                        '__student_key'   => $studentId,
+                        '__class_key'     => $finalClassId,
+                        '__dedup_key'     => $dedupKey,
+                        '__excel_row'     => $excelRow,
+                        '__extra_note'    => $extraNote,
+                        'product_id'      => $productId,
+                        'tuition_fee_id'  => $tuitionFeeId,
+                        'ec_id'           => $ecId,
+                        'ec_leader_id'    => $ecLeaderId,
+                        'must_charge'     => $price,
+                        'total_charged'   => $price,
+                        'debt_amount'     => 0,
+                        'total_sessions'  => $totalSes,
+                        'real_sessions'   => $realSes,
+                        'summary_sessions'=> $sumSes,
+                        'done_sessions'   => $doneSes,
+                        'start_date'      => $finalStartDate,
+                        'status'          => $finalStatus,
+                        'branch_id'       => 9,
+                        'created_at'      => $createdAt,
+                        'updated_at'      => $createdAt,
+                    ];
+                    $this->newContractsKeys[$contractKey] = true;
+                    $this->cntContNew++;
+                }
+            }
+
+            // Mark dedup key as used in-memory (prevent duplicate in same run)
+            if ($dedupKey) {
+                $this->dedupKeys[$dedupKey] = true;
+            }
+    
+            // ── 6. Payments (Phân đợt) ───────────────────────────────────────────
+            // Chỉ tạo payment nếu đây là agreement mới tạo. Nếu agreement đã tồn tại ở DB thì payments cũng đã tồn tại.
+            if ($isAgreementNew) {
+                if ($pay1Amount > 0) {
+                    $this->newPayments[] = [
+                        '__agreement_key' => $agreementId,
+                        '__student_key'   => $studentId,
+                        '__phase'         => 1,
+                        'amount'          => $pay1Amount,
+                        'must_charge'     => $pay1Amount,
+                        'total'           => $pay1Amount,
+                        'debt'            => 0,
+                        'count'           => 1,
+                        'type'            => 1,
+                        'charge_date'     => $pay1Date ?: now()->format('Y-m-d'),
+                        'method'          => 2, // Chuyển khoản (default guess)
+                        'is_import'       => 1,
+                        'note'            => 'Import đợt 1',
+                        'branch_id'       => 9,
+                        'created_at'      => $createdAt,
+                    ];
+                }
+                if ($pay2Amount > 0) {
+                    $this->newPayments[] = [
+                        '__agreement_key' => $agreementId,
+                        '__student_key'   => $studentId,
+                        '__phase'         => 2,
+                        'amount'          => $pay2Amount,
+                        'must_charge'     => $pay2Amount,
+                        'total'           => $pay2Amount,
+                        'debt'            => 0,
+                        'count'           => 2,
+                        'type'            => 1,
+                        'charge_date'     => $pay2Date ?: now()->format('Y-m-d'),
+                        'method'          => 2,
+                        'is_import'       => 1,
+                        'note'            => 'Import đợt 2',
+                        'branch_id'       => 9,
+                        'created_at'      => $createdAt,
+                    ];
+                }
+            }
+        } else {
+            // Unmapped course, skip financials
+            // Option to log or add tracking here if needed
         }
     }
 
@@ -689,6 +759,12 @@ class ImportStudentsFromJson extends Command
             // 5. Contract updates (status 4→7 etc.)
             foreach ($this->updContracts as $u) {
                 if (!is_int($u['id'])) continue;
+                
+                $clsKey = $u['data']['class_id'] ?? null;
+                if ($clsKey && str_starts_with((string)$clsKey, 'new_c_')) {
+                    $u['data']['class_id'] = $clsTempMap[$clsKey] ?? null;
+                }
+                
                 DB::table('contracts')->where('id', $u['id'])->update($u['data']);
             }
             if (count($this->updContracts)) {
@@ -799,30 +875,38 @@ class ImportStudentsFromJson extends Command
 
     private function getTuitionFeeIdFromCourse(string $course): ?int
     {
-        $c = strtolower(trim($course));
-        if (str_contains($c, 'combo pre_toeic + toeic lv(1+2) + toeic (s + w)')) return 50;
-        if (str_contains($c, 'combo pre_toeic + toeic lv(1+2) + toeic s')) return 46;
-        if (str_contains($c, 'combo pre_toeic + toeic lv(1+2) + toeic w')) return 53;
-        if (str_contains($c, 'combo pre_toeic + toeic lv(1+2)')) return 44;
+        // Loại bỏ toàn bộ khoảng trắng và đưa về viết thường để chống sai sót do gõ thừa/thiếu phím space
+        $c = str_replace(' ', '', mb_strtolower(trim($course), 'UTF-8'));
         
-        if (str_contains($c, 'combo toeic lv(1+2) + toeic (s + w)')) return 49;
-        if (str_contains($c, 'combo toeic lv(1+2) + toeic s')) return 54;
-        if (str_contains($c, 'combo toeic lv1+2')) return 45;
+        // Map với các gói có độ chính xác cao nhất (nhiều thành phần nhất) trước
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)+toeic(s+w)')) return 50;
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)+ônthict(l&r)+toeicw')) return 53; // Ôn thi CT + Toeic W -> tương đương combo có W
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)+ônthict(l&r)')) return 44; // Ôn thi CT -> tương đương combo 1+2
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)+toeics')) return 46;
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)+toeicw')) return 53;
+        if (str_contains($c, 'combopre_toeic+toeiclv(1+2)')) return 44;
         
-        if (str_contains($c, 'combo pre_toeic + toeic lv1 + toeic (s+w)')) return 51;
-        if (str_contains($c, 'combo pre_toeic + toeic lv1')) return 43;
+        if (str_contains($c, 'combotoeiclv(1+2)+toeic(s+w)')) return 49;
+        if (str_contains($c, 'toeiclv(1+2)+toeic(s+w)')) return 49;
+        if (str_contains($c, 'combotoeiclv(1+2)+toeics')) return 54;
+        if (str_contains($c, 'toeiclv(1+2)+toeics')) return 54;
+        if (str_contains($c, 'combotoeiclv1+2')) return 45;
+        
+        if (str_contains($c, 'combopre_toeic+toeiclv1+toeic(s+w)')) return 51;
+        if (str_contains($c, 'combopre_toeic+toeiclv1')) return 43;
 
-        if (str_contains($c, 'combo toeic lv1 + toeic (s+w)')) return 52;
+        if (str_contains($c, 'combotoeiclv1+toeic(s+w)')) return 52;
         
-        if (str_contains($c, 'combo toeic lv2 + toeic (s+ w)')) return 48;
-        if (str_contains($c, 'combo toeic lv2 + toeic s')) return 55;
-        if (str_contains($c, 'combo toeic (s+ w)')) return 47;
+        if (str_contains($c, 'combotoeiclv2+toeic(s+w)')) return 48;
+        if (str_contains($c, 'combotoeiclv2+toeics')) return 55;
+        if (str_contains($c, 'combotoeic(s+w)')) return 47;
+        if (str_contains($c, 'toeic(s+w)')) return 47;
         
         if (str_contains($c, 'pre_toeic')) return 38;
-        if (str_contains($c, 'toeic lv1')) return 39;
-        if (str_contains($c, 'toeic lv2')) return 40;
-        if (str_contains($c, 'toeic speaking')) return 41;
-        if (str_contains($c, 'toeic writing')) return 42;
+        if (str_contains($c, 'toeiclv1')) return 39;
+        if (str_contains($c, 'toeiclv2')) return 40;
+        if (str_contains($c, 'toeicspeaking')) return 41;
+        if (str_contains($c, 'toeicwriting')) return 42;
         
         return null;
     }
