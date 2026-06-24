@@ -70,7 +70,12 @@
             <student-payment :student_info="student_info" />
           </div>
         </vs-tab>
-        <vs-tab label="Khóa học">
+        <vs-tab label="Khóa học đăng ký">
+          <div class="tab-text">
+            <student-agreements :student_info="student_info" />
+          </div>
+        </vs-tab>
+        <vs-tab label="Xếp lớp">
           <div class="tab-text">
             <student-sessions :student_info="student_info" />
           </div>
@@ -107,6 +112,7 @@
   import studentInfo from './components/studentInfo.vue'
   import studentLogs from './components/studentLogs.vue'
   import studentPayment from './components/studentPayment.vue'
+  import studentAgreements from './components/studentAgreements.vue'
   import studentSessions from './components/studentSessions.vue'
   import studentAssessments from './components/studentAssessments.vue'
   import studentOperating from './components/studentOperating.vue'
@@ -120,6 +126,7 @@
       studentInfo,
       studentLogs,
       studentPayment,
+      studentAgreements,
       studentSessions,
       studentAssessments,
       studentOperating

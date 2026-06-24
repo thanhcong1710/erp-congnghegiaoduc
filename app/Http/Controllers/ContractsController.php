@@ -689,6 +689,7 @@ class ContractsController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
+        $student_id = isset($request->student_id) ? $request->student_id : null;
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -696,6 +697,11 @@ class ContractsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " c.status > 0 ";
+        
+        if ($student_id) {
+            $cond .= " AND c.student_id = " . (int)$student_id;
+        }
+
         $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
         
         // Filter by ec_id for Sales and Sale Leader (role_id 68, 69)
