@@ -52,11 +52,11 @@ class TestCallLms extends Command
         //     $lms->addStudentToClass(data_get($row, 'id'));
         //     echo data_get($row, 'id') . "/";
         // }
-        // $lms->studentWithdrawContract(2091);
         // $lms->studentWithdrawContract(2040);
         $lms = new LMSController();
+        // $lms->studentWithdrawContract(2336);
         // $lms->addOrUpdateStudent(1997);
-        $lms->addStudentToClass(1997);
+        $lms->addStudentToClass(1721);
         return "ok";
     }
 }

@@ -837,6 +837,11 @@ class LMSController extends Controller
                 // if (data_get($classLMSCurrent, 'is_transfer') !== 'Y'){
                 //     $classLMSCurrent = null;
                 // }
+                if (data_get($studentInfo, 'cls_startdate') < data_get($classLMSCurrent, 'start_date')){
+                    $start_date = date('Y-m-d',strtotime(data_get($classLMSCurrent, 'start_date'))+24*3600);
+                } else {
+                    $start_date = data_get($studentInfo, 'cls_startdate');
+                }
                 $url = sprintf('%s/data/setup.asmx/CounStudentClassAddSubmit', config('lms.url'));
                 $method = 'POST';
                 $client = new Client();
@@ -853,7 +858,7 @@ class LMSController extends Controller
                             "coun_std_type" => data_get($classLMSCurrent, 'cstd_id') && !$is_trans_semester ? "transfer" : "add",
                             "coun_cls_id" => data_get($studentInfo, 'lms_class_id'),
                             "coun_std_id" => (string)data_get($studentInfo, 'lms_id'),
-                            "coun_registration_date" => data_get($studentInfo, 'cls_startdate'),
+                            "coun_registration_date" => $start_date,
                             "coun_from_cstd_id" => 0,
                             "coun_syl_id" => data_get($studentInfo, 'syl_id'),
                             "coun_old_cstd_id" => data_get($classLMSCurrent, 'cstd_id') ?? 0,
