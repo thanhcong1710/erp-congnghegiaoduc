@@ -3,8 +3,8 @@
     <div class="rpt-header">
       <div class="rpt-header__icon"><i class="fas fa-file-invoice-dollar"></i></div>
       <div>
-        <h3 class="rpt-header__title">BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG</h3>
-        <p class="rpt-header__sub">Học sinh đã đặt cọc · Hạn TT = buổi học thứ 8</p>
+        <h3 class="rpt-header__title">BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN</h3>
+        <p class="rpt-header__sub"></p>
       </div>
     </div>
 
