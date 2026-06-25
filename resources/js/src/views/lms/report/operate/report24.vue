@@ -44,13 +44,8 @@
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
         </div>
         <div>
-          <label class="rpt-label">Hạn thanh toán (từ — đến)</label>
-          <date-picker v-model="searchData.due_range" type="date" range :clearable="true"
-            format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
-        </div>
-        <div>
-          <label class="rpt-label">Ngày thu gần nhất (từ — đến)</label>
-          <date-picker v-model="searchData.pay_range" type="date" range :clearable="true"
+          <label class="rpt-label">Ngày tạo (từ — đến)</label>
+          <date-picker v-model="searchData.date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
       </div>
@@ -83,24 +78,24 @@
         <table class="rpt-table">
           <thead>
             <tr>
-              <th style="width:44px" class="text-center">STT</th>
-              <th style="width:100px">DATE_0</th>
-              <th style="min-width:120px">Trạng thái đăng ký</th>
-              <th style="min-width:130px">Up quá trình từ</th>
-              <th style="width:180px">Khoá học đăng kí</th>
-              <th style="width:150px">Họ và tên</th>
-              <th style="width:110px">Sđt</th>
-              <th style="width:120px">Team kinh doanh</th>
-              <th style="width:180px">ĐỊA CHỈ NHẬN SÁCH</th>
-              <th style="width:120px" class="text-right">Giá khoá học</th>
-              <th style="width:100px">DK chung</th>
-              <th style="width:130px" class="text-right">Học phí đợt 1</th>
-              <th style="width:110px" class="text-center">Ngày CK 1</th>
-              <th style="width:130px" class="text-right">Học phí đợt 2</th>
-              <th style="width:110px" class="text-center">Ngày CK 2</th>
-              <th style="width:100px">Ảnh Bill</th>
-              <th style="width:100px" class="text-right">Giảm trừ</th>
-              <th style="width:120px" class="text-right">Công nợ</th>
+              <th style="min-width:50px" class="text-center">STT</th>
+              <th style="min-width:120px">Ngày tạo</th>
+              <th style="min-width:80px">Trạng thái đăng ký</th>
+              <th style="min-width:80px">Up quá trình từ</th>
+              <th style="min-width:220px">Khoá học đăng kí</th>
+              <th style="min-width:200px">Họ và tên</th>
+              <th style="min-width:130px">Sđt</th>
+              <th style="min-width:180px">Team kinh doanh</th>
+              <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
+              <th style="min-width:140px" class="text-right">Giá khoá học</th>
+              <th style="min-width:110px">DK chung</th>
+              <th style="min-width:140px" class="text-right">Học phí đợt 1</th>
+              <th style="min-width:130px" class="text-center">Ngày CK 1</th>
+              <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
+              <th style="min-width:130px" class="text-center">Ngày CK 2</th>
+              <th style="min-width:150px">Ảnh Bill</th>
+              <th style="min-width:120px" class="text-right">Giảm trừ</th>
+              <th style="min-width:140px" class="text-right">Công nợ</th>
             </tr>
           </thead>
           <tbody>
@@ -120,7 +115,7 @@
               <td class="text-center date-cell">{{ row.p1_date }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.p2_amount) }}</td>
               <td class="text-center date-cell">{{ row.p2_date }}</td>
-              <td>{{ row.img_bill }}</td>
+              <td v-html="row.img_bill"></td>
               <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
               <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
                 {{ fmtMoney(row.debt_amount) }}
@@ -174,7 +169,7 @@
           arr_branch: [], branch_id: [],
           team_obj: null, ec_obj: null, completion_status_obj: null,
           keyword: '',
-          due_range: '', pay_range: '',
+          date_range: '',
         },
         dpLang: {
           days: ['CN','T2','T3','T4','T5','T6','T7'],
@@ -190,7 +185,7 @@
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', due_range: '', pay_range: '' }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '' }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -214,14 +209,10 @@
       },
       buildPayload() {
         const branch_id = (this.searchData.arr_branch || []).map(b => b.id)
-        let due_start = '', due_end = '', pay_start = '', pay_end = ''
-        if (Array.isArray(this.searchData.due_range) && this.searchData.due_range[0]) {
-          due_start = this.fmtDate(this.searchData.due_range[0])
-          due_end   = this.fmtDate(this.searchData.due_range[1])
-        }
-        if (Array.isArray(this.searchData.pay_range) && this.searchData.pay_range[0]) {
-          pay_start = this.fmtDate(this.searchData.pay_range[0])
-          pay_end   = this.fmtDate(this.searchData.pay_range[1])
+        let start_date = '', end_date = ''
+        if (Array.isArray(this.searchData.date_range) && this.searchData.date_range[0]) {
+          start_date = this.fmtDate(this.searchData.date_range[0])
+          end_date   = this.fmtDate(this.searchData.date_range[1])
         }
         return {
           branch_id,
@@ -229,7 +220,7 @@
           ec_id:     this.searchData.ec_obj   ? this.searchData.ec_obj.id   : 0,
           completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           keyword:   this.searchData.keyword  || '',
-          due_start, due_end, pay_start, pay_end,
+          start_date, end_date,
           pagination: this.pagination,
         }
       },
@@ -260,12 +251,10 @@
         if (p.ec_id    > 0)  { keys.push('ec_id');    values.push(p.ec_id) }
         if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
-        if (p.due_start)     { keys.push('due_start'); values.push(p.due_start) }
-        if (p.due_end)       { keys.push('due_end');   values.push(p.due_end) }
-        if (p.pay_start)     { keys.push('pay_start'); values.push(p.pay_start) }
-        if (p.pay_end)       { keys.push('pay_end');   values.push(p.pay_end) }
+        if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }
+        if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
-        window.open(`/api/lms/exports/report22/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
+        window.open(`/api/lms/exports/report24/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
     },
   }

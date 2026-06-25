@@ -1723,6 +1723,7 @@ class ReportsController extends Controller
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
 
         // Phân quyền dữ liệu
         $user = Auth::user();
@@ -1760,6 +1761,12 @@ class ReportsController extends Controller
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
         }
+
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
+        }
         
         if ($start_date) {
             $cond .= " AND a.created_at >= '$start_date 00:00:00'";
@@ -1790,14 +1797,15 @@ class ReportsController extends Controller
                 END AS team_name,
                 s.address,
                 a.must_charge,
-                'Không' AS dk_chung,
+                IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
                 (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
                 (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
                 '' AS img_bill,
                 a.discount_amount AS discount,
-                a.debt_amount
+                a.debt_amount,
+                a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
@@ -1815,6 +1823,24 @@ class ReportsController extends Controller
             if ($row->p2_amount < 0) $row->p2_amount = 0;
             
             $row->p2_date = ($row->p2_amount > 0) ? $row->last_pay_date : '';
+            
+            $agrmId = $row->agreement_id;
+            $tmpPayments = u::query("SELECT attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 1");
+            $bills = [];
+            foreach($tmpPayments as $tp) {
+                if (!empty($tp->attachments)) {
+                    $arr = json_decode($tp->attachments, true);
+                    if (is_array($arr)) {
+                        $billIndex = 1;
+                        foreach($arr as $path) {
+                            $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
+                            $bills[] = '<a href="'.$fullUrl.'" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndex.'</a>';
+                            $billIndex++;
+                        }
+                    }
+                }
+            }
+            $row->img_bill = implode('<br>', $bills);
         }
 
         $data = u::makingPagination($list, $totalCount, $page, $limit);
