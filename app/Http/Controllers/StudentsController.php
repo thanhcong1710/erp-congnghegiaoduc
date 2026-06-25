@@ -348,11 +348,11 @@ class StudentsController extends Controller
         $contract_id = isset($request->contract_id) ? (int)$request->contract_id : 0;
         
         if ($contract_id) {
-            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions, c.enrolment_start_date
                 FROM contracts AS c 
                 WHERE c.id = $contract_id AND c.student_id=$student_id");
         } else {
-            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions
+            $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions, c.last_done_sessions, c.enrolment_start_date
                 FROM contracts AS c 
                 WHERE c.count_recharge = 
                     IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
@@ -365,8 +365,9 @@ class StudentsController extends Controller
             $limit = $contract_active->summary_sessions - count($done_sessions) + $contract_active->last_done_sessions;
             $limit = $limit > 0 ? $limit : 0;
             if($contract_active->class_id){
+                $start_date = $contract_active->enrolment_start_date && $contract_active->enrolment_start_date > date('Y-m-d') ? $contract_active->enrolment_start_date : date('Y-m-d');
                 $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
-                    WHERE s.class_id = $contract_active->class_id AND s.class_date > CURRENT_DATE ORDER BY s.class_date LIMIT $limit");
+                    WHERE s.class_id = $contract_active->class_id AND s.class_date >= '".$start_date."' ORDER BY s.class_date LIMIT $limit");
             }
         }
         $result = [
