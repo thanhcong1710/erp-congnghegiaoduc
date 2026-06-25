@@ -1846,4 +1846,121 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $totalCount, $page, $limit);
         return response()->json($data);
     }
+
+    public function report25(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;
+        $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
+        }
+        if ($start_date) {
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+
+        $totalRow = u::first("
+            SELECT COUNT(a.id) AS total
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ");
+        $totalCount = (int) ($totalRow->total ?? 0);
+
+        $query = "
+            SELECT
+                DATE(a.created_at) AS date_0,
+                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                'Không' AS up_process,
+                tf.name AS course_name,
+                s.name AS student_name,
+                s.gud_mobile1 AS phone,
+                CASE
+                    WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS team_name,
+                s.address,
+                a.must_charge,
+                IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
+                (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
+                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
+                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
+                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                a.discount_amount AS discount,
+                a.debt_amount,
+                a.id AS agreement_id
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY a.id DESC
+            $limitation
+        ";
+
+        $list = u::query($query);
+        
+        foreach($list as &$row) {
+            $row->p1_amount = (float)$row->p1_amount;
+            $total_paid = (float)$row->total_paid;
+            $row->p2_amount = $total_paid - $row->p1_amount;
+            if ($row->p2_amount < 0) $row->p2_amount = 0;
+            
+            $row->p2_date = ($row->p2_amount > 0) ? $row->last_pay_date : '';
+            
+            $row->xn_ketoan = ((float)$row->debt_amount > 0) ? 'R thiếu' : 'R';
+            
+            $row->luong_sale = 0;
+            if ((float)$row->debt_amount == 0) {
+                $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
+                $row->luong_sale = ((float)$row->must_charge) * $rate;
+            }
+        }
+
+        $data = u::makingPagination($list, $totalCount, $page, $limit);
+        return response()->json($data);
+    }
 }

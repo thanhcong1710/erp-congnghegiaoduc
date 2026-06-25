@@ -74,6 +74,11 @@
                 <p>13. BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-25'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>14. BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

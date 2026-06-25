@@ -2697,6 +2697,241 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report25(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $team_id = 0;
+        $ec_id = 0;
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+        $completion_status = -1;
+
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v') $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'team_id':
+                    $team_id = (int) $v;
+                    break;
+                case 'ec_id':
+                    $ec_id = (int) $v;
+                    break;
+                case 'keyword':
+                    $keyword = urldecode($v);
+                    break;
+                case 'start_date':
+                    $start_date = $v;
+                    break;
+                case 'end_date':
+                    $end_date = $v;
+                    break;
+                case 'completion_status':
+                    $completion_status = (int) $v;
+                    break;
+            }
+        }
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id;
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id;
+        }
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
+        }
+        if ($start_date) {
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+
+        $query = "
+            SELECT
+                DATE(a.created_at) AS date_0,
+                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                'Không' AS up_process,
+                tf.name AS course_name,
+                s.name AS student_name,
+                s.gud_mobile1 AS phone,
+                CASE
+                    WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS team_name,
+                s.address,
+                a.must_charge,
+                IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
+                (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
+                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
+                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
+                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                a.discount_amount AS discount,
+                a.debt_amount,
+                a.id AS agreement_id
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY a.id DESC
+        ";
+
+        $list = u::query($query);
+        
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+        $title = 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM';
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:S1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 13],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Up quá trình từ', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
+        
+        $hStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
+        ];
+        
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue($cols[$i] . '3', $h);
+        }
+        $sheet->getStyle('A3:S3')->applyFromArray($hStyle);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+
+        $widths = [8, 14, 16, 16, 22, 22, 14, 16, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
+        foreach ($cols as $i => $c) {
+            $sheet->getColumnDimension($c)->setWidth($widths[$i]);
+        }
+
+        $moneyFmt = '#,##0';
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E0E0E0']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $leftAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
+        $rowIdx = 4;
+        foreach ($list as $idx => $item) {
+            $p1_amount = (float)$item->p1_amount;
+            $total_paid = (float)$item->total_paid;
+            $p2_amount = $total_paid - $p1_amount;
+            if ($p2_amount < 0) $p2_amount = 0;
+            $p2_date = ($p2_amount > 0) ? $item->last_pay_date : '';
+            
+            $xn_ketoan = ((float)$item->debt_amount > 0) ? 'R thiếu' : 'R';
+            $luong_sale = 0;
+            if ((float)$item->debt_amount == 0) {
+                $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
+                $luong_sale = ((float)$item->must_charge) * $rate;
+            }
+
+            $sheet->setCellValue('A' . $rowIdx, $idx + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item->date_0);
+            $sheet->setCellValue('C' . $rowIdx, $item->status_register);
+            $sheet->setCellValue('D' . $rowIdx, $item->up_process);
+            $sheet->setCellValue('E' . $rowIdx, $item->course_name ?? '—');
+            $sheet->setCellValue('F' . $rowIdx, $item->student_name);
+            $sheet->setCellValue('G' . $rowIdx, $item->phone);
+            $sheet->setCellValue('H' . $rowIdx, $item->team_name ?? '—');
+            $sheet->setCellValue('I' . $rowIdx, $item->address ?? '—');
+            $sheet->setCellValue('J' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('K' . $rowIdx, $item->dk_chung);
+            $sheet->setCellValue('L' . $rowIdx, $p1_amount);
+            $sheet->setCellValue('M' . $rowIdx, $item->p1_date);
+            $sheet->setCellValue('N' . $rowIdx, $p2_amount);
+            $sheet->setCellValue('O' . $rowIdx, $p2_date);
+            $sheet->setCellValue('P' . $rowIdx, (float)$item->discount);
+            $sheet->setCellValue('Q' . $rowIdx, (float)$item->debt_amount);
+            $sheet->setCellValue('R' . $rowIdx, $xn_ketoan);
+            $sheet->setCellValue('S' . $rowIdx, (float)$luong_sale);
+
+            $sheet->getStyle("A$rowIdx:S$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:D$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("E$rowIdx:I$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("J$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("J$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("K$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("L$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("L$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("M$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("N$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("N$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("O$rowIdx")->applyFromArray($centerAlign);
+            
+            $sheet->getStyle("P$rowIdx:Q$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            
+            if ((float)$item->debt_amount > 0) {
+                $sheet->getStyle("Q$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+            }
+            
+            $sheet->getStyle("R$rowIdx")->applyFromArray($centerAlign);
+            if ($xn_ketoan === 'R') {
+                $sheet->getStyle("R$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
+            } else {
+                $sheet->getStyle("R$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+            }
+            
+            $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("S$rowIdx")->getFont()->setBold(true);
+
+            $rowIdx++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao cao doanh so chi tiet theo team.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 
