@@ -1,14 +1,14 @@
 <template>
   <div id="page-report-22">
-    <div class="rpt-header">
-      <div class="rpt-header__icon"><i class="fas fa-file-invoice-dollar"></i></div>
-      <div>
-        <h3 class="rpt-header__title">BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</h3>
-        <p class="rpt-header__sub"></p>
-      </div>
-    </div>
-
     <vx-card no-shadow class="rpt-card">
+      <div class="mb-6 flex items-center">
+        <div class="mr-3 flex items-center justify-center p-3 rounded-lg" style="background:rgba(79, 70, 229, 0.1); color:#4f46e5;">
+          <i class="fas fa-file-invoice-dollar text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</h3>
+        </div>
+      </div>
       <!-- Filters -->
       <div class="rpt-filter-grid mb-5">
         <div>

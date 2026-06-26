@@ -1,14 +1,14 @@
 <template>
   <div id="page-report-14">
-    <div class="rpt-header">
-      <div class="rpt-header__icon"><i class="fas fa-building"></i></div>
-      <div>
-        <h3 class="rpt-header__title">BÁO CÁO TỔNG QUAN DOANH THU THEO TRUNG TÂM</h3>
-        <p class="rpt-header__sub">Tổng hợp doanh thu học sinh đi học theo trung tâm</p>
-      </div>
-    </div>
-
     <vx-card no-shadow class="rpt-card">
+      <div class="mb-6 flex items-center">
+        <div class="mr-3 flex items-center justify-center p-3 rounded-lg" style="background:rgba(79, 70, 229, 0.1); color:#4f46e5;">
+          <i class="fas fa-building text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO TỔNG QUAN DOANH THU THEO TRUNG TÂM</h3>
+        </div>
+      </div>
       <div class="rpt-filter-grid mb-5" style="max-width:320px;">
         <div>
           <label class="rpt-label">Thời gian</label>

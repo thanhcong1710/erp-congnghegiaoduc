@@ -1,14 +1,14 @@
 <template>
   <div id="page-report-19">
-    <div class="rpt-header mb-5">
-      <div class="rpt-header__icon"><i class="fas fa-users"></i></div>
-      <div>
-        <h3 class="rpt-header__title">SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</h3>
-        <p class="rpt-header__sub">Thống kê học viên đã thanh toán đủ theo từng gói học phí</p>
-      </div>
-    </div>
-
     <vx-card no-shadow class="rpt-card">
+      <div class="mb-6 flex items-center">
+        <div class="mr-3 flex items-center justify-center p-3 rounded-lg" style="background:rgba(79, 70, 229, 0.1); color:#4f46e5;">
+          <i class="fas fa-users text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</h3>
+        </div>
+      </div>
       <div class="rpt-filter-grid mb-5">
         <div>
           <label class="rpt-label">Trung tâm</label>
