@@ -158,10 +158,10 @@
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
-.rpt-table thead th { color:white; font-weight:600; padding:11px 12px; white-space:nowrap; border:none; }
+.rpt-table thead th { color:white; font-weight:600; padding:11px 12px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:10px 12px; vertical-align:middle; }
+.rpt-row td { padding:10px 12px; vertical-align:middle; border:1px solid #e5e7eb; }
 
 .font-medium { font-weight:500; }
 .student-badge { display:inline-block; background:#eef2ff; color:#4338ca; border-radius:20px; padding:3px 14px; font-weight:700; font-size:.88rem; }

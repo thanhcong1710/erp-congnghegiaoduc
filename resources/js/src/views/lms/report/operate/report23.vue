@@ -183,7 +183,7 @@
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:9px 10px; vertical-align:middle; border-bottom:1px solid #f3f4f6; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; border-bottom:1px solid #f3f4f6; }
 
 /* Total row */
 .rpt-total td { background:#eef2ff; font-weight:700; padding:11px 10px; font-size:.88rem; border-top:2px solid #4f46e5; color:#1e1b4b; }

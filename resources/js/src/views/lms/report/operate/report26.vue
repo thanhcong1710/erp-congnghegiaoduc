@@ -1,9 +1,9 @@
 <template>
-  <div id="page-report-22">
+  <div id="page-report-26">
     <div class="rpt-header">
-      <div class="rpt-header__icon"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div class="rpt-header__icon"><i class="fas fa-users"></i></div>
       <div>
-        <h3 class="rpt-header__title">BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</h3>
+        <h3 class="rpt-header__title">BÁO CÁO CHI TIẾT XẾP LỚP</h3>
         <p class="rpt-header__sub"></p>
       </div>
     </div>
@@ -34,14 +34,26 @@
           </multiselect>
         </div>
         <div>
-          <label class="rpt-label">Trạng thái công nợ</label>
-          <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Hoàn thành (công nợ = 0)'}, {id:0, name:'Chưa hoàn thành'}]" label="name" track-by="id"
+          <label class="rpt-label">Trạng thái</label>
+          <multiselect v-model="searchData.class_status_obj" :options="[{id:1, name:'Đã xếp lớp'}, {id:0, name:'Chưa xếp lớp'}]" label="name" track-by="id"
             placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
+          </multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Khóa lẻ</label>
+          <multiselect v-model="searchData.product_obj" :options="product_list" label="name" track-by="id"
+            placeholder="Chọn khóa lẻ" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
         <div>
           <label class="rpt-label">Tìm kiếm học sinh</label>
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
+        </div>
+        <div>
+          <label class="rpt-label">Ngày khai giảng (từ — đến)</label>
+          <date-picker v-model="searchData.start_date_range" type="date" range :clearable="true"
+            format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
         <div>
           <label class="rpt-label">Ngày tạo (từ — đến)</label>
@@ -57,21 +69,6 @@
         <span class="rpt-badge-count">{{ pagination.total }} bản ghi</span>
       </div>
 
-      <!-- Summary pills -->
-      <div class="rpt-summary mb-5" v-if="summary">
-        <div class="rpt-pill rpt-pill--blue">
-          <span class="rpt-pill__label">Tổng học phí</span>
-          <span class="rpt-pill__value">{{ fmtMoney(summary.total_must) }}</span>
-        </div>
-        <div class="rpt-pill rpt-pill--green">
-          <span class="rpt-pill__label">Đã thu</span>
-          <span class="rpt-pill__value">{{ fmtMoney(summary.total_charged) }}</span>
-        </div>
-        <div class="rpt-pill rpt-pill--red">
-          <span class="rpt-pill__label">Còn phải thu</span>
-          <span class="rpt-pill__value">{{ fmtMoney(summary.total_debt) }}</span>
-        </div>
-      </div>
 
       <!-- Table -->
       <div class="rpt-table-wrap">
@@ -80,53 +77,33 @@
             <tr>
               <th style="min-width:50px" class="text-center">STT</th>
               <th style="min-width:120px">Ngày tạo</th>
-              <th style="min-width:80px">Trạng thái đăng ký</th>
-              <th style="min-width:80px">Up quá trình từ</th>
-              <th style="min-width:220px">Khoá học đăng kí</th>
-              <th style="min-width:200px">Họ và tên</th>
-              <th style="min-width:130px">Sđt</th>
-              <th style="min-width:180px">Team kinh doanh</th>
-              <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
-              <th style="min-width:140px" class="text-right">Giá khoá học</th>
-              <th style="min-width:110px">DK chung</th>
-              <th style="min-width:140px" class="text-right">Học phí đợt 1</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 1</th>
-              <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 2</th>
-              <th style="min-width:120px" class="text-right">Giảm trừ</th>
-              <th style="min-width:140px" class="text-right">Công nợ</th>
-              <th style="min-width:120px" class="text-center">XN Kế toán</th>
-              <th style="min-width:140px" class="text-right">Lương sale</th>
+              <th style="min-width:180px">Họ tên HS</th>
+              <th style="min-width:120px">Mã HS</th>
+              <th style="min-width:120px">SĐT</th>
+              <th style="min-width:200px">Khóa học đăng ký</th>
+              <th style="min-width:150px">Khóa lẻ</th>
+              <th style="min-width:150px">Lớp đăng ký</th>
+              <th style="min-width:120px" class="text-center">Ngày khai giảng</th>
+              <th style="min-width:150px">Team kinh doanh</th>
+              <th style="min-width:150px">Thành viên sale</th>
             </tr>
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(row, idx) in datas" :key="idx">
               <td class="text-center text-muted">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-              <td class="date-cell">{{ row.date_0 }}</td>
-              <td>{{ row.status_register }}</td>
-              <td>{{ row.up_process }}</td>
-              <td>{{ row.course_name || '—' }}</td>
+              <td class="date-cell">{{ row.created_at }}</td>
               <td class="student-name">{{ row.student_name }}</td>
+              <td class="lms-code">{{ row.lms_code }}</td>
               <td class="student-phone text-muted">{{ row.phone }}</td>
+              <td>{{ row.course_name || '—' }}</td>
+              <td>{{ row.product_name || '—' }}</td>
+              <td>{{ row.class_name || '—' }}</td>
+              <td class="text-center date-cell">{{ row.start_date || '—' }}</td>
               <td>{{ row.team_name || '—' }}</td>
-              <td>{{ row.address || '—' }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
-              <td>{{ row.dk_chung }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
-              <td class="text-center date-cell">{{ row.p1_date }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.p2_amount) }}</td>
-              <td class="text-center date-cell">{{ row.p2_date }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
-              <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
-                {{ fmtMoney(row.debt_amount) }}
-              </td>
-              <td class="text-center font-bold" :class="row.xn_ketoan === 'R' ? 'text-success' : 'text-danger'">
-                {{ row.xn_ketoan }}
-              </td>
-              <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
+              <td>{{ row.ec_name || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="18" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="11" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -164,16 +141,17 @@
     components: { Multiselect, DatePicker },
     data() {
       return {
-        branch_list: [], team_list: [], ec_list: [],
+        branch_list: [], team_list: [], ec_list: [], product_list: [],
         datas: [],
         summary: null,
         limitSource: [20, 50, 100, 500],
         pagination: { cpage: 1, total: 0, limit: 20, init: 0 },
         searchData: {
           arr_branch: [], branch_id: [],
-          team_obj: null, ec_obj: null, completion_status_obj: null,
+          team_obj: null, ec_obj: null, class_status_obj: null, product_obj: null,
           keyword: '',
           date_range: '',
+          start_date_range: '',
         },
         dpLang: {
           days: ['CN','T2','T3','T4','T5','T6','T7'],
@@ -185,11 +163,12 @@
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
       axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
+      axios.g('/api/system/products').then(r => { this.product_list = r.data || [] })
       this.getData()
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '' }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, class_status_obj: null, product_obj: null, keyword: '', date_range: '', start_date_range: '' }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -218,13 +197,20 @@
           start_date = this.fmtDate(this.searchData.date_range[0])
           end_date   = this.fmtDate(this.searchData.date_range[1])
         }
+        let cls_start_date = '', cls_end_date = ''
+        if (Array.isArray(this.searchData.start_date_range) && this.searchData.start_date_range[0]) {
+          cls_start_date = this.fmtDate(this.searchData.start_date_range[0])
+          cls_end_date   = this.fmtDate(this.searchData.start_date_range[1])
+        }
         return {
           branch_id,
           team_id:   this.searchData.team_obj ? this.searchData.team_obj.id : 0,
           ec_id:     this.searchData.ec_obj   ? this.searchData.ec_obj.id   : 0,
-          completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
+          class_status: this.searchData.class_status_obj ? this.searchData.class_status_obj.id : -1,
+          product_id: this.searchData.product_obj ? this.searchData.product_obj.id : 0,
           keyword:   this.searchData.keyword  || '',
           start_date, end_date,
+          cls_start_date, cls_end_date,
           pagination: this.pagination,
         }
       },
@@ -235,12 +221,11 @@
         }
         this.searchData.branch_id = ids
         this.$vs.loading()
-        axios.p('/api/lms/reports/25', this.buildPayload())
+        axios.p('/api/lms/reports/26', this.buildPayload())
           .then(res => {
             this.$vs.loading.close()
             this.datas   = res.data.list    || []
             this.pagination = res.data.paging || this.pagination
-            this.summary = res.data.summary || null
             setTimeout(() => { this.pagination.init = 1 }, 500)
           })
           .catch(e => { console.error(e); this.$vs.loading.close() })
@@ -253,12 +238,15 @@
         if (p.branch_id && p.branch_id.length)  { keys.push('branch_id');  values.push(p.branch_id.join('-')) }
         if (p.team_id  > 0)  { keys.push('team_id');  values.push(p.team_id) }
         if (p.ec_id    > 0)  { keys.push('ec_id');    values.push(p.ec_id) }
-        if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
+        if (p.class_status !== -1) { keys.push('class_status'); values.push(p.class_status) }
+        if (p.product_id > 0) { keys.push('product_id'); values.push(p.product_id) }
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
         if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
+        if (p.cls_start_date) { keys.push('cls_start_date'); values.push(p.cls_start_date) }
+        if (p.cls_end_date)   { keys.push('cls_end_date');   values.push(p.cls_end_date) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
-        window.open(`/api/lms/exports/report25/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
+        window.open(`/api/lms/exports/report26/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
     },
   }
@@ -266,7 +254,7 @@
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-#page-report-22 { font-family: 'Inter', sans-serif; }
+#page-report-26 { font-family: 'Inter', sans-serif; }
 
 .rpt-header { display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; padding:20px 24px; border-radius:12px; box-shadow:0 4px 20px rgba(79,70,229,.3); margin-bottom:20px; }
 .rpt-header__icon { font-size:26px; width:50px; height:50px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }

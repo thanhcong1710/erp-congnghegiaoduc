@@ -2984,6 +2984,211 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+    public function report26(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $team_id = 0;
+        $ec_id = 0;
+        $product_id = 0;
+        $class_status = -1;
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+        $cls_start_date = '';
+        $cls_end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v') $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'team_id':
+                    $team_id = (int) $v;
+                    break;
+                case 'ec_id':
+                    $ec_id = (int) $v;
+                    break;
+                case 'product_id':
+                    $product_id = (int) $v;
+                    break;
+                case 'class_status':
+                    $class_status = (int) $v;
+                    break;
+                case 'keyword':
+                    $keyword = urldecode($v);
+                    break;
+                case 'start_date':
+                    $start_date = $v;
+                    break;
+                case 'end_date':
+                    $end_date = $v;
+                    break;
+                case 'cls_start_date':
+                    $cls_start_date = $v;
+                    break;
+                case 'cls_end_date':
+                    $cls_end_date = $v;
+                    break;
+            }
+        }
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $cond = " c.status > 0 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND c.ec_id = $ec_id";
+        }
+        if ($product_id > 0) {
+            $cond .= " AND c.product_id = $product_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($class_status == 1) {
+            $cond .= " AND c.class_id > 0";
+        } elseif ($class_status == 0) {
+            $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
+        }
+        if ($start_date) {
+            $cond .= " AND c.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+        if ($cls_start_date) {
+            $cond .= " AND cls.cls_startdate >= '$cls_start_date 00:00:00'";
+        }
+        if ($cls_end_date) {
+            $cond .= " AND cls.cls_startdate <= '$cls_end_date 23:59:59'";
+        }
+
+        $query = "
+            SELECT
+                c.created_at,
+                s.name AS student_name,
+                s.lms_code,
+                s.gud_mobile1 AS phone,
+                tf.name AS course_name,
+                p.name AS product_name,
+                cls.cls_name AS class_name,
+                cls.cls_startdate AS start_date,
+                u_team.name AS team_name,
+                u_ec.name AS ec_name
+            FROM contracts AS c
+            INNER JOIN students AS s ON s.id = c.student_id
+            LEFT JOIN agreements AS a ON a.id = c.agreement_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            LEFT JOIN products AS p ON p.id = c.product_id
+            LEFT JOIN classes AS cls ON cls.id = c.class_id
+            LEFT JOIN users AS u_team ON u_team.id = c.ec_leader_id
+            LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+            WHERE $cond
+            ORDER BY c.id DESC
+        ";
+
+        $list = u::query($query);
+        
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+        $title = 'BÁO CÁO CHI TIẾT XẾP LỚP';
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:K1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 13],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        $headers = ['STT', 'Ngày tạo', 'Họ và tên HS', 'Mã HS', 'SĐT', 'Khoá học đăng kí', 'Khóa lẻ', 'Lớp đăng ký', 'Ngày khai giảng', 'Team kinh doanh', 'Thành viên sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+        
+        $hStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
+        ];
+        
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue($cols[$i] . '3', $h);
+        }
+        $sheet->getStyle('A3:K3')->applyFromArray($hStyle);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+
+        $widths = [8, 14, 22, 14, 14, 22, 22, 22, 14, 16, 16];
+        foreach ($cols as $i => $c) {
+            $sheet->getColumnDimension($c)->setWidth($widths[$i]);
+        }
+
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E0E0E0']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $leftAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+
+        $rowIdx = 4;
+        foreach ($list as $idx => $item) {
+            $sheet->setCellValue('A' . $rowIdx, $idx + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item->created_at);
+            $sheet->setCellValue('C' . $rowIdx, $item->student_name);
+            $sheet->setCellValue('D' . $rowIdx, $item->lms_code);
+            $sheet->setCellValue('E' . $rowIdx, $item->phone);
+            $sheet->setCellValue('F' . $rowIdx, $item->course_name ?? '—');
+            $sheet->setCellValue('G' . $rowIdx, $item->product_name ?? '—');
+            $sheet->setCellValue('H' . $rowIdx, $item->class_name ?? '—');
+            $sheet->setCellValue('I' . $rowIdx, $item->start_date ?? '—');
+            $sheet->setCellValue('J' . $rowIdx, $item->team_name ?? '—');
+            $sheet->setCellValue('K' . $rowIdx, $item->ec_name ?? '—');
+
+            $sheet->getStyle("A$rowIdx:K$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("B$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("C$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("D$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("E$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("F$rowIdx:K$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("I$rowIdx")->applyFromArray($centerAlign);
+
+            $rowIdx++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao cao chi tiet xep lop.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 

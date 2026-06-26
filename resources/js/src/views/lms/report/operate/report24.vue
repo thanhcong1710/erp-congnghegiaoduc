@@ -309,7 +309,7 @@
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; border:1px solid #e5e7eb; }
 
 .lms-code { font-weight:600; color:#4338ca; font-size:.8rem; }
 .student-name { font-weight:600; }

@@ -153,7 +153,7 @@
 .rpt-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; max-width: 820px; }
 .rpt-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
 .rpt-table thead tr { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-.rpt-table thead th { color: white; font-weight: 600; padding: 12px 16px; white-space: nowrap; border: none; }
+.rpt-table thead th { color: white; font-weight: 600; padding: 12px 16px; white-space: nowrap; border:1px solid rgba(255,255,255,0.2); }
 
 /* Header alignment */
 .th-label { text-align: left;  width: 44%; }
@@ -161,7 +161,7 @@
 
 /* Row */
 .rpt-row { border-bottom: 1px solid #f3f4f6; }
-.rpt-row td { padding: 11px 16px; vertical-align: middle; }
+.rpt-row td { padding: 11px 16px; vertical-align:middle; border:1px solid #e5e7eb; }
 .row-bold td { background: #f0f4ff; font-weight: 700; font-size: .95rem; }
 .row-even td { background: #fafaff; }
 .rpt-row:hover td { background: #eef2ff; transition: background .12s; }

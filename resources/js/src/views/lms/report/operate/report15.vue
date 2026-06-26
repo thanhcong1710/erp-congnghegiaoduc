@@ -221,7 +221,7 @@
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
-.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:none; }
+.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
 .rpt-row td { padding:9px 10px; vertical-align:top; }
