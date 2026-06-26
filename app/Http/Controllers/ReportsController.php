@@ -1841,6 +1841,42 @@ class ReportsController extends Controller
                 }
             }
             $row->img_bill = implode('<br>', $bills);
+
+            $row->p1_amount_cd = 0;
+            $row->p1_date_cd = '';
+            $row->p2_amount_cd = 0;
+            $row->p2_date_cd = '';
+            $row->img_bill_cd = '';
+
+            $tmpPaymentsCd = u::query("SELECT charge_amount, charge_date, attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 0 ORDER BY id ASC");
+            if (count($tmpPaymentsCd) > 0) {
+                $row->p1_amount_cd = (float)$tmpPaymentsCd[0]->charge_amount;
+                $row->p1_date_cd = substr($tmpPaymentsCd[0]->charge_date, 0, 10);
+                $total_paid_cd = 0;
+                $last_pay_date_cd = '';
+                $bills_cd = [];
+                $billIndexCd = 1;
+                foreach($tmpPaymentsCd as $tp_cd) {
+                    $total_paid_cd += (float)$tp_cd->charge_amount;
+                    if ($tp_cd->charge_date) {
+                        $last_pay_date_cd = substr($tp_cd->charge_date, 0, 10);
+                    }
+                    if (!empty($tp_cd->attachments)) {
+                        $arr = json_decode($tp_cd->attachments, true);
+                        if (is_array($arr)) {
+                            foreach($arr as $path) {
+                                $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
+                                $bills_cd[] = '<a href="'.$fullUrl.'" target="_blank" style="color:red; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndexCd.'</a>';
+                                $billIndexCd++;
+                            }
+                        }
+                    }
+                }
+                $row->p2_amount_cd = $total_paid_cd - $row->p1_amount_cd;
+                if ($row->p2_amount_cd < 0) $row->p2_amount_cd = 0;
+                $row->p2_date_cd = ($row->p2_amount_cd > 0) ? $last_pay_date_cd : '';
+                $row->img_bill_cd = implode('<br>', $bills_cd);
+            }
         }
 
         $data = u::makingPagination($list, $totalCount, $page, $limit);

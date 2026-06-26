@@ -78,24 +78,33 @@
         <table class="rpt-table">
           <thead>
             <tr>
-              <th style="min-width:50px" class="text-center">STT</th>
-              <th style="min-width:120px">Ngày tạo</th>
-              <th style="min-width:80px">Trạng thái đăng ký</th>
-              <th style="min-width:80px">Up quá trình từ</th>
-              <th style="min-width:220px">Khoá học đăng kí</th>
-              <th style="min-width:200px">Họ và tên</th>
-              <th style="min-width:130px">Sđt</th>
-              <th style="min-width:180px">Team kinh doanh</th>
-              <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
-              <th style="min-width:140px" class="text-right">Giá khoá học</th>
-              <th style="min-width:110px">DK chung</th>
+              <th style="min-width:50px" class="text-center" rowspan="2">STT</th>
+              <th style="min-width:120px" rowspan="2">Ngày tạo</th>
+              <th style="min-width:80px" rowspan="2">Trạng thái đăng ký</th>
+              <th style="min-width:80px" rowspan="2">Up quá trình từ</th>
+              <th style="min-width:220px" rowspan="2">Khoá học đăng kí</th>
+              <th style="min-width:200px" rowspan="2">Họ và tên</th>
+              <th style="min-width:130px" rowspan="2">Sđt</th>
+              <th style="min-width:180px" rowspan="2">Team kinh doanh</th>
+              <th style="min-width:250px" rowspan="2">ĐỊA CHỈ NHẬN SÁCH</th>
+              <th style="min-width:140px" class="text-right" rowspan="2">Giá khoá học</th>
+              <th style="min-width:110px" rowspan="2">DK chung</th>
+              <th class="text-center" colspan="5" style="border-bottom: 1px solid rgba(255,255,255,0.2);">ĐÃ DUYỆT</th>
+              <th class="text-center" colspan="5" style="border-bottom: 1px solid rgba(255,255,255,0.2); border-left: 1px solid rgba(255,255,255,0.2);">CHƯA DUYỆT</th>
+              <th style="min-width:120px" class="text-right" rowspan="2">Giảm trừ</th>
+              <th style="min-width:140px" class="text-right" rowspan="2">Công nợ</th>
+            </tr>
+            <tr>
               <th style="min-width:140px" class="text-right">Học phí đợt 1</th>
               <th style="min-width:130px" class="text-center">Ngày CK 1</th>
               <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
               <th style="min-width:130px" class="text-center">Ngày CK 2</th>
               <th style="min-width:150px">Ảnh Bill</th>
-              <th style="min-width:120px" class="text-right">Giảm trừ</th>
-              <th style="min-width:140px" class="text-right">Công nợ</th>
+              <th style="min-width:140px; border-left: 1px solid rgba(255,255,255,0.2);" class="text-right">Học phí đợt 1</th>
+              <th style="min-width:130px" class="text-center">Ngày CK 1</th>
+              <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
+              <th style="min-width:130px" class="text-center">Ngày CK 2</th>
+              <th style="min-width:150px">Ảnh Bill</th>
             </tr>
           </thead>
           <tbody>
@@ -116,13 +125,18 @@
               <td class="text-right money-cell">{{ fmtMoney(row.p2_amount) }}</td>
               <td class="text-center date-cell">{{ row.p2_date }}</td>
               <td v-html="row.img_bill"></td>
+              <td class="text-right money-cell" style="border-left: 1px solid #e5e7eb;">{{ fmtMoney(row.p1_amount_cd) }}</td>
+              <td class="text-center date-cell">{{ row.p1_date_cd }}</td>
+              <td class="text-right money-cell">{{ fmtMoney(row.p2_amount_cd) }}</td>
+              <td class="text-center date-cell">{{ row.p2_date_cd }}</td>
+              <td v-html="row.img_bill_cd"></td>
               <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
               <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
                 {{ fmtMoney(row.debt_amount) }}
               </td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="18" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="23" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -289,13 +303,13 @@
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
-.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:none; text-align:left; }
+.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); text-align:left; }
 .rpt-table thead th.text-right  { text-align:right; }
 .rpt-table thead th.text-center { text-align:center; }
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:9px 10px; vertical-align:middle; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
 
 .lms-code { font-weight:600; color:#4338ca; font-size:.8rem; }
 .student-name { font-weight:600; }
