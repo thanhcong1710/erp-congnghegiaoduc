@@ -107,8 +107,8 @@ Vue.filter('getStatusText', function (status) {
   return 'Không kích hoạt'
 })
 
-Vue.filter('formatNumber', (v) => !isNaN(v) && v > 0 ? parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').slice(0, -2) : 0)
-Vue.filter('formatMoney', (v, c = 'đ') => !isNaN(v) && v > 0 && c !== '' ? `${parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').slice(0, -2)}${c}` : `0${c}`)
+Vue.filter('formatNumber', (v) => !isNaN(v) && v > 0 ? parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1.').slice(0, -2) : 0)
+Vue.filter('formatMoney', (v, c = 'đ') => !isNaN(v) && v > 0 && c !== '' ? `${parseInt(v).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1.').slice(0, -2)}${c}` : `0${c}`)
 Vue.filter('formatDateView', (v) => v ? moment(v).format('DD/MM/YYYY'):'')
 
 Vue.filter('formatDateViewDay', function (v) {

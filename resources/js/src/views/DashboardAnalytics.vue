@@ -8,10 +8,355 @@
 ========================================================================================== -->
 
 <template>
-  <div id="dashboard-analytics">
-    <div class="vx-row">
-      <div class="vx-col w-full mb-4 dash-select-branch">
-        <vx-input-group class="mb-base mr-3">
+  <div id="dashboard-analytics" v-if="overviewData">
+    <!-- GREETING CARD (Common for all roles) -->
+    <div class="vx-row mb-6">
+      <div class="vx-col w-full">
+        <vx-card slot="no-body" class="p-6 text-white rounded-lg shadow-lg relative overflow-hidden h-full" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+          <div class="relative z-10 flex items-center justify-between">
+            <div>
+              <h2 class="text-3xl font-bold mb-2 text-white">Xin chào, {{ $store.state.AppActiveUser.displayName }}! 👋</h2>
+              <p class="text-lg text-white opacity-90">{{ textGreeting }}</p>
+            </div>
+            <div class="hidden sm:flex items-center justify-center p-4 bg-white rounded-full shadow-md" style="color: #4f46e5;">
+              <feather-icon icon="AwardIcon" svgClasses="w-10 h-10"></feather-icon>
+            </div>
+          </div>
+          <img src="@assets/images/elements/decore-left.png" class="absolute left-0 top-0 opacity-50 pointer-events-none" alt="Decore Left" width="200" />
+          <img src="@assets/images/elements/decore-right.png" class="absolute right-0 top-0 opacity-50 pointer-events-none" alt="Decore Right" width="175" />
+        </vx-card>
+      </div>
+    </div>
+
+    <!-- SALES DASHBOARD -->
+    <template v-if="overviewData.is_sales && !overviewData.is_admin">
+      <div class="mb-5 flex items-center">
+        <feather-icon icon="TrendingUpIcon" class="mr-2 text-primary" svgClasses="w-6 h-6"></feather-icon>
+        <h3 class="text-xl font-bold text-gray-800">Hiệu suất Cá nhân</h3>
+      </div>
+      
+      <!-- Current Month KPIs -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Tháng hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- New Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-success h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Mới</h4>
+              <feather-icon icon="FilePlusIcon" class="text-success bg-success-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-success">{{ overviewData.sales.current_month.new_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-success">{{ (overviewData.sales.current_month.new_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Up-level Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-primary h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Up-level</h4>
+              <feather-icon icon="ArrowUpCircleIcon" class="text-primary bg-primary-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-primary">{{ overviewData.sales.current_month.uplevel_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-primary">{{ (overviewData.sales.current_month.uplevel_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Generated Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-warning h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Doanh thu phát sinh</h4>
+              <feather-icon icon="DollarSignIcon" class="text-warning bg-warning-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-warning">{{ (overviewData.sales.current_month.revenue / 1000000) | formatNumber }} <span class="text-base font-normal text-gray-500">tr</span></h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+
+      <!-- Current Year KPIs -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Lũy kế năm hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- Total Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-primary-light text-primary rounded-lg mr-4">
+                <feather-icon icon="LayersIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div class="w-full flex justify-between items-center">
+                <div>
+                  <p class="text-gray-500 font-medium text-sm uppercase">Tổng số HĐ</p>
+                  <h2 class="text-2xl font-bold text-primary">{{ overviewData.sales.current_year.total_contracts }}</h2>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">G/trị: <span class="font-bold">{{ (overviewData.sales.current_year.total_contracts_value / 1000000) | formatNumber }}tr</span></p>
+                </div>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-success-light text-success rounded-lg mr-4">
+                <feather-icon icon="CreditCardIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="text-gray-500 font-medium text-sm uppercase">Tổng Doanh thu</p>
+                <h2 class="text-2xl font-bold text-success">{{ (overviewData.sales.current_year.total_revenue / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Debt -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md bg-danger-gradient text-white h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 rounded-lg mr-4" style="background: rgba(0,0,0,0.1);">
+                <feather-icon icon="AlertTriangleIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="font-medium text-sm uppercase opacity-80">Tổng Công nợ</p>
+                <h2 class="text-2xl font-bold text-white">{{ (overviewData.sales.current_year.total_debt / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+    </template>
+
+
+    <!-- LEADER DASHBOARD -->
+    <template v-if="overviewData.is_leader && !overviewData.is_admin">
+      <div class="mb-5 flex items-center mt-8">
+        <feather-icon icon="UsersIcon" class="mr-2 text-primary" svgClasses="w-6 h-6"></feather-icon>
+        <h3 class="text-xl font-bold text-gray-800">Hiệu suất Đội Nhóm (Team)</h3>
+      </div>
+      
+      <!-- Current Month KPIs Leader -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Tháng hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- New Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-success h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Mới</h4>
+              <feather-icon icon="FilePlusIcon" class="text-success bg-success-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-success">{{ overviewData.leader.current_month.new_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-success">{{ (overviewData.leader.current_month.new_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Up-level Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-primary h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Up-level</h4>
+              <feather-icon icon="ArrowUpCircleIcon" class="text-primary bg-primary-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-primary">{{ overviewData.leader.current_month.uplevel_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-primary">{{ (overviewData.leader.current_month.uplevel_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Generated Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-warning h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Doanh thu phát sinh</h4>
+              <feather-icon icon="DollarSignIcon" class="text-warning bg-warning-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-warning">{{ (overviewData.leader.current_month.revenue / 1000000) | formatNumber }} <span class="text-base font-normal text-gray-500">tr</span></h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+
+      <!-- Current Year KPIs Leader -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Lũy kế năm hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- Total Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-primary-light text-primary rounded-lg mr-4">
+                <feather-icon icon="LayersIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div class="w-full flex justify-between items-center">
+                <div>
+                  <p class="text-gray-500 font-medium text-sm uppercase">Tổng số HĐ</p>
+                  <h2 class="text-2xl font-bold text-primary">{{ overviewData.leader.current_year.total_contracts }}</h2>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">G/trị: <span class="font-bold">{{ (overviewData.leader.current_year.total_contracts_value / 1000000) | formatNumber }}tr</span></p>
+                </div>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-success-light text-success rounded-lg mr-4">
+                <feather-icon icon="CreditCardIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="text-gray-500 font-medium text-sm uppercase">Tổng Doanh thu</p>
+                <h2 class="text-2xl font-bold text-success">{{ (overviewData.leader.current_year.total_revenue / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Debt -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md bg-danger-gradient text-white h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 rounded-lg mr-4" style="background: rgba(0,0,0,0.1);">
+                <feather-icon icon="AlertTriangleIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="font-medium text-sm uppercase opacity-80">Tổng Công nợ</p>
+                <h2 class="text-2xl font-bold text-white">{{ (overviewData.leader.current_year.total_debt / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+      
+                        <!-- Leaderboard & Chart -->
+      <div class="vx-row mb-base mt-8 flex flex-wrap items-stretch">
+        <!-- Table -->
+        <div class="vx-col w-full lg:w-7/12 mb-4">
+          <vx-card class="shadow-md border-0 h-full" title="🏆 Top Thành Viên">
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+              <table class="w-full text-left border-collapse border border-gray-200">
+                <thead class="sticky top-0 z-10 shadow-sm">
+                  <tr class="text-gray-500 uppercase text-xs tracking-wider border-b border-gray-200">
+                    <th class="py-3 px-3 font-semibold text-center border-r border-b border-gray-200 w-16" style="background-color: #f8f8f8;">STT</th>
+                    <th class="py-3 px-3 font-semibold border-r border-b border-gray-200" style="background-color: #f8f8f8;">Thành viên</th>
+                    <th class="py-3 px-3 font-semibold text-center w-24 border-r border-b border-gray-200" style="background-color: #f8f8f8;">Hợp đồng</th>
+                    <th class="py-3 px-3 font-semibold w-1/4 border-r border-b border-gray-200" style="background-color: #f8f8f8;">Tiến độ</th>
+                    <th class="py-3 px-3 font-semibold text-right border-b border-gray-200" style="background-color: #f8f8f8;">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(mem, idx) in overviewData.leader.members" :key="idx" class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-3 text-center border-r border-gray-200">
+                      <div class="font-bold text-gray-600">
+                        {{ idx + 1 }}
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 border-r border-gray-200">
+                      <div class="flex items-center">
+                        <div class="w-8 h-8 rounded bg-primary-light text-primary flex items-center justify-center font-bold mr-3 shadow-sm text-xs">
+                          {{ mem.name.charAt(0).toUpperCase() }}
+                        </div>
+                        <div>
+                          <p class="font-bold text-gray-800 text-sm">{{ mem.name }}</p>
+                          <p class="text-xs text-gray-500">Sales</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-center border-r border-gray-200">
+                      <span class="font-medium text-gray-600">{{ mem.contracts }}</span>
+                    </td>
+                    <td class="py-3 px-3 border-r border-gray-200">
+                      <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-gray-700">{{ ((mem.revenue / (overviewData.leader.members[0].revenue || 1)) * 100).toFixed(0) }}%</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-primary h-1.5 rounded-full" :style="'width: ' + ((mem.revenue / (overviewData.leader.members[0].revenue || 1)) * 100) + '%'"></div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                      <div class="flex items-center justify-end text-success font-bold text-sm">
+                        {{ mem.revenue | formatNumber }} đ
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Chart -->
+        <div class="vx-col w-full lg:w-5/12 mb-4">
+          <vx-card class="shadow-md h-full" title="📈 Doanh thu 6 tháng gần nhất">
+            <div style="height: 380px;">
+              <vue-apex-charts 
+                type="bar" 
+                height="100%" 
+                :options="{
+                  chart: { toolbar: { show: false } },
+                  colors: ['#7367F0'],
+                  plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+                  dataLabels: { enabled: false },
+                  xaxis: { categories: overviewData.leader.chart_6m.labels },
+                  yaxis: { labels: { formatter: function (val) { return (val / 1000000).toFixed(0) + ' tr' } } }
+                }" 
+                :series="[{ name: 'Doanh thu', data: overviewData.leader.chart_6m.data }]">
+              </vue-apex-charts>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+    </template>
+
+    <!-- ADMIN DASHBOARD -->
+    <template v-if="overviewData.is_admin">
+      <div class="mb-5 flex items-center mt-8">
+        <feather-icon icon="GlobeIcon" class="mr-2 text-primary" svgClasses="w-6 h-6"></feather-icon>
+        <h3 class="text-xl font-bold text-gray-800">Tổng quan Hệ thống</h3>
+      </div>
+
+      <!-- Branch selection -->
+      <div class="vx-row">
+        <div class="vx-col w-full mb-4 dash-select-branch">
+          <vx-input-group class="mb-base shadow-md rounded-lg bg-white p-2">
             <multiselect
               name="search_branch"
               placeholder="Chọn trung tâm để hiển thị dữ liệu"
@@ -28,102 +373,243 @@
             >
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>
-
             <template slot="append">
               <div class="append-text btn-addon">
                 <vs-button class="whitespace-no-wrap" @click="loadData">Tìm kiếm</vs-button>
               </div>
             </template>
           </vx-input-group>
+        </div>
+      </div>
+      
+      <!-- Current Month KPIs Admin -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Tháng hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- New Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-success h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Mới</h4>
+              <feather-icon icon="FilePlusIcon" class="text-success bg-success-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-success">{{ overviewData.admin.current_month.new_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-success">{{ (overviewData.admin.current_month.new_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
         
-      </div>
-    </div>
-    <div class="vx-row">
-      <div class="vx-col w-full lg:w-1/2 mb-base">
-        <vx-card slot="no-body" class="text-center bg-primary-gradient greet-user">
-                    <img src="@assets/images/elements/decore-left.png" class="decore-left" alt="Decore Left" width="200" >
-                    <img src="@assets/images/elements/decore-right.png" class="decore-right" alt="Decore Right" width="175">
-          <feather-icon icon="AwardIcon" class="p-6 mb-8 bg-primary inline-flex rounded-full text-white shadow" svgClasses="h-8 w-8"></feather-icon>
-          <h1 class="mb-6 text-white">Xin chào {{ $store.state.AppActiveUser.displayName }},</h1>
-          <p class="xl:w-3/4 lg:w-4/5 md:w-2/3 w-4/5 mx-auto text-white" v-html="textGreeting"></p>
-        </vx-card>
-      </div>
-
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_05')">
-        <statistics-card-line icon="DollarSignIcon" 
-          v-if="totalRevenueDay.analyticsData" 
-          :statistic="totalRevenueDay.analyticsData.data" 
-          statisticTitle="Doanh số ngày (triệu đồng)" 
-          :chartData="totalRevenueDay.series" 
-          type="area"
-        ></statistics-card-line>
-      </div>
-
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_06')">
-        <statistics-card-line icon="DollarSignIcon" 
-          v-if="totalRevenueMonth.analyticsData" 
-          :statistic="totalRevenueMonth.analyticsData.data " 
-          statisticTitle="Doanh số tháng (triệu đồng)" 
-          :chartData="totalRevenueMonth.series" 
-          color="warning" type="area"
-        ></statistics-card-line>
-      </div>
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
-          <statistics-card-line
-            ref="apexChart"
-            v-if="numDashStudent.analyticsData"
-            icon="UsersIcon"
-            :statistic="numDashStudent.analyticsData.data | formatNumber"
-            statisticTitle="Học viên đang học."
-            :chartData="numDashStudent.series"
-            type="area" />
+        <!-- Up-level Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-primary h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Hợp đồng Up-level</h4>
+              <feather-icon icon="ArrowUpCircleIcon" class="text-primary bg-primary-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-primary">{{ overviewData.admin.current_month.uplevel_contracts }} <span class="text-base font-normal text-gray-500">HĐ</span></h2>
+              </div>
+              <div class="text-right">
+                <span class="text-sm text-gray-500">Giá trị: </span>
+                <span class="font-bold text-primary">{{ (overviewData.admin.current_month.uplevel_contracts_value / 1000000) | formatNumber }}tr</span>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+        
+        <!-- Generated Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md border-t-4 border-warning h-full flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+              <h4 class="text-gray-500 font-medium uppercase text-sm">Doanh thu phát sinh</h4>
+              <feather-icon icon="DollarSignIcon" class="text-warning bg-warning-light p-2 rounded-lg" svgClasses="w-5 h-5"></feather-icon>
+            </div>
+            <div class="flex items-end justify-between mt-auto">
+              <div>
+                <h2 class="text-3xl font-bold text-warning">{{ (overviewData.admin.current_month.revenue / 1000000) | formatNumber }} <span class="text-base font-normal text-gray-500">tr</span></h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_02')">
-          <statistics-card-line
-            v-if="numDashClass.analyticsData"
-            icon="FileIcon"
-            :statistic="numDashClass.analyticsData.data | formatNumber"
-            statisticTitle="Tổng số lớp"
-            :chartData="numDashClass.series"
-            color="success"
-            type="area" />
+      <!-- Current Year KPIs Admin -->
+      <h4 class="mb-3 text-lg font-semibold text-gray-700">Lũy kế năm hiện tại</h4>
+      <div class="vx-row mb-base flex items-stretch">
+        <!-- Total Contracts -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-primary-light text-primary rounded-lg mr-4">
+                <feather-icon icon="LayersIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div class="w-full flex justify-between items-center">
+                <div>
+                  <p class="text-gray-500 font-medium text-sm uppercase">Tổng số HĐ</p>
+                  <h2 class="text-2xl font-bold text-primary">{{ overviewData.admin.current_year.total_contracts }}</h2>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-gray-500">G/trị: <span class="font-bold">{{ (overviewData.admin.current_year.total_contracts_value / 1000000) | formatNumber }}tr</span></p>
+                </div>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 bg-success-light text-success rounded-lg mr-4">
+                <feather-icon icon="CreditCardIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="text-gray-500 font-medium text-sm uppercase">Tổng Doanh thu</p>
+                <h2 class="text-2xl font-bold text-success">{{ (overviewData.admin.current_year.total_revenue / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Total Debt -->
+        <div class="vx-col w-full sm:w-1/3 mb-4">
+          <vx-card class="shadow-md bg-danger-gradient text-white h-full flex flex-col justify-center">
+            <div class="flex items-center h-full">
+              <div class="p-3 rounded-lg mr-4" style="background: rgba(0,0,0,0.1);">
+                <feather-icon icon="AlertTriangleIcon" svgClasses="w-6 h-6"></feather-icon>
+              </div>
+              <div>
+                <p class="font-medium text-sm uppercase opacity-80">Tổng Công nợ</p>
+                <h2 class="text-2xl font-bold text-white">{{ (overviewData.admin.current_year.total_debt / 1000000) | formatNumber }} tr</h2>
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+      
+      <!-- Student counts -->
+      <div class="vx-row mb-base flex items-stretch">
+        <div class="vx-col w-full sm:w-1/2 mb-4">
+          <vx-card class="shadow-md bg-primary-gradient text-white h-full">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-sm uppercase opacity-90 mb-1">Tổng số Học sinh (Hệ thống)</p>
+                <h2 class="text-4xl font-bold text-white">{{ overviewData.admin.total_students | formatNumber }}</h2>
+              </div>
+              <feather-icon icon="UsersIcon" svgClasses="w-12 h-12" class="opacity-50"></feather-icon>
+            </div>
+          </vx-card>
+        </div>
+        <div class="vx-col w-full sm:w-1/2 mb-4">
+          <vx-card class="shadow-md bg-success-gradient text-white h-full">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-sm uppercase opacity-90 mb-1">Học sinh Đang học</p>
+                <h2 class="text-4xl font-bold text-white">{{ overviewData.admin.active_students | formatNumber }}</h2>
+              </div>
+              <feather-icon icon="UserCheckIcon" svgClasses="w-12 h-12" class="opacity-50"></feather-icon>
+            </div>
+          </vx-card>
+        </div>
       </div>
 
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base"  v-if="checkPermission('dashboard_03')">
-          <statistics-card-line
-            v-if="numDashTeacher.analyticsData"
-            icon="UserIcon"
-            :statistic="numDashTeacher.analyticsData.data | formatNumber"
-            statisticTitle="Tổng số giáo viên"
-            :chartData="numDashTeacher.series"
-            color="danger"
-            type="area" />
+                        <!-- Admin Teams Leaderboard & Chart -->
+      <div class="vx-row mb-base mt-8 flex flex-wrap items-stretch">
+        <!-- Table -->
+        <div class="vx-col w-full lg:w-7/12 mb-4">
+          <vx-card class="shadow-md border-0 h-full" title="🏆 Top Team Sales">
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+              <table class="w-full text-left border-collapse border border-gray-200">
+                <thead class="sticky top-0 z-10 shadow-sm">
+                  <tr class="text-gray-500 uppercase text-xs tracking-wider border-b border-gray-200">
+                    <th class="py-3 px-3 font-semibold text-center border-r border-b border-gray-200 w-16" style="background-color: #f8f8f8;">STT</th>
+                    <th class="py-3 px-3 font-semibold border-r border-b border-gray-200" style="background-color: #f8f8f8;">Team (Leader)</th>
+                    <th class="py-3 px-3 font-semibold text-center w-24 border-r border-b border-gray-200" style="background-color: #f8f8f8;">Hợp đồng</th>
+                    <th class="py-3 px-3 font-semibold w-1/4 border-r border-b border-gray-200" style="background-color: #f8f8f8;">Tiến độ</th>
+                    <th class="py-3 px-3 font-semibold text-right border-b border-gray-200" style="background-color: #f8f8f8;">Doanh thu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(team, idx) in overviewData.admin.teams" :key="idx" class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-3 text-center border-r border-gray-200">
+                      <div class="font-bold text-gray-600">
+                        {{ idx + 1 }}
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 border-r border-gray-200">
+                      <div class="flex items-center">
+                        <div class="w-8 h-8 rounded bg-warning-light text-warning flex items-center justify-center font-bold mr-3 shadow-sm text-xs">
+                          {{ team.name.charAt(0).toUpperCase() }}
+                        </div>
+                        <div>
+                          <p class="font-bold text-gray-800 text-sm">{{ team.name }}</p>
+                          <p class="text-xs text-gray-500">Team Sales</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-center border-r border-gray-200">
+                      <span class="font-medium text-gray-600">{{ team.contracts }}</span>
+                    </td>
+                    <td class="py-3 px-3 border-r border-gray-200">
+                      <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-gray-700">{{ ((team.revenue / (overviewData.admin.teams[0].revenue || 1)) * 100).toFixed(0) }}%</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-warning h-1.5 rounded-full" :style="'width: ' + ((team.revenue / (overviewData.admin.teams[0].revenue || 1)) * 100) + '%'"></div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                      <div class="flex items-center justify-end text-success font-bold text-sm">
+                        {{ team.revenue | formatNumber }} đ
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </vx-card>
+        </div>
+
+        <!-- Chart -->
+        <div class="vx-col w-full lg:w-5/12 mb-4">
+          <vx-card class="shadow-md h-full" title="📈 Doanh thu 6 tháng gần nhất">
+            <div style="height: 380px;">
+              <vue-apex-charts 
+                type="bar" 
+                height="100%" 
+                :options="{
+                  chart: { toolbar: { show: false } },
+                  colors: ['#FF9F43'],
+                  plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+                  dataLabels: { enabled: false },
+                  xaxis: { categories: overviewData.admin.chart_6m.labels },
+                  yaxis: { labels: { formatter: function (val) { return (val / 1000000).toFixed(0) + ' tr' } } }
+                }" 
+                :series="[{ name: 'Doanh thu', data: overviewData.admin.chart_6m.data }]">
+              </vue-apex-charts>
+            </div>
+          </vx-card>
+        </div>
       </div>
-      <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
-          <statistics-card-line
-            v-if="numDashRooms.analyticsData"
-            icon="LayersIcon"
-            :statistic="numDashRooms.analyticsData.data | formatNumber"
-            statisticTitle="Tổng số phòng học"
-            :chartData="numDashRooms.series"
-            color="warning"
-            type="area" />
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
+
 <script>
 import Multiselect from "vue-multiselect";
-import StatisticsCardLine from '@/components/statistics-cards/StatisticsCardLine.vue'
 import axios from '../http/axios.js'
 import VueApexCharts from 'vue-apexcharts'
 import u from '../until/helper.js';
 
 export default {
   components: {
-    StatisticsCardLine,
     VueApexCharts,
     Multiselect,
   },
@@ -169,280 +655,21 @@ export default {
         ]
       },
       branch_list: [],
+      overviewData: null,
       searchData: {
         arr_branch: "",
         branch_id:"",
-      },
-      totalRevenueDay: {},
-      totalRevenueMonth: {},
-      numDashStudent: {},
-      numDashClass: {},
-      numDashTeacher: {},
-      numDashRooms: {},
-      pieChartStudent: {
-        series: [],
-        chartOptions: {
-          labels: [], 
-          colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E1E1E'],
-          responsive: [{
-            breakpoint: 480,
-            options: {
-              chart: {
-                width: 300
-              },
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }]
-        }
-      },
-      pieChartProduct: {
-        series: [],
-        chartOptions: {
-          labels: [], 
-          colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E1E1E'],
-          responsive: [{
-            breakpoint: 480,
-            options: {
-              chart: {
-                width: 300
-              },
-              legend: {
-                position: 'bottom'
-              }
-            }
-          }]
-        }
-      },
-      lineChartRevenue:{
-        chartOptions: {
-          xaxis: {
-            type: 'text',
-            categories: [],
-          },
-          yaxis: {
-            labels: {
-              formatter: function (value) {
-                return value + " tr";
-              }
-            },
-          },
-        },
-        series: []
-      },
-      lineChartRevenueEC:{
-        chartOptions: {
-          xaxis: {
-            type: 'text',
-            categories: [],
-          },
-          yaxis: {
-            labels: {
-              formatter: function (value) {
-                return value + " tr";
-              }
-            },
-          },
-        },
-        series: []
-      },
-      lineChartRenew:{
-        series: [{
-          name: 'Thành công',
-          data: [44, 55, 41, 37, 22, 43, 21]
-        }, {
-          name: 'Thất bại',
-          data: [53, 32, 33, 52, 13, 43, 32]
-        }],
-        chartOptions: {
-          chart: {
-            type: 'bar',
-            height: 350,
-            stacked: true,
-          },
-          plotOptions: {
-            bar: {
-              horizontal: true,
-              dataLabels: {
-                total: {
-                  enabled: true,
-                  offsetX: 0,
-                  style: {
-                    fontSize: '13px',
-                    fontWeight: 900
-                  }
-                }
-              }
-            },
-          },
-          stroke: {
-            width: 1,
-            colors: ['#fff']
-          },
-          xaxis: {
-            categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
-            labels: {
-              formatter: function (val) {
-                return val
-              }
-            }
-          },
-          yaxis: {
-            title: {
-              text: undefined
-            },
-          },
-          tooltip: {
-            y: {
-              formatter: function (val) {
-                return val
-              }
-            }
-          },
-          fill: {
-            opacity: 1
-          },
-          legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-            offsetX: 40
-          }
-        },
-      },
-      lineChartRenewAF:{
-        series: [{
-          name: 'Thành công',
-          data: [44, 55, 41, 37, 22, 43, 21]
-        }, {
-          name: 'Thất bại',
-          data: [53, 32, 33, 52, 13, 43, 32]
-        }],
-        chartOptions: {
-          chart: {
-            type: 'bar',
-            height: 350,
-            stacked: true,
-          },
-          plotOptions: {
-            bar: {
-              horizontal: true,
-              dataLabels: {
-                total: {
-                  enabled: true,
-                  offsetX: 0,
-                  style: {
-                    fontSize: '13px',
-                    fontWeight: 900
-                  }
-                }
-              }
-            },
-          },
-          stroke: {
-            width: 1,
-            colors: ['#fff']
-          },
-          xaxis: {
-            categories: [2008, 2009, 2010, 2011, 2012, 2013, 2014],
-            labels: {
-              formatter: function (val) {
-                return val
-              }
-            }
-          },
-          yaxis: {
-            title: {
-              text: undefined
-            },
-          },
-          tooltip: {
-            y: {
-              formatter: function (val) {
-                return val
-              }
-            }
-          },
-          fill: {
-            opacity: 1
-          },
-          legend: {
-            position: 'top',
-            horizontalAlign: 'left',
-            offsetX: 40
-          }
-        },
-      },
-      lineChartRenewLog: {
-        series: [{
-          name: 'Thất bại',
-          data: [44, 55, 41, 67, 22, 43]
-        }, {
-          name: 'Thành công',
-          data: [13, 23, 20, 8, 13, 27]
-        }],
-        chartOptions: {
-          chart: {
-            type: 'bar',
-            height: 350,
-            stacked: true,
-            toolbar: {
-              show: true
-            },
-            zoom: {
-              enabled: true
-            }
-          },
-          responsive: [{
-            breakpoint: 480,
-            options: {
-              legend: {
-                position: 'bottom',
-                offsetX: -10,
-                offsetY: 0
-              }
-            }
-          }],
-          plotOptions: {
-            bar: {
-              horizontal: false,
-              borderRadiusApplication: 'end', // 'around', 'end'
-              borderRadiusWhenStacked: 'last', // 'all', 'last'
-              dataLabels: {
-                total: {
-                  enabled: true,
-                  style: {
-                    fontSize: '13px',
-                    fontWeight: 900
-                  }
-                }
-              }
-            },
-          },
-          xaxis: {
-            type: 'text',
-            categories: ['08/2024', '09/2024', '10/2024', '11/2024', '12/2024', '01/2025'
-            ],
-          },
-          legend: {
-            position: 'bottom',
-            horizontalAlign: 'center',
-            offsetX: 20
-          },
-          fill: {
-            opacity: 1
-          }
-        },
       },
     }
   },
   created () {
     this.getTimeGreeting()
+    this.loadOverview()
     axios.g(`/api/system/branches-has-user`)
       .then(response => {
       this.branch_list = response.data
     })
-    this.loadData();
+    this.loadData()
   },
   methods: {
     getTimeGreeting() {
@@ -454,467 +681,29 @@ export default {
       const greetings = this.greetingsByTime[period];
       this.textGreeting = greetings[Math.floor(Math.random() * greetings.length)];
     },
+    loadData() {
+      this.loadOverview();
+    },
+    loadOverview() {
+      const ids_branch = []
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map(item => {
+          ids_branch.push(item.id)
+        })
+      }
+      this.searchData.branch_id = ids_branch;
+
+      this.$vs.loading();
+      axios.p('/api/dashboard/overview', { branch_id: this.searchData.branch_id }).then(res => {
+        this.$vs.loading.close();
+        this.overviewData = res.data;
+      }).catch(() => {
+        this.$vs.loading.close();
+      });
+    },
     checkPermission(text){
       return u.checkPermission(this.$store.state.AppActiveUser, text)
     },
-    loadDataDashboard01(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/01`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.numDashStudent = {
-          series: [
-            {
-              name: 'Học sinh',
-              data: response.data.numDashStudent.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.numDashStudent.data
-          }
-        }
-      })
-    },
-    loadDataDashboard02(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/02`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.numDashClass = {
-          series: [
-            {
-              name: 'Lớp',
-              data: response.data.numDashClass.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.numDashClass.data
-          }
-        }
-      })
-    },
-    loadDataDashboard03(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/03`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.numDashTeacher = {
-          series: [
-            {
-              name: 'Giáo viên',
-              data: response.data.numDashTeacher.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.numDashTeacher.data
-          }
-        }
-      })
-    },
-    loadDataDashboard04(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/04`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.numDashRooms = {
-          series: [
-            {
-              name: 'Phòng học',
-              data: response.data.numDashRooms.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.numDashRooms.data
-          }
-        }
-      })
-    },
-    loadDataDashboard05(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/05`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.pieChartStudent = {
-          series: [response.data.pieChartStudent.studentActive, response.data.pieChartStudent.studentTrial, response.data.pieChartStudent.studentPending, response.data.pieChartStudent.studentWithdraw],
-          chartOptions: {
-            labels: ['Đang đi học', 'Học thử', 'Bảo lưu & pending', 'Hết phí'], 
-            colors: ['#28C76F', '#1E1E1E', '#7367F0', '#EA5455'],
-            responsive: [{
-              breakpoint: 480,
-              options: {
-                chart: {
-                  width: 300
-                },
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }]
-          }
-        }
-      })
-    },
-    loadDataDashboard06(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/06`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.pieChartProduct = {
-          series: response.data.pieChartProduct.seriesChartProduct,
-          chartOptions: {
-            labels: response.data.pieChartProduct.labelsChartProduct, 
-            colors: ['#7367F0', '#28C76F', '#EA5455', '#FF9F43', '#1E1E1E'],
-            responsive: [{
-              breakpoint: 480,
-              options: {
-                chart: {
-                  width: 300
-                },
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }]
-          }
-        }
-      })
-    },
-    loadDataDashboard07(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/07`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.lineChartRevenue = {
-          chartOptions: {
-            xaxis: {
-              type: 'text',
-              categories: response.data.lineChartRevenue.categories,
-            },
-          },
-          series: response.data.lineChartRevenue.series
-        }
-      })
-    },
-    loadDataDashboard08(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/08`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.lineChartRevenueEC = {
-          chartOptions: {
-            xaxis: {
-              type: 'text',
-              categories: response.data.lineChartRevenueEC.categories,
-            },
-          },
-          series: response.data.lineChartRevenueEC.series
-        }
-      })
-    },
-    loadDataDashboard09(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/09`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.totalRevenueDay = {
-          series: [
-            {
-              name: 'Doanh số ngày',
-              data: response.data.totalRevenueDay.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.totalRevenueDay.data
-          }
-        }
-      })
-    },
-    loadDataDashboard10(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/10`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.totalRevenueMonth = {
-          series: [
-            {
-              name: 'Doanh số tháng',
-              data: response.data.totalRevenueMonth.series
-            }
-          ],
-          analyticsData: {
-            data: response.data.totalRevenueMonth.data
-          }
-        }
-      })
-    },
-    loadDataDashboard11(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/11`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.lineChartRenew = {
-          series: [ {
-            name: 'Thất bại',
-            data: response.data.lineChartRenew.dataFalseRenew
-          },{
-            name: 'Thành công',
-            data: response.data.lineChartRenew.dataRenew
-          }],
-          chartOptions: {
-            chart: {
-              type: 'bar',
-              height: 350,
-              stacked: true,
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true,
-                dataLabels: {
-                  total: {
-                    enabled: true,
-                    offsetX: 0,
-                    style: {
-                      fontSize: '13px',
-                      fontWeight: 900
-                    }
-                  }
-                }
-              },
-            },
-            stroke: {
-              width: 1,
-              colors: ['#fff']
-            },
-            xaxis: {
-              categories: response.data.lineChartRenew.categories,
-              labels: {
-                formatter: function (val) {
-                  return val
-                }
-              }
-            },
-            yaxis: {
-              title: {
-                text: undefined
-              },
-            },
-            tooltip: {
-              y: {
-                formatter: function (val) {
-                  return val
-                }
-              }
-            },
-            fill: {
-              opacity: 1
-            },
-            legend: {
-              position: 'top',
-              horizontalAlign: 'left',
-              offsetX: 40
-            }
-          },
-        }
-      })
-    },
-    loadDataDashboard12(){
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-      this.$vs.loading()
-      axios.p(`/api/dashboard/12`,{
-        branch_id: this.searchData.branch_id,
-      })
-      .then(response => {
-        this.$vs.loading.close()
-        this.lineChartRenewAF = {
-          series: [ {
-            name: 'Thất bại',
-            data: response.data.lineChartRenewAF.dataFalseRenew
-          },{
-            name: 'Thành công',
-            data: response.data.lineChartRenewAF.dataRenew
-          }],
-          chartOptions: {
-            chart: {
-              type: 'bar',
-              height: 350,
-              stacked: true,
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true,
-                dataLabels: {
-                  total: {
-                    enabled: true,
-                    offsetX: 0,
-                    style: {
-                      fontSize: '13px',
-                      fontWeight: 900
-                    }
-                  }
-                }
-              },
-            },
-            stroke: {
-              width: 1,
-              colors: ['#fff']
-            },
-            xaxis: {
-              categories: response.data.lineChartRenewAF.categories,
-              labels: {
-                formatter: function (val) {
-                  return val
-                }
-              }
-            },
-            yaxis: {
-              title: {
-                text: undefined
-              },
-            },
-            tooltip: {
-              y: {
-                formatter: function (val) {
-                  return val
-                }
-              }
-            },
-            fill: {
-              opacity: 1
-            },
-            legend: {
-              position: 'top',
-              horizontalAlign: 'left',
-              offsetX: 40
-            }
-          },
-        }
-      })
-    },
-    loadData(){
-      if(this.checkPermission('dashboard_01')){
-        this.loadDataDashboard01();
-      }
-      if(this.checkPermission('dashboard_02')){
-        this.loadDataDashboard02();
-      }
-      if(this.checkPermission('dashboard_03')){
-        this.loadDataDashboard03();
-      }
-      if(this.checkPermission('dashboard_04')){
-        this.loadDataDashboard04();
-      }
-      if(this.checkPermission('dashboard_05')){
-        this.loadDataDashboard09();
-      }
-      if(this.checkPermission('dashboard_06')){
-        this.loadDataDashboard10();
-      }
-    }
   },
 }
 </script>

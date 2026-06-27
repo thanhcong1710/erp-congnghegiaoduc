@@ -12,6 +12,202 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function overview(Request $request) {
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roles = [];
+        foreach($userRoles as $ur) {
+            $roles[] = $ur->role_id;
+        }
+
+        $is_leader = in_array(69, $roles);
+        $is_sales = in_array(68, $roles);
+        $is_admin = !($is_leader || $is_sales) || in_array(1, $roles); 
+
+        // Base Condition for branch
+        $req_branch_id = data_get($request, 'branch_id');
+        if($req_branch_id) {
+            if(!is_array($req_branch_id)) $req_branch_id = [$req_branch_id];
+            $branch_cond = " AND branch_id IN (" . implode(",", $req_branch_id) . ")";
+            $branch_cond_a = " AND a.branch_id IN (" . implode(",", $req_branch_id) . ")";
+            $branch_cond_p = " AND p.branch_id IN (" . implode(",", $req_branch_id) . ")";
+        } else {
+            $branch_cond = " AND branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+            $branch_cond_a = " AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+            $branch_cond_p = " AND p.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        }
+
+        $current_month_start = date('Y-m-01 00:00:00');
+        $current_year_start = date('Y-01-01 00:00:00');
+
+        $data = [
+            'roles' => $roles,
+            'is_admin' => $is_admin,
+            'is_leader' => $is_leader,
+            'is_sales' => $is_sales,
+        ];
+
+        // Prepare last 6 months dates
+        $last_6_months_labels = [];
+        $last_6_months_starts = [];
+        $last_6_months_ends = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $last_6_months_labels[] = date('m/Y', strtotime("-$i month"));
+            $last_6_months_starts[] = date('Y-m-01 00:00:00', strtotime("-$i month"));
+            $last_6_months_ends[] = date('Y-m-t 23:59:59', strtotime("-$i month"));
+        }
+
+        // 1. SALES DATA
+        if ($is_sales) {
+            $ec_id = $user->id;
+            
+            // Current Month
+            $new_cm = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE ec_id=$ec_id AND count_recharge=0 AND created_at >= '$current_month_start' $branch_cond");
+            $up_cm = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE ec_id=$ec_id AND count_recharge>0 AND created_at >= '$current_month_start' $branch_cond");
+            $rev_cm = u::first("SELECT SUM(amount) as v FROM payments WHERE ec_id=$ec_id AND charge_date >= '$current_month_start' $branch_cond");
+            
+            // Current Year
+            $tot_cy = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v, SUM(debt_amount) as d FROM agreements WHERE ec_id=$ec_id AND created_at >= '$current_year_start' $branch_cond");
+            $rev_cy = u::first("SELECT SUM(amount) as v FROM payments WHERE ec_id=$ec_id AND charge_date >= '$current_year_start' $branch_cond");
+
+            $data['sales'] = [
+                'current_month' => [
+                    'new_contracts' => (int)data_get($new_cm, 'c', 0),
+                    'new_contracts_value' => (float)data_get($new_cm, 'v', 0),
+                    'uplevel_contracts' => (int)data_get($up_cm, 'c', 0),
+                    'uplevel_contracts_value' => (float)data_get($up_cm, 'v', 0),
+                    'revenue' => (float)data_get($rev_cm, 'v', 0),
+                ],
+                'current_year' => [
+                    'total_contracts' => (int)data_get($tot_cy, 'c', 0),
+                    'total_contracts_value' => (float)data_get($tot_cy, 'v', 0),
+                    'total_revenue' => (float)data_get($rev_cy, 'v', 0),
+                    'total_debt' => (float)data_get($tot_cy, 'd', 0),
+                ]
+            ];
+        }
+
+        // 2. LEADER DATA
+        if ($is_leader) {
+            $team_id = $user->id;
+            $team_cond = " AND (ec_leader_id = $team_id OR (ec_leader_id IS NULL AND ec_id = $team_id)) ";
+            $team_cond_a = " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id)) ";
+            // Wait, payments doesn't have ec_leader_id, we check agreements
+            $team_cond_p = " AND p.agreement_id IN (SELECT id FROM agreements WHERE (ec_leader_id = $team_id OR (ec_leader_id IS NULL AND ec_id = $team_id))) ";
+
+            // Current Month
+            $new_cm_l = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE count_recharge=0 AND created_at >= '$current_month_start' $team_cond $branch_cond");
+            $up_cm_l = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE count_recharge>0 AND created_at >= '$current_month_start' $team_cond $branch_cond");
+            $rev_cm_l = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$current_month_start' $team_cond_p $branch_cond_p");
+            
+            // Current Year
+            $tot_cy_l = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v, SUM(debt_amount) as d FROM agreements WHERE created_at >= '$current_year_start' $team_cond $branch_cond");
+            $rev_cy_l = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$current_year_start' $team_cond_p $branch_cond_p");
+
+            // Members Revenue (Current Month)
+            $members = u::query("
+                SELECT u.name, 
+                       (SELECT COUNT(id) FROM agreements WHERE ec_id = u.id AND created_at >= '$current_month_start') as contracts,
+                       (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE ec_id = u.id AND charge_date >= '$current_month_start') as revenue
+                FROM users u 
+                WHERE u.id IN (SELECT DISTINCT ec_id FROM agreements WHERE (ec_leader_id = $team_id OR ec_id = $team_id))
+                ORDER BY revenue DESC
+                LIMIT 10
+            ");
+
+            // 6 Months Revenue for Leader
+            $chart_6m = [];
+            for ($i = 0; $i < 6; $i++) {
+                $start = $last_6_months_starts[$i];
+                $end = $last_6_months_ends[$i];
+                $rev = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$start' AND charge_date <= '$end' $team_cond_p $branch_cond_p");
+                $chart_6m[] = (float)data_get($rev, 'v', 0);
+            }
+
+            $data['leader'] = [
+                'current_month' => [
+                    'new_contracts' => (int)data_get($new_cm_l, 'c', 0),
+                    'new_contracts_value' => (float)data_get($new_cm_l, 'v', 0),
+                    'uplevel_contracts' => (int)data_get($up_cm_l, 'c', 0),
+                    'uplevel_contracts_value' => (float)data_get($up_cm_l, 'v', 0),
+                    'revenue' => (float)data_get($rev_cm_l, 'v', 0),
+                ],
+                'current_year' => [
+                    'total_contracts' => (int)data_get($tot_cy_l, 'c', 0),
+                    'total_contracts_value' => (float)data_get($tot_cy_l, 'v', 0),
+                    'total_revenue' => (float)data_get($rev_cy_l, 'v', 0),
+                    'total_debt' => (float)data_get($tot_cy_l, 'd', 0),
+                ],
+                'members' => $members,
+                'chart_6m' => [
+                    'labels' => $last_6_months_labels,
+                    'data' => $chart_6m
+                ]
+            ];
+        }
+
+        // 3. ADMIN DATA
+        if ($is_admin) {
+            // Current Month
+            $new_cm_a = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE count_recharge=0 AND created_at >= '$current_month_start' $branch_cond");
+            $up_cm_a = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v FROM agreements WHERE count_recharge>0 AND created_at >= '$current_month_start' $branch_cond");
+            $rev_cm_a = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$current_month_start' $branch_cond_p");
+            
+            // Current Year
+            $tot_cy_a = u::first("SELECT COUNT(id) as c, SUM(must_charge) as v, SUM(debt_amount) as d FROM agreements WHERE created_at >= '$current_year_start' $branch_cond");
+            $rev_cy_a = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$current_year_start' $branch_cond_p");
+
+            // Students
+            $total_st = u::first("SELECT count(id) as c FROM students WHERE status > 0 AND branch_id IN (" . Auth::user()->getBranchesHasUser() . ")");
+            $active_st = u::first("SELECT count(DISTINCT student_id) as c FROM contracts WHERE status=6 AND type>0 AND branch_id IN (" . Auth::user()->getBranchesHasUser() . ")");
+
+            // Teams
+            $teams = u::query("
+                SELECT u.name, 
+                       (SELECT COUNT(id) FROM agreements WHERE (ec_leader_id = u.id OR (ec_leader_id IS NULL AND ec_id = u.id)) AND created_at >= '$current_month_start') as contracts,
+                       (SELECT COALESCE(SUM(amount), 0) FROM payments p WHERE p.agreement_id IN (SELECT id FROM agreements WHERE (ec_leader_id = u.id OR (ec_leader_id IS NULL AND ec_id = u.id))) AND charge_date >= '$current_month_start') as revenue
+                FROM users u 
+                WHERE u.id IN (SELECT DISTINCT ec_leader_id FROM agreements WHERE ec_leader_id IS NOT NULL)
+                ORDER BY revenue DESC
+                LIMIT 10
+            ");
+
+            // 6 Months Revenue for Admin
+            $chart_6m_a = [];
+            for ($i = 0; $i < 6; $i++) {
+                $start = $last_6_months_starts[$i];
+                $end = $last_6_months_ends[$i];
+                $rev = u::first("SELECT SUM(amount) as v FROM payments p WHERE charge_date >= '$start' AND charge_date <= '$end' $branch_cond_p");
+                $chart_6m_a[] = (float)data_get($rev, 'v', 0);
+            }
+
+            $data['admin'] = [
+                'current_month' => [
+                    'new_contracts' => (int)data_get($new_cm_a, 'c', 0),
+                    'new_contracts_value' => (float)data_get($new_cm_a, 'v', 0),
+                    'uplevel_contracts' => (int)data_get($up_cm_a, 'c', 0),
+                    'uplevel_contracts_value' => (float)data_get($up_cm_a, 'v', 0),
+                    'revenue' => (float)data_get($rev_cm_a, 'v', 0),
+                ],
+                'current_year' => [
+                    'total_contracts' => (int)data_get($tot_cy_a, 'c', 0),
+                    'total_contracts_value' => (float)data_get($tot_cy_a, 'v', 0),
+                    'total_revenue' => (float)data_get($rev_cy_a, 'v', 0),
+                    'total_debt' => (float)data_get($tot_cy_a, 'd', 0),
+                ],
+                'total_students' => (int)data_get($total_st, 'c', 0),
+                'active_students' => (int)data_get($active_st, 'c', 0),
+                'teams' => $teams,
+                'chart_6m' => [
+                    'labels' => $last_6_months_labels,
+                    'data' => $chart_6m_a
+                ]
+            ];
+        }
+
+        return response()->json($data);
+    }
+
     public function dashboard01(Request $request)
     {
         if(data_get($request, 'branch_id')) {

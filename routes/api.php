@@ -394,7 +394,8 @@ Route::group(['middleware' => 'api'], function ($router) {
         });
 
         Route::post('dashboard', 'DashboardController@index');
-        Route::prefix('dashboard')->group(function () {
+        Route::group(['prefix' => 'dashboard'], function () {
+            Route::post('overview', 'DashboardController@overview');
             Route::post('01', 'DashboardController@dashboard01');
             Route::post('02', 'DashboardController@dashboard02');
             Route::post('03', 'DashboardController@dashboard03');
