@@ -65,9 +65,13 @@ mix.js('resources/js/app.js', 'public/js')
 //     });
 // }
 
+// Enable versioning for cache busting - appends unique hash to asset URLs
+// so browsers automatically fetch the latest files after each build
+mix.version();
+
 mix.webpackConfig({
     output: {
-        chunkFilename: 'js/chunks/[name].js',
+        chunkFilename: 'js/chunks/[name].[chunkhash].js',
     }
 });
 
