@@ -563,6 +563,7 @@ class ImportStudentsFromJson extends Command
                             '__excel_row'     => $excelRow,
                             '__extra_note'    => $extraNote,
                             '__agr_total_charged' => $finalTotalCharged,
+                            '__agr_debt_amount'   => $finalDebtAmount,
                             'product_id'      => $productId,
                             'tuition_fee_id'  => $tuitionFeeId,
                             'ec_id'           => $ecId,
@@ -623,6 +624,7 @@ class ImportStudentsFromJson extends Command
                             '__excel_row'     => $excelRow,
                             '__extra_note'    => "Auto-generated from combo",
                             '__agr_total_charged' => $finalTotalCharged,
+                            '__agr_debt_amount'   => $finalDebtAmount,
                             'product_id'      => $compProdId,
                             'tuition_fee_id'  => $compTfId,
                             'ec_id'           => $ecId,
@@ -843,11 +845,12 @@ class ImportStudentsFromJson extends Command
                 $extraNote   = $ct['__extra_note'];
 
                 $agrTotal = $ct['__agr_total_charged'];
+                $agrDebt  = $ct['__agr_debt_amount'] ?? 0;
                 unset(
                     $ct['__agreement_key'], $ct['__student_key'],
                     $ct['__class_key'],     $ct['__dedup_key'],
                     $ct['__excel_row'],     $ct['__extra_note'],
-                    $ct['__agr_total_charged']
+                    $ct['__agr_total_charged'], $ct['__agr_debt_amount']
                 );
 
                 if (!$agreementId || !$studentId) continue;
@@ -862,6 +865,7 @@ class ImportStudentsFromJson extends Command
                 if (!isset($contractsByAgr[$agreementId])) {
                     $contractsByAgr[$agreementId] = [
                         'remain' => $agrTotal,
+                        'agr_debt' => $agrDebt,
                         'contracts' => []
                     ];
                 }
@@ -870,6 +874,7 @@ class ImportStudentsFromJson extends Command
 
             foreach ($contractsByAgr as $agrId => $grp) {
                 $remain = $grp['remain'];
+                $agrDebt = $grp['agr_debt'];
                 $cts = &$grp['contracts'];
                 // Not strictly sorting by count_recharge since they are all new (count_recharge=0)
                 
@@ -878,8 +883,15 @@ class ImportStudentsFromJson extends Command
                     $paid = ($remain <= 0) ? 0 : min($mustCharge, $remain);
                     $remain -= $paid;
                     
-                    $c['total_charged'] = $paid;
-                    $c['debt_amount'] = $mustCharge - $paid;
+                    if ($agrDebt <= 0) {
+                        $c['total_charged'] = $mustCharge;
+                        $c['debt_amount'] = 0;
+                        $paid = $mustCharge; // override for session calc
+                    } else {
+                        $c['total_charged'] = $paid;
+                        $c['debt_amount'] = $mustCharge - $paid;
+                    }
+                    
                     $c['init_total_charged'] = $paid;
                     
                     $tfSession = $this->tuitionFeeSession[$c['tuition_fee_id']] ?? $c['total_sessions'];
@@ -892,7 +904,7 @@ class ImportStudentsFromJson extends Command
                     $c['summary_sessions'] = $availableSession;
                     $c['left_sessions'] = $availableSession - ($c['done_sessions'] ?? 0);
                     
-                    if ($c['class_id'] && $availableSession > 0) {
+                    if ($c['class_id'] && $c['start_date'] && $availableSession > 0) {
                         if (!in_array($c['status'], [6, 7])) {
                             $c['status'] = 6;
                         }
