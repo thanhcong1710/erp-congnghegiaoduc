@@ -367,7 +367,9 @@ class StudentsController extends Controller
         if ($contract_active) {
             $done_sessions = u::query("SELECT s.class_date,  s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s 
                 WHERE s.contract_id = $contract_active->id");
-            $limit = $contract_active->summary_sessions - count($done_sessions);
+            $done_sessions_active = u::query("SELECT s.class_date,  s.subject_stt, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s 
+                WHERE s.contract_id = $contract_active->id AND s.status=1");
+            $limit = $contract_active->summary_sessions - count($done_sessions_active);
             $limit = $limit > 0 ? $limit : 0;
             if ($contract_active->class_id) {
                 $next_sessions = u::query("SELECT s.class_date,  s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s 
