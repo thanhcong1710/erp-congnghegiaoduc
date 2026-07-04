@@ -51,6 +51,7 @@ class ImportStudentsFromJson extends Command
     private array $usersByTmpName   = []; // tmp_name      → {id, manager_id}
     private array $importedPaymentsAgreements = []; // agreement_id → true
     private array $newContractsKeys = []; // agreementId_productId → true (for in-memory deduplication)
+    private array $tuitionFeeRelations = []; // tuition_fee_id(combo) → [product_id → exchange_tuition_fee_id]
 
     // ── Pending flush buffers ────────────────────────────────────────────────
     private array $newStudents   = [];
@@ -78,6 +79,8 @@ class ImportStudentsFromJson extends Command
     // ─────────────────────────────────────────────────────────────────────────
     public function handle(): int
     {
+        ini_set('memory_limit', '-1');
+        
         $this->info('🗑  Resetting system cache...');
         Artisan::call('cache:clear');
         
@@ -167,15 +170,19 @@ class ImportStudentsFromJson extends Command
             });
 
         // Classes: code → {id, cls_startdate, cls_enddate}
-        DB::table('classes')->select('id', 'code', 'cls_startdate', 'cls_enddate')->get()->each(function ($c) {
-            if ($c->code) {
-                $this->classesByCode[strtoupper($c->code)] = [
-                    'id'            => $c->id,
-                    'cls_startdate' => $c->cls_startdate,
-                    'cls_enddate'   => $c->cls_enddate,
-                ];
-            }
-        });
+        DB::table('classes')->select('id', 'code', 'cls_startdate', 'cls_enddate')
+            ->orderBy('id')
+            ->chunk(5000, function ($rows) {
+                foreach ($rows as $c) {
+                    if ($c->code) {
+                        $this->classesByCode[strtoupper($c->code)] = [
+                            'id'            => $c->id,
+                            'cls_startdate' => $c->cls_startdate,
+                            'cls_enddate'   => $c->cls_enddate,
+                        ];
+                    }
+                }
+            });
 
         // Agreements: student_id_tuitionFeeId → agreement_id
         DB::table('agreements')
@@ -229,6 +236,20 @@ class ImportStudentsFromJson extends Command
             $this->tuitionFeeSession[$t->id] = (int) $t->session;
         });
 
+        // Tuition Fee Relation mapping (combo -> individual packages)
+        DB::table('tuition_fee_relation')
+            ->where('status', 1)
+            ->select('tuition_fee_id', 'exchange_tuition_fee_id')
+            ->get()
+            ->each(function($r) {
+                $comboId = $r->tuition_fee_id;
+                $indivId = $r->exchange_tuition_fee_id;
+                $prodId = $this->tuitionFeeProductId[$indivId] ?? null;
+                if ($prodId) {
+                    $this->tuitionFeeRelations[$comboId][$prodId] = $indivId;
+                }
+            });
+
         // Users mapping
         DB::table('users')->whereNotNull('tmp_name')->select('id', 'manager_id', 'tmp_name')->get()->each(function ($u) {
             $this->usersByTmpName[trim($u->tmp_name)] = [
@@ -242,9 +263,11 @@ class ImportStudentsFromJson extends Command
             ->where('is_import', 1)
             ->select('agreement_id')
             ->distinct()
-            ->get()
-            ->each(function($p) {
-                $this->importedPaymentsAgreements[$p->agreement_id] = true;
+            ->orderBy('agreement_id')
+            ->chunk(5000, function ($rows) {
+                foreach ($rows as $p) {
+                    $this->importedPaymentsAgreements[$p->agreement_id] = true;
+                }
             });
 
         $this->info(sprintf(
@@ -277,6 +300,7 @@ class ImportStudentsFromJson extends Command
         $rawStatus = $row['raw_status']      ?? '4';
         $excelRow  = $row['excel_row']       ?? 0;
         $course    = $row['course']          ?? '';
+        $gender    = $row['gender']          ?? 'M';
 
         $linkFb    = trim($row['link_fb'] ?? '');
         $email     = trim($row['email'] ?? '');
@@ -335,6 +359,7 @@ class ImportStudentsFromJson extends Command
                 'gud_name1'   => mb_substr($name, 0, 50),
                 'gud_email1'  => mb_substr($email, 0, 100),
                 'address'     => mb_substr($address, 0, 255),
+                'gender'      => $gender ?: 'M',
                 'branch_id'   => 9,
                 'status'      => 1,
                 'created_at'  => $createdAt,
@@ -443,7 +468,19 @@ class ImportStudentsFromJson extends Command
 
         // ── 4. Contract status & sessions ─────────────────────────────────────
         $productId    = $this->getProductIdFromClassCode($classCode);
-        $tuitionFeeId = $this->getTuitionFeeIdFromProductId($productId);
+        
+        $tuitionFeeId = null;
+        if ($agrTuitionFeeId !== null) {
+            if (isset($this->tuitionFeeRelations[$agrTuitionFeeId][$productId])) {
+                $tuitionFeeId = $this->tuitionFeeRelations[$agrTuitionFeeId][$productId];
+            } elseif (($this->tuitionFeeProductId[$agrTuitionFeeId] ?? null) == $productId) {
+                $tuitionFeeId = $agrTuitionFeeId;
+            }
+        }
+        if ($tuitionFeeId === null) {
+            $tuitionFeeId = $this->getTuitionFeeIdFromProductId($productId);
+        }
+
         $numSessions  = $productId ? ($this->productsById[$productId] ?? 0) : 0;
 
         $totalSes = $realSes = $sumSes = $doneSes = 0;
@@ -502,10 +539,11 @@ class ImportStudentsFromJson extends Command
                 $this->updContracts[] = [
                     'id'   => $existingContractId,
                     'data' => [
-                        'class_id'        => $finalClassId,
-                        'start_date'      => $finalStartDate,
-                        'status'          => $finalStatus,
-                        'total_sessions'  => $totalSes,
+                        'class_id'             => $finalClassId,
+                        'start_date'           => $finalStartDate,
+                        'enrolment_start_date' => $finalStartDate,
+                        'status'               => $finalStatus,
+                        'total_sessions'       => $totalSes,
                         'real_sessions'   => $realSes,
                         'summary_sessions'=> $sumSes,
                         'done_sessions'   => $doneSes,
@@ -515,34 +553,98 @@ class ImportStudentsFromJson extends Command
             } else {
                 // Prevent creating duplicates in the same run if multiple rows map to the same product under this agreement
                 if (!isset($this->newContractsKeys[$contractKey])) {
-                    $this->newContracts[] = [
-                        '__agreement_key' => $agreementId,
-                        '__student_key'   => $studentId,
-                        '__class_key'     => $finalClassId,
-                        '__dedup_key'     => $dedupKey,
-                        '__excel_row'     => $excelRow,
-                        '__extra_note'    => $extraNote,
-                        '__agr_total_charged' => $finalTotalCharged,
-                        'product_id'      => $productId,
-                        'tuition_fee_id'  => $tuitionFeeId,
-                        'ec_id'           => $ecId,
-                        'ec_leader_id'    => $ecLeaderId,
-                        'must_charge'     => $tuitionFeeId ? ($this->tuitionFeePrice[$tuitionFeeId] ?? $price) : $price,
-                        'discount_amount' => $discountAmount,
-                        'total_charged'   => 0, // Will be calculated by processContractsByAgreement
-                        'debt_amount'     => 0, // Will be calculated by processContractsByAgreement
-                        'total_sessions'  => $totalSes,
-                        'real_sessions'   => $realSes,
-                        'summary_sessions'=> $sumSes,
-                        'done_sessions'   => $doneSes,
-                        'start_date'      => $finalStartDate,
-                        'status'          => $finalStatus,
-                        'branch_id'       => 9,
-                        'created_at'      => $createdAt,
-                        'updated_at'      => $createdAt,
-                    ];
-                    $this->newContractsKeys[$contractKey] = true;
-                    $this->cntContNew++;
+                    $isCombo = isset($this->tuitionFeeRelations[$agrTuitionFeeId]);
+                    if ($productId !== null || !$isCombo) {
+                        $this->newContracts[] = [
+                            '__agreement_key' => $agreementId,
+                            '__student_key'   => $studentId,
+                            '__class_key'     => $finalClassId,
+                            '__dedup_key'     => $dedupKey,
+                            '__excel_row'     => $excelRow,
+                            '__extra_note'    => $extraNote,
+                            '__agr_total_charged' => $finalTotalCharged,
+                            'product_id'      => $productId,
+                            'tuition_fee_id'  => $tuitionFeeId,
+                            'ec_id'           => $ecId,
+                            'ec_leader_id'    => $ecLeaderId,
+                            'must_charge'     => $tuitionFeeId ? ($this->tuitionFeePrice[$tuitionFeeId] ?? $price) : $price,
+                            'discount_amount' => $discountAmount,
+                            'total_charged'   => 0, // Will be calculated by processContractsByAgreement
+                            'debt_amount'     => 0, // Will be calculated by processContractsByAgreement
+                            'total_sessions'  => $totalSes,
+                            'real_sessions'   => $realSes,
+                            'summary_sessions'    => $sumSes,
+                            'done_sessions'       => $doneSes,
+                            'start_date'          => $finalStartDate,
+                            'enrolment_start_date'=> $finalStartDate,
+                            'status'              => $finalStatus,
+                            'branch_id'       => 9,
+                            'created_at'      => $createdAt,
+                            'updated_at'      => $createdAt,
+                        ];
+                        $this->newContractsKeys[$contractKey] = count($this->newContracts) - 1;
+                        $this->cntContNew++;
+                    }
+                } else {
+                    // Update in-memory contract (e.g. auto-filled previously)
+                    $idx = $this->newContractsKeys[$contractKey];
+                    if (is_int($idx) && isset($this->newContracts[$idx])) {
+                        $this->newContracts[$idx]['__class_key']          = $finalClassId;
+                        $this->newContracts[$idx]['start_date']           = $finalStartDate;
+                        $this->newContracts[$idx]['enrolment_start_date'] = $finalStartDate;
+                        $this->newContracts[$idx]['status']               = $finalStatus;
+                        // For auto-filled contracts, __dedup_key might be empty, so update it if we have one
+                        if (empty($this->newContracts[$idx]['__dedup_key'])) {
+                            $this->newContracts[$idx]['__dedup_key'] = $dedupKey;
+                        }
+                    }
+                }
+            }
+
+            // Auto-fill missing contracts for this combo (if any)
+            if (isset($this->tuitionFeeRelations[$agrTuitionFeeId])) {
+                foreach ($this->tuitionFeeRelations[$agrTuitionFeeId] as $compProdId => $compTfId) {
+                    $compContractKey = $agreementId . '_' . $compProdId;
+                    
+                    $compExistsInDb = false;
+                    if (is_numeric($agreementId) && isset($this->contractsByAgrProd[$compContractKey])) {
+                        $compExistsInDb = true;
+                    }
+                    
+                    if (!$compExistsInDb && !isset($this->newContractsKeys[$compContractKey])) {
+                        $tfPrice = $this->tuitionFeePrice[$compTfId] ?? 0;
+                        $tfSession = $this->tuitionFeeSession[$compTfId] ?? 0;
+                        
+                        $this->newContracts[] = [
+                            '__agreement_key' => $agreementId,
+                            '__student_key'   => $studentId,
+                            '__class_key'     => null,
+                            '__dedup_key'     => '',
+                            '__excel_row'     => $excelRow,
+                            '__extra_note'    => "Auto-generated from combo",
+                            '__agr_total_charged' => $finalTotalCharged,
+                            'product_id'      => $compProdId,
+                            'tuition_fee_id'  => $compTfId,
+                            'ec_id'           => $ecId,
+                            'ec_leader_id'    => $ecLeaderId,
+                            'must_charge'     => $tfPrice,
+                            'discount_amount' => 0,
+                            'total_charged'   => 0,
+                            'debt_amount'     => 0,
+                            'total_sessions'  => $tfSession,
+                            'real_sessions'   => $tfSession,
+                            'summary_sessions'    => $tfSession,
+                            'done_sessions'       => 0,
+                            'start_date'          => null,
+                            'enrolment_start_date'=> null,
+                            'status'              => 4, // Pending
+                            'branch_id'       => 9,
+                            'created_at'      => $createdAt,
+                            'updated_at'      => $createdAt,
+                        ];
+                        $this->newContractsKeys[$compContractKey] = count($this->newContracts) - 1;
+                        $this->cntContNew++;
+                    }
                 }
             }
 
@@ -791,7 +893,9 @@ class ImportStudentsFromJson extends Command
                     $c['left_sessions'] = $availableSession - ($c['done_sessions'] ?? 0);
                     
                     if ($c['class_id'] && $availableSession > 0) {
-                        $c['status'] = 6;
+                        if (!in_array($c['status'], [6, 7])) {
+                            $c['status'] = 6;
+                        }
                     } else {
                         $c['status'] = ($paid >= $mustCharge) ? (($c['status'] > 3) ? $c['status'] : 3) : 2;
                     }
@@ -975,6 +1079,9 @@ class ImportStudentsFromJson extends Command
 
     private function getProductIdFromClassCode(string $code): ?int
     {
+        if (str_starts_with($code, 'O')) {
+            $code = substr($code, 1); // Bỏ tiền tố O (Online)
+        }
         if (str_starts_with($code, 'PT')) return 25;
         if (str_starts_with($code, 'T')) return 26;
         if (str_starts_with($code, 'V')) return 27;

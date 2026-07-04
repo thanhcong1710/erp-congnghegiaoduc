@@ -34,8 +34,6 @@
                   <p>Mã: <strong>{{ item.code }}</strong></p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
                   <p>Số buổi: {{ item.total_sessions }}</p>
-                  <p v-if="item.enrolment_start_date && item.enrolment_last_date">Thời gian: {{item.enrolment_start_date | formatDateView}} - {{item.enrolment_last_date | formatDateView}}</p>
-              
                 </td>
 
                 <td class="td vs-table--td">
@@ -43,10 +41,13 @@
                   <p class="text-danger">Công nợ: {{ item.debt_amount | formatMoney }}</p>
                 </td>
 
-                <td class="td vs-table--td text-center"">
+                <td class="td vs-table--td text-center">
                   <span class="status-badge">
                     {{ item.label_status }}
                   </span>
+                  <div class="mt-2 text-muted" style="font-size: 11px;" v-if="item.enrolment_start_date || item.enrolment_last_date">
+                    (<span v-if="item.enrolment_start_date">{{item.enrolment_start_date | formatDateView}}</span><span v-else>...</span> - <span v-if="item.enrolment_last_date">{{item.enrolment_last_date | formatDateView}}</span><span v-else>...</span>)
+                  </div>
                 </td>
 
                 <td class="td vs-table--td text-center">
