@@ -1768,11 +1768,18 @@ class ReportsController extends Controller
             $cond .= " AND a.debt_amount > 0";
         }
         
-        if ($start_date) {
-            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
-        }
-        if ($end_date) {
-            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        if ($start_date || $end_date) {
+            $pay_cond = [];
+            if ($start_date) {
+                $pay_cond[] = "created_at >= '$start_date 00:00:00'";
+            }
+            if ($end_date) {
+                $pay_cond[] = "created_at <= '$end_date 23:59:59'";
+            }
+            $pay_cond_str = implode(' AND ', $pay_cond);
+            $cond .= " AND (EXISTS (SELECT 1 FROM tmp_payments WHERE agreement_id = a.id AND $pay_cond_str) OR EXISTS (SELECT 1 FROM payments WHERE agreement_id = a.id AND $pay_cond_str))";
+        } else {
+            $cond .= " AND (EXISTS (SELECT 1 FROM tmp_payments WHERE agreement_id = a.id) OR EXISTS (SELECT 1 FROM payments WHERE agreement_id = a.id))";
         }
 
         $totalRow = u::first("

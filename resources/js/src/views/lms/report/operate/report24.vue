@@ -44,7 +44,7 @@
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
         </div>
         <div>
-          <label class="rpt-label">Ngày tạo (từ — đến)</label>
+          <label class="rpt-label">Ngày tạo phiếu thu (từ — đến)</label>
           <date-picker v-model="searchData.date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
