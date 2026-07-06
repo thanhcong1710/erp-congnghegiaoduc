@@ -159,6 +159,36 @@ class ImportClassesFromExcel extends Command
                         $product_id = $cache_products[$product_name]['id'];
                         $num_sessions = $cache_products[$product_name]['num_sessions'];
                     }
+
+                    // Fallback: map product dựa trên prefix mã lớp
+                    if (!$product_id) {
+                        $prefixMap = [
+                            'OPT' => 'Pre-Toeic',
+                            'PT'  => 'Pre-Toeic',
+                            'OT'  => 'Toeic level 1',
+                            'KA'  => 'Toeic level 1',
+                            'T'   => 'Toeic level 1',
+                            'OVIP'=> 'Toeic level 2',
+                            'VIP' => 'Toeic level 2',
+                            'OS'  => 'Toeic Speaking',
+                            'S'   => 'Toeic Speaking',
+                            'OW'  => 'Toeic Writing',
+                            'W'   => 'Toeic Writing',
+                        ];
+                        // Kiểm tra prefix dài trước (OVIP trước VIP, OPT trước OT trước T)
+                        $codeUpper = strtoupper($code_normalized);
+                        foreach ($prefixMap as $prefix => $pName) {
+                            if (strpos($codeUpper, $prefix) === 0 && preg_match('/^' . $prefix . '\d/', $codeUpper)) {
+                                if (isset($cache_products[$pName])) {
+                                    $product_id = $cache_products[$pName]['id'];
+                                    $num_sessions = $cache_products[$pName]['num_sessions'];
+                                    $product_name = $pName;
+                                    $this->info("  -> Prefix match: {$prefix} => {$pName} (product_id={$product_id})");
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 // Nếu không có product_id thì bỏ qua lớp này
