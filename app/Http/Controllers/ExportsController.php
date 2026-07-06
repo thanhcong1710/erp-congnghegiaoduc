@@ -346,7 +346,7 @@ class ExportsController extends Controller
             }
         }
 
-        $ordered_by = " ORDER BY c.cls_name DESC ";
+        $order_by = " ORDER BY REGEXP_REPLACE(c.cls_name, '[0-9]+$', '') DESC, CAST(REGEXP_REPLACE(c.cls_name, '^[^0-9]+', '') AS UNSIGNED) DESC ";
 
         $having = "";
         if ($status_filter !== '') {
