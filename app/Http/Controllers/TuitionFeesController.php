@@ -41,7 +41,8 @@ class TuitionFeesController extends Controller
         }
 
         $is_ceo = Auth::user()->checkRole(686868);
-        if ($is_ceo) {
+        $is_cm = Auth::user()->checkRole(56);
+        if ($is_ceo || $is_cm) {
             $user_branches = Auth::user()->getBranchesHasUser();
             if ($user_branches) {
                 $arrUBranches = explode(',', $user_branches);
