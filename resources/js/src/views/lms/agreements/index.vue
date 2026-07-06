@@ -44,6 +44,22 @@
             />
           </div>
         </div>
+        <div class="vx-row">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Team KD (quản lý)</label>
+            <multiselect v-model="searchData.team_obj" :options="team_list" label="label" track-by="id"
+              placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
+              <span slot="noResult">Không tìm thấy</span>
+            </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Nhân viên sale</label>
+            <multiselect v-model="searchData.ec_obj" :options="ec_list" label="label" track-by="id"
+              placeholder="Chọn sale" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
+              <span slot="noResult">Không tìm thấy</span>
+            </multiselect>
+          </div>
+        </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <router-link class="btn btn-success" :to="'/lms/agreements/add'">
@@ -85,6 +101,7 @@
                 <td class="td vs-table--td">
                   <p><strong>{{ item.branch_name }}</strong></p>
                   <p>EC: {{ item.ec_name }}</p>
+                  <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p>Mã:  <router-link :to="`/lms/agreements/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
@@ -152,12 +169,16 @@
     data() {
       return {
         branch_list: [],
+        team_list: [],
+        ec_list: [],
         searchData: {
           arr_branch: "",
           branch_id:"",
           keyword: "",
           dateRange: "",
           is_class: -1,
+          team_obj: null,
+          ec_obj: null,
         },
         isClassOptions: [
           { label: "Tất cả", value: -1 },
@@ -211,6 +232,14 @@
         .then(response => {
         this.branch_list = response.data
       })
+      axios.g(`/api/system/users?role_id=69`)
+        .then(response => {
+        this.team_list = response.data || []
+      })
+      axios.g(`/api/system/users?role_id=68,69`)
+        .then(response => {
+        this.ec_list = response.data || []
+      })
       this.getData();
     },
     methods: {
@@ -221,6 +250,8 @@
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
         this.searchData.is_class= -1
+        this.searchData.team_obj= null
+        this.searchData.ec_obj= null
         this.getData();
       },
       getData() {
@@ -240,6 +271,8 @@
             start_date:startDate,
             end_date:endDate,
             is_class: this.searchData.is_class,
+            team_id: this.searchData.team_obj ? this.searchData.team_obj.id : 0,
+            ec_id: this.searchData.ec_obj ? this.searchData.ec_obj.id : 0,
             pagination:this.pagination,
           }
 

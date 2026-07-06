@@ -200,16 +200,35 @@
         </div>
       </div>
       <vs-popup :class="'view-enrolments modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
-        <div class="vx-row" > 
+        <div class="vx-row" >
           <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label>Tìm kiếm</label>
             <vs-input class="w-full" placeholder="Nhập tên, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/2 w-full mb-4">
-            <vs-button class="mb-3 mr-3" @click="getData">Tìm kiếm</vs-button>
-            <vs-button class="mb-3" color="success" @click="addStudent">Thêm học sinh</vs-button>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label>Team KD (quản lý)</label>
+            <vue-select
+              label="label"
+              placeholder="Tất cả"
+              :options="ec_managers"
+              v-model="searchData.ec_selected"
+              :searchable="true"
+              :clearable="!user_role.is_sale && !user_role.is_sale_leader"
+              :disabled="user_role.is_sale && !user_role.is_sale_leader"
+            ></vue-select>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label>Ngày học dự kiến</label>
+            <datepicker v-model="searchData.dateRange" format="YYYY-MM-DD" style="width:100%" type="date" range :clearable="true" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></datepicker>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             Số chỗ trống còn lại trong lớp: <strong>{{class_info.max_students - class_info.num_students - checked_list.length}}</strong>
+          </div>
+        </div>
+        <div class="vx-row mb-4">
+          <div class="vx-col w-full">
+            <vs-button class="mr-3" @click="getData">Tìm kiếm</vs-button>
+            <vs-button color="success" @click="addStudent">Thêm học sinh</vs-button>
           </div>
         </div>
         <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -340,8 +359,12 @@
         students:[],
         class_dates: [],
         searchData:{
-          keyword:''
+          keyword:'',
+          ec_selected: null,
+          dateRange: [],
         },
+        ec_managers: [],
+        datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         studentSearch:[],
         limitSource: [20, 50, 100, 500],
         pagination: {
@@ -378,6 +401,10 @@
        axios.g(`/api/system/products`)
         .then(response => {
         this.html.products.list = response.data
+      })
+      axios.g(`/api/system/users?role_id=69`)
+        .then(response => {
+        this.ec_managers = response.data || []
       })
     },
     methods: {
@@ -444,6 +471,15 @@
         this.modal_enrol.show =true
         this.checked_list =[]
         this.studentSearch = []
+        this.searchData.keyword = ''
+        this.searchData.dateRange = []
+        // Auto-set ec_id for sale_leader role (role 69 is in ec_managers list)
+        if (this.user_role.is_sale_leader) {
+          const matched = this.ec_managers.find(m => m.id === this.user_role.user_id)
+          this.searchData.ec_selected = matched || null
+        } else {
+          this.searchData.ec_selected = null
+        }
         this.getData()
       },
       changePage() {
@@ -461,6 +497,9 @@
           const data = {
             class_id: this.class_info.class_id,
             keyword: this.searchData.keyword,
+            ec_id: this.searchData.ec_selected ? this.searchData.ec_selected.id : '',
+            start_date_from: this.searchData.dateRange && this.searchData.dateRange[0] ? moment(this.searchData.dateRange[0]).format('YYYY-MM-DD') : '',
+            start_date_to: this.searchData.dateRange && this.searchData.dateRange[1] ? moment(this.searchData.dateRange[1]).format('YYYY-MM-DD') : '',
             pagination:this.pagination
           }
           this.$vs.loading()

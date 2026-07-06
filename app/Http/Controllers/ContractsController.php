@@ -733,6 +733,18 @@ class ContractsController extends Controller
             $cond .= " AND NOT EXISTS (SELECT 1 FROM contracts ct WHERE ct.agreement_id = c.id AND ct.class_id > 0 AND ct.status > 0) ";
         }
 
+        // Filter by Team KD (sale leader)
+        $team_id = isset($request->team_id) && $request->team_id ? (int) $request->team_id : 0;
+        if ($team_id > 0) {
+            $cond .= " AND (c.ec_leader_id = $team_id OR c.ec_id = $team_id)";
+        }
+
+        // Filter by Nhân viên sale
+        $filter_ec_id = isset($request->ec_id) && $request->ec_id ? (int) $request->ec_id : 0;
+        if ($filter_ec_id > 0) {
+            $cond .= " AND c.ec_id = $filter_ec_id";
+        }
+
         $order_by = " ORDER BY c.id DESC ";
 
         $total = u::first("SELECT count(s.id) AS total 
@@ -741,6 +753,7 @@ class ContractsController extends Controller
         $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
                 (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id

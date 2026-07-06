@@ -133,6 +133,37 @@ class EnrolmentsController extends Controller
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
         }
+
+        // Filter by Team KD (sale leader id - role 69)
+        $ec_id = isset($request->ec_id) && $request->ec_id ? (int) $request->ec_id : '';
+        if ($ec_id) {
+            $cond .= " AND (c.ec_leader_id = $ec_id OR c.ec_id = $ec_id)";
+        }
+
+        // Filter by ngày học dự kiến (start_date range)
+        $start_date_from = isset($request->start_date_from) && $request->start_date_from ? $request->start_date_from : '';
+        $start_date_to = isset($request->start_date_to) && $request->start_date_to ? $request->start_date_to : '';
+        if ($start_date_from && $start_date_to) {
+            $cond .= " AND c.start_date >= '$start_date_from' AND c.start_date <= '$start_date_to'";
+        } elseif ($start_date_from) {
+            $cond .= " AND c.start_date >= '$start_date_from'";
+        } elseif ($start_date_to) {
+            $cond .= " AND c.start_date <= '$start_date_to'";
+        }
+
+        // Role-based filtering: sale/sale_leader chỉ thấy HS mình quản lý
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+
+        if ($is_sale && !$is_sale_leader) {
+            // Role 68 (sale): chỉ thấy HS có ec_id = user_id
+            $cond .= " AND c.ec_id = $current_user_id";
+        } elseif ($is_sale_leader) {
+            // Role 69 (sale leader): thấy HS có ec_id hoặc ec_leader_id = user_id
+            $cond .= " AND (c.ec_id = $current_user_id OR c.ec_leader_id = $current_user_id)";
+        }
+
         if (data_get($class_info, 'is_online') == 1) {
             $cond .= " AND t.type IN(0,2) ";
         } else {
