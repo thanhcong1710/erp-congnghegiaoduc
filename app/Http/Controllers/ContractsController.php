@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\SystemCode;
 use App\User;
 use App\Http\Controllers\Controller;
+use App\Models\LogClassStudent;
 use App\Models\LogStudents;
 use App\Models\LogParents;
 use App\Providers\UtilityServiceProvider as u;
@@ -141,6 +142,7 @@ class ContractsController extends Controller
         ], ['student_id' => $student_id], 'term_student_user');
 
         LogStudents::logAdd($student_id, 'Xếp vào lớp ' . data_get($class_info, 'cls_name'), Auth::user()->id);
+        LogClassStudent::logAction($class_id, $student_id, $contract_id, 1, Auth::user()->id);
 
         $actions = ['Phát sách', 'Thông báo lịch học'];
         TicketService::createTicketsForStudentEnrollment($student_id, $class_id, $contract_id, $actions);
