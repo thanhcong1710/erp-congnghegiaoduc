@@ -93,8 +93,8 @@ class EnrolmentsController extends Controller
 
         // Check current user's role for permission control
         $current_user_id = Auth::user()->id;
-        $is_sale = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
-        $is_sale_leader = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
 
         $data = [
             'class_info' => $class_info,
@@ -236,8 +236,8 @@ class EnrolmentsController extends Controller
 
         // Kiểm tra quyền: role 68 (sale) chỉ xóa HS có ec_id = user_id, role 69 (sale leader) chỉ xóa HS có ec_id hoặc ec_leader_id = user_id
         $current_user_id = Auth::user()->id;
-        $is_sale = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
-        $is_sale_leader = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
 
         if ($is_sale && !$is_sale_leader) {
             // Role 68 (sale): chỉ xóa HS mình quản lý (ec_id = user_id)
