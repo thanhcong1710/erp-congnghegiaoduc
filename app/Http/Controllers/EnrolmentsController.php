@@ -75,9 +75,9 @@ class EnrolmentsController extends Controller
         }
         $class_info->shift_text = $shift_text;
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
-        $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,
+        $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code, s.gud_mobile1,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
-                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status,
+                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status, c.ec_id, c.ec_leader_id,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name,
                 p.link_facebook
             FROM contracts AS c
@@ -90,12 +90,23 @@ class EnrolmentsController extends Controller
         $pre_schedules = u::query("SELECT s.class_date, s.subject_stt, sj.code FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.class_id = $class_id AND s.status=1 AND s.class_date < CURRENT_DATE ORDER BY s.class_date DESC LIMIT 3");
         $next_schedules = u::query("SELECT s.class_date, s.subject_stt, sj.code FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.class_id = $class_id AND s.status=1 AND s.class_date >= CURRENT_DATE ORDER BY s.class_date LIMIT 3");
         $reversed = array_reverse($pre_schedules);
+
+        // Check current user's role for permission control
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+
         $data = [
             'class_info' => $class_info,
             'students' => $students,
             'class_dates' => $class_dates,
             'pre_schedules' => $reversed,
             'next_schedules' => $next_schedules,
+            'user_role' => [
+                'user_id' => $current_user_id,
+                'is_sale' => !empty($is_sale),
+                'is_sale_leader' => !empty($is_sale_leader),
+            ],
         ];
         return response()->json($data);
     }
@@ -221,6 +232,29 @@ class EnrolmentsController extends Controller
                 'status' => 0,
                 'message' => 'Không thể xóa học sinh đã bắt đầu học khỏi lớp'
             ], 400);
+        }
+
+        // Kiểm tra quyền: role 68 (sale) chỉ xóa HS có ec_id = user_id, role 69 (sale leader) chỉ xóa HS có ec_id hoặc ec_leader_id = user_id
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT id FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+
+        if ($is_sale && !$is_sale_leader) {
+            // Role 68 (sale): chỉ xóa HS mình quản lý (ec_id = user_id)
+            if ((int) data_get($contract, 'ec_id') !== $current_user_id) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền xóa học sinh này. Chỉ được xóa học sinh mình quản lý.'
+                ], 403);
+            }
+        } elseif ($is_sale_leader) {
+            // Role 69 (sale leader): xóa HS có ec_id hoặc ec_leader_id = user_id
+            if ((int) data_get($contract, 'ec_id') !== $current_user_id && (int) data_get($contract, 'ec_leader_id') !== $current_user_id) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền xóa học sinh này. Chỉ được xóa học sinh trong team mình quản lý.'
+                ], 403);
+            }
         }
 
         // Cập nhật contract: status=3, class_id=null, enrolment_start_date=null, enrolment_last_date=null

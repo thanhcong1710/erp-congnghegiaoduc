@@ -44,7 +44,14 @@
           </div>
         </div>
         <div class="vx-col md:w-8/12 w-full item-last">
-          <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin cấu hình lớp học</h5>
+          <div class="vx-row">
+            <h5 class="vx-col md:w-1/2 w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin cấu hình lớp học</h5>
+            <div class="vx-col md:w-1/2 w-full text-right">
+              <vs-button color="dark" type="border" class="mb-2 mr-3" @click="reload()" >Hủy</vs-button>
+              <vs-button class="mb-2" color="success" @click="save()">{{config.is_edit ? 'Cập nhật' : 'Thêm mới'}}</vs-button>
+            </div>
+          </div>
+          
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Mã lớp</label>
@@ -278,12 +285,7 @@
       </vs-popup>
         </div>
       </div>
-      <div class="vx-row mt-5">
-        <div class="vx-col w-full text-right">
-          <vs-button color="dark" type="border" class="mb-2 mr-3" @click="reload()" >Hủy</vs-button>
-          <vs-button class="mb-2" color="success" @click="save()">{{config.is_edit ? 'Cập nhật' : 'Thêm mới'}}</vs-button>
-        </div>
-      </div>
+      
     </vx-card>
   </div>
 

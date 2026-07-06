@@ -117,7 +117,9 @@
             </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
-            <vs-button style="float: right" class="mb-3" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
+            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
+            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
+            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
             <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
             <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
@@ -139,6 +141,7 @@
                       <td class="td vs-table--td" style="max-width:250px;">
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
+                        <p v-if="item.gud_mobile1">SĐT: {{item.gud_mobile1}}</p>
                         <div v-if="item.link_facebook" style="margin-top:4px;">
                           <a :href="item.link_facebook" target="_blank" rel="noopener noreferrer"
                             style="font-size:12px; color:#1877f2; word-break:break-all;"
@@ -360,6 +363,11 @@
         checked_list: [],
         next_schedules:[],
         pre_schedules:[],
+        user_role: {
+          user_id: 0,
+          is_sale: false,
+          is_sale_leader: false,
+        },
       }
     },
     created() {
@@ -427,6 +435,9 @@
           this.students = response.data.students
           this.next_schedules = response.data.next_schedules
           this.pre_schedules = response.data.pre_schedules
+          if (response.data.user_role) {
+            this.user_role = response.data.user_role
+          }
         })
       },
       showModalEnrol(){
@@ -533,7 +544,19 @@
       },
       canRemoveStudent(student) {
         // Chỉ cho phép xóa nếu lớp chưa bắt đầu (done_sessions = 0)
-        return student.done_sessions === 0 || student.done_sessions === '0'
+        if (student.done_sessions !== 0 && student.done_sessions !== '0') {
+          return false
+        }
+        // Role 68 (sale): chỉ xóa HS mình quản lý (ec_id = user_id)
+        if (this.user_role.is_sale && !this.user_role.is_sale_leader) {
+          return parseInt(student.ec_id) === parseInt(this.user_role.user_id)
+        }
+        // Role 69 (sale leader): xóa HS có ec_id hoặc ec_leader_id = user_id
+        if (this.user_role.is_sale_leader) {
+          return parseInt(student.ec_id) === parseInt(this.user_role.user_id) || parseInt(student.ec_leader_id) === parseInt(this.user_role.user_id)
+        }
+        // Các role khác: cho phép xóa
+        return true
       },
       confirmRemoveStudent(student) {
         this.$vs.dialog({
@@ -613,6 +636,68 @@
             this.$vs.notify({
               title: 'Đã copy',
               text: `Đã sao chép ${links.length} link Facebook vào clipboard`,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-copy'
+            })
+          }).catch(() => {
+            this.fallbackCopy(text)
+          })
+        } else {
+          this.fallbackCopy(text)
+        }
+      },
+      copyAllNames() {
+        const names = this.students
+          .map(s => s.name)
+          .filter(n => !!n)
+        if (names.length === 0) {
+          this.$vs.notify({
+            title: 'Thông báo',
+            text: 'Không có học sinh nào',
+            color: 'warning',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+          return
+        }
+        const text = names.join('\n')
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => {
+            this.$vs.notify({
+              title: 'Đã copy',
+              text: `Đã sao chép ${names.length} tên học sinh vào clipboard`,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-copy'
+            })
+          }).catch(() => {
+            this.fallbackCopy(text)
+          })
+        } else {
+          this.fallbackCopy(text)
+        }
+      },
+      copyAllPhones() {
+        const phones = this.students
+          .map(s => s.gud_mobile1)
+          .filter(p => !!p)
+        if (phones.length === 0) {
+          this.$vs.notify({
+            title: 'Thông báo',
+            text: 'Không có học sinh nào có số điện thoại',
+            color: 'warning',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+          return
+        }
+        const text = phones.join('\n')
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(() => {
+            this.$vs.notify({
+              title: 'Đã copy',
+              text: `Đã sao chép ${phones.length} số điện thoại vào clipboard`,
               color: 'success',
               iconPack: 'feather',
               icon: 'icon-copy'
