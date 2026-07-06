@@ -408,7 +408,7 @@ class ReportsController extends Controller
             }
         }
 
-        $order_by = " ORDER BY c.id DESC ";
+        $order_by = " ORDER BY c.cls_name DESC ";
 
         if ($having) {
             $countSql = "SELECT count(*) as total FROM (
