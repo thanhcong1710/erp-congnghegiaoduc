@@ -249,7 +249,7 @@
             <label>Tìm kiếm</label>
             <vs-input class="w-full" placeholder="Nhập tên, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4" v-if="!user_role.is_sale && !user_role.is_sale_leader">
             <label>Team KD (quản lý)</label>
             <vue-select
               label="label"
@@ -257,8 +257,6 @@
               :options="ec_managers"
               v-model="searchData.ec_selected"
               :searchable="true"
-              :clearable="!user_role.is_sale && !user_role.is_sale_leader"
-              :disabled="user_role.is_sale && !user_role.is_sale_leader"
             ></vue-select>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">

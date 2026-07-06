@@ -239,6 +239,13 @@ class SystemController extends Controller
             $excludeCond = " AND u.id NOT IN (SELECT user_id FROM role_has_user WHERE role_id = $exclude_role_id) ";
         }
 
+        $current_user_id = Auth::user()->id;
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 69");
+        $managerCond = '';
+        if ($is_sale_leader && (in_array(68, $role_ids) || in_array(69, $role_ids))) {
+            $managerCond = " AND (u.manager_id = $current_user_id OR u.id = $current_user_id) ";
+        }
+
         $data = u::query("
             SELECT DISTINCT
                 u.id,
@@ -252,9 +259,22 @@ class SystemController extends Controller
               AND u.status = 1
               $branchCond
               $excludeCond
+              $managerCond
             ORDER BY u.name ASC
         ");
 
         return response()->json($data);
+    }
+
+    public function getCurrentUserRole(Request $request)
+    {
+        $user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 68");
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 69");
+        return response()->json([
+            'user_id' => $user_id,
+            'is_sale' => !empty($is_sale),
+            'is_sale_leader' => !empty($is_sale_leader),
+        ]);
     }
 }

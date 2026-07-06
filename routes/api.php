@@ -56,6 +56,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('customer-statuses', 'SystemController@getCustomerStatuses');
             Route::get('call-statuses', 'SystemController@getCallStatuses');
             Route::get('users', 'SystemController@getUsersByRole');
+            Route::get('current-user-role', 'SystemController@getCurrentUserRole');
         });
         Route::prefix('user')->group(function () {
             Route::post('update-info', 'UserController@updateInfo');

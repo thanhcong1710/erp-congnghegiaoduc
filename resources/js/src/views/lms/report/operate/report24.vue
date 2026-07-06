@@ -19,14 +19,14 @@
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-        <div>
+        <div v-if="!user_role.is_sale && !user_role.is_sale_leader">
           <label class="rpt-label">Team KD (quản lý)</label>
           <multiselect v-model="searchData.team_obj" :options="team_list" label="name" track-by="id"
             placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-        <div>
+        <div v-if="!user_role.is_sale || user_role.is_sale_leader">
           <label class="rpt-label">Nhân viên sale</label>
           <multiselect v-model="searchData.ec_obj" :options="ec_list" label="name" track-by="id"
             placeholder="Chọn sale" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
@@ -189,9 +189,11 @@
           days: ['CN','T2','T3','T4','T5','T6','T7'],
           months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
         },
+        user_role: { user_id: 0, is_sale: false, is_sale_leader: false },
       }
     },
     created() {
+      axios.g(`/api/system/current-user-role`).then(response => { this.user_role = response.data })
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
       axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })

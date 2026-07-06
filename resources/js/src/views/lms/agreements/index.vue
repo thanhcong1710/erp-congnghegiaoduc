@@ -45,14 +45,14 @@
           </div>
         </div>
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4" v-if="!user_role.is_sale && !user_role.is_sale_leader">
             <label for="" class="vs-input--label">Team KD (quản lý)</label>
             <multiselect v-model="searchData.team_obj" :options="team_list" label="label" track-by="id"
               placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
               <span slot="noResult">Không tìm thấy</span>
             </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4" v-if="!user_role.is_sale || user_role.is_sale_leader">
             <label for="" class="vs-input--label">Nhân viên sale</label>
             <multiselect v-model="searchData.ec_obj" :options="ec_list" label="label" track-by="id"
               placeholder="Chọn sale" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
@@ -225,9 +225,17 @@
           init: 0
         },
         delete_id:'',
+        user_role: {
+          user_id: 0,
+          is_sale: false,
+          is_sale_leader: false,
+        },
       }
     },
     created() {
+      axios.g(`/api/system/current-user-role`).then(response => {
+        this.user_role = response.data
+      })
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.branch_list = response.data
