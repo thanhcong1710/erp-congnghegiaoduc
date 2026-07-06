@@ -6,6 +6,7 @@ use App\Enums\SystemCode;
 use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\LogStudents;
+use App\Models\LogClassStudent;
 use App\Providers\UtilityServiceProvider as u;
 use App\Services\TicketService;
 use Illuminate\Http\Request;
@@ -79,11 +80,12 @@ class EnrolmentsController extends Controller
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
                 c.must_charge, c.total_charged, c.done_sessions, c.add_class_status, c.ec_id, c.ec_leader_id,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT created_at FROM log_class_students WHERE class_id=$class_id AND contract_id=c.id AND action=1 ORDER BY id DESC LIMIT 1) AS added_at,
                 p.link_facebook
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id
                 LEFT JOIN crm_parents AS p ON p.student_id = s.id
-            WHERE c.status!=7 AND c.class_id =$class_id");
+            WHERE c.status!=7 AND c.class_id =$class_id ORDER BY added_at ASC");
         $class_info->num_students = count($students);
         $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 AND class_date >= CURRENT_DATE ORDER BY class_date");
 
@@ -109,6 +111,18 @@ class EnrolmentsController extends Controller
             ],
         ];
         return response()->json($data);
+    }
+
+    public function getClassLogs(Request $request, $class_id)
+    {
+        $logs = u::query("SELECT l.*, s.name as student_name, s.lms_code, c.code as contract_code, u.name as creator_name
+            FROM log_class_students l
+            LEFT JOIN students s ON s.id = l.student_id
+            LEFT JOIN contracts c ON c.id = l.contract_id
+            LEFT JOIN users u ON u.id = l.creator_id
+            WHERE l.class_id = $class_id
+            ORDER BY l.created_at DESC");
+        return response()->json($logs);
     }
 
     public function getStudentsAdd(Request $request)
@@ -229,6 +243,7 @@ class EnrolmentsController extends Controller
                 'updator_id' => Auth::user()->id
             ), array('student_id' => $student_id), 'term_student_user');
             LogStudents::logAdd($student_id, 'Xếp vào lớp ' . data_get($class_info, 'cls_name'), Auth::user()->id);
+            LogClassStudent::logAction($class_id, $student_id, $contract_id, 1, Auth::user()->id);
 
             // Tự động tạo tickets khi học sinh được thêm vào lớp
             $actions = ['Phát sách', 'Thông báo lịch học'];
@@ -308,6 +323,7 @@ class EnrolmentsController extends Controller
             'Xóa khỏi lớp ' . data_get($class_info, 'cls_name'),
             Auth::user()->id
         );
+        LogClassStudent::logAction($class_id, $student_id, $contract_id, 0, Auth::user()->id);
 
         return response()->json([
             'status' => 1,

@@ -174,6 +174,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('enrolments/add-student', 'EnrolmentsController@addStudent');
             Route::post('enrolments/remove-student', 'EnrolmentsController@removeStudent');
             Route::post('enrolments/update-add-class-status', 'EnrolmentsController@updateAddClassStatus');
+            Route::get('enrolments/class-logs/{class_id}', 'EnrolmentsController@getClassLogs');
             Route::post('reserves/list', 'ReservesController@list');
             Route::post('reserves/search-student', 'ReservesController@searchStudent');
             Route::post('reserves/add', 'ReservesController@add');

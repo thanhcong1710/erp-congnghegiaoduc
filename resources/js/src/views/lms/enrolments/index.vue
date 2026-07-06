@@ -117,11 +117,14 @@
             </div>
           </div>
           <div class="mt-5" v-if="class_info.class_id">
-            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
-            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
-            <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
-            <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
-            <div class="vs-component vs-con-table stripe vs-table-primary">
+            <vs-tabs v-model="activeTab">
+              <vs-tab label="Danh sách học sinh">
+                <div class="pt-4">
+                  <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
+                  <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
+                  <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
+                  <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
+                  <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
                   <table class="vs-table vs-table--tbody-table">
@@ -162,6 +165,9 @@
                            <option :value="3">Chờ feedback</option>
                            <option :value="4">DONE</option>
                          </select>
+                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
+                           <i class="fa-regular fa-clock mr-1"></i>{{ item.added_at }}
+                         </div>
                       </td>
                       <td class="td vs-table--td">
                         <p>Mã: <strong>{{item.contract_code}}</strong></p>
@@ -196,6 +202,44 @@
                 </div>
               </div>
             </div>
+                </div>
+              </vs-tab>
+              <vs-tab label="Lịch sử xếp lớp" @click="loadClassLogs">
+                <div class="pt-4">
+                  <div class="vs-component vs-con-table stripe vs-table-primary">
+                    <div class="con-tablex vs-table--content">
+                      <div class="vs-con-tbody vs-table--tbody ">
+                        <table class="vs-table vs-table--tbody-table">
+                          <thead class="vs-table--thead">
+                           <tr>
+                              <th class="text-center">Thời gian</th>
+                              <th>Thao tác</th>
+                              <th>Học sinh</th>
+                              <th>Hợp đồng</th>
+                              <th>Người thực hiện</th>
+                            </tr>
+                          </thead>
+                          <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(log, idx) in class_logs" :key="'log'+idx">
+                            <td class="td vs-table--td text-center">{{ log.created_at }}</td>
+                            <td class="td vs-table--td">
+                              <strong :class="log.action == 1 ? 'text-success' : 'text-danger'">
+                                {{ log.action == 1 ? 'Xếp vào lớp' : 'Xóa khỏi lớp' }}
+                              </strong>
+                            </td>
+                            <td class="td vs-table--td">
+                              <p>Tên HS: {{ log.student_name }}</p>
+                              <p>Mã HS: {{ log.lms_code }}</p>
+                            </td>
+                            <td class="td vs-table--td">{{ log.contract_code }}</td>
+                            <td class="td vs-table--td">{{ log.creator_name }}</td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </vs-tab>
+            </vs-tabs>
           </div>
         </div>
       </div>
@@ -386,6 +430,8 @@
         checked_list: [],
         next_schedules:[],
         pre_schedules:[],
+        class_logs: [],
+        activeTab: 0,
         user_role: {
           user_id: 0,
           is_sale: false,
@@ -441,6 +487,19 @@
           this.classes =[]
         }
       },
+      loadClassLogs() {
+        if (!this.class_info.class_id) return;
+        this.$vs.loading();
+        axios.g(`/api/lms/enrolments/class-logs/${this.class_info.class_id}`)
+          .then(response => {
+            this.$vs.loading.close();
+            this.class_logs = response.data;
+          })
+          .catch(e => {
+            console.log(e);
+            this.$vs.loading.close();
+          });
+      },
       selectClass(selected_class) {
         if (selected_class.model.item_type === 'class') {
           this.loadDataClassSelected(selected_class.model.item_id)
@@ -453,6 +512,7 @@
         }
       },
       loadDataClassSelected(class_id){
+        this.activeTab = 0;
         this.$vs.loading();
         axios.g(`/api/lms/enrolments/info-class/${class_id}`)
           .then(response => {
