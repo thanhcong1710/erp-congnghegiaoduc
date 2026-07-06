@@ -108,9 +108,12 @@ class ClassesController extends Controller
             }
             if($exitSChedule){
                 $currentDate = date('Y-m-d');
-                u::query("DELETE FROM schedules WHERE class_id= $class_id AND class_date >= '$currentDate'");
+                $last_date = u::first("SELECT class_date FROM schedules WHERe class_id= $class_id ORDER BY class_date DESC LIMIT 1");
+                $lastDate = data_get($last_date, 'class_date') ? data_get($last_date, 'class_date') : $currentDate;
+                
+                u::query("DELETE FROM schedules WHERE class_id= $class_id AND class_date >= '$lastDate'");
                 foreach(data_get($data_sessions, 'dates') AS $row){
-                    if($row >= $currentDate){
+                    if($row >= $lastDate){
                         u::insertSimpleRow(array(
                             'class_date'=> $row,
                             'class_id'=> $class_id,
