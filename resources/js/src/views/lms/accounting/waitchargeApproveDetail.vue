@@ -311,7 +311,7 @@
             <input
               class="vs-inputx vs-input--input normal"
               type="text"debt_amount
-              :value="payment.debt_amount | formatNumber"
+              :value="payment.debt_amount - agreement_info.discount_amount | formatNumber"
               disabled="true"
             />
           </div>
