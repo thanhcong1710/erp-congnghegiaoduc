@@ -6,7 +6,7 @@
           <i class="fas fa-file-invoice-dollar text-xl"></i>
         </div>
         <div>
-          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN</h3>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN</h3>
         </div>
       </div>
       <!-- Filters -->
@@ -44,7 +44,7 @@
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
         </div>
         <div>
-          <label class="rpt-label">Ngày tạo</label>
+          <label class="rpt-label">Ngày tạo phiếu thu (từ — đến)</label>
           <date-picker v-model="searchData.date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
@@ -78,33 +78,19 @@
         <table class="rpt-table">
           <thead>
             <tr>
-              <th style="min-width:50px" class="text-center" rowspan="2">STT</th>
-              <th style="min-width:120px" rowspan="2">Ngày tạo</th>
-              <th style="min-width:80px" rowspan="2">Trạng thái đăng ký</th>
-              <th style="min-width:80px" rowspan="2">Up quá trình từ</th>
-              <th style="min-width:220px" rowspan="2">Khoá học đăng kí</th>
-              <th style="min-width:200px" rowspan="2">Họ và tên</th>
-              <th style="min-width:130px" rowspan="2">Sđt</th>
-              <th style="min-width:180px" rowspan="2">Team kinh doanh</th>
-              <th style="min-width:250px" rowspan="2">ĐỊA CHỈ NHẬN SÁCH</th>
-              <th style="min-width:140px" class="text-right" rowspan="2">Giá khoá học</th>
-              <th style="min-width:110px" rowspan="2">DK chung</th>
-              <th class="text-center" colspan="5" style="border-bottom: 1px solid rgba(255,255,255,0.2);">ĐÃ DUYỆT</th>
-              <th class="text-center" colspan="5" style="border-bottom: 1px solid rgba(255,255,255,0.2); border-left: 1px solid rgba(255,255,255,0.2);">CHƯA DUYỆT</th>
-              <th style="min-width:120px" class="text-right" rowspan="2">Giảm trừ</th>
-              <th style="min-width:140px" class="text-right" rowspan="2">Công nợ</th>
-            </tr>
-            <tr>
-              <th style="min-width:140px" class="text-right">Học phí đợt 1</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 1</th>
-              <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 2</th>
+              <th style="min-width:50px" class="text-center">STT</th>
+              <th style="min-width:120px">Ngày tạo phiếu</th>
+              <th style="min-width:80px">Trạng thái đăng ký</th>
+              <th style="min-width:220px">Khoá học đăng kí</th>
+              <th style="min-width:200px">Họ và tên</th>
+              <th style="min-width:130px">Sđt</th>
+              <th style="min-width:180px">Team kinh doanh</th>
+              <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
+              <th style="min-width:140px" class="text-right">Giá khoá học</th>
+              <th style="min-width:140px" class="text-right">Học phí</th>
+              <th style="min-width:130px" class="text-center">Ngày chuyển khoản</th>
               <th style="min-width:150px">Ảnh Bill</th>
-              <th style="min-width:140px; border-left: 1px solid rgba(255,255,255,0.2);" class="text-right">Học phí đợt 1</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 1</th>
-              <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
-              <th style="min-width:130px" class="text-center">Ngày CK 2</th>
-              <th style="min-width:150px">Ảnh Bill</th>
+              <th style="min-width:120px" class="text-right">Trạng thái duyệt</th>
             </tr>
           </thead>
           <tbody>
@@ -112,31 +98,23 @@
               <td class="text-center text-muted">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
-              <td>{{ row.up_process }}</td>
               <td>{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone text-muted">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
               <td>{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
-              <td>{{ row.dk_chung }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
-              <td class="text-center date-cell">{{ row.p1_date }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.p2_amount) }}</td>
-              <td class="text-center date-cell">{{ row.p2_date }}</td>
+              <td class="text-right money-cell" style="color:#059669;">{{ fmtMoney(row.charge_amount) }}</td>
+              <td class="text-center date-cell">{{ row.charge_date }}</td>
               <td v-html="row.img_bill"></td>
-              <td class="text-right money-cell" style="border-left: 1px solid #e5e7eb;">{{ fmtMoney(row.p1_amount_cd) }}</td>
-              <td class="text-center date-cell">{{ row.p1_date_cd }}</td>
-              <td class="text-right money-cell">{{ fmtMoney(row.p2_amount_cd) }}</td>
-              <td class="text-center date-cell">{{ row.p2_date_cd }}</td>
-              <td v-html="row.img_bill_cd"></td>
-              <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
-              <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
-                {{ fmtMoney(row.debt_amount) }}
+              <td class="text-right">
+                <span class="vs-badge" :class="row.status == 1 ? 'vs-badge-success' : (row.status == 2 ? 'vs-badge-danger' : 'vs-badge-warning')">
+                  {{ row.status == 1 ? 'Đã duyệt' : (row.status == 2 ? 'Từ chối' : 'Chờ duyệt') }}
+                </span>
               </td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="23" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="14" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -247,7 +225,7 @@
         }
         this.searchData.branch_id = ids
         this.$vs.loading()
-        axios.p('/api/lms/reports/24', this.buildPayload())
+        axios.p('/api/lms/reports/28', this.buildPayload())
           .then(res => {
             this.$vs.loading.close()
             this.datas   = res.data.list    || []
@@ -270,7 +248,7 @@
         if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
-        window.open(`/api/lms/exports/report24/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
+        window.open(`/api/lms/exports/report28/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
     },
   }

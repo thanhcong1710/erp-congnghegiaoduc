@@ -75,18 +75,23 @@
               </router-link>
             </div>
             <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-28'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>14. BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-25'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>14. BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</p>
+                <p>15. BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-26'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>15. BÁO CÁO CHI TIẾT XẾP LỚP</p>
+                <p>16. BÁO CÁO CHI TIẾT XẾP LỚP</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-27'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>16. BÁO CÁO PHÁT SÁCH</p>
+                <p>17. BÁO CÁO PHÁT SÁCH</p>
               </router-link>
             </div>
           </div>

@@ -1777,21 +1777,13 @@ class ReportsController extends Controller
         } elseif ($completion_status == 0) {
             $cond .= " AND a.debt_amount > 0";
         }
-        
-        if ($start_date || $end_date) {
-            $pay_cond = [];
-            if ($start_date) {
-                $pay_cond[] = "created_at >= '$start_date 00:00:00'";
-            }
-            if ($end_date) {
-                $pay_cond[] = "created_at <= '$end_date 23:59:59'";
-            }
-            $pay_cond_str = implode(' AND ', $pay_cond);
-            $cond .= " AND (EXISTS (SELECT 1 FROM tmp_payments WHERE agreement_id = a.id AND $pay_cond_str) OR EXISTS (SELECT 1 FROM payments WHERE agreement_id = a.id AND $pay_cond_str))";
-        } else {
-            $cond .= " AND (EXISTS (SELECT 1 FROM tmp_payments WHERE agreement_id = a.id) OR EXISTS (SELECT 1 FROM payments WHERE agreement_id = a.id))";
+        if ($start_date) {
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
         }
-
+        if ($end_date) {
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+        
         $totalRow = u::first("
             SELECT COUNT(a.id) AS total
             FROM agreements AS a
@@ -1899,6 +1891,133 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $totalCount, $page, $limit);
         return response()->json($data);
     }
+
+    
+    public function report28(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;
+        $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
+        }
+        
+        if ($start_date || $end_date) {
+            if ($start_date) {
+                $cond .= " AND tp.created_at >= '$start_date 00:00:00'";
+            }
+            if ($end_date) {
+                $cond .= " AND tp.created_at <= '$end_date 23:59:59'";
+            }
+        }
+
+        $totalRow = u::first("
+            SELECT COUNT(tp.id) AS total
+            FROM tmp_payments AS tp
+            INNER JOIN agreements AS a ON a.id = tp.agreement_id
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ");
+        $totalCount = (int) ($totalRow->total ?? 0);
+
+        $query = "
+            SELECT
+                DATE(tp.created_at) AS date_0,
+                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                tf.name AS course_name,
+                s.name AS student_name,
+                s.gud_mobile1 AS phone,
+                CASE
+                    WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS team_name,
+                s.address,
+                a.must_charge,
+                tp.charge_amount,
+                tp.charge_date,
+                tp.attachments AS img_bill_raw,
+                tp.status
+            FROM tmp_payments AS tp
+            INNER JOIN agreements AS a ON a.id = tp.agreement_id
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY tp.id DESC
+            $limitation
+        ";
+
+        $list = u::query($query);
+        $finalList = [];
+        foreach ($list as $row) {
+            $bills = [];
+            if (!empty($row->img_bill_raw)) {
+                $arr = json_decode($row->img_bill_raw, true);
+                if (is_array($arr)) {
+                    $billIndex = 1;
+                    foreach($arr as $path) {
+                        $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
+                        $bills[] = '<a href="'.$fullUrl.'" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndex.'</a>';
+                        $billIndex++;
+                    }
+                }
+            }
+            $row->img_bill = implode('<br>', $bills);
+            $finalList[] = $row;
+        }
+
+        return response()->json([
+            'list' => $finalList,
+            'paging' => [
+                'cpage' => $page,
+                'limit' => $limit,
+                'total' => $totalCount,
+                'init' => 1
+            ]
+        ]);
+    }
+
 
     public function report25(Request $request)
     {

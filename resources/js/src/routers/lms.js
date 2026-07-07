@@ -943,7 +943,21 @@ export default {
           rule: 'editor'
         }
       },
-      {
+            {
+        path: '/lms/reports/operate/report-28',
+        name: 'lms-report-operate-28',
+        component: () => import('@/views/lms/report/operate/report28.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN', active: true }
+          ],
+          pageTitle: 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN',
+          rule: 'editor'
+        }
+      },
+{
         path: '/lms/reports/operate/report-25',
         name: 'lms-report-operate-25',
         component: () => import('@/views/lms/report/operate/report25.vue'),

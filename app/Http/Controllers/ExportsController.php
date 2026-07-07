@@ -3301,6 +3301,177 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function report28(Request $request, $key, $value)
+    {
+        $arr_key = explode(",", $key);
+        $arr_value = explode(",", $value);
+        $params = array_combine($arr_key, $arr_value);
+
+        $branch_id = (isset($params["branch_id"]) && $params["branch_id"] != "") ? explode("-", $params["branch_id"]) : [];
+        $team_id = isset($params["team_id"]) ? (int) $params["team_id"] : 0;
+        $ec_id = isset($params["ec_id"]) ? (int) $params["ec_id"] : 0;
+        $keyword = isset($params["keyword"]) ? urldecode($params["keyword"]) : "";
+        $start_date = isset($params["start_date"]) ? $params["start_date"] : "";
+        $end_date = isset($params["end_date"]) ? $params["end_date"] : "";
+        $completion_status = isset($params["completion_status"]) ? (int) $params["completion_status"] : -1;
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== "") {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 0) {
+            $cond .= " AND a.debt_amount > 0";
+        }
+        
+        if ($start_date || $end_date) {
+            if ($start_date) {
+                $cond .= " AND tp.created_at >= '$start_date 00:00:00'";
+            }
+            if ($end_date) {
+                $cond .= " AND tp.created_at <= '$end_date 23:59:59'";
+            }
+        }
+
+        $query = "
+            SELECT
+                DATE(tp.created_at) AS date_0,
+                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                tf.name AS course_name,
+                s.name AS student_name,
+                s.gud_mobile1 AS phone,
+                CASE
+                    WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS team_name,
+                s.address,
+                a.must_charge,
+                tp.charge_amount,
+                tp.charge_date,
+                tp.status,
+                tp.attachments
+            FROM tmp_payments AS tp
+            INNER JOIN agreements AS a ON a.id = tp.agreement_id
+            INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            WHERE $cond
+            ORDER BY tp.id DESC
+        ";
+        
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName("Calibri")->setSize(11);
+
+        $sheet->setCellValue("A1", "BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN");
+        $sheet->mergeCells("A1:M1");
+        $sheet->getStyle("A1")->applyFromArray(["font" => ["bold" => true, "size" => 14], "alignment" => ["horizontal" => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, "vertical" => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $headers = [
+            "A2" => "STT",
+            "B2" => "Ngày tạo phiếu",
+            "C2" => "Trạng thái đăng ký",
+            "D2" => "Khoá học đăng kí",
+            "E2" => "Họ và tên",
+            "F2" => "Sđt",
+            "G2" => "Team kinh doanh",
+            "H2" => "ĐỊA CHỈ NHẬN SÁCH",
+            "I2" => "Giá khoá học",
+            "J2" => "Học phí",
+            "K2" => "Ngày chuyển khoản",
+            "L2" => "Link Bill",
+            "M2" => "Trạng thái duyệt"
+        ];
+        
+        foreach ($headers as $c => $l) {
+            $sheet->setCellValue($c, $l);
+        }
+
+        $hStyle = ["font" => ["bold" => true], "fill" => ["fillType" => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, "startColor" => ["rgb" => "E8E8E8"]], "alignment" => ["horizontal" => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, "vertical" => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER], "borders" => ["allBorders" => ["borderStyle" => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, "color" => ["rgb" => "BBBBBB"]]]];
+        $sheet->getStyle("A2:M2")->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+        $borderOnly = ["borders" => ["allBorders" => ["borderStyle" => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, "color" => ["rgb" => "DDDDDD"]]]];
+
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 3;
+            $item = $list[$i];
+            
+            $status_str = "";
+            if ($item->status == 1) $status_str = "Đã duyệt";
+            elseif ($item->status == 2) $status_str = "Từ chối";
+            else $status_str = "Chờ duyệt";
+            
+            $bills_links = [];
+            if (!empty($item->attachments)) {
+                $arr = json_decode($item->attachments, true);
+                if (is_array($arr)) {
+                    foreach($arr as $path) {
+                        $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
+                        $bills_links[] = $fullUrl;
+                    }
+                }
+            }
+
+            $sheet->setCellValue("A" . $x, $i + 1);
+            $sheet->setCellValue("B" . $x, $item->date_0);
+            $sheet->setCellValue("C" . $x, $item->status_register);
+            $sheet->setCellValue("D" . $x, $item->course_name);
+            $sheet->setCellValue("E" . $x, $item->student_name);
+            $sheet->setCellValueExplicit("F" . $x, $item->phone, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue("G" . $x, $item->team_name);
+            $sheet->setCellValue("H" . $x, $item->address);
+            $sheet->setCellValue("I" . $x, $item->must_charge);
+            $sheet->setCellValue("J" . $x, $item->charge_amount);
+            $sheet->setCellValue("K" . $x, $item->charge_date);
+            $sheet->setCellValue("L" . $x, implode("\n", $bills_links));
+            $sheet->setCellValue("M" . $x, $status_str);
+
+            $sheet->getStyle("A$x:M$x")->applyFromArray($borderOnly);
+        }
+
+        foreach (range("A", "M") as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            header("Content-Disposition: attachment;filename=\"Bao_cao_chi_tiet_phuc_vu_xuat_hoa_don.xlsx\"");
+            header("Cache-Control: max-age=0");
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
 }
-
-
