@@ -12,7 +12,7 @@
       </div>
       <!-- Filters -->
       <div class="rpt-filter-grid mb-5">
-        <div class="rpt-filter-item">
+        <div v-show="false" class="rpt-filter-item">
           <label class="rpt-label">Trung tâm</label>
           <multiselect
             name="search_branch"

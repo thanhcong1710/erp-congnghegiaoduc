@@ -11,7 +11,7 @@
       </div>
       <!-- Filters -->
       <div class="rpt-filter-grid mb-5">
-        <div>
+        <div v-show="false">
           <label class="rpt-label">Trung tâm</label>
           <multiselect v-model="searchData.arr_branch" :options="branch_list" label="name" track-by="id"
             placeholder="Chọn trung tâm" :multiple="true" :close-on-select="false" :hide-selected="true"
@@ -49,6 +49,10 @@
         <div>
           <label class="rpt-label">Tìm kiếm học sinh</label>
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
+        </div>
+        <div>
+          <label class="rpt-label">Lớp học</label>
+          <vs-input v-model="searchData.class_keyword" placeholder="Mã / Tên lớp" class="w-full" />
         </div>
         <div>
           <label class="rpt-label">Ngày khai giảng (từ — đến)</label>
@@ -149,7 +153,7 @@
         searchData: {
           arr_branch: [], branch_id: [],
           team_obj: null, ec_obj: null, class_status_obj: null, product_obj: null,
-          keyword: '',
+          keyword: '', class_keyword: '',
           date_range: '',
           start_date_range: '',
         },
@@ -170,7 +174,7 @@
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, class_status_obj: null, product_obj: null, keyword: '', date_range: '', start_date_range: '' }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, class_status_obj: null, product_obj: null, keyword: '', class_keyword: '', date_range: '', start_date_range: '' }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -211,6 +215,7 @@
           class_status: this.searchData.class_status_obj ? this.searchData.class_status_obj.id : -1,
           product_id: this.searchData.product_obj ? this.searchData.product_obj.id : 0,
           keyword:   this.searchData.keyword  || '',
+          class_keyword: this.searchData.class_keyword || '',
           start_date, end_date,
           cls_start_date, cls_end_date,
           pagination: this.pagination,
@@ -243,6 +248,7 @@
         if (p.class_status !== -1) { keys.push('class_status'); values.push(p.class_status) }
         if (p.product_id > 0) { keys.push('product_id'); values.push(p.product_id) }
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
+        if (p.class_keyword) { keys.push('class_keyword'); values.push(encodeURIComponent(p.class_keyword)) }
         if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
         if (p.cls_start_date) { keys.push('cls_start_date'); values.push(p.cls_start_date) }

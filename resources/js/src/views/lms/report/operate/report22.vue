@@ -11,7 +11,7 @@
       </div>
       <!-- Filters -->
       <div class="rpt-filter-grid mb-5">
-        <div>
+        <div v-show="false">
           <label class="rpt-label">Trung tâm</label>
           <multiselect v-model="searchData.arr_branch" :options="branch_list" label="name" track-by="id"
             placeholder="Chọn trung tâm" :multiple="true" :close-on-select="false" :hide-selected="true"

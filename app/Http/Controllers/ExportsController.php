@@ -3008,6 +3008,7 @@ class ExportsController extends Controller
         $end_date = '';
         $cls_start_date = '';
         $cls_end_date = '';
+        $class_keyword = '';
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
@@ -3030,6 +3031,9 @@ class ExportsController extends Controller
                     break;
                 case 'keyword':
                     $keyword = urldecode($v);
+                    break;
+                case 'class_keyword':
+                    $class_keyword = urldecode($v);
                     break;
                 case 'start_date':
                     $start_date = $v;
@@ -3076,6 +3080,10 @@ class ExportsController extends Controller
         if ($keyword !== '') {
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($class_keyword !== '') {
+            $kw_cls = addslashes($class_keyword);
+            $cond .= " AND (cls.cls_name LIKE '%$kw_cls%' OR cls.id = '$kw_cls')";
         }
         if ($class_status == 1) {
             $cond .= " AND c.class_id > 0";

@@ -8,8 +8,8 @@
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5 mt-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
+          <div v-show="false" class="vx-col sm:w-1/4 w-full mb-4">
+          <label for="" class="vs-input--label">Trung tâm</label>
             <multiselect
                 name="search_branch"
                 placeholder="Chọn trung tâm"

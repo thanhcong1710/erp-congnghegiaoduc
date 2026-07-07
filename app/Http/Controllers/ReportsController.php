@@ -2143,6 +2143,7 @@ class ReportsController extends Controller
         $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;
         $product_id = isset($request->product_id) ? (int) $request->product_id : 0;
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $class_keyword = isset($request->class_keyword) ? trim($request->class_keyword) : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $cls_start_date = isset($request->cls_start_date) ? $request->cls_start_date : '';
@@ -2184,6 +2185,10 @@ class ReportsController extends Controller
         if ($keyword !== '') {
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($class_keyword !== '') {
+            $kw_cls = addslashes($class_keyword);
+            $cond .= " AND (cls.cls_name LIKE '%$kw_cls%' OR cls.id = '$kw_cls')";
         }
         $class_status = isset($request->class_status) ? (int) $request->class_status : -1;
         if ($class_status == 1) {
