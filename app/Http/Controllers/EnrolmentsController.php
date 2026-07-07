@@ -218,6 +218,21 @@ class EnrolmentsController extends Controller
         $holidays = u::getPublicHolidays(data_get($request, 'branch_id'), data_get($request, 'product_id'));
         $arr_day = explode(",", data_get($class_info, 'class_day'));
 
+        // Check if role sale/sale leader and class has already started
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+        
+        if ($is_sale || $is_sale_leader) {
+            $class_startdate = data_get($class_info, 'cls_startdate');
+            if ($class_startdate && $class_startdate < date('Y-m-d')) {
+                return response()->json(array(
+                    'status' => 0,
+                    'message' => 'Lớp đã khai giảng, Sale và Sale Leader không có quyền thêm học sinh'
+                ), 403);
+            }
+        }
+
         foreach ($contracts as $contract) {
             $contract_id = data_get($contract, 'contract_id');
             $student_id = data_get($contract, 'student_id');

@@ -133,7 +133,7 @@
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
-                  <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="class_info.num_students >= class_info.max_students"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
+                  <vs-button style="float: right" class="mb-3" type="border" color="success" @click="showModalEnrol"  :disabled="isDisabledAddStudent"><i class="fa fa-plus"></i> Thêm học sinh</vs-button>
                   <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">
@@ -469,6 +469,20 @@
           if (this.filterAddClassStatus === '') return true;
           return s.add_class_status == this.filterAddClassStatus;
         });
+      },
+      isDisabledAddStudent() {
+        if (!this.class_info || !this.class_info.class_id) return true;
+        if (this.class_info.num_students >= this.class_info.max_students) {
+          return true;
+        }
+        if ((this.user_role.is_sale || this.user_role.is_sale_leader) && this.class_info.cls_startdate) {
+          const startDate = moment(this.class_info.cls_startdate, 'YYYY-MM-DD');
+          const today = moment().startOf('day');
+          if (today.isAfter(startDate)) {
+            return true;
+          }
+        }
+        return false;
       }
     },
     methods: {
