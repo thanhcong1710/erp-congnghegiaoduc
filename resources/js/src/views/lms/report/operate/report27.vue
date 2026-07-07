@@ -11,8 +11,8 @@
       </div>
       <div class="rpt-filter-grid mb-5">
         <div>
-          <label class="rpt-label">Trung tâm</label>
-          <multiselect name="search_branch" placeholder="Chọn trung tâm" v-model="searchData.arr_branch" :options="branch_list" label="name" :close-on-select="false" :hide-selected="true" :multiple="true" :searchable="true" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+          <label class="rpt-label">Team kinh doanh</label>
+          <multiselect name="search_team" placeholder="Chọn Team KD" v-model="searchData.team" :options="team_list" label="name" :close-on-select="true" :multiple="false" :searchable="true" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
         </div>
         <div>
           <label class="rpt-label">Sản phẩm</label>
@@ -29,6 +29,10 @@
         <div>
           <label class="rpt-label">Ngày phát sách</label>
           <date-picker style="width:100%" v-model="searchData.dateRange" type="date" range :clearable="true" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></date-picker>
+        </div>
+        <div>
+          <label class="rpt-label">Ngày khai giảng</label>
+          <date-picker style="width:100%" v-model="searchData.clsDateRange" type="date" range :clearable="true" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></date-picker>
         </div>
       </div>
       <div class="rpt-actions mb-5">
@@ -54,11 +58,15 @@
                 <vs-checkbox v-model="selectAll" @input="toggleSelectAll"></vs-checkbox>
               </th>
               <th style="width:50px" class="text-center">STT</th>
-              <th>Trung tâm</th>
+              <th>Team kinh doanh</th>
               <th>Mã HV</th>
               <th>Họ tên</th>
+              <th>Số điện thoại</th>
               <th>Mã lớp</th>
+              <th>Ngày khai giảng</th>
               <th>Sản phẩm</th>
+              <th>Địa chỉ nhận sách</th>
+              <th>Link Facebook</th>
               <th style="width:200px">Ngày phát sách</th>
             </tr>
           </thead>
@@ -68,11 +76,19 @@
                 <vs-checkbox v-model="selected_items" :vs-value="item.contract_id"></vs-checkbox>
               </td>
               <td class="text-center text-muted">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-              <td class="text-muted small">{{ item.branch_name }}</td>
+              <td class="text-muted small">{{ item.team_name }}</td>
               <td><span class="badge-code">{{ item.lms_code }}</span></td>
               <td class="font-bold">{{ item.student_name }}</td>
+              <td class="text-muted small">{{ item.phone }}</td>
               <td><span class="badge-code">{{ item.cls_name }}</span></td>
+              <td class="text-muted small">{{ item.cls_startdate }}</td>
               <td>{{ item.product_name }}</td>
+              <td class="text-muted small">{{ item.address }}</td>
+              <td>
+                <a v-if="item.link_facebook" :href="item.link_facebook" target="_blank" class="text-primary hover:underline">
+                  <i class="fab fa-facebook mr-1"></i> Link
+                </a>
+              </td>
               <td>
                 <div class="flex items-center gap-2">
                   <date-picker style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
@@ -112,9 +128,9 @@
     components: { vSelect, Multiselect, DatePicker },
     data() {
       return {
-        branch_list: [], products: [],
+        team_list: [], products: [],
         status_list: [ {id:'1',label:'Đã phát sách'}, {id:'0',label:'Chưa phát sách'} ],
-        searchData: { arr_branch:'', branch_id:'', keyword:'', dateRange:'', product:'', status:'' },
+        searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'' },
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],
         limitSource: [20, 50, 100, 500],
@@ -125,7 +141,7 @@
       }
     },
     created() {
-      axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
+      axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data })
       axios.g('/api/system/products').then(r => { this.products = r.data })
       this.getData()
     },
@@ -156,25 +172,26 @@
         return d
       },
       reset() {
-        this.searchData = { arr_branch:'', branch_id:'', keyword:'', dateRange:'', product:'', status:'' }
+        this.searchData = { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'' }
         this.getData()
       },
       getData() {
         this.selected_items = []
         this.selectAll = false
-        const ids = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => ids.push(i.id))
-        this.searchData.branch_id = ids
         const start_date = this.searchData.dateRange && this.searchData.dateRange[0] ? this.fmtDate(this.searchData.dateRange[0]) : ''
         const end_date = this.searchData.dateRange && this.searchData.dateRange[1] ? this.fmtDate(this.searchData.dateRange[1]) : ''
+        const cls_start_start = this.searchData.clsDateRange && this.searchData.clsDateRange[0] ? this.fmtDate(this.searchData.clsDateRange[0]) : ''
+        const cls_start_end = this.searchData.clsDateRange && this.searchData.clsDateRange[1] ? this.fmtDate(this.searchData.clsDateRange[1]) : ''
         
         const data = { 
           keyword: this.searchData.keyword, 
-          branch_id: this.searchData.branch_id, 
+          team_id: this.searchData.team ? this.searchData.team.id : 0, 
           product_id: this.searchData.product ? this.searchData.product.id : '', 
           status: this.searchData.status ? this.searchData.status.id : '', 
           start_date: start_date, 
           end_date: end_date, 
+          cls_start_start: cls_start_start,
+          cls_start_end: cls_start_end,
           pagination: this.pagination 
         }
         this.$vs.loading()
@@ -233,9 +250,7 @@
       
       exportExcel() {
         let keys = [], values = []
-        const ids = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => ids.push(i.id))
-        if (ids.length) { keys.push('branch_id'); values.push(ids.join('-')) }
+        if (this.searchData.team) { keys.push('team_id'); values.push(this.searchData.team.id) }
         if (this.searchData.keyword) { keys.push('keyword'); values.push(this.searchData.keyword) }
         if (this.searchData.product) { keys.push('product_id'); values.push(this.searchData.product.id) }
         if (this.searchData.status) { keys.push('status'); values.push(this.searchData.status.id) }
@@ -246,6 +261,14 @@
         if (this.searchData.dateRange && this.searchData.dateRange[1]) {
           keys.push('end_date')
           values.push(this.fmtDate(this.searchData.dateRange[1]))
+        }
+        if (this.searchData.clsDateRange && this.searchData.clsDateRange[0]) {
+          keys.push('cls_start_start')
+          values.push(this.fmtDate(this.searchData.clsDateRange[0]))
+        }
+        if (this.searchData.clsDateRange && this.searchData.clsDateRange[1]) {
+          keys.push('cls_start_end')
+          values.push(this.fmtDate(this.searchData.clsDateRange[1]))
         }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/book-delivered/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')

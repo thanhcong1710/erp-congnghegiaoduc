@@ -2127,12 +2127,14 @@ class ReportsController extends Controller
 
     public function reportBookDelivered(Request $request)
     {
-        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $product_id = isset($request->product_id) ? $request->product_id : '';
         $status = isset($request->status) ? $request->status : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
+        $cls_start_start = isset($request->cls_start_start) ? $request->cls_start_start : '';
+        $cls_start_end = isset($request->cls_start_end) ? $request->cls_start_end : '';
+        $team_id = isset($request->team_id) ? (int)$request->team_id : 0;
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -2142,8 +2144,8 @@ class ReportsController extends Controller
 
         $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND c.total_charged > 0 AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
 
-        if (!empty($branch_id)) {
-            $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
+        if ($team_id > 0) {
+            $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
         }
 
         if ($keyword !== '') {
@@ -2156,6 +2158,14 @@ class ReportsController extends Controller
 
         if ($end_date !== '') {
             $cond .= " AND c.book_delivered_date <= '$end_date' ";
+        }
+
+        if ($cls_start_start !== '') {
+            $cond .= " AND cls.cls_startdate >= '$cls_start_start' ";
+        }
+
+        if ($cls_start_end !== '') {
+            $cond .= " AND cls.cls_startdate <= '$cls_start_end' ";
         }
 
         if ($product_id !== '') {
@@ -2180,15 +2190,19 @@ class ReportsController extends Controller
         $total = u::first($countSql);
 
         $query = "SELECT c.id AS contract_id, c.book_delivered_date,
-                    s.lms_code, s.name AS student_name,
-                    cls.cls_name,
-                    b.name AS branch_name,
-                    p.name AS product_name
+                    s.lms_code, s.name AS student_name, s.address, s.gud_mobile1 AS phone,
+                    cls.cls_name, cls.cls_startdate,
+                    p.name AS product_name,
+                    cp.link_facebook,
+                    CASE
+                        WHEN c.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id)
+                        ELSE (SELECT u.name FROM users u WHERE u.id = c.ec_id)
+                    END AS team_name
                 FROM contracts AS c
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
-                    LEFT JOIN branches AS b ON s.branch_id = b.id
                     LEFT JOIN products AS p ON c.product_id = p.id
+                    LEFT JOIN crm_parents AS cp ON cp.student_id = s.id
                 WHERE $cond 
                 $order_by $limitation";
 

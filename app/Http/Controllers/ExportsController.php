@@ -3206,8 +3206,9 @@ class ExportsController extends Controller
         }
 
         $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND c.total_charged > 0 AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
-        if (isset($req->branch_id) && $req->branch_id) {
-            $cond .= " AND s.branch_id IN (" . str_replace('-', ',', $req->branch_id) . ")";
+        if (isset($req->team_id) && $req->team_id > 0) {
+            $team_id = (int) $req->team_id;
+            $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
         }
         if (isset($req->keyword) && $req->keyword) {
             $cond .= " AND (s.lms_code LIKE '%" . $req->keyword . "%' OR s.name LIKE '%" . $req->keyword . "%' OR cls.cls_name LIKE '%" . $req->keyword . "%') ";
@@ -3228,19 +3229,29 @@ class ExportsController extends Controller
         if (isset($req->end_date) && $req->end_date) {
             $cond .= " AND c.book_delivered_date <= '" . $req->end_date . "' ";
         }
+        if (isset($req->cls_start_start) && $req->cls_start_start) {
+            $cond .= " AND cls.cls_startdate >= '" . $req->cls_start_start . "' ";
+        }
+        if (isset($req->cls_start_end) && $req->cls_start_end) {
+            $cond .= " AND cls.cls_startdate <= '" . $req->cls_start_end . "' ";
+        }
 
         $order_by = " ORDER BY c.id DESC ";
 
         $query = "SELECT c.id AS contract_id, c.book_delivered_date,
-                    s.lms_code, s.name AS student_name,
-                    cls.cls_name,
-                    b.name AS branch_name,
-                    p.name AS product_name
+                    s.lms_code, s.name AS student_name, s.address, s.gud_mobile1 AS phone,
+                    cls.cls_name, cls.cls_startdate,
+                    p.name AS product_name,
+                    cp.link_facebook,
+                    CASE
+                        WHEN c.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id)
+                        ELSE (SELECT u.name FROM users u WHERE u.id = c.ec_id)
+                    END AS team_name
                 FROM contracts AS c
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
-                    LEFT JOIN branches AS b ON s.branch_id = b.id
                     LEFT JOIN products AS p ON c.product_id = p.id
+                    LEFT JOIN crm_parents AS cp ON cp.student_id = s.id
                 WHERE $cond 
                 $order_by";
 
@@ -3252,7 +3263,7 @@ class ExportsController extends Controller
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->mergeCells('A1:G1');
 
-        $headers = ['STT', 'Trung tâm', 'Mã HV', 'Họ tên', 'Mã lớp', 'Sản phẩm', 'Ngày phát sách'];
+        $headers = ['STT', 'Team kinh doanh', 'Mã HV', 'Họ tên', 'Số điện thoại', 'Lớp học', 'Ngày khai giảng', 'Sản phẩm', 'Địa chỉ nhận sách', 'Link Facebook', 'Ngày phát sách'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -3263,16 +3274,20 @@ class ExportsController extends Controller
         $rowIdx = 4;
         foreach ($list as $index => $item) {
             $sheet->setCellValue('A' . $rowIdx, $index + 1);
-            $sheet->setCellValue('B' . $rowIdx, $item->branch_name);
+            $sheet->setCellValue('B' . $rowIdx, $item->team_name);
             $sheet->setCellValue('C' . $rowIdx, $item->lms_code);
             $sheet->setCellValue('D' . $rowIdx, $item->student_name);
-            $sheet->setCellValue('E' . $rowIdx, $item->cls_name);
-            $sheet->setCellValue('F' . $rowIdx, $item->product_name);
-            $sheet->setCellValue('G' . $rowIdx, $item->book_delivered_date);
+            $sheet->setCellValue('E' . $rowIdx, $item->phone);
+            $sheet->setCellValue('F' . $rowIdx, $item->cls_name);
+            $sheet->setCellValue('G' . $rowIdx, $item->cls_startdate);
+            $sheet->setCellValue('H' . $rowIdx, $item->product_name);
+            $sheet->setCellValue('I' . $rowIdx, $item->address);
+            $sheet->setCellValue('J' . $rowIdx, $item->link_facebook);
+            $sheet->setCellValue('K' . $rowIdx, $item->book_delivered_date);
             $rowIdx++;
         }
 
-        foreach (range('A', 'G') as $columnID) {
+        foreach (range('A', 'K') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
