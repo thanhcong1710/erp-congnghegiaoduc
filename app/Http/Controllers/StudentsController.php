@@ -101,12 +101,25 @@ class StudentsController extends Controller
         }
         $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
         $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
-        if (in_array(68, $roles) || in_array(69, $roles)) {
-            $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+        
+        $is_exact_phone = false;
+        if ($keyword !== '' && preg_match('/^[0-9]{10,11}$/', $keyword)) {
+            $is_exact_phone = true;
         }
 
-        if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            if ($is_exact_phone) {
+                $cond .= " AND (s.gud_mobile1 = '$keyword' OR s.gud_mobile2 = '$keyword') ";
+            } else {
+                $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+                if ($keyword !== '') {
+                    $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+                }
+            }
+        } else {
+            if ($keyword !== '') {
+                $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+            }
         }
 
         // Nếu có filter theo status, thêm điều kiện dựa trên logic ưu tiên
@@ -218,6 +231,7 @@ class StudentsController extends Controller
                 c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
+                t.ec_id,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
                 (SELECT id FROM crm_parents WHERE student_id = s.id LIMIT 1) AS parent_id,
                 '' AS left_amount
@@ -236,11 +250,34 @@ class StudentsController extends Controller
             $data->left_amount = 0;
         }
 
+        $data->read_only = 0;
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $staff_ids = explode(',', Auth::user()->getStaffHasUser());
+            if (!in_array($data->ec_id, $staff_ids)) {
+                $data->read_only = 1;
+            }
+        }
+
         return response()->json($data);
     }
 
     public function update(Request $request)
     {
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $ec_id = u::first("SELECT ec_id FROM term_student_user WHERE student_id = " . (int)$request->id)->ec_id ?? 0;
+            $staff_ids = explode(',', Auth::user()->getStaffHasUser());
+            if (!in_array($ec_id, $staff_ids)) {
+                return response()->json((object) [
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền cập nhật thông tin học sinh này!'
+                ]);
+            }
+        }
+
         $pre_student_info = u::first("SELECT * FROM students WHERE id = $request->id");
         $arr_name = u::explodeName(data_get($request, 'name'));
         $data_update = array(
