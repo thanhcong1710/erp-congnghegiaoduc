@@ -374,7 +374,7 @@ class ExportsController extends Controller
                     (SELECT start_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS start_time,
                     (SELECT end_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS end_time,
                     (SELECT name FROM rooms WHERE id = (SELECT room_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS room_name,
-                    (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND ct.status != 7 AND s.status > 0) AS total_students
+                    (SELECT count(ct.id) FROM contracts ct LEFT JOIN students s ON ct.student_id = s.id WHERE ct.class_id = c.id AND (ct.status != 7 OR c.cls_enddate < CURDATE()) AND s.status > 0) AS total_students
                 FROM classes AS c
                     LEFT JOIN branches AS b ON b.id = c.branch_id
                     LEFT JOIN products AS p ON p.id = c.product_id

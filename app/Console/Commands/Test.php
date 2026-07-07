@@ -44,7 +44,8 @@ class Test extends Command
      */
     public function handle(Request $request)
     {
-        $list = u::query("SELECT id,enrolment_start_date FROM contracts WHERE enrolment_start_date < '2026-05-07'  AND `status`=6 AND debt_amount=0");
+        $list = u::query("SELECT c.* FROM contracts As c LEFT JOIN classes AS cl ON cl.id=c.class_id WHERe c.status=6 AND cl.cls_enddate > CURRENT_DATE AND c.debt_amount=0 AND c.id >9912");
+        // $list = u::query("SELECT id,enrolment_start_date FROM contracts WHERE enrolment_start_date < '2026-05-07'  AND `status`=6 AND debt_amount=0");
         foreach($list AS $row){
             u::processDataContractsPast(data_get($row, 'id'),data_get($row, 'enrolment_start_date'));
 
