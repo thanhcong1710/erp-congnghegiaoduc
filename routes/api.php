@@ -243,6 +243,8 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('02b', 'ReportsController@report02b');
                 Route::post('02c', 'ReportsController@report02c');
                 Route::post('active-classes', 'ReportsController@reportActiveClasses');
+                Route::post('book-delivered', 'ReportsController@reportBookDelivered');
+                Route::post('update-book-delivered-date', 'ReportsController@updateBookDeliveredDate');
                 Route::post('13', 'ReportsController@report13');
                 Route::post('14', 'ReportsController@report14');
                 Route::post('15', 'ReportsController@report15');
@@ -278,6 +280,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('report25/{key}/{value}', 'ExportsController@report25');
                 Route::get('report26/{key}/{value}', 'ExportsController@report26');
                 Route::get('active-classes/{key}/{value}', 'ExportsController@reportActiveClasses');
+                Route::get('book-delivered/{key}/{value}', 'ExportsController@reportBookDelivered');
             });
         });
 

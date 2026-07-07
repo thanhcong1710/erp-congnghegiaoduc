@@ -84,6 +84,11 @@
                 <p>15. BÁO CÁO CHI TIẾT XẾP LỚP</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-27'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>16. BÁO CÁO PHÁT SÁCH</p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

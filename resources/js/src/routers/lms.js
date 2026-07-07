@@ -972,6 +972,20 @@ export default {
         }
       },
       {
+        path: '/lms/reports/operate/report-27',
+        name: 'lms-report-operate-27',
+        component: () => import('@/views/lms/report/operate/report27.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'BÁO CÁO PHÁT SÁCH', active: true }
+          ],
+          pageTitle: 'BÁO CÁO PHÁT SÁCH',
+          rule: 'editor'
+        }
+      },
+      {
         path: "/lms/reports/academic",
         name: "lms-reports-academic",
         component: () => import("@/views/lms/report/academic/index.vue"),

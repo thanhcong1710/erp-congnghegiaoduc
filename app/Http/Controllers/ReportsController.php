@@ -2124,4 +2124,92 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $totalCount, $page, $limit);
         return response()->json($data);
     }
+
+    public function reportBookDelivered(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $product_id = isset($request->product_id) ? $request->product_id : '';
+        $status = isset($request->status) ? $request->status : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND c.total_charged > 0 AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
+
+        if (!empty($branch_id)) {
+            $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR cls.cls_name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date !== '') {
+            $cond .= " AND c.book_delivered_date >= '$start_date' ";
+        }
+
+        if ($end_date !== '') {
+            $cond .= " AND c.book_delivered_date <= '$end_date' ";
+        }
+
+        if ($product_id !== '') {
+            $cond .= " AND c.product_id = '$product_id' ";
+        }
+        
+        if ($status !== '') {
+            if ($status == '1') {
+                $cond .= " AND c.book_delivered_date IS NOT NULL ";
+            } elseif ($status == '0') {
+                $cond .= " AND c.book_delivered_date IS NULL ";
+            }
+        }
+
+        $order_by = " ORDER BY c.id DESC ";
+
+        $countSql = "SELECT count(c.id) AS total 
+                     FROM contracts AS c
+                     LEFT JOIN students AS s ON c.student_id = s.id
+                     LEFT JOIN classes AS cls ON c.class_id = cls.id
+                     WHERE $cond";
+        $total = u::first($countSql);
+
+        $query = "SELECT c.id AS contract_id, c.book_delivered_date,
+                    s.lms_code, s.name AS student_name,
+                    cls.cls_name,
+                    b.name AS branch_name,
+                    p.name AS product_name
+                FROM contracts AS c
+                    LEFT JOIN students AS s ON c.student_id = s.id
+                    LEFT JOIN classes AS cls ON c.class_id = cls.id
+                    LEFT JOIN branches AS b ON s.branch_id = b.id
+                    LEFT JOIN products AS p ON c.product_id = p.id
+                WHERE $cond 
+                $order_by $limitation";
+
+        $list = u::query($query);
+
+        $data = u::makingPagination($list, $total ? $total->total : 0, $page, $limit);
+        return response()->json($data);
+    }
+
+    public function updateBookDeliveredDate(Request $request) 
+    {
+        $contract_ids = $request->contract_ids;
+        $date = $request->book_delivered_date;
+        
+        if (!empty($contract_ids) && is_array($contract_ids) && !empty($date)) {
+            $ids = implode(',', array_map('intval', $contract_ids));
+            $safe_date = date('Y-m-d', strtotime($date));
+            u::query("UPDATE contracts SET book_delivered_date = '$safe_date' WHERE id IN ($ids)");
+            u::query("UPDATE log_contracts SET book_delivered_date = '$safe_date' WHERE contract_id IN ($ids)");
+            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
+        }
+        return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
+    }
 }

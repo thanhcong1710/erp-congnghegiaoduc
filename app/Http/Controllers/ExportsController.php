@@ -3195,6 +3195,97 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function reportBookDelivered($keys, $values)
+    {
+        $arr_key = explode(',', $keys);
+        $arr_value = explode(',', $values);
+        $req = new \stdClass();
+        foreach ($arr_key as $k => $v) {
+            $req->$v = $arr_value[$k];
+        }
+
+        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND c.total_charged > 0 AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
+        if (isset($req->branch_id) && $req->branch_id) {
+            $cond .= " AND s.branch_id IN (" . str_replace('-', ',', $req->branch_id) . ")";
+        }
+        if (isset($req->keyword) && $req->keyword) {
+            $cond .= " AND (s.lms_code LIKE '%" . $req->keyword . "%' OR s.name LIKE '%" . $req->keyword . "%' OR cls.cls_name LIKE '%" . $req->keyword . "%') ";
+        }
+        if (isset($req->product_id) && $req->product_id) {
+            $cond .= " AND c.product_id = '" . $req->product_id . "' ";
+        }
+        if (isset($req->status) && $req->status !== '') {
+            if ($req->status == '1') {
+                $cond .= " AND c.book_delivered_date IS NOT NULL ";
+            } elseif ($req->status == '0') {
+                $cond .= " AND c.book_delivered_date IS NULL ";
+            }
+        }
+        if (isset($req->start_date) && $req->start_date) {
+            $cond .= " AND c.book_delivered_date >= '" . $req->start_date . "' ";
+        }
+        if (isset($req->end_date) && $req->end_date) {
+            $cond .= " AND c.book_delivered_date <= '" . $req->end_date . "' ";
+        }
+
+        $order_by = " ORDER BY c.id DESC ";
+
+        $query = "SELECT c.id AS contract_id, c.book_delivered_date,
+                    s.lms_code, s.name AS student_name,
+                    cls.cls_name,
+                    b.name AS branch_name,
+                    p.name AS product_name
+                FROM contracts AS c
+                    LEFT JOIN students AS s ON c.student_id = s.id
+                    LEFT JOIN classes AS cls ON c.class_id = cls.id
+                    LEFT JOIN branches AS b ON s.branch_id = b.id
+                    LEFT JOIN products AS p ON c.product_id = p.id
+                WHERE $cond 
+                $order_by";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'BÁO CÁO PHÁT SÁCH');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->mergeCells('A1:G1');
+
+        $headers = ['STT', 'Trung tâm', 'Mã HV', 'Họ tên', 'Mã lớp', 'Sản phẩm', 'Ngày phát sách'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        $rowIdx = 4;
+        foreach ($list as $index => $item) {
+            $sheet->setCellValue('A' . $rowIdx, $index + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item->branch_name);
+            $sheet->setCellValue('C' . $rowIdx, $item->lms_code);
+            $sheet->setCellValue('D' . $rowIdx, $item->student_name);
+            $sheet->setCellValue('E' . $rowIdx, $item->cls_name);
+            $sheet->setCellValue('F' . $rowIdx, $item->product_name);
+            $sheet->setCellValue('G' . $rowIdx, $item->book_delivered_date);
+            $rowIdx++;
+        }
+
+        foreach (range('A', 'G') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao_cao_phat_sach.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }
 
 
