@@ -20,7 +20,7 @@ class ClassInfoController extends Controller
         }
 
         $class_info = u::first("SELECT c.id, c.cls_name, c.cls_startdate, c.cls_enddate, c.max_students,
-                (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) AS enrolled_students,
+                (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status IN (6,1)) AS enrolled_students,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.teacher_id) AS teacher_name,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.cm_id) AS cm_name,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.ta_id) AS ta_name,
@@ -39,11 +39,11 @@ class ClassInfoController extends Controller
                     ELSE 'Đang diễn ra'
                 END AS status_text,
                 CASE 
-                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) >= c.max_students THEN 'Đã đầy'
-                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) >= c.max_students * 0.8 THEN 'Sắp đầy'
+                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status IN (6,1)) >= c.max_students THEN 'Đã đầy'
+                    WHEN (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status IN (6,1)) >= c.max_students * 0.8 THEN 'Sắp đầy'
                     ELSE 'Còn chỗ'
                 END AS availability_text,
-                c.max_students - (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status = 6) AS available_slots
+                c.max_students - (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status IN (6,1)) AS available_slots
             FROM classes c
             WHERE c.id = $class_id AND c.status = 1");
 
