@@ -6,7 +6,7 @@
     <vx-card no-shadow class="mt-5">
       <div class="mb-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             <label for="" class="vs-input--label">Trung tâm</label>
             <multiselect
                 name="search_branch"
@@ -24,16 +24,34 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã HS, tên HS, mã hợp đồng" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã HS, tên HS, mã HĐ" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             <label for="" class="vs-input--label">Loại thu phí</label>
             <select class="vs-inputx vs-input--input normal" v-model="searchData.type" @change="getData">
               <option value="1">Phí nhập học</option>
               <option value="2">Phí bảo lưu</option>
             </select>
+          </div>
+          <div class="vx-col sm:w-1/5 w-full mb-4">
+            <label for="" class="vs-input--label">Trạng thái</label>
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.status" @change="getData">
+              <option value="">Tất cả</option>
+              <option value="0">Chưa duyệt</option>
+              <option value="1">Đã duyệt</option>
+              <option value="2">Từ chối duyệt</option>
+            </select>
+          </div>
+          <div class="vx-col sm:w-1/5 w-full mb-4">
+            <label for="" class="vs-input--label">Ngày đóng phí</label>
+            <datepicker class="w-full"
+              v-model="searchData.dateRange"
+              range
+              placeholder="Chọn khoảng thời gian"
+              :lang="datepickerOptions.lang"
+            />
           </div>
         </div>
         <div class="vx-row mt-3">
@@ -137,11 +155,14 @@
   import axios from '../../../http/axios.js'
   import Multiselect from "vue-multiselect";
   import u from '../../../until/helper.js'
+  import datepicker from "vue2-datepicker";
+  import moment from 'moment';
 
   export default {
     components: { 
       vSelect,
-      Multiselect
+      Multiselect,
+      datepicker
     },
     data() {
       return {
@@ -152,7 +173,9 @@
           keyword: "",
           dateRange: "",
           type: 1,
+          status: "",
         },
+        datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         contracts: [],
         limitSource: [20, 50, 100, 500],
         pagination: {
@@ -185,6 +208,8 @@
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
+        this.searchData.status = ""
+        this.searchData.dateRange = ""
         this.searchData.pagination= this.pagination
         this.getData();
       },
@@ -200,7 +225,10 @@
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
             pagination:this.pagination,
-            type: this.searchData.type
+            type: this.searchData.type,
+            status: this.searchData.status,
+            start_date: this.searchData.dateRange && this.searchData.dateRange[0] ? moment(this.searchData.dateRange[0]).format("YYYY-MM-DD") : "",
+            end_date: this.searchData.dateRange && this.searchData.dateRange[1] ? moment(this.searchData.dateRange[1]).format("YYYY-MM-DD") : "",
           }
 
         this.$vs.loading()

@@ -590,6 +590,9 @@ class ChargesController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $type = isset($request->type) ? $request->type : 1;
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $status = isset($request->status) ? $request->status : '';
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -606,6 +609,15 @@ class ChargesController extends Controller
 
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
+            }
+            if ($start_date !== '') {
+                $cond .= " AND tp.charge_date >= '$start_date'";
+            }
+            if ($end_date !== '') {
+                $cond .= " AND tp.charge_date <= '$end_date'";
+            }
+            if ($status !== '') {
+                $cond .= " AND tp.status = " . (int)$status;
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
@@ -637,6 +649,15 @@ class ChargesController extends Controller
 
             if ($keyword !== '') {
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
+            }
+            if ($start_date !== '') {
+                $cond .= " AND tp.charge_date >= '$start_date'";
+            }
+            if ($end_date !== '') {
+                $cond .= " AND tp.charge_date <= '$end_date'";
+            }
+            if ($status !== '') {
+                $cond .= " AND tp.status = " . (int)$status;
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
             $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
