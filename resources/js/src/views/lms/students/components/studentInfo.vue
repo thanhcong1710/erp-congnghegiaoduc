@@ -58,6 +58,16 @@
           <span class="text-danger text-sm" v-if="errors.gud_email1">{{ errors.gud_email1 }}</span>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Link Facebook</label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="link_facebook"
+            v-model="student_info.link_facebook"
+            :disabled="disabled_edit"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Ngày sinh <span class="text-danger"> (*)</span></label>
           <datepicker class="w-full"
             v-model="student_info.date_of_birth"

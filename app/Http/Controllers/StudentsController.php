@@ -234,6 +234,7 @@ class StudentsController extends Controller
                 t.ec_id,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name, '' AS satus_label,
                 (SELECT id FROM crm_parents WHERE student_id = s.id LIMIT 1) AS parent_id,
+                (SELECT link_facebook FROM crm_parents WHERE student_id = s.id LIMIT 1) AS link_facebook,
                 '' AS left_amount
             FROM students AS s 
                 LEFT JOIN contracts AS c ON c.student_id=s.id 
@@ -315,7 +316,8 @@ class StudentsController extends Controller
             address = '".addslashes($request->address)."',
             province_id = '".(int)$request->province_id."',
             district_id = '".(int)$request->district_id."',
-            point_toeic = '".(int)$request->point_toeic."'
+            point_toeic = '".(int)$request->point_toeic."',
+            link_facebook = '".addslashes($request->link_facebook)."'
             WHERE student_id = $request->id");
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
         $result = (object) array(
