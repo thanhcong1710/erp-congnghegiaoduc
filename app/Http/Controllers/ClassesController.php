@@ -70,6 +70,8 @@ class ClassesController extends Controller
             
         if($request->is_edit){
             $class_id = data_get($request,'class_id');
+            $old_class_info = u::first("SELECT cls_startdate FROM classes WHERE id = $class_id");
+            $old_startdate = $old_class_info ? $old_class_info->cls_startdate : null;
             u::query("DELETE FROM sessions WHERE class_id= $class_id");
             u::query("DELETE FROM subject_has_class WHERE class_id= $class_id");
             u::query("DELETE FROM schedules WHERE class_id= $class_id");
@@ -154,6 +156,12 @@ class ClassesController extends Controller
                 'total_cycles'=> data_get($request,'total_cycles'),
                 'type_fee'=> data_get($request,'type_fee'),
             ), array('id'=>data_get($request,'class_id')), 'classes');
+
+            // Cập nhật enrolment_start_date cho các contracts thuộc lớp này nếu ngày khai giảng có thay đổi
+            $start_date = data_get($request, 'start_date');
+            if ($start_date && $start_date != $old_startdate) {
+                u::query("UPDATE contracts SET enrolment_start_date = '$start_date' WHERE class_id = $class_id");
+            }
 
         }else{
             $class_id = u::insertSimpleRow(array(
