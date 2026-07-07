@@ -344,6 +344,12 @@ class ExportsController extends Controller
             if ($key == 'status' && $arr_value[$k]) {
                 $status_filter = $arr_value[$k];
             }
+            if ($key == 'start_date' && $arr_value[$k]) {
+                $cond .= " AND c.cls_startdate >= '" . $arr_value[$k] . "' ";
+            }
+            if ($key == 'end_date' && $arr_value[$k]) {
+                $cond .= " AND c.cls_startdate <= '" . $arr_value[$k] . "' ";
+            }
         }
 
         $order_by = " ORDER BY REGEXP_REPLACE(c.cls_name, '[0-9]+$', '') DESC, CAST(REGEXP_REPLACE(c.cls_name, '^[^0-9]+', '') AS UNSIGNED) DESC ";

@@ -376,6 +376,8 @@ class ReportsController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $product_id = isset($request->product_id) ? $request->product_id : '';
         $status = isset($request->status) ? $request->status : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -391,6 +393,14 @@ class ReportsController extends Controller
 
         if ($keyword !== '') {
             $cond .= " AND (c.cls_name LIKE '%$keyword%') ";
+        }
+
+        if ($start_date !== '') {
+            $cond .= " AND c.cls_startdate >= '$start_date' ";
+        }
+
+        if ($end_date !== '') {
+            $cond .= " AND c.cls_startdate <= '$end_date' ";
         }
 
         if ($product_id !== '') {

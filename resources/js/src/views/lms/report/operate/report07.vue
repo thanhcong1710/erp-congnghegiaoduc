@@ -26,6 +26,10 @@
           <label class="rpt-label">Từ khóa</label>
           <vs-input class="w-full" placeholder="Mã lớp, tên lớp" v-model="searchData.keyword"></vs-input>
         </div>
+        <div>
+          <label class="rpt-label">Ngày khai giảng</label>
+          <date-picker style="width:100%" v-model="searchData.dateRange" range format="YYYY-MM-DD" value-type="YYYY-MM-DD" placeholder="Chọn khoảng ngày"></date-picker>
+        </div>
       </div>
       <div class="rpt-actions mb-5">
         <vs-button class="rpt-btn" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
@@ -113,7 +117,6 @@
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
       axios.g('/api/system/products').then(r => { this.products = r.data })
       this.getData()
-      this.searchData.dateRange = new Date()
     },
     methods: {
       reset() {
@@ -130,7 +133,9 @@
         const ids = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => ids.push(i.id))
         this.searchData.branch_id = ids
-        const data = { keyword: this.searchData.keyword, branch_id: this.searchData.branch_id, product_id: this.searchData.product ? this.searchData.product.id : '', status: this.searchData.status ? this.searchData.status.id : '', start_date: u.getDateMonth(this.searchData.dateRange), pagination: this.pagination }
+        const start_date = this.searchData.dateRange && this.searchData.dateRange[0] ? this.searchData.dateRange[0] : ''
+        const end_date = this.searchData.dateRange && this.searchData.dateRange[1] ? this.searchData.dateRange[1] : ''
+        const data = { keyword: this.searchData.keyword, branch_id: this.searchData.branch_id, product_id: this.searchData.product ? this.searchData.product.id : '', status: this.searchData.status ? this.searchData.status.id : '', start_date: start_date, end_date: end_date, pagination: this.pagination }
         this.$vs.loading()
         axios.p('/api/lms/reports/active-classes', data).then(res => { this.$vs.loading.close(); this.datas = res.data.list; this.pagination = res.data.paging; setTimeout(() => { this.pagination.init = 1 }, 500) }).catch(e => { console.error(e); this.$vs.loading.close() })
       },
@@ -144,6 +149,14 @@
         if (this.searchData.keyword) { keys.push('keyword'); values.push(this.searchData.keyword) }
         if (this.searchData.product) { keys.push('product_id'); values.push(this.searchData.product.id) }
         if (this.searchData.status) { keys.push('status'); values.push(this.searchData.status.id) }
+        if (this.searchData.dateRange && this.searchData.dateRange[0]) {
+          keys.push('start_date')
+          values.push(this.searchData.dateRange[0])
+        }
+        if (this.searchData.dateRange && this.searchData.dateRange[1]) {
+          keys.push('end_date')
+          values.push(this.searchData.dateRange[1])
+        }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/active-classes/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       }
