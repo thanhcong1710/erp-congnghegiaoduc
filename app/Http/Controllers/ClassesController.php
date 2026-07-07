@@ -16,10 +16,28 @@ class ClassesController extends Controller
         $data = [];
         $branch_id = (int)$request->branch_id;
         $product_id = (int)$request->product_id;
+        $status_filter = isset($request->class_status) ? (int) $request->class_status : 0;
+        
+        $cond = " c.branch_id = $branch_id AND c.product_id = $product_id ";
+        if ($status_filter == 1) { 
+            $cond .= " AND c.status = 1 AND c.cls_startdate > CURDATE() ";
+        } elseif ($status_filter == 2) { 
+            $cond .= " AND c.status = 1 AND c.cls_startdate <= CURDATE() AND c.cls_enddate >= CURDATE() ";
+        } elseif ($status_filter == 3) { 
+            $cond .= " AND c.status = 1 AND c.cls_enddate < CURDATE() ";
+        }
+
         $query = "SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 
             'class' AS item_type, 
-            c.cls_name AS `text`, 
+            c.cls_name,
+            CONCAT('<b style=\"font-size: 16px\">', c.cls_name, '</b> (', 
+                IF((SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7) >= c.max_students, 
+                    CONCAT('<b style=\"color:red\">', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students),
+                    CONCAT('<b>', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students)
+                ), 
+                ' <i class=\"fa-regular fa-calendar mx-1 text-primary\"></i>', c.cls_startdate, 
+            ')') AS `text`, 
             0 AS parent_id, 
             IF(c.cm_id > 0, 
                 IF(c.status = 0, 
@@ -27,7 +45,7 @@ class ClassesController extends Controller
                     IF((SELECT COUNT(u.id) FROM users u LEFT JOIN sessions s ON u.id = s.teacher_id WHERE u.status > 0 AND s.class_id = c.id) > 0, 'fa-solid fa-file-lines fa-fw', 'fa-solid fa-triangle-exclamation fa-fw')), 'fa-solid fa-user-xmark fa-fw') AS icon, 
             c.status 
         FROM classes AS c 
-        WHERE c.branch_id =$branch_id AND c.product_id = $product_id 
+        WHERE $cond 
         ORDER BY REGEXP_REPLACE(c.cls_name, '[0-9]+$', '') DESC, CAST(REGEXP_REPLACE(c.cls_name, '^[^0-9]+', '') AS UNSIGNED) DESC ";
         $class = u::query($query);
         if (count($class)) {

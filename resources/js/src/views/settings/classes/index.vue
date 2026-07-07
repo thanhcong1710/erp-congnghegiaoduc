@@ -29,16 +29,38 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Trạng thái lớp</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái"
+                    :options="html.class_status.list"
+                    v-model="html.class_status.item"
+                    :searchable="false"
+                    @input="loadClasses"
+                ></vue-select>
+            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
-              <label @click="selectClass(0)" style="font-size: 18px; cursor: pointer;" v-if="productName">
-                {{productName}}<i style="font-size: 12px;margin-left: 5px;">(Click để thêm mới)</i></label>
+              <div class="flex items-center justify-between mb-2">
+                <label @click="selectClass(0)" style="font-size: 18px; cursor: pointer;" v-if="productName">
+                  {{productName}}<i style="font-size: 12px;margin-left: 5px;">(Click để thêm mới)</i>
+                </label>
+                <span v-else>Danh sách lớp học</span>
+              </div>
+              <vs-input v-model="class_search_keyword" placeholder="Tìm tên lớp học..." class="w-full mb-4" icon="icon-search" icon-pack="feather" />
               <tree
-                :data="classes"
+                :data="filteredClasses"
                 text-field-name="text"
                 allow-batch
                 @item-click="selectClass"
               >
+                <template slot-scope="_">
+                  <div style="display: inherit; cursor: pointer; width: 100%;" @click="_.vm.itemClick()">
+                    <i :class="_.model.icon" style="margin-right: 5px;"></i>
+                    <span v-html="_.model.text"></span>
+                  </div>
+                </template>
               </tree>
             </div>
           </div>
@@ -377,6 +399,15 @@
             item: '',
             list: []
           },
+          class_status: {
+            item: {id: 1, label: 'Sắp khai giảng'},
+            list: [
+              {id: 0, label: 'Tất cả'},
+              {id: 1, label: 'Sắp khai giảng'},
+              {id: 2, label: 'Đang học'},
+              {id: 3, label: 'Đã kết thúc'}
+            ]
+          }
         },
         config:{
           total_cycles:1,
@@ -428,6 +459,14 @@
         },
         check_exit:0,
         productName:'',
+        class_search_keyword: '',
+      }
+    },
+    computed: {
+      filteredClasses() {
+        if (!this.class_search_keyword) return this.classes;
+        let kw = this.class_search_keyword.toLowerCase();
+        return this.classes.filter(c => c.cls_name && c.cls_name.toLowerCase().includes(kw));
       }
     },
     created() {
@@ -533,6 +572,7 @@
           axios.p(`/api/settings/classes/load-classes`, {
             branch_id: this.config.branch_id,
             product_id: this.config.product_id,
+            class_status: this.html.class_status.item ? this.html.class_status.item.id : 0
           })
             .then(response => {
             this.$vs.loading.close();

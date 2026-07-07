@@ -29,15 +29,35 @@
                     @input="saveProduct"
                 ></vue-select>
             </div>
+            <div class="vx-col w-full mb-4">
+              <label>Trạng thái lớp</label>
+              <vue-select
+                    label="label"
+                    placeholder="Chọn trạng thái"
+                    :options="html.class_status.list"
+                    v-model="html.class_status.item"
+                    :searchable="false"
+                    @input="loadClasses"
+                ></vue-select>
+            </div>
             <vs-divider/>
             <div class="vx-col w-full mb-4">
-              Danh sách lớp học
+              <div class="flex items-center justify-between mb-2">
+                <span>Danh sách lớp học</span>
+              </div>
+              <vs-input v-model="class_search_keyword" placeholder="Tìm tên lớp học..." class="w-full mb-4" icon="icon-search" icon-pack="feather" />
               <tree
-                :data="classes"
+                :data="filteredClasses"
                 text-field-name="text"
                 allow-batch
                 @item-click="selectClass"
               >
+                <template slot-scope="_">
+                  <div style="display: inherit; cursor: pointer; width: 100%;" @click="_.vm.itemClick()">
+                    <i :class="_.model.icon" style="margin-right: 5px;"></i>
+                    <span v-html="_.model.text"></span>
+                  </div>
+                </template>
               </tree>
             </div>
           </div>
@@ -142,16 +162,17 @@
                      <tr>
                         <th colspan="1" rowspan="1" class="text-center">STT</th>
                         <th colspan="1" rowspan="1">Học sinh</th>
-                        <th colspan="1" rowspan="1">Add lớp</th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
-                        <th colspan="1" rowspan="1">Gói phí</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
-                        <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+                        <th colspan="1" rowspan="1" class="text-center">Add lớp</th>
                       </tr>
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td>
                       <td class="td vs-table--td" style="max-width:250px;">
+                        <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
+                           <i class="fa-regular fa-clock mr-1"></i>{{ item.added_at }}
+                         </div>
                         <p>Tên HS: {{item.name}}</p>
                         <p>Mã HS:{{item.lms_code}}</p>
                         <p v-if="item.gud_mobile1">SĐT: {{item.gud_mobile1}}</p>
@@ -163,6 +184,20 @@
                         </div>
                       </td>
                       <td class="td vs-table--td">
+                        <p>Mã: <strong>{{item.contract_code}}</strong></p>
+                        <p>Gói: <strong>{{item.tuition_fee_name}}</strong></p>
+                        <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
+                        <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
+                        <p v-if="item.ec_name">Sale: {{item.ec_name}}</p>
+                        <p v-if="item.team_name">Team KD: {{item.team_name}}</p>
+                      </td>
+                      <td class="td vs-table--td">
+                        <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
+                        <p>Ngày kết thúc: {{item.enrolment_last_date}}</p>
+                        <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
+                        <p>Tổng số buổi: {{item.summary_sessions}}</p>
+                      </td>
+                      <td class="td vs-table--td text-center">
                          <select
                            v-model="item.add_class_status"
                            class="vs-inputx vs-input--input normal"
@@ -175,25 +210,6 @@
                            <option :value="3">Chờ feedback</option>
                            <option :value="4">DONE</option>
                          </select>
-                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
-                           <i class="fa-regular fa-clock mr-1"></i>{{ item.added_at }}
-                         </div>
-                      </td>
-                      <td class="td vs-table--td">
-                        <p>Mã: <strong>{{item.contract_code}}</strong></p>
-                        <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>
-                        <p>Ngày kết thúc: {{item.enrolment_last_date}}</p>
-                      </td>
-                      <td class="td vs-table--td">
-                        <p><strong>{{item.tuition_fee_name}}</strong></p>
-                        <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
-                        <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
-                      </td>
-                      <td class="td vs-table--td">
-                        <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
-                        <p>Tổng số buổi: {{item.summary_sessions}}</p>
-                      </td>
-                      <td class="td vs-table--td text-center">
                         <vs-button 
                           v-if="canRemoveStudent(item)"
                           size="small" 
@@ -201,6 +217,7 @@
                           type="border" 
                           icon-pack="feather" 
                           icon="icon-trash-2"
+                          style="margin: auto; margin-top: 10px;"
                           @click="confirmRemoveStudent(item)"
                         >
                           Xóa
@@ -390,6 +407,7 @@
           body: '',
           color:'',
         },
+        class_search_keyword: '',
         filterAddClassStatus: '',
         classes: [],
         html:{
@@ -401,6 +419,15 @@
             item: '',
             list: []
           },
+          class_status: {
+            item: {id: 1, label: 'Sắp khai giảng'},
+            list: [
+              {id: 0, label: 'Tất cả'},
+              {id: 1, label: 'Sắp khai giảng'},
+              {id: 2, label: 'Đang học'},
+              {id: 3, label: 'Đã kết thúc'}
+            ]
+          }
         },
         enrol:{
           branch_id:'',
@@ -483,6 +510,11 @@
           }
         }
         return false;
+      },
+      filteredClasses() {
+        if (!this.class_search_keyword) return this.classes;
+        let kw = this.class_search_keyword.toLowerCase();
+        return this.classes.filter(c => c.cls_name && c.cls_name.toLowerCase().includes(kw));
       }
     },
     methods: {
@@ -510,6 +542,7 @@
           axios.p(`/api/lms/enrolments/load-classes`, {
             branch_id: this.enrol.branch_id,
             product_id: this.enrol.product_id,
+            class_status: this.html.class_status.item ? this.html.class_status.item.id : 0
           })
             .then(response => {
             this.$vs.loading.close();
