@@ -120,6 +120,16 @@
             <vs-tabs v-model="activeTab">
               <vs-tab label="Danh sách học sinh">
                 <div class="pt-4">
+                  <div style="float: left; margin-bottom: 15px;">
+                    <select v-model="filterAddClassStatus" class="vs-inputx vs-input--input normal" style="padding: 6px; width: 200px;">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="0">Chưa chọn</option>
+                      <option value="1">Đã gửi tin nhắn</option>
+                      <option value="2">LỖI LINK FB</option>
+                      <option value="3">Chờ feedback</option>
+                      <option value="4">DONE</option>
+                    </select>
+                  </div>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
@@ -139,7 +149,7 @@
                         <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                       </tr>
                     </thead>
-                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in students" :key="index">
+                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td>
                       <td class="td vs-table--td" style="max-width:250px;">
                         <p>Tên HS: {{item.name}}</p>
@@ -380,6 +390,7 @@
           body: '',
           color:'',
         },
+        filterAddClassStatus: '',
         classes: [],
         html:{
           branches: {
@@ -450,6 +461,15 @@
         .then(response => {
         this.ec_managers = response.data || []
       })
+    },
+    computed: {
+      filteredStudents() {
+        if (!this.students) return [];
+        return this.students.filter(s => {
+          if (this.filterAddClassStatus === '') return true;
+          return s.add_class_status == this.filterAddClassStatus;
+        });
+      }
     },
     methods: {
       saveBranch(data = null){
@@ -714,7 +734,7 @@
         }
       },
       copyAllFacebookLinks() {
-        const links = this.students
+        const links = this.filteredStudents
           .map(s => s.link_facebook)
           .filter(l => !!l)
         if (links.length === 0) {
@@ -745,7 +765,7 @@
         }
       },
       copyAllNames() {
-        const names = this.students
+        const names = this.filteredStudents
           .map(s => s.name)
           .filter(n => !!n)
         if (names.length === 0) {
@@ -776,7 +796,7 @@
         }
       },
       copyAllPhones() {
-        const phones = this.students
+        const phones = this.filteredStudents
           .map(s => s.gud_mobile1)
           .filter(p => !!p)
         if (phones.length === 0) {
