@@ -361,7 +361,7 @@ class StudentsController extends Controller
         }
         if($contract_active){
             $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.status, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
-                WHERE s.contract_id = $contract_active->id");
+                WHERE s.contract_id = $contract_active->id ORDER BY s.class_date");
             $done_sessions_fee = u::first("SELECT count(s.id) AS total FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
                 WHERE s.contract_id = $contract_active->id AND s.status=1");
             $limit = $contract_active->summary_sessions - $done_sessions_fee->total + $contract_active->last_done_sessions;
