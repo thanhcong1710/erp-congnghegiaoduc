@@ -82,12 +82,13 @@ class ContractsController extends Controller
     /**
      * Xếp lớp cho 1 contract (logic giống EnrolmentsController@addStudent nhưng dành cho 1 học sinh).
      */
-    private function enrolContractToClass(int $contract_id, int $student_id, int $class_id, int $branch_id, int $product_id, string $start_date): void
+    private function enrolContractToClass(int $contract_id, int $student_id, int $class_id, int $branch_id, int $product_id): void
     {
         $class_info = u::getObject(['id' => $class_id], 'classes');
         if (!$class_info) {
             return;
         }
+        $start_date = data_get($class_info,'cls_startdate');
         // Safety: chỉ cho xếp đúng trung tâm & đúng product
         if ((int) data_get($class_info, 'branch_id') !== (int) $branch_id) {
             return;
@@ -422,15 +423,13 @@ class ContractsController extends Controller
                 $enrol_contract = $created_contracts[0];
                 $enrol_contract_id = (int) $enrol_contract->id;
                 $product_id = (int) $enrol_contract->product_id;
-                $start_date_enrol = date('Y-m-d');
 
                 $this->enrolContractToClass(
                     $enrol_contract_id,
                     $student_id,
                     $class_id,
                     (int) data_get($request, 'branch_id'),
-                    $product_id,
-                    $start_date_enrol
+                    $product_id
                 );
             }
         }
@@ -670,7 +669,7 @@ class ContractsController extends Controller
                 $contract_info = u::first("SELECT id, product_id FROM contracts WHERE id = $enrol_contract_id LIMIT 1");
                 $product_id = (int) data_get($contract_info, 'product_id', 0);
                 $start_date_enrol = date('Y-m-d');
-                $this->enrolContractToClass($enrol_contract_id, $student_id, $class_id, (int) data_get($request, 'branch_id'), $product_id, $start_date_enrol);
+                $this->enrolContractToClass($enrol_contract_id, $student_id, $class_id, (int) data_get($request, 'branch_id'), $product_id);
             }
         }
 
@@ -1026,8 +1025,7 @@ class ContractsController extends Controller
                             $agreementInfo->student_id,
                             $class_id,
                             (int) $agreementInfo->branch_id,
-                            $product_id,
-                            $start_date_enrol
+                            $product_id
                         );
                     }
                 }
