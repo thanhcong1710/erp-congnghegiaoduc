@@ -369,7 +369,7 @@ class StudentsController extends Controller
             if($contract_active->class_id){
                 $start_date = $contract_active->enrolment_start_date && $contract_active->enrolment_start_date > date('Y-m-d') ? $contract_active->enrolment_start_date : date('Y-m-d');
                 $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
-                    WHERE s.class_id = $contract_active->class_id AND s.class_date >= '".$start_date."' ORDER BY s.class_date LIMIT $limit");
+                    WHERE s.class_id = $contract_active->class_id AND s.class_date > '".$start_date."' ORDER BY s.class_date LIMIT $limit");
             }
         }
         $result = [
