@@ -132,6 +132,13 @@ class StudentDataTransformer
         if (str_starts_with($dateStr, '#')) {
             return null; // Ignore #NAME?, #REF!, #VALUE!
         }
+        
+        // Handle strings with multiple dates like "26/06/2026 và 29/06/2026"
+        if (mb_stripos($dateStr, ' và ') !== false || str_contains($dateStr, '&') || str_contains($dateStr, ',')) {
+            $parts = preg_split('/(\s+và\s+|,|\s+&\s+)/iu', $dateStr);
+            $dateStr = trim(end($parts));
+        }
+
         try {
             // Excel serial date (e.g., 45110)
             if (is_numeric($dateStr)) {

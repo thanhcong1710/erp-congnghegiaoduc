@@ -850,4 +850,69 @@ class ChargesController extends Controller
             'agreement' => $updatedAgreement,
         ]);
     }
+
+    public function reProcessAgreement($agreement_id){
+        $agreement_info = u::getObject(array('id' => $agreement_id), 'agreements');
+        $total_charged =u::first("SELECT SUM(amount) AS total FROM payments WHERE agreement_id=".$agreement_id);
+
+        $must_charge = (int) data_get($agreement_info, 'must_charge');
+        $total_charged = data_get($total_charged, 'total');
+        $discount_amount = (int) data_get($agreement_info, 'discount_amount');
+
+        // ---- Validate cân bằng ----
+        // must_charge = total_charged + charge_amount + debt_after + discount_amount
+        $debt_after = $must_charge - $total_charged - $discount_amount;
+        $debt_after = $debt_after > 0 ? $debt_after :0; 
+
+        // ---- Cập nhật agreements ----
+        $new_total_charged = $total_charged;
+        if ($debt_after <= 0) {
+            u::updateSimpleRow(array(
+                'status' => 3,
+                'total_charged' => $new_total_charged,
+                'debt_amount' => 0
+            ), array('id' => data_get($agreement_info, 'id')), 'agreements');
+        } else {
+            u::updateSimpleRow(array(
+                'status' => 2,
+                'total_charged' => $new_total_charged,
+                'debt_amount' => $debt_after
+            ), array('id' => data_get($agreement_info, 'id')), 'agreements');
+        }
+
+        $this->processContractsByAgreementNew(data_get($agreement_info, 'id'));
+        return true;
+    }
+
+    public static function processContractsByAgreementNew($agreement_id)
+    {
+        $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8");
+        $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
+        $packages = data_get($dataResult, 'packages');
+        if (!empty($packages)) {
+            foreach ($packages as $row) {
+                $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
+                    round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
+                if( data_get($row, 'contract_data.class_id') && $availableSession > 0){
+                    $status = 6;
+                }else{
+                    $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
+                }
+                u::updateSimpleRow([
+                    'status' => $status,
+                    'real_sessions' => $availableSession,
+                    'summary_sessions' => $availableSession,
+                    'left_sessions' => $availableSession - data_get($row, 'done_sessions'),
+                    'total_charged' => (int) data_get($row, 'total_charged'),
+                    'init_total_charged' => (int) data_get($row, 'total_charged'),
+                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id ?? 0,
+                ], array('id' => data_get($row, 'contract_id')), 'contracts');
+            }
+        }
+
+        return true;
+    }
 }
