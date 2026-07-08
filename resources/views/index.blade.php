@@ -5,12 +5,12 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>FlexStart Bootstrap Template - Index</title>
+  <title>Scots English</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="../static/flexstart/img/favicon.png" rel="icon">
+  <link href="/images/logo/favicon.png" rel="icon">
   <link href="../static/flexstart/img/apple-touch-icon.png" rel="apple-touch-icon">
 
   <!-- Google Fonts -->

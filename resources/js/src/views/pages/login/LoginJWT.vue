@@ -1,38 +1,44 @@
 <template>
   <div>
-    <vs-input
-        v-validate="'required'"
-        data-vv-validate-on="blur"
-        name="hrm_id"
-        icon-no-border
-        icon="icon icon-user"
-        icon-pack="feather"
-        label-placeholder="Mã nhân viên"
-        v-model="hrm_id"
-        class="w-full"/>
-    <span class="text-danger text-sm">{{ errors.first('hrm_id') }}</span>
-
-    <vs-input
-        @keyup.enter="loginJWT"
-        data-vv-validate-on="blur"
-        v-validate="'required|min:6'"
-        type="password"
-        name="password"
-        icon-no-border
-        icon="icon icon-lock"
-        icon-pack="feather"
-        label-placeholder="Mật khẩu"
-        v-model="password"
-        class="w-full mt-6" />
-    <span class="text-danger text-sm">{{ errors.first('password') }}</span>
-
-    <div class="flex flex-wrap justify-between my-5">
-        <vs-checkbox v-model="checkbox_remember_me" class="mb-3">Lưu mật khẩu</vs-checkbox>
-        <router-link to="/pages/forgot-password">Quên mật khẩu?</router-link>
+    <div class="mb-5">
+      <label class="block text-lg font-bold text-slate-700 mb-2">Mã nhân viên</label>
+      <vs-input
+          v-validate="'required'"
+          data-vv-validate-on="blur"
+          name="hrm_id"
+          icon-no-border
+          icon="icon icon-user"
+          icon-pack="feather"
+          placeholder="Mã nhân viên"
+          v-model="hrm_id"
+          class="w-full custom-input-wrapper"/>
+      <span class="text-danger text-lg">{{ errors.first('hrm_id') }}</span>
     </div>
-    <div class="flex flex-wrap justify-between mb-3">
-      <vs-button  type="border" @click="registerUser">Đăng ký</vs-button>
-      <vs-button :disabled="!validateForm" @click="loginJWT">Đăng nhập</vs-button>
+
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-2">
+        <label class="block text-lg font-bold text-slate-700">Mật khẩu</label>
+        <router-link to="/pages/forgot-password" class="text-base font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Quên mật khẩu?</router-link>
+      </div>
+      <vs-input
+          @keyup.enter="loginJWT"
+          data-vv-validate-on="blur"
+          v-validate="'required|min:6'"
+          type="password"
+          name="password"
+          icon-no-border
+          icon="icon icon-lock"
+          icon-pack="feather"
+          placeholder="••••••••"
+          v-model="password"
+          class="w-full custom-input-wrapper" />
+      <span class="text-danger text-lg">{{ errors.first('password') }}</span>
+    </div>
+
+    <div class="flex flex-wrap justify-between mb-3 mt-4">
+      <vs-button :disabled="!validateForm" @click="loginJWT" class="w-full btn-login-custom">
+        Hệ Thống Đăng Nhập <i class="feather icon-arrow-right ml-2"></i>
+      </vs-button>
     </div>
 
     <div class="flex flex-wrap justify-between mt-10 text-center" v-if="resendActive">
