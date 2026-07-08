@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\LogClassStudent;
 use App\Models\LogStudents;
 use Illuminate\Console\Command;
 use App\Providers\UtilityServiceProvider as u;
@@ -53,6 +54,7 @@ class AutoWithdrawEnrollmentDeposit extends Command
             u::addLogContracts(data_get($contract, 'id'));
             LogStudents::logAdd(data_get($contract, 'student_id'), 'Xóa học sinh cọc khi lớp bắt đầu khai giảng', 0);
             echo data_get($contract, 'id')."/";
+            LogClassStudent::logAction($contract->class_id, $contract->student_id, $contract->id, 0, 0);
         }
 
         
