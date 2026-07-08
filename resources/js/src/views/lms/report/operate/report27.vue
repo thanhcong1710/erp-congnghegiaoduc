@@ -23,6 +23,10 @@
           <multiselect name="search_status" placeholder="Chọn trạng thái" v-model="searchData.status" :options="status_list" label="label" :close-on-select="true" :multiple="false" :searchable="false" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
         </div>
         <div>
+          <label class="rpt-label">Loại lớp</label>
+          <multiselect name="search_is_online" placeholder="Chọn loại lớp" v-model="searchData.is_online" :options="is_online_list" label="label" :close-on-select="true" :multiple="false" :searchable="false" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div>
           <label class="rpt-label">Từ khóa</label>
           <vs-input class="w-full" placeholder="Mã HV, tên HV, mã lớp" v-model="searchData.keyword"></vs-input>
         </div>
@@ -130,7 +134,8 @@
       return {
         team_list: [], products: [],
         status_list: [ {id:'1',label:'Đã phát sách'}, {id:'0',label:'Chưa phát sách'} ],
-        searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'' },
+        is_online_list: [ {id:'0',label:'Lớp Offline'}, {id:'1',label:'Lớp Online'} ],
+        searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'' },
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],
         limitSource: [20, 50, 100, 500],
@@ -172,7 +177,7 @@
         return d
       },
       reset() {
-        this.searchData = { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'' }
+        this.searchData = { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'' }
         this.getData()
       },
       getData() {
@@ -188,6 +193,7 @@
           team_id: this.searchData.team ? this.searchData.team.id : 0, 
           product_id: this.searchData.product ? this.searchData.product.id : '', 
           status: this.searchData.status ? this.searchData.status.id : '', 
+          is_online: this.searchData.is_online ? this.searchData.is_online.id : '',
           start_date: start_date, 
           end_date: end_date, 
           cls_start_start: cls_start_start,
@@ -254,6 +260,7 @@
         if (this.searchData.keyword) { keys.push('keyword'); values.push(this.searchData.keyword) }
         if (this.searchData.product) { keys.push('product_id'); values.push(this.searchData.product.id) }
         if (this.searchData.status) { keys.push('status'); values.push(this.searchData.status.id) }
+        if (this.searchData.is_online) { keys.push('is_online'); values.push(this.searchData.is_online.id) }
         if (this.searchData.dateRange && this.searchData.dateRange[0]) {
           keys.push('start_date')
           values.push(this.fmtDate(this.searchData.dateRange[0]))

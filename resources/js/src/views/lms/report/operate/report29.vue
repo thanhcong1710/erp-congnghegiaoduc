@@ -6,7 +6,7 @@
           <i class="fas fa-users text-xl"></i>
         </div>
         <div>
-          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO CHI TIẾT ĐÃ XẾP LỚP</h3>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">BÁO CÁO CHI TIẾT CHƯA XẾP LỚP</h3>
         </div>
       </div>
       <!-- Filters -->
@@ -19,20 +19,21 @@
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-        <div>
+        <div v-if="!user_role.is_sale && !user_role.is_sale_leader">
           <label class="rpt-label">Team KD (quản lý)</label>
           <multiselect v-model="searchData.team_obj" :options="team_list" label="name" track-by="id"
             placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-        <div>
+        <div v-if="!user_role.is_sale || user_role.is_sale_leader">
           <label class="rpt-label">Nhân viên sale</label>
           <multiselect v-model="searchData.ec_obj" :options="ec_list" label="name" track-by="id"
             placeholder="Chọn sale" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
+
         <div>
           <label class="rpt-label">Khóa lẻ</label>
           <multiselect v-model="searchData.product_obj" :options="product_list" label="name" track-by="id"
@@ -80,8 +81,6 @@
               <th style="min-width:120px">SĐT</th>
               <th style="min-width:200px">Khóa học đăng ký</th>
               <th style="min-width:150px">Khóa lẻ</th>
-              <th style="min-width:150px">Lớp đăng ký</th>
-              <th style="min-width:120px" class="text-center">Ngày khai giảng</th>
               <th style="min-width:150px">Team kinh doanh</th>
               <th style="min-width:150px">Thành viên sale</th>
             </tr>
@@ -95,13 +94,11 @@
               <td class="student-phone text-muted">{{ row.phone }}</td>
               <td>{{ row.course_name || '—' }}</td>
               <td>{{ row.product_name || '—' }}</td>
-              <td>{{ row.class_name || '—' }}</td>
-              <td class="text-center date-cell">{{ row.start_date || '—' }}</td>
               <td>{{ row.team_name || '—' }}</td>
               <td>{{ row.ec_name || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="11" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="9" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -222,7 +219,7 @@
         }
         this.searchData.branch_id = ids
         this.$vs.loading()
-        axios.p('/api/lms/reports/26', this.buildPayload())
+        axios.p('/api/lms/reports/29', this.buildPayload())
           .then(res => {
             this.$vs.loading.close()
             this.datas   = res.data.list    || []

@@ -86,12 +86,17 @@
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-26'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>16. BÁO CÁO CHI TIẾT XẾP LỚP</p>
+                <p>16. BÁO CÁO CHI TIẾT ĐÃ XẾP LỚP</p>
+              </router-link>
+            </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-29'" v-if="checkPermission('lms_reports_operate_05')">
+                <p>17. BÁO CÁO CHI TIẾT CHƯA XẾP LỚP</p>
               </router-link>
             </div>
             <div class="mb-2">
               <router-link class="link-report" :to="'/lms/reports/operate/report-27'" v-if="checkPermission('lms_reports_operate_05')">
-                <p>17. BÁO CÁO PHÁT SÁCH</p>
+                <p>18. BÁO CÁO PHÁT SÁCH</p>
               </router-link>
             </div>
           </div>

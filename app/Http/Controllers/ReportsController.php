@@ -2150,18 +2150,7 @@ class ReportsController extends Controller
         $cls_end_date = isset($request->cls_end_date) ? $request->cls_end_date : '';
 
         $user = Auth::user();
-        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
-        $roleIds = [];
-        foreach ($userRoles as $ur) {
-            $roleIds[] = $ur->role_id;
-        }
-
-        if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
-        } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
-        }
-
+        
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -2190,12 +2179,7 @@ class ReportsController extends Controller
             $kw_cls = addslashes($class_keyword);
             $cond .= " AND (cls.cls_name LIKE '%$kw_cls%' OR cls.id = '$kw_cls')";
         }
-        $class_status = isset($request->class_status) ? (int) $request->class_status : -1;
-        if ($class_status == 1) {
-            $cond .= " AND c.class_id > 0";
-        } elseif ($class_status == 0) {
-            $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
-        }
+        $cond .= " AND c.class_id > 0";
         if ($start_date) {
             $cond .= " AND c.created_at >= '$start_date 00:00:00'";
         }
@@ -2249,6 +2233,99 @@ class ReportsController extends Controller
         return response()->json($data);
     }
 
+    public function report29(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;
+        $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;
+        $product_id = isset($request->product_id) ? (int) $request->product_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " c.status > 0 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND c.ec_id = $ec_id";
+        }
+        if ($product_id > 0) {
+            $cond .= " AND c.product_id = $product_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        
+        $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
+
+        if ($start_date) {
+            $cond .= " AND c.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+
+        $totalRow = u::first("
+            SELECT COUNT(c.id) AS total
+            FROM contracts AS c
+            INNER JOIN students AS s ON s.id = c.student_id
+            WHERE $cond
+        ");
+        $totalCount = (int) ($totalRow->total ?? 0);
+
+        $query = "
+            SELECT
+                c.created_at,
+                s.name AS student_name,
+                s.lms_code,
+                s.gud_mobile1 AS phone,
+                tf.name AS course_name,
+                p.name AS product_name,
+                u_team.name AS team_name,
+                u_ec.name AS ec_name
+            FROM contracts AS c
+            INNER JOIN students AS s ON s.id = c.student_id
+            LEFT JOIN agreements AS a ON a.id = c.agreement_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            LEFT JOIN products AS p ON p.id = c.product_id
+            LEFT JOIN users AS u_team ON u_team.id = c.ec_leader_id
+            LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+            WHERE $cond
+            ORDER BY c.id DESC
+            $limitation
+        ";
+
+        $list = u::query($query);
+
+        $data = u::makingPagination($list, $totalCount, $page, $limit);
+        return response()->json($data);
+    }
+
     public function reportBookDelivered(Request $request)
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
@@ -2259,6 +2336,7 @@ class ReportsController extends Controller
         $cls_start_start = isset($request->cls_start_start) ? $request->cls_start_start : '';
         $cls_start_end = isset($request->cls_start_end) ? $request->cls_start_end : '';
         $team_id = isset($request->team_id) ? (int)$request->team_id : 0;
+        $is_online = isset($request->is_online) ? $request->is_online : '';
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -2302,6 +2380,10 @@ class ReportsController extends Controller
             } elseif ($status == '0') {
                 $cond .= " AND c.book_delivered_date IS NULL ";
             }
+        }
+
+        if ($is_online !== '') {
+            $cond .= " AND cls.is_online = " . (int)$is_online . " ";
         }
 
         $order_by = " ORDER BY c.id DESC ";

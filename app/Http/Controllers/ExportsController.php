@@ -3051,18 +3051,6 @@ class ExportsController extends Controller
         }
 
         $user = Auth::user();
-        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
-        $roleIds = [];
-        foreach ($userRoles as $ur) {
-            $roleIds[] = $ur->role_id;
-        }
-
-        if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
-        } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
-        }
-
         $cond = " c.status > 0 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
@@ -3085,11 +3073,7 @@ class ExportsController extends Controller
             $kw_cls = addslashes($class_keyword);
             $cond .= " AND (cls.cls_name LIKE '%$kw_cls%' OR cls.id = '$kw_cls')";
         }
-        if ($class_status == 1) {
-            $cond .= " AND c.class_id > 0";
-        } elseif ($class_status == 0) {
-            $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
-        }
+        $cond .= " AND c.class_id > 0";
         if ($start_date) {
             $cond .= " AND c.created_at >= '$start_date 00:00:00'";
         }
@@ -3204,6 +3188,155 @@ class ExportsController extends Controller
         }
     }
 
+    public function report29(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $team_id = 0;
+        $ec_id = 0;
+        $product_id = 0;
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v') $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'team_id':
+                    $team_id = (int) $v;
+                    break;
+                case 'ec_id':
+                    $ec_id = (int) $v;
+                    break;
+                case 'product_id':
+                    $product_id = (int) $v;
+                    break;
+                case 'keyword':
+                    $keyword = urldecode($v);
+                    break;
+                case 'start_date':
+                    $start_date = $v;
+                    break;
+                case 'end_date':
+                    $end_date = $v;
+                    break;
+            }
+        }
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        if (in_array(69, $roleIds)) {
+            $team_id = $user->id; 
+        } elseif (in_array(68, $roleIds)) {
+            $ec_id = $user->id; 
+        }
+
+        $cond = " c.status > 0 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND c.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+        if ($team_id > 0) {
+            $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id))";
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND c.ec_id = $ec_id";
+        }
+        if ($product_id > 0) {
+            $cond .= " AND c.product_id = $product_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        
+        $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
+        
+        if ($start_date) {
+            $cond .= " AND c.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND c.created_at <= '$end_date 23:59:59'";
+        }
+
+        $query = "
+            SELECT
+                c.created_at,
+                s.name AS student_name,
+                s.lms_code,
+                s.gud_mobile1 AS phone,
+                tf.name AS course_name,
+                p.name AS product_name,
+                u_team.name AS team_name,
+                u_ec.name AS ec_name
+            FROM contracts AS c
+            INNER JOIN students AS s ON s.id = c.student_id
+            LEFT JOIN agreements AS a ON a.id = c.agreement_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            LEFT JOIN products AS p ON p.id = c.product_id
+            LEFT JOIN users AS u_team ON u_team.id = c.ec_leader_id
+            LEFT JOIN users AS u_ec ON u_ec.id = c.ec_id
+            WHERE $cond
+            ORDER BY c.id DESC
+        ";
+
+        $list = u::query($query);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Ngày tạo');
+        $sheet->setCellValue('C1', 'Họ tên HS');
+        $sheet->setCellValue('D1', 'Mã HS');
+        $sheet->setCellValue('E1', 'SĐT');
+        $sheet->setCellValue('F1', 'Khóa học đăng ký');
+        $sheet->setCellValue('G1', 'Khóa lẻ');
+        $sheet->setCellValue('H1', 'Team KD');
+        $sheet->setCellValue('I1', 'Sale');
+
+        foreach(range('A','I') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $rowIdx = 2;
+        foreach ($list as $idx => $row) {
+            $sheet->setCellValue('A' . $rowIdx, $idx + 1);
+            $sheet->setCellValue('B' . $rowIdx, $row->created_at);
+            $sheet->setCellValue('C' . $rowIdx, $row->student_name);
+            $sheet->setCellValue('D' . $rowIdx, $row->lms_code);
+            $sheet->setCellValueExplicit('E' . $rowIdx, $row->phone, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('F' . $rowIdx, $row->course_name);
+            $sheet->setCellValue('G' . $rowIdx, $row->product_name);
+            $sheet->setCellValue('H' . $rowIdx, $row->team_name);
+            $sheet->setCellValue('I' . $rowIdx, $row->ec_name);
+            $rowIdx++;
+        }
+
+        try {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="Bao_cao_chua_xep_lop.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
     public function reportBookDelivered($keys, $values)
     {
         $arr_key = explode(',', $keys);
@@ -3242,6 +3375,9 @@ class ExportsController extends Controller
         }
         if (isset($req->cls_start_end) && $req->cls_start_end) {
             $cond .= " AND cls.cls_startdate <= '" . $req->cls_start_end . "' ";
+        }
+        if (isset($req->is_online) && $req->is_online !== '') {
+            $cond .= " AND cls.is_online = " . (int) $req->is_online . " ";
         }
 
         $order_by = " ORDER BY c.id DESC ";
