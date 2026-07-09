@@ -61,9 +61,43 @@ const router = new Router({
           path: '/admin/dashboard',
           name: 'admin-dashboard',
           component: () => import('./views/DashboardAnalytics.vue'),
-          meta: {
-            rule: 'editor'
-          }
+          meta: { rule: 'editor' }
+        },
+        {
+          path: '/loyalty/dashboard',
+          name: 'loyalty-dashboard',
+          component: () => import('./views/loyalty/LoyaltyDashboard.vue'),
+          meta: { rule: 'editor', pageTitle: 'Dashboard Thống kê' }
+        },
+        {
+          path: '/loyalty/history',
+          name: 'loyalty-history',
+          component: () => import('./views/loyalty/History.vue'),
+          meta: { rule: 'editor', pageTitle: 'Lịch sử tích/tiêu điểm' }
+        },
+        {
+          path: '/loyalty/member-ranks',
+          name: 'loyalty-member-ranks',
+          component: () => import('./views/loyalty/MemberRanks.vue'),
+          meta: { rule: 'editor', pageTitle: 'Quản lý hạng thành viên' }
+        },
+        {
+          path: '/loyalty/rules',
+          name: 'loyalty-rules',
+          component: () => import('./views/loyalty/Rules.vue'),
+          meta: { rule: 'editor', pageTitle: 'Quy tắc tích điểm' }
+        },
+        {
+          path: '/loyalty/point-conversion',
+          name: 'loyalty-point-conversion',
+          component: () => import('./views/loyalty/PointConversion.vue'),
+          meta: { rule: 'editor', pageTitle: 'Cấu hình quy đổi điểm' }
+        },
+        {
+          path: '/loyalty/vouchers',
+          name: 'loyalty-vouchers',
+          component: () => import('./views/loyalty/Vouchers.vue'),
+          meta: { rule: 'editor', pageTitle: 'Danh sách Voucher' }
         },
        
         

@@ -216,6 +216,55 @@ export default [
     ]
   },
   {
+    header: 'LOYALTY & CSKH',
+    icon: 'HeartIcon',
+    permission: 'Dashboard', 
+    items: [
+      {
+        url: '/loyalty/dashboard',
+        name: 'Dashboard Thống kê',
+        icon: 'PieChartIcon',
+        slug: 'loyalty-dashboard',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/loyalty/history',
+        name: 'Lịch sử điểm',
+        icon: 'ClockIcon',
+        slug: 'loyalty-history',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/loyalty/member-ranks',
+        name: 'Hạng thành viên',
+        icon: 'AwardIcon',
+        slug: 'loyalty-member-ranks',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/loyalty/rules',
+        name: 'Quy tắc tích điểm',
+        icon: 'CheckSquareIcon',
+        slug: 'loyalty-rules',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/loyalty/point-conversion',
+        name: 'Cấu hình quy đổi',
+        icon: 'RefreshCwIcon',
+        slug: 'loyalty-point-conversion',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/loyalty/vouchers',
+        name: 'Danh sách Voucher/Quà',
+        icon: 'GiftIcon',
+        slug: 'loyalty-vouchers',
+        permission: 'Dashboard',
+      }
+    ]
+  },
+  {
     header: 'MARKETING',
     icon: 'PackageIcon',
     permission:'Marketing',
