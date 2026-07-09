@@ -305,6 +305,7 @@ class StudentsController extends Controller
             'gud_job2' => $request->gud_job2,
             'gud_mobile1' => $request->gud_mobile1,
             'point_toeic' => $request->point_toeic,
+            'source_id' => (int) $request->source_id,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         );

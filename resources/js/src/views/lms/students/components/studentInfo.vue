@@ -133,14 +133,18 @@
           />
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
-          <label >Nguồn </label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.source_name"
-            disabled="true"
-          />
+          <label >Nguồn <span class="text-danger"> (*)</span></label>
+          <vue-select
+            name="input_source"
+            label="name"
+            placeholder="Chọn Nguồn"
+            :options="html.sources.list"
+            v-model="html.sources.item"
+            :searchable="true"
+            language="tv-VN"
+            @input="saveSource"
+            :disabled="disabled_edit"
+          ></vue-select>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
           <label >Trạng thái </label>
@@ -271,6 +275,10 @@
             item: '',
             list: []
           },
+          sources: {
+            item: '',
+            list: []
+          },
         },
         tmp_district_id:'',
       }
@@ -284,9 +292,14 @@
         .then(response => {
         this.html.jobs.list = response.data
       })
+      await axios.g(`/api/system/sources`)
+        .then(response => {
+        this.html.sources.list = response.data
+      })
       this.html.jobs.item = this.html.jobs.list.filter(item => item.id == this.student_info.gud_job1)[0]
       this.html.jobs.item2 = this.html.jobs.list.filter(item => item.id == this.student_info.gud_job2)[0]
       this.html.province.item = this.html.province.list.filter(item => item.id == this.student_info.province_id)[0]
+      this.html.sources.item = this.html.sources.list.filter(item => item.id == this.student_info.source_id)[0]
       this.tmp_district_id = this.student_info.district_id
       this.getDistrict(this.html.province.item);
     },
@@ -405,6 +418,18 @@
           this.student_info.gud_job2 = ""
         }
       },
+      saveSource(data = null){
+        if (data && typeof data === 'object') {
+          const source_id = data.id
+          this.html.sources.item = data
+          this.student_info.source_id = source_id
+          this.student_info.source_name = data.name
+        }else{
+          this.html.sources.item = ""
+          this.student_info.source_id = ""
+          this.student_info.source_name = ""
+        }
+      },
       reloadPage(){
         location.reload();
       },
@@ -421,6 +446,10 @@
         }
         if (this.student_info.gud_mobile1 != "" && !u.vld.phone(this.student_info.gud_mobile1)) {
           mess += " - Số điện thoại không đúng định dạng<br/>";
+          resp = false;
+        }
+        if (!this.student_info.source_id) {
+          mess += " - Nguồn không được để trống<br/>";
           resp = false;
         }
         if (this.student_info.gud_email1 != "" && this.student_info.gud_email1 != null && !u.vld.email(this.student_info.gud_email1)) {
