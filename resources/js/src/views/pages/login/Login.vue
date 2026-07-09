@@ -277,79 +277,81 @@ $slate-200: #e2e8f0;
 }
 
 /* Custom styling for Vuexy vs-input to match Tailwind */
-.vs-input--input.normal {
-  border-radius: 12px !important;
-  border: 1px solid $slate-200 !important;
-  padding: 18px 20px !important;
-  background: #ffffff !important;
-  color: $slate-700 !important;
-  font-weight: 600 !important;
-  font-size: 1.25rem !important;
-  transition: all 0.2s ease;
-  width: 100% !important;
-  text-align: left !important;
-  
-  &:focus {
-    border-color: $indigo-600 !important;
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
+#page-login {
+  .vs-input--input.normal {
+    border-radius: 12px !important;
+    border: 1px solid $slate-200 !important;
+    padding: 18px 20px !important;
+    background: #ffffff !important;
+    color: $slate-700 !important;
+    font-weight: 600 !important;
+    font-size: 1.25rem !important;
+    transition: all 0.2s ease;
+    width: 100% !important;
+    text-align: left !important;
+    
+    &:focus {
+      border-color: $indigo-600 !important;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
+    }
+    
+    &::placeholder {
+      color: #94a3b8 !important;
+    }
   }
-  
-  &::placeholder {
-    color: #94a3b8 !important;
+
+  .vs-input--icon {
+    display: none !important;
   }
-}
 
-.vs-input--icon {
-  display: none !important;
-}
-
-.vs-input {
-  margin-bottom: 1.25rem !important;
-}
-
-.vs-input--label {
-  display: block;
-  font-size: 1.15rem !important;
-  font-weight: 700 !important;
-  color: $slate-700 !important;
-  margin-bottom: 0.75rem !important;
-  padding-left: 0 !important;
-}
-
-.vs-button {
-  border-radius: 12px !important;
-  font-weight: 800 !important;
-  font-size: 1.35rem !important;
-  padding: 20px 24px !important;
-  background: $indigo-600 !important;
-  color: white !important;
-  width: 100%;
-  transition: all 0.2s ease !important;
-  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3) !important;
-  
-  &:hover {
-    background: $indigo-700 !important;
-    transform: scale(0.98);
+  .vs-input {
+    margin-bottom: 1.25rem !important;
   }
-}
 
-.vs-button-border, .vs-button--border {
-  background: transparent !important;
-  color: $indigo-600 !important;
-  border: 1.5px solid $indigo-600 !important;
-  box-shadow: none !important;
-  
-  &:hover {
-    background: rgba(79, 70, 229, 0.05) !important;
-    color: $indigo-700 !important;
+  .vs-input--label {
+    display: block;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    color: $slate-700 !important;
+    margin-bottom: 0.75rem !important;
+    padding-left: 0 !important;
   }
-}
 
-.text-danger {
-  display: block;
-  margin-top: -10px;
-  margin-bottom: 15px;
-  font-size: 0.85rem;
-  color: #ef4444;
+  .vs-button {
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    font-size: 1.35rem !important;
+    padding: 20px 24px !important;
+    background: $indigo-600 !important;
+    color: white !important;
+    width: 100%;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3) !important;
+    
+    &:hover {
+      background: $indigo-700 !important;
+      transform: scale(0.98);
+    }
+  }
+
+  .vs-button-border, .vs-button--border {
+    background: transparent !important;
+    color: $indigo-600 !important;
+    border: 1.5px solid $indigo-600 !important;
+    box-shadow: none !important;
+    
+    &:hover {
+      background: rgba(79, 70, 229, 0.05) !important;
+      color: $indigo-700 !important;
+    }
+  }
+
+  .text-danger {
+    display: block;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #ef4444;
+  }
 }
 </style>

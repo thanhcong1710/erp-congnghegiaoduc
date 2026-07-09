@@ -672,10 +672,10 @@ export default {
         arr_branch: "",
         branch_id:"",
       },
-      totalRevenueWeek: {},
-      totalRevenueMonth: {},
-      numDashStudent: {},
-      numDashClass: {},
+      totalRevenueWeek: { analyticsData: { data: 0 } },
+      totalRevenueMonth: { analyticsData: { data: 0 } },
+      numDashStudent: { analyticsData: { data: 0 } },
+      numDashClass: { analyticsData: { data: 0 } },
       pieChartStudent: {
         series: [],
         chartOptions: {
@@ -1347,6 +1347,54 @@ export default {
       })
     },
     loadData(){
+      if(this.checkPermission('dashboard_01')){
+        this.loadDataDashboard01();
+      }
+      if(this.checkPermission('dashboard_02')){
+        this.loadDataDashboard02();
+      }
+      if(this.checkPermission('dashboard_03')){
+        this.loadDataDashboard03();
+      }
+      if(this.checkPermission('dashboard_04')){
+        this.loadDataDashboard04();
+      }
+      if(this.checkPermission('dashboard_05')){
+        this.loadDataDashboard05();
+      }
+      if(this.checkPermission('dashboard_06')){
+        this.loadDataDashboard06();
+      }
+      if(this.checkPermission('dashboard_07')){
+        this.loadDataDashboard07();
+      }
+      if(this.checkPermission('dashboard_08')){
+        this.loadDataDashboard08();
+      }
+      if(this.checkPermission('dashboard_09')){
+        this.loadDataDashboard09();
+      }
+      if(this.checkPermission('dashboard_10')){
+        this.loadDataDashboard10();
+      }
+      if(this.checkPermission('dashboard_11')){
+        this.loadDataDashboard11();
+      }
+      if(this.checkPermission('dashboard_12')){
+        this.loadDataDashboard12();
+      }
+      if(this.checkPermission('dashboard_13')){
+        this.loadDataDashboard13();
+      }
+      if(this.checkPermission('dashboard_14')){
+        this.loadDataDashboard14();
+      }
+      if(this.checkPermission('dashboard_15')){
+        this.loadDataDashboard15();
+      }
+      if(this.checkPermission('dashboard_16')){
+        this.loadDataDashboard16();
+      }
       this.loadDataDashboard17();
       this.loadDataDashboard18();
       this.loadDataDashboard19();
