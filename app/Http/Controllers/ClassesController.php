@@ -20,9 +20,9 @@ class ClassesController extends Controller
         
         $cond = " c.branch_id = $branch_id AND c.product_id = $product_id ";
         if ($status_filter == 1) { 
-            $cond .= " AND c.status = 1 AND c.cls_startdate > CURDATE() ";
+            $cond .= " AND c.status = 1 AND c.cls_startdate >= CURDATE() ";
         } elseif ($status_filter == 2) { 
-            $cond .= " AND c.status = 1 AND c.cls_startdate <= CURDATE() AND c.cls_enddate >= CURDATE() ";
+            $cond .= " AND c.status = 1 AND c.cls_startdate < CURDATE() AND c.cls_enddate >= CURDATE() ";
         } elseif ($status_filter == 3) { 
             $cond .= " AND c.status = 1 AND c.cls_enddate < CURDATE() ";
         }
