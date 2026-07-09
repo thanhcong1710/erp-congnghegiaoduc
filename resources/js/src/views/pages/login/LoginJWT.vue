@@ -1,10 +1,8 @@
 <template>
   <div>
     <div class="mb-5">
-      <label class="block text-lg font-bold text-slate-700 mb-2">Mã nhân viên</label>
+      <label class="block text-lg text-slate-700 mb-2">Mã nhân viên</label>
       <vs-input
-          v-validate="'required'"
-          data-vv-validate-on="blur"
           name="hrm_id"
           icon-no-border
           icon="icon icon-user"
@@ -12,18 +10,15 @@
           placeholder="Mã nhân viên"
           v-model="hrm_id"
           class="w-full custom-input-wrapper"/>
-      <span class="text-danger text-lg">{{ errors.first('hrm_id') }}</span>
     </div>
 
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2">
-        <label class="block text-lg font-bold text-slate-700">Mật khẩu</label>
+        <label class="block text-lg text-slate-700">Mật khẩu</label>
         <router-link to="/pages/forgot-password" class="text-base font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Quên mật khẩu?</router-link>
       </div>
       <vs-input
           @keyup.enter="loginJWT"
-          data-vv-validate-on="blur"
-          v-validate="'required|min:6'"
           type="password"
           name="password"
           icon-no-border
@@ -32,12 +27,14 @@
           placeholder="••••••••"
           v-model="password"
           class="w-full custom-input-wrapper" />
-      <span class="text-danger text-lg">{{ errors.first('password') }}</span>
     </div>
 
+    <div v-if="submitError" class="mb-2 text-danger text-lg font-medium text-center">
+      {{ submitError }}
+    </div>
     <div class="flex flex-wrap justify-between mb-3 mt-4">
-      <vs-button :disabled="!validateForm" @click="loginJWT" class="w-full btn-login-custom">
-        Hệ Thống Đăng Nhập <i class="feather icon-arrow-right ml-2"></i>
+      <vs-button @click="loginJWT" class="w-full btn-login-custom">
+        Đăng Nhập <i class="feather icon-arrow-right ml-2"></i>
       </vs-button>
     </div>
 
@@ -54,12 +51,8 @@ export default {
       hrm_id: '',
       password: '',
       checkbox_remember_me: false,
-      resendActive: false
-    }
-  },
-  computed: {
-    validateForm () {
-      return !this.errors.any() && this.phone !== '' && this.password !== ''
+      resendActive: false,
+      submitError: ''
     }
   },
   methods: {
@@ -84,6 +77,16 @@ export default {
       return true
     },
     loginJWT () {
+      this.submitError = '';
+      if (!this.hrm_id) {
+        this.submitError = 'Vui lòng nhập mã nhân viên';
+        return;
+      }
+      if (!this.password) {
+        this.submitError = 'Vui lòng nhập mật khẩu';
+        return;
+      }
+
       if (!this.checkLogin()) return
 
       // Loading

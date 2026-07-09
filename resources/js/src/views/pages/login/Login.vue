@@ -44,7 +44,7 @@
 
           <div class="brand-content mt-12 mb-12">
             <h2 class="slogan">Nền tảng quản trị<br>tiên phong.</h2>
-            <p class="sub-slogan">Hệ thống thông minh giúp tối ưu hóa vận hành và nâng cao hiệu quả công việc.</p>
+            <p class="sub-slogan" style="font-size: 16px;">Hệ thống thông minh giúp tối ưu hóa vận hành và nâng cao hiệu quả công việc.</p>
           </div>
 
           <div class="brand-footer">

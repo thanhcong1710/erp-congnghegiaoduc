@@ -45,7 +45,7 @@
             </template>
           </vx-input-group>
       </div>
-      <!-- <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
+      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
         <div class="vx-card overflow-hidden">
           <div class="vx-card__collapsible-content vs-con-loading__container">
               <div>
@@ -322,7 +322,7 @@
             </div>
           </div>
         </vx-card>
-      </div> -->
+      </div>
 
       <!-- Revenue Table Section - Dashboard 17 -->
       <div class="vx-col w-full mb-base">
