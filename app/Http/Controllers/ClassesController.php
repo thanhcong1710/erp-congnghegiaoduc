@@ -32,9 +32,9 @@ class ClassesController extends Controller
             'class' AS item_type, 
             c.cls_name,
             CONCAT('<b style=\"font-size: 16px\">', c.cls_name, '</b> (', 
-                IF((SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7) >= c.max_students, 
-                    CONCAT('<b style=\"color:red\">', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students),
-                    CONCAT('<b>', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students)
+                IF((SELECT COUNT(id) FROM contracts WHERE class_id = c.id ) >= c.max_students, 
+                    CONCAT('<b style=\"color:red\">', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id ), '</b>/', c.max_students),
+                    CONCAT('<b>', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id ), '</b>/', c.max_students)
                 ), 
                 ' <i class=\"fa-regular fa-calendar mx-1 text-primary\"></i>', c.cls_startdate, 
             ')') AS `text`, 

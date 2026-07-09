@@ -35,9 +35,9 @@ class EnrolmentsController extends Controller
             'class' AS item_type, 
             c.cls_name,
             CONCAT('<b style=\"font-size: 16px\">', c.cls_name, '</b> (', 
-                IF((SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7) >= c.max_students, 
-                    CONCAT('<b style=\"color:red\">', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students),
-                    CONCAT('<b>', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id AND status!=7), '</b>/', c.max_students)
+                IF((SELECT COUNT(id) FROM contracts WHERE class_id = c.id ) >= c.max_students, 
+                    CONCAT('<b style=\"color:red\">', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id ), '</b>/', c.max_students),
+                    CONCAT('<b>', (SELECT COUNT(id) FROM contracts WHERE class_id = c.id ), '</b>/', c.max_students)
                 ), 
                 ' <i class=\"fa-regular fa-calendar mx-1 text-primary\"></i>', c.cls_startdate, 
             ')') AS `text`, 
@@ -105,7 +105,7 @@ class EnrolmentsController extends Controller
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id
                 LEFT JOIN crm_parents AS p ON p.student_id = s.id
-            WHERE c.status!=7 AND c.class_id =$class_id ORDER BY added_at ASC");
+            WHERE c.class_id =$class_id ORDER BY added_at ASC");
         $class_info->num_students = count($students);
         $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 AND class_date >= CURRENT_DATE ORDER BY class_date");
 
