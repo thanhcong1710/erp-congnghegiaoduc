@@ -355,6 +355,27 @@ export default [
     ]
   },
   {
+    header: 'ĐÁNH GIÁ 5 SAO',
+    icon: 'StarIcon',
+    permission: 'Dashboard',
+    items: [
+      {
+        url: '/rate/ratings',
+        name: 'Hệ thống Đánh giá',
+        icon: 'MessageSquareIcon',
+        slug: 'rate-ratings',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/rate/csat-report',
+        name: 'Báo cáo CSAT',
+        icon: 'BarChartIcon',
+        slug: 'rate-csat-report',
+        permission: 'Dashboard',
+      }
+    ]
+  },
+  {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
     permission:'Config',

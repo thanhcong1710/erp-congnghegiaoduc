@@ -129,6 +129,18 @@ const router = new Router({
           component: () => import('./views/hr/Talent.vue'),
           meta: { rule: 'editor', pageTitle: 'Vinh danh Talent' }
         },
+        {
+          path: '/rate/ratings',
+          name: 'rate-ratings',
+          component: () => import('./views/rate/RatingsList.vue'),
+          meta: { rule: 'editor', pageTitle: 'Danh sách Đánh giá' }
+        },
+        {
+          path: '/rate/csat-report',
+          name: 'rate-csat',
+          component: () => import('./views/rate/CSATReport.vue'),
+          meta: { rule: 'editor', pageTitle: 'Báo cáo CSAT' }
+        },
         
         // =============================================================================
         // LAW MAIN PAGE LAYOUTS
