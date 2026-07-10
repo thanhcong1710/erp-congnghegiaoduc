@@ -69,7 +69,17 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC</label>
+              <vue-select
+                    v-if="agreement.is_admin"
+                    label="label"
+                    placeholder="Chọn EC"
+                    :options="html.ec.list"
+                    v-model="html.ec.item"
+                    :searchable="true"
+                    @input="saveEC"
+                ></vue-select>
               <input
+                v-else
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
@@ -507,6 +517,10 @@
             item: '',
             list: []
           },
+          ec: {
+            item: '',
+            list: []
+          },
           classes: {
             item: '',
             list: []
@@ -546,6 +560,9 @@
           group_type: 0,
           group_type_obj: null,
           point_toeic: '',
+          ec_id: '',
+          ec_leader_id: '',
+          is_admin: false,
           class_id: null,
           class_name: '',
           class_start_date: '',
@@ -688,6 +705,10 @@
             this.agreement.group_type_obj = groupOptions.find(o => o.value === this.agreement.group_type)
           }
           
+          if (this.agreement.is_admin) {
+            this.loadECList();
+          }
+
           this.loadTuitionFee(response.data.tuition_fee_id);
           this.loadClassesForEnrolment();
         })
@@ -798,6 +819,36 @@
           this.agreement.group_type = data.value
         }else{
           this.agreement.group_type = 0
+        }
+      },
+      loadECList() {
+        axios.g(`/api/users/get-data/users-manager`)
+          .then(response => {
+            this.html.ec.list = response.data.map(item => ({...item, label: item.name + ' - ' + item.hrm_id}))
+            if (this.agreement.ec_id) {
+              this.html.ec.item = this.html.ec.list.find(e => e.id === this.agreement.ec_id);
+            }
+          })
+      },
+      saveEC(data = null) {
+        if (data && typeof data === 'object') {
+          this.agreement.ec_id = data.id;
+          
+          axios.p('/api/lms/agreements/get-ec-leader', {
+            ec_id: data.id
+          }).then(response => {
+            if (response.data.status == 1 && response.data.data) {
+              this.agreement.ec_leader_id = response.data.data.id;
+              this.agreement.ec_leader_name = response.data.data.name + ' - ' + response.data.data.hrm_id;
+            } else {
+              this.agreement.ec_leader_id = data.id;
+              this.agreement.ec_leader_name = data.name + ' - ' + data.hrm_id;
+            }
+          });
+        } else {
+          this.agreement.ec_id = '';
+          this.agreement.ec_leader_id = '';
+          this.agreement.ec_leader_name = '';
         }
       },
       confirmSave () {

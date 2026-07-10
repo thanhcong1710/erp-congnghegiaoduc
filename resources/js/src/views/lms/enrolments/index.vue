@@ -326,7 +326,7 @@
                   <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in studentSearch" :key="index">
                     <td class="td vs-table--td">
                       <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
-                        <input type="checkbox" v-model="checked_list" :value="item.contract_id" class="vs-checkbox--input">
+                        <input type="checkbox" v-model="checked_list" :value="item.contract_id" class="vs-checkbox--input" :disabled="isStudentCheckboxDisabled(item)">
                         <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
                           <span class="vs-checkbox--check">
                             <i class="vs-icon notranslate icon-scale vs-checkbox--icon  material-icons null">check</i>
@@ -335,7 +335,12 @@
                       </div>
                     </td>
                     <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
+                    <td class="td vs-table--td">
+                      {{item.name}}
+                      <p class="text-danger mt-1 text-sm" v-if="isStudentCheckboxDisabled(item)" style="font-size: 11px;">
+                        <i>* Chỉ được xếp lớp khi có bill từ 2 triệu (hiện tại: {{ (item.tmp_payment_amount || 0) | formatMoney }})</i>
+                      </p>
+                    </td>
                     <td class="td vs-table--td text-center">{{item.lms_code}}</td>
                     <td class="td vs-table--td text-center">{{item.start_date}}</td>
                     <td class="td vs-table--td text-center">
@@ -473,6 +478,7 @@
           is_sale: false,
           is_sale_leader: false,
         },
+        minPaymentForClass: 2000000,
       }
     },
     created() {
@@ -526,6 +532,15 @@
           this.enrol.branch_id = ""
         }
         this.loadClasses();
+      },
+      isStudentCheckboxDisabled(item) {
+        if (this.user_role.is_sale || this.user_role.is_sale_leader) {
+          const totalPaid = Number(item.tmp_payment_amount) || 0;
+          if (totalPaid < this.minPaymentForClass) {
+            return true;
+          }
+        }
+        return false;
       },
       saveProduct(data = null){
         if (data && typeof data === 'object') {

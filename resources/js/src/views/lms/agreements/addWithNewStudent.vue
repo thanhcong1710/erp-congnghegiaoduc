@@ -229,8 +229,11 @@
                     v-model="html.classes.item"
                     :searchable="true"
                     @input="saveClass"
-                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id"
+                    :disabled="!agreement.branch_id || !agreement.tuition_fee_id || payment.amount < minPaymentForClass"
                 ></vue-select>
+                <p class="text-danger mt-1" v-if="payment.amount < minPaymentForClass">
+                  <i>* Chỉ được xếp lớp khi học viên có bill học phí từ 2 triệu trở lên (hiện tại: {{ payment.amount | formatMoney }})</i>
+                </p>
             </div>
             
             <!-- Hiển thị thông tin chi tiết lớp học -->
@@ -604,7 +607,8 @@
           note: ''
         },
         paymentAmountText: '',
-        selectedFiles: []
+        selectedFiles: [],
+        minPaymentForClass: 2000000
       }
     },
     created() {
@@ -646,6 +650,12 @@
           const value = u.fmc(val)
           this.paymentAmountText = value.s
           this.payment.amount = value.n
+        }
+
+        if (this.payment.amount < this.minPaymentForClass && this.agreement.class_id) {
+          this.html.classes.item = ''
+          this.agreement.class_id = ''
+          this.classInfo = null
         }
       }
     },

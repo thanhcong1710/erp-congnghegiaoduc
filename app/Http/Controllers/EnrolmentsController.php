@@ -210,8 +210,9 @@ class EnrolmentsController extends Controller
                 LEFT JOIN students AS s ON s.id=c.student_id 
                 LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id WHERE $cond");
 
-        $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions,
+        $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions, c.agreement_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) as tmp_payment_amount,
                 (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
             FROM contracts AS c 
                 LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id

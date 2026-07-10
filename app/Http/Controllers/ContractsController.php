@@ -816,6 +816,11 @@ class ContractsController extends Controller
         }
         $data->contracts = $dataContracts;
         $data->total_left_amount = $total_left_amount;
+
+        $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+        $data->is_admin = !empty($is_admin) ? true : false;
+
         return response()->json($data);
     }
 
@@ -1000,6 +1005,33 @@ class ContractsController extends Controller
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
                 u::addLogAgreements($agreement_id);
+            }
+
+            // Update EC and EC Leader if provided (only for admin)
+            if ($request->has('ec_id') && $request->ec_id > 0) {
+                $current_user_id = Auth::user()->id;
+                $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+                if ($is_admin) {
+                    $ec_id = (int)$request->ec_id;
+                    $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
+                    if ($ec_info) {
+                        $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['id' => $agreement_id], 'agreements');
+                        
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['agreement_id' => $agreement_id], 'contracts');
+
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
+                    }
+                }
             }
 
             // Xếp lớp ngay khi nhập học (nếu chọn)
