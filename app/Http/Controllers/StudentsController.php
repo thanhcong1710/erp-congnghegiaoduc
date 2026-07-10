@@ -175,7 +175,10 @@ class StudentsController extends Controller
         // Query danh sách học sinh với pagination
         $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, s.avatar_url,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
-                (SELECT name FROM branches WHERE id = s.branch_id) AS branch_name
+                (SELECT name FROM branches WHERE id = s.branch_id) AS branch_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_leader_id) AS ec_leader_name,
+                (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.cm_id) AS cm_name
             FROM students AS s
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id 
             WHERE $cond $order_by $limitation");
@@ -201,16 +204,12 @@ class StudentsController extends Controller
 
             if ($contract) {
                 $list[$k]->class_name = u::first("SELECT cls_name FROM classes WHERE id = " . (int) $contract->class_id)->cls_name ?? '';
-                $list[$k]->ec_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS ec_name FROM users WHERE id = " . (int) $contract->ec_id)->ec_name ?? '';
-                $list[$k]->cm_name = u::first("SELECT CONCAT(name, ' - ', hrm_id) AS cm_name FROM users WHERE id = " . (int) $contract->cm_id)->cm_name ?? '';
                 $list[$k]->done_sessions = $contract->done_sessions;
                 $list[$k]->summary_sessions = $contract->summary_sessions;
                 $list[$k]->type = $contract->type;
                 $list[$k]->status = $contract->status;
             } else {
                 $list[$k]->class_name = '';
-                $list[$k]->ec_name = '';
-                $list[$k]->cm_name = '';
                 $list[$k]->done_sessions = 0;
                 $list[$k]->summary_sessions = 0;
                 $list[$k]->type = 0;
