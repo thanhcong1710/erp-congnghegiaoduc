@@ -123,6 +123,12 @@ const router = new Router({
           component: () => import('./views/hr/Approvals.vue'),
           meta: { rule: 'editor', pageTitle: 'Quy trình phê duyệt' }
         },
+        {
+          path: '/hr/talent',
+          name: 'hr-talent',
+          component: () => import('./views/hr/Talent.vue'),
+          meta: { rule: 'editor', pageTitle: 'Vinh danh Talent' }
+        },
         
         // =============================================================================
         // LAW MAIN PAGE LAYOUTS

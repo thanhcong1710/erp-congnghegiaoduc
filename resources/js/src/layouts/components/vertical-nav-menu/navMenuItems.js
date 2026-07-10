@@ -344,6 +344,13 @@ export default [
         icon: 'CheckSquareIcon',
         slug: 'hr-approvals',
         permission: 'Dashboard',
+      },
+      {
+        url: '/hr/talent',
+        name: 'Vinh danh Talent',
+        icon: 'StarIcon',
+        slug: 'hr-talent',
+        permission: 'Dashboard',
       }
     ]
   },
