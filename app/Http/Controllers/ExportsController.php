@@ -382,7 +382,7 @@ class ExportsController extends Controller
                     LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
                 WHERE $cond 
                 HAVING 1=1 $having
-                $ordered_by";
+                $order_by";
 
         $list = u::query($query);
 
