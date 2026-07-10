@@ -99,7 +99,30 @@ const router = new Router({
           component: () => import('./views/loyalty/Vouchers.vue'),
           meta: { rule: 'editor', pageTitle: 'Danh sách Voucher' }
         },
-       
+        {
+          path: '/hr/profiles',
+          name: 'hr-profiles',
+          component: () => import('./views/hr/Profiles.vue'),
+          meta: { rule: 'editor', pageTitle: 'Quản lý Hồ sơ Nhân sự' }
+        },
+        {
+          path: '/hr/recruitment',
+          name: 'hr-recruitment',
+          component: () => import('./views/hr/Recruitment.vue'),
+          meta: { rule: 'editor', pageTitle: 'Tuyển dụng & Phỏng vấn' }
+        },
+        {
+          path: '/hr/kpi',
+          name: 'hr-kpi',
+          component: () => import('./views/hr/KPI.vue'),
+          meta: { rule: 'editor', pageTitle: 'Đánh giá KPI & OKR' }
+        },
+        {
+          path: '/hr/approvals',
+          name: 'hr-approvals',
+          component: () => import('./views/hr/Approvals.vue'),
+          meta: { rule: 'editor', pageTitle: 'Quy trình phê duyệt' }
+        },
         
         // =============================================================================
         // LAW MAIN PAGE LAYOUTS

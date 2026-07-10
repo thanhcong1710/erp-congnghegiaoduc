@@ -313,6 +313,41 @@ export default [
     ]
   },
   {
+    header: 'HR / NHÂN SỰ',
+    icon: 'UsersIcon',
+    permission: 'Dashboard', 
+    items: [
+      {
+        url: '/hr/profiles',
+        name: 'Quản lý Hồ sơ',
+        icon: 'UserIcon',
+        slug: 'hr-profiles',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/hr/recruitment',
+        name: 'Tuyển dụng',
+        icon: 'BriefcaseIcon',
+        slug: 'hr-recruitment',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/hr/kpi',
+        name: 'Đánh giá KPI',
+        icon: 'TargetIcon',
+        slug: 'hr-kpi',
+        permission: 'Dashboard',
+      },
+      {
+        url: '/hr/approvals',
+        name: 'Quy trình phê duyệt',
+        icon: 'CheckSquareIcon',
+        slug: 'hr-approvals',
+        permission: 'Dashboard',
+      }
+    ]
+  },
+  {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
     permission:'Config',
