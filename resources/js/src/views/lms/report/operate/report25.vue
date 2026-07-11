@@ -86,6 +86,8 @@
               <th style="min-width:200px">Họ và tên</th>
               <th style="min-width:130px">Sđt</th>
               <th style="min-width:180px">Team kinh doanh</th>
+              <th style="min-width:180px">Nhân viên sale</th>
+              <th style="min-width:200px">Lớp học</th>
               <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
               <th style="min-width:140px" class="text-right">Giá khoá học</th>
               <th style="min-width:110px">DK chung</th>
@@ -109,6 +111,8 @@
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone text-muted">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
+              <td>{{ row.ec_name || '—' }}</td>
+              <td>{{ row.class_info || '—' }}</td>
               <td>{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
               <td>{{ row.dk_chung }}</td>
@@ -126,7 +130,7 @@
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="18" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="20" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>

@@ -28,7 +28,7 @@
         </div>
         <div>
           <label class="rpt-label">Từ khóa</label>
-          <vs-input class="w-full" placeholder="Mã HV, tên HV, mã lớp" v-model="searchData.keyword"></vs-input>
+          <vs-input class="w-full" placeholder="Mã HV, tên HV, mã lớp, SĐT" v-model="searchData.keyword"></vs-input>
         </div>
         <div>
           <label class="rpt-label">Ngày phát sách</label>

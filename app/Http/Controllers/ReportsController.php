@@ -2095,6 +2095,12 @@ class ReportsController extends Controller
                     WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
                     ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
                 END AS team_name,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                (SELECT CONCAT(cls.cls_name, IF(ct.enrolment_start_date IS NOT NULL AND ct.enrolment_start_date > '2000-01-01', CONCAT(' (', SUBSTRING(ct.enrolment_start_date, 1, 10), ')'), ''))
+                 FROM contracts ct
+                 LEFT JOIN classes cls ON cls.id = ct.class_id
+                 WHERE ct.agreement_id = a.id AND ct.class_id > 0 AND ct.status > 0
+                 ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
                 a.must_charge,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
@@ -2351,7 +2357,7 @@ class ReportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR cls.cls_name LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR cls.cls_name LIKE '%$keyword%') ";
         }
 
         if ($start_date !== '') {

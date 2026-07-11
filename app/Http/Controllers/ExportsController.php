@@ -2851,6 +2851,12 @@ class ExportsController extends Controller
                     WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
                     ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
                 END AS team_name,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                (SELECT CONCAT(cls.cls_name, IF(ct.enrolment_start_date IS NOT NULL AND ct.enrolment_start_date > '2000-01-01', CONCAT(' (', SUBSTRING(ct.enrolment_start_date, 1, 10), ')'), ''))
+                 FROM contracts ct
+                 LEFT JOIN classes cls ON cls.id = ct.class_id
+                 WHERE ct.agreement_id = a.id AND ct.class_id > 0 AND ct.status > 0
+                 ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
                 a.must_charge,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
@@ -2876,15 +2882,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:S1');
+        $sheet->mergeCells('A1:U1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Up quá trình từ', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Up quá trình từ', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'];
         
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2896,10 +2902,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:S3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:U3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 16, 22, 22, 14, 16, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
+        $widths = [8, 14, 16, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2933,49 +2939,51 @@ class ExportsController extends Controller
             $sheet->setCellValue('F' . $rowIdx, $item->student_name);
             $sheet->setCellValue('G' . $rowIdx, $item->phone);
             $sheet->setCellValue('H' . $rowIdx, $item->team_name ?? '—');
-            $sheet->setCellValue('I' . $rowIdx, $item->address ?? '—');
-            $sheet->setCellValue('J' . $rowIdx, (float)$item->must_charge);
-            $sheet->setCellValue('K' . $rowIdx, $item->dk_chung);
-            $sheet->setCellValue('L' . $rowIdx, $p1_amount);
-            $sheet->setCellValue('M' . $rowIdx, $item->p1_date);
-            $sheet->setCellValue('N' . $rowIdx, $p2_amount);
-            $sheet->setCellValue('O' . $rowIdx, $p2_date);
-            $sheet->setCellValue('P' . $rowIdx, (float)$item->discount);
-            $sheet->setCellValue('Q' . $rowIdx, (float)$item->debt_amount);
-            $sheet->setCellValue('R' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('S' . $rowIdx, (float)$luong_sale);
+            $sheet->setCellValue('I' . $rowIdx, $item->ec_name ?? '—');
+            $sheet->setCellValue('J' . $rowIdx, $item->class_info ?? '—');
+            $sheet->setCellValue('K' . $rowIdx, $item->address ?? '—');
+            $sheet->setCellValue('L' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('M' . $rowIdx, $item->dk_chung);
+            $sheet->setCellValue('N' . $rowIdx, $p1_amount);
+            $sheet->setCellValue('O' . $rowIdx, $item->p1_date);
+            $sheet->setCellValue('P' . $rowIdx, $p2_amount);
+            $sheet->setCellValue('Q' . $rowIdx, $p2_date);
+            $sheet->setCellValue('R' . $rowIdx, (float)$item->discount);
+            $sheet->setCellValue('S' . $rowIdx, (float)$item->debt_amount);
+            $sheet->setCellValue('T' . $rowIdx, $xn_ketoan);
+            $sheet->setCellValue('U' . $rowIdx, (float)$luong_sale);
 
-            $sheet->getStyle("A$rowIdx:S$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:U$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx:D$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("E$rowIdx:I$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("J$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("J$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("K$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("E$rowIdx:K$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("L$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("L$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("M$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("N$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("N$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("O$rowIdx")->applyFromArray($centerAlign);
-            
-            $sheet->getStyle("P$rowIdx:Q$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("P$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("Q$rowIdx")->applyFromArray($centerAlign);
+            
+            $sheet->getStyle("R$rowIdx:S$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("R$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             
             if ((float)$item->debt_amount > 0) {
-                $sheet->getStyle("Q$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+                $sheet->getStyle("S$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
             
-            $sheet->getStyle("R$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
             if ($xn_ketoan === 'R') {
-                $sheet->getStyle("R$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
+                $sheet->getStyle("T$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
             } else {
-                $sheet->getStyle("R$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+                $sheet->getStyle("T$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
             }
             
-            $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("S$rowIdx")->getFont()->setBold(true);
+            $sheet->getStyle("U$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("U$rowIdx")->getFont()->setBold(true);
 
             $rowIdx++;
         }
@@ -3352,7 +3360,7 @@ class ExportsController extends Controller
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
         }
         if (isset($req->keyword) && $req->keyword) {
-            $cond .= " AND (s.lms_code LIKE '%" . $req->keyword . "%' OR s.name LIKE '%" . $req->keyword . "%' OR cls.cls_name LIKE '%" . $req->keyword . "%') ";
+            $cond .= " AND (s.lms_code LIKE '%" . $req->keyword . "%' OR s.name LIKE '%" . $req->keyword . "%' OR s.gud_mobile1 LIKE '%" . $req->keyword . "%' OR cls.cls_name LIKE '%" . $req->keyword . "%') ";
         }
         if (isset($req->product_id) && $req->product_id) {
             $cond .= " AND c.product_id = '" . $req->product_id . "' ";
@@ -3618,4 +3626,79 @@ class ExportsController extends Controller
         }
     }
 
+    public function exportClassStudents($class_id)
+    {
+        $class_id = (int)$class_id;
+        $class_info = u::first("SELECT cls_name FROM classes WHERE id = $class_id");
+        $cls_name = $class_info ? $class_info->cls_name : 'Class';
+
+        $query = "SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code, s.gud_mobile1,
+                c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
+                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status, c.ec_id, c.ec_leader_id,
+                (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT name FROM users WHERE id= c.ec_id) AS ec_name,
+                (SELECT name FROM users WHERE id= c.ec_leader_id) AS team_name,
+                (SELECT created_at FROM log_contracts WHERE contract_id = c.id AND class_id = $class_id ORDER BY id DESC LIMIT 1) AS added_at,
+                (SELECT link_facebook FROM crm_parents WHERE student_id = s.id LIMIT 1) as link_facebook
+            FROM contracts AS c
+            LEFT JOIN students AS s ON s.id=c.student_id
+            WHERE c.class_id=$class_id AND c.status!=7";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        $title = 'DANH SÁCH HỌC SINH LỚP: ' . $cls_name;
+        $sheet->setCellValue('A1', $title);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->mergeCells('A1:M1');
+
+        $headers = [
+            'STT', 'Họ tên', 'Mã HV', 'SĐT', 'Link Facebook', 'Mã hợp đồng', 'Gói học phí', 
+            'Phải đóng', 'Đã đóng', 'Ngày bắt đầu', 'Ngày kết thúc', 'Số buổi đã học', 'Tổng số buổi'
+        ];
+
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . '3', $header);
+            $sheet->getStyle($col . '3')->getFont()->setBold(true);
+            $col++;
+        }
+
+        $rowIdx = 4;
+        foreach ($list as $index => $item) {
+            $sheet->setCellValue('A' . $rowIdx, $index + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item->name);
+            $sheet->setCellValue('C' . $rowIdx, $item->lms_code);
+            $sheet->setCellValueExplicit('D' . $rowIdx, $item->gud_mobile1, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $sheet->setCellValue('E' . $rowIdx, $item->link_facebook);
+            $sheet->setCellValue('F' . $rowIdx, $item->contract_code);
+            $sheet->setCellValue('G' . $rowIdx, $item->tuition_fee_name);
+            $sheet->setCellValue('H' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('I' . $rowIdx, (float)$item->total_charged);
+            $sheet->setCellValue('J' . $rowIdx, $item->enrolment_start_date);
+            $sheet->setCellValue('K' . $rowIdx, $item->enrolment_last_date);
+            $sheet->setCellValue('L' . $rowIdx, $item->done_sessions);
+            $sheet->setCellValue('M' . $rowIdx, $item->summary_sessions);
+            
+            $sheet->getStyle("H$rowIdx:I$rowIdx")->getNumberFormat()->setFormatCode('#,##0');
+            $rowIdx++;
+        }
+
+        foreach (range('A', 'M') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Danh_sach_lop_'.$cls_name.'.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

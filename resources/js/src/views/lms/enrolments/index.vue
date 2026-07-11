@@ -150,6 +150,8 @@
                       <option value="4">DONE</option>
                     </select>
                   </div>
+
+                  <vs-button style="float: right" class="mb-3 ml-2" type="border" color="success"  @click.native="exportClassStudents()"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="primary"  @click.native="copyAllFacebookLinks()"><i class="fa-brands fa-facebook"></i> Copy FB</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="warning"  @click.native="copyAllPhones()"><i class="fa fa-phone"></i> Copy SĐT</vs-button>
                   <vs-button style="float: right" class="mb-3 ml-2" type="border" color="dark"  @click.native="copyAllNames()"><i class="fa fa-user"></i> Copy Tên</vs-button>
@@ -856,6 +858,10 @@
         } else {
           this.fallbackCopy(text)
         }
+      },
+      exportClassStudents() {
+        if (!this.class_info || !this.class_info.class_id) return;
+        window.open(`/api/lms/exports/class-students/${this.class_info.class_id}?token=${localStorage.getItem('accessToken')}`, '_blank');
       },
       copyAllPhones() {
         const phones = this.filteredStudents
