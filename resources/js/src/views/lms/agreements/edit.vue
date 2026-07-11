@@ -180,11 +180,14 @@
                     v-model="html.classes.item"
                     :searchable="true"
                     @input="saveClass"
-                    :disabled="isClassEditDisabled"
+                    :disabled="isClassEditDisabled || isClassSelectDisabled"
                 ></vue-select>
                 <div v-if="isClassEditDisabled" class="mt-1">
                    <small class="text-danger"><i class="fa-solid fa-lock mr-1"></i> Lớp học đã khai giảng nên không thể sửa đổi tại đây.</small>
                 </div>
+                <p class="text-danger mt-1 text-sm" v-if="isClassSelectDisabled" style="font-size: 11px;">
+                  <i>* Chỉ được xếp lớp khi có bill học phí từ 2 triệu trở lên (hiện tại: {{ (agreement.tmp_payment_amount || 0) | formatMoney }})</i>
+                </p>
             </div>
 
             <!-- HIỂN THỊ CHI TIẾT LỚP HỌC -->
@@ -578,6 +581,7 @@
         tmp_tuition_fee_id:'',
         tmp_discount_code_id:'',
         classInfo: null,
+        minPaymentForClass: 2000000,
       }
     },
     async created() {
@@ -664,6 +668,15 @@
         if (!this.agreement.class_id) return false;
         if (!this.agreement.class_start_date) return false;
         return moment(this.agreement.class_start_date).isBefore(moment(), 'day');
+      },
+      isClassSelectDisabled() {
+        if (this.agreement.is_sale_role) {
+          const totalPaid = Number(this.agreement.tmp_payment_amount) || 0;
+          if (totalPaid < this.minPaymentForClass) {
+            return true;
+          }
+        }
+        return false;
       }
     },
 

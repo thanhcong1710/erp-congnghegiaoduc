@@ -4,7 +4,7 @@ namespace App\Enums;
 
 class SystemCode
 {
-    public const ROLE_ADMIN = '99999999';
+    public const ROLE_ADMIN = '999999';
     public const ROLE_CEO_BRANCH = '686868';
     public const ROLE_EC = '68';
     public const ROLE_EC_LEADER = '69';

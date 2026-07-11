@@ -821,6 +821,12 @@ class ContractsController extends Controller
         $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
         $data->is_admin = !empty($is_admin) ? true : false;
 
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id IN (" . SystemCode::ROLE_EC . ", " . SystemCode::ROLE_EC_LEADER . ")");
+        $data->is_sale_role = !empty($is_sale) ? true : false;
+
+        $tmp_payment = u::first("SELECT SUM(charge_amount) as tmp_payment_amount FROM tmp_payments WHERE agreement_id = $agreement_id AND status IN (0, 1)");
+        $data->tmp_payment_amount = $tmp_payment ? (int) $tmp_payment->tmp_payment_amount : 0;
+
         return response()->json($data);
     }
 
