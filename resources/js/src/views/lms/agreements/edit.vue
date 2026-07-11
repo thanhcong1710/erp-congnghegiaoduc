@@ -837,7 +837,7 @@
       loadECList() {
         axios.g(`/api/users/get-data/users-manager`)
           .then(response => {
-            this.html.ec.list = response.data.map(item => ({...item, label: item.name + ' - ' + item.hrm_id}))
+            this.html.ec.list = response.data.map(item => ({...item, label: item.label_name}))
             if (this.agreement.ec_id) {
               this.html.ec.item = this.html.ec.list.find(e => e.id === this.agreement.ec_id);
             }
@@ -855,7 +855,7 @@
               this.agreement.ec_leader_name = response.data.data.name + ' - ' + response.data.data.hrm_id;
             } else {
               this.agreement.ec_leader_id = data.id;
-              this.agreement.ec_leader_name = data.name + ' - ' + data.hrm_id;
+              this.agreement.ec_leader_name = data.label_name;
             }
           });
         } else {
