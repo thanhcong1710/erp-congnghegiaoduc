@@ -8,608 +8,506 @@
 ========================================================================================== -->
 
 <template>
-  <div id="dashboard-analytics">
-    <div class="vx-row">
-      <div class="vx-col w-full mb-base">
-        <vx-card slot="no-body" class="text-center bg-primary-gradient greet-user">
-                    <img src="@assets/images/elements/decore-left.png" class="decore-left" alt="Decore Left" width="200" >
-                    <img src="@assets/images/elements/decore-right.png" class="decore-right" alt="Decore Right" width="175">
-          <feather-icon icon="AwardIcon" class="p-6 mb-8 bg-primary inline-flex rounded-full text-white shadow" svgClasses="h-8 w-8"></feather-icon>
-          <h1 class="mb-6 text-white">Xin chào {{ $store.state.AppActiveUser.displayName }},</h1>
-          <p class="xl:w-3/4 lg:w-4/5 md:w-2/3 w-4/5 mx-auto text-white" v-html="textGreeting"></p>
-        </vx-card>
+  <div id="dashboard-analytics" class="p-4 dashboard-crm">
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <h2 class="text-3xl font-extrabold mb-2 text-primary">Master Dashboard Analytics</h2>
+        <p class="text-gray-500 text-lg">Hệ thống báo cáo toàn diện (Tất cả chỉ số cho mọi vai trò)</p>
       </div>
-      <div class="vx-col w-full mb-4 dash-select-branch">
-        <vx-input-group class="mb-base mr-3">
-            <multiselect
-              name="search_branch"
-              placeholder="Chọn trung tâm để hiển thị dữ liệu"
-              v-model="searchData.arr_branch"
-              :options="branch_list"
-              label="name"
-              :close-on-select="false"
-              :hide-selected="true"
-              :multiple="true"
-              :searchable="true"
-              track-by="id"
-              selectedLabel="" selectLabel="" deselectLabel=""
-              class="vs-inputx vs-input--input"
-            >
-              <span slot="noResult">Không tìm thấy dữ liệu</span>
-            </multiselect>
-
-            <template slot="append">
-              <div class="append-text btn-addon">
-                <vs-button class="whitespace-no-wrap" @click="loadData">Tìm kiếm</vs-button>
-              </div>
-            </template>
-          </vx-input-group>
-      </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_01')">
-        <div class="vx-card overflow-hidden">
-          <div class="vx-card__collapsible-content vs-con-loading__container">
-              <div>
-                  <div class="p-6">
-                      <span
-                          class="p-3 inline-flex rounded-full feather-icon select-none relative text-primary mb-4"
-                          style="background: rgba(var(--vs-primary),.15);">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                              stroke-linecap="round" stroke-linejoin="round"
-                              class="feather feather-dollar-sign ">
-                              <line x1="12" y1="1" x2="12" y2="23"></line>
-                              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                          </svg>
-                      </span>
-                      <div class="truncate">
-                          <h2 class="mb-1 font-bold">{{totalRevenueWeek.analyticsData.data}}</h2>
-                          <span>Doanh số tuần (triệu đồng)</span>
-                      </div>
-                  </div>
-              </div> 
-          </div>
-        </div>
-      </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_02')">
-        <div class="vx-card overflow-hidden">
-          <div class="vx-card__collapsible-content vs-con-loading__container">
-              <div>
-                  <div class="p-6">
-                      <span
-                          class="p-3 inline-flex rounded-full feather-icon select-none relative text-warning mb-4"
-                          style="background: rgba(var(--vs-warning),.15);">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                              stroke-linecap="round" stroke-linejoin="round"
-                              class="feather feather-dollar-sign ">
-                              <line x1="12" y1="1" x2="12" y2="23"></line>
-                              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                          </svg>
-                      </span>
-                      <div class="truncate">
-                          <h2 class="mb-1 font-bold">{{totalRevenueMonth.analyticsData.data}}</h2>
-                          <span>Doanh số tháng (triệu đồng)</span>
-                      </div>
-                  </div>
-              </div> 
-          </div>
-        </div>
-      </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_03')">
-        <div class="vx-card overflow-hidden">
-          <div class="vx-card__collapsible-content vs-con-loading__container">
-              <div>
-                  <div class="p-6">
-                    <span class="p-3 inline-flex rounded-full feather-icon select-none relative text-primary mb-4"
-                        style="background: rgba(var(--vs-primary),.15);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="feather feather-users ">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </span>
-                      <div class="truncate">
-                          <h2 class="mb-1 font-bold">{{numDashStudent.analyticsData.data | formatNumber}}</h2>
-                          <span>Học viên đang học</span>
-                      </div>
-                  </div>
-              </div> 
-          </div>
-        </div>
-      </div>
-      <div class="vx-col w-1/2 sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base" v-if="checkPermission('dashboard_04')">
-        <div class="vx-card overflow-hidden">
-          <div class="vx-card__collapsible-content vs-con-loading__container">
-              <div>
-                  <div class="p-6">
-                    <span class="p-3 inline-flex rounded-full feather-icon select-none relative text-success mb-4"
-                        style="background: rgba(var(--vs-success),.15);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="feather feather-file ">
-                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                            <polyline points="13 2 13 9 20 9"></polyline>
-                        </svg>
-                    </span>
-                      <div class="truncate">
-                          <h2 class="mb-1 font-bold">{{numDashClass.analyticsData.data | formatNumber}}</h2>
-                          <span>Tổng số lớp</span>
-                      </div>
-                  </div>
-              </div> 
-          </div>
-        </div>
-      </div>
-      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_05')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Trạng thái học viên</h5>
-          <vue-apex-charts type="pie"  :options="pieChartStudent.chartOptions" :series="pieChartStudent.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/3 mb-base"  v-if="checkPermission('dashboard_07')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Trạng thái đóng phí</h5>
-          <vue-apex-charts type="pie"  :options="pieChartFee.chartOptions" :series="pieChartFee.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full md:w-1/3 mb-base" v-if="checkPermission('dashboard_06')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Đăng ký khóa học</h5>
-          <vue-apex-charts type="pie"  :options="pieChartProduct.chartOptions" :series="pieChartProduct.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_08')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Doanh thu theo trung tâm</h5>
-          <vue-apex-charts type="line" height="480" :options="lineChartRevenue.chartOptions" :series="lineChartRevenue.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_09')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Doanh thu RENEW theo trung tâm</h5>
-          <vue-apex-charts type="line" height="480" :options="lineChartRevenueRenew.chartOptions" :series="lineChartRevenueRenew.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_10')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Tỷ lệ RENEW theo trung tâm</h5>
-          <vue-apex-charts type="line" height="480" :options="lineChartRenew.chartOptions" :series="lineChartRenew.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_11')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Doanh thu theo EC</h5>
-          <vue-apex-charts type="line" height="480" :options="lineChartRevenueEC.chartOptions" :series="lineChartRevenueEC.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_12')">
-        <vx-card class="text">
-          <h5 class="mb-4 text-center">Học sinh Renew theo CM</h5>
-          <vue-apex-charts type="bar" :options="lineChartRenewCM.chartOptions" :series="lineChartRenewCM.series"></vue-apex-charts>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_13')">
-        <vx-card>
-          <h5 class="text-center mb-3">Danh sách học sinh học thử</h5>
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      
-                      <th colspan="1" rowspan="1" class="text-center">#</th>
-                      <th colspan="1" rowspan="1" >Họ tên</th>
-                      <th colspan="1" rowspan="1" >Số điện thoại</th>
-                      <th colspan="1" rowspan="1" >Lớp đang học</th>
-                      <th colspan="1" rowspan="1" >Số buổi học thử còn lại</th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in dataStudentTrial" :key="index">
-                    <td class="td vs-table--td text-center">{{ index + 1 }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.gud_mobile1}}</td>
-                    <td class="td vs-table--td">{{item.cls_name}}</td>
-                    <td class="td vs-table--td">{{item.left_sessions}}</td>
-                  </tr>
-                </table>
-                
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_14')">
-        <vx-card>
-          <h5 class="text-center mb-3">Danh sách học sinh đã cọc</h5>
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      
-                      <th colspan="1" rowspan="1" class="text-center">#</th>
-                      <th colspan="1" rowspan="1" >Họ tên</th>
-                      <th colspan="1" rowspan="1" >Số điện thoại</th>
-                      <th colspan="1" rowspan="1" >Gói học phí</th>
-                      <th colspan="1" rowspan="1" >Số tiền</th>
-                      <th colspan="1" rowspan="1" >Đã thanh toán</th>
-                      <th colspan="1" rowspan="1" >Cần nộp</th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in dataStudentDeposit" :key="index">
-                    <td class="td vs-table--td text-center">{{ index + 1 }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.gud_mobile1}}</td>
-                    <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
-                    <td class="td vs-table--td">{{item.must_charge | formatNumber}}</td>
-                    <td class="td vs-table--td">{{item.init_total_charged | formatNumber}}</td>
-                    <td class="td vs-table--td">{{item.debt_amount | formatNumber}}</td>
-                  </tr>
-                </table>
-                
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_15')">
-        <vx-card>
-          <h5 class="text-center mb-3">Danh sách học sinh Pending</h5>
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      
-                      <th colspan="1" rowspan="1" class="text-center">#</th>
-                      <th colspan="1" rowspan="1" >Họ tên</th>
-                      <th colspan="1" rowspan="1" >Mã LMS</th>
-                      <th colspan="1" rowspan="1" >Số điện thoại</th>
-                      <th colspan="1" rowspan="1" >Trình độ</th>
-                      <th colspan="1" rowspan="1" >Ngày dự kiến học</th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in dataStudentPending" :key="index">
-                    <td class="td vs-table--td text-center">{{ index + 1 }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.lms_id}}</td>
-                    <td class="td vs-table--td">{{item.gud_mobile1}}</td>
-                    <td class="td vs-table--td">{{item.product_name}}</td>
-                    <td class="td vs-table--td">{{item.start_date}}</td>
-                  </tr>
-                </table>
-                
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-      <div class="vx-col w-full mb-base" v-if="checkPermission('dashboard_16')">
-        <vx-card>
-          <h5 class="text-center mb-3">Danh sách học sinh hết phí chưa withdraw</h5>
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody ">
-                <table class="vs-table vs-table--tbody-table">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      
-                      <th colspan="1" rowspan="1" class="text-center">#</th>
-                      <th colspan="1" rowspan="1" >Họ tên</th>
-                      <th colspan="1" rowspan="1" >Mã LMS</th>
-                      <th colspan="1" rowspan="1" >Lớp đang học</th>
-                      <th colspan="1" rowspan="1" >Ngày hết phí</th>
-                    </tr>
-                  </thead>
-                  <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in dataStudentWithdraw" :key="index">
-                    <td class="td vs-table--td text-center">{{ index + 1 }}</td>
-                    <td class="td vs-table--td">{{item.name}}</td>
-                    <td class="td vs-table--td">{{item.lms_id}}</td>
-                    <td class="td vs-table--td">{{item.cls_name}}</td>
-                    <td class="td vs-table--td">{{item.enrolment_last_date}}</td>
-                  </tr>
-                </table>
-                
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <!-- Revenue Table Section - Dashboard 17 -->
-      <div class="vx-col w-full mb-base">
-        <vx-card>
-          <h4 class="mb-4">1. DOANH SỐ THEO TRUNG TÂM</h4>
-          
-          <!-- Revenue Table -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table" style="width: 100%">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th class="text-center" style="width: 60px">STT</th>
-                      <th>Trung tâm</th>
-                      <th class="text-right">Doanh số ngày</th>
-                      <th class="text-right">Doanh số 3 ngày gần nhất</th>
-                      <th class="text-right">Doanh số tháng</th>
-                      <th class="text-right">Doanh số 3 tháng gần nhất</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr 
-                      v-for="(item, index) in revenueTableData" 
-                      :key="index"
-                      class="tr-values vs-table--tr"
-                    >
-                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
-                      <td class="td vs-table--td">
-                        <strong>{{ item.branch_name }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <span class="revenue-amount">{{ item.revenue_today | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <span class="revenue-amount">{{ item.revenue_3days | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <span class="revenue-amount highlight-month">{{ item.revenue_month | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <span class="revenue-amount highlight-3months">{{ item.revenue_3months | formatNumber }}</span>
-                      </td>
-                    </tr>
-                    <!-- Total Row - Only show when more than 1 branch -->
-                    <tr v-if="revenueTableData.length > 1" class="tr-values vs-table--tr total-row">
-                      <td class="td vs-table--td text-center" colspan="2">
-                        <strong>TỔNG CỘNG</strong>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <strong class="revenue-amount">{{ totalRevenueTable.today | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <strong class="revenue-amount">{{ totalRevenueTable.days3 | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <strong class="revenue-amount highlight-month">{{ totalRevenueTable.month | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-right">
-                        <strong class="revenue-amount highlight-3months">{{ totalRevenueTable.months3 | formatNumber }}</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <!-- Operations Dashboard Section - Dashboard 18 -->
-      <div class="vx-col w-full mb-base">
-        <vx-card>
-          <h4 class="mb-4">2. VẬN HÀNH</h4>
-          
-          <!-- Operations Table -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table" style="width: 100%">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th class="text-center" style="width: 60px">STT</th>
-                      <th>Trung tâm</th>
-                      <th class="text-center">Số học sinh Check in mới</th>
-                      <th class="text-center">Số học sinh đăng ký mới</th>
-                      <th class="text-center">Số học sinh hết phí trong tháng</th>
-                      <th class="text-center">Tổng số hs active</th>
-                      <th class="text-center">Tổng số lớp</th>
-                      <th class="text-center">Tỉ lệ ACS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr 
-                      v-for="(item, index) in operationsTableData" 
-                      :key="index"
-                      class="tr-values vs-table--tr"
-                    >
-                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
-                      <td class="td vs-table--td">
-                        <strong>{{ item.branch_name }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number">{{ item.checkin_students | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number">{{ item.registered_students | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number highlight-warning">{{ item.expired_students | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number highlight-success">{{ item.active_students | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number">{{ item.total_classes | formatNumber }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="ops-number highlight-primary">{{ item.acs_ratio }}</span>
-                      </td>
-                    </tr>
-                    <!-- Total Row - Only show when more than 1 branch -->
-                    <tr v-if="operationsTableData.length > 1" class="tr-values vs-table--tr total-row">
-                      <td class="td vs-table--td text-center" colspan="2">
-                        <strong>TỔNG CỘNG</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number">{{ totalOperations.checkin | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number">{{ totalOperations.registered | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number highlight-warning">{{ totalOperations.expired | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number highlight-success">{{ totalOperations.active | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number">{{ totalOperations.classes | formatNumber }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="ops-number highlight-primary">{{ totalOperations.acsRatio }}</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <!-- Student Re-enrollment Section - Dashboard 19 -->
-      <div class="vx-col w-full mb-base">
-        <vx-card>
-          <h4 class="mb-4">
-            3. SỐ LƯỢNG HỌC SINH CHƯA TÁI PHÍ
-          </h4>
-          
-          <!-- Re-enrollment Table -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table" style="width: 100%">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th class="text-center" style="width: 60px">STT</th>
-                      <th>Trung tâm</th>
-                      <th class="text-center">Số học sinh hết phí trong tháng hiện tại (T)</th>
-                      <th class="text-center">Số học sinh hết phí trong tháng T+1</th>
-                      <th class="text-center">Số học sinh hết phí trong tháng T+2</th>
-                      <th class="text-center">Số học sinh hết phí trong tháng T+3</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr 
-                      v-for="(item, index) in reenrollmentTableData" 
-                      :key="index"
-                      class="tr-values vs-table--tr"
-                    >
-                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
-                      <td class="td vs-table--td">
-                        <strong>{{ item.branch_name }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="renew-ratio">{{ item.ratio_t }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="renew-ratio">{{ item.ratio_t1 }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="renew-ratio">{{ item.ratio_t2 }}</span>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <span class="renew-ratio">{{ item.ratio_t3 }}</span>
-                      </td>
-                    </tr>
-                    <!-- Total Row - Only show when more than 1 branch -->
-                    <tr v-if="reenrollmentTableData.length > 1" class="tr-values vs-table--tr total-row">
-                      <td class="td vs-table--td text-center" colspan="2">
-                        <strong>TỔNG CỘNG</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t1 }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t2 }}</strong>
-                      </td>
-                      <td class="td vs-table--td text-center">
-                        <strong class="renew-ratio">{{ totalReenrollment.ratio_t3 }}</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </vx-card>
-      </div>
-
-      <!-- Student Expired Details Section - Dashboard 20 -->
-      <div class="vx-col w-full mb-base">
-        <vx-card>
-          <h4 class="mb-4">
-            4. CHI TIẾT HỌC SINH HẾT PHÍ TRONG THÁNG HIỆN TẠI
-          </h4>
-          
-          <!-- Expired Students Table -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
-            <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table" style="width: 100%">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th class="text-center" style="width: 60px">STT</th>
-                      <th>Trung tâm</th>
-                      <th>Tên học sinh</th>
-                      <th>Mã học sinh</th>
-                      <th>Lớp học hiện tại</th>
-                      <th>Ngày hết phí</th>
-                      <th>Tình trạng</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr 
-                      v-for="(item, index) in expiredStudentsData" 
-                      :key="index"
-                      class="tr-values vs-table--tr"
-                    >
-                      <td class="td vs-table--td text-center">{{ item.stt }}</td>
-                      <td class="td vs-table--td">
-                        <strong>{{ item.branch_name }}</strong>
-                      </td>
-                      <td class="td vs-table--td">{{ item.student_name }}</td>
-                      <td class="td vs-table--td">{{ item.lms_code || item.lms_id }}</td>
-                      <td class="td vs-table--td">{{ item.class_name }}</td>
-                      <td class="td vs-table--td">{{ item.enrolment_last_date }}</td>
-                      <td class="td vs-table--td">
-                        <span 
-                          :class="{
-                            'status-withdraw': item.status === 'Đã Withdraw',
-                            'status-processing': item.status === 'Đang xử lý',
-                            'status-renewed': item.status === 'Đã tái phí',
-                            'status-upcoming': item.status === 'Sắp hết phí'
-                          }"
-                        >
-                          {{ item.status }}
-                        </span>
-                      </td>
-                    </tr>
-                    <tr v-if="expiredStudentsData.length === 0" class="tr-values vs-table--tr">
-                      <td class="td vs-table--td text-center" colspan="7">
-                        <em>Không có dữ liệu</em>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </vx-card>
+      <div class="w-1/3">
       </div>
     </div>
+
+    <!-- TABS CHO CÁC ROLE -->
+    <vs-tabs v-model="activeTab" position="top" class="dashboard-tabs" alignment="fixed">
+      
+      <!-- ============================================== -->
+      <!-- ADMIN / BAN GIÁM ĐỐC -->
+      <!-- ============================================== -->
+      <vs-tab label="Ban Giám Đốc (Toàn cảnh)" icon="globe">
+        <div class="pt-6">
+          <h3 class="mb-4 text-primary font-bold"><feather-icon icon="TrendingUpIcon" class="mr-2"/> Chỉ Số Tài Chính & Tăng Trưởng (Macro)</h3>
+          <!-- KPI Row 1: 6 Cards -->
+          <div class="vx-row mb-base">
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Doanh Thu MTD')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Doanh Thu (MTD)</p>
+                <h2 class="text-2xl font-bold text-primary">4.52 Tỷ</h2>
+                <span class="text-success text-xs">▲ 15%</span>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Lợi Nhuận Gộp')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Lợi Nhuận Gộp</p>
+                <h2 class="text-2xl font-bold text-success">38%</h2>
+                <span class="text-success text-xs">▲ 2%</span>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Học Viên Active')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Học Viên Active</p>
+                <h2 class="text-2xl font-bold text-warning">12,500</h2>
+                <span class="text-success text-xs">▲ 450 HS</span>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Renew Rate')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Renew Rate</p>
+                <h2 class="text-2xl font-bold text-primary">78.5%</h2>
+                <span class="text-danger text-xs">▼ 1.2%</span>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('ARPS')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">ARPS (Tr/HS)</p>
+                <h2 class="text-2xl font-bold text-dark">3.2 Tr</h2>
+                <span class="text-success text-xs">▲ 0.1 Tr</span>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('CAC')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">CAC (Chi phí/HS)</p>
+                <h2 class="text-2xl font-bold text-danger">850k</h2>
+                <span class="text-success text-xs">▼ Giảm 5%</span>
+              </vx-card>
+            </div>
+          </div>
+
+          <!-- Charts Row 2: Finance & Demographics -->
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Phễu Chuyển Đổi Tổng & LTV" class="h-full">
+                <vue-apex-charts type="bar" height="280" :options="adminFunnelOptions" :series="adminFunnelSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/4 mb-base">
+              <vx-card title="Churn Rate (Rời bỏ)" class="h-full text-center">
+                <vue-apex-charts type="radialBar" height="280" :options="adminChurnOptions" :series="adminChurnSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/4 mb-base">
+              <vx-card title="Doanh Thu Theo SP" class="h-full">
+                <vue-apex-charts type="donut" height="280" :options="adminProductOptions" :series="adminProductSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+          <!-- Charts Row 3: Leaderboards & Operations -->
+          <h3 class="mb-4 text-primary font-bold mt-8"><feather-icon icon="BarChartIcon" class="mr-2"/> Xếp Hạng & Vận Hành Hệ Thống</h3>
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Bảng Xếp Hạng TT (Doanh thu & Lấp đầy)" class="h-full">
+                <vue-apex-charts type="bar" height="300" :options="adminLeaderboardOptions" :series="adminLeaderboardSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Dòng Tiền & Công Nợ & Quỹ Lương" class="h-full">
+                <vue-apex-charts type="line" height="300" :options="adminCashflowOptions" :series="adminCashflowSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+                    <!-- Row 4: Lists -->
+          <div class="vx-row">
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Tỉ Lệ Nhân Sự Giảng Dạy" class="h-full">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold flex items-center"><feather-icon icon="UserIcon" class="text-primary mr-2"/> GV Nước Ngoài:</span>
+                    <span class="font-bold text-primary">45 <span class="text-sm font-normal text-gray-500">(30%)</span></span>
+                </div>
+                <vs-progress :percent="30" color="primary"></vs-progress>
+                <div class="flex justify-between text-xs text-gray-500 mt-1 mb-6">
+                    <span>Phụ trách: 120 Lớp</span>
+                    <span>Lương TB: 450k/h</span>
+                </div>
+
+                <div class="flex justify-between items-center mb-2 mt-4">
+                    <span class="font-bold flex items-center"><feather-icon icon="UserCheckIcon" class="text-success mr-2"/> GV Việt Nam:</span> 
+                    <span class="font-bold text-success">105 <span class="text-sm font-normal text-gray-500">(70%)</span></span>
+                </div>
+                <vs-progress :percent="70" color="success"></vs-progress>
+                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Phụ trách: 350 Lớp</span>
+                    <span>Lương TB: 150k/h</span>
+                </div>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-2/3 mb-base">
+              <vx-card title="Cảnh Báo & Vấn Đề Chờ Xử Lý" class="h-full">
+                <vs-table :data="[{id: 1, issue: 'Phụ huynh khiếu nại chất lượng lớp PT19, đòi hoàn phí', branch: 'Cầu Giấy', status: 'Đang xử lý', time: '2 giờ trước', pic: 'Nguyễn Văn A'}, {id: 2, issue: 'Chưa thanh toán mặt bằng tháng 7', branch: 'Hà Đông', status: 'Khẩn cấp', time: '1 ngày trước', pic: 'Trần Thị B'}]">
+                  <template slot="thead">
+                    <vs-th>Sự cố / Vấn đề</vs-th>
+                    <vs-th>Cơ sở</vs-th>
+                    <vs-th>Phụ trách</vs-th>
+                    <vs-th>Mức độ</vs-th>
+                    <vs-th>Thao tác</vs-th>
+                  </template>
+                  <template slot-scope="{data}">
+                    <vs-tr :key="indextr" v-for="(tr, indextr) in data">
+                      <vs-td>
+                        <p class="font-semibold text-dark truncate w-48" :title="data[indextr].issue">{{ data[indextr].issue }}</p>
+                        <span class="text-xs text-gray-500">{{ data[indextr].time }}</span>
+                      </vs-td>
+                      <vs-td>{{ data[indextr].branch }}</vs-td>
+                      <vs-td>{{ data[indextr].pic }}</vs-td>
+                      <vs-td><vs-chip transparent :color="data[indextr].status === 'Khẩn cấp' ? 'danger' : 'warning'">{{ data[indextr].status }}</vs-chip></vs-td>
+                      <vs-td><feather-icon icon="ArrowRightCircleIcon" class="cursor-pointer text-primary" /></vs-td>
+                    </vs-tr>
+                  </template>
+                </vs-table>
+              </vx-card>
+            </div>
+          </div>
+        </div>
+      </vs-tab>
+
+      <!-- ============================================== -->
+      <!-- GIÁM ĐỐC TRUNG TÂM -->
+      <!-- ============================================== -->
+      <vs-tab label="GĐ Trung Tâm (BM)" icon="store">
+        <div class="pt-6">
+          <h3 class="mb-4 text-primary font-bold"><feather-icon icon="TargetIcon" class="mr-2"/> Chỉ Tiêu Chi Nhánh</h3>
+          
+          <div class="vx-row mb-base">
+            <!-- 6 KPI Cards -->
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg bg-primary-gradient text-white" @click="goToReport('DT vs Chỉ Tiêu')">
+                <p class="text-white text-sm font-semibold mb-1 opacity-75">DT vs Chỉ Tiêu</p>
+                <h2 class="text-2xl font-bold text-white">85%</h2>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Lượt Walk-in')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Lượt Walk-in</p>
+                <h2 class="text-2xl font-bold text-success">320</h2>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('HS Active')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">HS Active</p>
+                <h2 class="text-2xl font-bold text-primary">850</h2>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Occupancy')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Occupancy</p>
+                <h2 class="text-2xl font-bold text-warning">88%</h2>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('HS Đã Renew')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">HS Đã Renew</p>
+                <h2 class="text-2xl font-bold text-success">145</h2>
+              </vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/3 lg:w-1/6 mb-4">
+              <vx-card class="h-full dash-kpi-card text-center cursor-pointer hover:shadow-lg" @click="goToReport('Điểm NPS')">
+                <p class="text-gray-500 text-sm font-semibold mb-1">Điểm NPS</p>
+                <h2 class="text-2xl font-bold text-dark">9.2/10</h2>
+              </vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Phễu Chuyển Đổi Nhánh (Checkin -> Full)" class="h-full">
+                <vue-apex-charts type="bar" height="280" :options="bmFunnelOptions" :series="bmFunnelSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Phân bổ Học viên / Số lớp" class="h-full">
+                <vue-apex-charts type="pie" height="280" :options="bmClassOptions" :series="bmClassSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Xếp Hạng KPI Sale" class="h-full">
+                <div class="mt-4 overflow-y-auto pr-2" style="max-height: 320px;">
+                  <div v-for="i in 10" :key="'sale-'+i" class="mb-5 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <vs-avatar :color="i === 1 ? 'success' : (i === 2 ? 'primary' : (i === 3 ? 'warning' : 'dark'))" :text="'S' + i" class="mr-3 shadow-md" />
+                        <div>
+                            <p class="font-bold text-sm">{{i}}. Nhân viên Sale {{i}}</p>
+                            <p class="text-xs text-gray-500" v-if="i === 1">Top 1 Doanh Thu</p>
+                            <p class="text-xs text-gray-500" v-else-if="i === 2">Kỷ lục Walk-in</p>
+                            <p class="text-xs text-gray-500" v-else-if="i === 3">Best Telesale</p>
+                            <p class="text-xs text-gray-500" v-else>Đang nỗ lực bứt phá</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-lg" :class="i === 1 ? 'text-success' : (i === 2 ? 'text-primary' : (i === 3 ? 'text-warning' : 'text-dark'))">{{ 90 - (i-1)*4 }}%</span>
+                        <vs-progress :percent="90 - (i-1)*4" :color="i === 1 ? 'success' : (i === 2 ? 'primary' : (i === 3 ? 'warning' : 'dark'))" class="mt-1" height="6"></vs-progress>
+                    </div>
+                  </div>
+                </div>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Xếp Hạng Tái Phí CM" class="h-full">
+                <div class="mt-4 overflow-y-auto pr-2" style="max-height: 320px;">
+                  <div v-for="i in 10" :key="'cm-'+i" class="mb-5 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <vs-avatar :color="i === 1 ? 'success' : (i === 2 ? 'primary' : (i === 3 ? 'warning' : 'dark'))" :icon="i === 1 ? 'icon-star' : (i === 2 ? 'icon-user-check' : 'icon-heart')" icon-pack="feather" class="mr-3 shadow-md" />
+                        <div>
+                            <p class="font-bold text-sm">{{i}}. Chăm sóc KH {{i}}</p>
+                            <p class="text-xs text-gray-500" v-if="i === 1">Chăm sóc chuẩn</p>
+                            <p class="text-xs text-gray-500" v-else-if="i === 2">Phản hồi nhanh</p>
+                            <p class="text-xs text-gray-500" v-else-if="i === 3">Tái phí ổn định</p>
+                            <p class="text-xs text-gray-500" v-else>Cần cố gắng thêm</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-lg" :class="i === 1 ? 'text-success' : (i === 2 ? 'text-primary' : (i === 3 ? 'text-warning' : 'text-dark'))">{{ 85 - (i-1)*3 }}%</span>
+                        <vs-progress :percent="85 - (i-1)*3" :color="i === 1 ? 'success' : (i === 2 ? 'primary' : (i === 3 ? 'warning' : 'dark'))" class="mt-1" height="6"></vs-progress>
+                    </div>
+                  </div>
+                </div>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Khung Giờ & Chuyên Cần" class="h-full">
+                <vue-apex-charts type="radar" height="350" :options="bmRadarOptions" :series="bmRadarSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row">
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card class="text-white overflow-hidden relative shadow-lg" style="background: linear-gradient(118deg, #ea5455, rgba(234, 84, 85, 0.7));">
+                <feather-icon icon="DollarSignIcon" class="absolute right-0 bottom-0 text-white opacity-25" size="120" style="right: -20px; bottom: -20px;" />
+                <h3 class="text-white mb-2 font-bold flex items-center"><feather-icon icon="AlertTriangleIcon" class="mr-2"/> Cảnh Báo Công Nợ</h3>
+                <h2 class="text-4xl font-extrabold text-white mt-4">120 Tr</h2>
+                <p class="mt-2 font-semibold">Cần thu hồi ngay trong tuần này.</p>
+                <vs-button color="white" text-color="#ea5455" class="mt-4 w-full font-bold">Xem Danh Sách Nợ</vs-button>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+               <vx-card class="text-white overflow-hidden relative shadow-lg" style="background: linear-gradient(118deg, #ff9f43, rgba(255, 159, 67, 0.7));">
+                <feather-icon icon="ClockIcon" class="absolute right-0 bottom-0 text-white opacity-25" size="120" style="right: -20px; bottom: -20px;" />
+                <h3 class="text-white mb-2 font-bold flex items-center"><feather-icon icon="BellIcon" class="mr-2"/> HS Sắp Hết Phí</h3>
+                <h2 class="text-4xl font-extrabold text-white mt-4">45 HS</h2>
+                <p class="mt-2 font-semibold">Học sinh còn dưới 5 buổi.</p>
+                <vs-button color="white" text-color="#ff9f43" class="mt-4 w-full font-bold">Gửi Tin Nhắn Loạt</vs-button>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+               <vx-card class="text-white overflow-hidden relative shadow-lg" style="background: linear-gradient(118deg, #28c76f, rgba(40, 199, 111, 0.7));">
+                <feather-icon icon="UsersIcon" class="absolute right-0 bottom-0 text-white opacity-25" size="120" style="right: -20px; bottom: -20px;" />
+                <h3 class="text-white mb-2 font-bold flex items-center"><feather-icon icon="RefreshCwIcon" class="mr-2"/> Chuyển/Hủy Lớp</h3>
+                <h2 class="text-4xl font-extrabold text-white mt-4">12 / 2</h2>
+                <p class="mt-2 font-semibold">HS chuyển lớp / Hủy lớp tháng này.</p>
+                <vs-button color="white" text-color="#28c76f" class="mt-4 w-full font-bold">Duyệt Yêu Cầu</vs-button>
+              </vx-card>
+            </div>
+          </div>
+        </div>
+      </vs-tab>
+
+      <!-- ============================================== -->
+      <!-- SALE & TUYỂN SINH -->
+      <!-- ============================================== -->
+      <vs-tab label="Sale & Tư Vấn (EC)" icon="shopping_cart">
+        <div class="pt-6">
+          <h3 class="mb-4 text-primary font-bold"><feather-icon icon="CrosshairIcon" class="mr-2"/> Mục Tiêu & Hành Động Hằng Ngày</h3>
+          
+          <div class="vx-row mb-base">
+            <!-- KPIs -->
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4">
+               <vx-card class="text-center h-full"><h2 class="text-primary font-bold text-3xl">65%</h2><p>Tiến độ KPI (Goal)</p></vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4">
+               <vx-card class="text-center h-full"><h2 class="text-success font-bold text-3xl">15</h2><p>New Leads Hôm nay</p></vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4">
+               <vx-card class="text-center h-full"><h2 class="text-warning font-bold text-3xl">45/60</h2><p>Cuộc gọi Outbound</p></vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4">
+               <vx-card class="text-center h-full"><h2 class="text-primary font-bold text-3xl">8</h2><p>Lịch hẹn Test</p></vx-card>
+            </div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4">
+               <vx-card class="text-center h-full"><h2 class="text-success font-bold text-3xl">75%</h2><p>Tỉ lệ Show-up</p></vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-2/3 mb-base">
+              <vx-card title="Lịch Sử Chuyển Đổi & Chốt Deal" class="h-full">
+                <vue-apex-charts type="area" height="300" :options="saleLineOptions" :series="saleLineSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Phân Bổ Hot Lead & Nguồn" class="h-full">
+                <vue-apex-charts type="donut" height="300" :options="saleSourceOptions" :series="saleSourceSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row">
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Thành Tích Cá Nhân & Thất Bại" class="h-full">
+                <div class="flex justify-between items-end mb-2">
+                    <div>
+                        <p class="text-gray-500 text-sm">Hạng Của Bạn (Nhóm Cầu Giấy)</p>
+                        <h3 class="font-bold text-primary text-2xl">#2 <span class="text-lg text-gray-400">/ 15</span></h3>
+                    </div>
+                    <vs-avatar color="primary" icon="icon-award" icon-pack="feather" />
+                </div>
+                <vs-progress :percent="85" color="success" class="mb-6"></vs-progress>
+                
+                <div class="p-3 bg-white rounded-lg border border-danger mt-4">
+                    <p class="font-bold text-danger mb-2 flex items-center"><feather-icon icon="TrendingDownIcon" class="mr-2" size="18"/> Hợp Đồng Thất Bại: 5</p>
+                    <p class="text-xs text-gray-600 mb-2">Tổng thiệt hại ước tính: <b>150 Triệu VNĐ</b></p>
+                    <ul class="ml-4 list-disc text-sm text-gray-700">
+                        <li>Khách chê học phí cao (3)</li>
+                        <li>Chuyển sang trung tâm đối thủ (1)</li>
+                        <li>Sai thông tin liên lạc (1)</li>
+                    </ul>
+                </div>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Phân Tích Chỉ Số Chốt Sales" class="h-full">
+                <div class="mb-6">
+                    <p class="text-gray-500 text-sm mb-1">Doanh Thu Tái Phí Đạt Được</p>
+                    <div class="flex items-center">
+                        <h2 class="text-primary font-bold mr-2">15.000.000đ</h2>
+                        <span class="text-success text-xs font-bold bg-white border border-success px-1 py-1 rounded">+5%</span>
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <p class="text-gray-500 text-sm mb-1">Thời Gian Chốt Khách TB (Sales Cycle)</p>
+                    <div class="flex items-center">
+                        <h2 class="text-warning font-bold mr-2">12 Ngày</h2>
+                        <span class="text-success text-xs font-bold bg-white border border-success px-1 py-1 rounded">Nhanh hơn 2 ngày</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm mb-1">Hoa Hồng Dự Kiến Tháng Này</p>
+                    <div class="flex items-center">
+                        <h2 class="text-success font-bold mr-2">3.500.000đ</h2>
+                    </div>
+                    <vs-progress :percent="60" color="success" class="mt-2"></vs-progress>
+                </div>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/3 mb-base">
+              <vx-card title="Công Việc Cần Theo Dõi" class="h-full">
+                <ul class="activity-timeline">
+                  <li class="relative pb-4 border-l-2 border-warning pl-6 ml-2">
+                    <div class="absolute w-4 h-4 bg-warning rounded-full top-1 border-2 border-white" style="left: -9px;"></div>
+                    <div class="flex justify-between">
+                        <p class="font-bold text-dark">Gọi lại Chị Hương</p>
+                        <span class="text-xs text-gray-500">15:00 Hôm nay</span>
+                    </div>
+                    <span class="text-sm text-gray-600">Khách hứa chuyển khoản đóng cọc 5 triệu.</span>
+                    <div class="mt-2 flex gap-2">
+                        <vs-button size="small" type="flat" icon="icon-phone" icon-pack="feather"></vs-button>
+                        <vs-button size="small" type="flat" color="success" icon="icon-check" icon-pack="feather"></vs-button>
+                    </div>
+                  </li>
+                  <li class="relative pb-4 border-l-2 border-primary pl-6 ml-2 mt-4">
+                    <div class="absolute w-4 h-4 bg-primary rounded-full top-1 border-2 border-white" style="left: -9px;"></div>
+                    <div class="flex justify-between">
+                        <p class="font-bold text-dark">Xác nhận lịch kiểm tra Anh Tuấn</p>
+                        <span class="text-xs text-gray-500">17:00 Hôm nay</span>
+                    </div>
+                    <span class="text-sm text-gray-600">Kiểm tra đầu vào IELTS 5.0 cho bé Trang.</span>
+                  </li>
+                </ul>
+                <vs-button class="w-full mt-4" type="border" color="primary">Xem tất cả công việc</vs-button>
+              </vx-card>
+            </div>
+          </div>
+        </div>
+      </vs-tab>
+<!-- ============================================== -->
+      <!-- CHĂM SÓC KHÁCH HÀNG / HỌC THUẬT -->
+      <!-- ============================================== -->
+      <vs-tab label="Chăm Sóc Khách Hàng (CM)" icon="heart">
+        <div class="pt-6">
+          <h3 class="mb-4 text-primary font-bold"><feather-icon icon="SmileIcon" class="mr-2"/> Chất Lượng Trải Nghiệm & Tái Phí</h3>
+          
+          <div class="vx-row mb-base">
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4"><vx-card class="text-center h-full"><h2 class="text-primary font-bold text-3xl">12</h2><p>Lớp Quản Lý</p></vx-card></div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4"><vx-card class="text-center h-full"><h2 class="text-success font-bold text-3xl">185</h2><p>Tổng Học Viên</p></vx-card></div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4"><vx-card class="text-center h-full"><h2 class="text-warning font-bold text-3xl">82%</h2><p>Tỉ lệ Renew (Cá nhân)</p></vx-card></div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4"><vx-card class="text-center h-full"><h2 class="text-primary font-bold text-3xl">96%</h2><p>Tỉ lệ Đi học</p></vx-card></div>
+            <div class="vx-col w-1/2 md:w-1/4 lg:w-1/5 mb-4"><vx-card class="text-center h-full"><h2 class="text-danger font-bold text-3xl">2</h2><p>Phản hồi chưa XL</p></vx-card></div>
+          </div>
+
+          <div class="vx-row mb-base">
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Điểm TB Học Viên & Mức Độ Đạt" class="h-full">
+                <vue-apex-charts type="bar" height="280" :options="cmAcademicOptions" :series="cmAcademicSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/4 mb-base">
+              <vx-card title="Đánh Giá Phụ Huynh (Rating)" class="h-full text-center">
+                <vue-apex-charts type="radialBar" height="280" :options="cmRatingOptions" :series="cmRatingSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/4 mb-base">
+              <vx-card title="Lý Do Churn/Bảo Lưu" class="h-full">
+                <vue-apex-charts type="pie" height="280" :options="cmChurnOptions" :series="cmChurnSeries" ></vue-apex-charts>
+              </vx-card>
+            </div>
+          </div>
+
+          <div class="vx-row">
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Học Sinh Cảnh Báo (Cần Chăm Sóc Gấp)" class="h-full">
+                 <ul class="activity-timeline">
+                  <li class="relative pb-4 border-l-2 border-danger pl-6 ml-2">
+                    <div class="absolute w-4 h-4 bg-danger rounded-full  top-1 border-2 border-white flex items-center justify-center"><feather-icon icon="AlertCircleIcon" size="10" class="text-white"/></div>
+                    <div class="bg-white p-3 rounded-lg border border-danger">
+                        <p class="font-bold text-danger mb-1 text-base">3 HS Vắng 3 buổi liên tiếp (Rủi ro Churn)</p>
+                        <p class="text-sm text-gray-700 mb-2"><b>Lớp PT199:</b> Bé Nguyễn Văn A, Trần Thị B, Lê Văn C.</p>
+                        <div class="flex gap-2">
+                            <vs-button size="small" color="danger" icon="icon-phone" icon-pack="feather">Gọi Phụ Huynh</vs-button>
+                            <vs-button size="small" type="border" color="danger">Xem Lịch Sử Học</vs-button>
+                        </div>
+                    </div>
+                  </li>
+                  <li class="relative pl-6 ml-2 mt-4">
+                    <div class="absolute w-4 h-4 bg-warning rounded-full  top-1 border-2 border-white flex items-center justify-center"><feather-icon icon="ClockIcon" size="10" class="text-white"/></div>
+                    <div class="p-3 rounded-lg border" style="background-color: rgba(255, 159, 67, 0.1); border-color: rgba(255, 159, 67, 0.3);">
+                        <p class="font-bold text-warning mb-1 text-base">15 HS Sắp Hết Phí (Còn dưới 5 buổi)</p>
+                        <p class="text-sm text-gray-700 mb-2">Nhóm học sinh chuẩn bị kết thúc khóa trong tuần tới. Cần gửi thư báo giá mới.</p>
+                        <vs-button size="small" color="warning" icon="icon-mail" icon-pack="feather">Gửi Thông Báo Tái Phí</vs-button>
+                    </div>
+                  </li>
+                </ul>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full lg:w-1/2 mb-base">
+              <vx-card title="Sự Kiện & Lịch Trình Tương Lai" class="h-full">
+                <div class="flex items-start mb-6 p-3 rounded-lg border" style="background-color: rgba(115, 103, 240, 0.1); border-color: rgba(115, 103, 240, 0.3);">
+                    <div class="p-3 bg-primary text-white rounded-lg mr-4 shadow"><feather-icon icon="GiftIcon" size="24"/></div>
+                    <div>
+                        <h4 class="font-bold text-primary mb-1">5 Học Sinh Sinh Nhật Tuần Này</h4>
+                        <p class="text-sm text-gray-600 mb-2">Bé Mai (12/07), Bé Hùng (14/07), Bé Lan (15/07)...</p>
+                        <span class="text-xs font-semibold cursor-pointer text-primary hover:underline">Gửi tin nhắn chúc mừng tự động</span>
+                    </div>
+                </div>
+                <div class="flex items-start p-3 bg-white border border-success rounded-lg">
+                    <div class="p-3 bg-success text-white rounded-lg mr-4 shadow"><feather-icon icon="ActivityIcon" size="24"/></div>
+                    <div>
+                        <h4 class="font-bold text-success mb-1">45 HS Đăng Ký Ngoại Khóa Mùa Hè</h4>
+                        <p class="text-sm text-gray-600 mb-2">Chương trình "English Summer Camp" ngày 20/07.</p>
+                        <span class="text-xs font-semibold cursor-pointer text-success hover:underline">Xem danh sách chuẩn bị</span>
+                    </div>
+                </div>
+                <vs-button class="mt-6 w-full shadow-lg" color="primary" type="gradient">Lập Kịch Bản Chăm Sóc Hằng Tuần</vs-button>
+              </vx-card>
+            </div>
+          </div>
+        </div>
+      </vs-tab>
+
+
+    </vs-tabs>
   </div>
 </template>
 
@@ -628,6 +526,62 @@ export default {
   },
   data () {
     return {
+      activeTab: 0,
+      checkoutTracker: [],
+      branch_id: [],
+      branches: [
+        { id: 1, name: 'Cầu Giấy' },
+        { id: 2, name: 'Đống Đa' },
+        { id: 3, name: 'Hà Đông' },
+        { id: 4, name: 'Thanh Xuân' },
+        { id: 5, name: 'Ba Đình' },
+        { id: 6, name: 'Long Biên' },
+        { id: 7, name: 'Hai Bà Trưng' }
+      ],
+      
+        // --- MASTER DEMO UI DATA ---
+        // ADMIN CHARTS
+        adminFunnelSeries: [{ name: 'Số lượng', data: [5000, 3500, 2000, 1500] }],
+        adminFunnelOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Phễu Chuyển Đổi Tổng & LTV') }.bind(this) },  type: 'bar', toolbar: { show: false } }, plotOptions: { bar: { horizontal: true, borderRadius: 4, distributed: true } }, colors: ['#7367F0', '#00CFE8', '#FF9F43', '#28C76F'], xaxis: { categories: ['Lead', 'Test', 'Deposit', 'Full Fee'] } },
+        
+        adminChurnSeries: [12],
+        adminChurnOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Churn Rate (Rời bỏ)') }.bind(this) },  type: 'radialBar' }, colors: ['#EA5455'], plotOptions: { radialBar: { dataLabels: { name: { show: true }, value: { formatter: function(val) { return val + "%" } } } } }, labels: ['Rời bỏ'] },
+
+        adminProductSeries: [45, 30, 25],
+        adminProductOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Doanh Thu Theo SP') }.bind(this) },  type: 'donut' }, labels: ['Kids', 'Teens', 'Kinder'], colors: ['#28C76F', '#7367F0', '#FF9F43'], plotOptions: { pie: { donut: { size: '65%' } } } , legend: { position: 'bottom' } },
+
+        adminLeaderboardSeries: [{ name: 'Doanh thu (Tỷ)', data: [1.2, 0.9, 0.8, 0.6, 0.5] }],
+        adminLeaderboardOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Bảng Xếp Hạng TT (Doanh thu & Lấp đầy)') }.bind(this) },  type: 'bar' }, colors: ['#7367F0'], xaxis: { categories: ['Cầu Giấy', 'Hà Đông', 'Đống Đa', 'Thanh Xuân', 'Long Biên'] } },
+
+        adminCashflowSeries: [{ name: 'Dòng tiền vào', data: [3.5, 4.0, 3.8, 4.5] }, { name: 'Chi phí (Quỹ lương+Opex)', data: [2.0, 2.2, 2.1, 2.3] }],
+        adminCashflowOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Dòng Tiền & Công Nợ & Quỹ Lương') }.bind(this) },  type: 'line', toolbar: { show: false } }, stroke: { curve: 'smooth' }, colors: ['#28C76F', '#EA5455'], xaxis: { categories: ['T1', 'T2', 'T3', 'T4'] } },
+
+        // BM CHARTS
+        bmFunnelSeries: [{ name: 'Số lượng', data: [850, 400, 200, 150] }],
+        bmFunnelOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Phễu Chuyển Đổi Nhánh (Checkin -> Full)') }.bind(this) },  type: 'bar' }, plotOptions: { bar: { horizontal: true, borderRadius: 4, distributed: true } }, colors: ['#00CFE8', '#FF9F43', '#7367F0', '#28C76F'], xaxis: { categories: ['Check-in', 'Test', 'Cọc', 'Full'] } },
+
+        bmClassSeries: [120, 80, 40],
+        bmClassOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Phân bổ Học viên / Số lớp') }.bind(this) },  type: 'pie' }, labels: ['Kids', 'Teens', 'IELTS'], colors: ['#7367F0', '#28C76F', '#FF9F43'] , legend: { position: 'bottom' } },
+
+        bmRadarSeries: [{ name: 'Chuyên cần', data: [90, 85, 95, 80, 88] }],
+        bmRadarOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Khung Giờ & Chuyên Cần') }.bind(this) },  type: 'radar' }, xaxis: { categories: ['T2-T4', 'T3-T5', 'T7-CN Sáng', 'T7-CN Chiều', 'Tối'] }, colors: ['#7367F0'] },
+
+        // SALE CHARTS
+        saleLineSeries: [{ name: 'Chốt Deal', data: [2, 5, 3, 8, 4, 10, 6] }],
+        saleLineOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Lịch Sử Chuyển Đổi & Chốt Deal') }.bind(this) },  type: 'area', toolbar: { show: false } }, stroke: { curve: 'smooth' }, colors: ['#28C76F'], fill: { type: 'gradient' }, xaxis: { categories: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'] } },
+
+        saleSourceSeries: [50, 30, 20],
+        saleSourceOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Phân Bổ Hot Lead & Nguồn') }.bind(this) },  type: 'donut' }, labels: ['Facebook', 'Referral', 'Walk-in'], colors: ['#7367F0', '#00CFE8', '#FF9F43'] , legend: { position: 'bottom' } },
+
+        // CM CHARTS
+        cmAcademicSeries: [{ name: 'Điểm TB', data: [8.5, 7.8, 9.0, 6.5] }],
+        cmAcademicOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Điểm TB Học Viên & Mức Độ Đạt') }.bind(this) },  type: 'bar', toolbar: { show: false } }, colors: ['#7367F0'], xaxis: { categories: ['PT199', 'KT12', 'TN05', 'KD01'] } },
+
+        cmRatingSeries: [92],
+        cmRatingOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Đánh Giá Phụ Huynh (Rating)') }.bind(this) },  type: 'radialBar' }, colors: ['#FF9F43'], labels: ['Hài Lòng'] },
+
+        cmChurnSeries: [45, 30, 25],
+        cmChurnOptions: { chart: { events: { dataPointSelection: function(e, c, o) { this.handleChartClick(e, c, o, 'Lý Do Churn/Bảo Lưu') }.bind(this) },  type: 'pie' }, labels: ['Chuyển nhà', 'Không hiệu quả', 'Hết tiền'], colors: ['#EA5455', '#FF9F43', '#7367F0'] , legend: { position: 'bottom' } },
       textGreeting : '',
       greetingsByTime: {
         morning: [
@@ -823,7 +777,7 @@ export default {
       lineChartRenewCM: {
         series: [],
         chartOptions: {
-          chart: {
+          chart: { events: { dataPointSelection: this.handleChartClick }, 
             type: 'bar',
             height: 350,
             stacked: true,
@@ -905,7 +859,42 @@ export default {
     })
     this.loadData();
   },
+  mounted() {
+    if (this.$route.query.tab !== undefined) {
+      this.activeTab = parseInt(this.$route.query.tab) || 0;
+    }
+    if (this.$route.query.scroll) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(this.$route.query.scroll), behavior: 'smooth' });
+      }, 500);
+    }
+  },
   methods: {
+    handleChartClick(event, chartContext, config, chartTitle) {
+      let label = 'chart-clicked';
+      let value = '';
+      if (config && config.w && config.w.globals) {
+        if (config.w.globals.labels) {
+          label = config.w.globals.labels[config.dataPointIndex] || label;
+        }
+        try {
+          let seriesIdx = config.seriesIndex > -1 ? config.seriesIndex : 0;
+          if (config.w.globals.series && config.w.globals.series[seriesIdx] && config.w.globals.series[seriesIdx].length > config.dataPointIndex) {
+            value = config.w.globals.series[seriesIdx][config.dataPointIndex];
+          } else if (config.w.config.series && typeof config.w.config.series[config.dataPointIndex] === 'number') {
+            value = config.w.config.series[config.dataPointIndex];
+          }
+        } catch(e) {}
+      }
+      if (chartTitle) {
+         label = chartTitle + ' - ' + label;
+      }
+      this.goToReport(label, value);
+    },
+    goToReport(filterValue, dataValue = '') {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      this.$router.push({ path: '/admin/dashboard/report', query: { filter: filterValue, value: dataValue, scroll: scrollY, tab: this.activeTab } });
+    },
     getTimeGreeting() {
       const hour = new Date().getHours();
       let period = "morning";
@@ -1232,7 +1221,7 @@ export default {
         this.lineChartRenewCM = {
           series: response.data.lineChartRenewCM.series,
           chartOptions: {
-            chart: {
+            chart: { events: { dataPointSelection: this.handleChartClick }, 
               type: 'bar',
               height: 350,
               stacked: true,

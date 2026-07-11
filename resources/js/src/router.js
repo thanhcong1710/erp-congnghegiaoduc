@@ -64,6 +64,12 @@ const router = new Router({
           meta: { rule: 'editor' }
         },
         {
+          path: '/admin/dashboard/report',
+          name: 'dashboard-detail-report',
+          component: () => import('./views/DashboardDetailReport.vue'),
+          meta: { rule: 'editor', pageTitle: 'Chi tiết Dashboard' }
+        },
+        {
           path: '/loyalty/dashboard',
           name: 'loyalty-dashboard',
           component: () => import('./views/loyalty/LoyaltyDashboard.vue'),
