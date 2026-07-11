@@ -123,7 +123,12 @@
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td" style="width: 240px">
-                  <p><strong>{{ item.name }}</strong></p>
+                  <p>
+                    <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
+                      <strong>{{ item.name }}</strong>
+                    </router-link>
+                    <strong v-else>{{ item.name }}</strong>
+                  </p>
                   <p>Giới tính: {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}</p>
                   <p>Ngày sinh: {{ item.birthday }}</p>
                 </td>

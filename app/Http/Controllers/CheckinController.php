@@ -56,7 +56,7 @@ class CheckinController extends Controller
 
         $total = u::first("SELECT count(s.id) AS total FROM crm_students AS s  LEFT JOIN crm_parents AS p ON p.id =s.parent_id WHERE $cond");
         
-        $list = u::query("SELECT s.id, s.name, s.gender, s.birthday, p.name AS parent_name, p.mobile_1, p.address, 
+        $list = u::query("SELECT s.id, s.lms_id, s.name, s.gender, s.birthday, p.name AS parent_name, p.mobile_1, p.address, 
                 (SELECT name FROM sources WHERE id = p.source_id) AS source_name,
                 (SELECT name FROM branches WHERE id = c.checkin_branch_id) AS checkin_branch_name,
                 (SELECT name FROM products WHERE id = c.type_product) AS checkin_product_name,

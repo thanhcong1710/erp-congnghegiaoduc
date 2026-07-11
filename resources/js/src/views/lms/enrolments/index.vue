@@ -158,7 +158,13 @@
                       <td class="td vs-table--td">{{index+1}}</td> 
                       <td class="td vs-table--td">
                         <p><strong>{{item.contract_code}}</strong></p>
-                        <p>Tên HS: {{item.name}}</p>
+                        <p>
+                          Tên HS: 
+                          <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
+                            {{item.name}}
+                          </router-link>
+                          <span v-else>{{item.name}}</span>
+                        </p>
                         <p>Mã HS:{{item.lms_code}}</p>
                         <p>Mã LMS:{{item.lms_id}}</p>
                         <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>

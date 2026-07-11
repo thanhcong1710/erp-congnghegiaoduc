@@ -141,7 +141,7 @@ class ReportsController extends Controller
                 AND s.status > 0
             $cond");
 
-            $list = u::query("SELECT DISTINCT c.id, b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cls.cls_name, p.name AS product_name,
+            $list = u::query("SELECT DISTINCT c.id, s.id AS student_id, b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cls.cls_name, p.name AS product_name,
                 CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
                 IF(c.count_recharge=0, 'NEW', 'RENEW') AS type_fee, c.last_done_sessions, c.done_sessions,c.summary_sessions,c.enrolment_last_date AS end_date,
                 (SELECT class_date FROM schedule_has_student WHERE contract_id=c.id ORDER BY class_date ASC LIMIT 1) AS start_date
@@ -186,7 +186,7 @@ class ReportsController extends Controller
             $total = u::first("SELECT count(r.id) AS total 
                 FROM report_full_fee_active AS r LEFT JOIN students AS s ON s.id=r.student_id WHERE $cond");
             
-            $list = u::query("SELECT b.name AS branch_name, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
+            $list = u::query("SELECT b.name AS branch_name, s.id AS student_id, s.lms_code, s.name, s.gud_name1, cl.cls_name, p.name AS product_name,
                     CONCAT (u.hrm_id, ' - ', u.name) AS cm_name, t.name AS tuition_fee_name,
                     IF(r.type=0, 'NEW', 'RENEW') AS type_fee, r.last_done_sessions, r.done_sessions,r.summary_sessions,r.start_date, r.end_date
                 FROM report_full_fee_active AS r 

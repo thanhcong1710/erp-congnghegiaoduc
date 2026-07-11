@@ -74,7 +74,12 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.lms_code}}</td>
-                <td class="td vs-table--td">{{item.name}}</td>
+                <td class="td vs-table--td">
+                  <router-link v-if="item.student_id" :to="`/lms/students/${item.student_id}/detail`" target="_blank">
+                    {{item.name}}
+                  </router-link>
+                  <span v-else>{{item.name}}</span>
+                </td>
                 <td class="td vs-table--td">{{item.gud_name1}}</td>
                 <td class="td vs-table--td">{{ item.cls_name}}</td>
                 <td class="td vs-table--td">{{ item.product_name}}</td>
