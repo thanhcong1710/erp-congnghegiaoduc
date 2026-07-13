@@ -878,7 +878,7 @@
       save() {
         let mess = "";
         let resp = true;
-        if (this.agreement.total_charged > this.agreement.total_amount) {
+        if (this.agreement.total_charged > this.agreement.total_amount && !this.agreement.can_edit_lower_fee) {
           mess += " - Số tiền phải đóng phải lớn hơn số tiền đã đóng<br/>";
           resp = false;
         }
