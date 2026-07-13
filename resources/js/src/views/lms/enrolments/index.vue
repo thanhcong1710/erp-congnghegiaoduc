@@ -64,7 +64,7 @@
         </div>
         <div class="vx-col md:w-3/4 w-full item-last">
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin lớp học</h5>
-          <div v-if="class_info.class_id" style="background: #72ae7517; padding: 10px; font-size: 16px;">
+          <div v-if="class_info.class_id" style="background: #72ae7517; padding: 10px; font-size: 15px;">
             <div class="vx-row">
                 <div class="vx-col md:w-1/3 w-full text-right">
                   <span>Tên lớp học:</span>
@@ -78,7 +78,7 @@
                   <span>Thời gian:</span>
                 </div>
                 <div class="vx-col md:w-2/3 w-full text-left">
-                  <span>{{class_info.cls_startdate | formatDateView}} - {{class_info.cls_enddate | formatDateView}}</span>
+                  <span>{{class_info.cls_startdate | formatDateView}} - {{class_info.cls_enddate | formatDateView}} (<strong v-if="class_info.class_day_text">{{class_info.class_day_text}}</strong>)</span>
                 </div>
             </div>
             <div class="vx-row">
@@ -175,9 +175,9 @@
                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
                            <i class="fa-regular fa-clock mr-1"></i>{{ item.added_at }}
                          </div>
-                        <p>Tên HS: {{item.name}}</p>
-                        <p>Mã HS:{{item.lms_code}}</p>
-                        <p v-if="item.gud_mobile1">SĐT: {{item.gud_mobile1}}</p>
+                        <p>Tên HS: <strong>{{item.name}}</strong></p>
+                        <p>Mã HS: <strong>{{item.lms_code}}</strong></p>
+                        <p v-if="item.gud_mobile1">SĐT: <strong>{{item.gud_mobile1}}</strong></p>
                         <div v-if="item.link_facebook" style="margin-top:4px;">
                           <a :href="item.link_facebook" target="_blank" rel="noopener noreferrer"
                             style="font-size:12px; color:#1877f2; word-break:break-all;"
@@ -948,6 +948,11 @@
 
 .td.vs-table--td{
   vertical-align: top;
+  font-size: 15px;
+}
+.td.vs-table--td p {
+  font-size: 15px;
+  margin-bottom: 2px;
 }
 .box-item-student.active{
   border: 1px solid rgba(var(--vs-success), 1);
