@@ -502,6 +502,7 @@ class ContractsController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
             'branch_id' => data_get($request, 'branch_id'),
+            'source_id' => data_get($request, 'source_id'),
             'status' => 1,
             'avatar_url' => data_get($request, 'student_gender') == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'
         ), 'students');

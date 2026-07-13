@@ -317,6 +317,7 @@ class StudentsController extends Controller
             province_id = '".(int)$request->province_id."',
             district_id = '".(int)$request->district_id."',
             point_toeic = '".(int)$request->point_toeic."',
+            source_id = '".(int) $request->source_id."',
             link_facebook = '".addslashes($request->link_facebook)."'
             WHERE student_id = $request->id");
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
