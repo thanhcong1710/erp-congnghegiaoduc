@@ -757,6 +757,7 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id

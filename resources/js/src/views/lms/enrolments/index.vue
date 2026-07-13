@@ -190,6 +190,7 @@
                         <p>Gói: <strong>{{item.tuition_fee_name}}</strong></p>
                         <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                         <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
+                        <p v-if="item.source_name">Nguồn: {{ item.source_name }}</p>
                         <p v-if="item.ec_name">Sale: {{item.ec_name}}</p>
                         <p v-if="item.team_name">Team KD: {{item.team_name}}</p>
                       </td>

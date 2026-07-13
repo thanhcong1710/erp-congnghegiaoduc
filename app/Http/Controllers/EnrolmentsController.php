@@ -101,6 +101,7 @@ class EnrolmentsController extends Controller
                 (SELECT u.name FROM users u WHERE u.id = c.ec_id) AS ec_name,
                 (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id) AS team_name,
                 (SELECT created_at FROM log_class_students WHERE class_id=$class_id AND contract_id=c.id AND action=1 ORDER BY id DESC LIMIT 1) AS added_at,
+                (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 p.link_facebook
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id

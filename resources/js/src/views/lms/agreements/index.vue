@@ -100,6 +100,7 @@
                 </td>
                 <td class="td vs-table--td">
                   <p><strong>{{ item.branch_name }}</strong></p>
+                  <p v-if="item.source_name">Nguồn: {{ item.source_name }}</p>
                   <p>EC: {{ item.ec_name }}</p>
                   <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>

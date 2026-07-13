@@ -179,6 +179,10 @@ class ClassesController extends Controller
             $start_date = data_get($request, 'start_date');
             if ($start_date && $start_date != $old_startdate) {
                 u::query("UPDATE contracts SET enrolment_start_date = '$start_date' WHERE class_id = $class_id");
+                if($start_date >= date('Y-m-d')){
+                    u::query("UPDATE contracts SET done_sessions=0,left_sessions =summary_sessions WHERE class_id = $class_id");
+                    u::query("DELETE FROM schedule_has_student WHERE class_id=$class_id");
+                }
             }
 
         }else{
