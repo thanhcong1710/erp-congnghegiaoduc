@@ -37,6 +37,16 @@
           <span class="text-danger text-sm" v-if="errors.gud_mobile1">{{ errors.gud_mobile1 }}</span>
         </div>
         <div class="vx-col md:w-1/3 w-full mb-4">
+          <label>Số điện thoại phụ huynh</label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="text"
+            name="gud_mobile2"
+            v-model="student_info.gud_mobile2"
+            :disabled="disabled_edit"
+          />
+        </div>
+        <div class="vx-col md:w-1/3 w-full mb-4">
           <label>Điểm đầu vào Toeic </label>
           <input
             class="vs-inputx vs-input--input normal"

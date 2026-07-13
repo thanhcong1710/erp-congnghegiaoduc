@@ -42,6 +42,16 @@
             </div>
 
             <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số điện thoại phụ huynh</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                v-model="student.phone2"
+                placeholder="Nhập số điện thoại phụ huynh"
+              />
+            </div>
+
+            <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Email</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -549,11 +559,13 @@
         },
         errors: {
           phone: '',
+          phone2: '',
           email: '',
         },
         student:{
           name: '',
           phone: '',
+          phone2: '',
           email: '',
           gender: '',
           gender_obj: null,

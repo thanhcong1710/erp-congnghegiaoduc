@@ -20,6 +20,7 @@
               <div class="flex mb-4">
                 <div class="mr-5"><i class="fa-solid fa-user"></i> <span>{{student_info.lms_code}}</span></div>
                 <div class="mr-5"><i class="fa-solid fa-phone"></i> <span>{{student_info.gud_mobile1}}</span></div>
+                <div class="mr-5" v-if="student_info.gud_mobile2"><i class="fa-solid fa-phone"></i> <span>{{student_info.gud_mobile2}}</span></div>
                 <div><i class="fa-solid fa-envelope"></i> <span>{{student_info.gud_email1}}</span></div>
               </div>
             </div>

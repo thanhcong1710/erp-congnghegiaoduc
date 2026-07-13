@@ -268,6 +268,7 @@ class ParentsController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'mobile_1' => $request->mobile_1,
+            'mobile_2' => $request->mobile_2,
             'address' => $request->address,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
@@ -287,6 +288,7 @@ class ParentsController extends Controller
             u::updateSimpleRow(array(
                 'gud_name1' => $request->name,
                 'gud_mobile1' => $request->mobile_1,
+                'gud_mobile2' => $request->mobile_2,
                 'gud_email1' => $request->email,
                 'address' => $request->address,
                 'province_id' => $request->province_id,

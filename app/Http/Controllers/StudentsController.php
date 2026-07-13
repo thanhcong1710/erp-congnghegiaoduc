@@ -312,6 +312,7 @@ class StudentsController extends Controller
         u::query("UPDATE crm_parents SET 
             name = '".addslashes($request->gud_name1)."',
             mobile_1 = '$request->gud_mobile1',
+            mobile_2 = '$request->gud_mobile2',
             email = '$request->gud_email1',
             address = '".addslashes($request->address)."',
             province_id = '".(int)$request->province_id."',

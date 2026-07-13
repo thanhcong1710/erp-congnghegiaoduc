@@ -125,6 +125,16 @@
                       <span class="text-danger text-sm" v-if="errors.mobile_1">{{ errors.mobile_1 }}</span>
                     </div>
                     <div class="vx-col md:w-1/2 w-full mb-4">
+                      <label >Điện thoại phụ huynh</label>
+                      <input
+                        class="vs-inputx vs-input--input normal"
+                        type="text"
+                        name="title"
+                        v-model="parent.mobile_2"
+                        :disabled="disabled_edit"
+                      />
+                    </div>
+                    <div class="vx-col md:w-1/2 w-full mb-4">
                       <label >Email</label>
                       <input
                         class="vs-inputx vs-input--input normal"
