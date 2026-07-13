@@ -3535,7 +3535,15 @@ class ExportsController extends Controller
                 tp.charge_amount,
                 tp.charge_date,
                 tp.status,
-                tp.attachments
+                tp.attachments,
+                (
+                    SELECT COUNT(tp2.id)
+                    FROM tmp_payments tp2
+                    INNER JOIN agreements a2 ON a2.id = tp2.agreement_id
+                    WHERE a2.student_id = a.student_id 
+                      AND (tp2.charge_date < tp.charge_date 
+                           OR (tp2.charge_date = tp.charge_date AND tp2.id <= tp.id))
+                ) AS transfer_count
             FROM tmp_payments AS tp
             INNER JOIN agreements AS a ON a.id = tp.agreement_id
             INNER JOIN students AS s ON s.id = a.student_id
@@ -3551,7 +3559,7 @@ class ExportsController extends Controller
         $sheet->getParent()->getDefaultStyle()->getFont()->setName("Calibri")->setSize(11);
 
         $sheet->setCellValue("A1", "BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN");
-        $sheet->mergeCells("A1:M1");
+        $sheet->mergeCells("A1:N1");
         $sheet->getStyle("A1")->applyFromArray(["font" => ["bold" => true, "size" => 14], "alignment" => ["horizontal" => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, "vertical" => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER]]);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
@@ -3567,8 +3575,9 @@ class ExportsController extends Controller
             "I2" => "Giá khoá học",
             "J2" => "Học phí",
             "K2" => "Ngày chuyển khoản",
-            "L2" => "Link Bill",
-            "M2" => "Trạng thái duyệt"
+            "L2" => "Lần chuyển khoản",
+            "M2" => "Link Bill",
+            "N2" => "Trạng thái duyệt"
         ];
         
         foreach ($headers as $c => $l) {
@@ -3576,7 +3585,7 @@ class ExportsController extends Controller
         }
 
         $hStyle = ["font" => ["bold" => true], "fill" => ["fillType" => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, "startColor" => ["rgb" => "E8E8E8"]], "alignment" => ["horizontal" => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, "vertical" => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER], "borders" => ["allBorders" => ["borderStyle" => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, "color" => ["rgb" => "BBBBBB"]]]];
-        $sheet->getStyle("A2:M2")->applyFromArray($hStyle);
+        $sheet->getStyle("A2:N2")->applyFromArray($hStyle);
         $sheet->getRowDimension(2)->setRowHeight(22);
 
         $borderOnly = ["borders" => ["allBorders" => ["borderStyle" => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, "color" => ["rgb" => "DDDDDD"]]]];
@@ -3612,13 +3621,14 @@ class ExportsController extends Controller
             $sheet->setCellValue("I" . $x, $item->must_charge);
             $sheet->setCellValue("J" . $x, $item->charge_amount);
             $sheet->setCellValue("K" . $x, $item->charge_date);
-            $sheet->setCellValue("L" . $x, implode("\n", $bills_links));
-            $sheet->setCellValue("M" . $x, $status_str);
+            $sheet->setCellValue("L" . $x, $item->transfer_count);
+            $sheet->setCellValue("M" . $x, implode("\n", $bills_links));
+            $sheet->setCellValue("N" . $x, $status_str);
 
-            $sheet->getStyle("A$x:M$x")->applyFromArray($borderOnly);
+            $sheet->getStyle("A$x:N$x")->applyFromArray($borderOnly);
         }
 
-        foreach (range("A", "M") as $columnID) {
+        foreach (range("A", "N") as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 

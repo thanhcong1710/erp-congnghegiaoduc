@@ -1978,7 +1978,15 @@ class ReportsController extends Controller
                 tp.charge_amount,
                 tp.charge_date,
                 tp.attachments AS img_bill_raw,
-                tp.status
+                tp.status,
+                (
+                    SELECT COUNT(tp2.id)
+                    FROM tmp_payments tp2
+                    INNER JOIN agreements a2 ON a2.id = tp2.agreement_id
+                    WHERE a2.student_id = a.student_id 
+                      AND (tp2.charge_date < tp.charge_date 
+                           OR (tp2.charge_date = tp.charge_date AND tp2.id <= tp.id))
+                ) AS transfer_count
             FROM tmp_payments AS tp
             INNER JOIN agreements AS a ON a.id = tp.agreement_id
             INNER JOIN students AS s ON s.id = a.student_id

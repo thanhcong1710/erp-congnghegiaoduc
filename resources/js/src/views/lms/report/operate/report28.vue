@@ -89,6 +89,7 @@
               <th style="min-width:140px" class="text-right">Giá khoá học</th>
               <th style="min-width:140px" class="text-right">Học phí</th>
               <th style="min-width:130px" class="text-center">Ngày chuyển khoản</th>
+              <th style="min-width:100px" class="text-center">Lần chuyển khoản</th>
               <th style="min-width:150px">Ảnh Bill</th>
               <th style="min-width:120px" class="text-right">Trạng thái duyệt</th>
             </tr>
@@ -106,6 +107,7 @@
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
               <td class="text-right money-cell" style="color:#059669;">{{ fmtMoney(row.charge_amount) }}</td>
               <td class="text-center date-cell">{{ row.charge_date }}</td>
+              <td class="text-center font-bold">{{ row.transfer_count }}</td>
               <td v-html="row.img_bill"></td>
               <td class="text-right">
                 <span class="vs-badge" :class="row.status == 1 ? 'vs-badge-success' : (row.status == 2 ? 'vs-badge-danger' : 'vs-badge-warning')">
