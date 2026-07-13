@@ -851,36 +851,62 @@ class ContractsController extends Controller
             }
             $updateChargesFee = false;
             if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')) {
+                // Lấy contracts hiện tại
+                $oldContracts = u::query("SELECT * FROM contracts WHERE agreement_id = $agreement_id AND status != 8 AND status > 0");
+
+                $newProductIds = [];
+                $tuition_fee_info = null;
+                $relationFees = [];
+                
+                if (data_get($request, 'tuition_fee_type') == 1) {
+                    $tuition_fee_info = u::getObject(['id' => data_get($request, 'tuition_fee_id')], 'tuition_fee');
+                    if ($tuition_fee_info) {
+                        $newProductIds[] = $tuition_fee_info->product_id;
+                    }
+                } elseif (data_get($request, 'tuition_fee_type') == 2) {
+                    $relationFees = u::query("SELECT t.*, r.price_combo, r.stt 
+                        FROM tuition_fee_relation r
+                            LEFT JOIN tuition_fee t ON r.exchange_tuition_fee_id = t.id
+                        WHERE r.status = 1 AND r.tuition_fee_id = " . data_get($request, 'tuition_fee_id')
+                    );
+                    foreach ($relationFees as $fee) {
+                        $newProductIds[] = $fee->product_id;
+                    }
+                }
+
+                $studied_amount_overlapped = 0;
+                foreach ($oldContracts as $contract) {
+                    if (in_array($contract->product_id, $newProductIds)) {
+                        $left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : $contract->total_charged;
+                        $studied_amount = $contract->total_charged - $left_amount;
+                        $studied_amount_overlapped += $studied_amount;
+                    }
+                }
+
+                $new_total_charged = data_get($request, 'total_left_amount') + $studied_amount_overlapped;
+
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
                     'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
                     'must_charge' => data_get($request, 'tuition_fee_amount'),
                     'debt_amount' => data_get($request, 'debt_amount'),
-                    'total_charged' => data_get($request, 'total_left_amount'),
+                    'total_charged' => $new_total_charged,
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
                     'book_receive_address' => data_get($request, 'book_receive_address', ''),
                     'contract_receive' => data_get($request, 'contract_receive', 0),
                     'group_type' => data_get($request, 'group_type', 0),
-                    'status' => data_get($request, 'total_left_amount') == 0 ? 1 : (data_get($request, 'debt_amount') > 0 ? 3 : 2),
+                    'status' => $new_total_charged == 0 ? 1 : (data_get($request, 'debt_amount') > 0 ? 3 : 2),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
                 u::addLogAgreements($agreement_id);
-                // Lấy contracts hiện tại
-                $oldContracts = u::query("SELECT * FROM contracts WHERE agreement_id = $agreement_id AND status != 8 AND status > 0");
 
                 // ====== XỬ LÝ GÓI LẺ ======
                 if (data_get($request, 'tuition_fee_type') == 1) {
 
-                    $tuition_fee_info = u::getObject(
-                        ['id' => data_get($request, 'tuition_fee_id')],
-                        'tuition_fee'
-                    );
-
                     if ($tuition_fee_info) {
-                        $newProductIds[] = $tuition_fee_info->product_id;
 
                         // kiểm tra contract đã tồn tại chưa
                         $existContract = u::first("SELECT * FROM contracts
@@ -934,15 +960,8 @@ class ContractsController extends Controller
                         }
                     }
                 } elseif (data_get($request, 'tuition_fee_type') == 2) {
-                    $relationFees = u::query("SELECT t.*, r.price_combo, r.stt 
-                        FROM tuition_fee_relation r
-                            LEFT JOIN tuition_fee t ON r.exchange_tuition_fee_id = t.id
-                        WHERE r.status = 1 AND r.tuition_fee_id = " . data_get($request, 'tuition_fee_id')
-                    );
 
                     foreach ($relationFees as $fee) {
-
-                        $newProductIds[] = $fee->product_id;
 
                         $existContract = u::first("SELECT * FROM contracts
                             WHERE agreement_id = $agreement_id AND product_id = {$fee->product_id} AND status NOT IN (0, 8) LIMIT 1");
@@ -987,22 +1006,23 @@ class ContractsController extends Controller
                             u::addLogContracts($contract_id);
                         }
                     }
-                    foreach ($oldContracts as $contract) {
-                        if (!in_array($contract->product_id, $newProductIds)) {
+                }
 
-                            // xác định status theo số buổi đã học
-                            $newStatus = (int) ($contract->done_sessions ?? 0) > 0 ? 8 : 0;
+                foreach ($oldContracts as $contract) {
+                    if (!in_array($contract->product_id, $newProductIds)) {
 
-                            u::updateSimpleRow([
-                                'status' => $newStatus,
-                                'updated_at' => date('Y-m-d H:i:s'),
-                                'updator_id' => Auth::user()->id
-                            ], [
-                                'id' => $contract->id
-                            ], 'contracts');
+                        // xác định status theo số buổi đã học
+                        $newStatus = (int) ($contract->done_sessions ?? 0) > 0 ? 8 : 0;
 
-                            u::addLogContracts($contract->id);
-                        }
+                        u::updateSimpleRow([
+                            'status' => $newStatus,
+                            'updated_at' => date('Y-m-d H:i:s'),
+                            'updator_id' => Auth::user()->id
+                        ], [
+                            'id' => $contract->id
+                        ], 'contracts');
+
+                        u::addLogContracts($contract->id);
                     }
                 }
                 $updateChargesFee = true;
