@@ -78,6 +78,7 @@
               <th style="min-width:180px">Họ tên HS</th>
               <th style="min-width:120px">Mã HS</th>
               <th style="min-width:120px">SĐT</th>
+              <th style="min-width:120px">SĐT phụ huynh</th>
               <th style="min-width:200px">Khóa học đăng ký</th>
               <th style="min-width:150px">Khóa lẻ</th>
               <th style="min-width:150px">Lớp đăng ký</th>
@@ -92,7 +93,8 @@
               <td class="date-cell">{{ row.created_at }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="lms-code">{{ row.lms_code }}</td>
-              <td class="student-phone text-muted">{{ row.phone }}</td>
+              <td class="student-phone font-bold text-black" style="color:#000;">{{ row.phone }}</td>
+              <td class="student-phone">{{ row.parent_phone }}</td>
               <td>{{ row.course_name || '—' }}</td>
               <td>{{ row.product_name || '—' }}</td>
               <td>{{ row.class_name || '—' }}</td>
@@ -101,7 +103,7 @@
               <td>{{ row.ec_name || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="11" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="12" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>

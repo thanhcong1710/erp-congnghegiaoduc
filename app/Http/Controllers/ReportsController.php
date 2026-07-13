@@ -2222,6 +2222,7 @@ class ReportsController extends Controller
                 s.name AS student_name,
                 s.lms_code,
                 s.gud_mobile1 AS phone,
+                s.gud_mobile2 AS parent_phone,
                 tf.name AS course_name,
                 p.name AS product_name,
                 cls.cls_name AS class_name,

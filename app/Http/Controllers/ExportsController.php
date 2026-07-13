@@ -3101,6 +3101,7 @@ class ExportsController extends Controller
                 s.name AS student_name,
                 s.lms_code,
                 s.gud_mobile1 AS phone,
+                s.gud_mobile2 AS parent_phone,
                 tf.name AS course_name,
                 p.name AS product_name,
                 cls.cls_name AS class_name,
@@ -3127,15 +3128,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO CHI TIẾT XẾP LỚP';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:K1');
+        $sheet->mergeCells('A1:L1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Họ và tên HS', 'Mã HS', 'SĐT', 'Khoá học đăng kí', 'Khóa lẻ', 'Lớp đăng ký', 'Ngày khai giảng', 'Team kinh doanh', 'Thành viên sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+        $headers = ['STT', 'Ngày tạo', 'Họ và tên HS', 'Mã HS', 'SĐT', 'SĐT phụ huynh', 'Khoá học đăng kí', 'Khóa lẻ', 'Lớp đăng ký', 'Ngày khai giảng', 'Team kinh doanh', 'Thành viên sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
         
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -3147,10 +3148,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:K3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:L3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 22, 14, 14, 22, 22, 22, 14, 16, 16];
+        $widths = [8, 14, 22, 14, 14, 14, 22, 22, 22, 14, 16, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -3166,21 +3167,26 @@ class ExportsController extends Controller
             $sheet->setCellValue('C' . $rowIdx, $item->student_name);
             $sheet->setCellValue('D' . $rowIdx, $item->lms_code);
             $sheet->setCellValue('E' . $rowIdx, $item->phone);
-            $sheet->setCellValue('F' . $rowIdx, $item->course_name ?? '—');
-            $sheet->setCellValue('G' . $rowIdx, $item->product_name ?? '—');
-            $sheet->setCellValue('H' . $rowIdx, $item->class_name ?? '—');
-            $sheet->setCellValue('I' . $rowIdx, $item->start_date ?? '—');
-            $sheet->setCellValue('J' . $rowIdx, $item->team_name ?? '—');
-            $sheet->setCellValue('K' . $rowIdx, $item->ec_name ?? '—');
+            $sheet->setCellValue('F' . $rowIdx, $item->parent_phone);
+            $sheet->setCellValue('G' . $rowIdx, $item->course_name ?? '—');
+            $sheet->setCellValue('H' . $rowIdx, $item->product_name ?? '—');
+            $sheet->setCellValue('I' . $rowIdx, $item->class_name ?? '—');
+            $sheet->setCellValue('J' . $rowIdx, $item->start_date ?? '—');
+            $sheet->setCellValue('K' . $rowIdx, $item->team_name ?? '—');
+            $sheet->setCellValue('L' . $rowIdx, $item->ec_name ?? '—');
 
-            $sheet->getStyle("A$rowIdx:K$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:L$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("B$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("C$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("D$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("E$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("F$rowIdx:K$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("I$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("F$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("G$rowIdx:L$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("J$rowIdx")->applyFromArray($centerAlign);
+
+            // In SĐT bold as requested? Wait, the request said "báo cáo chi tiết xếp lớp (report-26) thêm cột SDT phụ huynh cạnh cột SDT và cột SDT cho màu đậm".
+            $sheet->getStyle("E$rowIdx")->getFont()->setBold(true);
 
             $rowIdx++;
         }
