@@ -2343,6 +2343,7 @@ class ReportsController extends Controller
         $cls_start_end = isset($request->cls_start_end) ? $request->cls_start_end : '';
         $team_id = isset($request->team_id) ? (int)$request->team_id : 0;
         $is_online = isset($request->is_online) ? $request->is_online : '';
+        $book_receive = isset($request->book_receive) ? $request->book_receive : '';
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -2392,10 +2393,15 @@ class ReportsController extends Controller
             $cond .= " AND cls.is_online = " . (int)$is_online . " ";
         }
 
+        if ($book_receive !== '') {
+            $cond .= " AND a.book_receive = " . (int)$book_receive . " ";
+        }
+
         $order_by = " ORDER BY c.id DESC ";
 
         $countSql = "SELECT count(c.id) AS total 
                      FROM contracts AS c
+                     LEFT JOIN agreements AS a ON a.id = c.agreement_id
                      LEFT JOIN students AS s ON c.student_id = s.id
                      LEFT JOIN classes AS cls ON c.class_id = cls.id
                      WHERE $cond";
@@ -2406,11 +2412,13 @@ class ReportsController extends Controller
                     cls.cls_name, cls.cls_startdate,
                     p.name AS product_name,
                     cp.link_facebook,
+                    a.book_receive,
                     CASE
                         WHEN c.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id)
                         ELSE (SELECT u.name FROM users u WHERE u.id = c.ec_id)
                     END AS team_name
                 FROM contracts AS c
+                    LEFT JOIN agreements AS a ON a.id = c.agreement_id
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
                     LEFT JOIN products AS p ON c.product_id = p.id

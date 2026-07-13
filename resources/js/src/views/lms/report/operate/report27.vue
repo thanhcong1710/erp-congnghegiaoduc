@@ -27,6 +27,10 @@
           <multiselect name="search_is_online" placeholder="Chọn loại lớp" v-model="searchData.is_online" :options="is_online_list" label="label" :close-on-select="true" :multiple="false" :searchable="false" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
         </div>
         <div>
+          <label class="rpt-label">Đăng ký nhận sách</label>
+          <multiselect name="search_book_receive" placeholder="Chọn đăng ký" v-model="searchData.book_receive" :options="book_receive_list" label="label" :close-on-select="true" :multiple="false" :searchable="false" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div>
           <label class="rpt-label">Từ khóa</label>
           <vs-input class="w-full" placeholder="Mã HV, tên HV, mã lớp, SĐT" v-model="searchData.keyword"></vs-input>
         </div>
@@ -71,6 +75,7 @@
               <th>Sản phẩm</th>
               <th>Địa chỉ nhận sách</th>
               <th>Link Facebook</th>
+              <th>Đăng ký nhận sách</th>
               <th style="width:200px">Ngày phát sách</th>
             </tr>
           </thead>
@@ -94,7 +99,11 @@
                 </a>
               </td>
               <td>
-                <div class="flex items-center gap-2">
+                <span v-if="item.book_receive == 1" class="text-warning font-semibold">Có nhận</span>
+                <span v-else-if="item.book_receive == 2" class="text-danger font-semibold">Không nhận</span>
+              </td>
+              <td>
+                <div class="flex items-center gap-2" v-if="item.book_receive != 2">
                   <date-picker style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
                 </div>
               </td>
@@ -135,7 +144,8 @@
         team_list: [], products: [],
         status_list: [ {id:'1',label:'Đã phát sách'}, {id:'0',label:'Chưa phát sách'} ],
         is_online_list: [ {id:'0',label:'Lớp Offline'}, {id:'1',label:'Lớp Online'} ],
-        searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'' },
+        book_receive_list: [ {id:1,label:'Có nhận'}, {id:2,label:'Không nhận'} ],
+        searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'', book_receive:'' },
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],
         limitSource: [20, 50, 100, 500],
@@ -177,7 +187,7 @@
         return d
       },
       reset() {
-        this.searchData = { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'' }
+        this.searchData = { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'', book_receive:'' }
         this.getData()
       },
       getData() {
@@ -194,6 +204,7 @@
           product_id: this.searchData.product ? this.searchData.product.id : '', 
           status: this.searchData.status ? this.searchData.status.id : '', 
           is_online: this.searchData.is_online ? this.searchData.is_online.id : '',
+          book_receive: this.searchData.book_receive ? this.searchData.book_receive.id : '',
           start_date: start_date, 
           end_date: end_date, 
           cls_start_start: cls_start_start,
@@ -261,6 +272,7 @@
         if (this.searchData.product) { keys.push('product_id'); values.push(this.searchData.product.id) }
         if (this.searchData.status) { keys.push('status'); values.push(this.searchData.status.id) }
         if (this.searchData.is_online) { keys.push('is_online'); values.push(this.searchData.is_online.id) }
+        if (this.searchData.book_receive) { keys.push('book_receive'); values.push(this.searchData.book_receive.id) }
         if (this.searchData.dateRange && this.searchData.dateRange[0]) {
           keys.push('start_date')
           values.push(this.fmtDate(this.searchData.dateRange[0]))

@@ -339,7 +339,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận sách"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
                     v-model="agreement.book_receive_obj"
                     :searchable="false"
                     @input="saveBookReceive"

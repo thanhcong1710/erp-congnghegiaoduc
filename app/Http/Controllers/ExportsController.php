@@ -3387,6 +3387,9 @@ class ExportsController extends Controller
         if (isset($req->is_online) && $req->is_online !== '') {
             $cond .= " AND cls.is_online = " . (int) $req->is_online . " ";
         }
+        if (isset($req->book_receive) && $req->book_receive !== '') {
+            $cond .= " AND a.book_receive = " . (int) $req->book_receive . " ";
+        }
 
         $order_by = " ORDER BY c.id DESC ";
 
@@ -3395,11 +3398,13 @@ class ExportsController extends Controller
                     cls.cls_name, cls.cls_startdate,
                     p.name AS product_name,
                     cp.link_facebook,
+                    a.book_receive,
                     CASE
                         WHEN c.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id)
                         ELSE (SELECT u.name FROM users u WHERE u.id = c.ec_id)
                     END AS team_name
                 FROM contracts AS c
+                    LEFT JOIN agreements AS a ON a.id = c.agreement_id
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
                     LEFT JOIN products AS p ON c.product_id = p.id
@@ -3413,9 +3418,9 @@ class ExportsController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'BÁO CÁO PHÁT SÁCH');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:H1');
 
-        $headers = ['STT', 'Team kinh doanh', 'Mã HV', 'Họ tên', 'Số điện thoại', 'Lớp học', 'Ngày khai giảng', 'Sản phẩm', 'Địa chỉ nhận sách', 'Link Facebook', 'Ngày phát sách'];
+        $headers = ['STT', 'Team kinh doanh', 'Mã HV', 'Họ tên', 'Số điện thoại', 'Lớp học', 'Ngày khai giảng', 'Sản phẩm', 'Địa chỉ nhận sách', 'Link Facebook', 'Đăng ký nhận sách', 'Ngày phát sách'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -3423,23 +3428,25 @@ class ExportsController extends Controller
             $col++;
         }
 
+        $book_options = [1 => 'Có nhận', 2 => 'Không nhận', 0 => ''];
         $rowIdx = 4;
         foreach ($list as $index => $item) {
             $sheet->setCellValue('A' . $rowIdx, $index + 1);
             $sheet->setCellValue('B' . $rowIdx, $item->team_name);
             $sheet->setCellValue('C' . $rowIdx, $item->lms_code);
             $sheet->setCellValue('D' . $rowIdx, $item->student_name);
-            $sheet->setCellValue('E' . $rowIdx, $item->phone);
+            $sheet->setCellValueExplicit('E' . $rowIdx, $item->phone, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('F' . $rowIdx, $item->cls_name);
             $sheet->setCellValue('G' . $rowIdx, $item->cls_startdate);
             $sheet->setCellValue('H' . $rowIdx, $item->product_name);
             $sheet->setCellValue('I' . $rowIdx, $item->address);
             $sheet->setCellValue('J' . $rowIdx, $item->link_facebook);
-            $sheet->setCellValue('K' . $rowIdx, $item->book_delivered_date);
+            $sheet->setCellValue('K' . $rowIdx, $book_options[(int)$item->book_receive] ?? '');
+            $sheet->setCellValue('L' . $rowIdx, $item->book_receive == 2 ? '' : $item->book_delivered_date);
             $rowIdx++;
         }
 
-        foreach (range('A', 'K') as $columnID) {
+        foreach (range('A', 'L') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 

@@ -234,7 +234,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận sách"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
                     v-model="agreement.book_receive_obj"
                     :searchable="false"
                     @input="saveBookReceive"
@@ -706,7 +706,7 @@
           
           // Set các obj cho vue-select
           if (this.agreement.book_receive > 0) {
-            const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận', value: 3}]
+            const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]
             this.agreement.book_receive_obj = bookOptions.find(o => o.value === this.agreement.book_receive)
           }
           if (this.agreement.contract_receive > 0) {
