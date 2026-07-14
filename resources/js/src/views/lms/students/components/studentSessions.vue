@@ -25,9 +25,9 @@
               >
                 <td class="td vs-table--td">
                   <p class="fw-bold">{{ item.branch_name }}</p>
-                  <p class="text-muted">EC: {{ item.ec_name }}</p>
-                  <p class="text-muted">AF: {{ item.cm_name }}</p>
-                  <p class="text-muted">Lớp: {{ item.cls_name }}</p>
+                  <p>EC: {{ item.ec_name }}</p>
+                  <p>AF: {{ item.cm_name }}</p>
+                  <p>Lớp: <strong>{{ item.cls_name }}</strong></p>
                 </td>
 
                 <td class="td vs-table--td">
@@ -45,7 +45,7 @@
                   <span class="status-badge">
                     {{ item.label_status }}
                   </span>
-                  <div class="mt-2 text-muted" style="font-size: 11px;" v-if="item.enrolment_start_date || item.enrolment_last_date">
+                  <div class="mt-2" style="font-size: 11px;" v-if="item.enrolment_start_date || item.enrolment_last_date">
                     (<span v-if="item.enrolment_start_date">{{item.enrolment_start_date | formatDateView}}</span><span v-else>...</span> - <span v-if="item.enrolment_last_date">{{item.enrolment_last_date | formatDateView}}</span><span v-else>...</span>)
                   </div>
                 </td>

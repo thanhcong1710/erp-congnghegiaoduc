@@ -772,6 +772,44 @@ class ContractsController extends Controller
         return response()->json($data);
     }
 
+    public function listByStudent(Request $request)
+    {
+        $student_id = isset($request->student_id) ? (int)$request->student_id : 0;
+        
+        if (!$student_id) {
+            return response()->json(u::makingPagination([], 0, 1, 20));
+        }
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " c.status > 0 AND c.student_id = " . $student_id;
+        
+        $order_by = " ORDER BY c.id DESC ";
+
+        $total = u::first("SELECT count(s.id) AS total 
+            FROM agreements AS c LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
+
+        $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
+                (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
+                (SELECT name FROM products WHERE id =c.product_id) AS product_name,
+                c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
+                c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id
+            FROM agreements AS c 
+                LEFT JOIN students AS s ON s.id=c.student_id
+            WHERE $cond $order_by $limitation");
+        foreach ($list as $k => $row) {
+            $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
+        }
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+        return response()->json($data);
+    }
+
     public function delete(Request $request)
     {
         $cagreement_info = u::first("SELECT student_id, code FROM agreements WHERE id=$request->agreement_id");

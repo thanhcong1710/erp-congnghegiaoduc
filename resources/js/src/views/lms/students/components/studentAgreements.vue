@@ -81,7 +81,7 @@
           }
 
         this.$vs.loading()
-        axios.p('/api/lms/agreements/list', data)
+        axios.p('/api/lms/agreements/list-by-student', data)
           .then((response) => {
             this.$vs.loading.close()
             this.agreements = response.data.list

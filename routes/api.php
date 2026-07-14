@@ -156,6 +156,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('agreements/add', 'ContractsController@add');
             Route::post('agreements/add-with-new-student', 'ContractsController@addWithNewStudent');
             Route::post('agreements/list', 'ContractsController@list');
+            Route::post('agreements/list-by-student', 'ContractsController@listByStudent');
             Route::post('agreements/delete', 'ContractsController@delete');
             Route::get('agreements/show/{agreement_id}', 'ContractsController@show');
             Route::post('agreements/update', 'ContractsController@update');
