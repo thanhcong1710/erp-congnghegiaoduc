@@ -45,7 +45,7 @@
                   <span class="status-badge">
                     {{ item.label_status }}
                   </span>
-                  <div class="mt-2" " v-if="item.enrolment_start_date || item.enrolment_last_date">
+                  <div class="mt-2" v-if="item.enrolment_start_date || item.enrolment_last_date">
                     (<span v-if="item.enrolment_start_date">{{item.enrolment_start_date | formatDateView}}</span><span v-else>...</span> - <span v-if="item.enrolment_last_date">{{item.enrolment_last_date | formatDateView}}</span><span v-else>...</span>)
                   </div>
                 </td>
