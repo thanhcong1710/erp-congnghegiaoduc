@@ -478,6 +478,7 @@
         activeTab: 0,
         user_role: {
           user_id: 0,
+          is_admin: false,
           is_sale: false,
           is_sale_leader: false,
         },
@@ -511,7 +512,10 @@
         if (this.class_info.num_students >= this.class_info.max_students) {
           return true;
         }
-        if ((this.user_role.is_sale || this.user_role.is_sale_leader) && this.class_info.cls_startdate) {
+        if (this.user_role.is_sale && !this.user_role.is_sale_leader) {
+          return true;
+        }
+        if (this.user_role.is_sale_leader && this.class_info.cls_startdate) {
           const startDate = moment(this.class_info.cls_startdate, 'YYYY-MM-DD');
           const today = moment().startOf('day');
           if (today.isAfter(startDate)) {
@@ -725,13 +729,17 @@
         });
       },
       canRemoveStudent(student) {
+        // Admin được phép xóa luôn
+        if (this.user_role.is_admin) {
+          return true
+        }
+        // Role 68 (sale): chỉ được view, không được xóa
+        if (this.user_role.is_sale && !this.user_role.is_sale_leader) {
+          return false
+        }
         // Chỉ cho phép xóa nếu lớp chưa bắt đầu (done_sessions = 0)
         if (student.done_sessions !== 0 && student.done_sessions !== '0') {
           return false
-        }
-        // Role 68 (sale): chỉ xóa HS mình quản lý (ec_id = user_id)
-        if (this.user_role.is_sale && !this.user_role.is_sale_leader) {
-          return parseInt(student.ec_id) === parseInt(this.user_role.user_id)
         }
         // Role 69 (sale leader): xóa HS có ec_id hoặc ec_leader_id = user_id
         if (this.user_role.is_sale_leader) {

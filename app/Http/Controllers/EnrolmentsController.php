@@ -116,6 +116,7 @@ class EnrolmentsController extends Controller
 
         // Check current user's role for permission control
         $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
 
@@ -127,6 +128,7 @@ class EnrolmentsController extends Controller
             'next_schedules' => $next_schedules,
             'user_role' => [
                 'user_id' => $current_user_id,
+                'is_admin' => !empty($is_admin),
                 'is_sale' => !empty($is_sale),
                 'is_sale_leader' => !empty($is_sale_leader),
             ],
@@ -245,12 +247,19 @@ class EnrolmentsController extends Controller
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
         
-        if ($is_sale || $is_sale_leader) {
+        if ($is_sale && !$is_sale_leader) {
+            return response()->json(array(
+                'status' => 0,
+                'message' => 'Tài khoản Sale chỉ có quyền xem, không được phép thêm học sinh.'
+            ), 403);
+        }
+
+        if ($is_sale_leader) {
             $class_startdate = data_get($class_info, 'cls_startdate');
             if ($class_startdate && $class_startdate < date('Y-m-d')) {
                 return response()->json(array(
                     'status' => 0,
-                    'message' => 'Lớp đã khai giảng, Sale và Sale Leader không có quyền thêm học sinh'
+                    'message' => 'Lớp đã khai giảng, Sale Leader không có quyền thêm học sinh'
                 ), 403);
             }
         }
@@ -309,8 +318,11 @@ class EnrolmentsController extends Controller
             ], 404);
         }
 
+        $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+
         // Kiểm tra xem học sinh đã bắt đầu học chưa (done_sessions > 0)
-        if ((int) data_get($contract, 'done_sessions', 0) > 0) {
+        if (empty($is_admin) && (int) data_get($contract, 'done_sessions', 0) > 0) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Không thể xóa học sinh đã bắt đầu học khỏi lớp'
@@ -318,18 +330,14 @@ class EnrolmentsController extends Controller
         }
 
         // Kiểm tra quyền: role 68 (sale) chỉ xóa HS có ec_id = user_id, role 69 (sale leader) chỉ xóa HS có ec_id hoặc ec_leader_id = user_id
-        $current_user_id = Auth::user()->id;
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
 
         if ($is_sale && !$is_sale_leader) {
-            // Role 68 (sale): chỉ xóa HS mình quản lý (ec_id = user_id)
-            if ((int) data_get($contract, 'ec_id') !== $current_user_id) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Bạn không có quyền xóa học sinh này. Chỉ được xóa học sinh mình quản lý.'
-                ], 403);
-            }
+            return response()->json([
+                'status' => 0,
+                'message' => 'Tài khoản Sale chỉ có quyền xem, không được phép xóa học sinh.'
+            ], 403);
         } elseif ($is_sale_leader) {
             // Role 69 (sale leader): xóa HS có ec_id hoặc ec_leader_id = user_id
             if ((int) data_get($contract, 'ec_id') !== $current_user_id && (int) data_get($contract, 'ec_leader_id') !== $current_user_id) {
@@ -348,7 +356,10 @@ class EnrolmentsController extends Controller
             'enrolment_last_date' => null,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
+            'left_sessions' => data_get($contract, 'summary_sessions'),
+            'done_sessions' => 0,
         ], ['id' => $contract_id], 'contracts');
+        u::query("DELETE FROM schedule_has_student WHERe contract_id=".$contract_id);
 
         u::addLogContracts($contract_id);
 
