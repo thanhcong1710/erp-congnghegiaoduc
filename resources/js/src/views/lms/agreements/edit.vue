@@ -609,13 +609,13 @@
           this.html.tuition_fee.item.tuition_fee_relation
         ) {
           return this.html.tuition_fee.item.tuition_fee_relation.map(
-            i => i.product_id
+            i => Number(i.product_id)
           )
         }
 
         // Gói thường
         if (this.html.tuition_fee.item.product_id) {
-          return [this.html.tuition_fee.item.product_id]
+          return [Number(this.html.tuition_fee.item.product_id)]
         }
 
         return []
@@ -630,7 +630,7 @@
         }
 
         return this.agreement.contracts.map(contract => {
-          const isInNewFee = this.productIdsOfNewFee.includes(contract.product_id)
+          const isInNewFee = this.productIdsOfNewFee.includes(Number(contract.product_id))
 
           return {
             name: contract.tuition_fee_name,
@@ -758,26 +758,11 @@
         }
 
         // 👉 Danh sách product_id thuộc gói phí mới
-        let productIdsOfNewFee = []
-
-        // Gói combo
-        if (
-          this.agreement.tuition_fee_type == 2 &&
-          this.agreement.tuition_fee_relation &&
-          this.agreement.tuition_fee_relation.length
-        ) {
-          productIdsOfNewFee = this.agreement.tuition_fee_relation.map(
-            item => item.product_id
-          )
-        } 
-        // Gói thường
-        else if (this.agreement.product_id) {
-          productIdsOfNewFee = [this.agreement.product_id]
-        }
+        let productIdsOfNewFee = this.productIdsOfNewFee
 
         // 👉 Tính tiền
         this.agreement.contracts.forEach(contract => {
-          if (productIdsOfNewFee.includes(contract.product_id)) {
+          if (productIdsOfNewFee.includes(Number(contract.product_id))) {
             total += Number(contract.total_charged || 0)
           } else {
             total += Number(contract.left_amount || 0)
@@ -785,7 +770,7 @@
         })
 
         this.agreement.total_left_amount = total
-        this.agreement.debt_amount = this.agreement.total_amount - this.agreement.total_left_amount
+        this.agreement.debt_amount = this.agreement.total_amount > this.agreement.total_left_amount ? this.agreement.total_amount - this.agreement.total_left_amount : 0
       },
       loadTuitionFee(tuition_fee_id=0){
         if(this.agreement.branch_id){
