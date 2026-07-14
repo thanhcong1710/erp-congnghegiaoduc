@@ -206,6 +206,7 @@
                            class="vs-inputx vs-input--input normal"
                            style="width:160px; padding:5px !important;"
                            @change="updateAddClassStatus(item)"
+                           :disabled="user_role.is_sale || user_role.is_sale_leader"
                          >
                            <option :value="0">-- Chưa chọn --</option>
                            <option :value="1">Đã gửi tin nhắn</option>
@@ -213,6 +214,7 @@
                            <option :value="3">Chờ feedback</option>
                            <option :value="4">DONE</option>
                          </select>
+                         <br>
                         <vs-button 
                           v-if="canRemoveStudent(item)"
                           size="small" 

@@ -381,6 +381,17 @@ class EnrolmentsController extends Controller
 
     public function updateAddClassStatus(Request $request)
     {
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+
+        if ($is_sale || $is_sale_leader) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Tài khoản Sale và Sale Leader không được phép cập nhật trạng thái này.'
+            ], 403);
+        }
+
         $contract_id = (int) data_get($request, 'contract_id');
         $status = (int) data_get($request, 'add_class_status');
 
