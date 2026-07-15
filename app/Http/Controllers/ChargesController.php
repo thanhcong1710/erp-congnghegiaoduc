@@ -353,7 +353,7 @@ class ChargesController extends Controller
     public static function processContractsByAgreement($agreement_id)
     {
         $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8");
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 ORDER BY product_id");
         $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
@@ -887,7 +887,7 @@ class ChargesController extends Controller
     public static function processContractsByAgreementNew($agreement_id)
     {
         $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8");
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 ORDER BY product_id");
         $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
