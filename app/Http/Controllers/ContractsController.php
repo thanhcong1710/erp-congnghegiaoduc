@@ -878,6 +878,15 @@ class ContractsController extends Controller
 
     public function update(Request $request)
     {
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id IN (" . SystemCode::ROLE_EC . ", " . SystemCode::ROLE_EC_LEADER . ")");
+        if ($is_sale) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn không có quyền cập nhật hợp đồng'
+            ]);
+        }
+
         $agreement_id = data_get($request, 'id');
         $agreementInfo = u::getObject(['id' => data_get($request, 'id')], 'agreements');
         if ($agreementInfo) {

@@ -404,7 +404,7 @@
           <router-link class="btn btn-danger" :to="`/lms/agreements/${agreement.id}/detail`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
-          <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
+          <vs-button v-if="!agreement.is_sale_role" class="mb-2" color="success" @click="save">Lưu</vs-button>
         </div>
       </div>
       <vs-divider/>

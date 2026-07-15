@@ -169,7 +169,7 @@
                         <th colspan="1" rowspan="1" class="text-center">Add lớp</th>
                       </tr>
                     </thead>
-                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index" :style="item.add_class_status == 4 ? 'background-color: #d4edda !important;' : item.add_class_status == 3 ? 'background-color: #fff3cd !important;' : item.add_class_status == 2 ? 'background-color: #f8d7da !important;' : ''">
+                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td>
                       <td class="td vs-table--td" style="max-width:250px;">
                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
@@ -204,7 +204,7 @@
                          <select
                            v-model="item.add_class_status"
                            class="vs-inputx vs-input--input normal"
-                           style="width:160px; padding:5px !important;"
+                           :style="`width:160px; padding:5px !important; ${item.add_class_status == 4 ? 'background-color: #d4edda !important;' : item.add_class_status == 3 ? 'background-color: #fff3cd !important;' : item.add_class_status == 2 ? 'background-color: #f8d7da !important;' : ''}`"
                            @change="updateAddClassStatus(item)"
                            :disabled="user_role.is_sale || user_role.is_sale_leader"
                          >
