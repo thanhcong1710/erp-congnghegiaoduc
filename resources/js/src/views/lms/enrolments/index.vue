@@ -169,7 +169,7 @@
                         <th colspan="1" rowspan="1" class="text-center">Add lớp</th>
                       </tr>
                     </thead>
-                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
+                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index" :style="item.add_class_status == 4 ? 'background-color: #d4edda !important;' : item.add_class_status == 3 ? 'background-color: #fff3cd !important;' : item.add_class_status == 2 ? 'background-color: #f8d7da !important;' : ''">
                       <td class="td vs-table--td">{{index+1}}</td>
                       <td class="td vs-table--td" style="max-width:250px;">
                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
@@ -186,13 +186,13 @@
                         </div>
                       </td>
                       <td class="td vs-table--td">
-                        <p>Mã: <strong>{{item.contract_code}}</strong></p>
-                        <p>Gói: <strong>{{item.tuition_fee_name}}</strong></p>
+                        <p><strong>Mã: {{item.contract_code}}</strong></p>
+                        <p>Gói: {{item.tuition_fee_name}}</p>
                         <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
-                        <p>Đã đóng: {{item.total_charged | formatMoney}}</p>
+                        <p><strong>Đã đóng: {{item.total_charged | formatMoney}}</strong></p>
                         <p v-if="item.source_name">Nguồn: {{ item.source_name }}</p>
                         <p v-if="item.ec_name">Sale: {{item.ec_name}}</p>
-                        <p v-if="item.team_name">Team KD: {{item.team_name}}</p>
+                        <p v-if="item.team_name"><strong>Team KD: {{item.team_name}}</strong></p>
                       </td>
                       <td class="td vs-table--td">
                         <p>Ngày bắt đầu: {{item.enrolment_start_date}}</p>

@@ -52,10 +52,23 @@ class Test extends Command
         //     echo data_get($row, 'id')."/";
         // }
         $charge = new ChargesController();
-        $list = u::query("SELECT DISTINCT agreement_id FROM payments WHERe is_import=2");
-        foreach($list AS $row){
-            $charge->reProcessAgreement($row->agreement_id);
-            echo  $row->agreement_id."/";
+        // $list = u::query("SELECT DISTINCT agreement_id FROM payments WHERe is_import=2");
+        // foreach($list AS $row){
+        //     $charge->reProcessAgreement($row->agreement_id);
+        //     echo  $row->agreement_id."/";
+        // }
+        foreach([207,
+        597,
+        4153,
+        6317,
+        7053,
+        9132,
+        9635,
+        9638,
+        10007] as $row){
+
+        $charge->reProcessAgreement($row);
+         echo  $row."/";
         }
         
         return "ok";

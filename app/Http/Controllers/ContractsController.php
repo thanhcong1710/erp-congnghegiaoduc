@@ -74,6 +74,7 @@ class ContractsController extends Controller
                 AND c.branch_id = $branch_id
                 AND c.product_id = $product_id
                 $where_date
+            HAVING (enrolled_students < max_students" . ($current_class_id > 0 ? " OR c.id = $current_class_id" : "") . ")
             ORDER BY c.cls_startdate DESC, c.cls_name DESC");
 
         return response()->json($classes);
