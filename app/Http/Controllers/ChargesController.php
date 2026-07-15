@@ -360,7 +360,7 @@ class ChargesController extends Controller
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if( data_get($row, 'contract_data.class_id') && $availableSession > 0){
+                if( data_get($row, 'contract_data.class_id')){
                     $status = 6;
                 }else{
                     $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
@@ -894,7 +894,7 @@ class ChargesController extends Controller
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if( data_get($row, 'contract_data.class_id') && $availableSession > 0){
+                if( data_get($row, 'contract_data.class_id')){
                     $status = 6;
                 }else{
                     $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
