@@ -922,16 +922,17 @@ class ContractsController extends Controller
                     }
                 }
 
-                $studied_amount_overlapped = 0;
-                foreach ($oldContracts as $contract) {
-                    if (in_array($contract->product_id, $newProductIds)) {
-                        $left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : $contract->total_charged;
-                        $studied_amount = $contract->total_charged - $left_amount;
-                        $studied_amount_overlapped += $studied_amount;
-                    }
-                }
+                // $studied_amount_overlapped = 0;
+                // foreach ($oldContracts as $contract) {
+                //     if (in_array($contract->product_id, $newProductIds)) {
+                //         $left_amount = $contract->summary_sessions > 0 ? ($contract->total_charged * $contract->left_sessions / $contract->summary_sessions) : $contract->total_charged;
+                //         $studied_amount = $contract->total_charged - $left_amount;
+                //         $studied_amount_overlapped += $studied_amount;
+                //     }
+                // }
 
-                $new_total_charged = data_get($request, 'total_left_amount') + $studied_amount_overlapped;
+                // $new_total_charged = data_get($request, 'total_left_amount') + $studied_amount_overlapped;
+                $new_total_charged = data_get($request, 'total_left_amount');
 
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
