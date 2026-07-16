@@ -306,7 +306,20 @@ class ContractsController extends Controller
         $availableSession = (int) data_get($request, 'tuition_fee_session') && (int)data_get($request, 'total_amount') ? 
             round($total_amount / ((int)data_get($request, 'total_amount')/(int)data_get($request, 'tuition_fee_session'))) : 0; 
         $availableSession = $availableSession - (int)data_get($pre_update_contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($pre_update_contract_info, 'last_done_sessions') : 0;
-            
+        
+        if(data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0){
+            $status=3;
+        } else {
+            if($total_amount>0){
+                if(data_get($request, 'total_amount') > $total_amount){
+                    $status=2;
+                }else{
+                    $status=3;
+                }
+            }else{
+                $status=1;
+            }
+        }
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
            'student_id' => data_get($request, 'student_id'), 
@@ -345,7 +358,7 @@ class ContractsController extends Controller
            'updated_at'=>date('Y-m-d H:i:s'),
            'updator_id'=>Auth::user()->id,
            'left_sessions' => $availableSession - (int)data_get($pre_update_contract_info, 'done_sessions'), 
-           'status' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? 3 : 1, 
+           'status' => $status,
            'b2b_campaign_id' => data_get($request,'b2b_campaign_id'),
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
