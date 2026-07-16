@@ -277,8 +277,8 @@
           <router-link class="btn btn-danger" :to="`/lms/agreements`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
-          <router-link v-if="!agreement.is_sale_role" class="btn btn-success" :to="`/lms/agreements/${agreement.id}/edit`">
-            <vs-button color="success" class="mb-2" >Cập nhật</vs-button>
+          <router-link class="btn btn-success" :to="`/lms/agreements/${agreement.id}/edit`">
+            <vs-button class="mb-2" color="success">Cập nhật thông tin</vs-button>
           </router-link>
         </div>
       </div>

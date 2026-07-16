@@ -117,8 +117,8 @@
                     <router-link :to="`/lms/agreements/${item.agreement_id}/detail`" >
                       <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
-                    <router-link v-if="!user_role.is_sale && !user_role.is_sale_leader" :to="`/lms/agreements/${item.agreement_id}/edit`">
-                      <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
+                    <router-link :to="`/lms/agreements/${item.agreement_id}/edit`">
+                      <vs-button size="small" color="success" ><i class="fa-solid fa-pen-to-square"></i></vs-button>
                     </router-link>
                     <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
                     <vs-button size="small" color="danger" v-if="item.total_charged == 0" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>

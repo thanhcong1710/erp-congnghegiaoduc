@@ -121,7 +121,7 @@
                     :searchable="true"
                     language="tv-VN"
                     @input="saveTuitionFee"
-                    :disabled="!agreement.branch_id"
+                    :disabled="!agreement.branch_id || agreement.is_sale_role"
                 ></vue-select>
             </div>
             <div class="vx-col w-full mb-4 vs-con-table stripe vs-table-primary" v-if="agreement.tuition_fee_type==2">
@@ -404,7 +404,7 @@
           <router-link class="btn btn-danger" :to="`/lms/agreements/${agreement.id}/detail`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
-          <vs-button v-if="!agreement.is_sale_role" class="mb-2" color="success" @click="save">Lưu</vs-button>
+          <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
         </div>
       </div>
       <vs-divider/>

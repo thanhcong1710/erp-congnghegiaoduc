@@ -880,12 +880,7 @@ class ContractsController extends Controller
     {
         $current_user_id = Auth::user()->id;
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id IN (" . SystemCode::ROLE_EC . ", " . SystemCode::ROLE_EC_LEADER . ")");
-        if ($is_sale) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Bạn không có quyền cập nhật hợp đồng'
-            ]);
-        }
+
 
         $agreement_id = data_get($request, 'id');
         $agreementInfo = u::getObject(['id' => data_get($request, 'id')], 'agreements');
@@ -899,6 +894,12 @@ class ContractsController extends Controller
             }
             $updateChargesFee = false;
             if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')) {
+                if ($is_sale) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Bạn không có quyền thay đổi Gói học phí'
+                    ]);
+                }
                 // Lấy contracts hiện tại
                 $oldContracts = u::query("SELECT * FROM contracts WHERE agreement_id = $agreement_id AND status != 8 AND status > 0");
 
