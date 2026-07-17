@@ -2360,7 +2360,7 @@ class ReportsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
-        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND c.total_charged > 0 AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
+        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
 
         if ($team_id > 0) {
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
