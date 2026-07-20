@@ -251,12 +251,25 @@ class ChargesController extends Controller
 
                 // ---- Cập nhật agreements ----
                 $new_total_charged = $total_charged + $charge_amount;
+                $charge_date = date('Y-m-d', strtotime(data_get($tmp_payment, 'charge_date')));
                 if ($debt_after <= 0) {
+                    $count_recharge = (int) data_get($agreement_info, 'count_recharge');
+                    $first_8th = data_get($agreement_info, 'first_8th_session_date');
+                    if (!empty($first_8th)) {
+                        if ($charge_date <= $first_8th) {
+                            $count_recharge = 0;
+                        } else {
+                            $count_recharge = 1;
+                        }
+                    }
+
                     u::updateSimpleRow(array(
                         'status' => 3,
                         'total_charged' => $new_total_charged,
                         'debt_amount' => 0,
-                        'full_fee_date' => data_get($tmp_payment, 'charge_date'),
+                        'full_fee_date' => $charge_date,
+                        'last_pay_date' => $charge_date,
+                        'count_recharge' => $count_recharge,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
@@ -266,6 +279,7 @@ class ChargesController extends Controller
                         'status' => 2,
                         'total_charged' => $new_total_charged,
                         'debt_amount' => $debt_after,
+                        'last_pay_date' => $charge_date,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');

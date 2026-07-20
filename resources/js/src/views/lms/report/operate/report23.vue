@@ -65,7 +65,7 @@
             <tr>
               <th class="text-center th-green" style="width:90px">MỚI</th>
               <th class="text-center th-green" style="width:90px">UP LV</th>
-              <th class="text-center th-green-dark" style="width:120px">DOANH SỐ<br>(Chưa tách)</th>
+              <th class="text-center th-green-dark" style="width:120px">DOANH SỐ<br>(CHƯA TÁCH)</th>
               <th class="text-center th-green-dark" style="width:120px">DOANH SỐ<br>(SAU TÁCH)</th>
             </tr>
           </thead>

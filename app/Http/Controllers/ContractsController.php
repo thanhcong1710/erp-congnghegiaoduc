@@ -122,6 +122,24 @@ class ContractsController extends Controller
         $arr_day = explode(",", (string) data_get($class_info, 'class_day'));
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
 
+        $agreement = u::getObject(['id' => data_get($contract, 'agreement_id')], 'agreements');
+        if ($agreement && (int) data_get($agreement, 'is_first_package') == 1 && empty(data_get($agreement, 'first_8th_session_date'))) {
+            $arr_day_filtered = array_filter($arr_day);
+            if (count($arr_day_filtered) > 0) {
+                $eighth_session_info = u::calculatorSessionsByNumberOfSessions($start_date, 8, $holidays, $arr_day_filtered);
+                $first_8th_session_date = data_get($eighth_session_info, 'end_date');
+            } else {
+                $first_8th_session_date = date('Y-m-d', strtotime($start_date . ' + 28 days'));
+            }
+            if ($first_8th_session_date) {
+                u::updateSimpleRow([
+                    'first_8th_session_date' => $first_8th_session_date,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ], ['id' => data_get($agreement, 'id')], 'agreements');
+                u::addLogAgreements(data_get($agreement, 'id'));
+            }
+        }
+
         u::updateSimpleRow([
             'cm_id' => $cm_id,
             'cm_leader_id' => $cm_leader_id,
@@ -304,9 +322,11 @@ class ContractsController extends Controller
             $ec_id = data_get($ec_info, 'id');
             $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id'): $ec_id;
         }
-        // Tính count_recharge cho agreement: 0 nếu chưa có, MAX+1 nếu đã có
-        $prevAgreement = u::first("SELECT MAX(count_recharge) AS max_cr FROM agreements WHERE student_id = $student_id AND tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . " AND status > 0");
-        $count_recharge = ($prevAgreement && $prevAgreement->max_cr !== null) ? (int) $prevAgreement->max_cr + 1 : 0;
+        // Tính count_recharge cho agreement: 1 nếu đã có gói trước đó (status > 0), 0 nếu là gói đầu
+        $first_agreement = u::first("SELECT id, first_8th_session_date FROM agreements WHERE student_id = $student_id AND status > 0 ORDER BY id ASC LIMIT 1");
+        $count_recharge = $first_agreement ? 1 : 0;
+        $is_first_package = $first_agreement ? 0 : 1;
+        $first_8th = $first_agreement ? data_get($first_agreement, 'first_8th_session_date') : null;
 
         $agreement_id = u::insertSimpleRow(array(
             'student_id' => $student_id,
@@ -323,7 +343,9 @@ class ContractsController extends Controller
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
-            'count_recharge' => $count_recharge,   // ← tự động tính
+            'count_recharge' => $count_recharge,
+            'is_first_package' => $is_first_package,
+            'first_8th_session_date' => $first_8th,
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,
@@ -539,9 +561,11 @@ class ContractsController extends Controller
             'status' => 1
         ), 'term_student_user');
 
-        // Tính count_recharge: 0 nếu HS chưa có agreement nào với tuition_fee này, MAX+1 nếu đã có
-        $prevAgreement2 = u::first("SELECT MAX(count_recharge) AS max_cr FROM agreements WHERE student_id = $student_id AND tuition_fee_id = " . (int) data_get($request, 'tuition_fee_id') . " AND status > 0");
-        $count_recharge2 = ($prevAgreement2 && $prevAgreement2->max_cr !== null) ? (int) $prevAgreement2->max_cr + 1 : 0;
+        // Tính count_recharge: 0 nếu HS chưa có agreement nào, 1 nếu đã có
+        $first_agreement = u::first("SELECT id, first_8th_session_date FROM agreements WHERE student_id = $student_id AND status > 0 ORDER BY id ASC LIMIT 1");
+        $count_recharge2 = $first_agreement ? 1 : 0;
+        $is_first_package2 = $first_agreement ? 0 : 1;
+        $first_8th2 = $first_agreement ? data_get($first_agreement, 'first_8th_session_date') : null;
 
         // Tạo agreement
         $agreement_id = u::insertSimpleRow(array(
@@ -559,7 +583,9 @@ class ContractsController extends Controller
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
-            'count_recharge' => $count_recharge2,  // ← tự động tính
+            'count_recharge' => $count_recharge2,
+            'is_first_package' => $is_first_package2,
+            'first_8th_session_date' => $first_8th2,
             'status' => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,

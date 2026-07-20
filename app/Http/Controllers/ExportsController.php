@@ -2408,7 +2408,7 @@ class ExportsController extends Controller
         ]);
 
         // Row 4: column headers
-        $headers = ['STT', 'TEAM', 'MỚI', 'UP LV', 'DOANH SỐ (Chưa tách)', 'DOANH SỐ (SAU TÁCH)', 'DOANH THU', 'LƯƠNG SALE'];
+        $headers = ['STT', 'TEAM', 'MỚI', 'UP LV', 'DOANH SỐ (CHƯA TÁCH)', 'DOANH SỐ (SAU TÁCH)', 'DOANH THU', 'LƯƠNG SALE'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         $hBgColor = ['A' => '4F46E5', 'B' => '4F46E5', 'C' => '16A34A', 'D' => '16A34A', 'E' => '518E47', 'F' => '518E47', 'G' => 'EA580C', 'H' => 'EA580C'];
         foreach ($headers as $i => $h) {

@@ -1714,8 +1714,6 @@ class ReportsController extends Controller
             GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
             ORDER BY team_name ASC
         ";
-        var_dump($query);
-        die();
 
         $rows = u::query($query);
 
