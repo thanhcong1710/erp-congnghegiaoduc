@@ -1497,9 +1497,9 @@ class ReportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $pagination = (object) $request->pagination;
@@ -1527,7 +1527,7 @@ class ReportsController extends Controller
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
         }
-        
+
         if ($completion_status == 1) {
             $cond .= " AND a.debt_amount = 0";
         } elseif ($completion_status == 0) {
@@ -1650,22 +1650,43 @@ class ReportsController extends Controller
     public function report23(Request $request)
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
+        $pay_start_date = isset($request->pay_start_date) ? $request->pay_start_date : '';
+        $pay_end_date = isset($request->pay_end_date) ? $request->pay_end_date : '';
 
         // ---- Điều kiện cơ bản ----
         $cond = " a.status > 0
-                  AND a.total_charged > 0
                   AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+
         if ($start_date) {
-            $cond .= " AND a.full_fee_date >= '$start_date'";
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
         }
         if ($end_date) {
-            $cond .= " AND a.full_fee_date <= '$end_date'";
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
 
         // ---- Main query: group theo team ----
@@ -1682,19 +1703,24 @@ class ReportsController extends Controller
                 )                                                       AS team_name,
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
+                COUNT(a.id)                                            AS unseparated_sales,
+                SUM(tf.number_of_months)                               AS separated_sales,
                 SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
                 SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
                 SUM(a.must_charge)                                      AS total_revenue
             FROM agreements AS a
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
             GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
             ORDER BY team_name ASC
         ";
+        var_dump($query);
+        die();
 
         $rows = u::query($query);
 
         $result = [];
-        $sum = ['new_count' => 0, 'uplv_count' => 0, 'new_revenue' => 0.0, 'uplv_revenue' => 0.0, 'total_revenue' => 0.0, 'salary' => 0.0];
+        $sum = ['new_count' => 0, 'uplv_count' => 0, 'unseparated_sales' => 0, 'separated_sales' => 0, 'new_revenue' => 0.0, 'uplv_revenue' => 0.0, 'total_revenue' => 0.0, 'salary' => 0.0];
 
         foreach ($rows as $row) {
             $new_rev = (float) $row->new_revenue;
@@ -1706,6 +1732,8 @@ class ReportsController extends Controller
                 'team_name' => $row->team_name ?: '—',
                 'new_count' => (int) $row->new_count,
                 'uplv_count' => (int) $row->uplv_count,
+                'unseparated_sales' => (int) $row->unseparated_sales,
+                'separated_sales' => (int) $row->separated_sales,
                 'new_revenue' => $new_rev,
                 'uplv_revenue' => $uplv_rev,
                 'total_revenue' => (float) $row->total_revenue,
@@ -1713,6 +1741,8 @@ class ReportsController extends Controller
             ];
             $sum['new_count'] += (int) $row->new_count;
             $sum['uplv_count'] += (int) $row->uplv_count;
+            $sum['unseparated_sales'] += (int) $row->unseparated_sales;
+            $sum['separated_sales'] += (int) $row->separated_sales;
             $sum['new_revenue'] += $new_rev;
             $sum['uplv_revenue'] += $uplv_rev;
             $sum['total_revenue'] += (float) $row->total_revenue;
@@ -1744,9 +1774,9 @@ class ReportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $pagination = (object) $request->pagination;
@@ -1783,7 +1813,7 @@ class ReportsController extends Controller
         if ($end_date) {
             $cond .= " AND a.created_at <= '$end_date 23:59:59'";
         }
-        
+
         $totalRow = u::first("
             SELECT COUNT(a.id) AS total
             FROM agreements AS a
@@ -1823,26 +1853,27 @@ class ReportsController extends Controller
         ";
 
         $list = u::query($query);
-        
-        foreach($list as &$row) {
-            $row->p1_amount = (float)$row->p1_amount;
-            $total_paid = (float)$row->total_paid;
+
+        foreach ($list as &$row) {
+            $row->p1_amount = (float) $row->p1_amount;
+            $total_paid = (float) $row->total_paid;
             $row->p2_amount = $total_paid - $row->p1_amount;
-            if ($row->p2_amount < 0) $row->p2_amount = 0;
-            
+            if ($row->p2_amount < 0)
+                $row->p2_amount = 0;
+
             $row->p2_date = ($row->p2_amount > 0) ? $row->last_pay_date : '';
-            
+
             $agrmId = $row->agreement_id;
             $tmpPayments = u::query("SELECT attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 1");
             $bills = [];
-            foreach($tmpPayments as $tp) {
+            foreach ($tmpPayments as $tp) {
                 if (!empty($tp->attachments)) {
                     $arr = json_decode($tp->attachments, true);
                     if (is_array($arr)) {
                         $billIndex = 1;
-                        foreach($arr as $path) {
+                        foreach ($arr as $path) {
                             $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
-                            $bills[] = '<a href="'.$fullUrl.'" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndex.'</a>';
+                            $bills[] = '<a href="' . $fullUrl . '" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill ' . $billIndex . '</a>';
                             $billIndex++;
                         }
                     }
@@ -1858,30 +1889,31 @@ class ReportsController extends Controller
 
             $tmpPaymentsCd = u::query("SELECT charge_amount, charge_date, attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 0 ORDER BY id ASC");
             if (count($tmpPaymentsCd) > 0) {
-                $row->p1_amount_cd = (float)$tmpPaymentsCd[0]->charge_amount;
+                $row->p1_amount_cd = (float) $tmpPaymentsCd[0]->charge_amount;
                 $row->p1_date_cd = substr($tmpPaymentsCd[0]->charge_date, 0, 10);
                 $total_paid_cd = 0;
                 $last_pay_date_cd = '';
                 $bills_cd = [];
                 $billIndexCd = 1;
-                foreach($tmpPaymentsCd as $tp_cd) {
-                    $total_paid_cd += (float)$tp_cd->charge_amount;
+                foreach ($tmpPaymentsCd as $tp_cd) {
+                    $total_paid_cd += (float) $tp_cd->charge_amount;
                     if ($tp_cd->charge_date) {
                         $last_pay_date_cd = substr($tp_cd->charge_date, 0, 10);
                     }
                     if (!empty($tp_cd->attachments)) {
                         $arr = json_decode($tp_cd->attachments, true);
                         if (is_array($arr)) {
-                            foreach($arr as $path) {
+                            foreach ($arr as $path) {
                                 $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
-                                $bills_cd[] = '<a href="'.$fullUrl.'" target="_blank" style="color:red; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndexCd.'</a>';
+                                $bills_cd[] = '<a href="' . $fullUrl . '" target="_blank" style="color:red; text-decoration:underline; white-space:nowrap;">Xem bill ' . $billIndexCd . '</a>';
                                 $billIndexCd++;
                             }
                         }
                     }
                 }
                 $row->p2_amount_cd = $total_paid_cd - $row->p1_amount_cd;
-                if ($row->p2_amount_cd < 0) $row->p2_amount_cd = 0;
+                if ($row->p2_amount_cd < 0)
+                    $row->p2_amount_cd = 0;
                 $row->p2_date_cd = ($row->p2_amount_cd > 0) ? $last_pay_date_cd : '';
                 $row->img_bill_cd = implode('<br>', $bills_cd);
             }
@@ -1891,7 +1923,7 @@ class ReportsController extends Controller
         return response()->json($data);
     }
 
-    
+
     public function report28(Request $request)
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
@@ -1910,9 +1942,9 @@ class ReportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $pagination = (object) $request->pagination;
@@ -1942,7 +1974,7 @@ class ReportsController extends Controller
         } elseif ($completion_status == 0) {
             $cond .= " AND a.debt_amount > 0";
         }
-        
+
         if ($start_date || $end_date) {
             if ($start_date) {
                 $cond .= " AND tp.created_at >= '$start_date 00:00:00'";
@@ -2003,9 +2035,9 @@ class ReportsController extends Controller
                 $arr = json_decode($row->img_bill_raw, true);
                 if (is_array($arr)) {
                     $billIndex = 1;
-                    foreach($arr as $path) {
+                    foreach ($arr as $path) {
                         $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
-                        $bills[] = '<a href="'.$fullUrl.'" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill '.$billIndex.'</a>';
+                        $bills[] = '<a href="' . $fullUrl . '" target="_blank" style="color:blue; text-decoration:underline; white-space:nowrap;">Xem bill ' . $billIndex . '</a>';
                         $billIndex++;
                     }
                 }
@@ -2046,9 +2078,9 @@ class ReportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $pagination = (object) $request->pagination;
@@ -2136,21 +2168,22 @@ class ReportsController extends Controller
         ";
 
         $list = u::query($query);
-        
-        foreach($list as &$row) {
-            $row->p1_amount = (float)$row->p1_amount;
-            $total_paid = (float)$row->total_paid;
+
+        foreach ($list as &$row) {
+            $row->p1_amount = (float) $row->p1_amount;
+            $total_paid = (float) $row->total_paid;
             $row->p2_amount = $total_paid - $row->p1_amount;
-            if ($row->p2_amount < 0) $row->p2_amount = 0;
-            
+            if ($row->p2_amount < 0)
+                $row->p2_amount = 0;
+
             $row->p2_date = ($row->p2_amount > 0) ? $row->last_pay_date : '';
-            
-            $row->xn_ketoan = ((float)$row->debt_amount > 0) ? 'R thiếu' : 'R';
-            
+
+            $row->xn_ketoan = ((float) $row->debt_amount > 0) ? 'R thiếu' : 'R';
+
             $row->luong_sale = 0;
-            if ((float)$row->debt_amount == 0) {
+            if ((float) $row->debt_amount == 0) {
                 $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
-                $row->luong_sale = ((float)$row->must_charge) * $rate;
+                $row->luong_sale = ((float) $row->must_charge) * $rate;
             }
         }
 
@@ -2172,7 +2205,7 @@ class ReportsController extends Controller
         $cls_end_date = isset($request->cls_end_date) ? $request->cls_end_date : '';
 
         $user = Auth::user();
-        
+
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -2274,9 +2307,9 @@ class ReportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $pagination = (object) $request->pagination;
@@ -2303,7 +2336,7 @@ class ReportsController extends Controller
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
         }
-        
+
         $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
 
         if ($start_date) {
@@ -2358,7 +2391,7 @@ class ReportsController extends Controller
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $cls_start_start = isset($request->cls_start_start) ? $request->cls_start_start : '';
         $cls_start_end = isset($request->cls_start_end) ? $request->cls_start_end : '';
-        $team_id = isset($request->team_id) ? (int)$request->team_id : 0;
+        $team_id = isset($request->team_id) ? (int) $request->team_id : 0;
         $is_online = isset($request->is_online) ? $request->is_online : '';
         $book_receive = isset($request->book_receive) ? $request->book_receive : '';
 
@@ -2368,7 +2401,7 @@ class ReportsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
-        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
+        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if ($team_id > 0) {
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
@@ -2397,7 +2430,7 @@ class ReportsController extends Controller
         if ($product_id !== '') {
             $cond .= " AND c.product_id = '$product_id' ";
         }
-        
+
         if ($status !== '') {
             if ($status == '1') {
                 $cond .= " AND c.book_delivered_date IS NOT NULL ";
@@ -2407,11 +2440,11 @@ class ReportsController extends Controller
         }
 
         if ($is_online !== '') {
-            $cond .= " AND cls.is_online = " . (int)$is_online . " ";
+            $cond .= " AND cls.is_online = " . (int) $is_online . " ";
         }
 
         if ($book_receive !== '') {
-            $cond .= " AND a.book_receive = " . (int)$book_receive . " ";
+            $cond .= " AND a.book_receive = " . (int) $book_receive . " ";
         }
 
         $order_by = " ORDER BY c.id DESC ";
@@ -2449,11 +2482,11 @@ class ReportsController extends Controller
         return response()->json($data);
     }
 
-    public function updateBookDeliveredDate(Request $request) 
+    public function updateBookDeliveredDate(Request $request)
     {
         $contract_ids = $request->contract_ids;
         $date = $request->book_delivered_date;
-        
+
         if (!empty($contract_ids) && is_array($contract_ids)) {
             $ids = implode(',', array_map('intval', $contract_ids));
             if (!empty($date)) {

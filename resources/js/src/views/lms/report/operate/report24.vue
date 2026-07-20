@@ -306,6 +306,8 @@
 .rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); text-align:left;  font-size:15px; position:sticky; top:0; z-index:2;  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
+.rpt-table thead tr:first-child th { z-index:3; }
+.rpt-table thead tr:nth-child(2) th { top:44px; z-index:2; }
 .rpt-table thead th.text-right  { text-align:right; }
 .rpt-table thead th.text-center { text-align:center; }
 

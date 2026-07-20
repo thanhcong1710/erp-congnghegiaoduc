@@ -20,8 +20,26 @@
           </multiselect>
         </div>
         <div>
-          <label class="rpt-label">Full fee date (từ — đến)</label>
+          <label class="rpt-label">Team KD (quản lý)</label>
+          <multiselect v-model="searchData.team_obj" :options="team_list" label="name" track-by="id"
+            placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
+            <span slot="noResult">Không tìm thấy</span>
+          </multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Trạng thái công nợ</label>
+          <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Đã hoàn thành'}, {id:2, name:'Đã chuyển khoản'}, {id:3, name:'Chưa chuyển khoản'}]" label="name" track-by="id"
+            placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
+          </multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Ngày tạo (từ — đến)</label>
           <date-picker v-model="searchData.dateRange" type="date" range :clearable="true"
+            format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
+        </div>
+        <div>
+          <label class="rpt-label">Ngày CK gần nhất</label>
+          <date-picker v-model="searchData.pay_date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
       </div>
@@ -40,13 +58,15 @@
             <tr class="group-header-row">
               <th rowspan="2" style="width:44px" class="text-center">STT</th>
               <th rowspan="2" style="min-width:180px">TEAM</th>
-              <th colspan="2" class="text-center th-green">DOANH SỐ</th>
+              <th colspan="4" class="text-center th-green">DOANH SỐ</th>
               <th rowspan="2" style="width:140px" class="text-right th-orange">DOANH THU</th>
               <th rowspan="2" style="width:140px" class="text-right th-orange">LƯƠNG SALE</th>
             </tr>
             <tr>
               <th class="text-center th-green" style="width:90px">MỚI</th>
               <th class="text-center th-green" style="width:90px">UP LV</th>
+              <th class="text-center th-green-dark" style="width:120px">DOANH SỐ<br>(Chưa tách)</th>
+              <th class="text-center th-green-dark" style="width:120px">DOANH SỐ<br>(SAU TÁCH)</th>
             </tr>
           </thead>
           <tbody>
@@ -55,11 +75,13 @@
               <td class="team-name">{{ row.team_name }}</td>
               <td class="text-center num-cell">{{ row.new_count }}</td>
               <td class="text-center num-cell">{{ row.uplv_count }}</td>
+              <td class="text-center num-cell">{{ row.unseparated_sales }}</td>
+              <td class="text-center num-cell">{{ row.separated_sales }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.total_revenue) }}</td>
               <td class="text-right salary-cell">{{ fmtMoney(row.salary) }}</td>
             </tr>
             <tr v-if="rows.length === 0">
-              <td colspan="6" class="text-center py-8">Không có dữ liệu</td>
+              <td colspan="8" class="text-center py-8">Không có dữ liệu</td>
             </tr>
           </tbody>
           <tfoot v-if="summary">
@@ -67,6 +89,8 @@
               <td colspan="2" class="text-right">TỔNG</td>
               <td class="text-center">{{ summary.new_count }}</td>
               <td class="text-center">{{ summary.uplv_count }}</td>
+              <td class="text-center">{{ summary.unseparated_sales }}</td>
+              <td class="text-center">{{ summary.separated_sales }}</td>
               <td class="text-right">{{ fmtMoney(summary.total_revenue) }}</td>
               <td class="text-right">{{ fmtMoney(summary.salary) }}</td>
             </tr>
@@ -86,9 +110,15 @@
     components: { Multiselect, DatePicker },
     data() {
       return {
-        branch_list: [],
+        branch_list: [], team_list: [],
         rows: [], summary: null,
-        searchData: { arr_branch: [], dateRange: '' },
+        searchData: { 
+          arr_branch: [], 
+          dateRange: '', 
+          team_obj: null, 
+          completion_status_obj: null, 
+          pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)] 
+        },
         dpLang: {
           days: ['CN','T2','T3','T4','T5','T6','T7'],
           months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
@@ -97,11 +127,18 @@
     },
     created() {
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
+      axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
       this.getData()
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], dateRange: '' }
+        this.searchData = { 
+          arr_branch: [], 
+          dateRange: '', 
+          team_obj: null, 
+          completion_status_obj: null, 
+          pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)] 
+        }
         this.getData()
       },
       fmtDate(d) {
@@ -127,7 +164,20 @@
           start_date = this.fmtDate(this.searchData.dateRange[0])
           end_date   = this.fmtDate(this.searchData.dateRange[1])
         }
-        return { branch_id, start_date, end_date }
+        let pay_start_date = '', pay_end_date = ''
+        if (Array.isArray(this.searchData.pay_date_range) && this.searchData.pay_date_range[0]) {
+          pay_start_date = this.fmtDate(this.searchData.pay_date_range[0])
+          pay_end_date   = this.fmtDate(this.searchData.pay_date_range[1])
+        }
+        return { 
+          branch_id, 
+          start_date, 
+          end_date,
+          team_id: this.searchData.team_obj ? this.searchData.team_obj.id : 0,
+          completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
+          pay_start_date,
+          pay_end_date
+        }
       },
       getData() {
         this.$vs.loading()
@@ -145,6 +195,10 @@
         if (p.branch_id && p.branch_id.length) { keys.push('branch_id'); values.push(p.branch_id.join('-')) }
         if (p.start_date) { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)   { keys.push('end_date');   values.push(p.end_date) }
+        if (p.team_id > 0) { keys.push('team_id'); values.push(p.team_id) }
+        if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
+        if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }
+        if (p.pay_end_date)   { keys.push('pay_end_date');   values.push(p.pay_end_date) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report23/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
@@ -173,13 +227,14 @@
 .rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 
 /* Group header row */
-.rpt-table thead .group-header-row th { padding:10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:0; z-index:2; font-size:15px; }
-.rpt-table thead tr:nth-child(2) th { padding:8px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:0; z-index:2; font-size:15px; }
+.rpt-table thead .group-header-row th { padding:10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:0; z-index:3; font-size:15px; }
+.rpt-table thead tr:nth-child(2) th { padding:8px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:43px; z-index:2; font-size:15px; }
 
 /* Column color groups */
 .th-green  { background:#16a34a !important; color:white !important; font-weight:600; }
+.th-green-dark { background:#518E47 !important; color:white !important; font-weight:600; }
 .th-orange { background:#ea580c !important; color:white !important; font-weight:600; }
-.rpt-table thead th:not(.th-green):not(.th-orange) { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; font-weight:600;  font-size:15px; position:sticky; top:0; z-index:2; }
+.rpt-table thead th:not(.th-green):not(.th-green-dark):not(.th-orange) { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; font-weight:600;  font-size:15px; position:sticky; top:0; z-index:2; }
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }

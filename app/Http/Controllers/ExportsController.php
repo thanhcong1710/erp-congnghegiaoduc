@@ -2298,6 +2298,10 @@ class ExportsController extends Controller
         $branch_id = [];
         $start_date = '';
         $end_date = '';
+        $team_id = 0;
+        $completion_status = -1;
+        $pay_start_date = '';
+        $pay_end_date = '';
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
             if ($v === 'v')
@@ -2312,18 +2316,47 @@ class ExportsController extends Controller
                 case 'end_date':
                     $end_date = $v;
                     break;
+                case 'team_id':
+                    $team_id = (int) $v;
+                    break;
+                case 'completion_status':
+                    $completion_status = (int) $v;
+                    break;
+                case 'pay_start_date':
+                    $pay_start_date = $v;
+                    break;
+                case 'pay_end_date':
+                    $pay_end_date = $v;
+                    break;
             }
         }
 
-        $cond = " a.status > 0 AND a.total_charged > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
+        if ($team_id > 0) {
+            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+
         if ($start_date) {
-            $cond .= " AND a.full_fee_date >= '$start_date'";
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
         }
         if ($end_date) {
-            $cond .= " AND a.full_fee_date <= '$end_date'";
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
 
         $rows = u::query("
@@ -2337,10 +2370,13 @@ class ExportsController extends Controller
                 ) AS team_name,
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
+                COUNT(a.id)                                            AS unseparated_sales,
+                SUM(tf.number_of_months)                               AS separated_sales,
                 SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
                 SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
                 SUM(a.must_charge) AS total_revenue
             FROM agreements AS a
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
             GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
             ORDER BY team_name ASC
@@ -2354,7 +2390,7 @@ class ExportsController extends Controller
         $period = ($start_date ? $start_date : '...') . ' – ' . ($end_date ? $end_date : '...');
         $title = 'THỐNG KÊ DOANH THU THEO TEAM SALE  |  Full fee: ' . $period;
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:H1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 12],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
@@ -2364,7 +2400,7 @@ class ExportsController extends Controller
 
         // Row 3: merged group header
         $sheet->setCellValue('C3', 'DOANH SỐ');
-        $sheet->mergeCells('C3:D3');
+        $sheet->mergeCells('C3:F3');
         $sheet->getStyle('C3')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '16A34A']],
@@ -2372,9 +2408,9 @@ class ExportsController extends Controller
         ]);
 
         // Row 4: column headers
-        $headers = ['STT', 'TEAM', 'MỚI', 'UP LV', 'DOANH THU', 'LƯƠNG SALE'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F'];
-        $hBgColor = ['A' => '4F46E5', 'B' => '4F46E5', 'C' => '16A34A', 'D' => '16A34A', 'E' => 'EA580C', 'F' => 'EA580C'];
+        $headers = ['STT', 'TEAM', 'MỚI', 'UP LV', 'DOANH SỐ (Chưa tách)', 'DOANH SỐ (SAU TÁCH)', 'DOANH THU', 'LƯƠNG SALE'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        $hBgColor = ['A' => '4F46E5', 'B' => '4F46E5', 'C' => '16A34A', 'D' => '16A34A', 'E' => '518E47', 'F' => '518E47', 'G' => 'EA580C', 'H' => 'EA580C'];
         foreach ($headers as $i => $h) {
             $c = $cols[$i];
             $sheet->setCellValue($c . '4', $h);
@@ -2389,7 +2425,7 @@ class ExportsController extends Controller
         $sheet->getRowDimension(4)->setRowHeight(22);
 
         // Column widths
-        $widths = ['A' => 8, 'B' => 28, 'C' => 12, 'D' => 12, 'E' => 18, 'F' => 18];
+        $widths = ['A' => 8, 'B' => 28, 'C' => 12, 'D' => 12, 'E' => 22, 'F' => 22, 'G' => 18, 'H' => 18];
         foreach ($widths as $c => $w) {
             $sheet->getColumnDimension($c)->setWidth($w);
         }
@@ -2402,6 +2438,8 @@ class ExportsController extends Controller
 
         $sumNew = 0;
         $sumUplv = 0;
+        $sumUnseparated = 0;
+        $sumSeparated = 0;
         $sumRevenue = 0.0;
         $sumSalary = 0.0;
         $row = 5;
@@ -2415,20 +2453,24 @@ class ExportsController extends Controller
             $sheet->setCellValue('B' . $row, $item->team_name ?? '—');
             $sheet->setCellValue('C' . $row, (int) $item->new_count);
             $sheet->setCellValue('D' . $row, (int) $item->uplv_count);
-            $sheet->setCellValue('E' . $row, $total);
-            $sheet->setCellValue('F' . $row, $salary);
+            $sheet->setCellValue('E' . $row, (int) $item->unseparated_sales);
+            $sheet->setCellValue('F' . $row, (int) $item->separated_sales);
+            $sheet->setCellValue('G' . $row, $total);
+            $sheet->setCellValue('H' . $row, $salary);
 
-            $sheet->getStyle("A$row:F$row")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$row:H$row")->applyFromArray($borderStyle);
             $sheet->getStyle("A$row")->applyFromArray($center);
             $sheet->getStyle("B$row")->applyFromArray($left);
-            $sheet->getStyle("C$row:D$row")->applyFromArray($center);
-            $sheet->getStyle("E$row:F$row")->applyFromArray($right);
-            $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("C$row:F$row")->applyFromArray($center);
+            $sheet->getStyle("G$row:H$row")->applyFromArray($right);
+            $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("H$row")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getRowDimension($row)->setRowHeight(18);
 
             $sumNew += (int) $item->new_count;
             $sumUplv += (int) $item->uplv_count;
+            $sumUnseparated += (int) $item->unseparated_sales;
+            $sumSeparated += (int) $item->separated_sales;
             $sumRevenue += $total;
             $sumSalary += $salary;
             $row++;
@@ -2439,19 +2481,21 @@ class ExportsController extends Controller
         $sheet->setCellValue('A' . $row, 'TỔNG');
         $sheet->setCellValue('C' . $row, $sumNew);
         $sheet->setCellValue('D' . $row, $sumUplv);
-        $sheet->setCellValue('E' . $row, $sumRevenue);
-        $sheet->setCellValue('F' . $row, $sumSalary);
+        $sheet->setCellValue('E' . $row, $sumUnseparated);
+        $sheet->setCellValue('F' . $row, $sumSeparated);
+        $sheet->setCellValue('G' . $row, $sumRevenue);
+        $sheet->setCellValue('H' . $row, $sumSalary);
         $totalStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
         ];
-        $sheet->getStyle("A$row:F$row")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$row:H$row")->applyFromArray($totalStyle);
         $sheet->getStyle("A$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle("B$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle("C$row:D$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode($moneyFmt);
-        $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("C$row:F$row")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("H$row")->getNumberFormat()->setFormatCode($moneyFmt);
         $sheet->getRowDimension($row)->setRowHeight(22);
 
         $writer = new Xlsx($spreadsheet);
