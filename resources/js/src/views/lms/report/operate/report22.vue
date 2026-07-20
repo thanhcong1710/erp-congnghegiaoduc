@@ -44,7 +44,7 @@
           <vs-input v-model="searchData.keyword" placeholder="Mã HV / Họ tên / SĐT" class="w-full" />
         </div>
         <div>
-          <label class="rpt-label">Hạn thanh toán (từ — đến)</label>
+          <label class="rpt-label">Hạn TT (từ — đến)</label>
           <date-picker v-model="searchData.due_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
@@ -93,7 +93,7 @@
               <th style="width:110px" class="text-right">Đã thu</th>
               <th style="width:120px" class="text-right">Còn phải thu</th>
               <th style="width:120px" class="text-center">Trạng thái</th>
-              <th style="width:110px" class="text-center">Hạn TT</th>
+              <th style="width:110px" class="text-center">Hạn thanh toán</th>
               <th style="width:120px" class="text-center">Thu gần nhất</th>
             </tr>
           </thead>
@@ -303,7 +303,7 @@
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; white-space:nowrap; }
 
 .lms-code { font-weight:600; color:#4338ca; font-size:15px; }
 .student-name { font-weight:600; }

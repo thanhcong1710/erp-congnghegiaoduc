@@ -101,6 +101,7 @@
               <th style="min-width:140px" class="text-right">Học phí đợt 2</th>
               <th style="min-width:130px" class="text-center">Ngày CK 2</th>
               <th style="min-width:120px" class="text-right">Giảm trừ</th>
+              <th style="min-width:130px" class="text-center">Hạn thanh toán</th>
               <th style="min-width:140px" class="text-right">Công nợ</th>
               <th style="min-width:120px" class="text-center">XN Kế toán</th>
               <th style="min-width:140px" class="text-right">Lương sale</th>
@@ -112,13 +113,13 @@
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
 
-              <td>{{ row.course_name || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
               <td>{{ row.ec_name || '—' }}</td>
-              <td>{{ row.class_info || '—' }}</td>
-              <td>{{ row.address || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.class_info || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
               <td>{{ row.dk_chung }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
@@ -126,6 +127,7 @@
               <td class="text-right money-cell">{{ fmtMoney(row.p2_amount) }}</td>
               <td class="text-center date-cell">{{ row.p2_date }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
+              <td class="text-center date-cell" :class="isDue(row.due_date) ? 'overdue' : ''">{{ row.due_date || '—' }}</td>
               <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
                 {{ fmtMoney(row.debt_amount) }}
               </td>
@@ -195,7 +197,10 @@
     created() {
       axios.g(`/api/system/current-user-role`).then(response => { this.user_role = response.data })
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
-      axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
+      axios.g('/api/system/users?role_id=69').then(r => {
+        this.team_list = r.data || []
+        this.team_list.push({id: -1, name: 'Khác (Không có team KD)'})
+      })
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
       this.getData()
     },
@@ -319,7 +324,7 @@
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
-.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; white-space:nowrap; }
 
 .lms-code { font-weight:600; color:#4338ca; font-size:15px; }
 .student-name { font-weight:600; }
@@ -327,6 +332,7 @@
 .text-center { text-align:center; }
 .text-right  { text-align:right; }
 .py-8 { padding:32px 0; }
+.text-wrap-cell { white-space: normal !important; max-width: 300px; word-wrap: break-word; line-height: 1.4; }
 
 .money-cell  { font-weight:600; color:#374151; }
 .money-green { font-weight:600; color:#059669; }

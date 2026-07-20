@@ -1535,24 +1535,10 @@ class ReportsController extends Controller
         }
         // Filter theo hạn thanh toán (buổi 8)
         if ($due_start) {
-            $cond .= " AND (
-                SELECT shs.class_date
-                FROM schedule_has_student shs
-                INNER JOIN contracts c2 ON c2.id = shs.contract_id
-                WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
-                ORDER BY shs.class_date ASC
-                LIMIT 7, 1
-            ) >= '$due_start'";
+            $cond .= " AND a.first_8th_session_date >= '$due_start'";
         }
         if ($due_end) {
-            $cond .= " AND (
-                SELECT shs.class_date
-                FROM schedule_has_student shs
-                INNER JOIN contracts c2 ON c2.id = shs.contract_id
-                WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
-                ORDER BY shs.class_date ASC
-                LIMIT 7, 1
-            ) <= '$due_end'";
+            $cond .= " AND a.first_8th_session_date <= '$due_end'";
         }
         // Filter theo ngày thu gần nhất
         if ($pay_start) {
@@ -1591,17 +1577,7 @@ class ReportsController extends Controller
                 a.debt_amount,
                 -- Ngày thu gần nhất
                 (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
-                -- Hạn thanh toán = buổi học thứ 8 (offset 7, 0-indexed) từ khi xếp lớp
-                -- Chỉ có giá trị khi đã xếp lớp (enrolment_start_date IS NOT NULL)
-                (
-                    SELECT shs.class_date
-                    FROM schedule_has_student shs
-                    INNER JOIN contracts c2 ON c2.id = shs.contract_id
-                    WHERE c2.agreement_id = a.id
-                      AND c2.enrolment_start_date IS NOT NULL
-                    ORDER BY shs.class_date ASC
-                    LIMIT 7, 1
-                )                               AS due_date,
+                a.first_8th_session_date                        AS due_date,
                 a.branch_id,
                 (SELECT name FROM branches WHERE id = a.branch_id) AS branch_name,
                 a.id                            AS agreement_id,
@@ -1823,7 +1799,7 @@ class ReportsController extends Controller
         $query = "
             SELECT
                 DATE(a.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -1957,7 +1933,9 @@ class ReportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $team_id))";
+        } elseif ($team_id == -1) {
+            $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
         }
         if ($ec_id > 0) {
             $cond .= " AND a.ec_id = $ec_id";
@@ -1994,7 +1972,7 @@ class ReportsController extends Controller
         $query = "
             SELECT
                 DATE(tp.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2093,7 +2071,9 @@ class ReportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $team_id))";
+        } elseif ($team_id == -1) {
+            $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
         }
         if ($ec_id > 0) {
             $cond .= " AND a.ec_id = $ec_id";
@@ -2155,6 +2135,7 @@ class ReportsController extends Controller
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
                 a.discount_amount AS discount,
+                a.first_8th_session_date AS due_date,
                 a.debt_amount,
                 a.id AS agreement_id
             FROM agreements AS a

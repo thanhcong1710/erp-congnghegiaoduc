@@ -99,11 +99,11 @@
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
-              <td>{{ row.course_name || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
-              <td>{{ row.address || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
               <td class="text-right money-cell" style="color:#059669;">{{ fmtMoney(row.charge_amount) }}</td>
               <td class="text-center date-cell">{{ row.charge_date }}</td>
@@ -175,7 +175,10 @@
     created() {
       axios.g(`/api/system/current-user-role`).then(response => { this.user_role = response.data })
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
-      axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
+      axios.g('/api/system/users?role_id=69').then(r => {
+        this.team_list = r.data || []
+        this.team_list.push({id: -1, name: 'Khác (Không có team KD)'})
+      })
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
       this.getData()
     },
@@ -299,6 +302,7 @@
 .text-center { text-align:center; }
 .text-right  { text-align:right; }
 .py-8 { padding:32px 0; }
+.text-wrap-cell { white-space: normal !important; max-width: 300px; word-wrap: break-word; line-height: 1.4; }
 
 .money-cell  { font-weight:600; color:#374151; }
 .money-green { font-weight:600; color:#059669; }

@@ -2142,10 +2142,10 @@ class ExportsController extends Controller
             $cond .= " AND a.debt_amount > 0";
         }
         if ($due_start) {
-            $cond .= " AND (SELECT shs.class_date FROM schedule_has_student shs INNER JOIN contracts c2 ON c2.id=shs.contract_id WHERE c2.agreement_id=a.id AND c2.enrolment_start_date IS NOT NULL ORDER BY shs.class_date ASC LIMIT 7,1) >= '$due_start'";
+            $cond .= " AND a.first_8th_session_date >= '$due_start'";
         }
         if ($due_end) {
-            $cond .= " AND (SELECT shs.class_date FROM schedule_has_student shs INNER JOIN contracts c2 ON c2.id=shs.contract_id WHERE c2.agreement_id=a.id AND c2.enrolment_start_date IS NOT NULL ORDER BY shs.class_date ASC LIMIT 7,1) <= '$due_end'";
+            $cond .= " AND a.first_8th_session_date <= '$due_end'";
         }
         if ($pay_start) {
             $cond .= " AND (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id=a.id) >= '$pay_start'";
@@ -2166,10 +2166,7 @@ class ExportsController extends Controller
                 (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
                 a.must_charge, a.total_charged, a.debt_amount,
                 (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
-                (SELECT shs.class_date FROM schedule_has_student shs
-                    INNER JOIN contracts c2 ON c2.id = shs.contract_id
-                    WHERE c2.agreement_id = a.id AND c2.enrolment_start_date IS NOT NULL
-                    ORDER BY shs.class_date ASC LIMIT 7, 1) AS due_date
+                a.first_8th_session_date AS due_date
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
@@ -2194,7 +2191,7 @@ class ExportsController extends Controller
         $sheet->getRowDimension(2)->setRowHeight(6);
 
         // Headers
-        $headers = ['Mã HV', 'Họ tên', 'Chương trình', 'Team KD', 'Thành viên sale', 'Tổng học phí', 'Đã thu', 'Còn phải thu', 'Trạng thái', 'Hạn thanh toán', 'Ngày thu gần nhất'];
+        $headers = ['Mã HV', 'Họ tên', 'Chương trình', 'Team KD', 'Thành viên sale', 'Tổng học phí', 'Đã thu', 'Còn phải thu', 'Trạng thái', 'Hạn TT', 'Ngày thu gần nhất'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2526,7 +2523,8 @@ class ExportsController extends Controller
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
-            if ($v === 'v') $v = '';
+            if ($v === 'v')
+                $v = '';
             switch ($key_name) {
                 case 'branch_id':
                     $branch_id = $v ? explode('-', $v) : [];
@@ -2594,7 +2592,7 @@ class ExportsController extends Controller
         $query = "
             SELECT
                 DATE(a.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2620,7 +2618,7 @@ class ExportsController extends Controller
         ";
 
         $list = u::query($query);
-        
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
@@ -2636,14 +2634,14 @@ class ExportsController extends Controller
 
         $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1 (Đã duyệt)', 'Ngày CK 1 (Đã duyệt)', 'Học phí đợt 2 (Đã duyệt)', 'Ngày CK 2 (Đã duyệt)', 'Ảnh Bill (Đã duyệt)', 'Học phí đợt 1 (Chưa duyệt)', 'Ngày CK 1 (Chưa duyệt)', 'Học phí đợt 2 (Chưa duyệt)', 'Ngày CK 2 (Chưa duyệt)', 'Ảnh Bill (Chưa duyệt)', 'Giảm trừ', 'Công nợ'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
-        
+
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
             'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
         ];
-        
+
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
@@ -2663,20 +2661,21 @@ class ExportsController extends Controller
 
         $rowIdx = 4;
         foreach ($list as $idx => $item) {
-            $p1_amount = (float)$item->p1_amount;
-            $total_paid = (float)$item->total_paid;
+            $p1_amount = (float) $item->p1_amount;
+            $total_paid = (float) $item->total_paid;
             $p2_amount = $total_paid - $p1_amount;
-            if ($p2_amount < 0) $p2_amount = 0;
+            if ($p2_amount < 0)
+                $p2_amount = 0;
             $p2_date = ($p2_amount > 0) ? $item->last_pay_date : '';
-            
+
             $agrmId = $item->agreement_id;
             $tmpPayments = u::query("SELECT attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 1");
             $bills = [];
-            foreach($tmpPayments as $tp) {
+            foreach ($tmpPayments as $tp) {
                 if (!empty($tp->attachments)) {
                     $arr = json_decode($tp->attachments, true);
                     if (is_array($arr)) {
-                        foreach($arr as $path) {
+                        foreach ($arr as $path) {
                             $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
                             $bills[] = $fullUrl;
                         }
@@ -2693,19 +2692,19 @@ class ExportsController extends Controller
             $tmpPaymentsCd = u::query("SELECT charge_amount, charge_date, attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 0 ORDER BY id ASC");
             $bills_cd = [];
             if (count($tmpPaymentsCd) > 0) {
-                $p1_amount_cd = (float)$tmpPaymentsCd[0]->charge_amount;
+                $p1_amount_cd = (float) $tmpPaymentsCd[0]->charge_amount;
                 $p1_date_cd = substr($tmpPaymentsCd[0]->charge_date, 0, 10);
                 $total_paid_cd = 0;
                 $last_pay_date_cd = '';
-                foreach($tmpPaymentsCd as $tp_cd) {
-                    $total_paid_cd += (float)$tp_cd->charge_amount;
+                foreach ($tmpPaymentsCd as $tp_cd) {
+                    $total_paid_cd += (float) $tp_cd->charge_amount;
                     if ($tp_cd->charge_date) {
                         $last_pay_date_cd = substr($tp_cd->charge_date, 0, 10);
                     }
                     if (!empty($tp_cd->attachments)) {
                         $arr = json_decode($tp_cd->attachments, true);
                         if (is_array($arr)) {
-                            foreach($arr as $path) {
+                            foreach ($arr as $path) {
                                 $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
                                 $bills_cd[] = $fullUrl;
                             }
@@ -2713,7 +2712,8 @@ class ExportsController extends Controller
                     }
                 }
                 $p2_amount_cd = $total_paid_cd - $p1_amount_cd;
-                if ($p2_amount_cd < 0) $p2_amount_cd = 0;
+                if ($p2_amount_cd < 0)
+                    $p2_amount_cd = 0;
                 $p2_date_cd = ($p2_amount_cd > 0) ? $last_pay_date_cd : '';
             }
             $img_bill_str_cd = implode("\n", $bills_cd);
@@ -2726,7 +2726,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('F' . $rowIdx, $item->phone);
             $sheet->setCellValue('G' . $rowIdx, $item->team_name ?? '—');
             $sheet->setCellValue('H' . $rowIdx, $item->address ?? '—');
-            $sheet->setCellValue('I' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('I' . $rowIdx, (float) $item->must_charge);
             $sheet->setCellValue('J' . $rowIdx, $item->dk_chung);
             $sheet->setCellValue('K' . $rowIdx, $p1_amount);
             $sheet->setCellValue('L' . $rowIdx, $item->p1_date);
@@ -2738,8 +2738,8 @@ class ExportsController extends Controller
             $sheet->setCellValue('R' . $rowIdx, $p2_amount_cd);
             $sheet->setCellValue('S' . $rowIdx, $p2_date_cd);
             $sheet->setCellValue('T' . $rowIdx, $img_bill_str_cd);
-            $sheet->setCellValue('U' . $rowIdx, (float)$item->discount);
-            $sheet->setCellValue('V' . $rowIdx, (float)$item->debt_amount);
+            $sheet->setCellValue('U' . $rowIdx, (float) $item->discount);
+            $sheet->setCellValue('V' . $rowIdx, (float) $item->debt_amount);
 
             $sheet->getStyle("A$rowIdx:V$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
@@ -2755,7 +2755,7 @@ class ExportsController extends Controller
             $sheet->getStyle("N$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("O$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("O$rowIdx")->getAlignment()->setWrapText(true);
-            
+
             $sheet->getStyle("P$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("Q$rowIdx")->applyFromArray($centerAlign);
@@ -2764,7 +2764,7 @@ class ExportsController extends Controller
             $sheet->getStyle("S$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("T$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("T$rowIdx")->getAlignment()->setWrapText(true);
-            
+
             if (!empty($bills)) {
                 $sheet->getCell('O' . $rowIdx)->getHyperlink()->setUrl($bills[0]);
                 $sheet->getStyle('O' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
@@ -2775,12 +2775,12 @@ class ExportsController extends Controller
                 $sheet->getStyle('T' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
                 $sheet->getStyle('T' . $rowIdx)->getFont()->setUnderline(true);
             }
-            
+
             $sheet->getStyle("U$rowIdx:V$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("V$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            
-            if ((float)$item->debt_amount > 0) {
+
+            if ((float) $item->debt_amount > 0) {
                 $sheet->getStyle("V$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
 
@@ -2818,7 +2818,8 @@ class ExportsController extends Controller
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
-            if ($v === 'v') $v = '';
+            if ($v === 'v')
+                $v = '';
             switch ($key_name) {
                 case 'branch_id':
                     $branch_id = $v ? explode('-', $v) : [];
@@ -2868,7 +2869,9 @@ class ExportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $team_id))";
+        } elseif ($team_id == -1) {
+            $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
         }
         if ($ec_id > 0) {
             $cond .= " AND a.ec_id = $ec_id";
@@ -2900,7 +2903,7 @@ class ExportsController extends Controller
         $query = "
             SELECT
                 DATE(a.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2922,6 +2925,7 @@ class ExportsController extends Controller
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
                 a.discount_amount AS discount,
+                a.first_8th_session_date AS due_date,
                 a.debt_amount,
                 a.id AS agreement_id
             FROM agreements AS a
@@ -2932,7 +2936,7 @@ class ExportsController extends Controller
         ";
 
         $list = u::query($query);
-        
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
@@ -2946,23 +2950,23 @@ class ExportsController extends Controller
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
-        
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Hạn thanh toán', 'Công nợ', 'XN Kế toán', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'];
+
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
             'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
         ];
-        
+
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:T3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:U3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
+        $widths = [8, 14, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 14, 16, 14, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2975,17 +2979,18 @@ class ExportsController extends Controller
 
         $rowIdx = 4;
         foreach ($list as $idx => $item) {
-            $p1_amount = (float)$item->p1_amount;
-            $total_paid = (float)$item->total_paid;
+            $p1_amount = (float) $item->p1_amount;
+            $total_paid = (float) $item->total_paid;
             $p2_amount = $total_paid - $p1_amount;
-            if ($p2_amount < 0) $p2_amount = 0;
+            if ($p2_amount < 0)
+                $p2_amount = 0;
             $p2_date = ($p2_amount > 0) ? $item->last_pay_date : '';
-            
-            $xn_ketoan = ((float)$item->debt_amount > 0) ? 'R thiếu' : 'R';
+
+            $xn_ketoan = ((float) $item->debt_amount > 0) ? 'R thiếu' : 'R';
             $luong_sale = 0;
-            if ((float)$item->debt_amount == 0) {
+            if ((float) $item->debt_amount == 0) {
                 $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
-                $luong_sale = ((float)$item->must_charge) * $rate;
+                $luong_sale = ((float) $item->must_charge) * $rate;
             }
 
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
@@ -2998,18 +3003,19 @@ class ExportsController extends Controller
             $sheet->setCellValue('H' . $rowIdx, $item->ec_name ?? '—');
             $sheet->setCellValue('I' . $rowIdx, $item->class_info ?? '—');
             $sheet->setCellValue('J' . $rowIdx, $item->address ?? '—');
-            $sheet->setCellValue('K' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('K' . $rowIdx, (float) $item->must_charge);
             $sheet->setCellValue('L' . $rowIdx, $item->dk_chung);
             $sheet->setCellValue('M' . $rowIdx, $p1_amount);
             $sheet->setCellValue('N' . $rowIdx, $item->p1_date);
             $sheet->setCellValue('O' . $rowIdx, $p2_amount);
             $sheet->setCellValue('P' . $rowIdx, $p2_date);
-            $sheet->setCellValue('Q' . $rowIdx, (float)$item->discount);
-            $sheet->setCellValue('R' . $rowIdx, (float)$item->debt_amount);
-            $sheet->setCellValue('S' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('T' . $rowIdx, (float)$luong_sale);
+            $sheet->setCellValue('Q' . $rowIdx, (float) $item->discount);
+            $sheet->setCellValue('R' . $rowIdx, $item->due_date ?? '—');
+            $sheet->setCellValue('S' . $rowIdx, (float) $item->debt_amount);
+            $sheet->setCellValue('T' . $rowIdx, $xn_ketoan);
+            $sheet->setCellValue('U' . $rowIdx, (float) $luong_sale);
 
-            $sheet->getStyle("A$rowIdx:T$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:U$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("D$rowIdx:J$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("K$rowIdx")->applyFromArray($rightAlign);
@@ -3021,22 +3027,27 @@ class ExportsController extends Controller
             $sheet->getStyle("O$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("O$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("P$rowIdx")->applyFromArray($centerAlign);
-            
-            $sheet->getStyle("Q$rowIdx:R$rowIdx")->applyFromArray($rightAlign);
+
+            $sheet->getStyle("Q$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("R$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            
-            if ((float)$item->debt_amount > 0) {
-                $sheet->getStyle("R$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+            $sheet->getStyle("R$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("U$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+
+            if ((float) $item->debt_amount > 0) {
+                $sheet->getStyle("S$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
-            
+
             $sheet->getStyle("S$rowIdx")->applyFromArray($centerAlign);
             if ($xn_ketoan === 'R') {
                 $sheet->getStyle("S$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
             } else {
                 $sheet->getStyle("S$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
             }
-            
+
             $sheet->getStyle("T$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("T$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("T$rowIdx")->getFont()->setBold(true);
@@ -3076,7 +3087,8 @@ class ExportsController extends Controller
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
-            if ($v === 'v') $v = '';
+            if ($v === 'v')
+                $v = '';
             switch ($key_name) {
                 case 'branch_id':
                     $branch_id = $v ? explode('-', $v) : [];
@@ -3177,7 +3189,7 @@ class ExportsController extends Controller
         ";
 
         $list = u::query($query);
-        
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
@@ -3193,14 +3205,14 @@ class ExportsController extends Controller
 
         $headers = ['STT', 'Ngày tạo', 'Họ và tên HS', 'Mã HS', 'SĐT', 'SĐT phụ huynh', 'Khoá học đăng kí', 'Khóa lẻ', 'Lớp đăng ký', 'Ngày khai giảng', 'Team kinh doanh', 'Thành viên sale'];
         $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
-        
+
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
             'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
         ];
-        
+
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
@@ -3276,7 +3288,8 @@ class ExportsController extends Controller
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
-            if ($v === 'v') $v = '';
+            if ($v === 'v')
+                $v = '';
             switch ($key_name) {
                 case 'branch_id':
                     $branch_id = $v ? explode('-', $v) : [];
@@ -3310,9 +3323,9 @@ class ExportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $cond = " c.status > 0 AND c.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
@@ -3333,9 +3346,9 @@ class ExportsController extends Controller
             $kw = addslashes($keyword);
             $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
         }
-        
+
         $cond .= " AND (c.class_id = 0 OR c.class_id IS NULL)";
-        
+
         if ($start_date) {
             $cond .= " AND c.created_at >= '$start_date 00:00:00'";
         }
@@ -3378,7 +3391,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('H1', 'Team KD');
         $sheet->setCellValue('I1', 'Sale');
 
-        foreach(range('A','I') as $columnID) {
+        foreach (range('A', 'I') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
@@ -3416,7 +3429,7 @@ class ExportsController extends Controller
             $req->$v = $arr_value[$k];
         }
 
-        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")"; 
+        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
         if (isset($req->team_id) && $req->team_id > 0) {
             $team_id = (int) $req->team_id;
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
@@ -3503,7 +3516,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('H' . $rowIdx, $item->product_name);
             $sheet->setCellValue('I' . $rowIdx, $item->address);
             $sheet->setCellValue('J' . $rowIdx, $item->link_facebook);
-            $sheet->setCellValue('K' . $rowIdx, $book_options[(int)$item->book_receive] ?? '');
+            $sheet->setCellValue('K' . $rowIdx, $book_options[(int) $item->book_receive] ?? '');
             $sheet->setCellValue('L' . $rowIdx, $item->book_receive == 2 ? '' : $item->book_delivered_date);
             $rowIdx++;
         }
@@ -3545,9 +3558,9 @@ class ExportsController extends Controller
         }
 
         if (in_array(69, $roleIds)) {
-            $team_id = $user->id; 
+            $team_id = $user->id;
         } elseif (in_array(68, $roleIds)) {
-            $ec_id = $user->id; 
+            $ec_id = $user->id;
         }
 
         $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
@@ -3556,7 +3569,9 @@ class ExportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $team_id))";
+        } elseif ($team_id == -1) {
+            $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
         }
         if ($ec_id > 0) {
             $cond .= " AND a.ec_id = $ec_id";
@@ -3571,7 +3586,7 @@ class ExportsController extends Controller
         } elseif ($completion_status == 0) {
             $cond .= " AND a.debt_amount > 0";
         }
-        
+
         if ($start_date || $end_date) {
             if ($start_date) {
                 $cond .= " AND tp.created_at >= '$start_date 00:00:00'";
@@ -3584,7 +3599,7 @@ class ExportsController extends Controller
         $query = "
             SELECT
                 DATE(tp.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -3613,7 +3628,7 @@ class ExportsController extends Controller
             WHERE $cond
             ORDER BY tp.id DESC
         ";
-        
+
         $list = u::query($query);
 
         $spreadsheet = new Spreadsheet();
@@ -3641,7 +3656,7 @@ class ExportsController extends Controller
             "M2" => "Link Bill",
             "N2" => "Trạng thái duyệt"
         ];
-        
+
         foreach ($headers as $c => $l) {
             $sheet->setCellValue($c, $l);
         }
@@ -3655,17 +3670,20 @@ class ExportsController extends Controller
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 3;
             $item = $list[$i];
-            
+
             $status_str = "";
-            if ($item->status == 1) $status_str = "Đã duyệt";
-            elseif ($item->status == 2) $status_str = "Từ chối";
-            else $status_str = "Chờ duyệt";
-            
+            if ($item->status == 1)
+                $status_str = "Đã duyệt";
+            elseif ($item->status == 2)
+                $status_str = "Từ chối";
+            else
+                $status_str = "Chờ duyệt";
+
             $bills_links = [];
             if (!empty($item->attachments)) {
                 $arr = json_decode($item->attachments, true);
                 if (is_array($arr)) {
-                    foreach($arr as $path) {
+                    foreach ($arr as $path) {
                         $fullUrl = rtrim(env('APP_URL'), '/') . '/' . ltrim($path, '/');
                         $bills_links[] = $fullUrl;
                     }
@@ -3707,7 +3725,7 @@ class ExportsController extends Controller
 
     public function exportClassStudents($class_id)
     {
-        $class_id = (int)$class_id;
+        $class_id = (int) $class_id;
         $class_info = u::first("SELECT cls_name FROM classes WHERE id = $class_id");
         $cls_name = $class_info ? $class_info->cls_name : 'Class';
 
@@ -3735,8 +3753,19 @@ class ExportsController extends Controller
         $sheet->mergeCells('A1:M1');
 
         $headers = [
-            'STT', 'Họ tên', 'Mã HV', 'SĐT', 'Link Facebook', 'Mã hợp đồng', 'Gói học phí', 
-            'Phải đóng', 'Đã đóng', 'Ngày bắt đầu', 'Ngày kết thúc', 'Số buổi đã học', 'Tổng số buổi'
+            'STT',
+            'Họ tên',
+            'Mã HV',
+            'SĐT',
+            'Link Facebook',
+            'Mã hợp đồng',
+            'Gói học phí',
+            'Phải đóng',
+            'Đã đóng',
+            'Ngày bắt đầu',
+            'Ngày kết thúc',
+            'Số buổi đã học',
+            'Tổng số buổi'
         ];
 
         $col = 'A';
@@ -3755,13 +3784,13 @@ class ExportsController extends Controller
             $sheet->setCellValue('E' . $rowIdx, $item->link_facebook);
             $sheet->setCellValue('F' . $rowIdx, $item->contract_code);
             $sheet->setCellValue('G' . $rowIdx, $item->tuition_fee_name);
-            $sheet->setCellValue('H' . $rowIdx, (float)$item->must_charge);
-            $sheet->setCellValue('I' . $rowIdx, (float)$item->total_charged);
+            $sheet->setCellValue('H' . $rowIdx, (float) $item->must_charge);
+            $sheet->setCellValue('I' . $rowIdx, (float) $item->total_charged);
             $sheet->setCellValue('J' . $rowIdx, $item->enrolment_start_date);
             $sheet->setCellValue('K' . $rowIdx, $item->enrolment_last_date);
             $sheet->setCellValue('L' . $rowIdx, $item->done_sessions);
             $sheet->setCellValue('M' . $rowIdx, $item->summary_sessions);
-            
+
             $sheet->getStyle("H$rowIdx:I$rowIdx")->getNumberFormat()->setFormatCode('#,##0');
             $rowIdx++;
         }
@@ -3773,7 +3802,7 @@ class ExportsController extends Controller
         $writer = new Xlsx($spreadsheet);
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header('Content-Disposition: attachment;filename="Danh_sach_lop_'.$cls_name.'.xlsx"');
+            header('Content-Disposition: attachment;filename="Danh_sach_lop_' . $cls_name . '.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

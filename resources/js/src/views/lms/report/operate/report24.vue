@@ -113,11 +113,11 @@
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
 
-              <td>{{ row.course_name || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
-              <td>{{ row.address || '—' }}</td>
+              <td class="text-wrap-cell">{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
               <td>{{ row.dk_chung }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
@@ -321,6 +321,7 @@
 .text-center { text-align:center; }
 .text-right  { text-align:right; }
 .py-8 { padding:32px 0; }
+.text-wrap-cell { white-space: normal !important; max-width: 300px; word-wrap: break-word; line-height: 1.4; }
 
 .money-cell  { font-weight:600; color:#374151; }
 .money-green { font-weight:600; color:#059669; }
