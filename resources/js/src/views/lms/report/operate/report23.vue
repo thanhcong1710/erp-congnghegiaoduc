@@ -169,17 +169,17 @@
 .rpt-badge-count { margin-left:auto; background:#eef2ff; color:#4338ca; padding:6px 14px; border-radius:20px; font-weight:600; font-size:.85rem; }
 
 /* Table */
-.rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
+.rpt-table-wrap { overflow-x:auto; max-height:75vh; overflow-y:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 
 /* Group header row */
-.rpt-table thead .group-header-row th { padding:10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2); }
-.rpt-table thead tr:nth-child(2) th { padding:8px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2); }
+.rpt-table thead .group-header-row th { padding:10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:0; z-index:2; font-size:15px; }
+.rpt-table thead tr:nth-child(2) th { padding:8px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2);  position:sticky; top:0; z-index:2; font-size:15px; }
 
 /* Column color groups */
 .th-green  { background:#16a34a !important; color:white !important; font-weight:600; }
 .th-orange { background:#ea580c !important; color:white !important; font-weight:600; }
-.rpt-table thead th:not(.th-green):not(.th-orange) { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; font-weight:600; }
+.rpt-table thead th:not(.th-green):not(.th-orange) { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; font-weight:600;  font-size:15px; position:sticky; top:0; z-index:2; }
 
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }

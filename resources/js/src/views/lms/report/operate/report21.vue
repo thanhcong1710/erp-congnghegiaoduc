@@ -150,10 +150,10 @@
 .rpt-btn { border-radius: 8px !important; }
 
 /* Table */
-.rpt-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; max-width: 820px; }
+.rpt-table-wrap { overflow-x:auto; max-height:75vh; overflow-y:auto; border-radius: 10px; border: 1px solid #e5e7eb; max-width: 820px; }
 .rpt-table { width: 100%; border-collapse: collapse; font-size:15px; }
 .rpt-table thead tr { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-.rpt-table thead th { color: white; font-weight: 600; padding: 12px 16px; white-space: nowrap; border:1px solid rgba(255,255,255,0.2); }
+.rpt-table thead th { color: white; font-weight: 600; padding: 12px 16px; white-space: nowrap; border:1px solid rgba(255,255,255,0.2);  font-size:15px; position:sticky; top:0; z-index:2;  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 
 /* Header alignment */
 .th-label { text-align: left;  width: 44%; }

@@ -296,10 +296,10 @@
 .rpt-pill--red   { background:#fee2e2; color:#b91c1c; }
 
 /* Table */
-.rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
+.rpt-table-wrap { overflow-x:auto; max-height:75vh; overflow-y:auto; border-radius:10px; border:1px solid #e5e7eb; }
 .rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
-.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); text-align:left; }
+.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); text-align:left;  font-size:15px; position:sticky; top:0; z-index:2;  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th.text-right  { text-align:right; }
 .rpt-table thead th.text-center { text-align:center; }
 
