@@ -59,19 +59,19 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
-              <td class="text-center text-muted">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-              <td class="text-muted small">{{ item.branch_name }}</td>
+              <td class="text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+              <td class="small">{{ item.branch_name }}</td>
               <td><span class="badge-code">{{ item.cls_name }}</span></td>
               <td>{{ item.product_name }}</td>
               <td class="text-center"><strong>{{ item.total_students }}</strong></td>
-              <td class="text-center text-muted">{{ item.max_students }}</td>
+              <td class="text-center">{{ item.max_students }}</td>
               <td><span class="status-badge" :class="getStatusClass(item.status_text)">{{ item.status_text }}</span></td>
-              <td class="text-muted small">{{ item.schedule_text }}</td>
-              <td class="text-muted small">{{ item.cls_startdate }}</td>
+              <td class="small">{{ item.schedule_text }}</td>
+              <td class="small">{{ item.cls_startdate }}</td>
               <td>{{ item.teacher_name }}</td>
-              <td class="text-muted">{{ item.ta_name }}</td>
-              <td class="text-muted small">{{ item.is_online_text }}</td>
-              <td class="text-muted small">{{ item.room_name }}</td>
+              <td>{{ item.ta_name }}</td>
+              <td class="small">{{ item.is_online_text }}</td>
+              <td class="small">{{ item.room_name }}</td>
             </tr>
           </tbody>
         </table>
@@ -186,19 +186,18 @@
 .rpt-btn { border-radius:8px !important; }
 .rpt-badge-count { margin-left:auto; background:#eef2ff; color:#4338ca; padding:6px 14px; border-radius:20px; font-weight:600; font-size:.85rem; }
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
 .rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
-.badge-code { background:#eef2ff; color:#4338ca; border-radius:6px; padding:2px 8px; font-size:.78rem; font-weight:600; }
-.status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.78rem; font-weight:600; }
+.badge-code { background:#eef2ff; color:#4338ca; border-radius:6px; padding:2px 8px; font-size:15px; font-weight:600; }
+.status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:15px; font-weight:600; }
 .status-active { background:#dcfce7; color:#15803d; }
 .status-deposit { background:#dbeafe; color:#1d4ed8; }
 .status-inactive { background:#fee2e2; color:#b91c1c; }
-.text-muted { color:#9ca3af; }
-.small { font-size:.8rem; }
+.small { font-size:15px; }
 .rpt-paging { display:flex; align-items:center; flex-wrap:wrap; margin-top:16px; }
 .paging-limit-btn { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer; background:white; font-size:.85rem; font-weight:500; }
 .multiselect { z-index:999; }

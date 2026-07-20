@@ -51,7 +51,7 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(row, idx) in rows" :key="idx">
-              <td class="text-center text-muted">{{ idx + 1 }}</td>
+              <td class="text-center">{{ idx + 1 }}</td>
               <td class="team-name">{{ row.team_name }}</td>
               <td class="text-center num-cell">{{ row.new_count }}</td>
               <td class="text-center num-cell">{{ row.uplv_count }}</td>
@@ -59,7 +59,7 @@
               <td class="text-right salary-cell">{{ fmtMoney(row.salary) }}</td>
             </tr>
             <tr v-if="rows.length === 0">
-              <td colspan="6" class="text-center py-8 text-muted">Không có dữ liệu</td>
+              <td colspan="6" class="text-center py-8">Không có dữ liệu</td>
             </tr>
           </tbody>
           <tfoot v-if="summary">
@@ -170,7 +170,7 @@
 
 /* Table */
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 
 /* Group header row */
 .rpt-table thead .group-header-row th { padding:10px; white-space:nowrap; border:1px solid rgba(255,255,255,.2); }
@@ -192,7 +192,6 @@
 .num-cell    { font-weight:600; color:#374151; }
 .money-cell  { font-weight:600; color:#374151; }
 .salary-cell { font-weight:700; color:#ea580c; }
-.text-muted  { color:#9ca3af; }
 .text-center { text-align:center; }
 .text-right  { text-align:right; }
 .py-8 { padding:32px 0; }

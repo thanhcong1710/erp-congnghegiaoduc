@@ -54,7 +54,7 @@
           </thead>
           <tbody>
             <tr v-for="(row, idx) in rows" :key="idx" class="rpt-row">
-              <td class="text-center text-muted">{{ idx + 1 }}</td>
+              <td class="text-center">{{ idx + 1 }}</td>
               <td class="font-medium">{{ row.course_name }}</td>
               <td class="text-center">
                 <span class="student-badge">{{ row.student_count | formatNumber }}</span>
@@ -156,7 +156,7 @@
 .rpt-pill--violet { background:#f5f3ff; color:#6d28d9; }
 
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 12px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
@@ -172,7 +172,6 @@
 
 .num-cell  { font-weight:600; color:#374151; }
 .money-cell { font-weight:700; color:#4338ca; }
-.text-muted { color:#9ca3af; }
 
 .rpt-total td { background:#eef2ff; font-weight:700; padding:11px 12px; font-size:.88rem; border-top:2px solid #4f46e5; color:#1e1b4b; }
 

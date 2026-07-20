@@ -116,13 +116,13 @@
           <tbody>
             <template v-for="(tr, idx) in contracts">
               <tr v-if="!tr.is_summary" :key="'r-'+idx" class="rpt-table__row">
-                <td class="text-center text-muted">{{ (pagination.cpage - 1) * pagination.limit + idx + 1 }}</td>
+                <td class="text-center">{{ (pagination.cpage - 1) * pagination.limit + idx + 1 }}</td>
                 <td><span class="badge-code">{{ tr.student_code }}</span></td>
                 <td class="font-medium">{{ tr.student_name }}</td>
                 <td>{{ tr.combo_name }}</td>
                 <td class="text-center">{{ tr.total_courses }}</td>
-                <td class="text-muted small">{{ tr.first_course_start_date | formatDateView }}</td>
-                <td class="text-muted small">{{ tr.full_fee_date | formatDateView }}</td>
+                <td class="small">{{ tr.first_course_start_date | formatDateView }}</td>
+                <td class="small">{{ tr.full_fee_date | formatDateView }}</td>
                 <td class="text-center num-cell">{{ tr.total_sessions }}</td>
                 <td class="text-right money-cell">{{ tr.combo_fee | formatMoney }}</td>
                 <td class="text-center num-cell">{{ tr.done_sessions }}</td>
@@ -299,7 +299,7 @@
 
 /* Table */
 .rpt-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; }
-.rpt-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.rpt-table { width: 100%; border-collapse: collapse; font-size:15px; }
 .rpt-table thead tr { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
 .rpt-total td {
   background: #eef2ff;
@@ -313,12 +313,11 @@
 .rpt-table__row:hover { background: #f8f7ff; }
 .rpt-table__row td { padding: 9px 10px; }
 
-.badge-code { background: #eef2ff; color: #4338ca; border-radius: 6px; padding: 2px 8px; font-size: .78rem; font-weight: 600; }
+.badge-code { background: #eef2ff; color: #4338ca; border-radius: 6px; padding: 2px 8px; font-size:15px; font-weight: 600; }
 .num-cell { font-weight: 600; color: #374151; }
 .money-cell { font-weight: 600; color: #374151; }
 .highlight-left { color: #b91c1c; font-weight: 700; }
-.text-muted { color: #9ca3af; }
-.small { font-size: .8rem; }
+.small { font-size:15px; }
 
 .pct-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
 .pct-high { background: #dcfce7; color: #15803d; }

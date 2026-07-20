@@ -87,18 +87,18 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(row, idx) in datas" :key="idx">
-              <td class="text-center text-muted">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+              <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.created_at }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="lms-code">{{ row.lms_code }}</td>
-              <td class="student-phone text-muted">{{ row.phone }}</td>
+              <td class="student-phone">{{ row.phone }}</td>
               <td>{{ row.course_name || '—' }}</td>
               <td>{{ row.product_name || '—' }}</td>
               <td>{{ row.team_name || '—' }}</td>
               <td>{{ row.ec_name || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="9" class="text-center py-8 text-muted">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="9" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -278,7 +278,7 @@
 
 /* Table */
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); text-align:left; }
 .rpt-table thead th.text-right  { text-align:right; }
@@ -288,10 +288,9 @@
 .rpt-row:hover { background:#f8f7ff; }
 .rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
 
-.lms-code { font-weight:600; color:#4338ca; font-size:.8rem; }
+.lms-code { font-weight:600; color:#4338ca; font-size:15px; }
 .student-name { font-weight:600; }
-.student-phone { font-size:.78rem; }
-.text-muted { color:#9ca3af; }
+.student-phone { font-size:15px; }
 .text-center { text-align:center; }
 .text-right  { text-align:right; }
 .py-8 { padding:32px 0; }
@@ -299,7 +298,7 @@
 .money-cell  { font-weight:600; color:#374151; }
 .money-green { font-weight:600; color:#059669; }
 .money-red   { font-weight:700; color:#dc2626; }
-.date-cell   { font-size:.8rem; }
+.date-cell   { font-size:15px; }
 .overdue     { color:#dc2626; font-weight:700; }
 
 /* Pagination */

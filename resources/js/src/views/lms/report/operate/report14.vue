@@ -38,7 +38,7 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
-              <td class="text-center text-muted">{{ index + 1 }}</td>
+              <td class="text-center">{{ index + 1 }}</td>
               <td class="font-medium">{{ item.branch_name }}</td>
               <td class="text-center num-cell">{{ item.total_students }}</td>
               <td class="text-center num-cell">{{ item.total_sessions }}</td>
@@ -105,7 +105,7 @@
 .rpt-pill__label { font-size:.7rem; font-weight:600; text-transform:uppercase; opacity:.7; }
 .rpt-pill__value { font-size:.95rem; font-weight:700; }
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
@@ -114,5 +114,4 @@
 .font-medium { font-weight:500; }
 .num-cell { font-weight:600; color:#374151; text-align:center; }
 .money-cell { font-weight:700; color:#4338ca; }
-.text-muted { color:#9ca3af; }
 </style>

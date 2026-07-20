@@ -69,7 +69,7 @@
           </thead>
           <tbody>
             <tr v-for="(row, idx) in rows" :key="idx" class="rpt-row">
-              <td class="text-center text-muted">{{ idx + 1 }}</td>
+              <td class="text-center">{{ idx + 1 }}</td>
               <td class="font-medium">{{ row.tuition_fee_name || '—' }}</td>
               <td class="text-center">{{ row.so_don_sau_tach }}</td>
               <td class="text-right money-cell">{{ row.gia_khoa_hoc | formatMoney }}</td>
@@ -180,7 +180,7 @@
 .rpt-pill--violet { background: #f5f3ff; color: #6d28d9; }
 
 .rpt-table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #e5e7eb; }
-.rpt-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.rpt-table { width: 100%; border-collapse: collapse; font-size:15px; }
 .rpt-table thead tr { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
 .rpt-table thead th { color: white; font-weight: 600; padding: 11px 12px; white-space: nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom: 1px solid #f3f4f6; transition: background .15s; }
@@ -188,7 +188,6 @@
 .rpt-row td { padding: 10px 12px; vertical-align:middle; border:1px solid #e5e7eb; }
 
 .font-medium { font-weight: 500; }
-.text-muted   { color: #9ca3af; }
 .money-cell   { font-weight: 700; color: #4338ca; }
 
 .badge-new     { display: inline-block; background: #d1fae5; color: #065f46; border-radius: 20px; padding: 3px 16px; font-weight: 700; font-size: .9rem; }

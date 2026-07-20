@@ -81,37 +81,37 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(item, index) in contracts" :key="index">
-              <td class="text-center text-muted">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+              <td class="text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td>
                 <p class="font-medium">{{ item.student_name }}</p>
-                <p class="text-muted small">{{ item.lms_code }}</p>
-                <p class="text-muted small">{{ item.gud_mobile1 }}</p>
+                <p class="small">{{ item.lms_code }}</p>
+                <p class="small">{{ item.gud_mobile1 }}</p>
               </td>
               <td>
                 <p><span class="badge-code">{{ item.contract_code }}</span></p>
                 <p class="small mt-1">TT: <span :class="getStatusClass(item.status)">{{ item.label_status }}</span></p>
-                <p class="text-muted small">{{ item.class_name || 'Chưa xếp lớp' }}</p>
-                <p class="text-muted small">{{ item.tuition_fee_name }}</p>
+                <p class="small">{{ item.class_name || 'Chưa xếp lớp' }}</p>
+                <p class="small">{{ item.tuition_fee_name }}</p>
               </td>
               <td>
                 <p class="small">{{ item.branch_name }}</p>
-                <p class="text-muted small">{{ item.product_name }}</p>
+                <p class="small">{{ item.product_name }}</p>
               </td>
               <td>
                 <p class="small">EC: {{ item.ec_name || '---' }}</p>
-                <p class="text-muted small">Lead: {{ item.ec_leader_name || '---' }}</p>
+                <p class="small">Lead: {{ item.ec_leader_name || '---' }}</p>
               </td>
               <td class="text-center">
                 <div>
                   <span style="font-size:1.1rem;font-weight:700;color:#4338ca">{{ item.done_sessions }}</span>
-                  <span class="text-muted"> / {{ item.summary_sessions }}</span>
+                  <span> / {{ item.summary_sessions }}</span>
                 </div>
-                <div class="text-muted" style="font-size:.78rem;">Còn: <strong>{{ item.left_sessions }}</strong> buổi</div>
+                <div >Còn: <strong>{{ item.left_sessions }}</strong> buổi</div>
                 <vs-progress v-if="item.summary_sessions" :height="5" :percent="Math.round(item.done_sessions*100/item.summary_sessions)" color="primary" style="margin-top:4px;"></vs-progress>
               </td>
               <td class="text-right">
                 <p class="small">Phải đóng: <strong>{{ item.must_charge | formatMoney }}</strong></p>
-                <p class="text-muted small">Đã đóng: {{ item.total_charged | formatMoney }}</p>
+                <p class="small">Đã đóng: {{ item.total_charged | formatMoney }}</p>
                 <p class="small" style="color:#b91c1c;">Nợ: {{ item.debt_amount | formatMoney }}</p>
               </td>
               <td class="text-right"><span class="left-box">{{ item.left_amount | formatMoney }}</span></td>
@@ -219,16 +219,15 @@
 .rpt-pill--teal    { background:#f0fdfa; color:#0f766e; }
 .rpt-pill--gray    { background:#f9fafb; color:#374151; }
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.84rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
 .rpt-row:hover { background:#f8f7ff; }
 .rpt-row td { padding:9px 10px; vertical-align:top; }
-.badge-code { background:#eef2ff; color:#4338ca; border-radius:6px; padding:2px 8px; font-size:.78rem; font-weight:600; }
+.badge-code { background:#eef2ff; color:#4338ca; border-radius:6px; padding:2px 8px; font-size:15px; font-weight:600; }
 .font-medium { font-weight:500; }
-.text-muted { color:#9ca3af; }
-.small { font-size:.8rem; }
+.small { font-size:15px; }
 .mt-1 { margin-top:4px; }
 .left-box { background:#eef2ff; color:#4338ca; padding:5px 12px; border-radius:8px; font-weight:700; font-size:.9rem; display:inline-block; }
 .text-success { color:#15803d; }

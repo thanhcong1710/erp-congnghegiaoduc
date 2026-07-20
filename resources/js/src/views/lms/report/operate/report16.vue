@@ -68,7 +68,7 @@
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
-              <td class="text-center text-muted">{{ index + 1 }}</td>
+              <td class="text-center">{{ index + 1 }}</td>
               <td class="font-medium">{{ item.branch_name }}</td>
               <td class="text-center num-cell">{{ item.total_contracts | formatNumber }}</td>
               <td class="text-right num-cell">{{ item.total_must_charge | formatMoney }}</td>
@@ -167,7 +167,7 @@
 .rpt-pill--green  { background:#f0fdf4; color:#15803d; }
 .rpt-pill--red    { background:#fef2f2; color:#b91c1c; }
 .rpt-table-wrap { overflow-x:auto; border-radius:10px; border:1px solid #e5e7eb; }
-.rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
 .rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
 .rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2); }
 .rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
@@ -175,7 +175,6 @@
 .rpt-row td { padding:10px; vertical-align:middle; border:1px solid #e5e7eb; }
 .font-medium { font-weight:500; }
 .num-cell { font-weight:600; }
-.text-muted { color:#9ca3af; }
 /* ── Dòng TỔNG CỘNG: clean indigo, không gradient ── */
 .rpt-total td { background:#eef2ff; font-weight:700; padding:11px 10px; border-top:2px solid #4f46e5; color:#1e1b4b; font-size:.88rem; }
 .left-box { background:#eef2ff; color:#4338ca; padding:5px 12px; border-radius:8px; font-weight:700; font-size:.88rem; display:inline-block; }
