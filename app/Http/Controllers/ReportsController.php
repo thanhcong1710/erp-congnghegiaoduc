@@ -2446,11 +2446,16 @@ class ReportsController extends Controller
         $contract_ids = $request->contract_ids;
         $date = $request->book_delivered_date;
         
-        if (!empty($contract_ids) && is_array($contract_ids) && !empty($date)) {
+        if (!empty($contract_ids) && is_array($contract_ids)) {
             $ids = implode(',', array_map('intval', $contract_ids));
-            $safe_date = date('Y-m-d', strtotime($date));
-            u::query("UPDATE contracts SET book_delivered_date = '$safe_date' WHERE id IN ($ids)");
-            u::query("UPDATE log_contracts SET book_delivered_date = '$safe_date' WHERE contract_id IN ($ids)");
+            if (!empty($date)) {
+                $safe_date = date('Y-m-d', strtotime($date));
+                u::query("UPDATE contracts SET book_delivered_date = '$safe_date' WHERE id IN ($ids)");
+                u::query("UPDATE log_contracts SET book_delivered_date = '$safe_date' WHERE contract_id IN ($ids)");
+            } else {
+                u::query("UPDATE contracts SET book_delivered_date = NULL WHERE id IN ($ids)");
+                u::query("UPDATE log_contracts SET book_delivered_date = NULL WHERE contract_id IN ($ids)");
+            }
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }
         return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);

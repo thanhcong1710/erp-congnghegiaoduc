@@ -228,15 +228,14 @@
       changePageLimit(limit) { this.pagination.cpage = 1; this.pagination.limit = limit; this.getData() },
       
       updateSingleDate(item) {
-        if (!item.book_delivered_date) return;
-        const date_str = this.fmtDate(item.book_delivered_date);
+        const date_str = item.book_delivered_date ? this.fmtDate(item.book_delivered_date) : '';
         this.$vs.loading();
         axios.p('/api/lms/reports/update-book-delivered-date', {
           contract_ids: [item.contract_id],
           book_delivered_date: date_str
         }).then(res => {
           this.$vs.loading.close();
-          this.$vs.notify({ title: 'Thành công', text: 'Cập nhật ngày phát sách thành công', color: 'success' });
+          this.$vs.notify({ title: 'Thành công', text: date_str ? 'Cập nhật ngày phát sách thành công' : 'Đã xóa ngày phát sách', color: 'success' });
         }).catch(err => {
           this.$vs.loading.close();
           this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
