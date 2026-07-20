@@ -35,7 +35,7 @@
         </div>
         <div>
           <label class="rpt-label">Trạng thái công nợ</label>
-          <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Hoàn thành (công nợ = 0)'}, {id:0, name:'Chưa hoàn thành'}]" label="name" track-by="id"
+          <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Đã hoàn thành'}, {id:2, name:'Đã chuyển khoản'}, {id:3, name:'Chưa chuyển khoản'}]" label="name" track-by="id"
             placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
           </multiselect>
         </div>
@@ -46,6 +46,11 @@
         <div>
           <label class="rpt-label">Ngày tạo (từ — đến)</label>
           <date-picker v-model="searchData.date_range" type="date" range :clearable="true"
+            format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
+        </div>
+        <div>
+          <label class="rpt-label">Ngày CK gần nhất</label>
+          <date-picker v-model="searchData.pay_date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
       </div>
@@ -81,7 +86,7 @@
               <th style="min-width:50px" class="text-center">STT</th>
               <th style="min-width:120px">Ngày tạo</th>
               <th style="min-width:80px">Trạng thái đăng ký</th>
-              <th style="min-width:80px">Up quá trình từ</th>
+
               <th style="min-width:220px">Khoá học đăng kí</th>
               <th style="min-width:200px">Họ và tên</th>
               <th style="min-width:130px">Sđt</th>
@@ -106,7 +111,7 @@
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
-              <td>{{ row.up_process }}</td>
+
               <td>{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone">{{ row.phone }}</td>
@@ -130,7 +135,7 @@
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="20" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="19" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -178,6 +183,7 @@
           team_obj: null, ec_obj: null, completion_status_obj: null,
           keyword: '',
           date_range: '',
+          pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
         },
         dpLang: {
           days: ['CN','T2','T3','T4','T5','T6','T7'],
@@ -195,7 +201,7 @@
     },
     methods: {
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '' }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '', pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)] }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -224,6 +230,11 @@
           start_date = this.fmtDate(this.searchData.date_range[0])
           end_date   = this.fmtDate(this.searchData.date_range[1])
         }
+        let pay_start_date = '', pay_end_date = ''
+        if (Array.isArray(this.searchData.pay_date_range) && this.searchData.pay_date_range[0]) {
+          pay_start_date = this.fmtDate(this.searchData.pay_date_range[0])
+          pay_end_date   = this.fmtDate(this.searchData.pay_date_range[1])
+        }
         return {
           branch_id,
           team_id:   this.searchData.team_obj ? this.searchData.team_obj.id : 0,
@@ -231,6 +242,7 @@
           completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           keyword:   this.searchData.keyword  || '',
           start_date, end_date,
+          pay_start_date, pay_end_date,
           pagination: this.pagination,
         }
       },
@@ -263,6 +275,8 @@
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
         if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
+        if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }
+        if (p.pay_end_date)   { keys.push('pay_end_date');   values.push(p.pay_end_date) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report25/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },

@@ -81,7 +81,7 @@
               <th style="min-width:50px" class="text-center" rowspan="2">STT</th>
               <th style="min-width:120px" rowspan="2">Ngày tạo</th>
               <th style="min-width:80px" rowspan="2">Trạng thái đăng ký</th>
-              <th style="min-width:80px" rowspan="2">Up quá trình từ</th>
+
               <th style="min-width:220px" rowspan="2">Khoá học đăng kí</th>
               <th style="min-width:200px" rowspan="2">Họ và tên</th>
               <th style="min-width:130px" rowspan="2">Sđt</th>
@@ -112,7 +112,7 @@
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
-              <td>{{ row.up_process }}</td>
+
               <td>{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
               <td class="student-phone">{{ row.phone }}</td>
@@ -136,7 +136,7 @@
               </td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="23" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="22" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>

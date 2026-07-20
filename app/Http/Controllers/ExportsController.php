@@ -2551,7 +2551,6 @@ class ExportsController extends Controller
             SELECT
                 DATE(a.created_at) AS date_0,
                 IF(a.count_recharge = 0, 'Mới', '') AS status_register,
-                'Không' AS up_process,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2584,15 +2583,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:W1');
+        $sheet->mergeCells('A1:V1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Up quá trình từ', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1 (Đã duyệt)', 'Ngày CK 1 (Đã duyệt)', 'Học phí đợt 2 (Đã duyệt)', 'Ngày CK 2 (Đã duyệt)', 'Ảnh Bill (Đã duyệt)', 'Học phí đợt 1 (Chưa duyệt)', 'Ngày CK 1 (Chưa duyệt)', 'Học phí đợt 2 (Chưa duyệt)', 'Ngày CK 2 (Chưa duyệt)', 'Ảnh Bill (Chưa duyệt)', 'Giảm trừ', 'Công nợ'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W'];
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1 (Đã duyệt)', 'Ngày CK 1 (Đã duyệt)', 'Học phí đợt 2 (Đã duyệt)', 'Ngày CK 2 (Đã duyệt)', 'Ảnh Bill (Đã duyệt)', 'Học phí đợt 1 (Chưa duyệt)', 'Ngày CK 1 (Chưa duyệt)', 'Học phí đợt 2 (Chưa duyệt)', 'Ngày CK 2 (Chưa duyệt)', 'Ảnh Bill (Chưa duyệt)', 'Giảm trừ', 'Công nợ'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
         
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2604,10 +2603,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:W3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:V3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 16, 22, 22, 14, 16, 22, 16, 12, 16, 14, 16, 14, 30, 16, 14, 16, 14, 30, 14, 16];
+        $widths = [8, 14, 16, 22, 22, 14, 16, 22, 16, 12, 16, 14, 16, 14, 30, 16, 14, 16, 14, 30, 14, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2678,68 +2677,67 @@ class ExportsController extends Controller
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
             $sheet->setCellValue('B' . $rowIdx, $item->date_0);
             $sheet->setCellValue('C' . $rowIdx, $item->status_register);
-            $sheet->setCellValue('D' . $rowIdx, $item->up_process);
-            $sheet->setCellValue('E' . $rowIdx, $item->course_name ?? '—');
-            $sheet->setCellValue('F' . $rowIdx, $item->student_name);
-            $sheet->setCellValue('G' . $rowIdx, $item->phone);
-            $sheet->setCellValue('H' . $rowIdx, $item->team_name ?? '—');
-            $sheet->setCellValue('I' . $rowIdx, $item->address ?? '—');
-            $sheet->setCellValue('J' . $rowIdx, (float)$item->must_charge);
-            $sheet->setCellValue('K' . $rowIdx, $item->dk_chung);
-            $sheet->setCellValue('L' . $rowIdx, $p1_amount);
-            $sheet->setCellValue('M' . $rowIdx, $item->p1_date);
-            $sheet->setCellValue('N' . $rowIdx, $p2_amount);
-            $sheet->setCellValue('O' . $rowIdx, $p2_date);
-            $sheet->setCellValue('P' . $rowIdx, $img_bill_str);
-            $sheet->setCellValue('Q' . $rowIdx, $p1_amount_cd);
-            $sheet->setCellValue('R' . $rowIdx, $p1_date_cd);
-            $sheet->setCellValue('S' . $rowIdx, $p2_amount_cd);
-            $sheet->setCellValue('T' . $rowIdx, $p2_date_cd);
-            $sheet->setCellValue('U' . $rowIdx, $img_bill_str_cd);
-            $sheet->setCellValue('V' . $rowIdx, (float)$item->discount);
-            $sheet->setCellValue('W' . $rowIdx, (float)$item->debt_amount);
+            $sheet->setCellValue('D' . $rowIdx, $item->course_name ?? '—');
+            $sheet->setCellValue('E' . $rowIdx, $item->student_name);
+            $sheet->setCellValue('F' . $rowIdx, $item->phone);
+            $sheet->setCellValue('G' . $rowIdx, $item->team_name ?? '—');
+            $sheet->setCellValue('H' . $rowIdx, $item->address ?? '—');
+            $sheet->setCellValue('I' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('J' . $rowIdx, $item->dk_chung);
+            $sheet->setCellValue('K' . $rowIdx, $p1_amount);
+            $sheet->setCellValue('L' . $rowIdx, $item->p1_date);
+            $sheet->setCellValue('M' . $rowIdx, $p2_amount);
+            $sheet->setCellValue('N' . $rowIdx, $p2_date);
+            $sheet->setCellValue('O' . $rowIdx, $img_bill_str);
+            $sheet->setCellValue('P' . $rowIdx, $p1_amount_cd);
+            $sheet->setCellValue('Q' . $rowIdx, $p1_date_cd);
+            $sheet->setCellValue('R' . $rowIdx, $p2_amount_cd);
+            $sheet->setCellValue('S' . $rowIdx, $p2_date_cd);
+            $sheet->setCellValue('T' . $rowIdx, $img_bill_str_cd);
+            $sheet->setCellValue('U' . $rowIdx, (float)$item->discount);
+            $sheet->setCellValue('V' . $rowIdx, (float)$item->debt_amount);
 
-            $sheet->getStyle("A$rowIdx:W$rowIdx")->applyFromArray($borderStyle);
-            $sheet->getStyle("A$rowIdx:D$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("E$rowIdx:I$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("J$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("J$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("K$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("L$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("L$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("M$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("N$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("N$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("O$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("P$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("P$rowIdx")->getAlignment()->setWrapText(true);
+            $sheet->getStyle("A$rowIdx:V$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("D$rowIdx:H$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("I$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("I$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("J$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("K$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("K$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("L$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("M$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("M$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("N$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("O$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("O$rowIdx")->getAlignment()->setWrapText(true);
             
-            $sheet->getStyle("Q$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("R$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("U$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("U$rowIdx")->getAlignment()->setWrapText(true);
+            $sheet->getStyle("P$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("Q$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("R$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("R$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("S$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("T$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("T$rowIdx")->getAlignment()->setWrapText(true);
             
             if (!empty($bills)) {
-                $sheet->getCell('P' . $rowIdx)->getHyperlink()->setUrl($bills[0]);
-                $sheet->getStyle('P' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
-                $sheet->getStyle('P' . $rowIdx)->getFont()->setUnderline(true);
+                $sheet->getCell('O' . $rowIdx)->getHyperlink()->setUrl($bills[0]);
+                $sheet->getStyle('O' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
+                $sheet->getStyle('O' . $rowIdx)->getFont()->setUnderline(true);
             }
             if (!empty($bills_cd)) {
-                $sheet->getCell('U' . $rowIdx)->getHyperlink()->setUrl($bills_cd[0]);
-                $sheet->getStyle('U' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
-                $sheet->getStyle('U' . $rowIdx)->getFont()->setUnderline(true);
+                $sheet->getCell('T' . $rowIdx)->getHyperlink()->setUrl($bills_cd[0]);
+                $sheet->getStyle('T' . $rowIdx)->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLUE);
+                $sheet->getStyle('T' . $rowIdx)->getFont()->setUnderline(true);
             }
             
-            $sheet->getStyle("V$rowIdx:W$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("U$rowIdx:V$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("V$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("W$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             
             if ((float)$item->debt_amount > 0) {
-                $sheet->getStyle("W$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+                $sheet->getStyle("V$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
 
             $rowIdx++;
@@ -2770,6 +2768,8 @@ class ExportsController extends Controller
         $keyword = '';
         $start_date = '';
         $end_date = '';
+        $pay_start_date = '';
+        $pay_end_date = '';
         $completion_status = -1;
 
         foreach ($keys as $k => $key_name) {
@@ -2793,6 +2793,12 @@ class ExportsController extends Controller
                     break;
                 case 'end_date':
                     $end_date = $v;
+                    break;
+                case 'pay_start_date':
+                    $pay_start_date = $v;
+                    break;
+                case 'pay_end_date':
+                    $pay_end_date = $v;
                     break;
                 case 'completion_status':
                     $completion_status = (int) $v;
@@ -2829,8 +2835,10 @@ class ExportsController extends Controller
         }
         if ($completion_status == 1) {
             $cond .= " AND a.debt_amount = 0";
-        } elseif ($completion_status == 0) {
-            $cond .= " AND a.debt_amount > 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
         }
         if ($start_date) {
             $cond .= " AND a.created_at >= '$start_date 00:00:00'";
@@ -2838,12 +2846,17 @@ class ExportsController extends Controller
         if ($end_date) {
             $cond .= " AND a.created_at <= '$end_date 23:59:59'";
         }
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
+        }
 
         $query = "
             SELECT
                 DATE(a.created_at) AS date_0,
                 IF(a.count_recharge = 0, 'Mới', '') AS status_register,
-                'Không' AS up_process,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2882,15 +2895,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:U1');
+        $sheet->mergeCells('A1:T1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Up quá trình từ', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'];
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Công nợ', 'XN Kế toán', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
         
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2902,10 +2915,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:U3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:T3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
+        $widths = [8, 14, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 16, 14, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2934,56 +2947,55 @@ class ExportsController extends Controller
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
             $sheet->setCellValue('B' . $rowIdx, $item->date_0);
             $sheet->setCellValue('C' . $rowIdx, $item->status_register);
-            $sheet->setCellValue('D' . $rowIdx, $item->up_process);
-            $sheet->setCellValue('E' . $rowIdx, $item->course_name ?? '—');
-            $sheet->setCellValue('F' . $rowIdx, $item->student_name);
-            $sheet->setCellValue('G' . $rowIdx, $item->phone);
-            $sheet->setCellValue('H' . $rowIdx, $item->team_name ?? '—');
-            $sheet->setCellValue('I' . $rowIdx, $item->ec_name ?? '—');
-            $sheet->setCellValue('J' . $rowIdx, $item->class_info ?? '—');
-            $sheet->setCellValue('K' . $rowIdx, $item->address ?? '—');
-            $sheet->setCellValue('L' . $rowIdx, (float)$item->must_charge);
-            $sheet->setCellValue('M' . $rowIdx, $item->dk_chung);
-            $sheet->setCellValue('N' . $rowIdx, $p1_amount);
-            $sheet->setCellValue('O' . $rowIdx, $item->p1_date);
-            $sheet->setCellValue('P' . $rowIdx, $p2_amount);
-            $sheet->setCellValue('Q' . $rowIdx, $p2_date);
-            $sheet->setCellValue('R' . $rowIdx, (float)$item->discount);
-            $sheet->setCellValue('S' . $rowIdx, (float)$item->debt_amount);
-            $sheet->setCellValue('T' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('U' . $rowIdx, (float)$luong_sale);
+            $sheet->setCellValue('D' . $rowIdx, $item->course_name ?? '—');
+            $sheet->setCellValue('E' . $rowIdx, $item->student_name);
+            $sheet->setCellValue('F' . $rowIdx, $item->phone);
+            $sheet->setCellValue('G' . $rowIdx, $item->team_name ?? '—');
+            $sheet->setCellValue('H' . $rowIdx, $item->ec_name ?? '—');
+            $sheet->setCellValue('I' . $rowIdx, $item->class_info ?? '—');
+            $sheet->setCellValue('J' . $rowIdx, $item->address ?? '—');
+            $sheet->setCellValue('K' . $rowIdx, (float)$item->must_charge);
+            $sheet->setCellValue('L' . $rowIdx, $item->dk_chung);
+            $sheet->setCellValue('M' . $rowIdx, $p1_amount);
+            $sheet->setCellValue('N' . $rowIdx, $item->p1_date);
+            $sheet->setCellValue('O' . $rowIdx, $p2_amount);
+            $sheet->setCellValue('P' . $rowIdx, $p2_date);
+            $sheet->setCellValue('Q' . $rowIdx, (float)$item->discount);
+            $sheet->setCellValue('R' . $rowIdx, (float)$item->debt_amount);
+            $sheet->setCellValue('S' . $rowIdx, $xn_ketoan);
+            $sheet->setCellValue('T' . $rowIdx, (float)$luong_sale);
 
-            $sheet->getStyle("A$rowIdx:U$rowIdx")->applyFromArray($borderStyle);
-            $sheet->getStyle("A$rowIdx:D$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("E$rowIdx:K$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("L$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("L$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("M$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("N$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("N$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("O$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("P$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("Q$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("A$rowIdx:T$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("D$rowIdx:J$rowIdx")->applyFromArray($leftAlign);
+            $sheet->getStyle("K$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("K$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("L$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("M$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("M$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("N$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("O$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("O$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("P$rowIdx")->applyFromArray($centerAlign);
             
-            $sheet->getStyle("R$rowIdx:S$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("Q$rowIdx:R$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("R$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             
             if ((float)$item->debt_amount > 0) {
-                $sheet->getStyle("S$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+                $sheet->getStyle("R$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
             
-            $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("S$rowIdx")->applyFromArray($centerAlign);
             if ($xn_ketoan === 'R') {
-                $sheet->getStyle("T$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
+                $sheet->getStyle("S$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
             } else {
-                $sheet->getStyle("T$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+                $sheet->getStyle("S$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
             }
             
-            $sheet->getStyle("U$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("U$rowIdx")->getFont()->setBold(true);
+            $sheet->getStyle("T$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("T$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("T$rowIdx")->getFont()->setBold(true);
 
             $rowIdx++;
         }

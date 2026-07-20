@@ -1796,7 +1796,6 @@ class ReportsController extends Controller
             SELECT
                 DATE(a.created_at) AS date_0,
                 IF(a.count_recharge = 0, 'Mới', '') AS status_register,
-                'Không' AS up_process,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
@@ -2035,6 +2034,8 @@ class ReportsController extends Controller
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
+        $pay_start_date = isset($request->pay_start_date) ? $request->pay_start_date : '';
+        $pay_end_date = isset($request->pay_end_date) ? $request->pay_end_date : '';
         $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
 
         $user = Auth::user();
@@ -2073,14 +2074,22 @@ class ReportsController extends Controller
         }
         if ($completion_status == 1) {
             $cond .= " AND a.debt_amount = 0";
-        } elseif ($completion_status == 0) {
-            $cond .= " AND a.debt_amount > 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
         }
         if ($start_date) {
             $cond .= " AND a.created_at >= '$start_date 00:00:00'";
         }
         if ($end_date) {
             $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
 
         $totalRow = u::first("
@@ -2094,8 +2103,7 @@ class ReportsController extends Controller
         $query = "
             SELECT
                 DATE(a.created_at) AS date_0,
-                IF(a.count_recharge = 0, 'Mới', '') AS status_register,
-                'Không' AS up_process,
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
