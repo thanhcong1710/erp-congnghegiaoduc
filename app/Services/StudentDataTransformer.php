@@ -85,6 +85,7 @@ class StudentDataTransformer
         $shipNote = $row['ghi_chu_van_don'] ?? ($row['shipping_note'] ?? '');
         $discountRaw = $row['giảm trừ'] ?? ($row['giam_tru'] ?? 0);
         $debtRaw = $row['công nợ'] ?? ($row['cong_no'] ?? 0);
+        $salaryMonthRaw = $row['xac_nhan_tra_luong'] ?? '';
 
         $pay1Amount = floatval(str_replace([',', ' '], '', $pay1AmountRaw));
         $pay2Amount = floatval(str_replace([',', ' '], '', $pay2AmountRaw));
@@ -94,6 +95,16 @@ class StudentDataTransformer
         $name = self::cleanName((string) $rawName);
         $className = self::cleanClassName((string) $rawClass);
         $statusWhenNoStart = trim(strtolower((string) $rawStatus)) === 'chờ lớp' ? '3' : '4';
+
+        $salaryMonth = null;
+        if (!empty($salaryMonthRaw)) {
+            // Match format like "Trả lương T07.2023" or "07/2023"
+            if (preg_match('/[Tt]?(\d{1,2})[\.\/](\d{4})/', $salaryMonthRaw, $m)) {
+                $month = str_pad($m[1], 2, '0', STR_PAD_LEFT);
+                $year = $m[2];
+                $salaryMonth = $year . '-' . $month;
+            }
+        }
 
         return [
             'phone'            => $phone,
@@ -117,6 +128,7 @@ class StudentDataTransformer
             'discount_amount'  => $discountAmount,
             'debt_amount_raw'  => $debtAmount,
             'raw_start_date'   => $startDate,
+            'salary_month'     => $salaryMonth,
         ];
     }
 
