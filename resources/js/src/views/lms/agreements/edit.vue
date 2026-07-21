@@ -997,7 +997,7 @@
           pagination: { limit: 100, cpage: 1 }
         }).then(res => {
           this.$vs.loading.close();
-          const list = res.data.items || res.data;
+          const list = res.data.list || res.data;
           this.transferAgreements = list
             .filter(item => item.agreement_id !== this.agreement.id)
             .map(item => ({
