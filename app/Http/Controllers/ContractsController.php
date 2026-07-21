@@ -837,6 +837,114 @@ class ContractsController extends Controller
         return response()->json($data);
     }
 
+    public function transferExcess(Request $request)
+    {
+        $from_agreement_id = (int)$request->from_agreement_id;
+        $to_agreement_id = (int)$request->to_agreement_id;
+        $amount = (float)$request->amount;
+        $note = $request->note ?? 'Chuyển tiền thừa sang gói khác';
+
+        if ($from_agreement_id <= 0 || $to_agreement_id <= 0 || $amount <= 0) {
+            return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
+        }
+
+        if ($from_agreement_id == $to_agreement_id) {
+            return response()->json(['status' => 0, 'message' => 'Không thể chuyển tiền cho cùng một gói']);
+        }
+
+        $from = u::first("SELECT * FROM agreements WHERE id = $from_agreement_id");
+        $to = u::first("SELECT * FROM agreements WHERE id = $to_agreement_id");
+
+        if (!$from || !$to) {
+            return response()->json(['status' => 0, 'message' => 'Gói học phí không tồn tại']);
+        }
+
+        if ($from->student_id != $to->student_id) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ có thể chuyển tiền giữa các gói của cùng một học sinh']);
+        }
+
+        $excess = $from->total_charged - $from->must_charge;
+        if ($excess < $amount) {
+            return response()->json(['status' => 0, 'message' => "Số tiền chuyển vượt quá số tiền thừa của gói cũ ($excess)"]);
+        }
+
+        // Cập nhật gói cũ
+        $new_from_total = $from->total_charged - $amount;
+        $new_from_debt = $from->must_charge - $new_from_total;
+        u::updateSimpleRow([
+            'total_charged' => $new_from_total,
+            'debt_amount' => $new_from_debt > 0 ? $new_from_debt : 0,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $from_agreement_id], 'agreements');
+
+        // Cập nhật gói mới
+        $new_to_total = $to->total_charged + $amount;
+        $new_to_debt = $to->must_charge - $new_to_total;
+        u::updateSimpleRow([
+            'total_charged' => $new_to_total,
+            'debt_amount' => $new_to_debt > 0 ? $new_to_debt : 0,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $to_agreement_id], 'agreements');
+
+        // Ghi log vào bảng payment cho cả hai gói
+        u::insertSimpleRow([
+            'agreement_id' => $from_agreement_id,
+            'student_id' => $from->student_id,
+            'branch_id' => $from->branch_id,
+            'cm_id' => $from->cm_id,
+            'ec_id' => $from->ec_id,
+            'method' => 5, // Chuyển tiền nội bộ
+            'must_charge' => $from->must_charge,
+            'amount' => -$amount,
+            'total' => $new_from_total,
+            'debt' => $new_from_debt > 0 ? $new_from_debt : 0,
+            'charge_date' => date('Y-m-d'),
+            'note' => "Chuyển $amount tiền thừa sang gói $to->code: $note",
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'type' => 1
+        ], 'payments');
+
+        u::insertSimpleRow([
+            'agreement_id' => $to_agreement_id,
+            'student_id' => $to->student_id,
+            'branch_id' => $to->branch_id,
+            'cm_id' => $to->cm_id,
+            'ec_id' => $to->ec_id,
+            'method' => 5, // Chuyển tiền nội bộ
+            'must_charge' => $to->must_charge,
+            'amount' => $amount,
+            'total' => $new_to_total,
+            'debt' => $new_to_debt > 0 ? $new_to_debt : 0,
+            'charge_date' => date('Y-m-d'),
+            'note' => "Nhận $amount tiền thừa từ gói $from->code: $note",
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'type' => 1
+        ], 'payments');
+
+        // Ghi log chuyển tiền
+        u::insertSimpleRow([
+            'student_id' => $from->student_id,
+            'from_agreement_id' => $from_agreement_id,
+            'to_agreement_id' => $to_agreement_id,
+            'amount' => $amount,
+            'note' => $note,
+            'creator_id' => Auth::user()->id,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ], 'agreement_transfers');
+
+        // Chia lại contract total
+        $chargesController = new ChargesController();
+        $chargesController->processContractsByAgreement($from_agreement_id);
+        $chargesController->processContractsByAgreement($to_agreement_id);
+
+        return response()->json(['status' => 1, 'message' => 'Chuyển tiền thừa thành công']);
+    }
+
     public function delete(Request $request)
     {
         $cagreement_info = u::first("SELECT student_id, code FROM agreements WHERE id=$request->agreement_id");

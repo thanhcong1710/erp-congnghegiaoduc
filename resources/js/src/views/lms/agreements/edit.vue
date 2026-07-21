@@ -295,8 +295,15 @@
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
                   </div>
+                  <div class="invoice-total-item" v-if="excessAmount > 0">
+                      <p class="invoice-total-title"> Tiền thừa: </p>
+                      <div class="invoice-total-amount">
+                          <span class="text-success font-bold mr-2">{{ excessAmount | formatMoney }}</span>
+                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="primary" type="border" @click="openTransferModal">Chuyển sang gói khác</vs-button>
+                      </div>
+                  </div>
                   <div  class="invoice-total-item">
-                      <p  class="invoice-total-title"> Số tiền còn lại: </p>
+                      <p  class="invoice-total-title"> Số tiền còn lại (đã học): </p>
                       <p  class="invoice-total-amount" style="font-weight: bold;color: red;"> {{ agreement.total_left_amount | formatMoney}} </p>
                   </div>
               </div>
@@ -447,6 +454,39 @@
           </div>
       </div>  
     </vx-card>
+
+    <vs-popup title="Chuyển tiền thừa sang gói khác" :active.sync="popupTransferActive">
+      <div v-if="transferData" class="vx-row">
+        <div class="vx-col w-full mb-4">
+          <p class="mb-2">Số tiền thừa hiện tại: <strong>{{ excessAmount | formatMoney }}</strong></p>
+          <label>Chọn gói học phí nhận tiền</label>
+          <vue-select
+            label="label"
+            placeholder="Chọn gói nhận tiền"
+            :options="transferAgreements"
+            v-model="transferData.to_agreement"
+            :searchable="true"
+          ></vue-select>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label>Số tiền muốn chuyển</label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="number"
+            v-model="transferData.amount"
+            :max="excessAmount"
+          />
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label>Ghi chú</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="transferData.note"></textarea>
+        </div>
+        <div class="vx-col w-full text-right mt-4">
+          <vs-button color="dark" type="border" class="mr-2" @click="popupTransferActive = false">Hủy</vs-button>
+          <vs-button color="success" @click="submitTransfer" :disabled="transferCalling">Xác nhận chuyển</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 
 </template>
@@ -582,6 +622,14 @@
         tmp_discount_code_id:'',
         classInfo: null,
         minPaymentForClass: 2000000,
+        popupTransferActive: false,
+        transferCalling: false,
+        transferAgreements: [],
+        transferData: {
+          to_agreement: null,
+          amount: 0,
+          note: ''
+        },
       }
     },
     async created() {
@@ -677,6 +725,11 @@
           }
         }
         return false;
+      },
+      excessAmount() {
+        const charged = Number(this.agreement.total_charged) || 0;
+        const must_charge = Number(this.agreement.total_amount) || 0;
+        return charged > must_charge ? (charged - must_charge) : 0;
       }
     },
 
@@ -936,6 +989,86 @@
       },
       formatDate(date) {
         return date ? moment(date).format('DD/MM/YYYY') : '---';
+      },
+      openTransferModal() {
+        this.$vs.loading();
+        axios.p('/api/lms/agreements/list-by-student', {
+          student_id: this.agreement.student_id,
+          pagination: { limit: 100, cpage: 1 }
+        }).then(res => {
+          this.$vs.loading.close();
+          const list = res.data.items || res.data;
+          this.transferAgreements = list
+            .filter(item => item.agreement_id !== this.agreement.id)
+            .map(item => ({
+              ...item,
+              label: `${item.code} - ${item.tuition_fee_name} (Nợ: ${u.formatMoney(item.debt_amount)})`
+            }));
+          
+          this.transferData = {
+            to_agreement: null,
+            amount: this.excessAmount,
+            note: 'Chuyển tiền thừa sang gói khác'
+          };
+          this.popupTransferActive = true;
+        }).catch(e => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+      },
+      submitTransfer() {
+        if (!this.transferData.to_agreement) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Vui lòng chọn gói học phí nhận tiền',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        if (this.transferData.amount <= 0 || this.transferData.amount > this.excessAmount) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền chuyển không hợp lệ',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        this.transferCalling = true;
+        axios.p('/api/lms/agreements/transfer-excess', {
+          from_agreement_id: this.agreement.id,
+          to_agreement_id: this.transferData.to_agreement.agreement_id,
+          amount: this.transferData.amount,
+          note: this.transferData.note
+        }).then(res => {
+          this.transferCalling = false;
+          if (res.data.status === 1) {
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: res.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+            this.popupTransferActive = false;
+            this.loadDetail(); // Reload trang để cập nhật số dư
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: res.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          }
+        }).catch(e => {
+          console.log(e);
+          this.transferCalling = false;
+        });
       }
     },
   }
