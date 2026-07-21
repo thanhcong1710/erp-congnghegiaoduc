@@ -56,7 +56,7 @@
         <div>
           <label class="rpt-label">Tháng tính lương</label>
           <div class="flex items-center gap-2">
-            <date-picker v-model="searchData.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="flex:1" :disabled="searchData.no_salary_month"></date-picker>
+            <date-picker v-model="searchData.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="flex:1" :disabled="searchData.no_salary_month" :append-to-body="true"></date-picker>
             <vs-checkbox v-model="searchData.no_salary_month" style="margin:0">Chưa có</vs-checkbox>
           </div>
         </div>
@@ -158,7 +158,7 @@
               </td>
               <td>
                 <div v-if="user_role.is_admin || user_role.is_accountant" class="flex items-center gap-2">
-                  <date-picker style="width:140px" v-model="row.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" @change="updateSingleDate(row)"></date-picker>
+                  <date-picker style="width:140px" v-model="row.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" @change="updateSingleDate(row)" :append-to-body="true"></date-picker>
                 </div>
                 <span v-else>{{ row.salary_month || '—' }}</span>
               </td>

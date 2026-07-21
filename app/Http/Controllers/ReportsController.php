@@ -1632,6 +1632,7 @@ class ReportsController extends Controller
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $pay_start_date = isset($request->pay_start_date) ? $request->pay_start_date : '';
         $pay_end_date = isset($request->pay_end_date) ? $request->pay_end_date : '';
+        $salary_month = isset($request->salary_month) ? $request->salary_month : '';
 
         // ---- Điều kiện cơ bản ----
         $cond = " a.status > 0
@@ -1663,6 +1664,13 @@ class ReportsController extends Controller
         }
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
+        }
+
+        if ($salary_month === 'none') {
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+        } elseif ($salary_month !== '') {
+            $sm = addslashes($salary_month);
+            $cond .= " AND a.salary_month = '$sm'";
         }
 
         // ---- Main query: group theo team ----
