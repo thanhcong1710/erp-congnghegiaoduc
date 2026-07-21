@@ -53,6 +53,13 @@
           <date-picker v-model="searchData.pay_date_range" type="date" range :clearable="true"
             format="YYYY-MM-DD" style="width:100%" :lang="dpLang" placeholder="Từ ngày — Đến ngày" />
         </div>
+        <div>
+          <label class="rpt-label">Tháng tính lương</label>
+          <div class="flex items-center gap-2">
+            <date-picker v-model="searchData.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="flex:1" :disabled="searchData.no_salary_month"></date-picker>
+            <vs-checkbox v-model="searchData.no_salary_month" style="margin:0">Chưa có</vs-checkbox>
+          </div>
+        </div>
       </div>
 
       <div class="rpt-actions mb-5">
@@ -60,6 +67,14 @@
         <vs-button color="dark" type="border" class="rpt-btn" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
         <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
         <span class="rpt-badge-count">{{ pagination.total }} bản ghi</span>
+      </div>
+
+      <div class="mb-4 flex items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200" v-if="(user_role.is_admin || user_role.is_accountant) && selected_items.length > 0">
+        <div>
+          <label class="rpt-label">Tháng tính lương cho {{ selected_items.length }} bản ghi đã chọn</label>
+          <date-picker style="width:250px" v-model="batch_salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng tính lương"></date-picker>
+        </div>
+        <vs-button color="primary" class="rpt-btn" @click="updateBatchDate"><i class="fas fa-save"></i> Cập nhật</vs-button>
       </div>
 
       <!-- Summary pills -->
@@ -83,6 +98,9 @@
         <table class="rpt-table">
           <thead>
             <tr>
+              <th style="width:40px" class="text-center" v-if="user_role.is_admin || user_role.is_accountant">
+                <vs-checkbox v-model="selectAll" @input="toggleSelectAll"></vs-checkbox>
+              </th>
               <th style="min-width:50px" class="text-center">STT</th>
               <th style="min-width:120px">Ngày tạo</th>
               <th style="min-width:80px">Trạng thái đăng ký</th>
@@ -104,11 +122,15 @@
               <th style="min-width:130px" class="text-center">Hạn thanh toán</th>
               <th style="min-width:140px" class="text-right">Công nợ</th>
               <th style="min-width:120px" class="text-center">XN Kế toán</th>
+              <th style="min-width:150px" class="text-center">Tháng tính lương</th>
               <th style="min-width:140px" class="text-right">Lương sale</th>
             </tr>
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(row, idx) in datas" :key="idx">
+              <td class="text-center" v-if="user_role.is_admin || user_role.is_accountant">
+                <vs-checkbox v-model="selected_items" :vs-value="row.agreement_id"></vs-checkbox>
+              </td>
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
               <td>{{ row.status_register }}</td>
@@ -134,10 +156,16 @@
               <td class="text-center font-bold" :class="row.xn_ketoan === 'R' ? 'text-success' : 'text-danger'">
                 {{ row.xn_ketoan }}
               </td>
+              <td>
+                <div v-if="user_role.is_admin || user_role.is_accountant" class="flex items-center gap-2">
+                  <date-picker style="width:140px" v-model="row.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" @change="updateSingleDate(row)"></date-picker>
+                </div>
+                <span v-else>{{ row.salary_month || '—' }}</span>
+              </td>
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="19" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="21" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -186,12 +214,17 @@
           keyword: '',
           date_range: '',
           pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
+          salary_month: '',
+          no_salary_month: false,
         },
         dpLang: {
           days: ['CN','T2','T3','T4','T5','T6','T7'],
           months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
         },
-        user_role: { user_id: 0, is_sale: false, is_sale_leader: false },
+        user_role: { user_id: 0, is_sale: false, is_sale_leader: false, is_admin: false, is_accountant: false },
+        selected_items: [],
+        selectAll: false,
+        batch_salary_month: ''
       }
     },
     created() {
@@ -204,9 +237,59 @@
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
       this.getData()
     },
+    watch: {
+      selected_items(val) {
+        if (val.length > 0 && val.length === this.datas.length) {
+          this.selectAll = true
+        } else {
+          this.selectAll = false
+        }
+      }
+    },
     methods: {
+      toggleSelectAll(val) {
+        if (val) {
+          this.selected_items = this.datas.map(i => i.agreement_id)
+        } else {
+          this.selected_items = []
+        }
+      },
+      updateSingleDate(item) {
+        const val = item.salary_month || '';
+        this.$vs.loading();
+        axios.p('/api/lms/reports/update-salary-month', {
+          agreement_ids: [item.agreement_id],
+          salary_month: val
+        }).then(res => {
+          this.$vs.loading.close();
+          this.$vs.notify({ title: 'Thành công', text: val ? 'Cập nhật tháng tính lương thành công' : 'Đã xóa tháng tính lương', color: 'success' });
+        }).catch(err => {
+          this.$vs.loading.close();
+          this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
+        });
+      },
+      updateBatchDate() {
+        if (!this.batch_salary_month) {
+          this.$vs.notify({ title: 'Lỗi', text: 'Vui lòng chọn tháng tính lương', color: 'warning' });
+          return;
+        }
+        if (this.selected_items.length === 0) return;
+        
+        this.$vs.loading();
+        axios.p('/api/lms/reports/update-salary-month', {
+          agreement_ids: this.selected_items,
+          salary_month: this.batch_salary_month
+        }).then(res => {
+          this.$vs.loading.close();
+          this.$vs.notify({ title: 'Thành công', text: `Cập nhật tháng tính lương cho ${this.selected_items.length} học viên thành công`, color: 'success' });
+          this.getData();
+        }).catch(err => {
+          this.$vs.loading.close();
+          this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
+        });
+      },
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '', pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)] }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '', pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)], salary_month: '', no_salary_month: false }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -240,6 +323,12 @@
           pay_start_date = this.fmtDate(this.searchData.pay_date_range[0])
           pay_end_date   = this.fmtDate(this.searchData.pay_date_range[1])
         }
+        let salary_month = ''
+        if (this.searchData.no_salary_month) {
+          salary_month = 'none'
+        } else if (this.searchData.salary_month) {
+          salary_month = this.searchData.salary_month
+        }
         return {
           branch_id,
           team_id:   this.searchData.team_obj ? this.searchData.team_obj.id : 0,
@@ -248,10 +337,13 @@
           keyword:   this.searchData.keyword  || '',
           start_date, end_date,
           pay_start_date, pay_end_date,
+          salary_month,
           pagination: this.pagination,
         }
       },
       getData() {
+        this.selected_items = []
+        this.selectAll = false
         const ids = []
         if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
           this.searchData.arr_branch.forEach(i => ids.push(i.id))
@@ -282,6 +374,7 @@
         if (p.end_date)       { keys.push('end_date');   values.push(p.end_date) }
         if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }
         if (p.pay_end_date)   { keys.push('pay_end_date');   values.push(p.pay_end_date) }
+        if (p.salary_month)   { keys.push('salary_month');   values.push(p.salary_month) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report25/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },

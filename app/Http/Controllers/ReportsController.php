@@ -2045,6 +2045,7 @@ class ReportsController extends Controller
         $pay_start_date = isset($request->pay_start_date) ? $request->pay_start_date : '';
         $pay_end_date = isset($request->pay_end_date) ? $request->pay_end_date : '';
         $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
+        $salary_month = isset($request->salary_month) ? $request->salary_month : '';
 
         $user = Auth::user();
         $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
@@ -2101,6 +2102,12 @@ class ReportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        if ($salary_month === 'none') {
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+        } elseif ($salary_month !== '') {
+            $sm = addslashes($salary_month);
+            $cond .= " AND a.salary_month = '$sm'";
+        }
 
         $totalRow = u::first("
             SELECT COUNT(a.id) AS total
@@ -2138,7 +2145,8 @@ class ReportsController extends Controller
                 a.discount_amount AS discount,
                 a.first_8th_session_date AS due_date,
                 a.debt_amount,
-                a.id AS agreement_id
+                a.id AS agreement_id,
+                a.salary_month
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
@@ -2476,6 +2484,26 @@ class ReportsController extends Controller
             } else {
                 u::query("UPDATE contracts SET book_delivered_date = NULL WHERE id IN ($ids)");
                 u::query("UPDATE log_contracts SET book_delivered_date = NULL WHERE contract_id IN ($ids)");
+            }
+            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
+        }
+        return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
+    }
+
+    public function updateSalaryMonth(Request $request)
+    {
+        $agreement_ids = $request->agreement_ids;
+        $salary_month = $request->salary_month;
+
+        if (!empty($agreement_ids) && is_array($agreement_ids)) {
+            $ids = implode(',', array_map('intval', $agreement_ids));
+            if (!empty($salary_month)) {
+                $safe_month = addslashes($salary_month);
+                u::query("UPDATE agreements SET salary_month = '$safe_month' WHERE id IN ($ids)");
+                u::query("UPDATE log_agreements SET salary_month = '$safe_month' WHERE agreement_id IN ($ids)");
+            } else {
+                u::query("UPDATE agreements SET salary_month = NULL WHERE id IN ($ids)");
+                u::query("UPDATE log_agreements SET salary_month = NULL WHERE agreement_id IN ($ids)");
             }
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }

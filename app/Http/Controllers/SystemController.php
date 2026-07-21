@@ -271,10 +271,14 @@ class SystemController extends Controller
         $user_id = Auth::user()->id;
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 68");
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 69");
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 999999");
+        $is_accountant = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 83");
         return response()->json([
             'user_id' => $user_id,
             'is_sale' => !empty($is_sale),
             'is_sale_leader' => !empty($is_sale_leader),
+            'is_admin' => !empty($is_admin),
+            'is_accountant' => !empty($is_accountant),
         ]);
     }
 }

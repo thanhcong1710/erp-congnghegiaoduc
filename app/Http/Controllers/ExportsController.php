@@ -2815,6 +2815,7 @@ class ExportsController extends Controller
         $pay_start_date = '';
         $pay_end_date = '';
         $completion_status = -1;
+        $salary_month = '';
 
         foreach ($keys as $k => $key_name) {
             $v = $values[$k] ?? '';
@@ -2847,6 +2848,9 @@ class ExportsController extends Controller
                     break;
                 case 'completion_status':
                     $completion_status = (int) $v;
+                    break;
+                case 'salary_month':
+                    $salary_month = $v;
                     break;
             }
         }
@@ -2899,6 +2903,12 @@ class ExportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        if ($salary_month === 'none') {
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+        } elseif ($salary_month !== '') {
+            $sm = addslashes($salary_month);
+            $cond .= " AND a.salary_month = '$sm'";
+        }
 
         $query = "
             SELECT
@@ -2928,6 +2938,7 @@ class ExportsController extends Controller
                 a.discount_amount AS discount,
                 a.first_8th_session_date AS due_date,
                 a.debt_amount,
+                a.salary_month,
                 a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
@@ -2951,8 +2962,8 @@ class ExportsController extends Controller
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Hạn thanh toán', 'Công nợ', 'XN Kế toán', 'Lương sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U'];
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Hạn thanh toán', 'Công nợ', 'XN Kế toán', 'Tháng tính lương', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V'];
 
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2964,10 +2975,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:U3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:V3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 14, 16, 14, 16];
+        $widths = [8, 14, 16, 22, 22, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 14, 16, 14, 16, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -3014,9 +3025,10 @@ class ExportsController extends Controller
             $sheet->setCellValue('R' . $rowIdx, $item->due_date ?? '—');
             $sheet->setCellValue('S' . $rowIdx, (float) $item->debt_amount);
             $sheet->setCellValue('T' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('U' . $rowIdx, (float) $luong_sale);
+            $sheet->setCellValue('U' . $rowIdx, $item->salary_month ?? '—');
+            $sheet->setCellValue('V' . $rowIdx, (float) $luong_sale);
 
-            $sheet->getStyle("A$rowIdx:U$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:V$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("D$rowIdx:J$rowIdx")->applyFromArray($leftAlign);
             $sheet->getStyle("K$rowIdx")->applyFromArray($rightAlign);
@@ -3035,8 +3047,9 @@ class ExportsController extends Controller
             $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("U$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("U$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("V$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("V$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
 
             if ((float) $item->debt_amount > 0) {
                 $sheet->getStyle("S$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
