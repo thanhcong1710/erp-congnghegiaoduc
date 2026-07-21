@@ -1002,7 +1002,7 @@
             .filter(item => item.agreement_id !== this.agreement.id)
             .map(item => ({
               ...item,
-              label: `${item.code} - ${item.tuition_fee_name} (Nợ: ${u.formatMoney(item.debt_amount)})`
+              label: `${item.code} - ${item.tuition_fee_name} (Nợ: ${String(item.debt_amount).replace(/(.)(?=(\d{3})+$)/g,'$1,')})`
             }));
           
           this.transferData = {
