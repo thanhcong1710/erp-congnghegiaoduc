@@ -2371,7 +2371,7 @@ class ExportsController extends Controller
                 SUM(tf.number_of_months)                               AS separated_sales,
                 SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
                 SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
-                SUM(a.must_charge) AS total_revenue
+                SUM(a.total_charged) AS total_revenue
             FROM agreements AS a
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
@@ -2919,6 +2919,7 @@ class ExportsController extends Controller
                  ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
                 a.must_charge,
+                a.total_charged,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
                 (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
                 (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
@@ -2990,7 +2991,7 @@ class ExportsController extends Controller
             $luong_sale = 0;
             if ((float) $item->debt_amount == 0) {
                 $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
-                $luong_sale = ((float) $item->must_charge) * $rate;
+                $luong_sale = ((float) $item->total_charged) * $rate;
             }
 
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
