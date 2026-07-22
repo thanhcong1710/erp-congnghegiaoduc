@@ -536,6 +536,7 @@ export default {
           ],
           pageTitle: "Báo cáo",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -553,6 +554,7 @@ export default {
           ],
           pageTitle: "Báo cáo full fee active",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -570,6 +572,7 @@ export default {
           ],
           pageTitle: "Báo cáo tái phí - chi tiết",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -587,6 +590,7 @@ export default {
           ],
           pageTitle: "Báo cáo tái phí - tổng hợp",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -604,6 +608,7 @@ export default {
           ],
           pageTitle: "Báo cáo tái phí - AF",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -621,6 +626,7 @@ export default {
           ],
           pageTitle: "Báo cáo học sinh pending",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -638,6 +644,7 @@ export default {
           ],
           pageTitle: "Báo cáo học sinh bảo lưu",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -655,6 +662,7 @@ export default {
           ],
           pageTitle: "Báo cáo lớp học",
           rule: "editor",
+          permission: "lms_reports_operate_01",
         },
       },
       {
@@ -672,6 +680,7 @@ export default {
           ],
           pageTitle: "Chỉ số vận hành ACS",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -689,6 +698,7 @@ export default {
           ],
           pageTitle: "Báo cáo tỷ lệ ACS của từng AF",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -706,6 +716,7 @@ export default {
           ],
           pageTitle: "Báo cáo tỷ lệ ACS của từng trung tâm",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -723,6 +734,7 @@ export default {
           ],
           pageTitle: "Báo cáo học viên trial",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -740,6 +752,7 @@ export default {
           ],
           pageTitle: "Báo cáo học viên đặt cọc",
           rule: "editor",
+          permission: "lms_reports_operate",
         },
       },
       {
@@ -757,6 +770,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh số chi tiết",
           rule: "editor",
+          permission: "lms_reports_operate_02",
         },
       },
       {
@@ -777,6 +791,7 @@ export default {
           ],
           pageTitle: "Báo cáo tổng quan doanh thu theo trung tâm",
           rule: "editor",
+          permission: "lms_reports_operate_03",
         },
       },
       {
@@ -797,6 +812,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh thu chưa phân bổ theo học sinh",
           rule: "editor",
+          permission: "lms_reports_operate_04",
         },
       },
       {
@@ -817,6 +833,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh thu chưa phân bổ theo học sinh",
           rule: "editor",
+          permission: "lms_reports_operate_05",
         },
       },
       {
@@ -837,6 +854,7 @@ export default {
           ],
           pageTitle: "Báo cáo (KT) tổng hợp tiến độ học sau 01 năm",
           rule: "editor",
+          permission: "lms_reports_operate_06",
         },
       },
       {
@@ -857,6 +875,7 @@ export default {
           ],
           pageTitle: "Báo cáo chi tiết theo từng khóa trong combo",
           rule: "editor",
+          permission: "lms_reports_operate_07",
         },
       },
       {
@@ -870,7 +889,8 @@ export default {
             { title: 'Số lượng học viên theo từng khóa', active: true }
           ],
           pageTitle: 'Số lượng học viên theo từng khóa',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_08'
         }
       },
       {
@@ -884,7 +904,8 @@ export default {
             { title: 'Doanh số chi tiết theo khóa học', active: true }
           ],
           pageTitle: 'Doanh số chi tiết theo khóa học',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_09'
         }
       },
       {
@@ -898,7 +919,8 @@ export default {
             { title: 'Tổng quan học sinh năm', active: true }
           ],
           pageTitle: 'Tổng quan học sinh năm',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_10'
         }
       },
       {
@@ -912,7 +934,8 @@ export default {
             { title: 'Công nợ chi tiết theo khách hàng', active: true }
           ],
           pageTitle: 'Công nợ chi tiết theo khách hàng',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_11'
         }
       },
       {
@@ -926,7 +949,8 @@ export default {
             { title: 'Thống kê doanh thu theo Team sale', active: true }
           ],
           pageTitle: 'Thống kê doanh thu theo Team sale',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_12'
         }
       },
       {
@@ -940,7 +964,8 @@ export default {
             { title: 'BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN', active: true }
           ],
           pageTitle: 'BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_13'
         }
       },
             {
@@ -954,7 +979,8 @@ export default {
             { title: 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN', active: true }
           ],
           pageTitle: 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_14'
         }
       },
 {
@@ -968,7 +994,8 @@ export default {
             { title: 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM', active: true }
           ],
           pageTitle: 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_15'
         }
       },
       {
@@ -982,7 +1009,8 @@ export default {
             { title: 'BÁO CÁO CHI TIẾT XẾP LỚP', active: true }
           ],
           pageTitle: 'BÁO CÁO CHI TIẾT XẾP LỚP',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_16'
         }
       },
       {
@@ -996,7 +1024,23 @@ export default {
             { title: 'BÁO CÁO PHÁT SÁCH', active: true }
           ],
           pageTitle: 'BÁO CÁO PHÁT SÁCH',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'lms_reports_operate_18'
+        }
+      },
+      {
+        path: '/lms/reports/operate/report-29',
+        name: 'lms-report-operate-29',
+        component: () => import('@/views/lms/report/operate/report29.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'BÁO CÁO CHI TIẾT CHƯA XẾP LỚP', active: true }
+          ],
+          pageTitle: 'BÁO CÁO CHI TIẾT CHƯA XẾP LỚP',
+          rule: 'editor',
+          permission: 'lms_reports_operate_17'
         }
       },
       {
@@ -1010,6 +1054,7 @@ export default {
           ],
           pageTitle: "Báo cáo",
           rule: "editor",
+          permission: "lms_reports_academic",
         },
       },
       {
@@ -1027,6 +1072,7 @@ export default {
           ],
           pageTitle: "Giờ dạy trợ giảng",
           rule: "editor",
+          permission: "lms_reports_academic_01",
         },
       },
       {
@@ -1044,6 +1090,7 @@ export default {
           ],
           pageTitle: "Danh sách lớp test",
           rule: "editor",
+          permission: "lms_reports_academic_02",
         },
       },
       {
@@ -1057,6 +1104,7 @@ export default {
           ],
           pageTitle: "Báo cáo",
           rule: "editor",
+          permission: "lms_reports_teacher",
         },
       },
       {
@@ -1074,6 +1122,7 @@ export default {
           ],
           pageTitle: "Báo cáo chi tiết giờ dạy của giáo viên",
           rule: "editor",
+          permission: "lms_reports_teacher_01",
         },
       },
       {
@@ -1087,6 +1136,7 @@ export default {
           ],
           pageTitle: "Báo cáo",
           rule: "editor",
+          permission: "lms_reports_business",
         },
       },
       {
@@ -1104,6 +1154,7 @@ export default {
           ],
           pageTitle: "Kết quả kinh doanh ngày",
           rule: "editor",
+          permission: "lms_reports_business_01",
         },
       },
       {
@@ -1117,6 +1168,7 @@ export default {
           ],
           pageTitle: "Báo cáo",
           rule: "editor",
+          permission: "lms_reports_finance",
         },
       },
       {
@@ -1134,6 +1186,7 @@ export default {
           ],
           pageTitle: "Báo cáo chi tiết doanh số",
           rule: "editor",
+          permission: "lms_reports_finance_01",
         },
       },
       {
@@ -1151,6 +1204,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh số theo trung tâm",
           rule: "editor",
+          permission: "lms_reports_finance_02",
         },
       },
       {
@@ -1168,6 +1222,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh thu thực hiện",
           rule: "editor",
+          permission: "lms_reports_finance_03",
         },
       },
       {
@@ -1185,6 +1240,7 @@ export default {
           ],
           pageTitle: "Báo cáo doanh số theo nhân viên",
           rule: "editor",
+          permission: "lms_reports_finance_04",
         },
       },
       {
@@ -1202,6 +1258,7 @@ export default {
           ],
           pageTitle: "Báo cáo chi tiết đơn hàng",
           rule: "editor",
+          permission: "lms_reports_finance_05",
         },
       },
     ],

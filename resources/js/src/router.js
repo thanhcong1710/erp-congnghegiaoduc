@@ -222,10 +222,20 @@ router.afterEach(() => {
   }
 })
 
+import helper from './until/helper'
+import store from './store/store'
+
 router.beforeEach((to, from, next) => {
   if (to.meta.authRequired) {
     if (!(auth.isAuthenticated() || firebaseCurrentUser)) {
-      router.push({ path: '/pages/login', query: { to: to.path } })
+      return next({ path: '/pages/login', query: { to: to.path } })
+    }
+  }
+
+  if (to.meta && to.meta.permission) {
+    const activeUser = store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {}
+    if (!helper.checkPermission(activeUser, to.meta.permission)) {
+      return next({ path: '/pages/not-authorized' })
     }
   }
 
