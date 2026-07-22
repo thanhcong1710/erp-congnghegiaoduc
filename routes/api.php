@@ -248,6 +248,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('book-delivered', 'ReportsController@reportBookDelivered');
                 Route::post('update-book-delivered-date', 'ReportsController@updateBookDeliveredDate');
                 Route::post('update-salary-month', 'ReportsController@updateSalaryMonth');
+                Route::post('update-salary-month-all', 'ReportsController@updateSalaryMonthAll');
                 Route::post('13', 'ReportsController@report13');
                 Route::post('14', 'ReportsController@report14');
                 Route::post('15', 'ReportsController@report15');

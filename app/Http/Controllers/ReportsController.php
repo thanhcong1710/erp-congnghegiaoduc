@@ -2517,4 +2517,37 @@ class ReportsController extends Controller
         }
         return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
     }
+
+    public function updateSalaryMonthAll(Request $request)
+    {
+        $currentMonth = date('Y-m');
+        $query = "
+            UPDATE agreements
+            SET salary_month = '$currentMonth'
+            WHERE debt_amount = 0
+            AND id IN (
+                SELECT agreement_id
+                FROM payments
+                WHERE charge_date LIKE '$currentMonth-%'
+            )
+        ";
+        u::query($query);
+        
+        $queryLog = "
+            UPDATE log_agreements
+            SET salary_month = '$currentMonth'
+            WHERE agreement_id IN (
+                SELECT id FROM agreements 
+                WHERE debt_amount = 0
+                AND id IN (
+                    SELECT agreement_id
+                    FROM payments
+                    WHERE charge_date LIKE '$currentMonth-%'
+                )
+            )
+        ";
+        u::query($queryLog);
+
+        return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
+    }
 }

@@ -66,6 +66,7 @@
         <vs-button class="rpt-btn" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
         <vs-button color="dark" type="border" class="rpt-btn" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
         <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
+        <vs-button v-if="user_role.is_admin" color="primary" class="rpt-btn" @click="updateSalaryMonthAll"><i class="fas fa-calendar-check"></i> Update Tính Lương</vs-button>
         <span class="rpt-badge-count">{{ pagination.total }} bản ghi</span>
       </div>
 
@@ -286,6 +287,27 @@
         }).catch(err => {
           this.$vs.loading.close();
           this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
+        });
+      },
+      updateSalaryMonthAll() {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'primary',
+          title: 'Xác nhận',
+          text: 'Bạn có chắc chắn muốn cập nhật tháng tính lương = tháng hiện tại cho toàn bộ bản ghi thỏa mãn điều kiện (Công nợ = 0 và Có thanh toán trong tháng hiện tại)?',
+          acceptText: 'Đồng ý',
+          cancelText: 'Hủy',
+          accept: () => {
+            this.$vs.loading();
+            axios.p('/api/lms/reports/update-salary-month-all', {}).then(res => {
+              this.$vs.loading.close();
+              this.$vs.notify({ title: 'Thành công', text: 'Cập nhật tháng tính lương thành công', color: 'success' });
+              this.getData();
+            }).catch(err => {
+              this.$vs.loading.close();
+              this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
+            });
+          }
         });
       },
       reset() {
