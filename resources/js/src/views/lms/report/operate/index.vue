@@ -35,67 +35,67 @@
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-17'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-17'" v-if="checkPermission('lms_reports_operate_06')">
                 <p>06. BÁO CÁO (KT) TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-18'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-18'" v-if="checkPermission('lms_reports_operate_07')">
                 <p>07. BÁO CÁO (KT) CHI TIẾT THEO TỪNG KHÓA TRONG COMBO</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-19'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-19'" v-if="checkPermission('lms_reports_operate_08')">
                 <p>08. BÁO CÁO (KT) SỐ LƯỢNG HỌC VIÊN THEO TỪNG KHÓA</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-20'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-20'" v-if="checkPermission('lms_reports_operate_09')">
                 <p>09. BÁO CÁO (KT) DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC (MỚI / UP LEVEL)</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-21'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-21'" v-if="checkPermission('lms_reports_operate_10')">
                 <p>10. BÁO CÁO (KT) BẢNG TỔNG QUAN QUẢN LÝ HỌC SINH NĂM</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-22'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-22'" v-if="checkPermission('lms_reports_operate_11')">
                 <p>11. BÁO CÁO (KT) BÁO CÁO CHI TIẾT CÔNG NỢ THEO KHÁCH HÀNG</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-23'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-23'" v-if="checkPermission('lms_reports_operate_12')">
                 <p>12. BÁO CÁO (KT) THỐNG KÊ DOANH THU THEO TEAM SALE</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-24'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-24'" v-if="checkPermission('lms_reports_operate_13')">
                 <p>13. BÁO CÁO PHỤC VỤ XUẤT HÓA ĐƠN</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-28'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-28'" v-if="checkPermission('lms_reports_operate_14')">
                 <p>14. BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-25'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-25'" v-if="checkPermission('lms_reports_operate_15')">
                 <p>15. BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-26'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-26'" v-if="checkPermission('lms_reports_operate_16')">
                 <p>16. BÁO CÁO CHI TIẾT ĐÃ XẾP LỚP</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-29'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-29'" v-if="checkPermission('lms_reports_operate_17')">
                 <p>17. BÁO CÁO CHI TIẾT CHƯA XẾP LỚP</p>
               </router-link>
             </div>
             <div class="mb-2">
-              <router-link class="link-report" :to="'/lms/reports/operate/report-27'" v-if="checkPermission('lms_reports_operate_05')">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-27'" v-if="checkPermission('lms_reports_operate_18')">
                 <p>18. BÁO CÁO PHÁT SÁCH</p>
               </router-link>
             </div>
