@@ -84,7 +84,7 @@
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
                   <th colspan="1" rowspan="1">Học sinh</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Hợp đồng</th>
+                  <th colspan="1" rowspan="1" style="width: 180px;">Hợp đồng</th>
                   <th colspan="1" rowspan="1">Đóng phí</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
