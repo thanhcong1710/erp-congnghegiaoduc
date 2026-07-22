@@ -291,6 +291,14 @@
                       <p  class="invoice-total-title"> Số tiền đã đóng: </p>
                       <p  class="invoice-total-amount"> {{ agreement.total_charged | formatMoney}} </p>
                   </div>
+                  <div  class="invoice-total-item" v-if="agreement.transferred_amount > 0">
+                      <p  class="invoice-total-title"> Đã chuyển sang gói khác: </p>
+                      <p  class="invoice-total-amount" style="color: #ea5455;"> -{{ agreement.transferred_amount | formatMoney}} </p>
+                  </div>
+                  <div  class="invoice-total-item" v-if="agreement.received_amount > 0">
+                      <p  class="invoice-total-title"> Nhận từ gói khác: </p>
+                      <p  class="invoice-total-amount" style="color: #28c76f;"> +{{ agreement.received_amount | formatMoney}} </p>
+                  </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
@@ -727,7 +735,7 @@
         return false;
       },
       excessAmount() {
-        const charged = Number(this.agreement.total_charged) || 0;
+        const charged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
         const must_charge = Number(this.agreement.total_amount) || 0;
         return charged > must_charge ? (charged - must_charge) : 0;
       }

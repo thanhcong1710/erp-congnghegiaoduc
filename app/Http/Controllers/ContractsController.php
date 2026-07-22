@@ -788,7 +788,7 @@ class ContractsController extends Controller
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
-                c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id
+                c.must_charge, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
@@ -826,7 +826,7 @@ class ContractsController extends Controller
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
-                c.must_charge, c.debt_amount, c.total_charged, c.status, c.student_id
+                c.must_charge, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
@@ -863,67 +863,46 @@ class ContractsController extends Controller
             return response()->json(['status' => 0, 'message' => 'Chỉ có thể chuyển tiền giữa các gói của cùng một học sinh']);
         }
 
-        $excess = $from->total_charged - $from->must_charge;
+        $from_transferred = (float) data_get($from, 'transferred_amount', 0);
+        $from_received = (float) data_get($from, 'received_amount', 0);
+        $from_total_charged = (float) data_get($from, 'total_charged', 0);
+        $from_must_charge = (float) data_get($from, 'must_charge', 0);
+
+        $from_effective = $from_total_charged + $from_received - $from_transferred;
+        $excess = $from_effective - $from_must_charge;
+
         if ($excess < $amount) {
             return response()->json(['status' => 0, 'message' => "Số tiền chuyển vượt quá số tiền thừa của gói cũ ($excess)"]);
         }
 
-        // Cập nhật gói cũ
-        $new_from_total = $from->total_charged - $amount;
-        $new_from_debt = $from->must_charge - $new_from_total;
+        // Cập nhật gói cũ: tăng transferred_amount, giữ nguyên total_charged
+        $new_from_transferred = $from_transferred + $amount;
+        $new_from_effective = $from_total_charged + $from_received - $new_from_transferred;
+        $new_from_debt = $from_must_charge - $new_from_effective;
+
         u::updateSimpleRow([
-            'total_charged' => $new_from_total,
+            'transferred_amount' => $new_from_transferred,
             'debt_amount' => $new_from_debt > 0 ? $new_from_debt : 0,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ], ['id' => $from_agreement_id], 'agreements');
 
-        // Cập nhật gói mới
-        $new_to_total = $to->total_charged + $amount;
-        $new_to_debt = $to->must_charge - $new_to_total;
+        // Cập nhật gói mới: tăng received_amount, giữ nguyên total_charged
+        $to_transferred = (float) data_get($to, 'transferred_amount', 0);
+        $to_received = (float) data_get($to, 'received_amount', 0);
+        $to_total_charged = (float) data_get($to, 'total_charged', 0);
+        $to_must_charge = (float) data_get($to, 'must_charge', 0);
+
+        $new_to_received = $to_received + $amount;
+        $new_to_effective = $to_total_charged + $new_to_received - $to_transferred;
+        $new_to_debt = $to_must_charge - $new_to_effective;
+
         u::updateSimpleRow([
-            'total_charged' => $new_to_total,
+            'received_amount' => $new_to_received,
             'debt_amount' => $new_to_debt > 0 ? $new_to_debt : 0,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ], ['id' => $to_agreement_id], 'agreements');
-
-        // Ghi log vào bảng payment cho cả hai gói
-        u::insertSimpleRow([
-            'agreement_id' => $from_agreement_id,
-            'student_id' => $from->student_id,
-            'branch_id' => $from->branch_id,
-            'cm_id' => $from->cm_id,
-            'ec_id' => $from->ec_id,
-            'method' => 5, // Chuyển tiền nội bộ
-            'must_charge' => $from->must_charge,
-            'amount' => -$amount,
-            'total' => $new_from_total,
-            'debt' => $new_from_debt > 0 ? $new_from_debt : 0,
-            'charge_date' => date('Y-m-d'),
-            'note' => "Chuyển $amount tiền thừa sang gói $to->code: $note",
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
-            'type' => 1
-        ], 'payments');
-
-        u::insertSimpleRow([
-            'agreement_id' => $to_agreement_id,
-            'student_id' => $to->student_id,
-            'branch_id' => $to->branch_id,
-            'cm_id' => $to->cm_id,
-            'ec_id' => $to->ec_id,
-            'method' => 5, // Chuyển tiền nội bộ
-            'must_charge' => $to->must_charge,
-            'amount' => $amount,
-            'total' => $new_to_total,
-            'debt' => $new_to_debt > 0 ? $new_to_debt : 0,
-            'charge_date' => date('Y-m-d'),
-            'note' => "Nhận $amount tiền thừa từ gói $from->code: $note",
-            'created_at' => date('Y-m-d H:i:s'),
-            'creator_id' => Auth::user()->id,
-            'type' => 1
-        ], 'payments');
 
         // Ghi log chuyển tiền
         u::insertSimpleRow([
@@ -936,6 +915,10 @@ class ContractsController extends Controller
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
         ], 'agreement_transfers');
+
+        // Ghi log thay đổi gói học phí
+        u::addLogAgreements($from_agreement_id);
+        u::addLogAgreements($to_agreement_id);
 
         // Chia lại contract total
         $chargesController = new ChargesController();

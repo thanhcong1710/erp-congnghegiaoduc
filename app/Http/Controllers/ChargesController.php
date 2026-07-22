@@ -374,7 +374,10 @@ class ChargesController extends Controller
     {
         $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
         $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 ORDER BY product_id");
-        $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
+        $effectiveCharged = (float) data_get($agreementInfo, 'total_charged', 0)
+            + (float) data_get($agreementInfo, 'received_amount', 0)
+            - (float) data_get($agreementInfo, 'transferred_amount', 0);
+        $dataResult = self::splitChargedAmount($effectiveCharged, (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
             foreach ($packages as $row) {
