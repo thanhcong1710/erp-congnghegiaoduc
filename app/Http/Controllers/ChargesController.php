@@ -34,7 +34,9 @@ class ChargesController extends Controller
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -63,7 +65,9 @@ class ChargesController extends Controller
                 $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -261,6 +265,8 @@ class ChargesController extends Controller
                         } else {
                             $count_recharge = 1;
                         }
+                    } else {
+                        $count_recharge = 0;
                     }
 
                     u::updateSimpleRow(array(
@@ -374,9 +380,9 @@ class ChargesController extends Controller
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if( data_get($row, 'contract_data.class_id')){
+                if (data_get($row, 'contract_data.class_id')) {
                     $status = 6;
-                }else{
+                } else {
                     $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
                 }
                 u::updateSimpleRow([
@@ -463,7 +469,9 @@ class ChargesController extends Controller
                 $cond .= " AND p.charge_date >= '$start_date'";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -500,7 +508,9 @@ class ChargesController extends Controller
                 $cond .= " AND p.charge_date >= '$start_date'";
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -631,10 +641,12 @@ class ChargesController extends Controller
                 $cond .= " AND tp.charge_date <= '$end_date'";
             }
             if ($status !== '') {
-                $cond .= " AND tp.status = " . (int)$status;
+                $cond .= " AND tp.status = " . (int) $status;
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -671,10 +683,12 @@ class ChargesController extends Controller
                 $cond .= " AND tp.charge_date <= '$end_date'";
             }
             if ($status !== '') {
-                $cond .= " AND tp.status = " . (int)$status;
+                $cond .= " AND tp.status = " . (int) $status;
             }
             $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-            $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
+            $roles = array_map(function ($r) {
+                return $r->role_id;
+            }, $role_ids);
             if (in_array(68, $roles) || in_array(69, $roles)) {
                 $cond .= " AND t.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
             }
@@ -865,9 +879,10 @@ class ChargesController extends Controller
         ]);
     }
 
-    public function reProcessAgreement($agreement_id){
+    public function reProcessAgreement($agreement_id)
+    {
         $agreement_info = u::getObject(array('id' => $agreement_id), 'agreements');
-        $total_charged =u::first("SELECT SUM(amount) AS total FROM payments WHERE agreement_id=".$agreement_id);
+        $total_charged = u::first("SELECT SUM(amount) AS total FROM payments WHERE agreement_id=" . $agreement_id);
 
         $must_charge = (int) data_get($agreement_info, 'must_charge');
         $total_charged = data_get($total_charged, 'total');
@@ -876,7 +891,7 @@ class ChargesController extends Controller
         // ---- Validate cân bằng ----
         // must_charge = total_charged + charge_amount + debt_after + discount_amount
         $debt_after = $must_charge - $total_charged - $discount_amount;
-        $debt_after = $debt_after > 0 ? $debt_after :0; 
+        $debt_after = $debt_after > 0 ? $debt_after : 0;
 
         // ---- Cập nhật agreements ----
         $new_total_charged = $total_charged;
@@ -908,9 +923,9 @@ class ChargesController extends Controller
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if( data_get($row, 'contract_data.class_id')){
+                if (data_get($row, 'contract_data.class_id')) {
                     $status = 6;
-                }else{
+                } else {
                     $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
                 }
                 u::updateSimpleRow([
