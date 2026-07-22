@@ -110,7 +110,8 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
-                  <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
+                  <p>Đã thu: {{ item.total_charged | formatMoney }}</p>
+                  <p>Công nợ: <span :class="{'text-danger font-bold': item.debt_amount > 0}">{{ item.debt_amount | formatMoney }}</span></p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 

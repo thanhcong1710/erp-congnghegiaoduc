@@ -30,6 +30,7 @@
             </td>
             <td class="td vs-table--td">
               <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
+              <p>Đã thu: {{ item.total_charged | formatMoney }}</p>
               <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
             </td>
             <td class="td vs-table--td text-center">{{ item.label_status}}</td>
