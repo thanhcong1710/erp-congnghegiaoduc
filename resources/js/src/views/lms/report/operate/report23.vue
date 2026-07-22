@@ -64,7 +64,7 @@
           <thead>
             <tr class="group-header-row">
               <th rowspan="2" style="width:44px" class="text-center">STT</th>
-              <th rowspan="2" style="min-width:180px">TEAM</th>
+              <th rowspan="2" style="min-width:120px">TEAM</th>
               <th colspan="4" class="text-center th-green">DOANH SỐ</th>
               <th rowspan="2" style="width:140px" class="text-right th-orange">DOANH THU</th>
               <th rowspan="2" style="width:140px" class="text-right th-orange">LƯƠNG SALE</th>

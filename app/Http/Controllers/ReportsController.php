@@ -1642,7 +1642,7 @@ class ReportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR (a.ec_leader_id IS NULL AND a.ec_id = $team_id))";
+            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) = $team_id OR (IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL AND IF(s.source_id = 6, 336, a.ec_id) = $team_id))";
         }
         if ($completion_status == 1) {
             $cond .= " AND a.debt_amount = 0";
@@ -1676,13 +1676,13 @@ class ReportsController extends Controller
         // ---- Main query: group theo team ----
         $query = "
             SELECT
-                COALESCE(a.ec_leader_id, a.ec_id)                      AS team_user_id,
+                COALESCE(IF(s.source_id = 6, 336, a.ec_leader_id), IF(s.source_id = 6, 336, a.ec_id)) AS team_user_id,
                 ANY_VALUE(
                     CASE
-                        WHEN a.ec_leader_id IS NOT NULL
-                            THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                        WHEN IF(s.source_id = 6, 336, a.ec_leader_id) IS NOT NULL
+                            THEN (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_leader_id))
                         ELSE
-                            (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                            (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id))
                     END
                 )                                                       AS team_name,
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
@@ -1693,9 +1693,10 @@ class ReportsController extends Controller
                 SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
                 SUM(a.total_charged)                                      AS total_revenue
             FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
-            GROUP BY COALESCE(a.ec_leader_id, a.ec_id)
+            GROUP BY COALESCE(IF(s.source_id = 6, 336, a.ec_leader_id), IF(s.source_id = 6, 336, a.ec_id))
             ORDER BY team_name ASC
         ";
 
@@ -2080,12 +2081,12 @@ class ReportsController extends Controller
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
         if ($team_id > 0) {
-            $cond .= " AND (a.ec_leader_id = $team_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $team_id))";
+            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) = $team_id OR ((IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_leader_id) = 0) AND IF(s.source_id = 6, 336, a.ec_id) = $team_id))";
         } elseif ($team_id == -1) {
-            $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
+            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_leader_id) = 0) AND (IF(s.source_id = 6, 336, a.ec_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_id) = 0)";
         }
         if ($ec_id > 0) {
-            $cond .= " AND a.ec_id = $ec_id";
+            $cond .= " AND IF(s.source_id = 6, 336, a.ec_id) = $ec_id";
         }
         if ($keyword !== '') {
             $kw = addslashes($keyword);
@@ -2133,10 +2134,10 @@ class ReportsController extends Controller
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
                 CASE
-                    WHEN a.ec_leader_id IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
-                    ELSE (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                    WHEN IF(s.source_id = 6, 336, a.ec_leader_id) IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_leader_id))
+                    ELSE (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id))
                 END AS team_name,
-                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id)) AS ec_name,
                 (SELECT CONCAT(cls.cls_name, IF(ct.enrolment_start_date IS NOT NULL AND ct.enrolment_start_date > '2000-01-01', CONCAT(' (', SUBSTRING(ct.enrolment_start_date, 1, 10), ')'), ''))
                  FROM contracts ct
                  LEFT JOIN classes cls ON cls.id = ct.class_id
