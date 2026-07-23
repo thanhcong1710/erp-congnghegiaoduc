@@ -70,7 +70,7 @@
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC</label>
               <vue-select
-                    v-if="agreement.is_admin"
+                    v-if="!agreement.is_admin"
                     label="label"
                     placeholder="Chọn EC"
                     :options="html.ec.list"
@@ -779,7 +779,7 @@
             this.agreement.group_type_obj = groupOptions.find(o => o.value === this.agreement.group_type)
           }
           
-          if (this.agreement.is_admin) {
+          if (!this.agreement.is_sale_role) {
             this.loadECList();
           }
 
