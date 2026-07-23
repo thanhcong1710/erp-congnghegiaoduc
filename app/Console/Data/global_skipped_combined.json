@@ -8533,5 +8533,29 @@
         "debt_amount_raw": 0,
         "raw_start_date": "13-Jul",
         "salary_month": null
+    },
+    {
+        "phone": "0000000368",
+        "price": 2468,
+        "address": "Đường 2\/9, ngách 44, nhà số 1, Cẩm Trung, Quảng Ninh",
+        "name": "Trần Thị Mai Lan",
+        "class_name": "PT458",
+        "course": "Pre_Toeic",
+        "raw_status": "4",
+        "start_date": null,
+        "team_kinh_doanh": "Hải Anh Meca",
+        "sale_team": "Hải Anh Meca",
+        "sale_member": "hải anh",
+        "shipping_note": "",
+        "link_fb": "",
+        "email": "",
+        "payment_1_amount": 2550,
+        "payment_1_date": "2026-06-13",
+        "payment_2_amount": 0,
+        "payment_2_date": null,
+        "discount_amount": 0,
+        "debt_amount_raw": -82,
+        "raw_start_date": "",
+        "salary_month": "2026-06"
     }
 ]

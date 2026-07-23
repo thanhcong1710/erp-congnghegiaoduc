@@ -70,7 +70,7 @@
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC</label>
               <vue-select
-                    v-if="!agreement.is_admin"
+                    v-if="!agreement.is_sale_role"
                     label="label"
                     placeholder="Chọn EC"
                     :options="html.ec.list"
