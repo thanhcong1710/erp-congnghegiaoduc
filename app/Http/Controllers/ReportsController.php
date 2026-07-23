@@ -1753,7 +1753,7 @@ class ReportsController extends Controller
                     WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
                     ELSE -1
                 END,
-                IF(s.source_id = 6, 1, 0)
+                IF(s.source_id = 6, 'p_', '')
             ORDER BY team_name ASC
         ";
 
