@@ -1654,23 +1654,23 @@ class ReportsController extends Controller
         }
 
         if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
-            $cond .= " AND (a.ec_leader_id = {$user->id} OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = {$user->id}))";
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = {$user->id}))";
         } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
             if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
                 $leader_id = (int) substr($raw_team_id, 2);
                 $cond .= " AND s.source_id = 6";
                 if (in_array($leader_id, [38, 49, 58])) {
-                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
                 } elseif ($leader_id == -1) {
-                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) OR a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL OR a.ec_id = 0)";
                 }
             } else {
                 $leader_id = (int) $raw_team_id;
                 $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
-                if (in_array($leader_id, [38, 49, 58])) {
-                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                if ($leader_id > 0) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
                 } elseif ($leader_id == -1) {
-                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                    $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
                 }
             }
         }
@@ -1716,9 +1716,14 @@ class ReportsController extends Controller
                     CONCAT(
                         IF(s.source_id = 6, 'p_', ''),
                         CASE
-                            WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
-                            WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
-                            ELSE -1
+                            WHEN s.source_id = 6 THEN
+                                CASE
+                                    WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                                    WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                                    ELSE -1
+                                END
+                            ELSE
+                                COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
                         END
                     )
                 ) AS team_user_id,
@@ -1732,9 +1737,12 @@ class ReportsController extends Controller
                             END
                         ELSE
                             CASE
-                                WHEN a.ec_leader_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
-                                WHEN a.ec_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_id)
-                                ELSE 'Khác (Không có team KD)'
+                                WHEN a.ec_leader_id IS NOT NULL AND a.ec_leader_id > 0 THEN
+                                    (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                                WHEN a.ec_id IS NOT NULL AND a.ec_id > 0 THEN
+                                    (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                                ELSE
+                                    'Khác (Không có team KD)'
                             END
                     END
                 )                                                       AS team_name,
@@ -1750,12 +1758,17 @@ class ReportsController extends Controller
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
             GROUP BY
+                IF(s.source_id = 6, 1, 0),
                 CASE
-                    WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
-                    WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
-                    ELSE -1
-                END,
-                IF(s.source_id = 6, 1, 0)
+                    WHEN s.source_id = 6 THEN
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                            WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                            ELSE -1
+                        END
+                    ELSE
+                        COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
+                END
             ORDER BY team_name ASC
         ";
 
@@ -2141,23 +2154,23 @@ class ReportsController extends Controller
         }
 
         if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
-            $cond .= " AND (a.ec_leader_id = {$user->id} OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = {$user->id}))";
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = {$user->id}))";
         } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
             if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
                 $leader_id = (int) substr($raw_team_id, 2);
                 $cond .= " AND s.source_id = 6";
                 if (in_array($leader_id, [38, 49, 58])) {
-                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
                 } elseif ($leader_id == -1) {
-                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) OR a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL OR a.ec_id = 0)";
                 }
             } else {
                 $leader_id = (int) $raw_team_id;
                 $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
-                if (in_array($leader_id, [38, 49, 58])) {
-                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                if ($leader_id > 0) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
                 } elseif ($leader_id == -1) {
-                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                    $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
                 }
             }
         }
@@ -2223,9 +2236,12 @@ class ReportsController extends Controller
                         END
                     ELSE
                         CASE
-                            WHEN a.ec_leader_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
-                            WHEN a.ec_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_id)
-                            ELSE 'Khác (Không có team KD)'
+                            WHEN a.ec_leader_id IS NOT NULL AND a.ec_leader_id > 0 THEN
+                                (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                            WHEN a.ec_id IS NOT NULL AND a.ec_id > 0 THEN
+                                (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                            ELSE
+                                'Khác (Không có team KD)'
                         END
                 END AS team_name,
                 (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,

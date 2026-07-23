@@ -147,18 +147,22 @@
       axios.g(`/api/system/current-user-role`).then(response => {
         this.user_role = response.data
         axios.g('/api/system/users?role_id=69').then(r => {
-          const validIds = [38, 49, 58]
-          const leaders = (r.data || []).filter(l => validIds.includes(Number(l.id)))
+          const pageLeaderIds = [38, 49, 58]
+          const leaders = r.data || []
           const list = []
-          if (this.user_role.is_sale_leader && validIds.includes(Number(this.user_role.user_id))) {
+          if (this.user_role.is_sale_leader) {
             const me = leaders.find(l => l.id == this.user_role.user_id)
             const myName = me ? me.name : 'Team của tôi'
             list.push({ id: this.user_role.user_id, name: myName })
-            list.push({ id: `p_${this.user_role.user_id}`, name: `PAGE - ${myName}` })
+            if (pageLeaderIds.includes(Number(this.user_role.user_id))) {
+              list.push({ id: `p_${this.user_role.user_id}`, name: `PAGE - ${myName}` })
+            }
           } else {
             leaders.forEach(item => {
               list.push({ id: item.id, name: item.name })
-              list.push({ id: `p_${item.id}`, name: `PAGE - ${item.name}` })
+              if (pageLeaderIds.includes(Number(item.id))) {
+                list.push({ id: `p_${item.id}`, name: `PAGE - ${item.name}` })
+              }
             })
             list.push({ id: -1, name: 'Khác (Không có team KD)' })
             list.push({ id: 'p_-1', name: 'PAGE - Khác (Không có team KD)' })
