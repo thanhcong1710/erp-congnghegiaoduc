@@ -2509,10 +2509,8 @@ class ReportsController extends Controller
             if (!empty($salary_month)) {
                 $safe_month = addslashes($salary_month);
                 u::query("UPDATE agreements SET salary_month = '$safe_month' WHERE id IN ($ids)");
-                u::query("UPDATE log_agreements SET salary_month = '$safe_month' WHERE agreement_id IN ($ids)");
             } else {
                 u::query("UPDATE agreements SET salary_month = NULL WHERE id IN ($ids)");
-                u::query("UPDATE log_agreements SET salary_month = NULL WHERE agreement_id IN ($ids)");
             }
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }
@@ -2530,24 +2528,9 @@ class ReportsController extends Controller
                 SELECT agreement_id
                 FROM payments
                 WHERE charge_date LIKE '$currentMonth-%'
-            )
+            ) AND  salary_month IS NULL
         ";
         u::query($query);
-        
-        $queryLog = "
-            UPDATE log_agreements
-            SET salary_month = '$currentMonth'
-            WHERE agreement_id IN (
-                SELECT id FROM agreements 
-                WHERE debt_amount = 0
-                AND id IN (
-                    SELECT agreement_id
-                    FROM payments
-                    WHERE charge_date LIKE '$currentMonth-%'
-                )
-            )
-        ";
-        u::query($queryLog);
 
         return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
     }
