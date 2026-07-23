@@ -898,7 +898,7 @@
           }).then(response => {
             if (response.data.status == 1 && response.data.data) {
               this.agreement.ec_leader_id = response.data.data.id;
-              this.agreement.ec_leader_name = response.data.data.name + ' - ' + response.data.data.hrm_id;
+              this.agreement.ec_leader_name = response.data.data.name;
             } else {
               this.agreement.ec_leader_id = data.id;
               this.agreement.ec_leader_name = data.label_name;

@@ -1209,28 +1209,24 @@ class ContractsController extends Controller
 
             // Update EC and EC Leader if provided (only for admin)
             if ($request->has('ec_id') && $request->ec_id > 0) {
-                $current_user_id = Auth::user()->id;
-                $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
-                if ($is_admin) {
-                    $ec_id = (int)$request->ec_id;
-                    $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
-                    if ($ec_info) {
-                        $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['id' => $agreement_id], 'agreements');
-                        
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['agreement_id' => $agreement_id], 'contracts');
+                $ec_id = (int)$request->ec_id;
+                $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
+                if ($ec_info) {
+                    $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
+                    u::updateSimpleRow([
+                        'ec_id' => $ec_id,
+                        'ec_leader_id' => $ec_leader_id,
+                    ], ['id' => $agreement_id], 'agreements');
+                    
+                    u::updateSimpleRow([
+                        'ec_id' => $ec_id,
+                        'ec_leader_id' => $ec_leader_id,
+                    ], ['agreement_id' => $agreement_id], 'contracts');
 
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
-                    }
+                    u::updateSimpleRow([
+                        'ec_id' => $ec_id,
+                        'ec_leader_id' => $ec_leader_id,
+                    ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
                 }
             }
 
