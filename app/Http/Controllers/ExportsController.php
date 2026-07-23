@@ -2295,8 +2295,9 @@ class ExportsController extends Controller
         $branch_id = [];
         $start_date = '';
         $end_date = '';
-        $team_id = 0;
+        $raw_team_id = 0;
         $completion_status = -1;
+        $register_status = -1;
         $pay_start_date = '';
         $pay_end_date = '';
         $salary_month = '';
@@ -2315,10 +2316,13 @@ class ExportsController extends Controller
                     $end_date = $v;
                     break;
                 case 'team_id':
-                    $team_id = (int) $v;
+                    $raw_team_id = $v;
                     break;
                 case 'completion_status':
                     $completion_status = (int) $v;
+                    break;
+                case 'register_status':
+                    $register_status = (int) $v;
                     break;
                 case 'pay_start_date':
                     $pay_start_date = $v;
@@ -2332,12 +2336,40 @@ class ExportsController extends Controller
             }
         }
 
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        $is_sale_leader = in_array(69, $roleIds);
+
         $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        if ($team_id > 0) {
-            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) = $team_id OR (IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL AND IF(s.source_id = 6, 336, a.ec_id) = $team_id))";
+
+        if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = {$user->id}))";
+        } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
+            if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
+                $leader_id = (int) substr($raw_team_id, 2);
+                $cond .= " AND s.source_id = 6";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                }
+            } else {
+                $leader_id = (int) $raw_team_id;
+                $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                }
+            }
         }
         if ($completion_status == 1) {
             $cond .= " AND a.debt_amount = 0";
@@ -2345,6 +2377,12 @@ class ExportsController extends Controller
             $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
         } elseif ($completion_status == 3) {
             $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+
+        if ($register_status == 1) {
+            $cond .= " AND a.count_recharge = 0";
+        } elseif ($register_status == 2) {
+            $cond .= " AND a.count_recharge > 0";
         }
 
         if ($start_date) {
@@ -2368,11 +2406,27 @@ class ExportsController extends Controller
 
         $rows = u::query("
             SELECT
-                COALESCE(IF(s.source_id = 6, 336, a.ec_leader_id), IF(s.source_id = 6, 336, a.ec_id)) AS team_user_id,
+                CONCAT(
+                    IF(s.source_id = 6, 'p_', ''),
+                    CASE
+                        WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                        WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                        ELSE -1
+                    END
+                ) AS team_user_id,
                 ANY_VALUE(
-                    CASE WHEN IF(s.source_id = 6, 336, a.ec_leader_id) IS NOT NULL
-                        THEN (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_leader_id))
-                        ELSE (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id))
+                    CASE WHEN s.source_id = 6 THEN
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id))
+                            WHEN a.ec_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
+                            ELSE 'PAGE - Khác (Không có team KD)'
+                        END
+                    ELSE
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                            WHEN a.ec_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                            ELSE 'Khác (Không có team KD)'
+                        END
                     END
                 ) AS team_name,
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
@@ -2386,7 +2440,13 @@ class ExportsController extends Controller
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             WHERE $cond
-            GROUP BY COALESCE(IF(s.source_id = 6, 336, a.ec_leader_id), IF(s.source_id = 6, 336, a.ec_id))
+            GROUP BY
+                CASE
+                    WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                    WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                    ELSE -1
+                END,
+                IF(s.source_id = 6, 1, 0)
             ORDER BY team_name ASC
         ");
 
@@ -2818,7 +2878,7 @@ class ExportsController extends Controller
         $values = explode(',', $value);
 
         $branch_id = [];
-        $team_id = 0;
+        $raw_team_id = 0;
         $ec_id = 0;
         $keyword = '';
         $start_date = '';
@@ -2826,6 +2886,7 @@ class ExportsController extends Controller
         $pay_start_date = '';
         $pay_end_date = '';
         $completion_status = -1;
+        $register_status = -1;
         $salary_month = '';
 
         foreach ($keys as $k => $key_name) {
@@ -2837,7 +2898,7 @@ class ExportsController extends Controller
                     $branch_id = $v ? explode('-', $v) : [];
                     break;
                 case 'team_id':
-                    $team_id = (int) $v;
+                    $raw_team_id = $v;
                     break;
                 case 'ec_id':
                     $ec_id = (int) $v;
@@ -2860,6 +2921,9 @@ class ExportsController extends Controller
                 case 'completion_status':
                     $completion_status = (int) $v;
                     break;
+                case 'register_status':
+                    $register_status = (int) $v;
+                    break;
                 case 'salary_month':
                     $salary_month = $v;
                     break;
@@ -2873,9 +2937,8 @@ class ExportsController extends Controller
             $roleIds[] = $ur->role_id;
         }
 
-        if (in_array(69, $roleIds)) {
-            $team_id = $user->id;
-        } elseif (in_array(68, $roleIds)) {
+        $is_sale_leader = in_array(69, $roleIds);
+        if (in_array(68, $roleIds) && !$is_sale_leader) {
             $ec_id = $user->id;
         }
 
@@ -2883,13 +2946,30 @@ class ExportsController extends Controller
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        if ($team_id > 0) {
-            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) = $team_id OR ((IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_leader_id) = 0) AND IF(s.source_id = 6, 336, a.ec_id) = $team_id))";
-        } elseif ($team_id == -1) {
-            $cond .= " AND (IF(s.source_id = 6, 336, a.ec_leader_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_leader_id) = 0) AND (IF(s.source_id = 6, 336, a.ec_id) IS NULL OR IF(s.source_id = 6, 336, a.ec_id) = 0)";
+
+        if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = {$user->id}))";
+        } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
+            if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
+                $leader_id = (int) substr($raw_team_id, 2);
+                $cond .= " AND s.source_id = 6";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                }
+            } else {
+                $leader_id = (int) $raw_team_id;
+                $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR (a.ec_leader_id NOT IN (38,49,58) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL))";
+                }
+            }
         }
         if ($ec_id > 0) {
-            $cond .= " AND IF(s.source_id = 6, 336, a.ec_id) = $ec_id";
+            $cond .= " AND a.ec_id = $ec_id";
         }
         if ($keyword !== '') {
             $kw = addslashes($keyword);
@@ -2901,6 +2981,11 @@ class ExportsController extends Controller
             $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
         } elseif ($completion_status == 3) {
             $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+        if ($register_status == 1) {
+            $cond .= " AND a.count_recharge = 0";
+        } elseif ($register_status == 2) {
+            $cond .= " AND a.count_recharge > 0";
         }
         if ($start_date) {
             $cond .= " AND a.created_at >= '$start_date 00:00:00'";
@@ -2929,10 +3014,20 @@ class ExportsController extends Controller
                 s.name AS student_name,
                 s.gud_mobile1 AS phone,
                 CASE
-                    WHEN IF(s.source_id = 6, 336, a.ec_leader_id) IS NOT NULL THEN (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_leader_id))
-                    ELSE (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id))
+                    WHEN s.source_id = 6 THEN
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id))
+                            WHEN a.ec_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
+                            ELSE 'PAGE - Khác (Không có team KD)'
+                        END
+                    ELSE
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                            WHEN a.ec_id IN (38, 49, 58) THEN (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                            ELSE 'Khác (Không có team KD)'
+                        END
                 END AS team_name,
-                (SELECT u.name FROM users u WHERE u.id = IF(s.source_id = 6, 336, a.ec_id)) AS ec_name,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
                 (SELECT CONCAT(cls.cls_name, IF(ct.enrolment_start_date IS NOT NULL AND ct.enrolment_start_date > '2000-01-01', CONCAT(' (', SUBSTRING(ct.enrolment_start_date, 1, 10), ')'), ''))
                  FROM contracts ct
                  LEFT JOIN classes cls ON cls.id = ct.class_id

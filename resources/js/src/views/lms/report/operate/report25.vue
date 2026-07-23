@@ -19,7 +19,7 @@
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-        <div v-if="!user_role.is_sale && !user_role.is_sale_leader">
+        <div v-if="!user_role.is_sale">
           <label class="rpt-label">Team KD (quản lý)</label>
           <multiselect v-model="searchData.team_obj" :options="team_list" label="name" track-by="id"
             placeholder="Chọn team KD" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
@@ -31,6 +31,12 @@
           <multiselect v-model="searchData.ec_obj" :options="ec_list" label="name" track-by="id"
             placeholder="Chọn sale" :searchable="true" selectedLabel="" selectLabel="" deselectLabel="">
             <span slot="noResult">Không tìm thấy</span>
+          </multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Trạng thái đăng ký</label>
+          <multiselect v-model="searchData.register_status_obj" :options="[{id:1, name:'Mới'}, {id:2, name:'Up level'}]" label="name" track-by="id"
+            placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
           </multiselect>
         </div>
         <div>
@@ -211,7 +217,7 @@
         pagination: { cpage: 1, total: 0, limit: 20, init: 0 },
         searchData: {
           arr_branch: [], branch_id: [],
-          team_obj: null, ec_obj: null, completion_status_obj: null,
+          team_obj: null, ec_obj: null, register_status_obj: null, completion_status_obj: null,
           keyword: '',
           date_range: '',
           pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
@@ -229,11 +235,28 @@
       }
     },
     created() {
-      axios.g(`/api/system/current-user-role`).then(response => { this.user_role = response.data })
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
-      axios.g('/api/system/users?role_id=69').then(r => {
-        this.team_list = r.data || []
-        this.team_list.push({id: -1, name: 'Khác (Không có team KD)'})
+      axios.g(`/api/system/current-user-role`).then(response => {
+        this.user_role = response.data
+        axios.g('/api/system/users?role_id=69').then(r => {
+          const validIds = [38, 49, 58]
+          const leaders = (r.data || []).filter(l => validIds.includes(Number(l.id)))
+          const list = []
+          if (this.user_role.is_sale_leader && validIds.includes(Number(this.user_role.user_id))) {
+            const me = leaders.find(l => l.id == this.user_role.user_id)
+            const myName = me ? me.name : 'Team của tôi'
+            list.push({ id: this.user_role.user_id, name: myName })
+            list.push({ id: `p_${this.user_role.user_id}`, name: `PAGE - ${myName}` })
+          } else {
+            leaders.forEach(item => {
+              list.push({ id: item.id, name: item.name })
+              list.push({ id: `p_${item.id}`, name: `PAGE - ${item.name}` })
+            })
+            list.push({ id: -1, name: 'Khác (Không có team KD)' })
+            list.push({ id: 'p_-1', name: 'PAGE - Khác (Không có team KD)' })
+          }
+          this.team_list = list
+        })
       })
       axios.g('/api/system/users?role_id=68,69').then(r => { this.ec_list = r.data || [] })
       this.getData()
@@ -311,7 +334,7 @@
         });
       },
       reset() {
-        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, completion_status_obj: null, keyword: '', date_range: '', pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)], salary_month: '', no_salary_month: false }
+        this.searchData = { arr_branch: [], branch_id: [], team_obj: null, ec_obj: null, register_status_obj: null, completion_status_obj: null, keyword: '', date_range: '', pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)], salary_month: '', no_salary_month: false }
         this.pagination.cpage = 1
         this.getData()
       },
@@ -355,6 +378,7 @@
           branch_id,
           team_id:   this.searchData.team_obj ? this.searchData.team_obj.id : 0,
           ec_id:     this.searchData.ec_obj   ? this.searchData.ec_obj.id   : 0,
+          register_status: this.searchData.register_status_obj ? this.searchData.register_status_obj.id : -1,
           completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           keyword:   this.searchData.keyword  || '',
           start_date, end_date,
@@ -390,6 +414,7 @@
         if (p.branch_id && p.branch_id.length)  { keys.push('branch_id');  values.push(p.branch_id.join('-')) }
         if (p.team_id  > 0)  { keys.push('team_id');  values.push(p.team_id) }
         if (p.ec_id    > 0)  { keys.push('ec_id');    values.push(p.ec_id) }
+        if (p.register_status !== -1) { keys.push('register_status'); values.push(p.register_status) }
         if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.keyword)       { keys.push('keyword');  values.push(encodeURIComponent(p.keyword)) }
         if (p.start_date)     { keys.push('start_date'); values.push(p.start_date) }

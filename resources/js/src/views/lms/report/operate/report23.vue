@@ -27,6 +27,12 @@
           </multiselect>
         </div>
         <div>
+          <label class="rpt-label">Trạng thái đăng ký</label>
+          <multiselect v-model="searchData.register_status_obj" :options="[{id:1, name:'Mới'}, {id:2, name:'Up level'}]" label="name" track-by="id"
+            placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
+          </multiselect>
+        </div>
+        <div>
           <label class="rpt-label">Trạng thái công nợ</label>
           <multiselect v-model="searchData.completion_status_obj" :options="[{id:1, name:'Đã hoàn thành'}, {id:2, name:'Đã chuyển khoản'}, {id:3, name:'Chưa chuyển khoản'}]" label="name" track-by="id"
             placeholder="Tất cả" :searchable="false" selectedLabel="" selectLabel="" deselectLabel="">
@@ -123,6 +129,7 @@
           arr_branch: [], 
           dateRange: '', 
           team_obj: null, 
+          register_status_obj: null,
           completion_status_obj: null, 
           pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
           salary_month: '',
@@ -132,11 +139,33 @@
           days: ['CN','T2','T3','T4','T5','T6','T7'],
           months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'],
         },
+        user_role: { user_id: 0, is_sale: false, is_sale_leader: false, is_admin: false, is_accountant: false },
       }
     },
     created() {
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
-      axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data || [] })
+      axios.g(`/api/system/current-user-role`).then(response => {
+        this.user_role = response.data
+        axios.g('/api/system/users?role_id=69').then(r => {
+          const validIds = [38, 49, 58]
+          const leaders = (r.data || []).filter(l => validIds.includes(Number(l.id)))
+          const list = []
+          if (this.user_role.is_sale_leader && validIds.includes(Number(this.user_role.user_id))) {
+            const me = leaders.find(l => l.id == this.user_role.user_id)
+            const myName = me ? me.name : 'Team của tôi'
+            list.push({ id: this.user_role.user_id, name: myName })
+            list.push({ id: `p_${this.user_role.user_id}`, name: `PAGE - ${myName}` })
+          } else {
+            leaders.forEach(item => {
+              list.push({ id: item.id, name: item.name })
+              list.push({ id: `p_${item.id}`, name: `PAGE - ${item.name}` })
+            })
+            list.push({ id: -1, name: 'Khác (Không có team KD)' })
+            list.push({ id: 'p_-1', name: 'PAGE - Khác (Không có team KD)' })
+          }
+          this.team_list = list
+        })
+      })
       this.getData()
     },
     methods: {
@@ -145,6 +174,7 @@
           arr_branch: [], 
           dateRange: '', 
           team_obj: null, 
+          register_status_obj: null,
           completion_status_obj: null, 
           pay_date_range: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)],
           salary_month: '',
@@ -191,6 +221,7 @@
           start_date, 
           end_date,
           team_id: this.searchData.team_obj ? this.searchData.team_obj.id : 0,
+          register_status: this.searchData.register_status_obj ? this.searchData.register_status_obj.id : -1,
           completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           pay_start_date,
           pay_end_date,
@@ -214,6 +245,7 @@
         if (p.start_date) { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)   { keys.push('end_date');   values.push(p.end_date) }
         if (p.team_id > 0) { keys.push('team_id'); values.push(p.team_id) }
+        if (p.register_status !== -1) { keys.push('register_status'); values.push(p.register_status) }
         if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }
         if (p.pay_end_date)   { keys.push('pay_end_date');   values.push(p.pay_end_date) }
