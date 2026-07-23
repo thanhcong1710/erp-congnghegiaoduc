@@ -2406,13 +2406,15 @@ class ExportsController extends Controller
 
         $rows = u::query("
             SELECT
-                CONCAT(
-                    IF(s.source_id = 6, 'p_', ''),
-                    CASE
-                        WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
-                        WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
-                        ELSE -1
-                    END
+                ANY_VALUE(
+                    CONCAT(
+                        IF(s.source_id = 6, 'p_', ''),
+                        CASE
+                            WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                            WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                            ELSE -1
+                        END
+                    )
                 ) AS team_user_id,
                 ANY_VALUE(
                     CASE WHEN s.source_id = 6 THEN
@@ -2446,7 +2448,7 @@ class ExportsController extends Controller
                     WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
                     ELSE -1
                 END,
-                IF(s.source_id = 6, 'p_', '')
+                IF(s.source_id = 6, 1, 0)
             ORDER BY team_name ASC
         ");
 
