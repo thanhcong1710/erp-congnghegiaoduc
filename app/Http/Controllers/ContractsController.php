@@ -1034,6 +1034,8 @@ class ContractsController extends Controller
         if ($data) {
             $refunded = u::first("SELECT ABS(SUM(amount)) AS refunded FROM payments WHERE agreement_id = $agreement_id AND amount < 0");
             $data->refunded_amount = $refunded ? (float) $refunded->refunded : 0;
+            $tf_info = $data->tuition_fee_id ? u::first("SELECT price FROM tuition_fee WHERE id = {$data->tuition_fee_id}") : null;
+            $data->init_tuition_fee_amount = $tf_info ? (float)$tf_info->price : ((float)$data->must_charge + (float)data_get($data, 'discount_amount', 0));
         }
         $total_left_amount = 0;
         $dataContracts = u::query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id,
@@ -1085,6 +1087,14 @@ class ContractsController extends Controller
         $agreement_id = data_get($request, 'id');
         $agreementInfo = u::getObject(['id' => data_get($request, 'id')], 'agreements');
         if ($agreementInfo) {
+            $discount_amount = max(0, (float) data_get($request, 'discount_amount', 0));
+            $discount_note = trim(data_get($request, 'discount_note', ''));
+            if ($is_sale && ($discount_amount != (float) $agreementInfo->discount_amount || $discount_note != (string) $agreementInfo->discount_note)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền thay đổi Giảm trừ'
+                ]);
+            }
             if ($request->has('point_toeic')) {
                 u::updateSimpleRow(
                     ['point_toeic' => $request->point_toeic],
@@ -1133,16 +1143,21 @@ class ContractsController extends Controller
                 // }
 
                 $current_total_charged = (float) data_get($agreementInfo, 'total_charged', 0);
-                $new_must_charge = (float) data_get($request, 'tuition_fee_amount', 0);
+                $base_price = (float) data_get($request, 'tuition_fee_amount', 0);
+                $discount_amount = max(0, (float) data_get($request, 'discount_amount', 0));
+                $discount_note = trim(data_get($request, 'discount_note', ''));
+                $new_must_charge = max(0, $base_price - $discount_amount);
                 $transferred_amount = (float) data_get($agreementInfo, 'transferred_amount', 0);
                 $received_amount = (float) data_get($agreementInfo, 'received_amount', 0);
                 $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
-                $new_debt_amount = $new_must_charge > $effective_charged ? ($new_must_charge - $effective_charged) : 0;
+                $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
                     'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
                     'must_charge' => $new_must_charge,
+                    'discount_amount' => $discount_amount,
+                    'discount_note' => $discount_note,
                     'debt_amount' => $new_debt_amount,
                     'total_charged' => $current_total_charged,
                     'start_date' => data_get($request, 'start_date'),
@@ -1281,13 +1296,29 @@ class ContractsController extends Controller
                 }
                 $updateChargesFee = true;
             } else {
+                $current_total_charged = (float) data_get($agreementInfo, 'total_charged', 0);
+                $discount_amount = max(0, (float) data_get($request, 'discount_amount', 0));
+                $discount_note = trim(data_get($request, 'discount_note', ''));
+                $tf_info = $agreementInfo->tuition_fee_id ? u::first("SELECT price FROM tuition_fee WHERE id = {$agreementInfo->tuition_fee_id}") : null;
+                $base_price = $tf_info ? (float)$tf_info->price : ((float) data_get($request, 'tuition_fee_amount', 0) ?: ((float)$agreementInfo->must_charge + (float)$agreementInfo->discount_amount));
+                $new_must_charge = max(0, $base_price - $discount_amount);
+                $transferred_amount = (float) data_get($agreementInfo, 'transferred_amount', 0);
+                $received_amount = (float) data_get($agreementInfo, 'received_amount', 0);
+                $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
+                $new_debt_amount = max(0, $new_must_charge - $effective_charged);
+
                 u::updateSimpleRow(array(
+                    'must_charge' => $new_must_charge,
+                    'discount_amount' => $discount_amount,
+                    'discount_note' => $discount_note,
+                    'debt_amount' => $new_debt_amount,
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
                     'book_receive_address' => data_get($request, 'book_receive_address', ''),
                     'contract_receive' => data_get($request, 'contract_receive', 0),
                     'group_type' => data_get($request, 'group_type', 0),
+                    'status' => $current_total_charged == 0 ? 1 : ($new_debt_amount > 0 ? 2 : 3),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');

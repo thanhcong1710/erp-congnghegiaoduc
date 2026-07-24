@@ -416,8 +416,9 @@
           branch_id:'',
           product_id:'',
           session: 0,
-          max_students: 16,
+          max_students: 9,
           type: 1,
+          is_online: 1,
           status: 1,
           start_date:'',
           cm_id:'',
@@ -659,9 +660,9 @@
         this.config.class_day.day_7 = false
         this.config.class_day.day_8 = false
         this.config.session= 0
-        this.config.max_students= 16
+        this.config.max_students= 9
         this.config.type= 1
-        this.config.is_online = 0
+        this.config.is_online = 1
         this.config.start_date=''
         this.config.cm_id=''
         this.config.teacher_id=''

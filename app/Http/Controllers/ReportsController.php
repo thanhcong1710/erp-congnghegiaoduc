@@ -2226,6 +2226,7 @@ class ReportsController extends Controller
                 IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
                 tf.name AS course_name,
                 s.name AS student_name,
+                (SELECT p.link_facebook FROM crm_parents p WHERE p.student_id = s.id ORDER BY p.id DESC LIMIT 1) AS link_facebook,
                 s.gud_mobile1 AS phone,
                 CASE
                     WHEN s.source_id = 6 THEN

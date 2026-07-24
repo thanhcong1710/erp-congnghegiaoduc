@@ -114,6 +114,7 @@
 
               <th style="min-width:220px">Khoá học đăng kí</th>
               <th style="min-width:200px">Họ và tên</th>
+              <th style="min-width:220px">Link Facebook</th>
               <th style="min-width:130px">Sđt</th>
               <th style="min-width:180px">Team kinh doanh</th>
               <th style="min-width:180px">Nhân viên sale</th>
@@ -144,6 +145,10 @@
 
               <td class="text-wrap-cell">{{ row.course_name || '—' }}</td>
               <td class="student-name">{{ row.student_name }}</td>
+              <td class="text-wrap-cell">
+                <a v-if="row.link_facebook" :href="row.link_facebook" target="_blank" class="text-primary font-medium" style="word-break: break-all;">{{ row.link_facebook }}</a>
+                <span v-else>—</span>
+              </td>
               <td class="student-phone">{{ row.phone }}</td>
               <td>{{ row.team_name || '—' }}</td>
               <td>{{ row.ec_name || '—' }}</td>
@@ -172,7 +177,7 @@
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="21" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="22" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>

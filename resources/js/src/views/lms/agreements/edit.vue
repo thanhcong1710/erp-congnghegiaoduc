@@ -274,8 +274,30 @@
                     @input="saveGroupType"
                 ></vue-select>
             </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Số tiền giảm trừ (VNĐ)</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="number"
+                min="0"
+                placeholder="Nhập số tiền giảm trừ"
+                v-model="agreement.discount_amount"
+                @input="updateDiscount"
+                :disabled="agreement.is_sale_role"
+              />
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Lý do / Ghi chú giảm trừ</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                placeholder="Nhập lý do giảm trừ"
+                v-model="agreement.discount_note"
+                :disabled="agreement.is_sale_role"
+              />
+            </div>
             <div class="vx-col w-full mb-4">
-              <label>Ghi chú</label>
+              <label>Ghi chú hợp đồng</label>
               <textarea class="vs-inputx vs-input--input normal" v-model="agreement.note"></textarea>
             </div>
             <vs-divider/>
@@ -801,9 +823,12 @@
           .then(response => {
           this.$vs.loading.close();
           this.agreement = response.data
+          this.agreement.discount_amount = Number(response.data.discount_amount) || 0
+          this.agreement.discount_note = response.data.discount_note || ''
+          this.agreement.tuition_fee_amount = Number(response.data.init_tuition_fee_amount) || (Number(response.data.must_charge || 0) + Number(response.data.discount_amount || 0))
           this.agreement.total_amount = response.data.must_charge
+          this.agreement.must_charge = response.data.must_charge
           this.agreement.total_session = response.data.total_sessions
-          this.agreement.tuition_fee_amount = response.data.init_tuition_fee_amount
           this.agreement.tuition_fee_session = response.data.init_tuition_fee_session
           this.agreement.tuition_fee_type = response.data.type_fee
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
@@ -811,6 +836,7 @@
           this.agreement.class_id = response.data.class_id
           this.agreement.class_name = response.data.class_name
           this.agreement.class_start_date = response.data.class_start_date
+          this.updateDiscount();
           
           // Load các trường mới
           this.agreement.book_receive = response.data.book_receive || 0
@@ -856,7 +882,7 @@
           this.agreement.tuition_fee_session = data.session
           this.agreement.tuition_fee_type = data.type_fee
           this.agreement.tuition_fee_relation = data.tuition_fee_relation
-          this.agreement.total_amount = data.price
+          this.updateDiscount();
           this.calculatorLeftAmountWhenChangeTuitionFee();
           this.loadClassesForEnrolment();
         }else{
@@ -1131,6 +1157,16 @@
           console.log(e);
           this.transferCalling = false;
         });
+      },
+      updateDiscount() {
+        const feePrice = Number(this.agreement.tuition_fee_amount) || 0;
+        const discount = Math.max(0, Number(this.agreement.discount_amount) || 0);
+        this.agreement.discount_amount = discount;
+        this.agreement.must_charge = Math.max(0, feePrice - discount);
+        this.agreement.total_amount = this.agreement.must_charge;
+
+        const effectiveCharged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
+        this.agreement.debt_amount = Math.max(0, this.agreement.must_charge - effectiveCharged);
       },
       openRefundModal() {
         this.refundData = {
