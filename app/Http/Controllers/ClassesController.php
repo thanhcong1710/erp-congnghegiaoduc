@@ -88,8 +88,9 @@ class ClassesController extends Controller
             
         if($request->is_edit){
             $class_id = data_get($request,'class_id');
-            $old_class_info = u::first("SELECT cls_startdate FROM classes WHERE id = $class_id");
+            $old_class_info = u::first("SELECT cls_startdate, class_day FROM classes WHERE id = $class_id");
             $old_startdate = $old_class_info ? $old_class_info->cls_startdate : null;
+            $old_class_day = $old_class_info ? $old_class_info->class_day : null;
             u::query("DELETE FROM sessions WHERE class_id= $class_id");
             u::query("DELETE FROM subject_has_class WHERE class_id= $class_id");
             u::query("DELETE FROM schedules WHERE class_id= $class_id");
@@ -153,6 +154,8 @@ class ClassesController extends Controller
                 }
             }
 
+            $new_class_day = implode(",", $arr_day);
+
             u::updateSimpleRow(array(
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
@@ -164,7 +167,7 @@ class ClassesController extends Controller
                 'ta_id'=> data_get($request,'ta_id'),
                 'cls_startdate'=> data_get($request,'start_date'),
                 'cls_enddate'=> data_get($data_sessions,'end_date'),
-                'class_day'=> implode(",", $arr_day),
+                'class_day'=> $new_class_day,
                 'max_students'=> data_get($request,'max_students'),
                 'updated_at'=> date('Y-m-d H:i:s'),
                 'updator_id'=> Auth::user()->id,
@@ -183,6 +186,10 @@ class ClassesController extends Controller
                     u::query("UPDATE contracts SET done_sessions=0,left_sessions =summary_sessions WHERE class_id = $class_id");
                     u::query("DELETE FROM schedule_has_student WHERE class_id=$class_id");
                 }
+            }
+
+            if (($start_date && $start_date != $old_startdate) || ($new_class_day != $old_class_day)) {
+                u::updateAgreementsFirst8thSessionDateForClass($class_id);
             }
 
         }else{

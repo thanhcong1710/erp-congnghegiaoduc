@@ -1158,4 +1158,100 @@ class UtilityServiceProvider extends ServiceProvider
         return true;
     }
 
+    public static function updateAgreementFirst8thSessionDate($agreement_id)
+    {
+        $agreement_id = (int)$agreement_id;
+        if (!$agreement_id) {
+            return;
+        }
+
+        $agreement = self::first("SELECT id, student_id, full_fee_date, status FROM agreements WHERE id = $agreement_id AND status > 0");
+        if (!$agreement) {
+            return;
+        }
+
+        $first_contract = self::first("
+            SELECT c.agreement_id, c.id, c.enrolment_start_date, cls.class_day, cls.branch_id, cls.product_id
+            FROM contracts c
+            JOIN classes cls ON c.class_id = cls.id
+            WHERE c.agreement_id = $agreement_id 
+              AND c.status > 0 
+              AND c.class_id IS NOT NULL 
+              AND c.enrolment_start_date IS NOT NULL
+            ORDER BY c.enrolment_start_date ASC, c.id ASC
+            LIMIT 1
+        ");
+
+        $first_8th_session_date = null;
+        if ($first_contract) {
+            $branch_id = (int)$first_contract->branch_id;
+            $product_id = (int)$first_contract->product_id;
+            $holidays = self::getPublicHolidays($branch_id, $product_id);
+            
+            if (!empty($first_contract->class_day)) {
+                $arr_day = array_filter(explode(',', $first_contract->class_day));
+                if (count($arr_day) > 0) {
+                    $eighth_session_info = self::calculatorSessionsByNumberOfSessions($first_contract->enrolment_start_date, 8, $holidays, $arr_day);
+                    $first_8th_session_date = data_get($eighth_session_info, 'end_date');
+                } else {
+                    $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+                }
+            } else {
+                $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+            }
+        }
+
+        $student_agreements = self::query("
+            SELECT id, student_id, full_fee_date
+            FROM agreements
+            WHERE status > 0 AND student_id = {$agreement->student_id}
+            ORDER BY 
+                CASE WHEN last_pay_date IS NULL THEN 1 ELSE 0 END, 
+                last_pay_date ASC, 
+                created_at ASC
+        ");
+
+        foreach ($student_agreements as $index => $agr) {
+            $is_first_package = ($index === 0) ? 1 : 0;
+            $count_recharge = 1;
+            if ($is_first_package === 1) {
+                $count_recharge = 0;
+            } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
+                $count_recharge = 0;
+            }
+
+            self::updateSimpleRow([
+                'is_first_package' => $is_first_package,
+                'count_recharge' => $count_recharge,
+                'first_8th_session_date' => $first_8th_session_date,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], ['id' => $agr->id], 'agreements');
+            self::addLogAgreements($agr->id);
+        }
+    }
+
+    public static function updateAgreementsFirst8thSessionDateForClass($class_id)
+    {
+        $class_id = (int)$class_id;
+        if (!$class_id) {
+            return;
+        }
+
+        $agreements = self::query("
+            SELECT DISTINCT agreement_id 
+            FROM contracts 
+            WHERE class_id = $class_id AND status > 0 AND agreement_id IS NOT NULL
+        ");
+
+        if (empty($agreements)) {
+            return;
+        }
+
+        foreach ($agreements as $agr) {
+            $agreement_id = (int)$agr->agreement_id;
+            self::updateAgreementFirst8thSessionDate($agreement_id);
+        }
+    }
+
 }
+
