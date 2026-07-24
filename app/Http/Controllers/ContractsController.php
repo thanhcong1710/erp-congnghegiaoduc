@@ -894,7 +894,7 @@ class ContractsController extends Controller
         $to_must_charge = (float) data_get($to, 'must_charge', 0);
 
         $new_to_received = $to_received + $amount;
-        $new_to_effective = $to_total_charged + $new_to_received - $to_transferred;
+        $new_to_effective = $to_total_charged + $new_to_received - $to_transferred +data_get($to, 'discount_amount', 0);
         $new_to_debt = $to_must_charge - $new_to_effective;
 
         u::updateSimpleRow([
