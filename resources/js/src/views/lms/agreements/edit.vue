@@ -831,7 +831,8 @@
         })
 
         this.agreement.total_left_amount = total
-        this.agreement.debt_amount = this.agreement.total_amount > this.agreement.total_left_amount ? this.agreement.total_amount - this.agreement.total_left_amount : 0
+        const effectiveCharged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0)
+        this.agreement.debt_amount = Number(this.agreement.total_amount || 0) > effectiveCharged ? Number(this.agreement.total_amount || 0) - effectiveCharged : 0
       },
       loadTuitionFee(tuition_fee_id=0){
         if(this.agreement.branch_id){

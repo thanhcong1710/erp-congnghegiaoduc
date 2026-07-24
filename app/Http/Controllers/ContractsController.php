@@ -1060,22 +1060,26 @@ class ContractsController extends Controller
                 //     }
                 // }
 
-                // $new_total_charged = data_get($request, 'total_left_amount') + $studied_amount_overlapped;
-                $new_total_charged = data_get($request, 'total_left_amount');
+                $current_total_charged = (float) data_get($agreementInfo, 'total_charged', 0);
+                $new_must_charge = (float) data_get($request, 'tuition_fee_amount', 0);
+                $transferred_amount = (float) data_get($agreementInfo, 'transferred_amount', 0);
+                $received_amount = (float) data_get($agreementInfo, 'received_amount', 0);
+                $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
+                $new_debt_amount = $new_must_charge > $effective_charged ? ($new_must_charge - $effective_charged) : 0;
 
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
                     'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
-                    'must_charge' => data_get($request, 'tuition_fee_amount'),
-                    'debt_amount' => data_get($request, 'debt_amount'),
-                    'total_charged' => $new_total_charged,
+                    'must_charge' => $new_must_charge,
+                    'debt_amount' => $new_debt_amount,
+                    'total_charged' => $current_total_charged,
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
                     'book_receive_address' => data_get($request, 'book_receive_address', ''),
                     'contract_receive' => data_get($request, 'contract_receive', 0),
                     'group_type' => data_get($request, 'group_type', 0),
-                    'status' => $new_total_charged == 0 ? 1 : (data_get($request, 'debt_amount') > 0 ? 3 : 2),
+                    'status' => $current_total_charged == 0 ? 1 : ($new_debt_amount > 0 ? 2 : 3),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
