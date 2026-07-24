@@ -788,12 +788,15 @@ class ContractsController extends Controller
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
-                c.must_charge, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id
+                c.must_charge, c.discount_amount, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id,
+                (SELECT ABS(SUM(amount)) FROM payments WHERE agreement_id = c.id AND amount < 0) AS refunded_amount
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
+            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount;
+            $list[$k]->excess_amount = $effective > (float)$row->must_charge ? ($effective - (float)$row->must_charge) : 0;
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -826,12 +829,15 @@ class ContractsController extends Controller
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
-                c.must_charge, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id
+                c.must_charge, c.discount_amount, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id,
+                (SELECT ABS(SUM(amount)) FROM payments WHERE agreement_id = c.id AND amount < 0) AS refunded_amount
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
+            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount;
+            $list[$k]->excess_amount = $effective > (float)$row->must_charge ? ($effective - (float)$row->must_charge) : 0;
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
@@ -928,6 +934,68 @@ class ContractsController extends Controller
         return response()->json(['status' => 1, 'message' => 'Chuyển tiền thừa thành công']);
     }
 
+    public function refundExcess(Request $request)
+    {
+        $agreement_id = (int) $request->agreement_id;
+        $amount = (float) $request->amount;
+        $method = (int) ($request->method ?? 1);
+        $note = trim($request->note ?? 'Hoàn tiền thừa cho học sinh');
+
+        if ($agreement_id <= 0 || $amount <= 0) {
+            return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
+        }
+
+        $agreement = u::first("SELECT * FROM agreements WHERE id = $agreement_id");
+        if (!$agreement) {
+            return response()->json(['status' => 0, 'message' => 'Hợp đồng không tồn tại']);
+        }
+
+        $total_charged = (float) data_get($agreement, 'total_charged', 0);
+        $received = (float) data_get($agreement, 'received_amount', 0);
+        $transferred = (float) data_get($agreement, 'transferred_amount', 0);
+        $must_charge = (float) data_get($agreement, 'must_charge', 0);
+
+        $effective = $total_charged + $received - $transferred;
+        $excess = $effective - $must_charge;
+
+        if ($excess < $amount) {
+            return response()->json(['status' => 0, 'message' => "Số tiền hoàn ($amount) vượt quá số tiền thừa ($excess)"]);
+        }
+
+        $new_total_charged = $total_charged - $amount;
+        $new_effective = $new_total_charged + $received - $transferred;
+        $new_debt = max(0, $must_charge - $new_effective);
+
+        u::updateSimpleRow([
+            'total_charged' => $new_total_charged,
+            'debt_amount' => $new_debt,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ], ['id' => $agreement_id], 'agreements');
+
+        u::insertSimpleRow([
+            'agreement_id' => $agreement_id,
+            'student_id' => $agreement->student_id,
+            'branch_id' => $agreement->branch_id,
+            'ec_id' => $agreement->ec_id,
+            'method' => $method,
+            'must_charge' => $must_charge,
+            'amount' => -$amount,
+            'total' => $new_total_charged,
+            'debt' => $new_debt,
+            'charge_date' => date('Y-m-d H:i:s'),
+            'note' => $note,
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'type' => 3,
+        ], 'payments');
+
+        u::addLogAgreements($agreement_id);
+        LogStudents::logAdd(data_get($agreement, 'student_id'), 'Hoàn tiền thừa hợp đồng - ' . data_get($agreement, 'code') . ' (' . number_format($amount) . 'đ)', Auth::user()->id);
+
+        return response()->json(['status' => 1, 'message' => 'Hoàn tiền thừa thành công']);
+    }
+
     public function delete(Request $request)
     {
         $cagreement_info = u::first("SELECT student_id, code FROM agreements WHERE id=$request->agreement_id");
@@ -963,6 +1031,10 @@ class ContractsController extends Controller
             LEFT JOIN students AS s ON s.id=c.student_id 
             LEFT JOIN crm_parents AS p ON p.student_id = s.id
             WHERE c.id=$agreement_id");
+        if ($data) {
+            $refunded = u::first("SELECT ABS(SUM(amount)) AS refunded FROM payments WHERE agreement_id = $agreement_id AND amount < 0");
+            $data->refunded_amount = $refunded ? (float) $refunded->refunded : 0;
+        }
         $total_left_amount = 0;
         $dataContracts = u::query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id

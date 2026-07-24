@@ -287,6 +287,10 @@
                       <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
                       <p  class="invoice-total-amount"> {{ agreement.total_amount | formatMoney}} </p>
                   </div>
+                  <div  class="invoice-total-item" v-if="agreement.discount_amount > 0">
+                      <p  class="invoice-total-title"> Giảm trừ: </p>
+                      <p  class="invoice-total-amount" style="color: #ff9f43;"> -{{ agreement.discount_amount | formatMoney}} </p>
+                  </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Số tiền đã đóng: </p>
                       <p  class="invoice-total-amount"> {{ agreement.total_charged | formatMoney}} </p>
@@ -299,15 +303,20 @@
                       <p  class="invoice-total-title"> Nhận từ gói khác: </p>
                       <p  class="invoice-total-amount" style="color: #28c76f;"> +{{ agreement.received_amount | formatMoney}} </p>
                   </div>
+                  <div  class="invoice-total-item" v-if="agreement.refunded_amount > 0">
+                      <p  class="invoice-total-title"> Đã hoàn tiền: </p>
+                      <p  class="invoice-total-amount" style="color: #ea5455;"> -{{ agreement.refunded_amount | formatMoney}} </p>
+                  </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
                   </div>
                   <div class="invoice-total-item" v-if="excessAmount > 0">
                       <p class="invoice-total-title"> Tiền thừa: </p>
-                      <div class="invoice-total-amount">
+                      <div class="invoice-total-amount flex items-center">
                           <span class="text-success font-bold mr-2">{{ excessAmount | formatMoney }}</span>
-                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="primary" type="border" @click="openTransferModal">Chuyển sang gói khác</vs-button>
+                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="primary" type="border" class="mr-2" @click="openTransferModal">Chuyển sang gói khác</vs-button>
+                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="danger" type="border" @click="openRefundModal">Hoàn tiền</vs-button>
                       </div>
                   </div>
                   <div  class="invoice-total-item">
@@ -495,6 +504,39 @@
         </div>
       </div>
     </vs-popup>
+
+    <vs-popup title="Hoàn tiền thừa cho học sinh" :active.sync="popupRefundActive">
+      <div v-if="refundData" class="vx-row">
+        <div class="vx-col w-full mb-4">
+          <p class="mb-2">Số tiền thừa hiện tại: <strong class="text-success">{{ excessAmount | formatMoney }}</strong></p>
+          <label>Hình thức hoàn tiền</label>
+          <vue-select
+            label="label"
+            placeholder="Chọn hình thức"
+            :options="methodOptions"
+            v-model="refundData.method"
+            :searchable="false"
+          ></vue-select>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label>Số tiền muốn hoàn</label>
+          <input
+            class="vs-inputx vs-input--input normal"
+            type="number"
+            v-model="refundData.amount"
+            :max="excessAmount"
+          />
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label>Ghi chú hoàn tiền</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="refundData.note"></textarea>
+        </div>
+        <div class="vx-col w-full text-right mt-4">
+          <vs-button color="dark" type="border" class="mr-2" @click="popupRefundActive = false">Hủy</vs-button>
+          <vs-button color="danger" @click="submitRefund" :disabled="refundCalling">Xác nhận hoàn tiền</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 
 </template>
@@ -638,6 +680,17 @@
           amount: 0,
           note: ''
         },
+        popupRefundActive: false,
+        refundCalling: false,
+        refundData: {
+          amount: 0,
+          method: { label: 'Chuyển khoản', value: 1 },
+          note: ''
+        },
+        methodOptions: [
+          { label: 'Chuyển khoản', value: 1 },
+          { label: 'Tiền mặt', value: 2 }
+        ],
       }
     },
     async created() {
@@ -1077,6 +1130,58 @@
         }).catch(e => {
           console.log(e);
           this.transferCalling = false;
+        });
+      },
+      openRefundModal() {
+        this.refundData = {
+          amount: this.excessAmount,
+          method: { label: 'Chuyển khoản', value: 1 },
+          note: 'Hoàn tiền thừa cho học sinh'
+        };
+        this.popupRefundActive = true;
+      },
+      submitRefund() {
+        if (this.refundData.amount <= 0 || this.refundData.amount > this.excessAmount) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền hoàn không hợp lệ',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        this.refundCalling = true;
+        axios.p('/api/lms/agreements/refund-excess', {
+          agreement_id: this.agreement.id,
+          amount: this.refundData.amount,
+          method: this.refundData.method ? this.refundData.method.value : 1,
+          note: this.refundData.note
+        }).then(res => {
+          this.refundCalling = false;
+          if (res.data.status === 1) {
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: res.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+            this.popupRefundActive = false;
+            this.loadDetail();
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: res.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          }
+        }).catch(e => {
+          console.log(e);
+          this.refundCalling = false;
         });
       }
     },

@@ -110,8 +110,13 @@
                 </td>
                 <td class="td vs-table--td">
                   <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
-                  <p>Đã thu: {{ item.total_charged | formatMoney }}</p>
+                  <p v-if="item.discount_amount > 0" style="color: #ff9f43;">Giảm trừ: -{{ item.discount_amount | formatMoney }}</p>
+                  <p>Đã thu: <strong>{{ item.total_charged | formatMoney }}</strong></p>
+                  <p v-if="item.received_amount > 0" class="font-medium" style="color: #28c76f;">+Nhận gói khác: {{ item.received_amount | formatMoney }}</p>
+                  <p v-if="item.transferred_amount > 0" class="font-medium" style="color: #ea5455;">-Chuyển gói khác: {{ item.transferred_amount | formatMoney }}</p>
+                  <p v-if="item.refunded_amount > 0" class="font-medium" style="color: #ea5455;">-Hoàn tiền: {{ item.refunded_amount | formatMoney }}</p>
                   <p>Công nợ: <span :class="{'text-danger font-bold': item.debt_amount > 0}">{{ item.debt_amount | formatMoney }}</span></p>
+                  <p v-if="item.excess_amount > 0" class="font-bold" style="color: #28c76f;">Tiền thừa: {{ item.excess_amount | formatMoney }}</p>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 

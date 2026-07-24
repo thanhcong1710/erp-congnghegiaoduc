@@ -1750,9 +1750,9 @@ class ReportsController extends Controller
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
                 COUNT(a.id)                                            AS unseparated_sales,
                 SUM(tf.number_of_months)                               AS separated_sales,
-                SUM(CASE WHEN a.count_recharge = 0 THEN a.must_charge ELSE 0 END) AS new_revenue,
-                SUM(CASE WHEN a.count_recharge > 0 THEN a.must_charge ELSE 0 END) AS uplv_revenue,
-                SUM(a.total_charged)                                      AS total_revenue
+                SUM(CASE WHEN a.count_recharge = 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS new_revenue,
+                SUM(CASE WHEN a.count_recharge > 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS uplv_revenue,
+                SUM(a.must_charge - COALESCE(a.discount_amount, 0)) AS total_revenue
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
@@ -2287,7 +2287,7 @@ class ReportsController extends Controller
             $row->luong_sale = 0;
             if ((float) $row->debt_amount == 0) {
                 $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
-                $row->luong_sale = ((float) $row->total_charged) * $rate;
+                $row->luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
             }
         }
 

@@ -250,13 +250,33 @@
                       <p  class="invoice-total-title"> Tổng tiền phải đóng: </p>
                       <p  class="invoice-total-amount"> {{ agreement.total_amount | formatMoney}} </p>
                   </div>
+                  <div  class="invoice-total-item" v-if="agreement.discount_amount > 0">
+                      <p  class="invoice-total-title"> Giảm trừ: </p>
+                      <p  class="invoice-total-amount" style="color: #ff9f43;"> -{{ agreement.discount_amount | formatMoney}} </p>
+                  </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Số tiền đã đóng: </p>
                       <p  class="invoice-total-amount"> {{ agreement.total_charged | formatMoney}} </p>
                   </div>
+                  <div  class="invoice-total-item" v-if="agreement.transferred_amount > 0">
+                      <p  class="invoice-total-title"> Đã chuyển sang gói khác: </p>
+                      <p  class="invoice-total-amount" style="color: #ea5455;"> -{{ agreement.transferred_amount | formatMoney}} </p>
+                  </div>
+                  <div  class="invoice-total-item" v-if="agreement.received_amount > 0">
+                      <p  class="invoice-total-title"> Nhận từ gói khác: </p>
+                      <p  class="invoice-total-amount" style="color: #28c76f;"> +{{ agreement.received_amount | formatMoney}} </p>
+                  </div>
+                  <div  class="invoice-total-item" v-if="agreement.refunded_amount > 0">
+                      <p  class="invoice-total-title"> Đã hoàn tiền: </p>
+                      <p  class="invoice-total-amount" style="color: #ea5455;"> -{{ agreement.refunded_amount | formatMoney}} </p>
+                  </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
+                  </div>
+                  <div class="invoice-total-item" v-if="excessAmount > 0">
+                      <p class="invoice-total-title"> Tiền thừa: </p>
+                      <p class="invoice-total-amount text-success font-bold">{{ excessAmount | formatMoney }}</p>
                   </div>
                   <div  class="invoice-total-item">
                       <p  class="invoice-total-title"> Số tiền còn lại: </p>
@@ -437,6 +457,13 @@
         },
         tmp_tuition_fee_id:'',
         tmp_discount_code_id:'',
+      }
+    },
+    computed: {
+      excessAmount() {
+        const charged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
+        const must_charge = Number(this.agreement.total_amount) || Number(this.agreement.must_charge) || 0;
+        return charged > must_charge ? (charged - must_charge) : 0;
       }
     },
     async created() {
