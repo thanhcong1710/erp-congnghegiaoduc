@@ -963,14 +963,6 @@ class ContractsController extends Controller
             LEFT JOIN students AS s ON s.id=c.student_id 
             LEFT JOIN crm_parents AS p ON p.student_id = s.id
             WHERE c.id=$agreement_id");
-        $mapComboPrice = [];
-        if (!empty($data->tuition_fee_id)) {
-            $relationFees = u::query("SELECT exchange_tuition_fee_id, price_combo FROM tuition_fee_relation WHERE status=1 AND tuition_fee_id=" . (int) $data->tuition_fee_id);
-            foreach ($relationFees as $rf) {
-                $mapComboPrice[$rf->exchange_tuition_fee_id] = (float) $rf->price_combo;
-            }
-        }
-
         $total_left_amount = 0;
         $dataContracts = u::query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id
@@ -979,13 +971,16 @@ class ContractsController extends Controller
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'), c.count_recharge ASC");
         foreach ($dataContracts as $k => $contract) {
             $dataContracts[$k]->label_status = u::geLabelStatusContract($contract->status);
-            $price = isset($mapComboPrice[$contract->tuition_fee_id]) && $mapComboPrice[$contract->tuition_fee_id] > 0 ? $mapComboPrice[$contract->tuition_fee_id] : $contract->total_charged;
-            if ($contract->summary_sessions > 0) {
-                $left_amount = round($price * $contract->left_sessions / $contract->summary_sessions);
+            $charged = (float) $contract->total_charged;
+            if ($charged <= 0) {
+                $left_amount = 0;
+            } elseif ($contract->summary_sessions > 0) {
+                $left_amount = round($charged * max(0, $contract->left_sessions) / $contract->summary_sessions);
             } elseif ($contract->real_sessions > 0) {
-                $left_amount = round($price * ($contract->real_sessions - $contract->done_sessions) / $contract->real_sessions);
+                $left_sessions = max(0, (int) $contract->real_sessions - (int) $contract->done_sessions);
+                $left_amount = round($charged * $left_sessions / $contract->real_sessions);
             } else {
-                $left_amount = $price;
+                $left_amount = $charged;
             }
             $dataContracts[$k]->left_amount = $left_amount;
             $total_left_amount = $total_left_amount + $left_amount;
