@@ -1152,6 +1152,39 @@ class ContractsController extends Controller
                 $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
+                // Tính toán last_pay_date, full_fee_date và count_recharge khi update
+                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0");
+                $last_pay_date = ($last_pay && $last_pay->last_date) ? date('Y-m-d', strtotime($last_pay->last_date)) : date('Y-m-d', strtotime($agreementInfo->created_at ?? now()));
+
+                $is_first_package = (int) data_get($agreementInfo, 'is_first_package', 0);
+                if (!$is_first_package && $agreementInfo->student_id) {
+                    $first_agr = u::first("SELECT id FROM agreements WHERE student_id = {$agreementInfo->student_id} AND status > 0 ORDER BY created_at ASC, id ASC LIMIT 1");
+                    if ($first_agr && $first_agr->id == $agreement_id) {
+                        $is_first_package = 1;
+                    }
+                }
+
+                if ($new_debt_amount <= 0) {
+                    $full_fee_date = $last_pay_date;
+                    if ($is_first_package == 1) {
+                        $count_recharge = 0;
+                    } else {
+                        $first_8th = data_get($agreementInfo, 'first_8th_session_date');
+                        if (empty($first_8th) && $agreementInfo->student_id) {
+                            $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
+                            $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                        }
+                        if (!empty($first_8th) && $full_fee_date <= $first_8th) {
+                            $count_recharge = 0;
+                        } else {
+                            $count_recharge = 1;
+                        }
+                    }
+                } else {
+                    $full_fee_date = null;
+                    $count_recharge = ($is_first_package == 1) ? 0 : 1;
+                }
+
                 u::updateSimpleRow(array(
                     'type_fee' => data_get($request, 'tuition_fee_type'),
                     'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
@@ -1160,6 +1193,10 @@ class ContractsController extends Controller
                     'discount_note' => $discount_note,
                     'debt_amount' => $new_debt_amount,
                     'total_charged' => $current_total_charged,
+                    'last_pay_date' => $last_pay_date,
+                    'full_fee_date' => $full_fee_date,
+                    'count_recharge' => $count_recharge,
+                    'is_first_package' => $is_first_package,
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
@@ -1170,6 +1207,7 @@ class ContractsController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
+                u::updateSimpleRow(['count_recharge' => $count_recharge], ['agreement_id' => $agreement_id], 'contracts');
                 u::addLogAgreements($agreement_id);
 
                 // ====== XỬ LÝ GÓI LẺ ======
@@ -1307,11 +1345,48 @@ class ContractsController extends Controller
                 $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
+                // Tính toán last_pay_date, full_fee_date và count_recharge khi update
+                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0");
+                $last_pay_date = ($last_pay && $last_pay->last_date) ? date('Y-m-d', strtotime($last_pay->last_date)) : date('Y-m-d', strtotime($agreementInfo->created_at ?? now()));
+
+                $is_first_package = (int) data_get($agreementInfo, 'is_first_package', 0);
+                if (!$is_first_package && $agreementInfo->student_id) {
+                    $first_agr = u::first("SELECT id FROM agreements WHERE student_id = {$agreementInfo->student_id} AND status > 0 ORDER BY created_at ASC, id ASC LIMIT 1");
+                    if ($first_agr && $first_agr->id == $agreement_id) {
+                        $is_first_package = 1;
+                    }
+                }
+
+                if ($new_debt_amount <= 0) {
+                    $full_fee_date = $last_pay_date;
+                    if ($is_first_package == 1) {
+                        $count_recharge = 0;
+                    } else {
+                        $first_8th = data_get($agreementInfo, 'first_8th_session_date');
+                        if (empty($first_8th) && $agreementInfo->student_id) {
+                            $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
+                            $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                        }
+                        if (!empty($first_8th) && $full_fee_date <= $first_8th) {
+                            $count_recharge = 0;
+                        } else {
+                            $count_recharge = 1;
+                        }
+                    }
+                } else {
+                    $full_fee_date = null;
+                    $count_recharge = ($is_first_package == 1) ? 0 : 1;
+                }
+
                 u::updateSimpleRow(array(
                     'must_charge' => $new_must_charge,
                     'discount_amount' => $discount_amount,
                     'discount_note' => $discount_note,
                     'debt_amount' => $new_debt_amount,
+                    'last_pay_date' => $last_pay_date,
+                    'full_fee_date' => $full_fee_date,
+                    'count_recharge' => $count_recharge,
+                    'is_first_package' => $is_first_package,
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
@@ -1322,6 +1397,7 @@ class ContractsController extends Controller
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
+                u::updateSimpleRow(['count_recharge' => $count_recharge], ['agreement_id' => $agreement_id], 'contracts');
                 u::addLogAgreements($agreement_id);
             }
 
