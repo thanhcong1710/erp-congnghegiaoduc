@@ -314,6 +314,9 @@ class EnrolmentsController extends Controller
             // Tự động tạo tickets khi học sinh được thêm vào lớp
             $actions = ['Phát sách', 'Thông báo lịch học'];
             TicketService::createTicketsForStudentEnrollment($student_id, $class_id, $contract_id, $actions);
+            if ($start_date < date('Y-m-d')){
+                u::updateScheduleHasStudent($contract_id, $start_date);
+            }
         }
 
         $result = array(
