@@ -20,7 +20,7 @@ class UpdateAgreementsData extends Command
      *
      * @var string
      */
-    protected $description = 'Update agreements data: last_pay_date, full_fee_date, count_recharge, first_8th_session_date, is_first_package';
+    protected $description = 'Update agreements data: last_pay_date, full_fee_date, count_recharge, first_8th_session_date, end_session_date, is_first_package';
 
     /**
      * Execute the console command.
@@ -65,13 +65,14 @@ class UpdateAgreementsData extends Command
             $student_agreements[$agr->student_id][] = $agr;
         }
 
-        $this->info("3. Đang tải thông tin lớp học (contracts)...");
+        $this->info("3. Đang tải thông tin lớp học (contracts) của gói đầu tiên...");
         $contracts_by_agr = [];
         $chunks = array_chunk($first_agr_ids, 1000);
         foreach ($chunks as $chunk) {
             $ids_str = implode(',', $chunk);
             $contracts = DB::select("
-                SELECT c.agreement_id, c.id, c.enrolment_start_date, cls.class_day, cls.branch_id, cls.product_id
+                SELECT c.agreement_id, c.id, c.enrolment_start_date, c.enrolment_last_date,
+                       c.real_sessions, c.summary_sessions, cls.class_day, cls.branch_id, cls.product_id
                 FROM contracts c
                 JOIN classes cls ON c.class_id = cls.id
                 WHERE c.agreement_id IN ($ids_str) 
@@ -87,7 +88,7 @@ class UpdateAgreementsData extends Command
             }
         }
 
-        $this->info("4. Đang tính toán ngày học thứ 8 và chuẩn bị cập nhật...");
+        $this->info("4. Đang tính toán ngày học thứ 8, ngày học cuối và chuẩn bị cập nhật...");
         $updates = [];
         $holidays_cache = [];
         foreach ($student_agreements as $student_id => $agrs) {
@@ -95,6 +96,8 @@ class UpdateAgreementsData extends Command
             $first_agr_id = $first_agr->id;
             
             $first_8th_session_date = null;
+            $end_session_date = null;
+
             if (isset($contracts_by_agr[$first_agr_id])) {
                 $first_contract = $contracts_by_agr[$first_agr_id];
                 $branch_id = $first_contract->branch_id;
@@ -117,6 +120,26 @@ class UpdateAgreementsData extends Command
                 } else {
                     $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
                 }
+
+                // Tính end_session_date: ưu tiên dùng enrolment_last_date đã lưu sẵn
+                if (!empty($first_contract->enrolment_last_date)) {
+                    $end_session_date = date('Y-m-d', strtotime($first_contract->enrolment_last_date));
+                } else {
+                    // Fallback: tính lại từ số buổi của contract
+                    $sessions = (int)$first_contract->real_sessions ?: (int)$first_contract->summary_sessions;
+                    if ($sessions > 0 && !empty($first_contract->class_day)) {
+                        $arr_day_es = array_filter(explode(',', $first_contract->class_day));
+                        if (count($arr_day_es) > 0) {
+                            $session_info = u::calculatorSessionsByNumberOfSessions(
+                                $first_contract->enrolment_start_date,
+                                $sessions,
+                                $holidays,
+                                $arr_day_es
+                            );
+                            $end_session_date = data_get($session_info, 'end_date');
+                        }
+                    }
+                }
             }
             
             foreach ($agrs as $index => $agr) {
@@ -126,6 +149,9 @@ class UpdateAgreementsData extends Command
                     $count_recharge = 0;
                 } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
                     $count_recharge = 0;
+                } else if ($agr->full_fee_date !== null && $end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($end_session_date . ' + 2 months'))) {
+                    // Ngày full fee > ngày buổi học cuối + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                    $count_recharge = 0;
                 }
                 
                 $updates[] = [
@@ -133,6 +159,7 @@ class UpdateAgreementsData extends Command
                     'is_first_package' => $is_first_package,
                     'count_recharge' => $count_recharge,
                     'first_8th_session_date' => $first_8th_session_date,
+                    'end_session_date' => $end_session_date,
                 ];
             }
         }
@@ -148,6 +175,7 @@ class UpdateAgreementsData extends Command
                 $cases_first = [];
                 $cases_recharge = [];
                 $cases_8th = [];
+                $cases_end = [];
                 $ids = [];
                 
                 foreach ($chunk as $u) {
@@ -160,18 +188,26 @@ class UpdateAgreementsData extends Command
                     } else {
                         $cases_8th[] = "WHEN id = {$u['id']} THEN '{$u['first_8th_session_date']}'";
                     }
+
+                    if ($u['end_session_date'] === null) {
+                        $cases_end[] = "WHEN id = {$u['id']} THEN NULL";
+                    } else {
+                        $cases_end[] = "WHEN id = {$u['id']} THEN '{$u['end_session_date']}'";
+                    }
                 }
                 
                 $ids_str = implode(',', $ids);
                 $cases_first_str = implode(' ', $cases_first);
                 $cases_recharge_str = implode(' ', $cases_recharge);
                 $cases_8th_str = implode(' ', $cases_8th);
+                $cases_end_str = implode(' ', $cases_end);
                 
                 DB::statement("
                     UPDATE agreements 
                     SET is_first_package = CASE $cases_first_str END,
                         count_recharge = CASE $cases_recharge_str END,
-                        first_8th_session_date = CASE $cases_8th_str END
+                        first_8th_session_date = CASE $cases_8th_str END,
+                        end_session_date = CASE $cases_end_str END
                     WHERE id IN ($ids_str)
                 ");
                 

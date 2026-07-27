@@ -123,22 +123,36 @@ class ContractsController extends Controller
         $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
 
         $agreement = u::getObject(['id' => data_get($contract, 'agreement_id')], 'agreements');
-        if ($agreement && (int) data_get($agreement, 'is_first_package') == 1 && empty(data_get($agreement, 'first_8th_session_date'))) {
+        if ($agreement && (int) data_get($agreement, 'is_first_package') == 1) {
             $arr_day_filtered = array_filter($arr_day);
-            if (count($arr_day_filtered) > 0) {
-                $eighth_session_info = u::calculatorSessionsByNumberOfSessions($start_date, 8, $holidays, $arr_day_filtered);
-                $first_8th_session_date = data_get($eighth_session_info, 'end_date');
-            } else {
-                $first_8th_session_date = date('Y-m-d', strtotime($start_date . ' + 28 days'));
+            $agreement_update_data = [];
+
+            // Tính first_8th_session_date nếu chưa có
+            if (empty(data_get($agreement, 'first_8th_session_date'))) {
+                if (count($arr_day_filtered) > 0) {
+                    $eighth_session_info = u::calculatorSessionsByNumberOfSessions($start_date, 8, $holidays, $arr_day_filtered);
+                    $first_8th_session_date = data_get($eighth_session_info, 'end_date');
+                } else {
+                    $first_8th_session_date = date('Y-m-d', strtotime($start_date . ' + 28 days'));
+                }
+                if ($first_8th_session_date) {
+                    $agreement_update_data['first_8th_session_date'] = $first_8th_session_date;
+                }
             }
-            if ($first_8th_session_date) {
-                u::updateSimpleRow([
-                    'first_8th_session_date' => $first_8th_session_date,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ], ['id' => data_get($agreement, 'id')], 'agreements');
+
+            // Tính end_session_date: ngày buổi học cuối = enrolment_last_date của contract này (đã tính trong $data_sessions)
+            $end_session_date = data_get($data_sessions, 'end_date');
+            if ($end_session_date) {
+                $agreement_update_data['end_session_date'] = $end_session_date;
+            }
+
+            if (!empty($agreement_update_data)) {
+                $agreement_update_data['updated_at'] = date('Y-m-d H:i:s');
+                u::updateSimpleRow($agreement_update_data, ['id' => data_get($agreement, 'id')], 'agreements');
                 u::addLogAgreements(data_get($agreement, 'id'));
             }
         }
+
 
         u::updateSimpleRow([
             'cm_id' => $cm_id,

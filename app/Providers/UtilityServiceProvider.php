@@ -1201,6 +1201,46 @@ class UtilityServiceProvider extends ServiceProvider
             }
         }
 
+        // Tính end_session_date: ngày buổi học cuối của contract đầu tiên (is_first_package=1) được xếp lớp
+        $end_session_date = null;
+        $first_contract_with_class = self::first("
+            SELECT c.id, c.enrolment_last_date, c.enrolment_start_date, c.real_sessions, c.summary_sessions,
+                   cls.class_day, cls.branch_id, cls.product_id
+            FROM contracts c
+            JOIN classes cls ON c.class_id = cls.id
+            JOIN agreements a ON a.id = c.agreement_id
+            WHERE a.student_id = {$agreement->student_id}
+              AND a.is_first_package = 1
+              AND c.status > 0
+              AND c.class_id IS NOT NULL
+              AND c.enrolment_start_date IS NOT NULL
+            ORDER BY c.enrolment_start_date ASC, c.id ASC
+            LIMIT 1
+        ");
+        if ($first_contract_with_class) {
+            if (!empty($first_contract_with_class->enrolment_last_date)) {
+                $end_session_date = date('Y-m-d', strtotime($first_contract_with_class->enrolment_last_date));
+            } else {
+                // Fallback: tính lại từ số buổi học của contract
+                $sessions = (int)$first_contract_with_class->real_sessions ?: (int)$first_contract_with_class->summary_sessions;
+                if ($sessions > 0 && !empty($first_contract_with_class->class_day)) {
+                    $branch_id_es = (int)$first_contract_with_class->branch_id;
+                    $product_id_es = (int)$first_contract_with_class->product_id;
+                    $holidays_es = self::getPublicHolidays($branch_id_es, $product_id_es);
+                    $arr_day_es = array_filter(explode(',', $first_contract_with_class->class_day));
+                    if (count($arr_day_es) > 0) {
+                        $session_info = self::calculatorSessionsByNumberOfSessions(
+                            $first_contract_with_class->enrolment_start_date,
+                            $sessions,
+                            $holidays_es,
+                            $arr_day_es
+                        );
+                        $end_session_date = data_get($session_info, 'end_date');
+                    }
+                }
+            }
+        }
+
         $student_agreements = self::query("
             SELECT id, student_id, full_fee_date
             FROM agreements
@@ -1218,12 +1258,16 @@ class UtilityServiceProvider extends ServiceProvider
                 $count_recharge = 0;
             } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
                 $count_recharge = 0;
+            } else if ($agr->full_fee_date !== null && $end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($end_session_date . ' + 2 months'))) {
+                // Ngày full fee > ngày buổi học cuối + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                $count_recharge = 0;
             }
 
             self::updateSimpleRow([
                 'is_first_package' => $is_first_package,
                 'count_recharge' => $count_recharge,
                 'first_8th_session_date' => $first_8th_session_date,
+                'end_session_date' => $end_session_date,
                 'updated_at' => date('Y-m-d H:i:s')
             ], ['id' => $agr->id], 'agreements');
             self::addLogAgreements($agr->id);
