@@ -174,7 +174,6 @@ class EnrolmentsController extends Controller
                 'cm_leader_id' => $cm_leader_id,
                 'program_id' => data_get($class_info,'program_id', null),
                 'class_id' => data_get($class_info,'id', null),
-                'class_id' => data_get($class_info,'id', null),
                 'enrolment_start_date' => $start_date,
                 'enrolment_last_date' => data_get($data_sessions, 'end_date') ? data_get($data_sessions, 'end_date') : $start_date,
                 'status' => 6,
