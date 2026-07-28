@@ -957,7 +957,8 @@ class ContractsController extends Controller
         $agreement_id = (int) $request->agreement_id;
         $amount = (float) $request->amount;
         $method = (int) ($request->method ?? 1);
-        $note = trim($request->note ?? 'Hoàn tiền thừa cho học sinh');
+        $refund_type = (int) ($request->refund_type ?? 1); // 1: Hoàn tiền thừa, 2: Hoàn đặt cọc
+        $note = trim($request->note ?? ($refund_type == 1 ? 'Hoàn tiền thừa cho học sinh' : 'Hoàn tiền đặt cọc cho học sinh'));
 
         if ($agreement_id <= 0 || $amount <= 0) {
             return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
@@ -976,8 +977,16 @@ class ContractsController extends Controller
         $effective = $total_charged + $received - $transferred;
         $excess = $effective - $must_charge;
 
-        if ($excess < $amount) {
-            return response()->json(['status' => 0, 'message' => "Số tiền hoàn ($amount) vượt quá số tiền thừa ($excess)"]);
+        if ($refund_type == 1) {
+            if ($excess < $amount) {
+                return response()->json(['status' => 0, 'message' => "Số tiền hoàn ($amount) vượt quá số tiền thừa ($excess)"]);
+            }
+            $logTitle = 'Hoàn tiền thừa hợp đồng - ';
+        } else {
+            if ($effective < $amount) {
+                return response()->json(['status' => 0, 'message' => "Số tiền hoàn ($amount) vượt quá số tiền có thể hoàn ($effective)"]);
+            }
+            $logTitle = 'Hoàn tiền đặt cọc hợp đồng - ';
         }
 
         $new_total_charged = $total_charged - $amount;
@@ -1009,9 +1018,9 @@ class ContractsController extends Controller
         ], 'payments');
 
         u::addLogAgreements($agreement_id);
-        LogStudents::logAdd(data_get($agreement, 'student_id'), 'Hoàn tiền thừa hợp đồng - ' . data_get($agreement, 'code') . ' (' . number_format($amount) . 'đ)', Auth::user()->id);
+        LogStudents::logAdd(data_get($agreement, 'student_id'), $logTitle . data_get($agreement, 'code') . ' (' . number_format($amount) . 'đ)', Auth::user()->id);
 
-        return response()->json(['status' => 1, 'message' => 'Hoàn tiền thừa thành công']);
+        return response()->json(['status' => 1, 'message' => 'Hoàn tiền thành công']);
     }
 
     public function delete(Request $request)

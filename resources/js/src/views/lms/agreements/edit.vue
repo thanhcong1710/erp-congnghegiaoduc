@@ -333,11 +333,13 @@
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
                   </div>
-                  <div class="invoice-total-item" v-if="excessAmount > 0">
-                      <p class="invoice-total-title"> Tiền thừa: </p>
+                  <div class="invoice-total-item" v-if="excessAmount > 0 || effectiveAmount > 0">
+                      <p class="invoice-total-title" v-if="excessAmount > 0"> Tiền thừa: </p>
+                      <p class="invoice-total-title" v-else> Có thể hoàn cọc: </p>
                       <div class="invoice-total-amount flex items-center">
-                          <span class="text-success font-bold mr-2">{{ excessAmount | formatMoney }}</span>
-                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="primary" type="border" class="mr-2" @click="openTransferModal">Chuyển sang gói khác</vs-button>
+                          <span class="text-success font-bold mr-2" v-if="excessAmount > 0">{{ excessAmount | formatMoney }}</span>
+                          <span class="text-warning font-bold mr-2" v-else>{{ effectiveAmount | formatMoney }}</span>
+                          <vs-button v-if="agreement.can_edit_lower_fee && excessAmount > 0" size="small" color="primary" type="border" class="mr-2" @click="openTransferModal">Chuyển sang gói khác</vs-button>
                           <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="danger" type="border" @click="openRefundModal">Hoàn tiền</vs-button>
                       </div>
                   </div>
@@ -527,10 +529,21 @@
       </div>
     </vs-popup>
 
-    <vs-popup title="Hoàn tiền thừa cho học sinh" :active.sync="popupRefundActive">
+    <vs-popup title="Hoàn tiền cho học sinh" :active.sync="popupRefundActive">
       <div v-if="refundData" class="vx-row">
         <div class="vx-col w-full mb-4">
-          <p class="mb-2">Số tiền thừa hiện tại: <strong class="text-success">{{ excessAmount | formatMoney }}</strong></p>
+          <label>Loại hoàn tiền</label>
+          <vue-select
+            label="label"
+            placeholder="Chọn loại hoàn tiền"
+            :options="availableRefundTypes"
+            v-model="refundData.refund_type"
+            :searchable="false"
+            @input="changeRefundType"
+          ></vue-select>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <p class="mb-2">Số tiền có thể hoàn tối đa: <strong class="text-success">{{ maxRefundAmount | formatMoney }}</strong></p>
           <label>Hình thức hoàn tiền</label>
           <vue-select
             label="label"
@@ -546,7 +559,7 @@
             class="vs-inputx vs-input--input normal"
             type="number"
             v-model="refundData.amount"
-            :max="excessAmount"
+            :max="maxRefundAmount"
           />
         </div>
         <div class="vx-col w-full mb-4">
@@ -707,6 +720,7 @@
         refundData: {
           amount: 0,
           method: { label: 'Chuyển khoản', value: 1 },
+          refund_type: { label: 'Hoàn tiền thừa', value: 1 },
           note: ''
         },
         methodOptions: [
@@ -813,6 +827,25 @@
         const charged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
         const must_charge = Number(this.agreement.total_amount) || 0;
         return charged > must_charge ? (charged - must_charge) : 0;
+      },
+      effectiveAmount() {
+        return (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
+      },
+      availableRefundTypes() {
+        let types = [];
+        if (this.excessAmount > 0) {
+          types.push({ label: 'Hoàn tiền thừa', value: 1 });
+        }
+        if (this.effectiveAmount > 0) {
+          types.push({ label: 'Hoàn tiền đặt cọc', value: 2 });
+        }
+        return types;
+      },
+      maxRefundAmount() {
+         if (this.refundData && this.refundData.refund_type) {
+            return this.refundData.refund_type.value === 1 ? this.excessAmount : this.effectiveAmount;
+         }
+         return 0;
       }
     },
 
@@ -1169,15 +1202,23 @@
         this.agreement.debt_amount = Math.max(0, this.agreement.must_charge - effectiveCharged);
       },
       openRefundModal() {
+        let defaultType = this.availableRefundTypes.length > 0 ? this.availableRefundTypes[0] : { label: 'Hoàn tiền đặt cọc', value: 2 };
         this.refundData = {
-          amount: this.excessAmount,
+          amount: defaultType.value === 1 ? this.excessAmount : this.effectiveAmount,
           method: { label: 'Chuyển khoản', value: 1 },
-          note: 'Hoàn tiền thừa cho học sinh'
+          refund_type: defaultType,
+          note: defaultType.value === 1 ? 'Hoàn tiền thừa cho học sinh' : 'Hoàn tiền đặt cọc cho học sinh'
         };
         this.popupRefundActive = true;
       },
+      changeRefundType() {
+        if (this.refundData.refund_type) {
+           this.refundData.amount = this.maxRefundAmount;
+           this.refundData.note = this.refundData.refund_type.value === 1 ? 'Hoàn tiền thừa cho học sinh' : 'Hoàn tiền đặt cọc cho học sinh';
+        }
+      },
       submitRefund() {
-        if (this.refundData.amount <= 0 || this.refundData.amount > this.excessAmount) {
+        if (this.refundData.amount <= 0 || this.refundData.amount > this.maxRefundAmount) {
           this.$vs.notify({
             title: 'Lỗi',
             text: 'Số tiền hoàn không hợp lệ',
@@ -1193,6 +1234,7 @@
           agreement_id: this.agreement.id,
           amount: this.refundData.amount,
           method: this.refundData.method ? this.refundData.method.value : 1,
+          refund_type: this.refundData.refund_type ? this.refundData.refund_type.value : 1,
           note: this.refundData.note
         }).then(res => {
           this.refundCalling = false;
