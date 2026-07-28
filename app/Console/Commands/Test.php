@@ -44,7 +44,7 @@ class Test extends Command
      */
     public function handle(Request $request)
     {
-        $list= u::query("SELECT * FROM contracts WHERE class_id IS NOT NULL AND status !=7 AND id >14950");
+        $list= u::query("SELECT * FROM contracts WHERE class_id IS NOT NULL AND status !=7 ");
         foreach ($list AS $row){
             if($row->enrolment_start_date){
                 u::updateScheduleHasStudent($row->id,$row->enrolment_start_date);
