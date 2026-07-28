@@ -912,17 +912,21 @@ class ContractsController extends Controller
         $to_received = (float) data_get($to, 'received_amount', 0);
         $to_total_charged = (float) data_get($to, 'total_charged', 0);
         $to_must_charge = (float) data_get($to, 'must_charge', 0);
+        $to_discount = (float) data_get($to, 'discount_amount', 0);
 
         $new_to_received = $to_received + $amount;
-        $new_to_effective = $to_total_charged + $new_to_received - $to_transferred +data_get($to, 'discount_amount', 0);
-        $new_to_debt = $to_must_charge - $new_to_effective;
+        // effective = tổng tiền thực tế đã có (total_charged + received - transferred)
+        // debt = must_charge - effective - discount_amount
+        $new_to_effective = $to_total_charged + $new_to_received - $to_transferred;
+        $new_to_debt = $to_must_charge - $new_to_effective - $to_discount;
 
         u::updateSimpleRow([
             'received_amount' => $new_to_received,
-            'debt_amount' => $new_to_debt > 0 ? $new_to_debt : 0,
+            'debt_amount' => max(0, $new_to_debt),
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         ], ['id' => $to_agreement_id], 'agreements');
+
 
         // Ghi log chuyển tiền
         u::insertSimpleRow([
