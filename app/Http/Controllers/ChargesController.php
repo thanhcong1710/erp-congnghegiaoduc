@@ -216,16 +216,20 @@ class ChargesController extends Controller
                 $total_charged = (int) data_get($agreement_info, 'total_charged');
                 $charge_amount = (int) data_get($tmp_payment, 'charge_amount');
                 $discount_amount = (int) data_get($agreement_info, 'discount_amount');
+                $received_amount = (int) data_get($agreement_info, 'received_amount', 0);
+                $transferred_amount = (int) data_get($agreement_info, 'transferred_amount', 0);
 
                 // ---- Validate cân bằng ----
-                // must_charge = total_charged + charge_amount + debt_after + discount_amount
-                $debt_after = $must_charge - $total_charged - $charge_amount - $discount_amount;
-                $balance = $total_charged + $charge_amount + max(0, $debt_after) + $discount_amount;
+                // effective = tiền thực tế đã có: total_charged + received_amount - transferred_amount
+                // must_charge = effective + charge_amount + debt_after + discount_amount
+                $current_effective = $total_charged + $received_amount - $transferred_amount;
+                $debt_after = $must_charge - $current_effective - $charge_amount - $discount_amount;
+                $balance = $current_effective + $charge_amount + max(0, $debt_after) + $discount_amount;
                 if ($balance !== $must_charge) {
                     return response()->json([
                         'status' => 0,
                         'message' => 'Số liệu không cân bằng: '
-                            . 'Đã thu ' . number_format($total_charged)
+                            . 'Đã thu ' . number_format($current_effective)
                             . ' + Thu ' . number_format($charge_amount)
                             . ' + Giảm trừ ' . number_format($discount_amount)
                             . ' + Công nợ ' . number_format(max(0, $debt_after))
@@ -294,6 +298,7 @@ class ChargesController extends Controller
 
                 u::addLogAgreements(data_get($agreement_info, 'id'));
                 $this->processContractsByAgreement(data_get($agreement_info, 'id'));
+
             } else {
                 $reserve_info = u::getObject(array('id' => data_get($tmp_payment, 'agreement_id')), 'reserves');
                 u::insertSimpleRow(array(
