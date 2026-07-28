@@ -557,16 +557,26 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function getDaysForCalcSession($startTime, $endTime, $classdays, $holidays, $onlyTotal = false)
     {
-        $weekday = (int) date('N', $startTime);
-        if ($weekday === 7) {
-            $weekday = 0;
-        }
         $timeOfDay = 24 * 60 * 60;
         $maxLength = count($classdays) - 1;
         $days = [];
         $total = 0;
+        $weekday = (int) date('N', $startTime);
+        if ($weekday === 7) {
+            if (in_array(8, $classdays) && $startTime <= $endTime) {
+                if (!self::checkInHolidayByTimestampBinarySearch($startTime, $holidays)) {
+                    if ($onlyTotal) {
+                        ++$total;
+                    } else {
+                        $days[] = date("Y-m-d", $startTime);
+                    }
+                }
+            }
+            $weekday = 0;
+        }
         while ($startTime <= $endTime) {
             foreach ($classdays as $key => $classday) {
+                $classday = $classday - 1;
                 if ($weekday > $classday) {
                     if ($key >= $maxLength) {
                         $startTime += (7 - $weekday) * $timeOfDay;
