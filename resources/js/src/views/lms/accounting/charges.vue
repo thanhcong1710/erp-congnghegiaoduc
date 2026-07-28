@@ -95,9 +95,13 @@
                   <p> Thu phí nhập học</p>
                   <p >Mã HĐ: <strong>{{ item.code }}</strong></p>
                   <p>Gói phí: {{item.tuition_fee_name}}</p>
+                  <p v-if="item.ec_name">EC: {{ item.ec_name }}</p>
+                  <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>
                 <td class="td vs-table--td"  v-else>
                   <p> Thu phí bảo lưu</p>
+                  <p v-if="item.ec_name">EC: {{ item.ec_name }}</p>
+                  <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>
                 <td class="td vs-table--td">
                   <p><strong> {{ item.amount | formatMoney }}</strong></p>

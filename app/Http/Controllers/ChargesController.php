@@ -48,6 +48,7 @@ class ChargesController extends Controller
 
             $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                     c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                     c.must_charge, c.debt_amount, c.status
                 FROM agreements AS c 
@@ -79,6 +80,8 @@ class ChargesController extends Controller
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS reserve_id,c.id AS agreement_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.creator_id) AS creator_name,
                     c.must_charge, c.debt_amount, c.status
                 FROM reserves AS c 
@@ -492,6 +495,8 @@ class ChargesController extends Controller
                         LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
 
             $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
                     c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                     p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
@@ -532,6 +537,8 @@ class ChargesController extends Controller
                         LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
                     p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
                 FROM payments AS p
@@ -666,6 +673,8 @@ class ChargesController extends Controller
                     LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
 
             $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
                     c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
@@ -710,6 +719,8 @@ class ChargesController extends Controller
                      LEFT JOIN term_student_user AS t ON t.student_id=s.id WHERE $cond");
 
             $list = u::query("SELECT c.id AS agreement_id, s.name, s.lms_code, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
                     tp.*
