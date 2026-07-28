@@ -1315,30 +1315,36 @@ class UtilityServiceProvider extends ServiceProvider
             $currDate = date('Y-m-d');
             if( $enrolment_start_date < $currDate){
                 $class_info = self::getObject(array('id'=>data_get($contractInfo,'class_id')), 'classes');
-                if($class_info){
+                if($class_info && $class_info->class_day){
+                    $holidays = self::getPublicHolidays(data_get($contractInfo,'branch_id'), data_get($contractInfo,'product_id'));
                     $arr_day = explode(',', $class_info->class_day);
                     $end_date = $currDate > $class_info->cls_enddate ? $class_info->cls_enddate : $currDate;
-                    $holidays = self::getPublicHolidays(data_get($contractInfo,'branch_id'), data_get($contractInfo,'product_id'));
-                    $data_sessions = self::calculatorSessions($enrolment_start_date, $end_date, $holidays, $arr_day);
+                    if($end_date  != null){
+                        $data_sessions = self::calculatorSessions($enrolment_start_date, $end_date, $holidays, $arr_day);
+                    } else {
+                        $data_sessions = self::calculatorSessionsByNumberOfSessions($enrolment_start_date, data_get($contractInfo, 'total_sessions'), $holidays, $arr_day);
+                    }
                     $student_id= data_get($contractInfo,'student_id');
                     if(!empty(data_get($data_sessions, 'dates'))){
                         foreach(data_get($data_sessions, 'dates') AS $row){
-                            $checkExit = self::first("SELECT id FROM schedule_has_student WHERE student_id = $student_id AND class_date = '$row'");
-                            if(!$checkExit){
-                                self::insertSimpleRow(array(
-                                    'student_id'=>$student_id,
-                                    'branch_id'=>data_get($contractInfo, 'branch_id'),
-                                    'class_id'=>data_get($contractInfo, 'class_id'),
-                                    'contract_id'=>data_get($contractInfo, 'id'),
-                                    'product_id'=>data_get($contractInfo, 'product_id'),
-                                    'program_id'=>data_get($contractInfo, 'program_id'),
-                                    'class_date'=>$row,
-                                    'created_at'=>date('Y-m-d H:i:s'),
-                                    'status'=>1
-                                ), 'schedule_has_student');
-                            }
-                            self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
+                            if($row <= $currDate){
+                                $checkExit = self::first("SELECT id FROM schedule_has_student WHERE student_id = $student_id AND class_date = '$row'");
+                                if(!$checkExit){
+                                    self::insertSimpleRow(array(
+                                        'student_id'=>$student_id,
+                                        'branch_id'=>data_get($contractInfo, 'branch_id'),
+                                        'class_id'=>data_get($contractInfo, 'class_id'),
+                                        'contract_id'=>data_get($contractInfo, 'id'),
+                                        'product_id'=>data_get($contractInfo, 'product_id'),
+                                        'program_id'=>data_get($contractInfo, 'program_id'),
+                                        'class_date'=>$row,
+                                        'created_at'=>date('Y-m-d H:i:s'),
+                                        'status'=>1
+                                    ), 'schedule_has_student');
+                                }
+                                self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
                                     AND (SELECT count(id) FROM reserves WHERE start_date <= '$row' AND end_date>='$row' AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id AND is_reserved=1)>0");
+                            }
                         }
                     }
 
