@@ -1307,9 +1307,9 @@ class UtilityServiceProvider extends ServiceProvider
         }
     }
 
-    public static function updateScheduleHasStudent($contract_id, $start_date){
+    public static function updateScheduleHasStudent($contract_id, $start_date , $update=0){
         $contractInfo = self::getObject(array('id'=>$contract_id),'contracts');
-        if(data_get($contractInfo, 'status') ==6 && data_get($contractInfo, 'class_id')){
+        if((data_get($contractInfo, 'status') ==6 || $update==1) && data_get($contractInfo, 'class_id')){
             $enrolment_start_date = data_get($contractInfo, 'enrolment_start_date');
             $enrolment_start_date =  $enrolment_start_date < $start_date ? $start_date : $enrolment_start_date;
             $currDate = date('Y-m-d');
@@ -1320,6 +1320,9 @@ class UtilityServiceProvider extends ServiceProvider
                     $arr_day = explode(',', $class_info->class_day);
                     $end_date = $currDate > $class_info->cls_enddate ? $class_info->cls_enddate : $currDate;
                     if($end_date  != null){
+                        if($update==1){
+                            self::query("DELETE FROM schedule_has_student WHERE contract_id=$contract_id AND class_date>='$end_date'");
+                        }
                         $data_sessions = self::calculatorSessions($enrolment_start_date, $end_date, $holidays, $arr_day);
                     } else {
                         $data_sessions = self::calculatorSessionsByNumberOfSessions($enrolment_start_date, data_get($contractInfo, 'total_sessions'), $holidays, $arr_day);
