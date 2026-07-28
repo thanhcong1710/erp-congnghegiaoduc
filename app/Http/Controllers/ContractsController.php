@@ -1173,10 +1173,10 @@ class ContractsController extends Controller
                 $base_price = (float) data_get($request, 'tuition_fee_amount', 0);
                 $discount_amount = max(0, (float) data_get($request, 'discount_amount', 0));
                 $discount_note = trim(data_get($request, 'discount_note', ''));
-                $new_must_charge = max(0, $base_price - $discount_amount);
+                $new_must_charge = $base_price;
                 $transferred_amount = (float) data_get($agreementInfo, 'transferred_amount', 0);
                 $received_amount = (float) data_get($agreementInfo, 'received_amount', 0);
-                $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
+                $effective_charged = $current_total_charged + $received_amount - $transferred_amount + $discount_amount;
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
                 // Tính toán last_pay_date, full_fee_date và count_recharge khi update
@@ -1366,10 +1366,10 @@ class ContractsController extends Controller
                 $discount_note = trim(data_get($request, 'discount_note', ''));
                 $tf_info = $agreementInfo->tuition_fee_id ? u::first("SELECT price FROM tuition_fee WHERE id = {$agreementInfo->tuition_fee_id}") : null;
                 $base_price = $tf_info ? (float)$tf_info->price : ((float) data_get($request, 'tuition_fee_amount', 0) ?: ((float)$agreementInfo->must_charge + (float)$agreementInfo->discount_amount));
-                $new_must_charge = max(0, $base_price - $discount_amount);
+                $new_must_charge =$base_price;
                 $transferred_amount = (float) data_get($agreementInfo, 'transferred_amount', 0);
                 $received_amount = (float) data_get($agreementInfo, 'received_amount', 0);
-                $effective_charged = $current_total_charged + $received_amount - $transferred_amount;
+                $effective_charged = $current_total_charged + $received_amount - $transferred_amount+ $discount_amount;
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
                 // Tính toán last_pay_date, full_fee_date và count_recharge khi update
