@@ -499,7 +499,7 @@ class ChargesController extends Controller
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
                     c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
+                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at, p.type AS payment_type, p.note
                 FROM payments AS p
                     LEFT JOIN agreements AS c ON c.id=p.agreement_id
                     LEFT JOIN students AS s ON s.id=c.student_id
@@ -540,7 +540,7 @@ class ChargesController extends Controller
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_id) AS ec_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= t.ec_leader_id) AS ec_leader_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= p.creator_id) AS creator_name,
-                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at
+                    p.amount, p.must_charge, p.total, p.debt,p.charge_date, p.created_at, p.type AS payment_type, p.note
                 FROM payments AS p
                     LEFT JOIN reserves AS c ON c.id=p.agreement_id
                     LEFT JOIN students AS s ON s.id=c.student_id

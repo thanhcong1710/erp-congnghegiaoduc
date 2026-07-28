@@ -92,19 +92,22 @@
                   <p>Mã: {{ item.lms_code }}</p>
                 </td>
                 <td class="td vs-table--td" v-if="searchData.type==1">
-                  <p> Thu phí nhập học</p>
+                  <p v-if="item.payment_type == 3"> <strong>{{ item.note ? item.note : 'Hoàn tiền' }}</strong></p>
+                  <p v-else> Thu phí nhập học</p>
                   <p >Mã HĐ: <strong>{{ item.code }}</strong></p>
                   <p>Gói phí: {{item.tuition_fee_name}}</p>
                   <p v-if="item.ec_name">EC: {{ item.ec_name }}</p>
                   <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>
                 <td class="td vs-table--td"  v-else>
-                  <p> Thu phí bảo lưu</p>
+                  <p v-if="item.payment_type == 3"> <strong>{{ item.note ? item.note : 'Hoàn tiền' }}</strong></p>
+                  <p v-else> Thu phí bảo lưu</p>
                   <p v-if="item.ec_name">EC: {{ item.ec_name }}</p>
                   <p v-if="item.ec_leader_name">Team KD: {{ item.ec_leader_name }}</p>
                 </td>
                 <td class="td vs-table--td">
-                  <p><strong> {{ item.amount | formatMoney }}</strong></p>
+                  <p v-if="item.payment_type == 3"><strong> -{{ Math.abs(item.amount) | formatMoney }}</strong></p>
+                  <p v-else><strong> {{ item.amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
                   <p>Đã thu: {{ item.total | formatMoney }}</p>
                   <p>Công nợ: {{ item.debt | formatMoney }}</p>
