@@ -1305,7 +1305,7 @@ class UtilityServiceProvider extends ServiceProvider
             $currDate = date('Y-m-d');
             if( $enrolment_start_date < $currDate){
                 $class_info = self::getObject(array('id'=>data_get($contractInfo,'class_id')), 'classes');
-                if( $class_info->class_day){
+                if($class_info){
                     $arr_day = explode(',', $class_info->class_day);
                     $holidays = self::getPublicHolidays(data_get($contractInfo,'branch_id'), data_get($contractInfo,'product_id'));
                     $data_sessions = self::calculatorSessions($enrolment_start_date, $currDate, $holidays, $arr_day);
