@@ -1065,7 +1065,9 @@ class ContractsController extends Controller
             $data->init_tuition_fee_amount = $tf_info ? (float)$tf_info->price : ((float)$data->must_charge + (float)data_get($data, 'discount_amount', 0));
         }
         $total_left_amount = 0;
-        $dataContracts = u::query("SELECT c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id,
+        $dataContracts = u::query("SELECT c.id, c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id, c.relearn_from_contract_id,
+                    (SELECT COUNT(id) FROM contracts WHERE relearn_from_contract_id = c.id) AS has_relearned,
+                    (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
@@ -1103,6 +1105,53 @@ class ContractsController extends Controller
         $data->tmp_payment_amount = $tmp_payment ? (int) $tmp_payment->tmp_payment_amount : 0;
 
         return response()->json($data);
+    }
+
+    public function relearn(Request $request)
+    {
+        $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 99");
+        if (empty($is_admin)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này.']);
+        }
+        $contract_id = $request->contract_id;
+        $contract = u::first("SELECT * FROM contracts WHERE id = $contract_id");
+        if (!$contract) {
+            return response()->json(['status' => 0, 'message' => 'Gói phí không tồn tại.']);
+        }
+        if ($contract->status != 7) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ được phép học lại khi gói đã Hết phí.']);
+        }
+        if ($contract->relearn_from_contract_id) {
+            return response()->json(['status' => 0, 'message' => 'Đây là bản ghi được tạo ra do học lại nên không được phép học lại tiếp.']);
+        }
+        $check_relearned = u::first("SELECT 1 FROM contracts WHERE relearn_from_contract_id = $contract_id");
+        if ($check_relearned) {
+            return response()->json(['status' => 0, 'message' => 'Bản ghi này đã được tạo học lại rồi.']);
+        }
+
+        // Tạo bản ghi mới
+        $new_data = (array) $contract;
+        unset($new_data['id']);
+        $new_data['must_charge'] = 0;
+        $new_data['total_charged'] = 0;
+        $new_data['debt_amount'] = 0;
+        $new_data['discount_amount'] = 0;
+        $new_data['status'] = 3;
+        $new_data['done_sessions'] = 0;
+        $new_data['left_sessions'] = $contract->total_sessions;
+        $new_data['relearn_from_contract_id'] = $contract_id;
+        $new_data['created_at'] = date('Y-m-d H:i:s');
+        $new_data['updated_at'] = date('Y-m-d H:i:s');
+        $new_data['creator_id'] = $current_user_id;
+
+        $new_contract_id = u::insertSimpleRow($new_data, 'contracts');
+        
+        $new_data['contract_id'] = $new_contract_id;
+        unset($new_data['updated_at']);
+        u::insertSimpleRow($new_data, 'log_contracts');
+
+        return response()->json(['status' => 1, 'message' => 'Tạo gói học lại thành công.']);
     }
 
     public function update(Request $request)

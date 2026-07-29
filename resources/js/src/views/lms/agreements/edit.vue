@@ -340,7 +340,7 @@
                           <span class="text-success font-bold mr-2" v-if="excessAmount > 0">{{ excessAmount | formatMoney }}</span>
                           <span class="text-warning font-bold mr-2" v-else>{{ effectiveAmount | formatMoney }}</span>
                           <vs-button v-if="agreement.can_edit_lower_fee && excessAmount > 0" size="small" color="primary" type="border" class="mr-2" @click="openTransferModal">Chuyển sang gói khác</vs-button>
-                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="danger" type="border" @click="openRefundModal">Hoàn tiền</vs-button>
+                          <vs-button v-if="agreement.can_edit_lower_fee && availableRefundTypes.length > 0" size="small" color="danger" type="border" @click="openRefundModal">Hoàn tiền</vs-button>
                       </div>
                   </div>
                   <div  class="invoice-total-item">
@@ -478,14 +478,22 @@
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreement.contracts" :key="index">
                       <!---->
-                      <td class="td vs-table--td">{{item.code}}</td>
+                      <td class="td vs-table--td">
+                        {{item.code}}
+                        <div v-if="item.relearn_from_contract_code" style="font-size: 0.75rem; color: #ff9f43; font-style: italic;">
+                          (Học lại từ {{ item.relearn_from_contract_code }})
+                        </div>
+                      </td>
                       <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
                       <td class="td vs-table--td text-center">{{item.must_charge | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.total_charged | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.left_amount | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.real_sessions }}</td>
                       <td class="td vs-table--td text-center">{{item.done_sessions}}</td>
-                      <td class="td vs-table--td text-center">{{item.label_status}}</td>
+                      <td class="td vs-table--td text-center">
+                        <span class="mr-2">{{item.label_status}}</span>
+                        <vs-button v-if="agreement.is_admin && item.status == 7 && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="primary" type="border" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
+                      </td>
                     </tr>
                   </table>
                   
@@ -831,12 +839,16 @@
       effectiveAmount() {
         return (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);
       },
+      hasStudied() {
+        if (!this.agreement || !this.agreement.contracts) return false;
+        return this.agreement.contracts.some(c => Number(c.done_sessions) > 0);
+      },
       availableRefundTypes() {
         let types = [];
         if (this.excessAmount > 0) {
           types.push({ label: 'Hoàn tiền thừa', value: 1 });
         }
-        if (this.effectiveAmount > 0) {
+        if (this.effectiveAmount > 0 && !this.hasStudied) {
           types.push({ label: 'Hoàn tiền đặt cọc', value: 2 });
         }
         return types;
@@ -850,6 +862,44 @@
     },
 
     methods: {
+      confirmRelearn(contractId) {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: `Xác nhận`,
+          text: 'Bạn có chắc chắn muốn tạo gói học lại cho gói phí này?',
+          accept: () => this.relearnContract(contractId),
+          acceptText: 'Đồng ý'
+        });
+      },
+      relearnContract(contractId) {
+        this.$vs.loading();
+        axios.p('/api/lms/agreements/relearn', { contract_id: contractId })
+          .then((response) => {
+            this.$vs.loading.close();
+            if (response.data.status == 1) {
+              this.$vs.notify({
+                title: 'Thành công',
+                text: response.data.message,
+                color: 'success',
+                iconPack: 'feather',
+                icon: 'icon-check'
+              });
+              this.loadDetail(); // reload detail
+            } else {
+              this.$vs.notify({
+                title: 'Lỗi',
+                text: response.data.message,
+                color: 'danger',
+                iconPack: 'feather',
+                icon: 'icon-alert-circle'
+              });
+            }
+          })
+          .catch((error) => {
+            this.$vs.loading.close();
+          });
+      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/lms/agreements/show/${this.$route.params.id}`)
