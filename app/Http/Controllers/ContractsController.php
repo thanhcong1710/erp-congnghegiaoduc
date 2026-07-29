@@ -1110,7 +1110,7 @@ class ContractsController extends Controller
     public function relearn(Request $request)
     {
         $current_user_id = Auth::user()->id;
-        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 99");
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = ". SystemCode::ROLE_ADMIN);
         if (empty($is_admin)) {
             return response()->json(['status' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này.']);
         }
