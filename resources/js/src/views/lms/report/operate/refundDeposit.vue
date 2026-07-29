@@ -11,7 +11,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Tháng hoàn tiền</label>
-            <date-picker name="item-date" v-model="searchData.month" format="YYYY-MM" value-type="YYYY-MM" style="width: 100%" type="month"
+            <date-picker name="item-date" v-model="searchData.month" format="YYYY-MM" value-type="format" style="width: 100%" type="month"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng"></date-picker>
           </div>
         </div>
@@ -50,7 +50,7 @@
                   <td class="td vs-table--td">{{ item.student_phone }}</td>
                   <td class="td vs-table--td">{{ item.ec_leader_name }}</td>
                   <td class="td vs-table--td">{{ item.ec_name }}</td>
-                  <td class="td vs-table--td">{{ item.amount | formatMoney }}</td>
+                  <td class="td vs-table--td">{{ formatMoneySigned(item.amount) }}</td>
                   <td class="td vs-table--td">{{ item.refund_date | formatDateViewDay }}</td>
                 </tr>
               </tbody>
@@ -96,7 +96,7 @@ export default {
       listData: [],
       limitSource: [20, 50, 100, 500],
       pagination: {
-        url: "/api/lms/reports/refund-deposit",
+        url: "/api/reports/refund-deposit",
         id: "",
         style: "line",
         class: "",
@@ -133,6 +133,12 @@ export default {
     this.getData();
   },
   methods: {
+    formatMoneySigned(v, c = 'đ') {
+      if (isNaN(v)) return `0${c}`;
+      const sign = v < 0 ? '-' : '';
+      const absValue = Math.abs(v);
+      return `${sign}${parseInt(absValue).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1.').slice(0, -2)}${c}`;
+    },
     exportExcel() {
       let url = `/api/exports/refund-deposit?`;
       if (this.searchData.keyword) {

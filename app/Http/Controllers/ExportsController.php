@@ -4016,6 +4016,7 @@ class ExportsController extends Controller
                 $sheet->setCellValue('D' . $row_id, $item->ec_leader_name);
                 $sheet->setCellValue('E' . $row_id, $item->ec_name);
                 $sheet->setCellValue('F' . $row_id, $item->amount);
+                $sheet->getStyle('F' . $row_id)->getNumberFormat()->setFormatCode('#,##0');
                 $sheet->setCellValue('G' . $row_id, $item->refund_date);
                 $sheet->setCellValue('H' . $row_id, $item->note);
                 $row_id++;
