@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\ClassesController;
+use App\Http\Controllers\ClassTransfersController;
 use App\Http\Controllers\JobsController;
 use App\Http\Controllers\LMSController;
 use App\Http\Controllers\ReportsController;
@@ -53,16 +54,18 @@ class TestCallLms extends Command
         //     echo data_get($row, 'id') . "/";
         // }
         // $lms->studentWithdrawContract(2040);
-        // $lms = new LMSController();
+        $lms = new LMSController();
         // $lms->studentWithdrawContract(2336);
         // $lms->addOrUpdateStudent(1997);
-        // $lms->addStudentToClass(1721);
+        $lms->addStudentToClass(709);
 
-        $list= u::query("SELECT * FROM contracts where class_id=622");
-        foreach ($list AS $contract){
-            u::updateScheduleHasStudent($contract->id, '2026-07-21');
-            echo $contract->id."/";
-        }
+        // $list= u::query("SELECT * FROM contracts where class_id=622");
+        // foreach ($list AS $contract){
+        //     u::updateScheduleHasStudent($contract->id, '2026-07-21');
+        //     echo $contract->id."/";
+        // }
+        // $classTransfer =  new ClassTransfersController();
+        // $classTransfer->processClassTransfer(1226);
         return "ok";
     }
 }
