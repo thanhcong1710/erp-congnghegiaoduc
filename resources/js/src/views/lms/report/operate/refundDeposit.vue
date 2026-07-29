@@ -162,7 +162,7 @@ export default {
     },
     getData() {
       this.$vs.loading();
-      axios.p(this.pagination.url, {
+      axios.p("/api/lms/reports/refund-deposit", {
           keyword: this.searchData.keyword,
           month: this.searchData.month,
           pagination: this.pagination
