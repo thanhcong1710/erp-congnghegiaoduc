@@ -2642,4 +2642,60 @@ class ReportsController extends Controller
 
         return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
     }
+
+    public function refundDepositReport(Request $request)
+    {
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $month = isset($request->month) ? $request->month : date('Y-m'); // Format 'YYYY-MM'
+
+        $pagination = (object) $request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        // Base condition
+        $cond = "p.type = 3 AND p.note LIKE '%cọc%'";
+
+        if ($month) {
+            $cond .= " AND DATE_FORMAT(p.charge_date, '%Y-%m') = '$month'";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')";
+        }
+
+        // Leader Sale / Sales filter logic (Role 68, 69)
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
+        
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $staff_ids = Auth::user()->getStaffHasUser();
+            if ($staff_ids) {
+                $cond .= " AND (c.ec_id IN ($staff_ids) OR c.ec_leader_id = " . Auth::user()->id . ")";
+            } else {
+                $cond .= " AND (c.ec_id = " . Auth::user()->id . " OR c.ec_leader_id = " . Auth::user()->id . ")";
+            }
+        }
+
+        $sql_select = "SELECT p.id, s.lms_code, s.name as student_name, s.gud_mobile1 as student_phone, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
+                    p.amount, p.charge_date as refund_date, p.note";
+                    
+        $sql_from = "FROM payments p
+                    LEFT JOIN agreements c ON p.agreement_id = c.id
+                    LEFT JOIN students s ON p.student_id = s.id
+                    WHERE $cond";
+
+        $total_query = u::first("SELECT COUNT(p.id) as total $sql_from");
+        $total = $total_query ? $total_query->total : 0;
+
+        $list = u::query("$sql_select $sql_from ORDER BY p.id DESC $limitation");
+
+        $data = u::makingPagination($list, $total, $page, $limit);
+        return response()->json($data);
+    }
 }

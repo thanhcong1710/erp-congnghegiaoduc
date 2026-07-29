@@ -540,6 +540,20 @@ export default {
         },
       },
       {
+        path: "/lms/reports/operate/refund-deposit",
+        name: "lms-reports-refund-deposit",
+        component: () => import("@/views/lms/report/operate/refundDeposit.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Báo cáo vận hành", url: "/lms/reports/operate" },
+            { title: "Danh sách hoàn tiền cọc", active: true },
+          ],
+          pageTitle: "Danh sách hoàn tiền cọc",
+          rule: "editor",
+          permission: "lms_reports_operate",
+        },
+      },
+      {
         path: "/lms/reports/operate/report-01",
         name: "lms-report-operate-01",
         component: () => import("@/views/lms/report/operate/report01.vue"),
