@@ -95,7 +95,7 @@ export default {
       listData: [],
       limitSource: [20, 50, 100, 500],
       pagination: {
-        url: "/api/refund-deposit",
+        url: "/api/reports/refund-deposit",
         id: "",
         style: "line",
         class: "",
