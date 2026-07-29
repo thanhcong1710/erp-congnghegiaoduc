@@ -822,7 +822,8 @@ class LMSController extends Controller
         }
         $cond = "";
         $studentInfo = u::first("SELECT s.lms_id, c.enrolment_start_date, 
-                cl.lms_id AS lms_class_id, c.enrolment_last_date,cl.cls_startdate,
+                cl.lms_id AS lms_class_id, c.enrolment_last_date,
+                (SELECT class_date FROM schedules WHERE class_id=c.class_id ORDER BY class_date LIMIT 1) AS  cls_startdate,
                 (SELECT syl_id FROM lms_classes WHERE cls_id = cl.lms_id LIMIT 1) AS syl_id
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id = c.student_id 
