@@ -82,7 +82,7 @@
 import DatePicker from "vue2-datepicker";
 import "vue2-datepicker/index.css";
 import "vue2-datepicker/locale/vi";
-import axios from "../../../../../http/axios.js";
+import axios from "@/http/axios.js";
 
 export default {
   components: {
