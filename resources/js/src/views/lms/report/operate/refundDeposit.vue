@@ -96,7 +96,7 @@ export default {
       listData: [],
       limitSource: [20, 50, 100, 500],
       pagination: {
-        url: "/api/reports/refund-deposit",
+        url: "/api/lms/reports/refund-deposit",
         id: "",
         style: "line",
         class: "",
@@ -140,7 +140,7 @@ export default {
       return `${sign}${parseInt(absValue).toFixed(1).replace(/(\d)(?=(\d{3})+\.)/g, '$1.').slice(0, -2)}${c}`;
     },
     exportExcel() {
-      let url = `/api/exports/refund-deposit?`;
+      let url = `/api/lms/exports/refund-deposit?`;
       if (this.searchData.keyword) {
         url += `keyword=${encodeURIComponent(this.searchData.keyword)}&`;
       }
