@@ -147,7 +147,7 @@ export default {
       if (this.searchData.month) {
         url += `month=${encodeURIComponent(this.searchData.month)}&`;
       }
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
       window.open(url + `token=${token}`, "_blank");
     },
     getCurrentMonth() {
