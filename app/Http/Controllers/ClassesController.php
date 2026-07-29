@@ -348,7 +348,11 @@ class ClassesController extends Controller
     public function updateSchedule(Request $request)
     {
         $id = isset($request->id) ? $request->id : 0;
-        u::updateSimpleRow(['class_date'=>data_get($request, 'class_date')],['id'=>$id], 'schedules');
+        $class_date = data_get($request, 'class_date');
+        if ($class_date) {
+            $class_date = date('Y-m-d', strtotime($class_date));
+        }
+        u::updateSimpleRow(['class_date'=>$class_date],['id'=>$id], 'schedules');
         return response()->json('ok');
     }
 }

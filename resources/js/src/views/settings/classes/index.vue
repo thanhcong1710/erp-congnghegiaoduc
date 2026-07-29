@@ -296,6 +296,8 @@
                   v-model="modal_session.class_date"
                   placeholder="Chọn ngày học"
                   :lang="datepickerOptions.lang"
+                  format="YYYY-MM-DD"
+                  value-type="YYYY-MM-DD"
                   @change="selectDateEdit"
                 />
               </div>
