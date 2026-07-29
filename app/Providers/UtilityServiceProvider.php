@@ -796,6 +796,13 @@ class UtilityServiceProvider extends ServiceProvider
                         $resp->receive_tuition_fee = $to_tuition_fee;
                         $resp->transfer_amount = $transfer_amount;
                     }
+                }else {
+                    $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
+                        FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
+                        WHERE t.id=$from_tuition_fee_id");
+                    $resp->sessions = $transfer_session;
+                    $resp->receive_tuition_fee = $to_tuition_fee;
+                    $resp->transfer_amount = $transfer_amount;
                 }
             }
             
