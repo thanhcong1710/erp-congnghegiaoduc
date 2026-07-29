@@ -545,10 +545,14 @@ export default {
         component: () => import("@/views/lms/report/operate/refundDeposit.vue"),
         meta: {
           breadcrumb: [
-            { title: "Báo cáo vận hành", url: "/lms/reports/operate" },
-            { title: "Danh sách hoàn tiền cọc", active: true },
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo hoàn tiền cọc", active: true },
           ],
-          pageTitle: "Danh sách hoàn tiền cọc",
+          pageTitle: "Báo cáo hoàn tiền cọc",
           rule: "editor",
           permission: "lms_reports_operate",
         },

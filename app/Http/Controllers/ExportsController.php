@@ -3949,4 +3949,91 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function refundDepositReport(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $month = isset($request->month) ? $request->month : date('Y-m'); // Format 'YYYY-MM'
+
+        // Base condition
+        $cond = "p.type = 3 AND p.note LIKE '%cọc%'";
+
+        if ($month) {
+            $cond .= " AND DATE_FORMAT(p.charge_date, '%Y-%m') = '$month'";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')";
+        }
+
+        // Leader Sale / Sales filter logic (Role 68, 69)
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
+        
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $staff_ids = Auth::user()->getStaffHasUser();
+            if ($staff_ids) {
+                $cond .= " AND (c.ec_id IN ($staff_ids) OR c.ec_leader_id = " . Auth::user()->id . ")";
+            } else {
+                $cond .= " AND (c.ec_id = " . Auth::user()->id . " OR c.ec_leader_id = " . Auth::user()->id . ")";
+            }
+        }
+
+        $sql_select = "SELECT p.id, s.lms_code, s.name as student_name, s.gud_mobile1 as student_phone, 
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                    (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
+                    p.amount, p.charge_date as refund_date, p.note";
+                    
+        $sql_from = "FROM payments p
+                    LEFT JOIN agreements c ON p.agreement_id = c.id
+                    LEFT JOIN students s ON p.student_id = s.id
+                    WHERE $cond";
+
+        $list = u::query("$sql_select $sql_from ORDER BY p.id DESC");
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Mã học sinh');
+        $sheet->setCellValue('B1', 'Tên học sinh');
+        $sheet->setCellValue('C1', 'SĐT');
+        $sheet->setCellValue('D1', 'Leader Sale');
+        $sheet->setCellValue('E1', 'Thành viên Sale');
+        $sheet->setCellValue('F1', 'Số tiền hoàn');
+        $sheet->setCellValue('G1', 'Ngày hoàn');
+        $sheet->setCellValue('H1', 'Ghi chú');
+
+        if (count($list) > 0) {
+            $row_id = 2;
+            foreach ($list as $item) {
+                $sheet->setCellValue('A' . $row_id, $item->lms_code);
+                $sheet->setCellValue('B' . $row_id, $item->student_name);
+                $sheet->setCellValue('C' . $row_id, $item->student_phone);
+                $sheet->setCellValue('D' . $row_id, $item->ec_leader_name);
+                $sheet->setCellValue('E' . $row_id, $item->ec_name);
+                $sheet->setCellValue('F' . $row_id, $item->amount);
+                $sheet->setCellValue('G' . $row_id, $item->refund_date);
+                $sheet->setCellValue('H' . $row_id, $item->note);
+                $row_id++;
+            }
+        }
+
+        foreach (range('A', 'H') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Báo_cáo_hoàn_tiền_cọc.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

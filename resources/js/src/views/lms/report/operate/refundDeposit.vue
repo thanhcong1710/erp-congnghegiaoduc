@@ -1,7 +1,7 @@
 <template>
   <div id="page-refund-deposit-list">
     <vx-card no-shadow class="mt-5">
-      <h5>DANH SÁCH HOÀN TIỀN CỌC</h5>
+      <h5>BÁO CÁO HOÀN TIỀN CỌC</h5>
       <hr class="mt-2 mb-4" style="border: 0.5px solid #ccc;">
       <div class="mb-5">
         <div class="vx-row">
@@ -18,7 +18,8 @@
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
             <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="resetData"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="dark" type="border" class="mr-3 mb-2" @click="resetData"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button color="success" class="mb-2" @click="exportExcel" ><i class="fa fa-file-excel"></i> Export</vs-button>
           </div>
         </div>
       </div>
@@ -132,6 +133,17 @@ export default {
     this.getData();
   },
   methods: {
+    exportExcel() {
+      let url = `/api/exports/refund-deposit?`;
+      if (this.searchData.keyword) {
+        url += `keyword=${encodeURIComponent(this.searchData.keyword)}&`;
+      }
+      if (this.searchData.month) {
+        url += `month=${encodeURIComponent(this.searchData.month)}&`;
+      }
+      const token = localStorage.getItem("token");
+      window.open(url + `token=${token}`, "_blank");
+    },
     getCurrentMonth() {
       const now = new Date();
       return now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
