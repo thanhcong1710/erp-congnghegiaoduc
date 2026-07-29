@@ -102,6 +102,7 @@ class EnrolmentsController extends Controller
                 (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id) AS team_name,
                 (SELECT created_at FROM log_class_students WHERE class_id=$class_id AND contract_id=c.id AND action=1 ORDER BY id DESC LIMIT 1) AS added_at,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
+                (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
                 p.link_facebook
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id
@@ -213,9 +214,10 @@ class EnrolmentsController extends Controller
                 LEFT JOIN students AS s ON s.id=c.student_id 
                 LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id WHERE $cond");
 
-        $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions, c.agreement_id,
+        $list = u::query("SELECT c.id AS contract_id, c.code AS contract_code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions, c.agreement_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) as tmp_payment_amount,
+                (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
                 (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
             FROM contracts AS c 
                 LEFT JOIN tuition_fee AS t ON t.id=c.tuition_fee_id

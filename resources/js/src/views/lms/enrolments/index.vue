@@ -186,7 +186,12 @@
                         </div>
                       </td>
                       <td class="td vs-table--td">
-                        <p><strong>Mã: {{item.contract_code}}</strong></p>
+                        <p>
+                          <strong>Mã: {{item.contract_code}}</strong>
+                          <span v-if="item.relearn_from_contract_code" style="font-size: 0.75rem; color: #ff9f43; font-style: italic; display: block;">
+                            (Học lại từ {{ item.relearn_from_contract_code }})
+                          </span>
+                        </p>
                         <p>Gói: {{item.tuition_fee_name}}</p>
                         <p>Phải đóng: {{item.must_charge | formatMoney}}</p>
                         <p><strong>Đã đóng: {{item.total_charged | formatMoney}}</strong></p>
