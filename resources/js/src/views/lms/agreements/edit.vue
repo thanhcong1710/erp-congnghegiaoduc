@@ -333,7 +333,7 @@
                       <p  class="invoice-total-title"> Công nợ: </p>
                       <p  class="invoice-total-amount"  style="font-weight: bold;"> {{ agreement.debt_amount | formatMoney}} </p>
                   </div>
-                  <div class="invoice-total-item" v-if="excessAmount > 0 || effectiveAmount > 0">
+                  <div class="invoice-total-item" v-if="excessAmount > 0 || (effectiveAmount > 0 && !hasStudied)">
                       <p class="invoice-total-title" v-if="excessAmount > 0"> Tiền thừa: </p>
                       <p class="invoice-total-title" v-else> Có thể hoàn cọc: </p>
                       <div class="invoice-total-amount flex items-center">
@@ -491,8 +491,10 @@
                       <td class="td vs-table--td text-center">{{item.real_sessions }}</td>
                       <td class="td vs-table--td text-center">{{item.done_sessions}}</td>
                       <td class="td vs-table--td text-center">
-                        <span class="mr-2">{{item.label_status}}</span>
-                        <vs-button v-if="agreement.is_admin && item.status == 7 && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="primary" type="border" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
+                        <div class="flex flex-col items-center justify-center">
+                          <span class="mb-1">{{item.label_status}}</span>
+                          <vs-button v-if="agreement.is_admin && item.status == 7 && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="warning" type="filled" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
+                        </div>
                       </td>
                     </tr>
                   </table>
