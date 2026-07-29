@@ -476,7 +476,7 @@
                         <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                       </tr>
                     </thead>
-                    <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreement.contracts" :key="index">
+                    <tr class="tr-values vs-table--tr tr-table-state-null" :style="item.relearn_from_contract_code ? 'background-color: #fff9e6;' : ''" v-for="(item, index) in sortedContracts" :key="index">
                       <!---->
                       <td class="td vs-table--td">
                         {{item.code}}
@@ -832,6 +832,22 @@
           }
         }
         return false;
+      },
+      sortedContracts() {
+        if (!this.agreement || !this.agreement.contracts) return [];
+        let sorted = [];
+        let originalContracts = this.agreement.contracts.filter(c => !c.relearn_from_contract_id);
+        originalContracts.forEach(c => {
+          sorted.push(c);
+          let relearned = this.agreement.contracts.filter(r => r.relearn_from_contract_id == c.id);
+          sorted.push(...relearned);
+        });
+        
+        let processedIds = sorted.map(c => c.id);
+        let remaining = this.agreement.contracts.filter(c => !processedIds.includes(c.id));
+        sorted.push(...remaining);
+
+        return sorted;
       },
       excessAmount() {
         const charged = (Number(this.agreement.total_charged) || 0) + (Number(this.agreement.received_amount) || 0) - (Number(this.agreement.transferred_amount) || 0);

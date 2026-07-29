@@ -1133,6 +1133,7 @@ class ContractsController extends Controller
         // Tạo bản ghi mới
         $new_data = (array) $contract;
         unset($new_data['id']);
+        unset($new_data['code']);
         $new_data['must_charge'] = 0;
         $new_data['total_charged'] = 0;
         $new_data['debt_amount'] = 0;
@@ -1146,7 +1147,11 @@ class ContractsController extends Controller
         $new_data['creator_id'] = $current_user_id;
 
         $new_contract_id = u::insertSimpleRow($new_data, 'contracts');
+        $contract_code = str_pad((string) $new_contract_id, 6, '0', STR_PAD_LEFT);
+        $contract_code = config('app.prefix_contract_code') . $contract_code;
+        u::updateSimpleRow(array('code' => $contract_code), array('id' => $new_contract_id), 'contracts');
         
+        $new_data['code'] = $contract_code;
         $new_data['contract_id'] = $new_contract_id;
         unset($new_data['updated_at']);
         u::insertSimpleRow($new_data, 'log_contracts');
