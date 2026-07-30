@@ -381,16 +381,17 @@ class ChargesController extends Controller
     public static function processContractsByAgreement($agreement_id)
     {
         $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 ORDER BY product_id");
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 AND relearn_from_contract_id IS NULL ORDER BY product_id");
         $effectiveCharged = (float) data_get($agreementInfo, 'total_charged', 0)
             + (float) data_get($agreementInfo, 'received_amount', 0)
             - (float) data_get($agreementInfo, 'transferred_amount', 0);
-        $dataResult = self::splitChargedAmount($effectiveCharged, (array) $contracts);
+        $totalDiscount = (float) data_get($agreementInfo, 'discount_amount', 0);
+        $dataResult = self::splitChargedAndDiscountAmount($effectiveCharged, $totalDiscount, (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
-                    round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
+                    round(((int) data_get($row, 'total_charged') + (int) data_get($row, 'discount_amount')) / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
                 if (data_get($row, 'contract_data.class_id')) {
                     $status = 6;
                 } else {
@@ -403,7 +404,8 @@ class ChargesController extends Controller
                     'left_sessions' => $availableSession - data_get($row, 'done_sessions'),
                     'total_charged' => (int) data_get($row, 'total_charged'),
                     'init_total_charged' => (int) data_get($row, 'total_charged'),
-                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged'),
+                    'discount_amount' => (int) data_get($row, 'discount_amount'),
+                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged') - (int) data_get($row, 'discount_amount'),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id ?? 0,
                 ], array('id' => data_get($row, 'contract_id')), 'contracts');
@@ -413,39 +415,52 @@ class ChargesController extends Controller
 
         return true;
     }
-    public static function splitChargedAmount(float $totalCharged, array $packages): array
+    public static function splitChargedAndDiscountAmount(float $totalCharged, float $totalDiscount, array $packages): array
     {
         // Sắp xếp theo ưu tiên (count_recharge nhỏ -> ưu tiên cao)
         usort($packages, function ($a, $b) {
             return $a->count_recharge <=> $b->count_recharge;
         });
 
-        $remain = $totalCharged;
+        $remainCharged = $totalCharged;
+        $remainDiscount = $totalDiscount;
         $result = [];
 
         foreach ($packages as $package) {
-            if ($remain <= 0) {
+            $must_charge = (float) $package->must_charge;
+
+            if ($remainDiscount <= 0) {
+                $discount = 0;
+            } else {
+                $discount = min($must_charge, $remainDiscount);
+            }
+            $remainDiscount -= $discount;
+
+            $remain_must_charge = $must_charge - $discount;
+
+            if ($remainCharged <= 0) {
                 $paid = 0;
             } else {
-                $paid = min($package->must_charge, $remain);
+                $paid = min($remain_must_charge, $remainCharged);
             }
+            $remainCharged -= $paid;
 
             $result[] = [
                 'contract_id' => $package->id,
                 'must_charge' => $package->must_charge,
                 'total_charged' => $paid,
+                'discount_amount' => $discount,
                 'count_recharge' => $package->count_recharge,
-                'is_fully_paid' => $paid >= $package->must_charge,
+                'is_fully_paid' => ($paid + $discount) >= $package->must_charge,
                 'contract_data' => $package
             ];
-
-            $remain -= $paid;
         }
 
         return [
             'total_charged' => $totalCharged,
-            'total_used' => $totalCharged - max($remain, 0),
-            'remain_amount' => max($remain, 0),
+            'total_discount' => $totalDiscount,
+            'remain_charged' => max($remainCharged, 0),
+            'remain_discount' => max($remainDiscount, 0),
             'packages' => $result
         ];
     }
@@ -935,13 +950,14 @@ class ChargesController extends Controller
     public static function processContractsByAgreementNew($agreement_id)
     {
         $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 ORDER BY product_id");
-        $dataResult = self::splitChargedAmount(data_get($agreementInfo, 'total_charged'), (array) $contracts);
+        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 AND relearn_from_contract_id IS NULL ORDER BY product_id");
+        $totalDiscount = (float) data_get($agreementInfo, 'discount_amount', 0);
+        $dataResult = self::splitChargedAndDiscountAmount(data_get($agreementInfo, 'total_charged'), $totalDiscount, (array) $contracts);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
-                    round((int) data_get($row, 'total_charged') / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
+                    round(((int) data_get($row, 'total_charged') + (int) data_get($row, 'discount_amount')) / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
                 if (data_get($row, 'contract_data.class_id')) {
                     $status = 6;
                 } else {
@@ -954,7 +970,8 @@ class ChargesController extends Controller
                     'left_sessions' => $availableSession - data_get($row, 'done_sessions'),
                     'total_charged' => (int) data_get($row, 'total_charged'),
                     'init_total_charged' => (int) data_get($row, 'total_charged'),
-                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged'),
+                    'discount_amount' => (int) data_get($row, 'discount_amount'),
+                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged') - (int) data_get($row, 'discount_amount'),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id ?? 0,
                 ], array('id' => data_get($row, 'contract_id')), 'contracts');

@@ -21,7 +21,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "3-Dec",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-03-12",
+        "raw_book_sent_date": "12\/03\/2026"
     },
     {
         "phone": "963880651",
@@ -45,7 +47,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-15",
+        "raw_book_sent_date": "15\/05\/2026"
     },
     {
         "phone": "966381540",
@@ -69,7 +73,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "373578093",
@@ -93,7 +99,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "17-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-17",
+        "raw_book_sent_date": "17\/07\/2026"
     },
     {
         "phone": "369406833",
@@ -117,7 +125,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "5-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-07",
+        "raw_book_sent_date": "07\/05\/2026"
     },
     {
         "phone": "961942141",
@@ -141,7 +151,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-14",
+        "raw_book_sent_date": "14\/06\/2026"
     },
     {
         "phone": "941428549",
@@ -165,7 +177,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "869641727",
@@ -189,7 +203,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-04",
+        "raw_book_sent_date": "04\/05\/2026"
     },
     {
         "phone": "399361769",
@@ -213,7 +229,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "395117282",
@@ -237,7 +255,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "928345658",
@@ -261,7 +281,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "18-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "963973970",
@@ -285,7 +307,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "29-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-04",
+        "raw_book_sent_date": "04\/05\/2026"
     },
     {
         "phone": "382980481",
@@ -309,7 +333,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-27",
+        "raw_book_sent_date": "27\/05\/2026"
     },
     {
         "phone": "334926532",
@@ -333,7 +359,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "5-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-04",
+        "raw_book_sent_date": "04\/05\/2026"
     },
     {
         "phone": "795145368",
@@ -357,7 +385,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-20",
+        "raw_book_sent_date": "20\/05\/2026"
     },
     {
         "phone": "369516907",
@@ -381,7 +411,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-13",
+        "raw_book_sent_date": "13\/05\/2026"
     },
     {
         "phone": "392974064",
@@ -405,7 +437,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-06",
+        "raw_book_sent_date": "06\/05\/2026"
     },
     {
         "phone": "868925502",
@@ -429,7 +463,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-01",
+        "raw_book_sent_date": "01\/07\/2026"
     },
     {
         "phone": "375069837",
@@ -453,7 +489,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-27",
+        "raw_book_sent_date": "27\/05\/2026"
     },
     {
         "phone": "868152085",
@@ -477,7 +515,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-13",
+        "raw_book_sent_date": "13\/05\/2026"
     },
     {
         "phone": "367287865",
@@ -501,7 +541,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-27",
+        "raw_book_sent_date": "27\/05\/2026"
     },
     {
         "phone": "866563958",
@@ -525,7 +567,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "976337451",
@@ -549,7 +593,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "363280908",
@@ -573,7 +619,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -832,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "374608140",
@@ -597,7 +645,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "377793263",
@@ -621,7 +671,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "979592860",
@@ -645,7 +697,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-08",
+        "raw_book_sent_date": "08\/06\/2026"
     },
     {
         "phone": "963139152",
@@ -669,7 +723,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-05",
+        "raw_book_sent_date": "05\/06\/2026"
     },
     {
         "phone": "865419308",
@@ -693,7 +749,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "977999585",
@@ -717,7 +775,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-12",
+        "raw_book_sent_date": "12\/06\/2026"
     },
     {
         "phone": "964407517",
@@ -741,7 +801,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "961659208",
@@ -765,7 +827,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "7-Mar",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "963004641",
@@ -789,7 +853,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "17-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-17",
+        "raw_book_sent_date": "17\/07\/2026"
     },
     {
         "phone": "868880771",
@@ -813,7 +879,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "359983482",
@@ -837,7 +905,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "19-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "971860412",
@@ -861,7 +931,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "21-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-19",
+        "raw_book_sent_date": "19\/05\/2026"
     },
     {
         "phone": "815598880",
@@ -885,7 +957,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-05",
+        "raw_book_sent_date": "05\/06\/2026"
     },
     {
         "phone": "969968567",
@@ -909,7 +983,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "21-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "559703711",
@@ -933,7 +1009,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-12",
+        "raw_book_sent_date": "12\/06\/2026"
     },
     {
         "phone": "332522690",
@@ -957,7 +1035,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-27",
+        "raw_book_sent_date": "27\/05\/2026"
     },
     {
         "phone": "815100428",
@@ -981,7 +1061,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-26",
+        "raw_book_sent_date": "26\/05\/2026"
     },
     {
         "phone": "328403107",
@@ -1005,7 +1087,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-05-27",
+        "raw_book_sent_date": "27\/05\/2026"
     },
     {
         "phone": "346894464",
@@ -1029,7 +1113,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-Dec",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-12",
+        "raw_book_sent_date": "12\/06\/2026"
     },
     {
         "phone": "963779306",
@@ -1053,7 +1139,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-Dec",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-12",
+        "raw_book_sent_date": "12\/06\/2026"
     },
     {
         "phone": "395993010",
@@ -1077,7 +1165,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -100,
         "raw_start_date": "17-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "962035629",
@@ -1101,7 +1191,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "329367159",
@@ -1125,7 +1217,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-10",
+        "raw_book_sent_date": "10\/07\/2026"
     },
     {
         "phone": "333191450",
@@ -1149,7 +1243,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "357724659",
@@ -1173,7 +1269,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "27-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-05",
+        "raw_book_sent_date": "05\/06\/2026"
     },
     {
         "phone": "377460692",
@@ -1197,7 +1295,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "343949315",
@@ -1221,7 +1321,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -50,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "978494375",
@@ -1245,7 +1347,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "965373124",
@@ -1269,7 +1373,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-09",
+        "raw_book_sent_date": "09\/06\/2026"
     },
     {
         "phone": "398850541",
@@ -1293,7 +1399,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "329959206",
@@ -1317,7 +1425,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "966974426",
@@ -1341,7 +1451,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "325842448",
@@ -1365,7 +1477,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "19-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-18",
+        "raw_book_sent_date": "18\/06\/2026"
     },
     {
         "phone": "344695906",
@@ -1389,7 +1503,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 500,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "982652911",
@@ -1413,7 +1529,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-09",
+        "raw_book_sent_date": "09\/06\/2026"
     },
     {
         "phone": "969812933",
@@ -1437,7 +1555,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-04",
+        "raw_book_sent_date": "04\/06\/2026"
     },
     {
         "phone": "368037106",
@@ -1461,7 +1581,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "16-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "966571762",
@@ -1485,7 +1607,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "344638220",
@@ -1509,7 +1633,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "399843906",
@@ -1533,7 +1659,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "359207135",
@@ -1557,7 +1685,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-15",
+        "raw_book_sent_date": "15\/06\/2026"
     },
     {
         "phone": "965065394",
@@ -1581,7 +1711,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-09",
+        "raw_book_sent_date": "09\/07\/2026"
     },
     {
         "phone": "899467929",
@@ -1605,7 +1737,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "967153933",
@@ -1629,7 +1763,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 500,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "964113998",
@@ -1653,7 +1789,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-09",
+        "raw_book_sent_date": "09\/06\/2026"
     },
     {
         "phone": "983523299",
@@ -1677,7 +1815,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "782282062",
@@ -1701,7 +1841,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "588114888",
@@ -1725,7 +1867,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "366463310",
@@ -1749,7 +1893,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "968605209",
@@ -1773,7 +1919,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "17-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-17",
+        "raw_book_sent_date": "17\/07\/2026"
     },
     {
         "phone": "328648718",
@@ -1797,7 +1945,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "898781410",
@@ -1821,7 +1971,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "25-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-25",
+        "raw_book_sent_date": "25\/06\/2026"
     },
     {
         "phone": "869311106",
@@ -1845,7 +1997,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "17-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "835869535",
@@ -1869,7 +2023,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "929009707",
@@ -1893,7 +2049,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-11",
+        "raw_book_sent_date": "11\/06\/2026"
     },
     {
         "phone": "333933851",
@@ -1917,7 +2075,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "345654806",
@@ -1941,7 +2101,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "14-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-12",
+        "raw_book_sent_date": "12\/06\/2026"
     },
     {
         "phone": "866518904",
@@ -1965,7 +2127,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-13",
+        "raw_book_sent_date": "13\/06\/2026"
     },
     {
         "phone": "379368953",
@@ -1989,7 +2153,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-13",
+        "raw_book_sent_date": "13\/06\/2026"
     },
     {
         "phone": "374053582",
@@ -2013,7 +2179,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "19-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "394711808",
@@ -2037,7 +2205,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "978537556",
@@ -2061,7 +2231,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "343582123",
@@ -2085,7 +2257,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-22",
+        "raw_book_sent_date": "22\/06\/2026"
     },
     {
         "phone": "862260802",
@@ -2109,7 +2283,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-22",
+        "raw_book_sent_date": "22\/06\/2026"
     },
     {
         "phone": "333995682",
@@ -2133,7 +2309,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "344947554",
@@ -2157,7 +2335,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "559956855",
@@ -2181,7 +2361,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "14-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-14",
+        "raw_book_sent_date": "14\/07\/2026"
     },
     {
         "phone": "352859505",
@@ -2205,7 +2387,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "342696921",
@@ -2229,7 +2413,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -532,
         "raw_start_date": "21-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "336811283",
@@ -2253,7 +2439,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-13",
+        "raw_book_sent_date": "13\/06\/2026"
     },
     {
         "phone": "367743108",
@@ -2277,7 +2465,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "21-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-16",
+        "raw_book_sent_date": "16\/06\/2026"
     },
     {
         "phone": "982778197",
@@ -2301,7 +2491,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "386732186",
@@ -2325,7 +2517,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "879922947",
@@ -2349,7 +2543,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "949312087",
@@ -2373,7 +2569,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "876032938",
@@ -2397,7 +2595,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "21-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "904844028",
@@ -2421,7 +2621,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "869606389",
@@ -2445,7 +2647,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "888288558",
@@ -2469,7 +2673,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "7-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": "Không gửi"
     },
     {
         "phone": "345325106",
@@ -2493,7 +2699,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "353322454",
@@ -2517,7 +2725,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "13-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-07",
+        "raw_book_sent_date": "07\/07\/2026"
     },
     {
         "phone": "868483821",
@@ -2541,7 +2751,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -500,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "911524206",
@@ -2565,7 +2777,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -32,
         "raw_start_date": "19-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "336628966",
@@ -2589,7 +2803,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "337196060",
@@ -2613,7 +2829,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "942673060",
@@ -2637,7 +2855,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -100,
         "raw_start_date": "7-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "367566007",
@@ -2661,7 +2881,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "344536162",
@@ -2685,7 +2907,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "833042008",
@@ -2709,7 +2933,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "397153568",
@@ -2733,7 +2959,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "843638309",
@@ -2757,7 +2985,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "846898789",
@@ -2781,7 +3011,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-17",
+        "raw_book_sent_date": "17\/06\/2026"
     },
     {
         "phone": "389524012",
@@ -2805,7 +3037,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "373406311",
@@ -2829,7 +3063,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -100,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "368011008",
@@ -2853,7 +3089,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "21-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "329213206",
@@ -2877,7 +3115,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "963924026",
@@ -2901,7 +3141,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "389251100",
@@ -2925,7 +3167,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "25-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "364667248",
@@ -2949,7 +3193,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "373773908",
@@ -2973,7 +3219,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "982304205",
@@ -2997,7 +3245,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "25-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-25",
+        "raw_book_sent_date": "25\/06\/2026"
     },
     {
         "phone": "347089411",
@@ -3021,7 +3271,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "25-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-25",
+        "raw_book_sent_date": "25\/06\/2026"
     },
     {
         "phone": "946169955",
@@ -3045,7 +3297,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "369180206",
@@ -3069,7 +3323,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-25",
+        "raw_book_sent_date": "25\/06\/2026"
     },
     {
         "phone": "916685626",
@@ -3093,7 +3349,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "353193508",
@@ -3117,7 +3375,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "395667356",
@@ -3141,7 +3401,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "978084741",
@@ -3165,7 +3427,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "22-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-19",
+        "raw_book_sent_date": "19\/06\/2026"
     },
     {
         "phone": "949715391",
@@ -3189,7 +3453,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "868287396",
@@ -3213,7 +3479,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Oct",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-10",
+        "raw_book_sent_date": "10\/07\/2026"
     },
     {
         "phone": "377336982",
@@ -3237,7 +3505,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "6-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "329555773",
@@ -3261,7 +3531,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "328075926",
@@ -3285,7 +3557,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "348296828",
@@ -3309,7 +3583,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "708477681",
@@ -3333,7 +3609,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "28-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-26",
+        "raw_book_sent_date": "26\/06\/2026"
     },
     {
         "phone": "364776651",
@@ -3357,7 +3635,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "328628067",
@@ -3381,7 +3661,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "394037892",
@@ -3405,7 +3687,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "783607303",
@@ -3429,7 +3713,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "383834808",
@@ -3453,7 +3739,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "925318399",
@@ -3477,7 +3765,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "24-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "964267048",
@@ -3501,7 +3791,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "359649487",
@@ -3525,7 +3817,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "983553943",
@@ -3549,7 +3843,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "26-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-23",
+        "raw_book_sent_date": "23\/06\/2026"
     },
     {
         "phone": "763025233",
@@ -3573,7 +3869,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "17-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-17",
+        "raw_book_sent_date": "17\/07\/2026"
     },
     {
         "phone": "979717484",
@@ -3597,7 +3895,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "356219783",
@@ -3621,7 +3921,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Oct",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "879055625",
@@ -3645,7 +3947,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "342958522",
@@ -3669,7 +3973,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "343052356",
@@ -3693,7 +3999,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "984576539",
@@ -3717,7 +4025,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "776498666",
@@ -3741,7 +4051,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "983029137",
@@ -3765,7 +4077,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-24",
+        "raw_book_sent_date": "24\/06\/2026"
     },
     {
         "phone": "972142092",
@@ -3789,7 +4103,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "327870802",
@@ -3813,7 +4129,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "335708812",
@@ -3837,7 +4155,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Mar",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "779221489",
@@ -3861,7 +4181,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "30-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "327987682",
@@ -3885,7 +4207,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "377032912",
@@ -3909,7 +4233,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "965928793",
@@ -3933,7 +4259,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "971230954",
@@ -3957,7 +4285,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "7-Jan",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": "Không gửi"
     },
     {
         "phone": "354071409",
@@ -3981,7 +4311,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "962688102",
@@ -4005,7 +4337,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "377749902",
@@ -4029,7 +4363,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "23-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "931549972",
@@ -4053,7 +4389,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 100,
         "raw_start_date": "16-Jul",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-16",
+        "raw_book_sent_date": "16\/07\/2026"
     },
     {
         "phone": "971869361",
@@ -4077,7 +4415,9 @@
         "discount_amount": 0,
         "debt_amount_raw": -532,
         "raw_start_date": "29-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-06-29",
+        "raw_book_sent_date": "29\/06\/2026"
     },
     {
         "phone": "346082034",
@@ -4101,7 +4441,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "385907893",
@@ -4125,7 +4467,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Jun",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "346741525",
@@ -4149,7 +4493,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-May",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "822308805",
@@ -4173,7 +4519,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 500,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "1096266289",
@@ -4197,7 +4545,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Dec",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": "Không gửi"
     },
     {
         "phone": "978208501",
@@ -4221,7 +4571,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "7-Sep",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": "2026-07-02",
+        "raw_book_sent_date": "02\/07\/2026"
     },
     {
         "phone": "878883003",
@@ -4245,7 +4597,9 @@
         "discount_amount": 0,
         "debt_amount_raw": 500,
         "raw_start_date": "",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     },
     {
         "phone": "815100428",
@@ -4269,6 +4623,8 @@
         "discount_amount": 0,
         "debt_amount_raw": 0,
         "raw_start_date": "8-Apr",
-        "salary_month": "2026-06"
+        "salary_month": "2026-06",
+        "book_sent_date": null,
+        "raw_book_sent_date": ""
     }
 ]

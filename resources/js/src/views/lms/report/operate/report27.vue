@@ -50,7 +50,7 @@
         <span class="rpt-badge-count">{{ pagination.total }} bản ghi</span>
       </div>
 
-      <div class="mb-4 flex items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200" v-if="selected_items.length > 0">
+      <div class="mb-4 flex items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200" v-if="selected_items.length > 0 && !(user_role.is_sale || user_role.is_sale_leader)">
         <div>
           <label class="rpt-label">Ngày phát sách cho {{ selected_items.length }} học viên đã chọn</label>
           <date-picker style="width:250px" v-model="batch_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày phát sách"></date-picker>
@@ -70,17 +70,19 @@
               <th>Mã HV</th>
               <th>Họ tên</th>
               <th>Số điện thoại</th>
-              <th>Mã lớp</th>
+              <th>Mã lớp hiện tại</th>
+              <th>Lớp phát sách</th>
               <th>Ngày khai giảng</th>
               <th>Sản phẩm</th>
               <th>Địa chỉ nhận sách</th>
               <th>Link Facebook</th>
               <th>Đăng ký nhận sách</th>
               <th style="width:200px">Ngày phát sách</th>
+              <th style="width:200px">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
-            <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
+            <tr class="rpt-row" :class="{'bg-warning-light': !item.cls_name && item.book_delivered_date}" v-for="(item, index) in datas" :key="index">
               <td class="text-center">
                 <vs-checkbox v-model="selected_items" :vs-value="item.contract_id"></vs-checkbox>
               </td>
@@ -90,6 +92,7 @@
               <td class="font-bold">{{ item.student_name }}</td>
               <td class="small">{{ item.phone }}</td>
               <td><span class="badge-code">{{ item.cls_name }}</span></td>
+              <td><span v-if="item.book_class_name" class="badge-code">{{ item.book_class_name }}</span></td>
               <td class="small">{{ item.cls_startdate }}</td>
               <td>{{ item.product_name }}</td>
               <td class="small">{{ item.address }}</td>
@@ -104,8 +107,11 @@
               </td>
               <td>
                 <div class="flex items-center gap-2" v-if="item.book_receive != 2">
-                  <date-picker style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
+                  <date-picker :disabled="user_role.is_sale || user_role.is_sale_leader" style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
                 </div>
+              </td>
+              <td>
+                <vs-input v-if="item.book_receive != 2" :disabled="user_role.is_sale || user_role.is_sale_leader" v-model="item.book_note" @change="updateSingleDate(item)" placeholder="Ghi chú"></vs-input>
               </td>
             </tr>
             <tr v-if="datas.length === 0">
@@ -149,13 +155,15 @@
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],
         limitSource: [20, 50, 100, 500],
-        pagination: { cpage:1, total:0, limit:20, init:0 },
+        pagination: { total: 0, cpage: 1, limit: 20, init: 0 },
         selected_items: [],
         selectAll: false,
-        batch_date: ''
+        batch_date: '',
+        user_role: { user_id: 0, is_sale: false, is_sale_leader: false }
       }
     },
     created() {
+      axios.g(`/api/system/current-user-role`).then(response => { this.user_role = response.data })
       axios.g('/api/system/users?role_id=69').then(r => { this.team_list = r.data })
       axios.g('/api/system/products').then(r => { this.products = r.data })
       this.getData()
@@ -229,13 +237,23 @@
       
       updateSingleDate(item) {
         const date_str = item.book_delivered_date ? this.fmtDate(item.book_delivered_date) : '';
+        const note_str = item.book_note || '';
         this.$vs.loading();
         axios.p('/api/lms/reports/update-book-delivered-date', {
           contract_ids: [item.contract_id],
-          book_delivered_date: date_str
+          book_delivered_date: date_str,
+          book_note: note_str
         }).then(res => {
           this.$vs.loading.close();
-          this.$vs.notify({ title: 'Thành công', text: date_str ? 'Cập nhật ngày phát sách thành công' : 'Đã xóa ngày phát sách', color: 'success' });
+          if(res.data.status == 1) {
+            this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+            if (!item.book_class_name && date_str) {
+               this.getData(); // reload để thấy tên lớp phát sách vừa được gán
+            }
+          } else {
+            this.$vs.notify({ title: 'Lỗi', text: res.data.message, color: 'danger' });
+            this.getData();
+          }
         }).catch(err => {
           this.$vs.loading.close();
           this.$vs.notify({ title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger' });
@@ -298,6 +316,7 @@
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 #page-report-27 { font-family: 'Inter', sans-serif; }
+.bg-warning-light { background-color: #fef9c3 !important; }
 .rpt-header { display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; padding:20px 24px; border-radius:12px; box-shadow:0 4px 20px rgba(79,70,229,.3); margin-bottom:20px; }
 .rpt-header__icon { font-size:26px; width:50px; height:50px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .rpt-header__title { font-size:1.05rem; font-weight:700; margin:0; }

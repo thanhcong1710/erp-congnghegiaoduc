@@ -86,6 +86,7 @@ class StudentDataTransformer
         $discountRaw = $row['giảm trừ'] ?? ($row['giam_tru'] ?? 0);
         $debtRaw = $row['công nợ'] ?? ($row['cong_no'] ?? 0);
         $salaryMonthRaw = $row['xac_nhan_tra_luong'] ?? '';
+        $bookSentDateRaw = $row['ngày gửi sách'] ?? ($row['ngay_gui_sach'] ?? null);
 
         $pay1Amount = floatval(str_replace([',', ' '], '', $pay1AmountRaw));
         $pay2Amount = floatval(str_replace([',', ' '], '', $pay2AmountRaw));
@@ -129,6 +130,8 @@ class StudentDataTransformer
             'debt_amount_raw'  => $debtAmount,
             'raw_start_date'   => $startDate,
             'salary_month'     => $salaryMonth,
+            'book_sent_date'   => self::safeParseDate($bookSentDateRaw),
+            'raw_book_sent_date'=> trim((string)$bookSentDateRaw),
         ];
     }
 

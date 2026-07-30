@@ -2506,7 +2506,7 @@ class ReportsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
-        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $cond = " ((c.class_id IS NOT NULL AND c.class_id > 0) OR c.book_delivered_date IS NOT NULL) AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if ($team_id > 0) {
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
@@ -2562,9 +2562,10 @@ class ReportsController extends Controller
                      WHERE $cond";
         $total = u::first($countSql);
 
-        $query = "SELECT c.id AS contract_id, c.book_delivered_date,
+        $query = "SELECT c.id AS contract_id, c.book_delivered_date, c.book_note,
                     s.lms_code, s.name AS student_name, s.address, s.gud_mobile1 AS phone,
                     cls.cls_name, cls.cls_startdate,
+                    b_cls.cls_name AS book_class_name,
                     p.name AS product_name,
                     cp.link_facebook,
                     a.book_receive,
@@ -2576,6 +2577,7 @@ class ReportsController extends Controller
                     LEFT JOIN agreements AS a ON a.id = c.agreement_id
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
+                    LEFT JOIN classes AS b_cls ON c.book_class_id = b_cls.id
                     LEFT JOIN products AS p ON c.product_id = p.id
                     LEFT JOIN crm_parents AS cp ON cp.student_id = s.id
                 WHERE $cond 
@@ -2589,18 +2591,53 @@ class ReportsController extends Controller
 
     public function updateBookDeliveredDate(Request $request)
     {
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) { return $r->role_id; }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) { // 68: Sale, 69: Sale Leader
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật trường này']);
+        }
+
         $contract_ids = $request->contract_ids;
         $date = $request->book_delivered_date;
+        $note = $request->book_note;
+        $has_note = $request->has('book_note');
 
         if (!empty($contract_ids) && is_array($contract_ids)) {
             $ids = implode(',', array_map('intval', $contract_ids));
-            if (!empty($date)) {
-                $safe_date = date('Y-m-d', strtotime($date));
-                u::query("UPDATE contracts SET book_delivered_date = '$safe_date' WHERE id IN ($ids)");
-                u::query("UPDATE log_contracts SET book_delivered_date = '$safe_date' WHERE contract_id IN ($ids)");
-            } else {
-                u::query("UPDATE contracts SET book_delivered_date = NULL WHERE id IN ($ids)");
-                u::query("UPDATE log_contracts SET book_delivered_date = NULL WHERE contract_id IN ($ids)");
+            
+            $contracts = u::query("SELECT id, class_id, book_delivered_date FROM contracts WHERE id IN ($ids)");
+            
+            foreach ($contracts as $c) {
+                $upd_contracts = [];
+                $upd_log = [];
+                
+                if (!empty($date)) {
+                    $safe_date = date('Y-m-d', strtotime($date));
+                    $upd_contracts[] = "book_delivered_date = '$safe_date'";
+                    $upd_log[] = "book_delivered_date = '$safe_date'";
+                    
+                    if (empty($c->book_delivered_date)) {
+                        $cls_id = $c->class_id ? $c->class_id : 'NULL';
+                        $upd_contracts[] = "book_class_id = $cls_id";
+                        $upd_log[] = "book_class_id = $cls_id";
+                    }
+                } else if ($request->has('book_delivered_date')) {
+                    $upd_contracts[] = "book_delivered_date = NULL";
+                    $upd_log[] = "book_delivered_date = NULL";
+                    $upd_contracts[] = "book_class_id = NULL";
+                    $upd_log[] = "book_class_id = NULL";
+                }
+                
+                if ($has_note) {
+                    $safe_note = addslashes($note);
+                    $upd_contracts[] = "book_note = '$safe_note'";
+                    $upd_log[] = "book_note = '$safe_note'";
+                }
+                
+                if (!empty($upd_contracts)) {
+                    u::query("UPDATE contracts SET " . implode(', ', $upd_contracts) . " WHERE id = " . $c->id);
+                    u::query("UPDATE log_contracts SET " . implode(', ', $upd_log) . " WHERE contract_id = " . $c->id);
+                }
             }
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }

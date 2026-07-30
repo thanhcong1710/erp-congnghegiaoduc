@@ -3569,7 +3569,7 @@ class ExportsController extends Controller
             $req->$v = $arr_value[$k];
         }
 
-        $cond = " c.class_id IS NOT NULL AND c.class_id > 0 AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $cond = " ((c.class_id IS NOT NULL AND c.class_id > 0) OR c.book_delivered_date IS NOT NULL) AND ((SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) >= 2000000 OR (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id) >= 2000000) AND s.status > 0 AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
         if (isset($req->team_id) && $req->team_id > 0) {
             $team_id = (int) $req->team_id;
             $cond .= " AND (c.ec_leader_id = $team_id OR (c.ec_leader_id IS NULL AND c.ec_id = $team_id)) ";
@@ -3608,9 +3608,10 @@ class ExportsController extends Controller
 
         $order_by = " ORDER BY c.id DESC ";
 
-        $query = "SELECT c.id AS contract_id, c.book_delivered_date,
+        $query = "SELECT c.id AS contract_id, c.book_delivered_date, c.book_note,
                     s.lms_code, s.name AS student_name, s.address, s.gud_mobile1 AS phone,
                     cls.cls_name, cls.cls_startdate,
+                    b_cls.cls_name AS book_class_name,
                     p.name AS product_name,
                     cp.link_facebook,
                     a.book_receive,
@@ -3622,6 +3623,7 @@ class ExportsController extends Controller
                     LEFT JOIN agreements AS a ON a.id = c.agreement_id
                     LEFT JOIN students AS s ON c.student_id = s.id
                     LEFT JOIN classes AS cls ON c.class_id = cls.id
+                    LEFT JOIN classes AS b_cls ON c.book_class_id = b_cls.id
                     LEFT JOIN products AS p ON c.product_id = p.id
                     LEFT JOIN crm_parents AS cp ON cp.student_id = s.id
                 WHERE $cond 
@@ -3635,7 +3637,7 @@ class ExportsController extends Controller
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
         $sheet->mergeCells('A1:H1');
 
-        $headers = ['STT', 'Team kinh doanh', 'Mã HV', 'Họ tên', 'Số điện thoại', 'Lớp học', 'Ngày khai giảng', 'Sản phẩm', 'Địa chỉ nhận sách', 'Link Facebook', 'Đăng ký nhận sách', 'Ngày phát sách'];
+        $headers = ['STT', 'Team kinh doanh', 'Mã HV', 'Họ tên', 'Số điện thoại', 'Lớp học hiện tại', 'Lớp phát sách', 'Ngày khai giảng', 'Sản phẩm', 'Địa chỉ nhận sách', 'Link Facebook', 'Đăng ký nhận sách', 'Ngày phát sách', 'Ghi chú'];
         $col = 'A';
         foreach ($headers as $header) {
             $sheet->setCellValue($col . '3', $header);
@@ -3652,16 +3654,25 @@ class ExportsController extends Controller
             $sheet->setCellValue('D' . $rowIdx, $item->student_name);
             $sheet->setCellValueExplicit('E' . $rowIdx, $item->phone, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('F' . $rowIdx, $item->cls_name);
-            $sheet->setCellValue('G' . $rowIdx, $item->cls_startdate);
-            $sheet->setCellValue('H' . $rowIdx, $item->product_name);
-            $sheet->setCellValue('I' . $rowIdx, $item->address);
-            $sheet->setCellValue('J' . $rowIdx, $item->link_facebook);
-            $sheet->setCellValue('K' . $rowIdx, $book_options[(int) $item->book_receive] ?? '');
-            $sheet->setCellValue('L' . $rowIdx, $item->book_receive == 2 ? '' : $item->book_delivered_date);
+            $sheet->setCellValue('G' . $rowIdx, $item->book_class_name);
+            $sheet->setCellValue('H' . $rowIdx, $item->cls_startdate);
+            $sheet->setCellValue('I' . $rowIdx, $item->product_name);
+            $sheet->setCellValue('J' . $rowIdx, $item->address);
+            $sheet->setCellValue('K' . $rowIdx, $item->link_facebook);
+            $sheet->setCellValue('L' . $rowIdx, $book_options[(int) $item->book_receive] ?? '');
+            $sheet->setCellValue('M' . $rowIdx, $item->book_receive == 2 ? '' : $item->book_delivered_date);
+            $sheet->setCellValue('N' . $rowIdx, $item->book_note);
+            
+            if (empty($item->cls_name) && !empty($item->book_delivered_date)) {
+                $sheet->getStyle('A' . $rowIdx . ':N' . $rowIdx)->getFill()
+                      ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                      ->getStartColor()->setARGB('FFFFFFE0'); // Light yellow
+            }
+
             $rowIdx++;
         }
 
-        foreach (range('A', 'L') as $columnID) {
+        foreach (range('A', 'N') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
