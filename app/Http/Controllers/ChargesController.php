@@ -422,18 +422,36 @@ class ChargesController extends Controller
             return $a->count_recharge <=> $b->count_recharge;
         });
 
+        $total_must_charge = array_sum(array_map(function ($p) {
+            return (float) $p->must_charge;
+        }, $packages));
+
         $remainCharged = $totalCharged;
         $remainDiscount = $totalDiscount;
         $result = [];
 
+        $discountRatio = $total_must_charge > 0 ? $totalDiscount / $total_must_charge : 0;
+        $accumulatedDiscount = 0;
+        $accumulatedMustCharge = 0;
+
         foreach ($packages as $package) {
             $must_charge = (float) $package->must_charge;
 
-            if ($remainDiscount <= 0) {
-                $discount = 0;
+            if ($total_must_charge > 0) {
+                $accumulatedMustCharge += $must_charge;
+                $targetAccumulatedDiscount = round($accumulatedMustCharge * $discountRatio);
+                
+                $discount = $targetAccumulatedDiscount - $accumulatedDiscount;
+                
+                $discount = min($discount, $remainDiscount);
+                $discount = min($discount, $must_charge);
+                $discount = max($discount, 0);
+                
+                $accumulatedDiscount += $discount;
             } else {
-                $discount = min($must_charge, $remainDiscount);
+                $discount = 0;
             }
+            
             $remainDiscount -= $discount;
 
             $remain_must_charge = $must_charge - $discount;
