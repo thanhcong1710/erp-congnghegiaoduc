@@ -396,13 +396,13 @@
               </div>
             </div>
 
-            <div class="vx-col w-full mb-2">
+            <div class="vx-col w-full mb-2" v-if="!user_role.is_sale || user_role.is_sale_leader">
               <vs-button type="flat" icon-pack="feather" :icon="showPayment ? 'icon-chevron-down' : 'icon-chevron-right'" @click="showPayment = !showPayment" class="p-0 mb-4" style="font-size: 1.1rem; font-weight: 600;">
                 <i class="fa-solid fa-money-bill-wave mr-2"></i> THÔNG TIN THU PHÍ (Click để mở rộng)
               </vs-button>
             </div>
 
-            <div v-if="showPayment" class="vx-col w-full">
+            <div v-if="showPayment && (!user_role.is_sale || user_role.is_sale_leader)" class="vx-col w-full">
               <div class="vx-row p-4 border rounded bg-gray-50 mb-6">
                 <div class="vx-col md:w-1/3 w-full mb-4">
                   <label>Số tiền thu <span class="text-danger">(*)</span></label>
@@ -612,6 +612,11 @@
           color:'',
         },
         showPayment: false,
+        user_role: {
+          user_id: 0,
+          is_sale: false,
+          is_sale_leader: false,
+        },
         payment: {
           amount: 0,
           method: 1,
@@ -624,6 +629,9 @@
       }
     },
     created() {
+      axios.g(`/api/system/current-user-role`).then(response => {
+        this.user_role = response.data
+      })
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.html.branches.list = response.data
