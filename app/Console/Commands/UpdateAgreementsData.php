@@ -71,7 +71,7 @@ class UpdateAgreementsData extends Command
         foreach ($chunks as $chunk) {
             $ids_str = implode(',', $chunk);
             $contracts = DB::select("
-                SELECT c.agreement_id, c.id, c.enrolment_start_date, c.enrolment_last_date,
+                SELECT c.agreement_id, c.id, c.class_id, c.enrolment_start_date, c.enrolment_last_date,
                        c.real_sessions, c.summary_sessions, cls.class_day, cls.branch_id, cls.product_id
                 FROM contracts c
                 JOIN classes cls ON c.class_id = cls.id
@@ -84,6 +84,31 @@ class UpdateAgreementsData extends Command
             foreach ($contracts as $c) {
                 if (!isset($contracts_by_agr[$c->agreement_id])) {
                     $contracts_by_agr[$c->agreement_id] = $c;
+                }
+            }
+        }
+
+        $this->info("3.5. Đang tải dữ liệu schedules...");
+        $class_ids = [];
+        foreach ($contracts_by_agr as $c) {
+            if (!empty($c->class_id)) {
+                $class_ids[] = $c->class_id;
+            }
+        }
+        $class_ids = array_unique($class_ids);
+
+        $schedules_by_class = [];
+        if (!empty($class_ids)) {
+            $chunks = array_chunk($class_ids, 500);
+            foreach ($chunks as $chunk) {
+                $schedules = DB::table('schedules')
+                    ->whereIn('class_id', $chunk)
+                    ->where('status', 1)
+                    ->select('class_id', 'class_date')
+                    ->orderBy('class_date', 'asc')
+                    ->get();
+                foreach ($schedules as $s) {
+                    $schedules_by_class[$s->class_id][] = $s->class_date;
                 }
             }
         }
@@ -109,24 +134,47 @@ class UpdateAgreementsData extends Command
                 }
                 
                 $holidays = $holidays_cache[$cache_key];
-                if (!empty($first_contract->class_day)) {
-                    $arr_day = array_filter(explode(',', $first_contract->class_day));
-                    if (count($arr_day) > 0) {
-                        $eighth_session_info = u::calculatorSessionsByNumberOfSessions($first_contract->enrolment_start_date, 8, $holidays, $arr_day);
-                        $first_8th_session_date = data_get($eighth_session_info, 'end_date');
+                
+                $valid_schedules = [];
+                if (isset($schedules_by_class[$first_contract->class_id])) {
+                    foreach ($schedules_by_class[$first_contract->class_id] as $s_date) {
+                        if ($s_date >= $first_contract->enrolment_start_date) {
+                            $valid_schedules[] = $s_date;
+                        }
+                    }
+                }
+
+                $eighth_session = $valid_schedules[7] ?? null;
+
+                if ($eighth_session) {
+                    $first_8th_session_date = $eighth_session;
+                } else {
+                    if (!empty($first_contract->class_day)) {
+                        $arr_day = array_filter(explode(',', $first_contract->class_day));
+                        if (count($arr_day) > 0) {
+                            $eighth_session_info = u::calculatorSessionsByNumberOfSessions($first_contract->enrolment_start_date, 8, $holidays, $arr_day);
+                            $first_8th_session_date = data_get($eighth_session_info, 'end_date');
+                        } else {
+                            $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+                        }
                     } else {
                         $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
                     }
-                } else {
-                    $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
                 }
 
-                // Tính end_session_date: ưu tiên dùng enrolment_last_date đã lưu sẵn
-                if (!empty($first_contract->enrolment_last_date)) {
+                // Tính end_session_date: ưu tiên dùng schedules, sau đó enrolment_last_date, cuối cùng là tính toán
+                $sessions = (int)$first_contract->real_sessions ?: (int)$first_contract->summary_sessions;
+                $last_session = null;
+                if ($sessions > 0) {
+                    $last_session = $valid_schedules[$sessions - 1] ?? null;
+                }
+
+                if ($last_session) {
+                    $end_session_date = $last_session;
+                } elseif (!empty($first_contract->enrolment_last_date)) {
                     $end_session_date = date('Y-m-d', strtotime($first_contract->enrolment_last_date));
                 } else {
                     // Fallback: tính lại từ số buổi của contract
-                    $sessions = (int)$first_contract->real_sessions ?: (int)$first_contract->summary_sessions;
                     if ($sessions > 0 && !empty($first_contract->class_day)) {
                         $arr_day_es = array_filter(explode(',', $first_contract->class_day));
                         if (count($arr_day_es) > 0) {
