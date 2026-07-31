@@ -100,7 +100,7 @@ class FixIncorrectlyDroppedStudents extends Command
             ], ['id' => $contract_id], 'contracts');
 
             // Ghi log khôi phục
-            u::addLogContracts($contract_id);
+            // u::addLogContracts($contract_id);
             // LogClassStudent::logAction($class_id, $log->student_id, $contract_id, 1, 0); // Action 1 = add back
             // LogStudents::logAdd($log->student_id, 'Khôi phục học sinh vào lớp (rollback AutoWithdrawEnrollmentDeposit)', 0);
             // u::updateScheduleHasStudent($contract_id, $start_date);

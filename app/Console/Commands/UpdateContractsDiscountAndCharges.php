@@ -92,6 +92,9 @@ class UpdateContractsDiscountAndCharges extends Command
                     $totalChargedAllocated = (int) data_get($row, 'total_charged');
                     $discountAllocated = (int) data_get($row, 'discount_amount');
                     $debtAllocated = (int) data_get($row, 'debt_amount');
+                    if($debtAllocated==0){
+                        $availableSession =  (int) data_get($row, 'contract_data.init_tuition_fee_session');
+                    }
 
                     $updateData = [
                         'real_sessions' => $availableSession,
