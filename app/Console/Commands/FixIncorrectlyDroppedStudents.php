@@ -103,7 +103,7 @@ class FixIncorrectlyDroppedStudents extends Command
             u::addLogContracts($contract_id);
             // LogClassStudent::logAction($class_id, $log->student_id, $contract_id, 1, 0); // Action 1 = add back
             // LogStudents::logAdd($log->student_id, 'Khôi phục học sinh vào lớp (rollback AutoWithdrawEnrollmentDeposit)', 0);
-            u::updateScheduleHasStudent($contract_id, $start_date);
+            // u::updateScheduleHasStudent($contract_id, $start_date);
             $bar->advance();
         }
         
