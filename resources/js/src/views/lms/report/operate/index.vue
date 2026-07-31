@@ -104,6 +104,11 @@
                 <p>19. BÁO CÁO DANH SÁCH HOÀN TIỀN CỌC</p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/report-30'" v-if="checkPermission('lms_reports_operate_20')">
+                <p>20. BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM </p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>

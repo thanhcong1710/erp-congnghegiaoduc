@@ -1062,6 +1062,21 @@ export default {
         }
       },
       {
+        path: '/lms/reports/operate/report-30',
+        name: 'lms-report-operate-30',
+        component: () => import('@/views/lms/report/operate/report30.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách báo cáo vận hành', url: '/lms/reports/operate' },
+            { title: 'BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM', active: true }
+          ],
+          pageTitle: 'BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM',
+          rule: 'editor',
+          permission: 'lms_reports_operate_15'
+        }
+      },
+      {
         path: "/lms/reports/academic",
         name: "lms-reports-academic",
         component: () => import("@/views/lms/report/academic/index.vue"),

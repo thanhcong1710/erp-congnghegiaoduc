@@ -2296,6 +2296,168 @@ class ReportsController extends Controller
         return response()->json($data);
     }
 
+    public function report30(Request $request)
+    {
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $raw_team_id = isset($request->team_id) ? $request->team_id : 0;
+        $ec_id = isset($request->ec_id) ? (int) $request->ec_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $pay_start_date = isset($request->pay_start_date) ? $request->pay_start_date : '';
+        $pay_end_date = isset($request->pay_end_date) ? $request->pay_end_date : '';
+        $completion_status = isset($request->completion_status) ? (int) $request->completion_status : -1;
+        $register_status = isset($request->register_status) ? (int) $request->register_status : -1;
+        $salary_month = isset($request->salary_month) ? $request->salary_month : '';
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        $is_sale_leader = in_array(69, $roleIds);
+        if (in_array(68, $roleIds) && !$is_sale_leader) {
+            $ec_id = $user->id;
+        }
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = {$user->id}))";
+        } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
+            if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
+                $leader_id = (int) substr($raw_team_id, 2);
+                $cond .= " AND s.source_id = 6";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) OR a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL OR a.ec_id = 0)";
+                }
+            } else {
+                $leader_id = (int) $raw_team_id;
+                $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
+                if ($leader_id > 0) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
+                }
+            }
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+        if ($register_status == 1) {
+            $cond .= " AND a.count_recharge = 0";
+        } elseif ($register_status == 2) {
+            $cond .= " AND a.count_recharge > 0";
+        }
+        if ($start_date) {
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
+        }
+        if ($salary_month === 'none') {
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+        } elseif ($salary_month !== '') {
+            $sm = addslashes($salary_month);
+            $cond .= " AND a.salary_month = '$sm'";
+        }
+
+        $query = "
+            SELECT
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                a.must_charge,
+                a.discount_amount AS discount,
+                a.debt_amount,
+                a.ec_id
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ";
+
+        $list = u::query($query);
+        $grouped = [];
+        $total_luong_sale = 0;
+
+        foreach ($list as &$row) {
+            $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
+            $luong_sale = 0;
+            if ((float) $row->debt_amount == 0) {
+                $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
+                $luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
+            }
+
+            if (!isset($grouped[$ec_name])) {
+                $grouped[$ec_name] = [
+                    'ec_name' => $ec_name,
+                    'luong_sale' => 0,
+                    'luong_cung' => 0,
+                    'thuong_lead' => 0,
+                    'thuong_team' => 0,
+                    'tong_luong' => 0,
+                ];
+            }
+
+            $grouped[$ec_name]['luong_sale'] += $luong_sale;
+            $total_luong_sale += $luong_sale;
+        }
+
+        $final_list = [];
+        foreach ($grouped as $g) {
+            $g['tong_luong'] = $g['luong_sale'] + $g['luong_cung'] + $g['thuong_lead'] + $g['thuong_team'];
+            $final_list[] = $g;
+        }
+
+        // Sắp xếp danh sách theo tên giảm dần (hoặc lương giảm dần)
+        usort($final_list, function($a, $b) {
+            return $b['tong_luong'] <=> $a['tong_luong'];
+        });
+
+        $summary = [
+            'total_luong_sale' => $total_luong_sale,
+            'total_luong_cung' => 0,
+            'total_thuong_lead' => 0,
+            'total_thuong_team' => 0,
+            'total_tong_luong' => $total_luong_sale,
+        ];
+
+        return response()->json([
+            'list' => $final_list,
+            'summary' => $summary,
+            'paging' => [
+                'cpage' => 1,
+                'limit' => 1000,
+                'total' => count($final_list),
+                'init' => 1
+            ]
+        ]);
+    }
+
     public function report26(Request $request)
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];

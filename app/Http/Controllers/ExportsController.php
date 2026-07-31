@@ -3205,6 +3205,286 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+    public function report30(Request $request, $key, $value)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $keys = explode(',', $key);
+        $values = explode(',', $value);
+
+        $branch_id = [];
+        $raw_team_id = 0;
+        $ec_id = 0;
+        $keyword = '';
+        $start_date = '';
+        $end_date = '';
+        $pay_start_date = '';
+        $pay_end_date = '';
+        $completion_status = -1;
+        $register_status = -1;
+        $salary_month = '';
+
+        foreach ($keys as $k => $key_name) {
+            $v = $values[$k] ?? '';
+            if ($v === 'v')
+                $v = '';
+            switch ($key_name) {
+                case 'branch_id':
+                    $branch_id = $v ? explode('-', $v) : [];
+                    break;
+                case 'team_id':
+                    $raw_team_id = $v;
+                    break;
+                case 'ec_id':
+                    $ec_id = (int) $v;
+                    break;
+                case 'keyword':
+                    $keyword = urldecode($v);
+                    break;
+                case 'start_date':
+                    $start_date = $v;
+                    break;
+                case 'end_date':
+                    $end_date = $v;
+                    break;
+                case 'pay_start_date':
+                    $pay_start_date = $v;
+                    break;
+                case 'pay_end_date':
+                    $pay_end_date = $v;
+                    break;
+                case 'completion_status':
+                    $completion_status = (int) $v;
+                    break;
+                case 'register_status':
+                    $register_status = (int) $v;
+                    break;
+                case 'salary_month':
+                    $salary_month = $v;
+                    break;
+            }
+        }
+
+        $user = Auth::user();
+        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $roleIds = [];
+        foreach ($userRoles as $ur) {
+            $roleIds[] = $ur->role_id;
+        }
+
+        $is_sale_leader = in_array(69, $roleIds);
+        if (in_array(68, $roleIds) && !$is_sale_leader) {
+            $ec_id = $user->id;
+        }
+
+        $cond = " a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        if (!empty($branch_id)) {
+            $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
+        }
+
+        if ($is_sale_leader && (empty($raw_team_id) || $raw_team_id === 0 || $raw_team_id === '0')) {
+            $cond .= " AND (a.ec_leader_id = {$user->id} OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = {$user->id}))";
+        } elseif (!empty($raw_team_id) && $raw_team_id !== 0 && $raw_team_id !== '0') {
+            if (is_string($raw_team_id) && strpos($raw_team_id, 'p_') === 0) {
+                $leader_id = (int) substr($raw_team_id, 2);
+                $cond .= " AND s.source_id = 6";
+                if (in_array($leader_id, [38, 49, 58])) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id NOT IN (38,49,58) OR a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id NOT IN (38,49,58) OR a.ec_id IS NULL OR a.ec_id = 0)";
+                }
+            } else {
+                $leader_id = (int) $raw_team_id;
+                $cond .= " AND (s.source_id IS NULL OR s.source_id != 6)";
+                if ($leader_id > 0) {
+                    $cond .= " AND (a.ec_leader_id = $leader_id OR ((a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND a.ec_id = $leader_id))";
+                } elseif ($leader_id == -1) {
+                    $cond .= " AND (a.ec_leader_id IS NULL OR a.ec_leader_id = 0) AND (a.ec_id IS NULL OR a.ec_id = 0)";
+                }
+            }
+        }
+        if ($ec_id > 0) {
+            $cond .= " AND a.ec_id = $ec_id";
+        }
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%')";
+        }
+        if ($completion_status == 1) {
+            $cond .= " AND a.debt_amount = 0";
+        } elseif ($completion_status == 2) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged > 0";
+        } elseif ($completion_status == 3) {
+            $cond .= " AND a.debt_amount > 0 AND a.total_charged = 0";
+        }
+        if ($register_status == 1) {
+            $cond .= " AND a.count_recharge = 0";
+        } elseif ($register_status == 2) {
+            $cond .= " AND a.count_recharge > 0";
+        }
+        if ($start_date) {
+            $cond .= " AND a.created_at >= '$start_date 00:00:00'";
+        }
+        if ($end_date) {
+            $cond .= " AND a.created_at <= '$end_date 23:59:59'";
+        }
+        if ($pay_start_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) >= '$pay_start_date 00:00:00'";
+        }
+        if ($pay_end_date) {
+            $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
+        }
+        if ($salary_month === 'none') {
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+        } elseif ($salary_month !== '') {
+            $sm = addslashes($salary_month);
+            $cond .= " AND a.salary_month = '$sm'";
+        }
+
+        $query = "
+            SELECT
+                IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
+                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                a.must_charge,
+                a.discount_amount AS discount,
+                a.debt_amount
+            FROM agreements AS a
+            INNER JOIN students AS s ON s.id = a.student_id
+            WHERE $cond
+        ";
+
+        $list = u::query($query);
+        $grouped = [];
+
+        foreach ($list as &$row) {
+            $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
+            $luong_sale = 0;
+            if ((float) $row->debt_amount == 0) {
+                $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
+                $luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
+            }
+
+            if (!isset($grouped[$ec_name])) {
+                $grouped[$ec_name] = [
+                    'ec_name' => $ec_name,
+                    'luong_sale' => 0,
+                    'luong_cung' => 0,
+                    'thuong_lead' => 0,
+                    'thuong_team' => 0,
+                    'tong_luong' => 0,
+                ];
+            }
+
+            $grouped[$ec_name]['luong_sale'] += $luong_sale;
+        }
+
+        $final_list = [];
+        $sumSale = 0; $sumCung = 0; $sumLead = 0; $sumTeam = 0; $sumTong = 0;
+        foreach ($grouped as $g) {
+            $g['tong_luong'] = $g['luong_sale'] + $g['luong_cung'] + $g['thuong_lead'] + $g['thuong_team'];
+            $final_list[] = $g;
+            $sumSale += $g['luong_sale'];
+            $sumCung += $g['luong_cung'];
+            $sumLead += $g['thuong_lead'];
+            $sumTeam += $g['thuong_team'];
+            $sumTong += $g['tong_luong'];
+        }
+
+        usort($final_list, function($a, $b) {
+            return $b['tong_luong'] <=> $a['tong_luong'];
+        });
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
+
+        $title = 'BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM';
+        $sheet->setCellValue('A1', $title);
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 13],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
+
+        $headers = ['STT', 'TÊN THÀNH VIÊN', 'LƯƠNG SALE', 'LƯƠNG CỨNG', 'THƯỞNG LEAD', 'THƯỞNG TEAM', 'TỔNG LƯƠNG'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+        $hStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'FFFFFF']]],
+        ];
+
+        foreach ($headers as $i => $h) {
+            $sheet->setCellValue($cols[$i] . '3', $h);
+        }
+        $sheet->getStyle('A3:G3')->applyFromArray($hStyle);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+
+        $widths = [8, 30, 20, 20, 20, 20, 20];
+        foreach ($cols as $i => $c) {
+            $sheet->getColumnDimension($c)->setWidth($widths[$i]);
+        }
+
+        $moneyFmt = '#,##0';
+        $borderStyle = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'E0E0E0']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $leftAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
+        $rowIdx = 4;
+        foreach ($final_list as $idx => $item) {
+            $sheet->setCellValue('A' . $rowIdx, $idx + 1);
+            $sheet->setCellValue('B' . $rowIdx, $item['ec_name']);
+            $sheet->setCellValue('C' . $rowIdx, $item['luong_sale']);
+            $sheet->setCellValue('D' . $rowIdx, $item['luong_cung']);
+            $sheet->setCellValue('E' . $rowIdx, $item['thuong_lead']);
+            $sheet->setCellValue('F' . $rowIdx, $item['thuong_team']);
+            $sheet->setCellValue('G' . $rowIdx, $item['tong_luong']);
+
+            $sheet->getStyle("A$rowIdx:G$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("B$rowIdx")->applyFromArray($leftAlign);
+            
+            $sheet->getStyle("C$rowIdx:G$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("C$rowIdx:G$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+
+            $rowIdx++;
+        }
+
+        // TONG row
+        $sheet->mergeCells("A$rowIdx:B$rowIdx");
+        $sheet->setCellValue('A' . $rowIdx, 'Tổng cộng');
+        $sheet->setCellValue('C' . $rowIdx, $sumSale);
+        $sheet->setCellValue('D' . $rowIdx, $sumCung);
+        $sheet->setCellValue('E' . $rowIdx, $sumLead);
+        $sheet->setCellValue('F' . $rowIdx, $sumTeam);
+        $sheet->setCellValue('G' . $rowIdx, $sumTong);
+        
+        $totalStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
+        ];
+        $sheet->getStyle("A$rowIdx:G$rowIdx")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$rowIdx")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle("C$rowIdx:G$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getRowDimension($rowIdx)->setRowHeight(22);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao cao tra luong sale theo team.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
     public function report26(Request $request, $key, $value)
     {
         set_time_limit(300);
