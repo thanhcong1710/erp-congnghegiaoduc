@@ -41,7 +41,7 @@ class UpdateContractsDiscountAndCharges extends Command
     {
         $agreementId = $this->argument('agreement_id');
 
-        $query = "SELECT id, total_charged, received_amount, transferred_amount, discount_amount FROM agreements";
+        $query = "SELECT id, total_charged, received_amount, transferred_amount, discount_amount, debt_amount FROM agreements";
         if ($agreementId) {
             $query .= " WHERE id = " . (int)$agreementId;
         }
@@ -75,7 +75,9 @@ class UpdateContractsDiscountAndCharges extends Command
                 - (float) data_get($agreement, 'transferred_amount', 0);
             $totalDiscount = (float) data_get($agreement, 'discount_amount', 0);
             
-            $dataResult = ChargesController::splitChargedAndDiscountAmount($effectiveCharged, $totalDiscount, (array) $contracts);
+            $isFullyPaidAgreement = (isset($agreement->debt_amount) && (float) $agreement->debt_amount <= 0);
+            
+            $dataResult = ChargesController::splitChargedAndDiscountAmount($effectiveCharged, $totalDiscount, (array) $contracts, $isFullyPaidAgreement);
             $packages = data_get($dataResult, 'packages');
 
             if (!empty($packages)) {
@@ -89,7 +91,7 @@ class UpdateContractsDiscountAndCharges extends Command
                     
                     $totalChargedAllocated = (int) data_get($row, 'total_charged');
                     $discountAllocated = (int) data_get($row, 'discount_amount');
-                    $debtAllocated = (int) data_get($row, 'contract_data.must_charge') - $totalChargedAllocated - $discountAllocated;
+                    $debtAllocated = (int) data_get($row, 'debt_amount');
 
                     $updateData = [
                         'real_sessions' => $availableSession,

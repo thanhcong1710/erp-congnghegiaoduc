@@ -386,7 +386,9 @@ class ChargesController extends Controller
             + (float) data_get($agreementInfo, 'received_amount', 0)
             - (float) data_get($agreementInfo, 'transferred_amount', 0);
         $totalDiscount = (float) data_get($agreementInfo, 'discount_amount', 0);
-        $dataResult = self::splitChargedAndDiscountAmount($effectiveCharged, $totalDiscount, (array) $contracts);
+        $isFullyPaidAgreement = (isset($agreementInfo->debt_amount) && (float) $agreementInfo->debt_amount <= 0);
+
+        $dataResult = self::splitChargedAndDiscountAmount($effectiveCharged, $totalDiscount, (array) $contracts, $isFullyPaidAgreement);
         $packages = data_get($dataResult, 'packages');
         if (!empty($packages)) {
             foreach ($packages as $row) {
@@ -405,7 +407,7 @@ class ChargesController extends Controller
                     'total_charged' => (int) data_get($row, 'total_charged'),
                     'init_total_charged' => (int) data_get($row, 'total_charged'),
                     'discount_amount' => (int) data_get($row, 'discount_amount'),
-                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged') - (int) data_get($row, 'discount_amount'),
+                    'debt_amount' => (int) data_get($row, 'debt_amount'),
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id ?? 0,
                 ], array('id' => data_get($row, 'contract_id')), 'contracts');
@@ -415,7 +417,7 @@ class ChargesController extends Controller
 
         return true;
     }
-    public static function splitChargedAndDiscountAmount(float $totalCharged, float $totalDiscount, array $packages): array
+    public static function splitChargedAndDiscountAmount(float $totalCharged, float $totalDiscount, array $packages, bool $isFullyPaidAgreement = false): array
     {
         // Sắp xếp theo ưu tiên (count_recharge nhỏ -> ưu tiên cao)
         usort($packages, function ($a, $b) {
@@ -433,6 +435,9 @@ class ChargesController extends Controller
         $discountRatio = $total_must_charge > 0 ? $totalDiscount / $total_must_charge : 0;
         $accumulatedDiscount = 0;
         $accumulatedMustCharge = 0;
+        
+        $chargedRatio = $total_must_charge > 0 ? $totalCharged / $total_must_charge : 0;
+        $accumulatedCharged = 0;
 
         foreach ($packages as $package) {
             $must_charge = (float) $package->must_charge;
@@ -448,28 +453,44 @@ class ChargesController extends Controller
                 $discount = max($discount, 0);
                 
                 $accumulatedDiscount += $discount;
+                
+                if ($isFullyPaidAgreement) {
+                    $targetAccumulatedCharged = round($accumulatedMustCharge * $chargedRatio);
+                    $paid = $targetAccumulatedCharged - $accumulatedCharged;
+                    $paid = min($paid, $remainCharged);
+                    $paid = max($paid, 0);
+                    $accumulatedCharged += $paid;
+                }
             } else {
                 $discount = 0;
+                $paid = 0;
             }
             
             $remainDiscount -= $discount;
 
-            $remain_must_charge = $must_charge - $discount;
+            if (!$isFullyPaidAgreement) {
+                $remain_must_charge = $must_charge - $discount;
 
-            if ($remainCharged <= 0) {
-                $paid = 0;
-            } else {
-                $paid = min($remain_must_charge, $remainCharged);
+                if ($remainCharged <= 0) {
+                    $paid = 0;
+                } else {
+                    $paid = min($remain_must_charge, $remainCharged);
+                }
             }
+            
             $remainCharged -= $paid;
+            
+            $is_contract_fully_paid = $isFullyPaidAgreement ? true : ($paid + $discount) >= $package->must_charge;
+            $contract_debt_amount = $isFullyPaidAgreement ? 0 : ($must_charge - $paid - $discount);
 
             $result[] = [
                 'contract_id' => $package->id,
                 'must_charge' => $package->must_charge,
                 'total_charged' => $paid,
                 'discount_amount' => $discount,
+                'debt_amount' => $contract_debt_amount,
                 'count_recharge' => $package->count_recharge,
-                'is_fully_paid' => ($paid + $discount) >= $package->must_charge,
+                'is_fully_paid' => $is_contract_fully_paid,
                 'contract_data' => $package
             ];
         }
