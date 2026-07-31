@@ -49,8 +49,7 @@ class FixIncorrectlyDroppedStudents extends Command
             WHERE DATE_FORMAT(l.created_at, '%H:%i:%s') >= '23:55:00' 
             AND DATE_FORMAT(l.created_at, '%H:%i:%s') < '23:59:00' 
             AND c.debt_amount=0 
-            AND l.action=0
-            AND c.status = 7";
+            AND l.action=0";
             
         if ($studentId) {
             $query .= " AND l.student_id = " . (int)$studentId;
