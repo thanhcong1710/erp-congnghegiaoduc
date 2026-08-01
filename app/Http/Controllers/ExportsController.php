@@ -2439,6 +2439,7 @@ class ExportsController extends Controller
                         END
                     END
                 ) AS team_name,
+                IF(s.source_id = 6, 1, 0)                               AS is_page,
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
                 COUNT(a.id)                                            AS unseparated_sales,
@@ -2529,7 +2530,10 @@ class ExportsController extends Controller
         foreach ($rows as $idx => $item) {
             $new_rev = (float) $item->new_revenue;
             $uplv_rev = (float) $item->uplv_revenue;
-            $salary = round($new_rev * 0.10 + $uplv_rev * 0.06);
+            $is_page = (int) ($item->is_page ?? 0);
+            $new_rate = $is_page ? 0.05 : 0.10;
+            $uplv_rate = $is_page ? 0.03 : 0.06;
+            $salary = round($new_rev * $new_rate + $uplv_rev * $uplv_rate);
             $total = (float) $item->total_revenue;
 
             $sheet->setCellValue('A' . $row, $idx + 1);
@@ -3046,13 +3050,19 @@ class ExportsController extends Controller
                                 'Khác (Không có team KD)'
                         END
                 END AS team_name,
-                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                CASE
+                    WHEN s.source_id = 6 AND (a.ec_id IN (38, 49, 58) OR a.ec_leader_id IN (38, 49, 58)) THEN
+                        CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
+                    ELSE
+                        (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS ec_name,
                 (SELECT CONCAT(cls.cls_name, IF(ct.enrolment_start_date IS NOT NULL AND ct.enrolment_start_date > '2000-01-01', CONCAT(' (', SUBSTRING(ct.enrolment_start_date, 1, 10), ')'), ''))
                  FROM contracts ct
                  LEFT JOIN classes cls ON cls.id = ct.class_id
                  WHERE ct.agreement_id = a.id AND ct.class_id > 0 AND ct.status > 0
                  ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
+                s.source_id,
                 a.must_charge,
                 a.total_charged,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
@@ -3126,7 +3136,11 @@ class ExportsController extends Controller
             $xn_ketoan = ((float) $item->debt_amount > 0) ? 'R thiếu' : 'R';
             $luong_sale = 0;
             if ((float) $item->debt_amount == 0) {
-                $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
+                if ((int) $item->source_id == 6) {
+                    $rate = ($item->status_register == 'Mới') ? 0.05 : 0.03;
+                } else {
+                    $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
+                }
                 $luong_sale = ((float) $item->must_charge - (float) $item->discount) * $rate;
             }
 
@@ -3345,10 +3359,16 @@ class ExportsController extends Controller
         $query = "
             SELECT
                 IF(a.count_recharge = 0, 'Mới', 'Up level') AS status_register,
-                (SELECT u.name FROM users u WHERE u.id = a.ec_id) AS ec_name,
+                CASE
+                    WHEN s.source_id = 6 AND (a.ec_id IN (38, 49, 58) OR a.ec_leader_id IN (38, 49, 58)) THEN
+                        CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
+                    ELSE
+                        (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                END AS ec_name,
                 a.must_charge,
                 a.discount_amount AS discount,
-                a.debt_amount
+                a.debt_amount,
+                s.source_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             WHERE $cond
@@ -3361,7 +3381,11 @@ class ExportsController extends Controller
             $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
             $luong_sale = 0;
             if ((float) $row->debt_amount == 0) {
-                $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
+                if ((int) $row->source_id == 6) {
+                    $rate = ($row->status_register == 'Mới') ? 0.05 : 0.03;
+                } else {
+                    $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
+                }
                 $luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
             }
 
