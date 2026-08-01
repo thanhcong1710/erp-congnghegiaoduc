@@ -135,11 +135,12 @@ class TuitionFeesController extends Controller
     {
         $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
         $is_ceo = Auth::user()->checkRole(686868);
+        $is_cm = Auth::user()->checkRole(56);
         $user_branches = Auth::user()->getBranchesHasUser();
         $arrUBranches = $user_branches ? explode(',', $user_branches) : [];
 
         foreach($branches  AS $k => $row){
-            if ($is_ceo) {
+            if ($is_ceo || $is_cm) {
                 $branches[$k]->disabled = true;
                 if (in_array($row->id, $arrUBranches)) {
                     $branches[$k]->selected = true;
@@ -166,6 +167,7 @@ class TuitionFeesController extends Controller
         $branches = u::query("SELECT b.* FROM branches AS b WHERE b.status=1");
         
         $is_ceo = Auth::user()->checkRole(686868);
+        $is_cm = Auth::user()->checkRole(56);
         $user_branches = Auth::user()->getBranchesHasUser();
         $arrUBranches = $user_branches ? explode(',', $user_branches) : [];
 
@@ -176,7 +178,7 @@ class TuitionFeesController extends Controller
                 $branches[$k]->selected = false;
             }
 
-            if ($is_ceo) {
+            if ($is_ceo || $is_cm) {
                 $branches[$k]->disabled = true;
             } else {
                 $branches[$k]->disabled = false;
