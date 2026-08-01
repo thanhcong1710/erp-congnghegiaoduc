@@ -42,24 +42,27 @@ class AutoWithdrawEnrollmentDeposit extends Command
     public function handle()
     {
         $date = date('Y-m-d');
-        $listContracts = u::query("SELECT c.* 
+        $listContracts = u::query("SELECT c.* , a.debt_amount AS agreement_debt_amount, s.created_at AS student_created_at
                 FROM contracts AS c 
 				    LEFT JOIN students AS s On s.id=c.student_id
-                WHERE ((c.debt_amount>0 AND s.created_at>'2026-07-15 00:00:00') OR c.debt_amount > 600000 )
+                    LEFT JOIN agreements AS a ON a.id = c.agreement_id
+                WHERE c.debt_amount>0 
                     AND c.enrolment_start_date <= '$date' 
                     AND c.status!=7  AND c.status!=8 AND c.class_id IS NOT NULL");
         foreach ($listContracts AS $contract){
-            u::updateSimpleRow([
-                'program_id' => null,
-                'class_id' => null,
-                'enrolment_start_date' => null,
-                'enrolment_last_date' => null,
-                'status'=> 2
-            ], ['id'=> data_get($contract, 'id')], 'contracts');
-            u::addLogContracts(data_get($contract, 'id'));
-            LogStudents::logAdd(data_get($contract, 'student_id'), 'Xóa học sinh cọc khi lớp bắt đầu khai giảng', 0);
-            echo data_get($contract, 'id')."/";
-            LogClassStudent::logAction($contract->class_id, $contract->student_id, $contract->id, 0, 0);
+            if (data_get($contract,'agreement_debt_amount') > 600000 || data_get($contract,'student_created_at') > '2026-07-15 00:00:00') {
+                u::updateSimpleRow([
+                    'program_id' => null,
+                    'class_id' => null,
+                    'enrolment_start_date' => null,
+                    'enrolment_last_date' => null,
+                    'status'=> 2
+                ], ['id'=> data_get($contract, 'id')], 'contracts');
+                u::addLogContracts(data_get($contract, 'id'));
+                LogStudents::logAdd(data_get($contract, 'student_id'), 'Xóa học sinh cọc khi lớp bắt đầu khai giảng', 0);
+                echo data_get($contract, 'id')."/";
+                LogClassStudent::logAction($contract->class_id, $contract->student_id, $contract->id, 0, 0);
+            }
         }
 
         

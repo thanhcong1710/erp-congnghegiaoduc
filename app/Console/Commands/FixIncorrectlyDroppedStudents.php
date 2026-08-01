@@ -44,12 +44,11 @@ class FixIncorrectlyDroppedStudents extends Command
 
         // Query tìm các học sinh bị drop lúc 23:55 (bị xóa nhầm do debt_amount = 0)
         $query = "SELECT l.*, c.status as contract_current_status, c.class_id as contract_current_class_id
-            FROM log_class_students AS l 
-            LEFT JOIN contracts AS c ON c.id=l.contract_id
-            WHERE DATE_FORMAT(l.created_at, '%H:%i:%s') >= '23:55:00' 
-            AND DATE_FORMAT(l.created_at, '%H:%i:%s') < '23:59:00' 
-            AND c.debt_amount=0 
-            AND l.action=0";
+            FROM
+                log_class_students AS l
+                LEFT JOIN contracts AS c ON c.id = l.contract_id
+                LEFT JOIN agreements AS a ON a.id = c.agreement_id
+            WHERE DATE_FORMAT(l.created_at, '%H:%i')>='23:55' AND c.class_id IS NULL AND a.debt_amount<600000  AND l.action=0";
             
         if ($studentId) {
             $query .= " AND l.student_id = " . (int)$studentId;
