@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\ChargesController;
 use App\Models\LogClassStudent;
 use App\Models\LogStudents;
 use Illuminate\Console\Command;
@@ -43,20 +44,25 @@ class FixIncorrectlyDroppedStudents extends Command
         $studentId = $this->argument('student_id');
 
         // Query tìm các học sinh bị drop lúc 23:55 (bị xóa nhầm do debt_amount = 0)
-        $query = "SELECT l.*, c.status as contract_current_status, c.class_id as contract_current_class_id
+        $query = "SELECT l.*, c.status as contract_current_status, c.class_id as contract_current_class_id, c.product_id, c.agreement_id
             FROM
                 log_class_students AS l
                 LEFT JOIN contracts AS c ON c.id = l.contract_id
                 LEFT JOIN agreements AS a ON a.id = c.agreement_id
-            WHERE DATE_FORMAT(l.created_at, '%H:%i')>='23:55' AND c.class_id IS NULL AND a.debt_amount<600000  AND l.action=0";
+            WHERE DATE_FORMAT(l.created_at, '%H:%i')>='23:55' AND c.class_id IS NULL AND a.debt_amount<600000 AND l.action=0";
             
         if ($studentId) {
+            $query = "SELECT l.*, c.status as contract_current_status, c.class_id as contract_current_class_id, a.product_id, c.agreement_id
+            FROM
+                log_class_students AS l
+                LEFT JOIN contracts AS c ON c.id = l.contract_id
+                LEFT JOIN agreements AS a ON a.id = c.agreement_id
+            WHERE DATE_FORMAT(l.created_at, '%H:%i')>='23:55' ";
             $query .= " AND l.student_id = " . (int)$studentId;
         }
 
         $logs = u::query($query);
         $total = count($logs);
-        
         if ($total == 0) {
             $this->info("Không tìm thấy bản ghi nào cần fix.");
             return 0;
@@ -66,7 +72,6 @@ class FixIncorrectlyDroppedStudents extends Command
         
         $bar = $this->output->createProgressBar($total);
         $bar->start();
-
         foreach ($logs as $log) {
             $contract_id = $log->contract_id;
             
@@ -103,6 +108,9 @@ class FixIncorrectlyDroppedStudents extends Command
             // LogClassStudent::logAction($class_id, $log->student_id, $contract_id, 1, 0); // Action 1 = add back
             // LogStudents::logAdd($log->student_id, 'Khôi phục học sinh vào lớp (rollback AutoWithdrawEnrollmentDeposit)', 0);
             // u::updateScheduleHasStudent($contract_id, $start_date);
+            if(data_get($log, 'product_id') == 29 && data_get($log, 'agreement_id')){
+                ChargesController::processContractsByAgreement(data_get($log, 'agreement_id'));
+            }
             $bar->advance();
         }
         

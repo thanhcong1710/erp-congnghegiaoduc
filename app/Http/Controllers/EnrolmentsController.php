@@ -333,6 +333,9 @@ class EnrolmentsController extends Controller
             if ($start_date < date('Y-m-d')){
                 u::updateScheduleHasStudent($contract_id, $start_date);
             }
+            if(data_get($class_info, 'product_id') == 29 && data_get($agreement, 'id')){
+                ChargesController::processContractsByAgreement(data_get($agreement, 'id'));
+            }
         }
 
         $result = array(

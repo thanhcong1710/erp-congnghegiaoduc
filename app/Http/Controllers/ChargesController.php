@@ -394,7 +394,10 @@ class ChargesController extends Controller
             foreach ($packages as $row) {
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round(((int) data_get($row, 'total_charged') + (int) data_get($row, 'discount_amount')) / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if (data_get($row, 'contract_data.class_id')) {
+                
+                if (data_get($row, 'contract_data.status') ==7) {
+                    $status = 7;
+                }elseif (data_get($row, 'contract_data.class_id')) {
                     $status = 6;
                 } else {
                     $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
@@ -419,9 +422,47 @@ class ChargesController extends Controller
     }
     public static function splitChargedAndDiscountAmount(float $totalCharged, float $totalDiscount, array $packages, bool $isFullyPaidAgreement = false): array
     {
-        // Sắp xếp theo ưu tiên (count_recharge nhỏ -> ưu tiên cao)
-        usort($packages, function ($a, $b) {
-            return $a->count_recharge <=> $b->count_recharge;
+        // Kiểm tra điều kiện ưu tiên đặc biệt: tồn tại cả 28 & 29, trong đó 28 chưa xếp lớp và 29 đã xếp lớp
+        $has28Unassigned = false;
+        $has29Assigned = false;
+
+        foreach ($packages as $p) {
+            $pid = (int) data_get($p, 'product_id');
+            $classId = (int) data_get($p, 'class_id');
+            if ($pid === 28 && empty($classId)) {
+                $has28Unassigned = true;
+            }
+            if ($pid === 29 && !empty($classId)) {
+                $has29Assigned = true;
+            }
+        }
+
+        $swap28And29 = $has28Unassigned && $has29Assigned;
+
+        $getProductPriority = function ($package) use ($swap28And29) {
+            $pid = (int) data_get($package, 'product_id');
+            if ($swap28And29) {
+                $orderMap = [25 => 1, 26 => 2, 27 => 3, 29 => 4, 28 => 5];
+            } else {
+                $orderMap = [25 => 1, 26 => 2, 27 => 3, 28 => 4, 29 => 5];
+            }
+
+            return $orderMap[$pid] ?? (1000 + $pid);
+        };
+
+        // Sắp xếp theo ưu tiên product_id (25 -> 26 -> 27 -> 28 -> 29 hay 25 -> 26 -> 27 -> 29 -> 28), sau đó tới count_recharge
+        usort($packages, function ($a, $b) use ($getProductPriority) {
+            $prioA = $getProductPriority($a);
+            $prioB = $getProductPriority($b);
+            if ($prioA !== $prioB) {
+                return $prioA <=> $prioB;
+            }
+            $cntA = (int) data_get($a, 'count_recharge', 0);
+            $cntB = (int) data_get($b, 'count_recharge', 0);
+            if ($cntA !== $cntB) {
+                return $cntA <=> $cntB;
+            }
+            return (int) data_get($a, 'id', 0) <=> (int) data_get($b, 'id', 0);
         });
 
         $total_must_charge = array_sum(array_map(function ($p) {
@@ -950,73 +991,5 @@ class ChargesController extends Controller
             'debt_amount' => $new_debt_amount,
             'agreement' => $updatedAgreement,
         ]);
-    }
-
-    public function reProcessAgreement($agreement_id)
-    {
-        $agreement_info = u::getObject(array('id' => $agreement_id), 'agreements');
-        $total_charged = u::first("SELECT SUM(amount) AS total FROM payments WHERE agreement_id=" . $agreement_id);
-
-        $must_charge = (int) data_get($agreement_info, 'must_charge');
-        $total_charged = data_get($total_charged, 'total');
-        $discount_amount = (int) data_get($agreement_info, 'discount_amount');
-
-        // ---- Validate cân bằng ----
-        // must_charge = total_charged + charge_amount + debt_after + discount_amount
-        $debt_after = $must_charge - $total_charged - $discount_amount;
-        $debt_after = $debt_after > 0 ? $debt_after : 0;
-
-        // ---- Cập nhật agreements ----
-        $new_total_charged = $total_charged;
-        if ($debt_after <= 0) {
-            u::updateSimpleRow(array(
-                'status' => 3,
-                'total_charged' => $new_total_charged,
-                'debt_amount' => 0
-            ), array('id' => data_get($agreement_info, 'id')), 'agreements');
-        } else {
-            u::updateSimpleRow(array(
-                'status' => 2,
-                'total_charged' => $new_total_charged,
-                'debt_amount' => $debt_after
-            ), array('id' => data_get($agreement_info, 'id')), 'agreements');
-        }
-
-        $this->processContractsByAgreementNew(data_get($agreement_info, 'id'));
-        return true;
-    }
-
-    public static function processContractsByAgreementNew($agreement_id)
-    {
-        $agreementInfo = u::getObject(array('id' => $agreement_id), 'agreements');
-        $contracts = u::query("SELECT * FROM contracts WHERE agreement_id=$agreement_id AND status>0 AND status!=8 AND relearn_from_contract_id IS NULL ORDER BY product_id");
-        $totalDiscount = (float) data_get($agreementInfo, 'discount_amount', 0);
-        $dataResult = self::splitChargedAndDiscountAmount(data_get($agreementInfo, 'total_charged'), $totalDiscount, (array) $contracts);
-        $packages = data_get($dataResult, 'packages');
-        if (!empty($packages)) {
-            foreach ($packages as $row) {
-                $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
-                    round(((int) data_get($row, 'total_charged') + (int) data_get($row, 'discount_amount')) / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
-                if (data_get($row, 'contract_data.class_id')) {
-                    $status = 6;
-                } else {
-                    $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
-                }
-                u::updateSimpleRow([
-                    'status' => $status,
-                    'real_sessions' => $availableSession,
-                    'summary_sessions' => $availableSession,
-                    'left_sessions' => $availableSession - data_get($row, 'done_sessions'),
-                    'total_charged' => (int) data_get($row, 'total_charged'),
-                    'init_total_charged' => (int) data_get($row, 'total_charged'),
-                    'discount_amount' => (int) data_get($row, 'discount_amount'),
-                    'debt_amount' => (int) data_get($row, 'contract_data.must_charge') - (int) data_get($row, 'total_charged') - (int) data_get($row, 'discount_amount'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                    'updator_id' => Auth::user()->id ?? 0,
-                ], array('id' => data_get($row, 'contract_id')), 'contracts');
-            }
-        }
-
-        return true;
     }
 }
