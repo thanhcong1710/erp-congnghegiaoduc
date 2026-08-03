@@ -315,6 +315,7 @@ class EnrolmentsController extends Controller
                 'status' => 6,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
+                'add_class_status'=>0
             ), array('id' => $contract_id), 'contracts');
             u::addLogContracts($contract_id);
             u::updateSimpleRow(array(
