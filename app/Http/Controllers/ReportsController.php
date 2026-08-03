@@ -2458,7 +2458,7 @@ class ReportsController extends Controller
         }
 
         // Sắp xếp danh sách theo tên giảm dần (hoặc lương giảm dần)
-        usort($final_list, function($a, $b) {
+        usort($final_list, function ($a, $b) {
             return $b['tong_luong'] <=> $a['tong_luong'];
         });
 
@@ -2778,7 +2778,9 @@ class ReportsController extends Controller
     public function updateBookDeliveredDate(Request $request)
     {
         $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
-        $roles = array_map(function ($r) { return $r->role_id; }, $role_ids);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
         if (in_array(68, $roles) || in_array(69, $roles)) { // 68: Sale, 69: Sale Leader
             return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật trường này']);
         }
@@ -2790,18 +2792,18 @@ class ReportsController extends Controller
 
         if (!empty($contract_ids) && is_array($contract_ids)) {
             $ids = implode(',', array_map('intval', $contract_ids));
-            
+
             $contracts = u::query("SELECT id, class_id, book_delivered_date FROM contracts WHERE id IN ($ids)");
-            
+
             foreach ($contracts as $c) {
                 $upd_contracts = [];
                 $upd_log = [];
-                
+
                 if (!empty($date)) {
                     $safe_date = date('Y-m-d', strtotime($date));
                     $upd_contracts[] = "book_delivered_date = '$safe_date'";
                     $upd_log[] = "book_delivered_date = '$safe_date'";
-                    
+
                     if (empty($c->book_delivered_date)) {
                         $cls_id = $c->class_id ? $c->class_id : 'NULL';
                         $upd_contracts[] = "book_class_id = $cls_id";
@@ -2813,13 +2815,13 @@ class ReportsController extends Controller
                     $upd_contracts[] = "book_class_id = NULL";
                     $upd_log[] = "book_class_id = NULL";
                 }
-                
+
                 if ($has_note) {
                     $safe_note = addslashes($note);
                     $upd_contracts[] = "book_note = '$safe_note'";
                     $upd_log[] = "book_note = '$safe_note'";
                 }
-                
+
                 if (!empty($upd_contracts)) {
                     u::query("UPDATE contracts SET " . implode(', ', $upd_contracts) . " WHERE id = " . $c->id);
                     u::query("UPDATE log_contracts SET " . implode(', ', $upd_log) . " WHERE contract_id = " . $c->id);
@@ -2848,18 +2850,26 @@ class ReportsController extends Controller
         return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
     }
 
-    public function updateSalaryMonthAll(Request $request)
+    public function updateSalaryMonthAll()
     {
-        $currentMonth = date('Y-m');
+        if ((int) date('j') < 5) {
+            $salaryMonth = date('Y-m', strtotime('first day of previous month'));
+        } else {
+            $salaryMonth = date('Y-m');
+        }
+
         $query = "
             UPDATE agreements
-            SET salary_month = '$currentMonth'
+            SET salary_month = '$salaryMonth'
             WHERE debt_amount = 0
+            AND salary_month IS NULL
             AND id IN (
                 SELECT agreement_id
                 FROM payments
-                WHERE charge_date LIKE '$currentMonth-%'
-            ) AND  salary_month IS NULL
+                WHERE agreement_id IS NOT NULL
+                GROUP BY agreement_id
+                HAVING DATE_FORMAT(MAX(charge_date), '%Y-%m') = '$salaryMonth'
+            )
         ";
         u::query($query);
 
@@ -2893,7 +2903,7 @@ class ReportsController extends Controller
         $roles = array_map(function ($r) {
             return $r->role_id;
         }, $role_ids);
-        
+
         if (in_array(68, $roles) || in_array(69, $roles)) {
             $staff_ids = Auth::user()->getStaffHasUser();
             if ($staff_ids) {
@@ -2907,7 +2917,7 @@ class ReportsController extends Controller
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
                     (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                     p.amount, p.charge_date as refund_date, p.note";
-                    
+
         $sql_from = "FROM payments p
                     LEFT JOIN agreements c ON p.agreement_id = c.id
                     LEFT JOIN students s ON p.student_id = s.id

@@ -284,8 +284,10 @@ class ChargesController extends Controller
                         'last_pay_date' => $charge_date,
                         'count_recharge' => $count_recharge,
                         'updated_at' => date('Y-m-d H:i:s'),
-                        'updator_id' => Auth::user()->id,
+                        'updator_id' => Auth::user()->id
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
+                    $report = new ReportsController();
+                    $report->updateSalaryMonthAll();
                     LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Thu đủ phí cho hợp đồng - ' . data_get($agreement_info, 'code'), Auth::user()->id);
                 } else {
                     u::updateSimpleRow(array(
