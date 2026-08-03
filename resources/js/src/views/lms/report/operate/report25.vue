@@ -177,9 +177,26 @@
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="22" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td :colspan="(user_role.is_admin || user_role.is_accountant) ? 24 : 23" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
+          <tfoot v-if="datas.length > 0">
+            <tr class="rpt-row-total font-bold" style="background: #eef2ff; font-weight: bold; position: sticky; bottom: 0; z-index: 2;">
+              <td :colspan="(user_role.is_admin || user_role.is_accountant) ? 12 : 11" class="text-center font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5; color: #4338ca;">TỔNG CỘNG</td>
+              <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalMustCharge) }}</td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalP1Amount) }}</td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalP2Amount) }}</td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalDiscount) }}</td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td class="text-right money-red font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalDebtAmount) }}</td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
+              <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalLuongSale) }}</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -278,6 +295,26 @@
           this.selectAll = false
         }
       }
+    },
+    computed: {
+      totalMustCharge() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.must_charge) || 0), 0)
+      },
+      totalP1Amount() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.p1_amount) || 0), 0)
+      },
+      totalP2Amount() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.p2_amount) || 0), 0)
+      },
+      totalDiscount() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.discount) || 0), 0)
+      },
+      totalDebtAmount() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.debt_amount) || 0), 0)
+      },
+      totalLuongSale() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.luong_sale) || 0), 0)
+      },
     },
     methods: {
       toggleSelectAll(val) {
