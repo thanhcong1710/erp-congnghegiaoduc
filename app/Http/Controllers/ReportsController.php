@@ -2888,7 +2888,7 @@ class ReportsController extends Controller
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
         // Base condition
-        $cond = "p.type = 3 AND p.note LIKE '%cọc%'";
+        $cond = "p.type = 3 ";
 
         if ($month) {
             $cond .= " AND DATE_FORMAT(p.charge_date, '%Y-%m') = '$month'";

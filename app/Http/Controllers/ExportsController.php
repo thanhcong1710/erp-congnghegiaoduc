@@ -4274,7 +4274,7 @@ class ExportsController extends Controller
         $month = isset($request->month) ? $request->month : date('Y-m'); // Format 'YYYY-MM'
 
         // Base condition
-        $cond = "p.type = 3 AND p.note LIKE '%cọc%'";
+        $cond = "p.type = 3";
 
         if ($month) {
             $cond .= " AND DATE_FORMAT(p.charge_date, '%Y-%m') = '$month'";
