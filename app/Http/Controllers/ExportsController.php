@@ -4271,7 +4271,7 @@ class ExportsController extends Controller
         ini_set('memory_limit', '-1');
         
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';
-        $month = isset($request->month) ? $request->month : date('Y-m'); // Format 'YYYY-MM'
+        $month = isset($request->month) ? $request->month : ''; // Format 'YYYY-MM'
 
         // Base condition
         $cond = "p.type = 3";
@@ -4281,7 +4281,8 @@ class ExportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')";
+            $cleanKeyword = ltrim($keyword, '0');
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$cleanKeyword%' OR s.gud_mobile2 LIKE '%$keyword%' OR s.c2c_mobile LIKE '%$keyword%')";
         }
 
         // Leader Sale / Sales filter logic (Role 68, 69)

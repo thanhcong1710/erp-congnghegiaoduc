@@ -2879,7 +2879,7 @@ class ReportsController extends Controller
     public function refundDepositReport(Request $request)
     {
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';
-        $month = isset($request->month) ? $request->month : date('Y-m'); // Format 'YYYY-MM'
+        $month = isset($request->month) ? $request->month : ''; // Format 'YYYY-MM'
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -2895,7 +2895,8 @@ class ReportsController extends Controller
         }
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%')";
+            $cleanKeyword = ltrim($keyword, '0');
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$cleanKeyword%' OR s.gud_mobile2 LIKE '%$keyword%' OR s.c2c_mobile LIKE '%$keyword%')";
         }
 
         // Leader Sale / Sales filter logic (Role 68, 69)
