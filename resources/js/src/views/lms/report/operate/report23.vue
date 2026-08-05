@@ -248,7 +248,7 @@
         if (p.branch_id && p.branch_id.length) { keys.push('branch_id'); values.push(p.branch_id.join('-')) }
         if (p.start_date) { keys.push('start_date'); values.push(p.start_date) }
         if (p.end_date)   { keys.push('end_date');   values.push(p.end_date) }
-        if (p.team_id > 0) { keys.push('team_id'); values.push(p.team_id) }
+        if (p.team_id && p.team_id !== 0 && p.team_id !== '0') { keys.push('team_id'); values.push(p.team_id) }
         if (p.register_status !== -1) { keys.push('register_status'); values.push(p.register_status) }
         if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }

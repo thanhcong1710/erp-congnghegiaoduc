@@ -239,7 +239,7 @@
         const p = this.buildPayload()
         const keys = [], values = []
         if (p.branch_id && p.branch_id.length)  { keys.push('branch_id');  values.push(p.branch_id.join('-')) }
-        if (p.team_id  > 0)  { keys.push('team_id');  values.push(p.team_id) }
+        if (p.team_id && p.team_id !== 0 && p.team_id !== '0')  { keys.push('team_id');  values.push(p.team_id) }
         if (p.ec_id    > 0)  { keys.push('ec_id');    values.push(p.ec_id) }
         if (p.class_status !== -1) { keys.push('class_status'); values.push(p.class_status) }
         if (p.product_id > 0) { keys.push('product_id'); values.push(p.product_id) }
