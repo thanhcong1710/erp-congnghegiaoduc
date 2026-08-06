@@ -140,12 +140,6 @@ class ContractsController extends Controller
                 }
             }
 
-            // Tính end_session_date: ngày buổi học cuối = enrolment_last_date của contract này (đã tính trong $data_sessions)
-            $end_session_date = data_get($data_sessions, 'end_date');
-            if ($end_session_date) {
-                $agreement_update_data['end_session_date'] = $end_session_date;
-            }
-
             if (!empty($agreement_update_data)) {
                 $agreement_update_data['updated_at'] = date('Y-m-d H:i:s');
                 u::updateSimpleRow($agreement_update_data, ['id' => data_get($agreement, 'id')], 'agreements');
@@ -166,6 +160,10 @@ class ContractsController extends Controller
             'updator_id' => Auth::user()->id,
         ], ['id' => $contract_id], 'contracts');
         u::addLogContracts($contract_id);
+
+        if (!empty(data_get($contract, 'agreement_id'))) {
+            u::updateAgreementFirst8thSessionDate(data_get($contract, 'agreement_id'));
+        }
 
         u::updateSimpleRow([
             'cm_id' => $cm_id,
