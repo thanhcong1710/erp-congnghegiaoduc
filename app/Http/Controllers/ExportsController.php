@@ -298,7 +298,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('F' . $x, $list[$i]->last_date);
             $sheet->setCellValue('G' . $x, $list[$i]->status_title);
             $sheet->setCellValue('H' . $x, $list[$i]->status==1 ? $list[$i]->tuition_fee_name : '');
-            $sheet->setCellValue('I' . $x, $list[$i]->status==1 ? $$list[$i]->renew_amount : '');
+            $sheet->setCellValue('I' . $x, $list[$i]->status==1 ? $list[$i]->renew_amount : '');
             $sheet->setCellValue('J' . $x, $list[$i]->cm_name);
         }
         $writer = new Xlsx($spreadsheet);
