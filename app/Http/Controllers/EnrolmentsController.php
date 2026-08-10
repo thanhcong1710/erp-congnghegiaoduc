@@ -233,7 +233,7 @@ class EnrolmentsController extends Controller
         $list = u::query("SELECT c.id AS contract_id, c.code AS contract_code, s.name, s.lms_code, c.start_date, c.student_id AS student_id, c.left_sessions, c.agreement_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT SUM(charge_amount) FROM tmp_payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) as tmp_payment_amount,
-                (SELECT SUM(charge_amount) FROM payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) as payment_amount,
+                (SELECT SUM(amount) FROM payments WHERE agreement_id = c.agreement_id AND status IN (0, 1)) as payment_amount,
                 (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
                 (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date
             FROM contracts AS c 
