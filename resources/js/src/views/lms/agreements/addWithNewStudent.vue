@@ -26,6 +26,7 @@
                 type="text"
                 v-model="student.name"
                 placeholder="Nhập họ tên đầy đủ"
+                @blur="autoDetectGender"
               />
             </div>
 
@@ -567,8 +568,8 @@
           phone: '',
           phone2: '',
           email: '',
-          gender: '',
-          gender_obj: null,
+          gender: 'F',
+          gender_obj: {label: 'Nữ', value: 'F'},
           birthday: '',
           birthday_formatted: '',
           link_facebook: '',
@@ -793,6 +794,19 @@
           this.student.gender = data.value
         }else{
           this.student.gender = ""
+        }
+      },
+      autoDetectGender(){
+        if (!this.student.name) return
+        const words = this.student.name.toLowerCase().trim().split(/\s+/)
+        const hasThi = words.includes('thị')
+        const hasVan = words.includes('văn')
+        if (hasThi) {
+          this.student.gender = 'F'
+          this.student.gender_obj = {label: 'Nữ', value: 'F'}
+        } else if (hasVan) {
+          this.student.gender = 'M'
+          this.student.gender_obj = {label: 'Nam', value: 'M'}
         }
       },
       saveEC(data = null){

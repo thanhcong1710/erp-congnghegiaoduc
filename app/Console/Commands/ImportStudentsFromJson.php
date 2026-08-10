@@ -300,7 +300,7 @@ class ImportStudentsFromJson extends Command
         $rawStatus = $row['raw_status']      ?? '4';
         $excelRow  = $row['excel_row']       ?? 0;
         $course    = $row['course']          ?? '';
-        $gender    = $row['gender']          ?? 'M';
+        $gender    = $row['gender']          ?? 'F';
 
         $linkFb    = trim($row['link_fb'] ?? '');
         $email     = trim($row['email'] ?? '');
@@ -359,7 +359,7 @@ class ImportStudentsFromJson extends Command
                 'gud_name1'   => mb_substr($name, 0, 50),
                 'gud_email1'  => mb_substr($email, 0, 100),
                 'address'     => mb_substr($address, 0, 255),
-                'gender'      => $gender ?: 'M',
+                'gender'      => $gender ?: 'F',
                 'branch_id'   => 9,
                 'status'      => 1,
                 'created_at'  => $createdAt,

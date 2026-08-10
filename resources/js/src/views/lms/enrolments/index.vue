@@ -163,6 +163,7 @@
                     <thead class="vs-table--thead">
                      <tr>
                         <th colspan="1" rowspan="1" class="text-center">STT</th>
+                        <th colspan="1" rowspan="1">Lớp cũ</th>
                         <th colspan="1" rowspan="1">Học sinh</th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
@@ -171,6 +172,7 @@
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
                       <td class="td vs-table--td">{{index+1}}</td>
+                      <td class="td vs-table--td">{{item.previous_class_name}}</td>
                       <td class="td vs-table--td" style="max-width:250px;">
                         <div v-if="item.added_at" style="margin-top: 5px; font-size: 12px; color: #888;">
                            <i class="fa-regular fa-clock mr-1"></i>{{ item.added_at }}
@@ -188,7 +190,7 @@
                       <td class="td vs-table--td">
                         <p>
                           <strong>Mã: {{item.contract_code}}</strong>
-                          <span v-if="item.relearn_from_contract_code" style="font-size: 0.75rem; color: #ff9f43; font-style: italic; display: block;">
+                          <span v-if="item.relearn_from_contract_code" style="color: #ff9f43; font-style: italic; display: block;">
                             (Học lại từ {{ item.relearn_from_contract_code }})
                           </span>
                         </p>
@@ -282,11 +284,11 @@
       </div>
       <vs-popup :class="'view-enrolments modal_'+ modal_enrol.color" :title="modal_enrol.title" :active.sync="modal_enrol.show" v-if="class_info.class_id">
         <div class="vx-row" >
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             <label>Tìm kiếm</label>
             <vs-input class="w-full" placeholder="Nhập tên, mã học sinh" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4" v-if="!user_role.is_sale && !user_role.is_sale_leader">
+          <div class="vx-col sm:w-1/5 w-full mb-4" v-if="!user_role.is_sale && !user_role.is_sale_leader">
             <label>Team KD (quản lý)</label>
             <vue-select
               label="label"
@@ -296,11 +298,15 @@
               :searchable="true"
             ></vue-select>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             <label>Ngày học dự kiến</label>
             <datepicker v-model="searchData.dateRange" format="YYYY-MM-DD" style="width:100%" type="date" range :clearable="true" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></datepicker>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
+          <div class="vx-col sm:w-1/5 w-full mb-4">
+            <label>Lớp đã học</label>
+            <vs-input class="w-full" placeholder="Nhập tên lớp đã học" v-model="searchData.previous_class_keyword"></vs-input>
+          </div>
+          <div class="vx-col sm:w-1/5 w-full mb-4">
             Số chỗ trống còn lại trong lớp: <strong>{{class_info.max_students - class_info.num_students - checked_list.length}}</strong>
           </div>
         </div>
@@ -457,6 +463,7 @@
           keyword:'',
           ec_selected: null,
           dateRange: [],
+          previous_class_keyword: '',
         },
         ec_managers: [],
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
@@ -627,6 +634,7 @@
         this.studentSearch = []
         this.searchData.keyword = ''
         this.searchData.dateRange = []
+        this.searchData.previous_class_keyword = ''
         // Auto-set ec_id for sale_leader role (role 69 is in ec_managers list)
         if (this.user_role.is_sale_leader) {
           const matched = this.ec_managers.find(m => m.id === this.user_role.user_id)
@@ -654,6 +662,7 @@
             ec_id: this.searchData.ec_selected ? this.searchData.ec_selected.id : '',
             start_date_from: this.searchData.dateRange && this.searchData.dateRange[0] ? moment(this.searchData.dateRange[0]).format('YYYY-MM-DD') : '',
             start_date_to: this.searchData.dateRange && this.searchData.dateRange[1] ? moment(this.searchData.dateRange[1]).format('YYYY-MM-DD') : '',
+            previous_class_keyword: this.searchData.previous_class_keyword,
             pagination:this.pagination
           }
           this.$vs.loading()

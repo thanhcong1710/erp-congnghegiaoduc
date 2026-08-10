@@ -103,6 +103,16 @@ class EnrolmentsController extends Controller
                 (SELECT created_at FROM log_class_students WHERE class_id=$class_id AND contract_id=c.id AND action=1 ORDER BY id DESC LIMIT 1) AS added_at,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
+                (SELECT cls.cls_name FROM contracts AS prev_c
+                    LEFT JOIN classes AS cls ON cls.id = prev_c.class_id
+                    WHERE prev_c.student_id = c.student_id
+                        AND prev_c.id != c.id
+                        AND prev_c.enrolment_start_date IS NOT NULL
+                        AND prev_c.class_id IS NOT NULL
+                        AND prev_c.enrolment_start_date < c.enrolment_start_date
+                    ORDER BY prev_c.enrolment_start_date DESC
+                    LIMIT 1
+                ) AS previous_class_name,
                 p.link_facebook
             FROM contracts AS c
                 LEFT JOIN students AS s ON c.student_id=s.id
@@ -187,6 +197,12 @@ class EnrolmentsController extends Controller
             $cond .= " AND c.start_date >= '$start_date_from'";
         } elseif ($start_date_to) {
             $cond .= " AND c.start_date <= '$start_date_to'";
+        }
+
+        // Filter by lớp đã học (previous class name)
+        $previous_class_keyword = isset($request->previous_class_keyword) && $request->previous_class_keyword ? trim($request->previous_class_keyword) : '';
+        if ($previous_class_keyword !== '') {
+            $cond .= " AND EXISTS (SELECT 1 FROM contracts AS prev_c LEFT JOIN classes AS prev_cls ON prev_cls.id = prev_c.class_id WHERE prev_c.student_id = c.student_id AND prev_c.class_id IS NOT NULL AND prev_cls.cls_name LIKE '%$previous_class_keyword%')";
         }
 
         // Role-based filtering: sale/sale_leader chỉ thấy HS mình quản lý
