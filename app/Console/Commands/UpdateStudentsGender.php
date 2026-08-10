@@ -52,7 +52,7 @@ class UpdateStudentsGender extends Command
         $skippedCount = 0;
 
         $this->info("📋 Tổng số học sinh: {$totalStudents}");
-        $this->newLine();
+        $this->line('');
 
         $bar = $this->output->createProgressBar($totalStudents);
         $bar->start();
@@ -89,7 +89,7 @@ class UpdateStudentsGender extends Command
             if ($dryRun) {
                 $genderLabel = $newGender == 'F' ? 'Nữ' : 'Nam';
                 $oldGenderLabel = $student->gender == 'F' ? 'Nữ' : ($student->gender == 'M' ? 'Nam' : $student->gender);
-                $this->newLine();
+                $this->line('');
                 $this->line("  ID: {$student->id} | Tên: {$student->name} | {$oldGenderLabel} → {$genderLabel}");
             } else {
                 u::updateSimpleRow([
@@ -104,14 +104,15 @@ class UpdateStudentsGender extends Command
         }
 
         $bar->finish();
-        $this->newLine(2);
+        $this->line('');
+        $this->line('');
 
         $this->info("✅ Hoàn thành!");
         $this->info("   - Đã cập nhật: {$updatedCount}");
         $this->info("   - Bỏ qua: {$skippedCount}");
 
         if ($dryRun) {
-            $this->newLine();
+            $this->line('');
             $this->warn('⚠️  Đây là chế độ dry-run. Chạy lại không có --dry-run để cập nhật thực tế.');
         }
 
