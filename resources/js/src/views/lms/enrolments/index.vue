@@ -557,7 +557,8 @@
       isStudentCheckboxDisabled(item) {
         if (this.user_role.is_sale || this.user_role.is_sale_leader) {
           const totalPaid = Number(item.tmp_payment_amount) || 0;
-          if (totalPaid < this.minPaymentForClass) {
+          const totalPaidPay = Number(item.payment_amount) || 0;
+          if (totalPaid < this.minPaymentForClass && totalPaidPay < this.minPaymentForClass) {
             return true;
           }
         }
