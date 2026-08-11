@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\AddScheduleClass;
 use App\Console\Commands\AddScheduleHasStudent;
+use App\Console\Commands\AutoWithdraw;
 use App\Console\Commands\AutoWithdrawEnrollmentDeposit;
 use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
@@ -25,6 +26,7 @@ class Kernel extends ConsoleKernel
         JobsSendEmail::class,
         JobsProcessLockParent::class,
         AutoWithdrawEnrollmentDeposit::class,
+        AutoWithdraw::class
     ];
 
     /**
@@ -41,6 +43,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('scheduleHasStudent:add')->dailyAt('01:00')->withoutOverlapping();
         $schedule->command('processdata:command')->dailyAt('2:00'); 
         $schedule->command('jobsProcessLockParent:command')->dailyAt('3:00'); 
+        $schedule->command('autoWithdraw:process')->dailyAt('2:30')->withoutOverlapping();
     }
 
     /**
