@@ -50,7 +50,7 @@ class AutoWithdrawEnrollmentDeposit extends Command
                     AND c.enrolment_start_date <= '$date' 
                     AND c.status!=7  AND c.status!=8 AND c.class_id IS NOT NULL");
         foreach ($listContracts AS $contract){
-            if (data_get($contract,'agreement_debt_amount') > 600000 || (data_get($contract,'student_created_at') > '2026-07-15 00:00:00' && data_get($contract,'agreement_debt_amount') > 200000)) {
+            if (data_get($contract,'agreement_debt_amount') > 1500000 || (data_get($contract,'student_created_at') > '2026-07-15 00:00:00' && data_get($contract,'agreement_debt_amount') > 200000)) {
                 u::updateSimpleRow([
                     'program_id' => null,
                     'class_id' => null,
