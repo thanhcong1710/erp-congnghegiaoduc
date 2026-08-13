@@ -207,7 +207,7 @@
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
                       </td>
-                      <td class="td vs-table--td text-center" style="min-width: 180px;">
+                      <td class="td vs-table--td text-center" style="min-width: 150px;">
                          <select
                            v-model="item.add_class_status"
                            class="vs-inputx vs-input--input normal mb-2"
