@@ -388,7 +388,9 @@ class StudentsController extends Controller
         $student_id = isset($request->student_id) ? $request->student_id : 0;
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
                 c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type,
-                c.enrolment_start_date, c.enrolment_last_date,
+                c.enrolment_start_date, c.enrolment_last_date, c.agreement_id, c.student_id,
+                a.student_id AS agreement_student_id,
+                (SELECT CONCAT(name, ' - ', lms_code) FROM students WHERE id = a.student_id) AS transfer_from_student_name,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.creator_id) AS creator_name,
@@ -397,6 +399,7 @@ class StudentsController extends Controller
                 (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.id,
                 cl.cls_name 
             FROM contracts AS c
+                LEFT JOIN agreements AS a ON a.id = c.agreement_id
                 LEFT JOIN classes AS cl ON cl.id=c.class_id
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach ($list as $k => $row) {

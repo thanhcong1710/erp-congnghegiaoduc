@@ -39,6 +39,9 @@
                 <td class="td vs-table--td">
                   <p>Phải đóng: <strong>{{ item.must_charge | formatMoney }}</strong></p>
                   <p class="text-danger">Công nợ: {{ item.debt_amount | formatMoney }}</p>
+                  <p class="text-warning mt-1" v-if="item.agreement_student_id && item.agreement_student_id != student_info.id">
+                    <i>(Nhận chuyển phí từ học sinh {{ item.transfer_from_student_name || 'khác' }})</i>
+                  </p>
                 </td>
 
                 <td class="td vs-table--td text-center">

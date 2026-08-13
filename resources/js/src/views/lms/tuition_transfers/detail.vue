@@ -215,7 +215,7 @@
               <label>Tổng số tiền nhận</label>
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.received_amount | formatMoney"  disabled="true" />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="tuition_transfer_info.to_product_name">
               <label>Chương trình học quy đổi</label>
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer_info.to_product_name"  disabled="true" />
             </div>
@@ -231,13 +231,9 @@
               <p>Người tạo: {{tuition_transfer_info.creator_name}}</p>
               <p class="mb-3">Thời gian tạo: {{tuition_transfer_info.created_at}}</p>
 
-              <p v-if="tuition_transfer_info.ceo_approver_id">GĐTT duyệt: {{tuition_transfer_info.ceo_approver_name}}</p>
-              <p v-if="tuition_transfer_info.ceo_approver_id">Thời gian duyệt: {{tuition_transfer_info.ceo_approved_at}}</p>
-              <p class="mb-3" v-if="tuition_transfer_info.ceo_approver_id">Ghi chú duyệt: {{tuition_transfer_info.ceo_comment}}</p>
-
-              <p v-if="tuition_transfer_info.accounting_approver_id">Kế toán duyệt: {{tuition_transfer_info.accounting_approver_name}}</p>
-              <p v-if="tuition_transfer_info.accounting_approver_id">Thời gian duyệt: {{tuition_transfer_info.accounting_approved_at}}</p>
-              <p class="mb-3" v-if="tuition_transfer_info.accounting_approver_id">Ghi chú duyệt: {{tuition_transfer_info.accounting_comment}}</p>
+              <p v-if="tuition_transfer_info.ceo_approver_id || tuition_transfer_info.accounting_approver_id">Người duyệt: {{tuition_transfer_info.ceo_approver_name || tuition_transfer_info.accounting_approver_name}}</p>
+              <p v-if="tuition_transfer_info.ceo_approved_at || tuition_transfer_info.accounting_approved_at">Thời gian duyệt: {{tuition_transfer_info.ceo_approved_at || tuition_transfer_info.accounting_approved_at}}</p>
+              <p class="mb-3" v-if="tuition_transfer_info.ceo_comment || tuition_transfer_info.accounting_comment">Ghi chú duyệt: {{tuition_transfer_info.ceo_comment || tuition_transfer_info.accounting_comment}}</p>
 
               <label>Trạng thái: </label>
               <strong :class="getStatusTextColor(tuition_transfer_info.status)">{{tuition_transfer_info.status | getStatusName}}</strong>
@@ -409,7 +405,7 @@
         return resp
       },
       showAction(status){
-        return [1,3].indexOf(status) != -1 ? true : false
+        return Number(status) === 1
       },
       
     },
@@ -418,19 +414,19 @@
         let resp = ''
         switch (Number(value)) {
             case 1:
-                resp = 'Chờ duyệt đi';
+                resp = 'Chờ phê duyệt';
                 break;
             case 2:
-                resp = 'Từ chối duyệt đi';
+                resp = 'Đã từ chối';
                 break;
             case 3:
-                resp = 'Chờ duyệt đến';
+                resp = 'Chờ phê duyệt';
                 break;
             case 4:
-                resp = 'Từ chối duyệt đến';
+                resp = 'Đã từ chối';
                 break;
             case 5:
-                resp = 'Đã được duyệt đến';
+                resp = 'Đã phê duyệt';
                 break;
             case 6:
                 resp = 'Đã xử lý';

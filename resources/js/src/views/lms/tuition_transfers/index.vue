@@ -183,10 +183,8 @@
           status: "",
         },
         statusOptions:[
-          {id:1,label:'Chờ GĐTT duyệt'},
-          {id:2,label:'GĐTT đã từ chối duyệt'},
-          {id:3,label:'Chờ kế toán duyệt'},
-          {id:4,label:'Kế toán đã từ chối duyệt'},
+          {id:1,label:'Chờ phê duyệt'},
+          {id:2,label:'Đã từ chối'},
           {id:5,label:'Đã phê duyệt'},
           {id:6,label:'Đã xử lý'},
         ],
@@ -308,25 +306,25 @@
         let resp = ''
         switch (Number(value)) {
             case 1:
-                resp = 'Chờ GĐTT duyệt';
+                resp = 'Chờ phê duyệt';
                 break;
             case 2:
-                resp = 'GĐTT từ chối duyệt';
+                resp = 'Đã từ chối';
                 break;
             case 3:
-                resp = 'Chờ kế toán duyệt';
+                resp = 'Chờ phê duyệt';
                 break;
             case 4:
-                resp = 'Kế toán từ chối duyệt';
+                resp = 'Đã từ chối';
                 break;
             case 5:
-                resp = 'Đã được duyệt';
+                resp = 'Đã phê duyệt';
                 break;
             case 6:
                 resp = 'Đã xử lý';
                 break;
             default:
-                resp = 'Chờ GĐTT duyệt'
+                resp = 'Chờ phê duyệt'
                 break
         }
         return resp

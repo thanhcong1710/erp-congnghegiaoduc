@@ -78,7 +78,10 @@
                       <tr>
                         <!---->
                         <th colspan="2" rowspan="1" class="bg-primary" style="color:#fff">
-                          <div class="vs-table-text">{{index+1}}. Hợp đồng số {{item.code}} (gói phí {{item.tuition_fee_name}})</div>
+                          <div class="vs-table-text" style="display: flex; align-items: center;">
+                            <input type="checkbox" v-model="item.checked" @change="onSelectContract" style="margin-right: 8px; transform: scale(1.2); cursor: pointer;" />
+                            <span>{{index+1}}. Hợp đồng số {{item.code}} (gói phí {{item.tuition_fee_name}})</span>
+                          </div>
                         </th>
                       </tr>
                     </thead>
@@ -338,14 +341,7 @@
               <label>Tổng số tiền nhận</label>
               <input class="vs-inputx vs-input--input normal" :value="tuition_transfer.received_amount | formatMoney"  disabled="true" />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="tuition_transfer.to_student_id">
-              <label>Chương trình học quy đổi <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="tuition_transfer.to_product_id" @change="prepareTransferData()" :disabled="input_disabled">
-                <option value="" disabled>Chọn chương trình học</option>
-                <option :value="item.id" v-for="(item, index) in html.products.list" :key="index">{{item.name}}</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="tuition_transfer.to_student_id">
+            <div class="vx-col w-full mb-4" v-if="tuition_transfer.to_student_id">
               <label>Ngày bắt đầu chuyển <span class="text-danger"> (*)</span></label>
               <datepicker class="w-full"
                 v-model="tuition_transfer.transfer_date"
@@ -516,13 +512,17 @@
           student_id: student_id
         })
         .then((response) => {
-          this.from_contracts = response.data
+          this.from_contracts = (response.data || []).map(c => ({ ...c, checked: true }))
+          this.prepareTransferData()
           this.$vs.loading.close();
         })
         .catch((e) => {
           console.log(e);
           this.$vs.loading.close();
         });
+      },
+      onSelectContract(){
+        this.prepareTransferData();
       },
       searchSuggestToStudent(keyword) {
         this.resetToStudent();
@@ -556,9 +556,7 @@
         })
         .then((response) => {
           this.to_contracts = response.data
-          if(this.to_contracts[0].product_id){
-            this.tuition_transfer.to_product_id = this.to_contracts[0].product_id
-          }
+          this.prepareTransferData()
           this.$vs.loading.close();
         })
         .catch((e) => {
@@ -612,12 +610,12 @@
         this.tuition_transfer.transferred_amount = '';
       },
       prepareTransferData(){
-        if(this.tuition_transfer.transfer_date && this.tuition_transfer.to_product_id){
+        const selected_contracts = (this.from_contracts || []).filter(c => c.checked)
+        if(this.tuition_transfer.transfer_date && selected_contracts.length > 0){
           this.$vs.loading()
           axios.p("/api/lms/tuition_transfers/prepare-transfer-data",{
-            from_contracts: this.from_contracts,
+            from_contracts: selected_contracts,
             transfer_date: this.tuition_transfer.transfer_date,
-            to_product_id: this.tuition_transfer.to_product_id,
             to_branch_id: this.tuition_transfer.to_branch_id
           })
           .then((response) => {  
@@ -648,8 +646,13 @@
       save() {
         let mess = "";
         let resp = true;
+        const selected_contracts = (this.from_contracts || []).filter(c => c.checked);
         if (this.tuition_transfer.from_student_id == "") {
           mess += " - Học sinh chuyển không được để trống<br/>";
+          resp = false;
+        }
+        if (selected_contracts.length == 0) {
+          mess += " - Vui lòng chọn ít nhất 1 gói phí chuyển<br/>";
           resp = false;
         }
         if (this.tuition_transfer.to_branch_id == "") {
@@ -662,10 +665,6 @@
         }
         if (this.tuition_transfer.to_student_id!="" && this.tuition_transfer.to_student_id == this.tuition_transfer.from_student_id) {
           mess += " - Học sinh nhận phải khác học sinh chuyển<br/>";
-          resp = false;
-        }
-        if (this.tuition_transfer.to_product_id == "") {
-          mess += " - Chương trình học quy đổi không được để trống<br/>";
           resp = false;
         }
         if (this.tuition_transfer.transfer_date == "") {
@@ -686,7 +685,7 @@
         axios.p("/api/lms/tuition_transfers/add",{
           tuition_transfer: this.tuition_transfer,
           from_student_info: this.from_student_info,
-          from_contracts : this.from_contracts,
+          from_contracts : selected_contracts,
           to_student_info: this.to_student_info,
           to_contracts : this.to_contracts,
           transferred_contracts: this.transferred_contracts,

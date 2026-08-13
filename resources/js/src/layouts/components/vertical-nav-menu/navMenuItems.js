@@ -102,12 +102,12 @@ export default [
           //   slug: 'lms-branch_transfers',
           //   permission:'lms_branch_transfers',
           // },
-          // {
-          //   url: '/lms/tuition_transfers',
-          //   name: 'Chuyển phí',
-          //   slug: 'lms-tuition_transfers',
-          //   permission:'lms_tuition_transfers',
-          // },
+          {
+            url: '/lms/tuition_transfers',
+            name: 'Chuyển phí',
+            slug: 'lms-tuition_transfers',
+            permission:'lms_tuition_transfers',
+          },
           // {
           //   url: '/lms/exchange',
           //   name: 'Quy đổi',
