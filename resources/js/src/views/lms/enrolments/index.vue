@@ -167,7 +167,7 @@
                         <th colspan="1" rowspan="1">Học sinh</th>
                         <th colspan="1" rowspan="1">Hợp đồng</th>
                         <th colspan="1" rowspan="1">Buổi học</th>
-                        <th colspan="1" rowspan="1" class="text-center">Add lớp</th>
+                        <th colspan="1" rowspan="1" class="text-center" style="min-width: 180px;">Add lớp</th>
                       </tr>
                     </thead>
                     <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in filteredStudents" :key="index">
@@ -207,11 +207,11 @@
                         <p>Số buổi đã học: <strong>{{item.done_sessions}}</strong></p>
                         <p>Tổng số buổi: {{item.summary_sessions}}</p>
                       </td>
-                      <td class="td vs-table--td text-center">
+                      <td class="td vs-table--td text-center" style="min-width: 180px;">
                          <select
                            v-model="item.add_class_status"
-                           class="vs-inputx vs-input--input normal"
-                           :style="`width:160px; padding:5px !important; ${item.add_class_status == 4 ? 'background-color: #d4edda !important;' : item.add_class_status == 3 ? 'background-color: #fff3cd !important;' : item.add_class_status == 2 ? 'background-color: #f8d7da !important;' : ''}`"
+                           class="vs-inputx vs-input--input normal mb-2"
+                           :style="`width:100%; padding:5px !important; ${item.add_class_status == 4 ? 'background-color: #d4edda !important;' : item.add_class_status == 3 ? 'background-color: #fff3cd !important;' : item.add_class_status == 2 ? 'background-color: #f8d7da !important;' : ''}`"
                            @change="updateAddClassStatus(item)"
                            :disabled="user_role.is_sale || user_role.is_sale_leader"
                          >
@@ -221,7 +221,15 @@
                            <option :value="3">Chờ feedback</option>
                            <option :value="4">DONE</option>
                          </select>
-                         <br>
+                         <textarea 
+                           v-model="item.enrolment_note" 
+                           class="vs-inputx vs-input--input normal w-full mt-1 mb-2" 
+                           rows="2" 
+                           placeholder="Ghi chú xếp lớp..." 
+                           @change="updateEnrolmentNote(item)"
+                           :disabled="user_role.is_sale || user_role.is_sale_leader"
+                           style="padding: 5px !important; resize: vertical;"
+                         ></textarea>
                         <vs-button 
                           v-if="canRemoveStudent(item)"
                           size="small" 
@@ -229,12 +237,12 @@
                           type="border" 
                           icon-pack="feather" 
                           icon="icon-trash-2"
-                          style="margin: auto; margin-top: 10px;"
+                          style="margin: auto; margin-top: 5px;"
                           @click="confirmRemoveStudent(item)"
                         >
                           Xóa
                         </vs-button>
-                        <span v-else class="text-muted" style="font-size: 12px;">Đã học</span>
+                        <span v-else class="text-muted" style="font-size: 12px; display: block; margin-top: 5px;">Đã học</span>
                       </td>
                     </tr>
                   </table>
@@ -957,6 +965,32 @@
           this.$vs.notify({
             title: 'Lỗi',
             text: 'Cập nhật trạng thái thất bại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          })
+        })
+      },
+      updateEnrolmentNote(item) {
+        if (this.user_role.is_sale || this.user_role.is_sale_leader) {
+          return
+        }
+        axios.p('/api/lms/enrolments/update-enrolment-note', {
+          contract_id: item.contract_id,
+          enrolment_note: item.enrolment_note
+        }).then((resp) => {
+          if (resp.data.status) {
+            this.$vs.notify({
+              title: 'Thành công',
+              text: 'Cập nhật ghi chú thành công',
+              color: 'success'
+            })
+          }
+        }).catch((e) => {
+          console.log(e)
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: e.response && e.response.data && e.response.data.message ? e.response.data.message : 'Cập nhật ghi chú thất bại',
             color: 'danger',
             iconPack: 'feather',
             icon: 'icon-alert-circle'

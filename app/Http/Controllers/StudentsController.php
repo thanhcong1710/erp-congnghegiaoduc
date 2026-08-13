@@ -308,6 +308,22 @@ class StudentsController extends Controller
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
         );
+
+        $default_avatars = [
+            '/images/common/avatar-girl.svg',
+            '/images/common/avatar-boy.svg',
+            '/images/avatar-default.jpg',
+            '',
+            null
+        ];
+        $current_avatar = data_get($pre_student_info, 'avatar_url');
+        $old_gender = data_get($pre_student_info, 'gender');
+        $new_gender = $request->gender;
+
+        if ($new_gender && $new_gender != $old_gender && in_array($current_avatar, $default_avatars, true)) {
+            $data_update['avatar_url'] = $new_gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg';
+        }
+
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
         u::query("UPDATE crm_parents SET 
             name = '".addslashes($request->gud_name1)."',

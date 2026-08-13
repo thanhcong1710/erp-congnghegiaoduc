@@ -96,7 +96,7 @@ class EnrolmentsController extends Controller
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code, s.gud_mobile1,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
-                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status, c.ec_id, c.ec_leader_id,
+                c.must_charge, c.total_charged, c.done_sessions, c.add_class_status, c.ec_id, c.ec_leader_id, c.enrolment_note,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT u.name FROM users u WHERE u.id = c.ec_id) AS ec_name,
                 (SELECT u.name FROM users u WHERE u.id = c.ec_leader_id) AS team_name,
@@ -464,5 +464,36 @@ class EnrolmentsController extends Controller
         );
 
         return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
+    }
+
+    public function updateEnrolmentNote(Request $request)
+    {
+        $current_user_id = Auth::user()->id;
+        $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
+        $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
+
+        if ($is_sale || $is_sale_leader) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Tài khoản Sale và Sale Leader chỉ có quyền xem, không được phép chỉnh sửa ghi chú.'
+            ], 403);
+        }
+
+        $contract_id = (int) data_get($request, 'contract_id');
+        $enrolment_note = data_get($request, 'enrolment_note');
+
+        if (!$contract_id) {
+            return response()->json(['status' => 0, 'message' => 'Thiếu contract_id'], 400);
+        }
+
+        u::updateSimpleRow(
+            ['enrolment_note' => $enrolment_note, 'updated_at' => date('Y-m-d H:i:s'), 'updator_id' => $current_user_id],
+            ['id' => $contract_id],
+            'contracts'
+        );
+
+        u::addLogContracts($contract_id);
+
+        return response()->json(['status' => 1, 'message' => 'Cập nhật ghi chú thành công']);
     }
 }
