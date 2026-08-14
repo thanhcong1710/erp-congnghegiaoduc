@@ -493,7 +493,7 @@
                       <td class="td vs-table--td text-center">
                         <div class="flex flex-col items-center justify-center">
                           <span class="mb-1">{{item.label_status}}</span>
-                          <vs-button v-if="agreement.is_admin && item.status == 7 && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="warning" type="filled" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
+                          <vs-button v-if="agreement.is_admin && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="warning" type="filled" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
                         </div>
                       </td>
                     </tr>
