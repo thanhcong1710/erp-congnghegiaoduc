@@ -1456,7 +1456,9 @@ class ContractsController extends Controller
                     $full_fee_date = null;
                     $count_recharge = ($is_first_package == 1) ? 0 : 1;
                 }
-
+                if (data_get($agreementInfo, 'debt_amount') != $new_debt_amount) {
+                    $updateChargesFee = true;
+                }
                 u::updateSimpleRow(array(
                     'must_charge' => $new_must_charge,
                     'discount_amount' => $discount_amount,
