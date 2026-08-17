@@ -949,6 +949,35 @@ class ContractsController extends Controller
 
         return response()->json(['status' => 1, 'message' => 'Chuyển tiền thừa thành công']);
     }
+    
+    public function changeContractProduct(Request $request)
+    {
+        $contract_id = (int) $request->contract_id;
+        $new_product_id = (int) $request->product_id;
+        
+        $contract = u::first("SELECT c.*, (SELECT name FROM products WHERE id=c.product_id) AS old_product_name FROM contracts c WHERE c.id = $contract_id");
+        if (!$contract) {
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy hợp đồng']);
+        }
+        
+        if ($contract->product_id == $new_product_id) {
+            return response()->json(['status' => 0, 'message' => 'Sản phẩm mới phải khác sản phẩm hiện tại']);
+        }
+
+        $new_product = u::first("SELECT name FROM products WHERE id = $new_product_id");
+        if (!$new_product) {
+            return response()->json(['status' => 0, 'message' => 'Sản phẩm không hợp lệ']);
+        }
+        
+        u::updateSimpleRow(['product_id' => $new_product_id, 'updated_at' => date('Y-m-d H:i:s')], ['id' => $contract_id], 'contracts');
+        
+        $old_product_name = $contract->old_product_name ? $contract->old_product_name : 'Không xác định';
+        $new_product_name = $new_product->name;
+        
+        LogStudents::logAdd($contract->student_id, "Đổi từ sản phẩm $old_product_name sang sản phẩm $new_product_name (Hợp đồng: {$contract->code})", Auth::user()->id);
+        
+        return response()->json(['status' => 1, 'message' => 'Đổi sản phẩm thành công']);
+    }
 
     public function refundExcess(Request $request)
     {
@@ -1066,7 +1095,9 @@ class ContractsController extends Controller
         $dataContracts = u::query("SELECT c.id, c.code, c.must_charge, c.total_charged, c.debt_amount, c.status,c.real_sessions, c.done_sessions, c.left_sessions,c.summary_sessions, c.tuition_fee_id, c.relearn_from_contract_id,
                     (SELECT COUNT(id) FROM contracts WHERE relearn_from_contract_id = c.id) AS has_relearned,
                     (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
-                    (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name, c.product_id
+                    (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
+                    (SELECT product_id FROM tuition_fee WHERE id=c.tuition_fee_id) AS original_product_id,
+                    (SELECT name FROM products WHERE id=c.product_id) AS current_product_name, c.product_id
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'), c.count_recharge ASC");

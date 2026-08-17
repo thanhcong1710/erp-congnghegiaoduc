@@ -163,6 +163,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('agreements/relearn', 'ContractsController@relearn');
             Route::post('agreements/transfer-excess', 'ContractsController@transferExcess');
             Route::post('agreements/refund-excess', 'ContractsController@refundExcess');
+            Route::post('agreements/change-contract-product', 'ContractsController@changeContractProduct');
             Route::post('class-info', 'ClassInfoController@getClassInfo');
             Route::post('accounting/charges/list', 'ChargesController@list');
             Route::post('accounting/waitcharges/list', 'ChargesController@waitchargesList');

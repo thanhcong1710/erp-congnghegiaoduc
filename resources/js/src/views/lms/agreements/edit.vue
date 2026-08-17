@@ -484,7 +484,12 @@
                           (Học lại từ {{ item.relearn_from_contract_code }})
                         </div>
                       </td>
-                      <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
+                      <td class="td vs-table--td">
+                        {{item.tuition_fee_name}}
+                        <div v-if="item.product_id != item.original_product_id" style="font-size: 0.75rem; color: #ff9f43; font-style: italic; margin-top: 4px;">
+                          (đã đổi sang sản phẩm {{ item.current_product_name }})
+                        </div>
+                      </td>
                       <td class="td vs-table--td text-center">{{item.must_charge | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.total_charged | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.left_amount | formatMoney}}</td>
@@ -493,7 +498,8 @@
                       <td class="td vs-table--td text-center">
                         <div class="flex flex-col items-center justify-center">
                           <span class="mb-1">{{item.label_status}}</span>
-                          <vs-button v-if="agreement.is_admin && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="warning" type="filled" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại"></vs-button>
+                          <vs-button v-if="agreement.is_admin && !item.relearn_from_contract_id && !item.has_relearned" size="small" color="warning" type="filled" icon-pack="feather" icon="icon-refresh-cw" @click="confirmRelearn(item.id)" title="Học lại" class="mb-1"></vs-button>
+                          <vs-button v-if="agreement.can_edit_lower_fee" size="small" color="primary" type="filled" icon-pack="feather" icon="icon-edit" @click="openChangeProductModal(item)" title="Đổi sản phẩm"></vs-button>
                         </div>
                       </td>
                     </tr>
@@ -579,6 +585,26 @@
         <div class="vx-col w-full text-right mt-4">
           <vs-button color="dark" type="border" class="mr-2" @click="popupRefundActive = false">Hủy</vs-button>
           <vs-button color="danger" @click="submitRefund" :disabled="refundCalling">Xác nhận hoàn tiền</vs-button>
+        </div>
+      </div>
+    </vs-popup>
+
+    <vs-popup title="Đổi sản phẩm cho gói phí" :active.sync="popupChangeProductActive">
+      <div v-if="changeProductData && changeProductData.contract" class="vx-row">
+        <div class="vx-col w-full mb-4">
+          <p class="mb-2">Gói học phí: <strong>{{ changeProductData.contract.tuition_fee_name }}</strong></p>
+          <label>Chọn sản phẩm mới</label>
+          <vue-select
+            label="name"
+            placeholder="Chọn sản phẩm mới"
+            :options="html.products.list"
+            v-model="changeProductData.new_product"
+            :searchable="true"
+          ></vue-select>
+        </div>
+        <div class="vx-col w-full text-right mt-4">
+          <vs-button color="dark" type="border" class="mr-2" @click="popupChangeProductActive = false">Hủy</vs-button>
+          <vs-button color="success" @click="submitChangeProduct" :disabled="changeProductCalling">Xác nhận đổi</vs-button>
         </div>
       </div>
     </vs-popup>
@@ -737,6 +763,12 @@
           { label: 'Chuyển khoản', value: 1 },
           { label: 'Tiền mặt', value: 2 }
         ],
+        popupChangeProductActive: false,
+        changeProductCalling: false,
+        changeProductData: {
+          contract: null,
+          new_product: null
+        },
       }
     },
     async created() {
@@ -1328,6 +1360,67 @@
         }).catch(e => {
           console.log(e);
           this.refundCalling = false;
+        });
+      },
+      openChangeProductModal(contract) {
+        let currentProduct = this.html.products.list.find(p => Number(p.id) === Number(contract.product_id));
+        this.changeProductData = {
+          contract: contract,
+          new_product: currentProduct || null
+        };
+        this.popupChangeProductActive = true;
+      },
+      submitChangeProduct() {
+        if (!this.changeProductData.new_product) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Vui lòng chọn sản phẩm mới',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        
+        if (Number(this.changeProductData.new_product.id) === Number(this.changeProductData.contract.product_id)) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Sản phẩm mới phải khác sản phẩm hiện tại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        this.changeProductCalling = true;
+        axios.p('/api/lms/agreements/change-contract-product', {
+          contract_id: this.changeProductData.contract.id,
+          product_id: this.changeProductData.new_product.id
+        }).then(res => {
+          this.changeProductCalling = false;
+          if (res.data.status === 1) {
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: res.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+            this.popupChangeProductActive = false;
+            this.loadDetail();
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: res.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          }
+        }).catch(e => {
+          console.log(e);
+          this.changeProductCalling = false;
         });
       }
     },
