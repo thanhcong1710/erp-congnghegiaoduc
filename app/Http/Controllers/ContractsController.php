@@ -801,7 +801,8 @@ class ContractsController extends Controller
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 c.must_charge, c.discount_amount, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id,
-                (SELECT ABS(SUM(amount)) FROM payments WHERE agreement_id = c.id AND amount < 0) AS refunded_amount
+                (SELECT ABS(SUM(amount)) FROM payments WHERE agreement_id = c.id AND amount < 0) AS refunded_amount,
+                (SELECT GROUP_CONCAT(DISTINCT cl.cls_name SEPARATOR ', ') FROM contracts ct JOIN classes cl ON cl.id = ct.class_id WHERE ct.agreement_id = c.id AND ct.status > 0 AND ct.class_id > 0) AS class_names
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");

@@ -86,6 +86,7 @@
                   <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1" style="width: 180px;">Hợp đồng</th>
                   <th colspan="1" rowspan="1">Đóng phí</th>
+                  <th colspan="1" rowspan="1">Tên lớp</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -118,6 +119,7 @@
                   <p>Công nợ: <span :class="{'text-danger font-bold': item.debt_amount > 0}">{{ item.debt_amount | formatMoney }}</span></p>
                   <p v-if="item.excess_amount > 0" class="font-bold" style="color: #28c76f;">Tiền thừa: {{ item.excess_amount | formatMoney }}</p>
                 </td>
+                <td class="td vs-table--td">{{ item.class_names || '---' }}</td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/agreements/${item.agreement_id}/detail`" >
