@@ -432,6 +432,27 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('12', 'DashboardController@dashboard12');
         });
 
+        // HRM Routes
+        Route::prefix('hrm')->group(function () {
+            Route::prefix('departments')->group(function () {
+                Route::post('list', 'Hrm\DepartmentController@list');
+                Route::post('add', 'Hrm\DepartmentController@add');
+                Route::get('show/{id}', 'Hrm\DepartmentController@show');
+                Route::post('update/{id}', 'Hrm\DepartmentController@update');
+            });
+            Route::prefix('employees')->group(function () {
+                Route::post('list', 'Hrm\EmployeeProfileController@list');
+                Route::post('add', 'Hrm\EmployeeProfileController@add');
+                Route::get('show/{id}', 'Hrm\EmployeeProfileController@show');
+                Route::post('update/{id}', 'Hrm\EmployeeProfileController@update');
+            });
+            Route::prefix('leaves')->group(function () {
+                Route::post('list', 'Hrm\LeaveRequestController@list');
+                Route::post('add', 'Hrm\LeaveRequestController@add');
+                Route::post('approve/{id}', 'Hrm\LeaveRequestController@approve');
+            });
+        });
+
         // AI Chatbot Routes
         Route::prefix('ai')->group(function () {
             Route::post('chat', 'AI\ChatController@chat');

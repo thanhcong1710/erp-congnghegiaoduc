@@ -247,6 +247,34 @@ export default [
   //   ]
   // },
   {
+    header: 'HRM',
+    icon: 'UsersIcon',
+    permission: 'HRM', // Will need a permission setup eventually, using a placeholder for now or maybe 'editor' in Vue router.
+    items: [
+      {
+        url: '/hrm/departments',
+        name: 'Phòng ban',
+        icon: 'BriefcaseIcon',
+        slug: 'hrm-departments',
+        permission: 'hrm_departments',
+      },
+      {
+        url: '/hrm/employees',
+        name: 'Nhân viên',
+        icon: 'UsersIcon',
+        slug: 'hrm-employees',
+        permission: 'hrm_employees',
+      },
+      {
+        url: '/hrm/leaves',
+        name: 'Nghỉ phép',
+        icon: 'CalendarIcon',
+        slug: 'hrm-leaves',
+        permission: 'hrm_leaves',
+      }
+    ]
+  },
+  {
     header: 'Cấu hình hệ thống',
     icon: 'PackageIcon',
     permission: 'Config',
