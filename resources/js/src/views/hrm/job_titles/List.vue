@@ -2,27 +2,23 @@
   <div>
     <vs-card>
       <div class="flex items-center justify-between mb-4">
-        <h4>Cơ cấu tổ chức (Phòng ban)</h4>
-        <vs-button class="mr-3 mb-2" color="success"   @click="openPopup()"><i class="fa fa-plus"></i> Thêm phòng ban</vs-button>
+        <h4>Quản lý Chức danh</h4>
+        <vs-button class="mr-3 mb-2" color="success"   @click="openPopup()"><i class="fa fa-plus"></i> Thêm chức danh</vs-button>
       </div>
       
-      <vs-table :data="flatDepartments" search pagination :max-items="20">
+      <vs-table :data="titles" search pagination :max-items="10">
         <template slot="thead">
-          <vs-th>Tên phòng ban</vs-th>
-          <vs-th>Quản lý</vs-th>
+          <vs-th>Tên chức danh</vs-th>
+          <vs-th>Phòng ban liên kết</vs-th>
           <vs-th>Mô tả</vs-th>
           <vs-th>Trạng thái</vs-th>
           <vs-th>Thao tác</vs-th>
         </template>
         <template slot-scope="{data}">
           <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-            <vs-td :data="data[indextr].name">
-              <span :style="{ marginLeft: (data[indextr].level * 20) + 'px' }" class="font-medium">
-                {{ data[indextr].level > 0 ? '|_ ' : '' }}{{ data[indextr].name }}
-              </span>
-            </vs-td>
-            <vs-td :data="data[indextr].manager ? data[indextr].manager.name : ''">
-              {{ data[indextr].manager ? data[indextr].manager.name : 'Chưa cập nhật' }}
+            <vs-td :data="data[indextr].name">{{ data[indextr].name }}</vs-td>
+            <vs-td :data="data[indextr].department ? data[indextr].department.name : ''">
+              {{ data[indextr].department ? data[indextr].department.name : 'Dùng chung (Không gắn phòng ban)' }}
             </vs-td>
             <vs-td :data="data[indextr].description">{{ data[indextr].description }}</vs-td>
             <vs-td :data="data[indextr].status">
@@ -39,19 +35,19 @@
     </vs-card>
 
     <!-- Popup Add/Edit -->
-    <vs-popup :title="isEdit ? 'Cập nhật Phòng ban' : 'Thêm Phòng ban'" :active.sync="popupActive">
+    <vs-popup :title="isEdit ? 'Cập nhật Chức danh' : 'Thêm Chức danh'" :active.sync="popupActive">
       <div class="p-4">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <vs-input class="w-full" label="Tên phòng ban (*)" v-model="form.name" />
+            <vs-input class="w-full" label="Tên chức danh (*)" v-model="form.name" />
           </div>
         </div>
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <label class="text-base font-medium">Trực thuộc (Phòng ban cha)</label>
-            <vs-select class="w-full mt-1" v-model="form.parent_id" autocomplete>
-              <vs-select-item :value="null" text="-- Là cấp cao nhất --" />
-              <vs-select-item :key="index" :value="item.id" :text="item.name" v-for="(item,index) in flatDepartments" :disabled="item.id === form.id" />
+            <label class="text-base font-medium">Phòng ban liên kết</label>
+            <vs-select class="w-full mt-1" v-model="form.department_id" autocomplete>
+              <vs-select-item :value="null" text="Dùng chung (Không gắn)" />
+              <vs-select-item :key="index" :value="item.id" :text="item.name" v-for="(item,index) in departments" />
             </vs-select>
           </div>
         </div>
@@ -85,38 +81,46 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      titles: [],
       departments: [],
-      flatDepartments: [],
       popupActive: false,
       isEdit: false,
       form: {
         id: null,
         name: '',
-        parent_id: null,
+        department_id: null,
         description: '',
         status: 1
       }
     }
   },
   created() {
+    this.fetchTitles();
     this.fetchDepartments();
   },
   methods: {
-    fetchDepartments() {
-      axios.p('/api/hrm/departments/list').then(res => {
-        this.departments = res.data;
-        this.flatDepartments = this.flattenDepartments(this.departments);
+    fetchTitles() {
+      axios.p('/api/hrm/job-titles/list').then(res => {
+        this.titles = res.data;
       }).catch(err => {
         console.error(err);
       });
     },
-    flattenDepartments(deps, level = 0) {
+    fetchDepartments() {
+      // Need a flat list of departments here for the select box.
+      // Assuming /api/hrm/departments/list returns the list.
+      axios.p('/api/hrm/departments/list').then(res => {
+        // Flat mapping if it returns nested tree, but for simplicity assuming array.
+        // If it's a tree, we need to flatten it. Let's just use it as is if it's flat, or flatten if it has children.
+        this.departments = this.flattenDepartments(res.data);
+      }).catch(err => console.error(err));
+    },
+    flattenDepartments(deps, prefix = '') {
       let flat = [];
       deps.forEach(d => {
-        const item = { ...d, level: level };
-        flat.push(item);
+        flat.push({ id: d.id, name: prefix + d.name });
         if (d.children && d.children.length > 0) {
-          flat = flat.concat(this.flattenDepartments(d.children, level + 1));
+          flat = flat.concat(this.flattenDepartments(d.children, prefix + '-- '));
         }
       });
       return flat;
@@ -127,23 +131,23 @@ export default {
         this.form = { ...item };
       } else {
         this.isEdit = false;
-        this.form = { id: null, name: '', parent_id: null, description: '', status: 1 };
+        this.form = { id: null, name: '', department_id: null, description: '', status: 1 };
       }
       this.popupActive = true;
     },
     saveData() {
       if (!this.form.name) {
-        this.$vs.notify({title: 'Lỗi', text: 'Vui lòng nhập tên phòng ban', color: 'danger'});
+        this.$vs.notify({title: 'Lỗi', text: 'Vui lòng nhập tên chức danh', color: 'danger'});
         return;
       }
       
-      let url = this.isEdit ? `/api/hrm/departments/update/${this.form.id}` : '/api/hrm/departments/add';
+      let url = this.isEdit ? `/api/hrm/job-titles/update/${this.form.id}` : '/api/hrm/job-titles/add';
       
       axios.p(url, this.form).then(res => {
         if (res.data.status === 1) {
           this.$vs.notify({title: 'Thành công', text: res.data.message, color: 'success'});
           this.popupActive = false;
-          this.fetchDepartments();
+          this.fetchTitles();
         } else {
           this.$vs.notify({title: 'Lỗi', text: res.data.message, color: 'danger'});
         }

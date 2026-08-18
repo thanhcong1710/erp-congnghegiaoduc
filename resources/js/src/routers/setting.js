@@ -533,6 +533,20 @@ export default {
           pageTitle: 'Cập nhật phòng Zoom',
           rule: 'editor'
         }
+      },
+      {
+        path: '/settings/docs',
+        name: 'setting-docs',
+        component: () => import('@/views/settings/docs/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Cấu hình hệ thống', url: '/settings/docs' },
+            { title: 'Tài liệu hướng dẫn', active: true }
+          ],
+          pageTitle: 'Tài liệu Hướng dẫn Hệ thống',
+          rule: 'editor'
+        }
       }
     ]
   },

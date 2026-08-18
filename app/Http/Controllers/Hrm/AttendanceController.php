@@ -34,9 +34,30 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function checkIn(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required',
+            'date' => 'required|date',
+            'check_in' => 'required',
+        ]);
+
+        $data = $request->all();
+        $data['check_in_ip'] = $request->ip();
+        
+        $attendance = HrmAttendance::create($data);
+        return response()->json(['status' => 1, 'message' => 'Check-in thành công', 'data' => $attendance]);
+    }
+
+    public function checkOut(Request $request, $id)
+    {
+        $attendance = HrmAttendance::findOrFail($id);
+        
+        $data = $request->only(['check_out', 'check_out_location', 'device_id', 'note']);
+        $data['check_out_ip'] = $request->ip();
+
+        $attendance->update($data);
+        return response()->json(['status' => 1, 'message' => 'Check-out thành công', 'data' => $attendance]);
     }
 
     /**

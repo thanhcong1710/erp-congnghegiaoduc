@@ -445,6 +445,43 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'Hrm\EmployeeProfileController@add');
                 Route::get('show/{id}', 'Hrm\EmployeeProfileController@show');
                 Route::post('update/{id}', 'Hrm\EmployeeProfileController@update');
+                Route::post('add-contract', 'Hrm\EmployeeProfileController@addContract');
+                Route::post('add-document', 'Hrm\EmployeeProfileController@addDocument');
+            });
+            Route::prefix('job-titles')->group(function () {
+                Route::post('list', 'Hrm\JobTitleController@list');
+                Route::post('add', 'Hrm\JobTitleController@add');
+                Route::get('show/{id}', 'Hrm\JobTitleController@show');
+                Route::post('update/{id}', 'Hrm\JobTitleController@update');
+            });
+            Route::prefix('job-levels')->group(function () {
+                Route::post('list', 'Hrm\JobLevelController@list');
+                Route::post('add', 'Hrm\JobLevelController@add');
+                Route::get('show/{id}', 'Hrm\JobLevelController@show');
+                Route::post('update/{id}', 'Hrm\JobLevelController@update');
+            });
+            Route::prefix('shifts')->group(function () {
+                Route::post('list', 'Hrm\ShiftController@list');
+                Route::post('add', 'Hrm\ShiftController@add');
+                Route::post('update/{id}', 'Hrm\ShiftController@update');
+            });
+            Route::prefix('shift-assignments')->group(function () {
+                Route::post('list', 'Hrm\ShiftAssignmentController@list');
+                Route::post('add', 'Hrm\ShiftAssignmentController@add');
+            });
+            Route::prefix('overtime')->group(function () {
+                Route::post('list', 'Hrm\OvertimeRequestController@list');
+                Route::post('add', 'Hrm\OvertimeRequestController@add');
+                Route::post('update-status/{id}', 'Hrm\OvertimeRequestController@updateStatus');
+            });
+            Route::prefix('leave-types')->group(function () {
+                Route::post('list', 'Hrm\LeaveTypeController@list');
+                Route::post('add', 'Hrm\LeaveTypeController@add');
+                Route::post('update/{id}', 'Hrm\LeaveTypeController@update');
+            });
+            Route::prefix('attendances')->group(function () {
+                Route::post('check-in', 'Hrm\AttendanceController@checkIn');
+                Route::post('check-out/{id}', 'Hrm\AttendanceController@checkOut');
             });
             Route::prefix('leaves')->group(function () {
                 Route::post('list', 'Hrm\LeaveRequestController@list');

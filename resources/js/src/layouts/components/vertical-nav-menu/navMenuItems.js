@@ -249,28 +249,55 @@ export default [
   {
     header: 'HRM',
     icon: 'UsersIcon',
-    permission: 'HRM', // Will need a permission setup eventually, using a placeholder for now or maybe 'editor' in Vue router.
+    // permission: 'HRM', // Temporarily disabled for testing
     items: [
       {
         url: '/hrm/departments',
-        name: 'Phòng ban',
+        name: 'Cơ cấu tổ chức',
         icon: 'BriefcaseIcon',
         slug: 'hrm-departments',
-        permission: 'hrm_departments',
+        permission: 'hrm',
+      },
+      {
+        url: '/hrm/job-levels',
+        name: 'Cấp bậc',
+        icon: 'BarChart2Icon',
+        slug: 'hrm-job-levels',
+        permission: 'hrm',
+      },
+      {
+        url: '/hrm/job-titles',
+        name: 'Chức danh',
+        icon: 'AwardIcon',
+        slug: 'hrm-job-titles',
+        permission: 'hrm',
       },
       {
         url: '/hrm/employees',
         name: 'Nhân viên',
         icon: 'UsersIcon',
         slug: 'hrm-employees',
-        permission: 'hrm_employees',
+        permission: 'hrm',
       },
       {
-        url: '/hrm/leaves',
+        url: null,
+        name: 'Chấm công',
+        icon: 'ClockIcon',
+        submenu: [
+          { url: '/hrm/attendances', name: 'Bảng chấm công', slug: 'hrm-attendances', permission: 'hrm' },
+          { url: '/hrm/shifts', name: 'Ca làm việc', slug: 'hrm-shifts', permission: 'hrm' },
+          { url: '/hrm/shift-assignments', name: 'Xếp ca', slug: 'hrm-shift-assignments', permission: 'hrm' },
+          { url: '/hrm/overtime', name: 'Làm thêm giờ', slug: 'hrm-overtime', permission: 'hrm' },
+        ]
+      },
+      {
+        url: null,
         name: 'Nghỉ phép',
         icon: 'CalendarIcon',
-        slug: 'hrm-leaves',
-        permission: 'hrm_leaves',
+        submenu: [
+          { url: '/hrm/leaves', name: 'Đơn nghỉ phép', slug: 'hrm-leaves', permission: 'hrm' },
+          { url: '/hrm/leave-types', name: 'Loại nghỉ phép', slug: 'hrm-leave-types', permission: 'hrm' },
+        ]
       }
     ]
   },
@@ -279,6 +306,13 @@ export default [
     icon: 'PackageIcon',
     permission: 'Config',
     items: [
+      {
+        url: '/settings/docs',
+        name: 'Tài liệu hệ thống',
+        icon: 'BookIcon',
+        slug: 'settings-docs',
+        permission: 'Config',
+      },
       {
         url: '/settings/branches',
         name: 'Trung tâm',

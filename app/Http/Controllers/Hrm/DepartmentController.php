@@ -4,61 +4,35 @@ namespace App\Http\Controllers\Hrm;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\HrmDepartment;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function list(Request $request)
     {
-        //
+        // Get only root departments and load their nested children
+        $departments = HrmDepartment::with(['manager', 'children.manager', 'children.children.manager'])
+            ->whereNull('parent_id')
+            ->get();
+        return response()->json($departments);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    
+    public function add(Request $request) {
+        $department = HrmDepartment::create($request->all());
+        return response()->json(['status' => 1, 'message' => 'Created successfully', 'data' => $department]);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+    
+    public function show($id) {
+        $department = HrmDepartment::with(['manager', 'parent', 'children'])->find($id);
+        return response()->json($department);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+    
+    public function update(Request $request, $id) {
+        $department = HrmDepartment::find($id);
+        if ($department) {
+            $department->update($request->all());
+            return response()->json(['status' => 1, 'message' => 'Updated successfully']);
+        }
+        return response()->json(['status' => 0, 'message' => 'Not found'], 404);
     }
 }

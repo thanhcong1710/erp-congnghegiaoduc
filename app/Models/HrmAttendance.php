@@ -13,8 +13,13 @@ class HrmAttendance extends Model
         'date',
         'check_in',
         'check_out',
-        'note',
+        'check_in_ip',
+        'check_out_ip',
+        'check_in_location',
+        'check_out_location',
+        'device_id',
         'status',
+        'note',
     ];
 
     public function user()
