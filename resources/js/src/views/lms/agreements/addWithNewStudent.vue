@@ -340,7 +340,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận sách"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận (Trừ 100K/1khoá học)', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]"
                     v-model="agreement.book_receive_obj"
                     :searchable="false"
                     @input="saveBookReceive"
@@ -362,7 +362,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận hợp đồng"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]"
                     v-model="agreement.contract_receive_obj"
                     :searchable="false"
                     @input="saveContractReceive"
@@ -833,6 +833,17 @@
       saveBookReceive(data = null){
         if (data && typeof data === 'object') {
           this.agreement.book_receive = data.value
+          if (data.value === 2) {
+             const courseCount = (this.agreement.tuition_fee_type == 2 && this.agreement.tuition_fee_relation && this.agreement.tuition_fee_relation.length > 0) ? this.agreement.tuition_fee_relation.length : 1;
+             this.agreement.discount_amount = Number(this.agreement.discount_amount || 0) + (courseCount * 100000);
+             let noteAdd = 'Không nhận sách';
+             if (this.agreement.discount_note && !this.agreement.discount_note.includes(noteAdd)) {
+                 this.agreement.discount_note = this.agreement.discount_note + ', ' + noteAdd;
+             } else if (!this.agreement.discount_note) {
+                 this.agreement.discount_note = noteAdd;
+             }
+             this.caculatorSession();
+          }
         }else{
           this.agreement.book_receive = 0
         }

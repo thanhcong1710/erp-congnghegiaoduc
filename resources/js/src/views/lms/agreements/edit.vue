@@ -234,7 +234,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận sách"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận (Trừ 100K/1khoá học)', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]"
                     v-model="agreement.book_receive_obj"
                     :searchable="false"
                     @input="saveBookReceive"
@@ -256,7 +256,7 @@
               <vue-select
                     label="label"
                     placeholder="Chọn trạng thái nhận hợp đồng"
-                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]"
+                    :options="[{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]"
                     v-model="agreement.contract_receive_obj"
                     :searchable="false"
                     @input="saveContractReceive"
@@ -468,6 +468,7 @@
                         <!---->
                         <th colspan="1" rowspan="1"> Mã hợp đồng</th>
                         <th colspan="1" rowspan="1"> Gói phí</th>
+                        <th colspan="1" rowspan="1"> Tên Lớp</th>
                         <th colspan="1" rowspan="1" class="text-center">Giá</th>
                         <th colspan="1" rowspan="1" class="text-center">Đã đóng</th>
                         <th colspan="1" rowspan="1" class="text-center">Còn lại</th>
@@ -490,6 +491,7 @@
                           (đã đổi sang sản phẩm {{ item.current_product_name }})
                         </div>
                       </td>
+                      <td class="td vs-table--td">{{item.class_name}}</td>
                       <td class="td vs-table--td text-center">{{item.must_charge | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.total_charged | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.left_amount | formatMoney}}</td>
@@ -985,11 +987,11 @@
           
           // Set các obj cho vue-select
           if (this.agreement.book_receive > 0) {
-            const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]
+            const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận (Trừ 100K/1khoá học)', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]
             this.agreement.book_receive_obj = bookOptions.find(o => o.value === this.agreement.book_receive)
           }
           if (this.agreement.contract_receive > 0) {
-            const contractOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}]
+            const contractOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]
             this.agreement.contract_receive_obj = contractOptions.find(o => o.value === this.agreement.contract_receive)
           }
           if (this.agreement.group_type > 0) {
@@ -1081,6 +1083,17 @@
       saveBookReceive(data = null){
         if (data && typeof data === 'object') {
           this.agreement.book_receive = data.value
+          if (data.value === 2) {
+             const courseCount = this.productIdsOfNewFee && this.productIdsOfNewFee.length > 0 ? this.productIdsOfNewFee.length : (this.agreement.contracts ? this.agreement.contracts.length : 1);
+             this.agreement.discount_amount = Number(this.agreement.discount_amount || 0) + (courseCount * 100000);
+             let noteAdd = 'Không nhận sách';
+             if (this.agreement.discount_note && !this.agreement.discount_note.includes(noteAdd)) {
+                 this.agreement.discount_note = this.agreement.discount_note + ', ' + noteAdd;
+             } else if (!this.agreement.discount_note) {
+                 this.agreement.discount_note = noteAdd;
+             }
+             this.updateDiscount();
+          }
         }else{
           this.agreement.book_receive = 0
         }

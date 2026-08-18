@@ -1098,7 +1098,8 @@ class ContractsController extends Controller
                     (SELECT code FROM contracts WHERE id = c.relearn_from_contract_id) AS relearn_from_contract_code,
                     (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                     (SELECT product_id FROM tuition_fee WHERE id=c.tuition_fee_id) AS original_product_id,
-                    (SELECT name FROM products WHERE id=c.product_id) AS current_product_name, c.product_id
+                    (SELECT name FROM products WHERE id=c.product_id) AS current_product_name, c.product_id,
+                    (SELECT cls_name FROM classes WHERE id=c.class_id) AS class_name
                 FROM contracts AS c 
                 WHERE c.agreement_id= $agreement_id AND c.status>0 
                 ORDER BY DATE_FORMAT(c.created_at, '%Y-%m-%d'), c.count_recharge ASC");

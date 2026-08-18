@@ -315,6 +315,7 @@
                         <!---->
                         <th colspan="1" rowspan="1"> Mã hợp đồng</th>
                         <th colspan="1" rowspan="1"> Gói phí</th>
+                        <th colspan="1" rowspan="1"> Tên Lớp</th>
                         <th colspan="1" rowspan="1" class="text-center">Giá</th>
                         <th colspan="1" rowspan="1" class="text-center">Đã đóng</th>
                         <th colspan="1" rowspan="1" class="text-center">Còn lại</th>
@@ -327,6 +328,7 @@
                       <!---->
                       <td class="td vs-table--td">{{item.code}}</td>
                       <td class="td vs-table--td">{{item.tuition_fee_name}}</td>
+                      <td class="td vs-table--td">{{item.class_name}}</td>
                       <td class="td vs-table--td text-center">{{item.must_charge | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.total_charged | formatMoney}}</td>
                       <td class="td vs-table--td text-center">{{item.left_amount | formatMoney}}</td>
@@ -547,8 +549,8 @@
         const labels = {
           0: 'Chưa điền',
           1: 'Có nhận',
-          2: 'Không nhận',
-          3: 'Đã nhận'
+          2: 'Không nhận (Trừ 100K/1khoá học)',
+          3: 'Đã nhận (sale đưa trực tiếp cho học viên)'
         };
         return labels[value] || 'Chưa điền';
       },
@@ -556,7 +558,8 @@
         const labels = {
           0: 'Chưa điền',
           1: 'Có nhận',
-          2: 'Không nhận'
+          2: 'Không nhận',
+          3: 'Đã nhận (sale đưa trực tiếp cho học viên)'
         };
         return labels[value] || 'Chưa điền';
       },
