@@ -1,6 +1,6 @@
 export default {
   router: {
-    path: '',
+    path: '/hrm-module',
     component: () => import('@/layouts/main/Main.vue'),
     children: [
       {
