@@ -988,15 +988,15 @@
           // Set các obj cho vue-select
           if (this.agreement.book_receive > 0) {
             const bookOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận (Trừ 100K/1khoá học)', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]
-            this.agreement.book_receive_obj = bookOptions.find(o => o.value === this.agreement.book_receive)
+            this.agreement.book_receive_obj = bookOptions.find(o => o.value == this.agreement.book_receive)
           }
           if (this.agreement.contract_receive > 0) {
             const contractOptions = [{label: 'Có nhận', value: 1}, {label: 'Không nhận', value: 2}, {label: 'Đã nhận (sale đưa trực tiếp cho học viên)', value: 3}]
-            this.agreement.contract_receive_obj = contractOptions.find(o => o.value === this.agreement.contract_receive)
+            this.agreement.contract_receive_obj = contractOptions.find(o => o.value == this.agreement.contract_receive)
           }
           if (this.agreement.group_type > 0) {
             const groupOptions = [{label: 'Không', value: 0}, {label: 'Nhóm 2', value: 2}, {label: 'Nhóm 3', value: 3}, {label: 'Nhóm 4', value: 4}, {label: 'Nhóm 5', value: 5}, {label: 'Nhóm 6', value: 6}]
-            this.agreement.group_type_obj = groupOptions.find(o => o.value === this.agreement.group_type)
+            this.agreement.group_type_obj = groupOptions.find(o => o.value == this.agreement.group_type)
           }
           
           if (!this.agreement.is_sale_role) {
