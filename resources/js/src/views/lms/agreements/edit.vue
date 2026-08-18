@@ -963,7 +963,7 @@
         axios.g(`/api/lms/agreements/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.agreement = response.data
+          this.agreement = Object.assign({}, this.agreement, response.data)
           this.agreement.discount_amount = Number(response.data.discount_amount) || 0
           this.agreement.discount_note = response.data.discount_note || ''
           this.agreement.tuition_fee_amount = Number(response.data.init_tuition_fee_amount) || (Number(response.data.must_charge || 0) + Number(response.data.discount_amount || 0))
