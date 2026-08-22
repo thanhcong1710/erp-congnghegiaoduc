@@ -41,12 +41,12 @@ class AutoWithdrawEnrollmentDeposit extends Command
      */
     public function handle()
     {
-        $date = date('Y-m-d');
+        $date = date('Y-m-d', time() - 24*2*3600);
         $listContracts = u::query("SELECT c.* , a.debt_amount AS agreement_debt_amount, s.created_at AS student_created_at
                 FROM contracts AS c 
 				    LEFT JOIN students AS s On s.id=c.student_id
                     LEFT JOIN agreements AS a ON a.id = c.agreement_id
-                WHERE c.debt_amount>0 
+                WHERE c.debt_amount> 200000 
                     AND c.enrolment_start_date <= '$date' 
                     AND c.status!=7  AND c.status!=8 AND c.class_id IS NOT NULL");
         foreach ($listContracts AS $contract){
