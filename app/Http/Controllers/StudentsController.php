@@ -245,7 +245,7 @@ class StudentsController extends Controller
                 OR c.id IS NULL) AND s.id=$student_id");
         $data->status_label = u::genLearningStatusByContracts($data->id);
         if ($data->real_sessions > $data->done_sessions && $data->left_sessions) {
-            $data->left_amount = round($data->total_charged * ($data->left_sessions - $data->done_sessions) / $data->left_sessions);
+            $data->left_amount = round($data->total_charged * $data->left_sessions / $data->real_sessions);
         } else {
             $data->left_amount = 0;
         }

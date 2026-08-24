@@ -30,7 +30,7 @@
             <div class="flex flex-wrap">
               <!--begin::Stats-->
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
-                <div class="fw-semibold fs-6 text-gray-400"> Học phí (VNĐ)</div>
+                <div class="fw-semibold fs-6 text-gray-400"> Học phí còn lại(VNĐ)</div>
                 <div class="flex align-items-center">
                   <div class="fs-2 fw-bold counted"><span class="text-success">{{student_info.left_amount | formatNumber}}</span>
                     <span style="font-size: 16px;">/ {{student_info.init_total_charged | formatNumber}}</span>
@@ -39,7 +39,7 @@
               </div>
               <div class="box-item-student border border-gray-300 border-dashed rounded min-w-125px py-3 px-4 me-6 mb-3">
                 <!--begin::Number-->
-                <div class="fw-semibold fs-6 text-gray-400">Số buổi học</div>
+                <div class="fw-semibold fs-6 text-gray-400">Số buổi học còn lại</div>
                 <div class="flex align-items-center">
                   <div class="fs-2 fw-bold counted"><span class="text-success">{{student_info.left_sessions}}</span> 
                     <span style="font-size: 16px;">/ {{student_info.summary_sessions}}</span>
