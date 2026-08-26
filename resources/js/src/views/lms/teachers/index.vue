@@ -50,11 +50,11 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Lớp</th>
                   <th colspan="1" rowspan="1" class="text-center">Ngày</th>
                   <th colspan="1" rowspan="1">Giáo viên</th>
                   <th colspan="1" rowspan="1">Trợ giảng</th>
+                  <th colspan="1" rowspan="1" class="text-center">Điểm danh</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
               </thead>
@@ -62,11 +62,13 @@
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.class_name}}</td>
-                <td class="td vs-table--td text-center">{{item.class_date}}</td>
+                <td class="td vs-table--td text-center">{{item.class_date}}  <br> <strong class="text-primary">(Buổi {{item.subject_stt}})</strong></td>
                 <td class="td vs-table--td">{{item.teacher_name}}</td>
                 <td class="td vs-table--td">{{item.cm_name}}</td>
+                <td class="td vs-table--td text-center">
+                  <span class="font-medium" :class="item.present_count > 0 ? 'text-success' : 'text-gray-500'">{{item.present_count}}</span> / {{item.total_count}}
+                </td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/teachers/edit/${item.id}`">
                       <vs-button size="small" color="success"><i class="fa fa-edit"></i></vs-button>
@@ -169,7 +171,7 @@
     created() {
       let from_date =  new Date();
       this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
-      this.searchData.dateRange[1] = new Date(from_date.getFullYear(), from_date.getMonth() + 1, 1);
+      this.searchData.dateRange[1] = new Date();
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
         this.branch_list = response.data
@@ -184,7 +186,7 @@
         this.searchData.pagination= this.pagination
         let from_date =  new Date();
         this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
-        this.searchData.dateRange[1] = new Date(from_date.getFullYear(), from_date.getMonth() + 1, 1);
+        this.searchData.dateRange[1] = new Date();
         this.getData();
       },
       getData() {

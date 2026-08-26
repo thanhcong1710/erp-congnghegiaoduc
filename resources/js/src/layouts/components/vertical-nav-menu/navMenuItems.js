@@ -114,18 +114,18 @@ export default [
           //   slug: 'lms-exchange',
           //   permission:'lms_exchange',
           // },
-          {
-            url: '/lms/attendances',
-            name: 'Điểm danh',
-            slug: 'lms-attendances',
-            permission: 'lms_attendances',
-          },
-          {
-            url: '/lms/assessments',
-            name: 'Nhận xét & đánh giá',
-            slug: 'lms-attendances',
-            permission: 'lms_assessments',
-          },
+          // {
+          //   url: '/lms/attendances',
+          //   name: 'Điểm danh',
+          //   slug: 'lms-attendances',
+          //   permission: 'lms_attendances',
+          // },
+          // {
+          //   url: '/lms/assessments',
+          //   name: 'Nhận xét & đánh giá',
+          //   slug: 'lms-attendances',
+          //   permission: 'lms_assessments',
+          // },
           {
             url: '/lms/teachers',
             name: 'Giáo viên & trợ giảng',
