@@ -4353,4 +4353,94 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function teacherPayroll(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $cond = " s.status = 1 ";
+        
+        $user_role = \Illuminate\Support\Facades\Auth::user()->role_id;
+        $user_id = \Illuminate\Support\Facades\Auth::user()->id;
+        if ($user_role == 36) {
+            $cond .= " AND s.teacher_id = $user_id ";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (cl.cls_name LIKE '%$keyword%' OR ut.name LIKE '%$keyword%' OR ut.hrm_id LIKE '%$keyword%') ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND s.class_date <= '$end_date'";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND s.class_date >= '$start_date'";
+        }
+
+        $query = "SELECT s.teacher_id, s.class_id, 
+                    CONCAT(ut.name, ' - ', ut.hrm_id) AS teacher_name,
+                    ut.hrm_id AS teacher_code,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    COUNT(s.id) AS total_sessions
+            FROM schedules AS s 
+                INNER JOIN classes AS cl ON cl.id = s.class_id
+                LEFT JOIN products AS p ON p.id = cl.product_id
+                INNER JOIN users AS ut ON ut.id = s.teacher_id
+            WHERE $cond
+            GROUP BY s.teacher_id, s.class_id";
+
+        $list = u::query($query);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'STT');
+        $sheet->setCellValue('B1', 'Tên giáo viên');
+        $sheet->setCellValue('C1', 'Mã nhân viên');
+        $sheet->setCellValue('D1', 'Lớp');
+        $sheet->setCellValue('E1', 'Số buổi');
+        $sheet->setCellValue('F1', 'Lương giáo viên');
+
+        $sheet->getColumnDimension("A")->setWidth(10);
+        $sheet->getColumnDimension("B")->setWidth(30);
+        $sheet->getColumnDimension("C")->setWidth(20);
+        $sheet->getColumnDimension("D")->setWidth(20);
+        $sheet->getColumnDimension("E")->setWidth(15);
+        $sheet->getColumnDimension("F")->setWidth(20);
+
+        $grand_total = 0;
+        $x = 2;
+        for ($i = 0; $i < count($list); $i++) {
+            $salary = \App\Http\Controllers\ReportsController::calculateSalary($list[$i]->class_name, $list[$i]->product_name, $list[$i]->total_sessions);
+            $grand_total += $salary;
+            
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $list[$i]->teacher_name);
+            $sheet->setCellValue('C' . $x, $list[$i]->teacher_code);
+            $sheet->setCellValue('D' . $x, $list[$i]->class_name);
+            $sheet->setCellValue('E' . $x, $list[$i]->total_sessions);
+            $sheet->setCellValue('F' . $x, number_format($salary));
+            $sheet->getRowDimension($x)->setRowHeight(23);
+            $x++;
+        }
+
+        $sheet->setCellValue('A' . $x, 'TỔNG');
+        $sheet->mergeCells('A' . $x . ':E' . $x);
+        $sheet->setCellValue('F' . $x, number_format($grand_total));
+        $sheet->getStyle('A' . $x . ':F' . $x)->getFont()->setBold(true);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao_cao_tinh_luong_giao_vien.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

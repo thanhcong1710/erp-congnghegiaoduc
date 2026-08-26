@@ -526,6 +526,24 @@ export default {
         },
       },
       {
+        path: "/lms/reports/operate/teacher-payroll",
+        name: "lms-reports-teacher-payroll",
+        component: () => import("@/views/lms/report/operate/teacherPayroll.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tính lương giáo viên", active: true },
+          ],
+          pageTitle: "Báo cáo tính lương giáo viên",
+          rule: "editor",
+          permission: "lms_reports_operate_21",
+        },
+      },
+      {
         path: "/lms/reports/operate",
         name: "lms-reports-operate",
         component: () => import("@/views/lms/report/operate/index.vue"),

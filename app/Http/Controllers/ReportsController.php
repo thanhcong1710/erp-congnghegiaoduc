@@ -2932,4 +2932,116 @@ class ReportsController extends Controller
         $data = u::makingPagination($list, $total, $page, $limit);
         return response()->json($data);
     }
+
+    public function teacherPayroll(Request $request)
+    {
+        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 50;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation =  $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $cond = " s.status = 1 ";
+        
+        $user_role = \Illuminate\Support\Facades\Auth::user()->role_id;
+        $user_id = \Illuminate\Support\Facades\Auth::user()->id;
+        // Role 36: Giáo viên -> chỉ xem bản ghi của mình
+        if ($user_role == 36) {
+            $cond .= " AND s.teacher_id = $user_id ";
+        }
+
+        if ($keyword !== '') {
+            $cond .= " AND (cl.cls_name LIKE '%$keyword%' OR ut.name LIKE '%$keyword%' OR ut.hrm_id LIKE '%$keyword%') ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND s.class_date <= '$end_date'";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND s.class_date >= '$start_date'";
+        }
+
+        $query = "SELECT s.teacher_id, s.class_id, 
+                    CONCAT(ut.name, ' - ', ut.hrm_id) AS teacher_name,
+                    ut.hrm_id AS teacher_code,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    COUNT(s.id) AS total_sessions
+            FROM schedules AS s 
+                INNER JOIN classes AS cl ON cl.id = s.class_id
+                LEFT JOIN products AS p ON p.id = cl.product_id
+                INNER JOIN users AS ut ON ut.id = s.teacher_id
+            WHERE $cond
+            GROUP BY s.teacher_id, s.class_id";
+
+        $count_query = "SELECT COUNT(*) AS total FROM ($query) AS t";
+        $total = u::first($count_query);
+        
+        $list = u::query($query . $limitation);
+
+        $all_records = u::query($query);
+        $grand_total_salary = 0;
+        foreach ($all_records as $item) {
+            $grand_total_salary += self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+        }
+
+        foreach ($list as $k => $item) {
+            $list[$k]->salary = self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+        }
+
+        return response()->json([
+            'list' => $list,
+            'total_salary' => $grand_total_salary,
+            'paging' => [
+                'total' => $total ? (int)$total->total : 0,
+                'cpage' => $page,
+                'limit' => $limit
+            ]
+        ]);
+    }
+
+    public static function calculateSalary($class_name, $product_name, $total_sessions)
+    {
+        $is_offline = \Illuminate\Support\Str::startsWith(strtoupper($class_name), 'O');
+        $unit_price = 0;
+
+        if ($is_offline) {
+            switch (trim($product_name)) {
+                case 'Pre-Toeic':
+                    $unit_price = 300000;
+                    break;
+                case 'Toeic level 1':
+                    $unit_price = 350000;
+                    break;
+                case 'Toeic level 2':
+                    $unit_price = 400000;
+                    break;
+                case 'Toeic Writing':
+                case 'Toeic Speaking':
+                    $unit_price = 600000;
+                    break;
+            }
+        } else {
+            switch (trim($product_name)) {
+                case 'Pre-Toeic':
+                    $unit_price = 200000;
+                    break;
+                case 'Toeic level 1':
+                    $unit_price = 250000;
+                    break;
+                case 'Toeic level 2':
+                    $unit_price = 300000;
+                    break;
+                case 'Toeic Writing':
+                case 'Toeic Speaking':
+                    $unit_price = 450000;
+                    break;
+            }
+        }
+
+        return $unit_price * $total_sessions;
+    }
 }

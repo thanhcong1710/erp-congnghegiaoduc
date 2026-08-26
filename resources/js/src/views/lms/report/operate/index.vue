@@ -109,6 +109,11 @@
                 <p>20. BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM </p>
               </router-link>
             </div>
+            <div class="mb-2">
+              <router-link class="link-report" :to="'/lms/reports/operate/teacher-payroll'" v-if="checkPermission('lms_reports_operate_21')">
+                <p>21. BÁO CÁO TÍNH LƯƠNG GIÁO VIÊN </p>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
