@@ -4145,7 +4145,7 @@ class ExportsController extends Controller
         }
 
         $query = "SELECT s.teacher_id, s.class_id, 
-                    CONCAT(ut.name, ' - ', ut.hrm_id) AS teacher_name,
+                    ut.name AS teacher_name,
                     ut.hrm_id AS teacher_code,
                     cl.cls_name AS class_name,
                     p.name AS product_name,
@@ -4155,7 +4155,8 @@ class ExportsController extends Controller
                 LEFT JOIN products AS p ON p.id = cl.product_id
                 INNER JOIN users AS ut ON ut.id = s.teacher_id
             WHERE $cond
-            GROUP BY s.teacher_id, s.class_id";
+            GROUP BY s.teacher_id, s.class_id
+            ORDER BY ut.hrm_id ASC, cl.cls_name ASC";
 
         $list = u::query($query);
 
