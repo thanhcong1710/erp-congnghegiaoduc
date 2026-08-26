@@ -146,7 +146,7 @@ export default {
       };
 
       this.$vs.loading();
-      axios.p('/api/reports/teacher-payroll', data)
+      axios.p('/api/lms/reports/teacher-payroll', data)
         .then((response) => {
           this.$vs.loading.close();
           this.listData = response.data.list;
@@ -170,7 +170,7 @@ export default {
       const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[0] ? `${u.dateToString(this.searchData.dateRange[0])}` : '';
       const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[1] ? `${u.dateToString(this.searchData.dateRange[1])}` : '';
       
-      let url = `/api/exports/teacher-payroll?keyword=${this.searchData.keyword}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
+      let url = `/api/lms/exports/teacher-payroll?keyword=${this.searchData.keyword}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
       window.open(url, '_blank');
     }
   },
