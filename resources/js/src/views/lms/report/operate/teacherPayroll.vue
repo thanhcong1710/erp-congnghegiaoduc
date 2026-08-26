@@ -9,8 +9,8 @@
           </div>
           <div class="vx-col sm:w-1/2 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian tính lương</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian"></date-picker>
+            <date-picker name="item-date" v-model="searchData.month" type="month" format="YYYY-MM" style="width: 100%"
+              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng"></date-picker>
           </div>
         </div>
         <div class="vx-row mt-3">
@@ -33,7 +33,8 @@
                   <th>Mã nhân viên</th>
                   <th>Lớp</th>
                   <th class="text-center">Số buổi</th>
-                  <th class="text-right">Lương giáo viên</th>
+                  <th class="text-right">Lương theo lớp</th>
+                  <th class="text-right">Lương Tổng</th>
                 </tr>
               </thead>
               <tr class="tr-values vs-table--tr" v-for="(item, index) in listData" :key="index">
@@ -43,13 +44,10 @@
                 <td class="td vs-table--td">{{item.class_name}}</td>
                 <td class="td vs-table--td text-center">{{item.total_sessions}}</td>
                 <td class="td vs-table--td text-right font-medium text-success">{{item.salary | formatMoney}} VNĐ</td>
-              </tr>
-              <tr v-if="listData.length > 0" class="tr-values vs-table--tr" style="background: rgba(var(--vs-primary),.1);">
-                <td colspan="5" class="td vs-table--td text-center font-bold">TỔNG</td>
-                <td class="td vs-table--td text-right font-bold text-success">{{ total_salary | formatMoney }} VNĐ</td>
+                <td class="td vs-table--td text-right font-medium text-success">{{item.teacher_total_salary | formatMoney}} VNĐ</td>
               </tr>
               <tr v-if="listData.length === 0">
-                <td colspan="6" class="text-center p-5">Không có dữ liệu</td>
+                <td colspan="7" class="text-center p-5">Không có dữ liệu</td>
               </tr>
             </table>
           </div>
@@ -91,7 +89,7 @@ export default {
     return {
       searchData: {
         keyword: "",
-        dateRange: [],
+        month: "",
       },
       listData: [],
       total_salary: 0,
@@ -122,11 +120,7 @@ export default {
   },
   methods: {
     resetDate() {
-      let from_date = new Date();
-      this.searchData.dateRange = [
-        new Date(from_date.getFullYear(), from_date.getMonth(), 1),
-        new Date()
-      ];
+      this.searchData.month = new Date();
     },
     reset() {
       this.searchData.keyword = "";
@@ -135,8 +129,17 @@ export default {
       this.getData();
     },
     getData() {
-      const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[0] ? `${u.dateToString(this.searchData.dateRange[0])}` : '';
-      const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[1] ? `${u.dateToString(this.searchData.dateRange[1])}` : '';
+      let startDate = '';
+      let endDate = '';
+      if (this.searchData.month) {
+        const d = new Date(this.searchData.month);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const firstDay = new Date(y, m, 1);
+        const lastDay = new Date(y, m + 1, 0);
+        startDate = u.dateToString(firstDay);
+        endDate = u.dateToString(lastDay);
+      }
 
       const data = {
         keyword: this.searchData.keyword,
@@ -167,8 +170,17 @@ export default {
       }
     },
     exportExcel() {
-      const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[0] ? `${u.dateToString(this.searchData.dateRange[0])}` : '';
-      const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange != '' && this.searchData.dateRange[1] ? `${u.dateToString(this.searchData.dateRange[1])}` : '';
+      let startDate = '';
+      let endDate = '';
+      if (this.searchData.month) {
+        const d = new Date(this.searchData.month);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const firstDay = new Date(y, m, 1);
+        const lastDay = new Date(y, m + 1, 0);
+        startDate = u.dateToString(firstDay);
+        endDate = u.dateToString(lastDay);
+      }
       
       let url = `/api/lms/exports/teacher-payroll?keyword=${this.searchData.keyword}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
       window.open(url, '_blank');

@@ -2983,18 +2983,22 @@ class ReportsController extends Controller
         $list = u::query($query . $limitation);
 
         $all_records = u::query($query);
-        $grand_total_salary = 0;
+        $teacher_totals = [];
         foreach ($all_records as $item) {
-            $grand_total_salary += self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+            $salary = self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+            if (!isset($teacher_totals[$item->teacher_id])) {
+                $teacher_totals[$item->teacher_id] = 0;
+            }
+            $teacher_totals[$item->teacher_id] += $salary;
         }
 
         foreach ($list as $k => $item) {
             $list[$k]->salary = self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+            $list[$k]->teacher_total_salary = isset($teacher_totals[$item->teacher_id]) ? $teacher_totals[$item->teacher_id] : 0;
         }
 
         return response()->json([
             'list' => $list,
-            'total_salary' => $grand_total_salary,
             'paging' => [
                 'total' => $total ? (int)$total->total : 0,
                 'cpage' => $page,
