@@ -580,6 +580,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH SO CHI TIET', array ( 0 => 'BÁO CÁO DOANH SỐ CHI TIẾT HỌC SINH ĐI HỌC',), array ( 0 => '8', 1 => '28', 2 => '16', 3 => '28', 4 => '26', 5 => '14', 6 => '20',));
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -668,6 +672,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH THU THEO TRUNG TAM', array ( 0 => 'BÁO CÁO TỔNG QUAN DOANH THU HỌC SINH ĐI HỌC THEO TRUNG TÂM',), array ( 0 => '8', 1 => '36', 2 => '16', 3 => '16', 4 => '22',));
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -820,6 +828,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH THU CHUA PHAN BO THEO HS', array ( 0 => 'BÁO CÁO DOANH THU CHƪa PHÂN BỔ THEO HỌC SINH',), array ());
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -978,6 +990,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO TIEN DO HOC SAU 01 NAM', array ( 0 => 'BÁO CÁO TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM',), array ());
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -1142,6 +1158,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH THU CHUA PHAN BO THEO TT', array ( 0 => 'BÁO CÁO DOANH THU CHƪa PHÂN BỔ THEO TRUNG TÂM',), array ( 0 => '8', 1 => '32', 2 => '16', 3 => '20', 4 => '20', 5 => '16', 6 => '22',));
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -1657,6 +1677,10 @@ class ExportsController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH SO CHI TIET THEO KHOA HOC', array ( 0 => 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TỪNG KHÓA HỌC',), array ( 0 => '8', 1 => '42', 2 => '16', 3 => '22', 4 => '12', 5 => '12',));
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+        $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
+        $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
+
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -3921,7 +3945,6 @@ class ExportsController extends Controller
             $sheet->setCellValue("M" . $x, implode("\n", $bills_links));
             $sheet->setCellValue("N" . $x, $status_str);
 
-            $sheet->getStyle("A$x:N$x")->applyFromArray($borderOnly);
         $sheet->getStyle('A' . $x . ':' . $lastColStr . $x)->applyFromArray(['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]]);
             $sheet->getRowDimension($x)->setRowHeight(23);
             }
