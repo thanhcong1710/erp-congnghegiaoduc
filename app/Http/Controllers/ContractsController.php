@@ -886,8 +886,9 @@ class ContractsController extends Controller
         $from_received = (float) data_get($from, 'received_amount', 0);
         $from_total_charged = (float) data_get($from, 'total_charged', 0);
         $from_must_charge = (float) data_get($from, 'must_charge', 0);
+        $from_discount_amount = (float) data_get($from, 'discount_amount', 0);
 
-        $from_effective = $from_total_charged + $from_received - $from_transferred;
+        $from_effective = $from_total_charged + $from_received - $from_transferred + $from_discount_amount;
         $excess = $from_effective - $from_must_charge;
 
         if ($excess < $amount) {
@@ -896,7 +897,7 @@ class ContractsController extends Controller
 
         // Cập nhật gói cũ: tăng transferred_amount, giữ nguyên total_charged
         $new_from_transferred = $from_transferred + $amount;
-        $new_from_effective = $from_total_charged + $from_received - $new_from_transferred;
+        $new_from_effective = $from_total_charged + $from_received - $new_from_transferred  + $from_discount_amount; 
         $new_from_debt = $from_must_charge - $new_from_effective;
 
         u::updateSimpleRow([
