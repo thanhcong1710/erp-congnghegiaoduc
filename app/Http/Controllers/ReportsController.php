@@ -2850,19 +2850,24 @@ class ReportsController extends Controller
         return response()->json(['status' => 0, 'message' => 'Dữ liệu không hợp lệ']);
     }
 
-    public function updateSalaryMonthAll()
+    public function updateSalaryMonthAll($agreement_id = null)
     {
-        if ((int) date('j') < 5) {
+        if ((int) date('j') <= 5) {
             $salaryMonth = date('Y-m', strtotime('first day of previous month'));
         } else {
             $salaryMonth = date('Y-m');
+        }
+        if ($agreement_id) {
+            $cond = " AND id = $agreement_id";
+        } else {
+            $cond = "";
         }
 
         $query = "
             UPDATE agreements
             SET salary_month = '$salaryMonth'
             WHERE debt_amount = 0
-            AND salary_month IS NULL
+            AND salary_month IS NULL $cond
             AND id IN (
                 SELECT agreement_id
                 FROM payments
@@ -2870,6 +2875,14 @@ class ReportsController extends Controller
                 GROUP BY agreement_id
                 HAVING DATE_FORMAT(MAX(charge_date), '%Y-%m') = '$salaryMonth'
             )
+        ";
+        u::query($query);
+
+        $query = "
+            UPDATE agreements
+            SET salary_month = NULL
+            WHERE debt_amount > 0 $cond
+            AND salary_month = '$salaryMonth'
         ";
         u::query($query);
 

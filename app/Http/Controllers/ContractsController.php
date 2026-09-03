@@ -1569,6 +1569,8 @@ class ContractsController extends Controller
             if ($updateChargesFee){
                 $chargesController = new ChargesController();
                 $chargesController->processContractsByAgreement($agreement_id);
+                $report = new ReportsController();
+                $report->updateSalaryMonthAll($agreement_id);
             }
 
         }

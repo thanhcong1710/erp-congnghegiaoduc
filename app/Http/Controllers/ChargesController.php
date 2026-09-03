@@ -286,8 +286,6 @@ class ChargesController extends Controller
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
-                    $report = new ReportsController();
-                    $report->updateSalaryMonthAll();
                     LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Thu đủ phí cho hợp đồng - ' . data_get($agreement_info, 'code'), Auth::user()->id);
                 } else {
                     u::updateSimpleRow(array(
@@ -300,7 +298,9 @@ class ChargesController extends Controller
                     ), array('id' => data_get($agreement_info, 'id')), 'agreements');
                     LogStudents::logAdd(data_get($agreement_info, 'student_id'), 'Đặt cọc ' . u::formatCurrency($charge_amount) . ' cho hợp đồng - ' . data_get($agreement_info, 'code'), Auth::user()->id);
                 }
-
+                $report = new ReportsController();
+                $report->updateSalaryMonthAll(data_get($agreement_info, 'id'));
+                    
                 u::addLogAgreements(data_get($agreement_info, 'id'));
                 $this->processContractsByAgreement(data_get($agreement_info, 'id'));
 
