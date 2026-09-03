@@ -41,7 +41,7 @@ class AutoWithdrawEnrollmentDeposit extends Command
      */
     public function handle()
     {
-        $date = date('Y-m-d', time() - 24*2*3600);
+        $date = date('Y-m-d', time() - 24*7*3600);
         $listContracts = u::query("SELECT c.* , a.debt_amount AS agreement_debt_amount, s.created_at AS student_created_at
                 FROM contracts AS c 
 				    LEFT JOIN students AS s On s.id=c.student_id
