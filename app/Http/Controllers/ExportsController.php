@@ -2214,11 +2214,40 @@ class ExportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        $join_history = "";
+        $expr_must_charge = "a.must_charge";
+        $expr_discount = "a.discount_amount";
+        $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0)";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                $cond .= " AND a.salary_month = '$sm'";
+                $expr_must_charge = "a.must_charge";
+                $expr_discount = "a.discount_amount";
+                $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0)";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
+                $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
+                $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0)";
+            }
         }
 
         $rows = u::query("
@@ -2261,12 +2290,13 @@ class ExportsController extends Controller
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
                 COUNT(a.id)                                            AS unseparated_sales,
                 SUM(tf.number_of_months)                               AS separated_sales,
-                SUM(CASE WHEN a.count_recharge = 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS new_revenue,
-                SUM(CASE WHEN a.count_recharge > 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS uplv_revenue,
-                SUM(a.must_charge - COALESCE(a.discount_amount, 0)) AS total_revenue
+                SUM(CASE WHEN a.count_recharge = 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS new_revenue,
+                SUM(CASE WHEN a.count_recharge > 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS uplv_revenue,
+                SUM($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) AS total_revenue
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            $join_history
             WHERE $cond
             GROUP BY
                 IF(s.source_id = 6, 1, 0),
@@ -2835,11 +2865,46 @@ class ExportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        $join_history = "";
+        $select_must_charge = "a.must_charge";
+        $select_discount = "a.discount_amount AS discount";
+        $select_salary_month = "a.salary_month";
+        $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                // If filtered month is the actual current calendar month, use live data
+                $cond .= " AND a.salary_month = '$sm'";
+                
+                $select_must_charge = "a.must_charge";
+                $select_discount = "a.discount_amount AS discount";
+                $select_salary_month = "a.salary_month";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            } else {
+                // If filtered month is a past month, use history snapshot
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
+                $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
+                $select_salary_month = "IF(arh_current.id IS NOT NULL, arh_current.salary_month, a.salary_month) AS salary_month";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            }
         }
 
         $query = "
@@ -2880,21 +2945,23 @@ class ExportsController extends Controller
                  ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
                 s.source_id,
-                a.must_charge,
+                $select_must_charge,
                 a.total_charged,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
                 (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
                 (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
-                a.discount_amount AS discount,
+                $select_discount,
                 a.first_8th_session_date AS due_date,
                 a.debt_amount,
-                a.salary_month,
-                a.id AS agreement_id
+                $select_salary_month,
+                a.id AS agreement_id,
+                $select_truy_thu
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            $join_history
             WHERE $cond
             ORDER BY a.id DESC
         ";
@@ -2907,15 +2974,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO DOANH SỐ CHI TIẾT THEO TEAM';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:W1');
+        $sheet->mergeCells('A1:X1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Link Facebook', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Hạn thanh toán', 'Công nợ', 'XN Kế toán', 'Tháng tính lương', 'Lương sale'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W'];
+        $headers = ['STT', 'Ngày tạo', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Link Facebook', 'Sđt', 'Team kinh doanh', 'Nhân viên sale', 'Lớp học', 'ĐỊA CHỈ NHẬN SÁCH', 'Giá khoá học', 'Truy thu doanh số', 'DK chung', 'Học phí đợt 1', 'Ngày CK 1', 'Học phí đợt 2', 'Ngày CK 2', 'Giảm trừ', 'Hạn thanh toán', 'Công nợ', 'XN Kế toán', 'Tháng tính lương', 'Lương sale'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X'];
 
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -2927,10 +2994,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:W3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:X3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 14, 16, 22, 22, 30, 14, 16, 16, 22, 22, 16, 12, 16, 14, 16, 14, 14, 14, 16, 14, 16, 16];
+        $widths = [8, 14, 16, 22, 22, 30, 14, 16, 16, 22, 22, 16, 16, 12, 16, 14, 16, 14, 14, 14, 16, 14, 16, 16];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -2951,6 +3018,7 @@ class ExportsController extends Controller
             $p2_date = ($p2_amount > 0) ? $item->last_pay_date : '';
 
             $xn_ketoan = ((float) $item->debt_amount > 0) ? 'R thiếu' : 'R';
+            $truy_thu_doanh_so = (float) $item->truy_thu_doanh_so;
             $luong_sale = 0;
             if ((float) $item->debt_amount == 0) {
                 if ((int) $item->source_id == 6) {
@@ -2958,7 +3026,8 @@ class ExportsController extends Controller
                 } else {
                     $rate = ($item->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $luong_sale = ((float) $item->must_charge - (float) $item->discount) * $rate;
+                $doanh_so = ((float) $item->must_charge - (float) $item->discount) - $truy_thu_doanh_so;
+                $luong_sale = $doanh_so * $rate;
             }
 
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
@@ -2973,55 +3042,57 @@ class ExportsController extends Controller
             $sheet->setCellValue('J' . $rowIdx, $item->class_info ?? '—');
             $sheet->setCellValue('K' . $rowIdx, $item->address ?? '—');
             $sheet->setCellValue('L' . $rowIdx, (float) $item->must_charge);
-            $sheet->setCellValue('M' . $rowIdx, $item->dk_chung);
-            $sheet->setCellValue('N' . $rowIdx, $p1_amount);
-            $sheet->setCellValue('O' . $rowIdx, $item->p1_date);
-            $sheet->setCellValue('P' . $rowIdx, $p2_amount);
-            $sheet->setCellValue('Q' . $rowIdx, $p2_date);
-            $sheet->setCellValue('R' . $rowIdx, (float) $item->discount);
-            $sheet->setCellValue('S' . $rowIdx, $item->due_date ?? '—');
-            $sheet->setCellValue('T' . $rowIdx, (float) $item->debt_amount);
-            $sheet->setCellValue('U' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('V' . $rowIdx, $item->salary_month ?? '—');
-            $sheet->setCellValue('W' . $rowIdx, (float) $luong_sale);
+            $sheet->setCellValue('M' . $rowIdx, $truy_thu_doanh_so);
+            $sheet->setCellValue('N' . $rowIdx, $item->dk_chung);
+            $sheet->setCellValue('O' . $rowIdx, $p1_amount);
+            $sheet->setCellValue('P' . $rowIdx, $item->p1_date);
+            $sheet->setCellValue('Q' . $rowIdx, $p2_amount);
+            $sheet->setCellValue('R' . $rowIdx, $p2_date);
+            $sheet->setCellValue('S' . $rowIdx, (float) $item->discount);
+            $sheet->setCellValue('T' . $rowIdx, $item->due_date ?? '—');
+            $sheet->setCellValue('U' . $rowIdx, (float) $item->debt_amount);
+            $sheet->setCellValue('V' . $rowIdx, $xn_ketoan);
+            $sheet->setCellValue('W' . $rowIdx, $item->salary_month ?? '—');
+            $sheet->setCellValue('X' . $rowIdx, (float) $luong_sale);
 
-            $sheet->getStyle("A$rowIdx:W$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:X$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx:C$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("D$rowIdx:K$rowIdx")->applyFromArray($leftAlign);
-            $sheet->getStyle("L$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("L$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("M$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("N$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("N$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("O$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("P$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("P$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("Q$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("L$rowIdx:M$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("L$rowIdx:M$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            
+            $sheet->getStyle("N$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("O$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("O$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("P$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("Q$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("Q$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("R$rowIdx")->applyFromArray($centerAlign);
 
-            $sheet->getStyle("R$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("R$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("S$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("T$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("T$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("U$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("S$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("S$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("T$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("U$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("U$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("V$rowIdx")->applyFromArray($centerAlign);
-            $sheet->getStyle("W$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("W$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("W$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("X$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("X$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
 
             if ((float) $item->debt_amount > 0) {
-                $sheet->getStyle("T$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
+                $sheet->getStyle("U$rowIdx")->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FFD72B28'));
             }
 
-            $sheet->getStyle("U$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("V$rowIdx")->applyFromArray($centerAlign);
             if ($xn_ketoan === 'R') {
-                $sheet->getStyle("U$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
+                $sheet->getStyle("V$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_DARKGREEN);
             } else {
-                $sheet->getStyle("U$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
+                $sheet->getStyle("V$rowIdx")->getFont()->getColor()->setARGB(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED);
             }
 
-            $sheet->getStyle("W$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("W$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
-            $sheet->getStyle("W$rowIdx")->getFont()->setBold(true);
+            $sheet->getStyle("X$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("X$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("X$rowIdx")->getFont()->setBold(true);
 
             $rowIdx++;
         }
@@ -3166,11 +3237,40 @@ class ExportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        $join_history = "";
+        $select_must_charge = "a.must_charge";
+        $select_discount = "a.discount_amount AS discount";
+        $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                $cond .= " AND a.salary_month = '$sm'";
+                $select_must_charge = "a.must_charge";
+                $select_discount = "a.discount_amount AS discount";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
+                $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            }
         }
 
         $query = "
@@ -3182,12 +3282,15 @@ class ExportsController extends Controller
                     ELSE
                         (SELECT u.name FROM users u WHERE u.id = a.ec_id)
                 END AS ec_name,
-                a.must_charge,
-                a.discount_amount AS discount,
+                $select_must_charge,
+                $select_discount,
                 a.debt_amount,
-                s.source_id
+                s.source_id,
+                $select_truy_thu,
+                a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
+            $join_history
             WHERE $cond
         ";
 
@@ -3203,7 +3306,8 @@ class ExportsController extends Controller
                 } else {
                     $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
+                $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
+                $luong_sale = $doanh_so * $rate;
             }
 
             if (!isset($grouped[$ec_name])) {

@@ -1702,11 +1702,40 @@ class ReportsController extends Controller
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
 
+        $join_history = "";
+        $expr_must_charge = "a.must_charge";
+        $expr_discount = "a.discount_amount";
+        $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0)";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                $cond .= " AND a.salary_month = '$sm'";
+                $expr_must_charge = "a.must_charge";
+                $expr_discount = "a.discount_amount";
+                $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0)";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
+                $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
+                $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0)";
+            }
         }
 
         // ---- Main query: group theo team ----
@@ -1751,12 +1780,13 @@ class ReportsController extends Controller
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
                 COUNT(a.id)                                            AS unseparated_sales,
                 SUM(tf.number_of_months)                               AS separated_sales,
-                SUM(CASE WHEN a.count_recharge = 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS new_revenue,
-                SUM(CASE WHEN a.count_recharge > 0 THEN (a.must_charge - COALESCE(a.discount_amount, 0)) ELSE 0 END) AS uplv_revenue,
-                SUM(a.must_charge - COALESCE(a.discount_amount, 0)) AS total_revenue
+                SUM(CASE WHEN a.count_recharge = 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS new_revenue,
+                SUM(CASE WHEN a.count_recharge > 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS uplv_revenue,
+                SUM($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) AS total_revenue
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            $join_history
             WHERE $cond
             GROUP BY
                 IF(s.source_id = 6, 1, 0),
@@ -2209,11 +2239,46 @@ class ReportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        $join_history = "";
+        $select_must_charge = "a.must_charge";
+        $select_discount = "a.discount_amount AS discount";
+        $select_salary_month = "a.salary_month";
+        $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                // If filtered month is the actual current calendar month, use live data
+                $cond .= " AND a.salary_month = '$sm'";
+                
+                $select_must_charge = "a.must_charge";
+                $select_discount = "a.discount_amount AS discount";
+                $select_salary_month = "a.salary_month";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            } else {
+                // If filtered month is a past month, use history snapshot
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
+                $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
+                $select_salary_month = "IF(arh_current.id IS NOT NULL, arh_current.salary_month, a.salary_month) AS salary_month";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            }
         }
 
         $totalRow = u::first("
@@ -2262,21 +2327,23 @@ class ReportsController extends Controller
                  ORDER BY ct.id ASC LIMIT 1) AS class_info,
                 s.address,
                 s.source_id,
-                a.must_charge,
+                $select_must_charge,
                 a.total_charged,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
                 (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
                 (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
                 (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
                 (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
-                a.discount_amount AS discount,
+                $select_discount,
                 a.first_8th_session_date AS due_date,
                 a.debt_amount,
                 a.id AS agreement_id,
-                a.salary_month
+                $select_salary_month,
+                $select_truy_thu
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
             LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+            $join_history
             WHERE $cond
             ORDER BY a.id DESC
             $limitation
@@ -2295,6 +2362,7 @@ class ReportsController extends Controller
 
             $row->xn_ketoan = ((float) $row->debt_amount > 0) ? 'R thiếu' : 'R';
 
+            $row->truy_thu_doanh_so = (float) $row->truy_thu_doanh_so;
             $row->luong_sale = 0;
             if ((float) $row->debt_amount == 0) {
                 if ((int) $row->source_id == 6) {
@@ -2302,7 +2370,9 @@ class ReportsController extends Controller
                 } else {
                     $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $row->luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
+                
+                $doanh_so = ((float) $row->must_charge - (float) $row->discount) - $row->truy_thu_doanh_so;
+                $row->luong_sale = $doanh_so * $rate;
             }
         }
 
@@ -2394,11 +2464,40 @@ class ReportsController extends Controller
         if ($pay_end_date) {
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
+        $join_history = "";
+        $select_must_charge = "a.must_charge";
+        $select_discount = "a.discount_amount AS discount";
+        $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+
         if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '')";
+            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $cond .= " AND a.salary_month = '$sm'";
+            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
+            
+            if ($sm <= $current_month) {
+                $cond .= " AND a.salary_month = '$sm'";
+                $select_must_charge = "a.must_charge";
+                $select_discount = "a.discount_amount AS discount";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                
+                $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
+                $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
+                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+            }
         }
 
         $query = "
@@ -2410,13 +2509,16 @@ class ReportsController extends Controller
                     ELSE
                         (SELECT u.name FROM users u WHERE u.id = a.ec_id)
                 END AS ec_name,
-                a.must_charge,
-                a.discount_amount AS discount,
+                $select_must_charge,
+                $select_discount,
                 a.debt_amount,
                 a.ec_id,
-                s.source_id
+                s.source_id,
+                $select_truy_thu,
+                a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
+            $join_history
             WHERE $cond
         ";
 
@@ -2433,7 +2535,8 @@ class ReportsController extends Controller
                 } else {
                     $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $luong_sale = ((float) $row->must_charge - (float) $row->discount) * $rate;
+                $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
+                $luong_sale = $doanh_so * $rate;
             }
 
             if (!isset($grouped[$ec_name])) {

@@ -121,6 +121,7 @@
               <th style="min-width:200px">Lớp học</th>
               <th style="min-width:250px">ĐỊA CHỈ NHẬN SÁCH</th>
               <th style="min-width:140px" class="text-right">Giá khoá học</th>
+              <th style="min-width:140px" class="text-right">Truy thu doanh số</th>
               <th style="min-width:110px">DK chung</th>
               <th style="min-width:140px" class="text-right">Học phí đợt 1</th>
               <th style="min-width:130px" class="text-center">Ngày CK 1</th>
@@ -155,6 +156,7 @@
               <td class="text-wrap-cell">{{ row.class_info || '—' }}</td>
               <td class="text-wrap-cell">{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
+              <td class="text-right money-cell" style="color: #ea5455">{{ fmtMoney(row.truy_thu_doanh_so) }}</td>
               <td>{{ row.dk_chung }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
               <td class="text-center date-cell">{{ row.p1_date }}</td>
@@ -177,13 +179,14 @@
               <td class="text-right money-cell font-bold">{{ fmtMoney(row.luong_sale) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td :colspan="(user_role.is_admin || user_role.is_accountant) ? 24 : 23" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td :colspan="(user_role.is_admin || user_role.is_accountant) ? 25 : 24" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
           <tfoot v-if="datas.length > 0">
             <tr class="rpt-row-total font-bold" style="background: #eef2ff; font-weight: bold; position: sticky; bottom: 0; z-index: 2;">
               <td :colspan="(user_role.is_admin || user_role.is_accountant) ? 12 : 11" class="text-center font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5; color: #4338ca;">TỔNG CỘNG</td>
               <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalMustCharge) }}</td>
+              <td class="text-right money-cell font-bold text-danger" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalTruyThuDoanhSo) }}</td>
               <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
               <td class="text-right money-cell font-bold" style="background: #eef2ff; border-top: 2px solid #4f46e5;">{{ fmtMoney(totalP1Amount) }}</td>
               <td style="background: #eef2ff; border-top: 2px solid #4f46e5;"></td>
@@ -299,6 +302,9 @@
     computed: {
       totalMustCharge() {
         return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.must_charge) || 0), 0)
+      },
+      totalTruyThuDoanhSo() {
+        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.truy_thu_doanh_so) || 0), 0)
       },
       totalP1Amount() {
         return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.p1_amount) || 0), 0)
