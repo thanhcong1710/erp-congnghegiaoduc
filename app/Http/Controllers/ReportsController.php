@@ -2867,7 +2867,7 @@ class ReportsController extends Controller
             UPDATE agreements
             SET salary_month = '$salaryMonth'
             WHERE debt_amount = 0
-            AND salary_month IS NULL $cond
+            AND (salary_month IS NULL OR salary_month='') $cond
             AND id IN (
                 SELECT agreement_id
                 FROM payments
