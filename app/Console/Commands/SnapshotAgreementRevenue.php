@@ -14,7 +14,7 @@ class SnapshotAgreementRevenue extends Command
      *
      * @var string
      */
-    protected $signature = 'snapshot:agreement-revenue';
+    protected $signature = 'snapshot:agreement-revenue {salary_month? : The salary month to snapshot (format: YYYY-MM)}';
 
     /**
      * The console command description.
@@ -40,15 +40,17 @@ class SnapshotAgreementRevenue extends Command
      */
     public function handle()
     {
-        $today = Carbon::now();
-        $targetMonth = null;
+        $targetMonth = $this->argument('salary_month');
 
-        if ($today->day <= 5) {
-            // Processing for the previous month
-            $targetMonth = $today->copy()->subMonth()->format('Y-m');
-        } else {
-            // Processing for the current month
-            $targetMonth = $today->format('Y-m');
+        if (!$targetMonth) {
+            $today = Carbon::now();
+            if ($today->day <= 5) {
+                // Processing for the previous month
+                $targetMonth = $today->copy()->subMonth()->format('Y-m');
+            } else {
+                // Processing for the current month
+                $targetMonth = $today->format('Y-m');
+            }
         }
 
         $this->info("Starting snapshot for salary month: {$targetMonth}");
