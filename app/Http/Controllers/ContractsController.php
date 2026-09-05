@@ -1517,7 +1517,7 @@ class ContractsController extends Controller
             }
 
             // Update EC and EC Leader if provided (only for admin)
-            if ($request->has('ec_id') && $request->ec_id > 0) {
+            if ($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) {
                 $ec_id = (int)$request->ec_id;
                 $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
                 if ($ec_info) {
