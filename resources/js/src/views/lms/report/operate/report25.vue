@@ -156,7 +156,7 @@
               <td class="text-wrap-cell">{{ row.class_info || '—' }}</td>
               <td class="text-wrap-cell">{{ row.address || '—' }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.must_charge) }}</td>
-              <td class="text-right money-cell" style="color: #ea5455">{{ fmtMoney(row.truy_thu_doanh_so) }}</td>
+              <td class="text-right money-cell">{{ fmtMoney(row.truy_thu_doanh_so) }}</td>
               <td>{{ row.dk_chung }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.p1_amount) }}</td>
               <td class="text-center date-cell">{{ row.p1_date }}</td>
@@ -164,10 +164,10 @@
               <td class="text-center date-cell">{{ row.p2_date }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.discount) }}</td>
               <td class="text-center date-cell" :class="isDue(row.due_date) ? 'overdue' : ''">{{ row.due_date || '—' }}</td>
-              <td class="text-right" :class="row.debt_amount > 0 ? 'money-red' : 'money-green'">
+              <td class="text-right" :class="row.debt_amount <= 0 ? 'money-green' : (isDue(row.due_date) ? 'money-red' : 'money-cell')">
                 {{ fmtMoney(row.debt_amount) }}
               </td>
-              <td class="text-center font-bold" :class="row.xn_ketoan === 'R' ? 'text-success' : 'text-danger'">
+              <td class="text-center font-bold" :class="row.xn_ketoan === 'R' ? 'text-success' : (isDue(row.due_date) ? 'text-danger' : '')">
                 {{ row.xn_ketoan }}
               </td>
               <td>

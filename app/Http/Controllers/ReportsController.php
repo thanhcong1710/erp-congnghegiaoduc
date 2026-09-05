@@ -2980,12 +2980,22 @@ class ReportsController extends Controller
         ";
         u::query($query);
 
-        $query = "
-            UPDATE agreements
-            SET salary_month = NULL
-            WHERE debt_amount > 0 $cond
-            AND salary_month = '$salaryMonth'
-        ";
+        if ($agreement_id) {
+            $query = "
+                UPDATE agreements
+                SET salary_month = NULL
+                WHERE debt_amount > 0 $cond
+                AND id = $agreement_id'
+            ";
+        } else {
+            $query = "
+                UPDATE agreements
+                SET salary_month = NULL
+                WHERE debt_amount > 0 $cond
+                AND salary_month = '$salaryMonth'
+            ";
+        }
+        
         u::query($query);
 
         return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
