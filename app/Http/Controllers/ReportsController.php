@@ -2985,7 +2985,7 @@ class ReportsController extends Controller
                 UPDATE agreements
                 SET salary_month = NULL
                 WHERE debt_amount > 0 $cond
-                AND id = $agreement_id'
+                AND id = $agreement_id
             ";
         } else {
             $query = "
