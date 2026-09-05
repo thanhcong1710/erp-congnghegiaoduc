@@ -2963,7 +2963,13 @@ class ReportsController extends Controller
         if ($agreement_id) {
             $cond = " AND id = $agreement_id";
         } else {
-            $cond = "";
+            $cond = " AND id IN (
+                SELECT agreement_id
+                FROM payments
+                WHERE agreement_id IS NOT NULL
+                GROUP BY agreement_id
+                HAVING DATE_FORMAT(MAX(charge_date), '%Y-%m') = '$salaryMonth'
+            )";
         }
 
         $query = "
@@ -2971,13 +2977,6 @@ class ReportsController extends Controller
             SET salary_month = '$salaryMonth'
             WHERE debt_amount = 0
             AND (salary_month IS NULL OR salary_month='') $cond
-            AND id IN (
-                SELECT agreement_id
-                FROM payments
-                WHERE agreement_id IS NOT NULL
-                GROUP BY agreement_id
-                HAVING DATE_FORMAT(MAX(charge_date), '%Y-%m') = '$salaryMonth'
-            )
         ";
         u::query($query);
 
