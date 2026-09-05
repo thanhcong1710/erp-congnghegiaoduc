@@ -2924,7 +2924,13 @@ class ReportsController extends Controller
             $salaryMonth = date('Y-m');
         }
         if ($agreement_id) {
-            $cond = " AND id = $agreement_id";
+            $cond = " AND id = $agreement_id AND id IN (
+                SELECT agreement_id
+                FROM payments
+                WHERE agreement_id IS NOT NULL
+                GROUP BY agreement_id
+                HAVING DATE_FORMAT(MAX(charge_date), '%Y-%m') <= '$salaryMonth'
+            )";
         } else {
             $cond = " AND id IN (
                 SELECT agreement_id
