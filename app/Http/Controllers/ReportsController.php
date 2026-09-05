@@ -2241,33 +2241,18 @@ class ReportsController extends Controller
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
-            $current_month = (date('d') <= 5) ? date('Y-m', strtotime('-1 month')) : date('Y-m');
             
-            if ($sm <= $current_month) {
-                // If filtered month is the actual current calendar month, use live data
-                $cond .= " AND a.salary_month = '$sm'";
-                
-                $select_must_charge = "a.must_charge";
-                $select_discount = "a.discount_amount AS discount";
-                $select_salary_month = "a.salary_month";
-                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
-                     FROM agreements_revenue_histories arh_prev 
-                     WHERE arh_prev.agreement_id = a.id 
-                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
-            } else {
-                // If filtered month is a past month, use history snapshot
-                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
-                
-                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
-                
-                $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
-                $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
-                $select_salary_month = "IF(arh_current.id IS NOT NULL, arh_current.salary_month, a.salary_month) AS salary_month";
-                $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
-                     FROM agreements_revenue_histories arh_prev 
-                     WHERE arh_prev.agreement_id = a.id 
-                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
-            }
+            $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+            
+            $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+            
+            $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
+            $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
+            $select_salary_month = "IF(arh_current.id IS NOT NULL, arh_current.salary_month, a.salary_month) AS salary_month";
+            $select_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
         }
 
         $totalRow = u::first("
