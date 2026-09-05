@@ -37,6 +37,7 @@ class UpdateAgreementsData extends Command
             LEFT JOIN (
                 SELECT agreement_id, MAX(charge_date) as last_charge_date 
                 FROM payments 
+                WHERE type = 1
                 GROUP BY agreement_id
             ) p ON p.agreement_id = a.id
             SET a.last_pay_date = p.last_charge_date,

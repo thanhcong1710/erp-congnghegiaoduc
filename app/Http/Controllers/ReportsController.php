@@ -889,7 +889,7 @@ class ReportsController extends Controller
                 t.name AS combo_name,
                 COUNT(DISTINCT c.id) AS total_courses,
                 MIN(c.enrolment_start_date) AS first_course_start_date,
-                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
+                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 AND type = 1 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
                 SUM(c.summary_sessions) AS total_sessions,
                 (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
             FROM agreements AS a
@@ -1576,7 +1576,7 @@ class ReportsController extends Controller
                 a.total_charged,
                 a.debt_amount,
                 -- Ngày thu gần nhất
-                (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                (SELECT MAX(p.charge_date) FROM payments p WHERE p.agreement_id = a.id AND p.type = 1) AS last_pay_date,
                 a.first_8th_session_date                        AS due_date,
                 a.branch_id,
                 (SELECT name FROM branches WHERE id = a.branch_id) AS branch_name,
@@ -1914,10 +1914,10 @@ class ReportsController extends Controller
                 s.address,
                 a.must_charge,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
-                (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
-                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
-                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
-                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                (SELECT amount FROM payments p WHERE p.agreement_id = a.id AND p.type = 1 ORDER BY id ASC LIMIT 1) AS p1_amount,
+                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id AND p.type = 1 ORDER BY id ASC LIMIT 1) AS p1_date,
+                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id AND p.type = 1) AS total_paid,
+                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id AND p.type = 1) AS last_pay_date,
                 '' AS img_bill,
                 a.discount_amount AS discount,
                 a.debt_amount,
@@ -1965,7 +1965,7 @@ class ReportsController extends Controller
             $row->p2_date_cd = '';
             $row->img_bill_cd = '';
 
-            $tmpPaymentsCd = u::query("SELECT charge_amount, charge_date, attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 0 ORDER BY id ASC");
+            $tmpPaymentsCd = u::query("SELECT charge_amount, charge_date, attachments FROM tmp_payments WHERE agreement_id = $agrmId AND status = 0 AND type = 1 ORDER BY id ASC");
             if (count($tmpPaymentsCd) > 0) {
                 $row->p1_amount_cd = (float) $tmpPaymentsCd[0]->charge_amount;
                 $row->p1_date_cd = substr($tmpPaymentsCd[0]->charge_date, 0, 10);
@@ -2304,10 +2304,10 @@ class ReportsController extends Controller
                 $select_must_charge,
                 a.total_charged,
                 IF(a.group_type > 0, CONCAT('Nhóm ', a.group_type), 'Không') AS dk_chung,
-                (SELECT amount FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_amount,
-                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id ORDER BY id ASC LIMIT 1) AS p1_date,
-                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id) AS total_paid,
-                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) AS last_pay_date,
+                (SELECT amount FROM payments p WHERE p.agreement_id = a.id AND p.type = 1 ORDER BY id ASC LIMIT 1) AS p1_amount,
+                (SELECT charge_date FROM payments p WHERE p.agreement_id = a.id AND p.type = 1 ORDER BY id ASC LIMIT 1) AS p1_date,
+                (SELECT SUM(amount) FROM payments p WHERE p.agreement_id = a.id AND p.type = 1) AS total_paid,
+                (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id AND p.type = 1) AS last_pay_date,
                 $select_discount,
                 a.first_8th_session_date AS due_date,
                 a.debt_amount,

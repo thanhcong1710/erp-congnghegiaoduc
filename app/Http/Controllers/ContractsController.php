@@ -1266,7 +1266,7 @@ class ContractsController extends Controller
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
                 // Tính toán last_pay_date, full_fee_date và count_recharge khi update
-                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0");
+                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0 AND type = 1");
                 $last_pay_date = ($last_pay && $last_pay->last_date) ? date('Y-m-d', strtotime($last_pay->last_date)) : date('Y-m-d', strtotime($agreementInfo->created_at ?? now()));
 
                 $is_first_package = (int) data_get($agreementInfo, 'is_first_package', 0);
@@ -1459,7 +1459,7 @@ class ContractsController extends Controller
                 $new_debt_amount = max(0, $new_must_charge - $effective_charged);
 
                 // Tính toán last_pay_date, full_fee_date và count_recharge khi update
-                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0");
+                $last_pay = u::first("SELECT MAX(charge_date) AS last_date FROM payments WHERE agreement_id = $agreement_id AND amount > 0  AND type = 1");
                 $last_pay_date = ($last_pay && $last_pay->last_date) ? date('Y-m-d', strtotime($last_pay->last_date)) : date('Y-m-d', strtotime($agreementInfo->created_at ?? now()));
 
                 $is_first_package = (int) data_get($agreementInfo, 'is_first_package', 0);
