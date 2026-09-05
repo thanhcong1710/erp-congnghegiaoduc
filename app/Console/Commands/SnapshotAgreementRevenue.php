@@ -54,6 +54,7 @@ class SnapshotAgreementRevenue extends Command
         }
 
         $this->info("Starting snapshot for salary month: {$targetMonth}");
+        DB::table('agreements_revenue_histories')->where('salary_month', $targetMonth)->delete();
 
         // Select all agreements where salary_month matches targetMonth
         $agreements = DB::table('agreements')
