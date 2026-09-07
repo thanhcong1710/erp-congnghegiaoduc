@@ -2970,6 +2970,44 @@ class ReportsController extends Controller
         return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
     }
 
+    public function reSnapshotAgreementRevenue(Request $request)
+    {
+        $targetMonth = isset($request->salary_month) ? trim($request->salary_month) : '';
+        if (!$targetMonth) {
+            return response()->json(['status' => 0, 'message' => 'Vui lòng chọn tháng tính lương'], 422);
+        }
+
+        // Delete existing snapshot for this month
+        \DB::table('agreements_revenue_histories')->where('salary_month', $targetMonth)->delete();
+
+        // Select all agreements where salary_month matches targetMonth
+        $agreements = \DB::table('agreements')
+            ->select('id', 'must_charge', 'discount_amount', 'debt_amount')
+            ->where('salary_month', $targetMonth)
+            ->where('debt_amount', 0)
+            ->get();
+
+        $count = 0;
+        foreach ($agreements as $a) {
+            $revenue = (float)$a->must_charge - (float)$a->discount_amount;
+            \DB::table('agreements_revenue_histories')->updateOrInsert(
+                [
+                    'agreement_id' => $a->id,
+                    'salary_month' => $targetMonth
+                ],
+                [
+                    'must_charge' => (float)$a->must_charge,
+                    'discount_amount' => (float)$a->discount_amount,
+                    'revenue_amount' => $revenue,
+                    'updated_at' => now()
+                ]
+            );
+            $count++;
+        }
+
+        return response()->json(['status' => 1, 'message' => "Đã đẩy lại $count bản ghi chốt lương cho tháng $targetMonth"]);
+    }
+
     public function refundDepositReport(Request $request)
     {
         $keyword = isset($request->keyword) ? trim($request->keyword) : '';

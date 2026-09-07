@@ -73,6 +73,7 @@
         <vs-button color="dark" type="border" class="rpt-btn" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
         <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
         <vs-button v-if="user_role.is_admin" color="primary" class="rpt-btn" @click="updateSalaryMonthAll"><i class="fas fa-calendar-check"></i> Update Tính Lương</vs-button>
+        <vs-button v-if="user_role.is_admin" color="warning" class="rpt-btn" @click="showReSnapshotModal = true"><i class="fas fa-redo-alt"></i> Đẩy lại chốt lương</vs-button>
         <span class="rpt-badge-count">{{ pagination.total }} bản ghi</span>
       </div>
 
@@ -222,6 +223,19 @@
           @change="changePage()" />
       </div>
     </vx-card>
+
+    <!-- Modal đẩy lại chốt lương -->
+    <vs-popup title="Đẩy lại danh sách chốt lương" :active.sync="showReSnapshotModal">
+      <div class="p-4">
+        <p class="mb-4" style="color:#6b7280;">Chọn tháng tính lương cần đẩy lại. Hệ thống sẽ xóa dữ liệu cũ của tháng đó và tạo lại từ dữ liệu hiện tại.</p>
+        <label class="rpt-label">Tháng tính lương</label>
+        <date-picker v-model="reSnapshotMonth" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="width:100%" :append-to-body="true"></date-picker>
+        <div class="mt-4 flex justify-end gap-3">
+          <vs-button color="dark" type="border" @click="showReSnapshotModal = false">Hủy</vs-button>
+          <vs-button color="warning" @click="submitReSnapshot"><i class="fas fa-save"></i> Lưu</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 </template>
 
@@ -256,7 +270,9 @@
         user_role: { user_id: 0, is_sale: false, is_sale_leader: false, is_admin: false, is_accountant: false },
         selected_items: [],
         selectAll: false,
-        batch_salary_month: ''
+        batch_salary_month: '',
+        showReSnapshotModal: false,
+        reSnapshotMonth: '',
       }
     },
     created() {
@@ -476,6 +492,34 @@
         if (p.salary_month)   { keys.push('salary_month');   values.push(p.salary_month) }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report25/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
+      },
+      submitReSnapshot() {
+        if (!this.reSnapshotMonth) {
+          this.$vs.notify({ title: 'Lỗi', text: 'Vui lòng chọn tháng tính lương', color: 'warning' })
+          return
+        }
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'warning',
+          title: 'Xác nhận đẩy lại chốt lương',
+          text: `Bạn có chắc chắn muốn đẩy lại danh sách chốt lương cho tháng ${this.reSnapshotMonth}? Dữ liệu cũ của tháng này sẽ bị xóa và tạo lại.`,
+          acceptText: 'Đồng ý',
+          cancelText: 'Hủy',
+          accept: () => {
+            this.$vs.loading()
+            axios.p('/api/lms/reports/re-snapshot-agreement-revenue', {
+              salary_month: this.reSnapshotMonth
+            }).then(res => {
+              this.$vs.loading.close()
+              this.showReSnapshotModal = false
+              this.$vs.notify({ title: 'Thành công', text: res.data.message || 'Đẩy lại chốt lương thành công', color: 'success' })
+              this.getData()
+            }).catch(err => {
+              this.$vs.loading.close()
+              this.$vs.notify({ title: 'Lỗi', text: err.response && err.response.data ? err.response.data.message : 'Có lỗi xảy ra', color: 'danger' })
+            })
+          }
+        })
       },
     },
   }
