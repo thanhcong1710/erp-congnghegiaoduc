@@ -2376,8 +2376,8 @@ class ExportsController extends Controller
             $sheet->setCellValue('B' . $row, $item->team_name ?? '—');
             $sheet->setCellValue('C' . $row, (int) $item->new_count);
             $sheet->setCellValue('D' . $row, (int) $item->uplv_count);
-            $sheet->setCellValue('E' . $row, (int) $item->unseparated_sales);
-            $sheet->setCellValue('F' . $row, (int) $item->separated_sales);
+            $sheet->setCellValue('E' . $row, $item->unseparated_sales);
+            $sheet->setCellValue('F' . $row, $item->separated_sales);
             $sheet->setCellValue('G' . $row, $total);
             $sheet->setCellValue('H' . $row, $salary);
 
@@ -2392,8 +2392,8 @@ class ExportsController extends Controller
 
             $sumNew += (int) $item->new_count;
             $sumUplv += (int) $item->uplv_count;
-            $sumUnseparated += (int) $item->unseparated_sales;
-            $sumSeparated += (int) $item->separated_sales;
+            $sumUnseparated += $item->unseparated_sales;
+            $sumSeparated += $item->separated_sales;
             $sumRevenue += $total;
             $sumSalary += $salary;
             $row++;

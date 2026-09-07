@@ -1810,8 +1810,8 @@ class ReportsController extends Controller
                 'team_name' => $row->team_name ?: '—',
                 'new_count' => (int) $row->new_count,
                 'uplv_count' => (int) $row->uplv_count,
-                'unseparated_sales' => (int) $row->unseparated_sales,
-                'separated_sales' => (int) $row->separated_sales,
+                'unseparated_sales' => $row->unseparated_sales,
+                'separated_sales' => $row->separated_sales,
                 'new_revenue' => $new_rev,
                 'uplv_revenue' => $uplv_rev,
                 'total_revenue' => (float) $row->total_revenue,
@@ -1819,8 +1819,8 @@ class ReportsController extends Controller
             ];
             $sum['new_count'] += (int) $row->new_count;
             $sum['uplv_count'] += (int) $row->uplv_count;
-            $sum['unseparated_sales'] += (int) $row->unseparated_sales;
-            $sum['separated_sales'] += (int) $row->separated_sales;
+            $sum['unseparated_sales'] += $row->unseparated_sales;
+            $sum['separated_sales'] += $row->separated_sales;
             $sum['new_revenue'] += $new_rev;
             $sum['uplv_revenue'] += $uplv_rev;
             $sum['total_revenue'] += (float) $row->total_revenue;
