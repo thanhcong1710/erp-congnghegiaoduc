@@ -581,4 +581,5 @@
 .paging-limit-btn { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer; background:white; font-size:.85rem; font-weight:500; }
 .mr-4 { margin-right:16px; }
 .multiselect { z-index:999; }
+.mx-datepicker-popup { z-index: 99999 !important; }
 </style>
