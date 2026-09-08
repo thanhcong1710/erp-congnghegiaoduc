@@ -1727,8 +1727,8 @@ class ReportsController extends Controller
                  AND arh_prev.salary_month < '$sm'), 0)";
         }
 
-        // Loại trừ gói phí có công nợ >= 30% giá trị gói
-        $cond .= " AND NOT (a.debt_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+        // Loại trừ gói phí có giảm trừ >= 30% giá trị gói
+        $cond .= " AND NOT (a.discount_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
 
         // ---- Main query: group theo team ----
         $query = "
@@ -2342,8 +2342,8 @@ class ReportsController extends Controller
             $row->truy_thu_doanh_so = (float) $row->truy_thu_doanh_so;
             $row->luong_sale = 0;
 
-            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
-            $is_no_salary = ((float) $row->must_charge > 0) && ((float) $row->debt_amount >= 0.3 * (float) $row->must_charge);
+            // Gói phí có giảm trừ >= 30% giá trị gói → không tính lương
+            $is_no_salary = ((float) $row->must_charge > 0) && ((float) $row->discount >= 0.3 * (float) $row->must_charge);
             $row->is_no_salary = $is_no_salary;
 
             if ($is_no_salary) {
@@ -2500,8 +2500,8 @@ class ReportsController extends Controller
         $total_luong_sale = 0;
 
         foreach ($list as &$row) {
-            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
-            if ((float) $row->must_charge > 0 && (float) $row->debt_amount >= 0.3 * (float) $row->must_charge) {
+            // Gói phí có giảm trừ >= 30% giá trị gói → không tính lương
+            if ((float) $row->must_charge > 0 && (float) $row->discount >= 0.3 * (float) $row->must_charge) {
                 continue;
             }
 

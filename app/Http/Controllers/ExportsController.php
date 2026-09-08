@@ -2239,8 +2239,8 @@ class ExportsController extends Controller
                  AND arh_prev.salary_month < '$sm'), 0)";
         }
 
-        // Loại trừ gói phí có công nợ >= 30% giá trị gói
-        $cond .= " AND NOT (a.debt_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+        // Loại trừ gói phí có giảm trừ >= 30% giá trị gói
+        $cond .= " AND NOT (a.discount_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
 
         $rows = u::query("
             SELECT
@@ -2997,8 +2997,8 @@ class ExportsController extends Controller
             $xn_ketoan = ((float) $item->debt_amount > 0) ? 'R thiếu' : 'R';
             $truy_thu_doanh_so = (float) $item->truy_thu_doanh_so;
 
-            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
-            $is_no_salary = ((float) $item->must_charge > 0) && ((float) $item->debt_amount >= 0.3 * (float) $item->must_charge);
+            // Gói phí có giảm trừ >= 30% giá trị gói → không tính lương
+            $is_no_salary = ((float) $item->must_charge > 0) && ((float) $item->discount >= 0.3 * (float) $item->must_charge);
 
             $luong_sale = 0;
             if ($is_no_salary) {
@@ -3279,8 +3279,8 @@ class ExportsController extends Controller
         $grouped = [];
 
         foreach ($list as &$row) {
-            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
-            if ((float) $row->must_charge > 0 && (float) $row->debt_amount >= 0.3 * (float) $row->must_charge) {
+            // Gói phí có giảm trừ >= 30% giá trị gói → không tính lương
+            if ((float) $row->must_charge > 0 && (float) $row->discount >= 0.3 * (float) $row->must_charge) {
                 continue;
             }
 
