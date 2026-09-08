@@ -495,6 +495,7 @@
         window.open(`/api/lms/exports/report25/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
       submitReSnapshot() {
+        this.showReSnapshotModal = false
         if (!this.reSnapshotMonth) {
           this.$vs.notify({ title: 'Lỗi', text: 'Vui lòng chọn tháng tính lương', color: 'warning' })
           return
@@ -512,7 +513,6 @@
               salary_month: this.reSnapshotMonth
             }).then(res => {
               this.$vs.loading.close()
-              this.showReSnapshotModal = false
               this.$vs.notify({ title: 'Thành công', text: res.data.message || 'Đẩy lại chốt lương thành công', color: 'success' })
               this.getData()
             }).catch(err => {
