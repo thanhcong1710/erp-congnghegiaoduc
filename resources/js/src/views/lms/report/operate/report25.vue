@@ -137,9 +137,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr class="rpt-row" v-for="(row, idx) in datas" :key="idx">
+            <tr class="rpt-row" :class="{'no-salary-row': row.is_no_salary}" v-for="(row, idx) in datas" :key="idx">
               <td class="text-center" v-if="user_role.is_admin || user_role.is_accountant">
-                <vs-checkbox v-model="selected_items" :vs-value="row.agreement_id"></vs-checkbox>
+                <vs-checkbox v-model="selected_items" :vs-value="row.agreement_id" :disabled="row.is_no_salary"></vs-checkbox>
               </td>
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="date-cell">{{ row.date_0 }}</td>
@@ -172,7 +172,8 @@
                 {{ row.xn_ketoan }}
               </td>
               <td>
-                <div v-if="user_role.is_admin || user_role.is_accountant" class="flex items-center gap-2">
+                <div v-if="row.is_no_salary" class="no-salary-text">Không tính lương</div>
+                <div v-else-if="user_role.is_admin || user_role.is_accountant" class="flex items-center gap-2">
                   <date-picker style="width:140px" v-model="row.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" @change="updateSingleDate(row)" :append-to-body="true"></date-picker>
                 </div>
                 <span v-else>{{ row.salary_month || '—' }}</span>
@@ -317,31 +318,31 @@
     },
     computed: {
       totalMustCharge() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.must_charge) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.must_charge) || 0), 0)
       },
       totalTruyThuDoanhSo() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.truy_thu_doanh_so) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.truy_thu_doanh_so) || 0), 0)
       },
       totalP1Amount() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.p1_amount) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.p1_amount) || 0), 0)
       },
       totalP2Amount() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.p2_amount) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.p2_amount) || 0), 0)
       },
       totalDiscount() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.discount) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.discount) || 0), 0)
       },
       totalDebtAmount() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.debt_amount) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.debt_amount) || 0), 0)
       },
       totalLuongSale() {
-        return (this.datas || []).reduce((sum, i) => sum + (parseFloat(i.luong_sale) || 0), 0)
+        return (this.datas || []).filter(i => !i.is_no_salary).reduce((sum, i) => sum + (parseFloat(i.luong_sale) || 0), 0)
       },
     },
     methods: {
       toggleSelectAll(val) {
         if (val) {
-          this.selected_items = this.datas.map(i => i.agreement_id)
+          this.selected_items = this.datas.filter(i => !i.is_no_salary).map(i => i.agreement_id)
         } else {
           this.selected_items = []
         }
@@ -575,6 +576,11 @@
 .money-red   { font-weight:700; color:#dc2626; }
 .date-cell   { font-size:15px; }
 .overdue     { color:#dc2626; font-weight:700; }
+
+/* No salary row */
+.no-salary-row { background: #f0f0f0 !important; }
+.no-salary-row:hover { background: #e8e8e8 !important; }
+.no-salary-text { color: #999; font-style: italic; font-weight: 600; text-align: center; white-space: nowrap; }
 
 /* Pagination */
 .rpt-paging { display:flex; align-items:center; flex-wrap:wrap; margin-top:16px; }

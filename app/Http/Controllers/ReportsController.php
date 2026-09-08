@@ -1727,6 +1727,9 @@ class ReportsController extends Controller
                  AND arh_prev.salary_month < '$sm'), 0)";
         }
 
+        // Loại trừ gói phí có công nợ >= 30% giá trị gói
+        $cond .= " AND NOT (a.debt_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+
         // ---- Main query: group theo team ----
         $query = "
             SELECT
@@ -2338,7 +2341,14 @@ class ReportsController extends Controller
 
             $row->truy_thu_doanh_so = (float) $row->truy_thu_doanh_so;
             $row->luong_sale = 0;
-            if ((float) $row->debt_amount == 0) {
+
+            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
+            $is_no_salary = ((float) $row->must_charge > 0) && ((float) $row->debt_amount >= 0.3 * (float) $row->must_charge);
+            $row->is_no_salary = $is_no_salary;
+
+            if ($is_no_salary) {
+                $row->luong_sale = 0;
+            } elseif ((float) $row->debt_amount == 0) {
                 if ((int) $row->source_id == 6) {
                     $rate = ($row->status_register == 'Mới') ? 0.05 : 0.03;
                 } else {
@@ -2490,6 +2500,11 @@ class ReportsController extends Controller
         $total_luong_sale = 0;
 
         foreach ($list as &$row) {
+            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
+            if ((float) $row->must_charge > 0 && (float) $row->debt_amount >= 0.3 * (float) $row->must_charge) {
+                continue;
+            }
+
             $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
             $luong_sale = 0;
             if ((float) $row->debt_amount == 0) {

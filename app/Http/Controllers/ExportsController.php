@@ -2239,6 +2239,9 @@ class ExportsController extends Controller
                  AND arh_prev.salary_month < '$sm'), 0)";
         }
 
+        // Loại trừ gói phí có công nợ >= 30% giá trị gói
+        $cond .= " AND NOT (a.debt_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+
         $rows = u::query("
             SELECT
                 ANY_VALUE(
@@ -2993,8 +2996,14 @@ class ExportsController extends Controller
 
             $xn_ketoan = ((float) $item->debt_amount > 0) ? 'R thiếu' : 'R';
             $truy_thu_doanh_so = (float) $item->truy_thu_doanh_so;
+
+            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
+            $is_no_salary = ((float) $item->must_charge > 0) && ((float) $item->debt_amount >= 0.3 * (float) $item->must_charge);
+
             $luong_sale = 0;
-            if ((float) $item->debt_amount == 0) {
+            if ($is_no_salary) {
+                $luong_sale = 0;
+            } elseif ((float) $item->debt_amount == 0) {
                 if ((int) $item->source_id == 6) {
                     $rate = ($item->status_register == 'Mới') ? 0.05 : 0.03;
                 } else {
@@ -3026,7 +3035,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('T' . $rowIdx, $item->due_date ?? '—');
             $sheet->setCellValue('U' . $rowIdx, (float) $item->debt_amount);
             $sheet->setCellValue('V' . $rowIdx, $xn_ketoan);
-            $sheet->setCellValue('W' . $rowIdx, $item->salary_month ?? '—');
+            $sheet->setCellValue('W' . $rowIdx, $is_no_salary ? 'Không tính lương' : ($item->salary_month ?? '—'));
             $sheet->setCellValue('X' . $rowIdx, (float) $luong_sale);
 
             $sheet->getStyle("A$rowIdx:X$rowIdx")->applyFromArray($borderStyle);
@@ -3067,6 +3076,15 @@ class ExportsController extends Controller
             $sheet->getStyle("X$rowIdx")->applyFromArray($rightAlign);
             $sheet->getStyle("X$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
             $sheet->getStyle("X$rowIdx")->getFont()->setBold(true);
+
+            // Dòng không tính lương: tô nền xám
+            if ($is_no_salary) {
+                $grayBg = [
+                    'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E0E0E0']],
+                ];
+                $sheet->getStyle("A$rowIdx:X$rowIdx")->applyFromArray($grayBg);
+                $sheet->getStyle("W$rowIdx")->getFont()->setItalic(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF999999'));
+            }
 
             $rowIdx++;
         }
@@ -3261,6 +3279,11 @@ class ExportsController extends Controller
         $grouped = [];
 
         foreach ($list as &$row) {
+            // Gói phí có công nợ >= 30% giá trị gói → không tính lương
+            if ((float) $row->must_charge > 0 && (float) $row->debt_amount >= 0.3 * (float) $row->must_charge) {
+                continue;
+            }
+
             $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
             $luong_sale = 0;
             if ((float) $row->debt_amount == 0) {
