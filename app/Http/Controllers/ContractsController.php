@@ -751,7 +751,7 @@ class ContractsController extends Controller
         $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
         $roles = array_map(function($r) { return $r->role_id; }, $role_ids);
         if (in_array(68, $roles) || in_array(69, $roles)) {
-            $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ")";
+            $cond .= " AND c.ec_id IN (" . Auth::user()->getStaffHasUser() . ") OR c.ec_leader_id IN (" . Auth::user()->getStaffHasUser() . ")";
         }
 
         if (!empty($branch_id)) {
