@@ -1177,6 +1177,9 @@ class ContractsController extends Controller
         $new_data['created_at'] = date('Y-m-d H:i:s');
         $new_data['updated_at'] = date('Y-m-d H:i:s');
         $new_data['creator_id'] = $current_user_id;
+        $new_data['class_id'] =  null;
+        $new_data['enrolment_start_date'] =  null;
+        $new_data['enrolment_last_date'] =  null;
 
         $new_contract_id = u::insertSimpleRow($new_data, 'contracts');
         $contract_code = str_pad((string) $new_contract_id, 6, '0', STR_PAD_LEFT);
