@@ -111,7 +111,7 @@
                   <date-picker :disabled="user_role.is_sale || user_role.is_sale_leader" style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
                 </div>
                 <div class="flex items-center gap-2" v-if="item.book_receive == 3">
-                  {{ item.book_delivered_date }}
+                  {{ fmtDate(item.book_delivered_date) }}
                 </div>
               </td>
               <td>
