@@ -104,10 +104,14 @@
               <td>
                 <span v-if="item.book_receive == 1" class="text-warning font-semibold">Có nhận</span>
                 <span v-else-if="item.book_receive == 2" class="text-danger font-semibold">Không nhận</span>
+                <span v-else-if="item.book_receive == 3" class="text-success font-semibold">Đã nhận</span>
               </td>
               <td>
-                <div class="flex items-center gap-2" v-if="item.book_receive != 2">
+                <div class="flex items-center gap-2" v-if="item.book_receive == 1">
                   <date-picker :disabled="user_role.is_sale || user_role.is_sale_leader" style="width:140px" v-model="item.book_delivered_date" type="date" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Chọn ngày" @change="updateSingleDate(item)"></date-picker>
+                </div>
+                <div class="flex items-center gap-2" v-if="item.book_receive == 3">
+                  {{ item.book_delivered_date }}
                 </div>
               </td>
               <td>
@@ -150,7 +154,7 @@
         team_list: [], products: [],
         status_list: [ {id:'1',label:'Đã phát sách'}, {id:'0',label:'Chưa phát sách'} ],
         is_online_list: [ {id:'0',label:'Lớp Offline'}, {id:'1',label:'Lớp Online'} ],
-        book_receive_list: [ {id:1,label:'Có nhận'}, {id:2,label:'Không nhận'} ],
+        book_receive_list: [ {id:1,label:'Có nhận'}, {id:2,label:'Không nhận'}, {id:3,label:'Đã nhận'} ],
         searchData: { team:'', keyword:'', dateRange:'', clsDateRange:'', product:'', status:'', is_online:'', book_receive:'' },
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],

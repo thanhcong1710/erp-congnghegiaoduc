@@ -346,6 +346,16 @@
                     @input="saveBookReceive"
                 ></vue-select>
             </div>
+            
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.book_receive_obj && agreement.book_receive_obj.value == 3">
+              <label>Ngày phát sách <span class="text-danger">(*)</span></label>
+              <datepicker class="w-full"
+                v-model="agreement.book_delivered_date"
+                placeholder="Chọn ngày phát sách"
+                :lang="datepickerOptions.lang"
+                @change="selectBookDeliveredDate"
+              />
+            </div>
 
             <!-- <div class="vx-col w-full mb-4">
               <label>Địa chỉ nhận sách</label>
@@ -600,6 +610,7 @@
           class_id:'',
           book_receive: 1,
           book_receive_obj: {label: 'Có nhận', value: 1},
+          book_delivered_date: null,
           book_receive_address: '',
           contract_receive: 1,
           contract_receive_obj: {label: 'Có nhận', value: 1},
@@ -833,6 +844,9 @@
       saveBookReceive(data = null){
         if (data && typeof data === 'object') {
           this.agreement.book_receive = data.value
+          if (data.value !== 3) {
+            this.agreement.book_delivered_date = null;
+          }
           if (data.value === 2) {
              const courseCount = (this.agreement.tuition_fee_type == 2 && this.agreement.tuition_fee_relation && this.agreement.tuition_fee_relation.length > 0) ? this.agreement.tuition_fee_relation.length : 1;
              this.agreement.discount_amount = Number(this.agreement.discount_amount || 0) + (courseCount * 100000);
@@ -956,6 +970,11 @@
           this.agreement.start_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      selectBookDeliveredDate(date){
+        if (date) {
+          this.agreement.book_delivered_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
       selectChargeDate(date){
         if (date) {
           this.payment.charge_date = moment(date).format("YYYY-MM-DD");
@@ -1012,6 +1031,10 @@
           mess += " - Ngày dự kiến học không được để trống<br/>";
           resp = false;
         }
+        if (this.agreement.book_receive == 3 && !this.agreement.book_delivered_date) {
+          mess += " - Ngày phát sách không được để trống<br/>";
+          resp = false;
+        }
         if (this.showPayment) {
           if (this.payment.amount <= 0) {
             mess += " - Số tiền thu không được để trống khi chọn thu phí<br/>";
@@ -1052,6 +1075,7 @@
           note: this.agreement.note,
           class_id: this.agreement.class_id,
           book_receive: this.agreement.book_receive,
+          book_delivered_date: this.agreement.book_delivered_date,
           book_receive_address: this.agreement.book_receive_address,
           contract_receive: this.agreement.contract_receive,
           group_type: this.agreement.group_type,

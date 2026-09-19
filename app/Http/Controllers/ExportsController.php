@@ -3856,7 +3856,7 @@ class ExportsController extends Controller
             $col++;
         }
 
-        $book_options = [1 => 'Có nhận', 2 => 'Không nhận', 0 => ''];
+        $book_options = [1 => 'Có nhận', 2 => 'Không nhận', 3 => 'Đã nhận', 0 => ''];
         $rowIdx = 4;
         foreach ($list as $index => $item) {
             $sheet->setCellValue('A' . $rowIdx, $index + 1);
@@ -3871,7 +3871,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('J' . $rowIdx, $item->address);
             $sheet->setCellValue('K' . $rowIdx, $item->link_facebook);
             $sheet->setCellValue('L' . $rowIdx, $book_options[(int) $item->book_receive] ?? '');
-            $sheet->setCellValue('M' . $rowIdx, $item->book_receive == 2 ? '' : $item->book_delivered_date);
+            $sheet->setCellValue('M' . $rowIdx, $item->book_delivered_date);
             $sheet->setCellValue('N' . $rowIdx, $item->book_note);
             
             if (empty($item->cls_name) && !empty($item->book_delivered_date)) {

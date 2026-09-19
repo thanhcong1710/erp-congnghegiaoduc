@@ -352,6 +352,7 @@ class ContractsController extends Controller
             'start_date' => data_get($request, 'start_date'),
             'note' => data_get($request, 'note'),
             'book_receive' => data_get($request, 'book_receive', 0),
+            'book_delivered_date' => data_get($request, 'book_delivered_date', null),
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
@@ -396,7 +397,9 @@ class ContractsController extends Controller
                     'creator_id' => Auth::user()->id,
                     'status' => 1,
                     'count_recharge' => 1,
-                    'agreement_id' => $agreement_id
+                    'agreement_id' => $agreement_id,
+                    'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code') . $contract_code;
@@ -435,7 +438,9 @@ class ContractsController extends Controller
                     'creator_id' => Auth::user()->id,
                     'status' => 1,
                     'count_recharge' => data_get($tuition_fee_info, 'stt'),
-                    'agreement_id' => $agreement_id
+                    'agreement_id' => $agreement_id,
+                    'book_receive' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_receive', 0) : 0,
+                    'book_delivered_date' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_delivered_date', null) : null
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code') . $contract_code;
@@ -592,6 +597,7 @@ class ContractsController extends Controller
             'start_date' => data_get($request, 'start_date'),
             'note' => data_get($request, 'note'),
             'book_receive' => data_get($request, 'book_receive', 0),
+            'book_delivered_date' => data_get($request, 'book_delivered_date', null),
             'book_receive_address' => data_get($request, 'book_receive_address', ''),
             'contract_receive' => data_get($request, 'contract_receive', 0),
             'group_type' => data_get($request, 'group_type', 0),
@@ -640,7 +646,9 @@ class ContractsController extends Controller
                     'creator_id' => Auth::user()->id,
                     'status' => 1,
                     'count_recharge' => 1,
-                    'agreement_id' => $agreement_id
+                    'agreement_id' => $agreement_id,
+                    'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code') . $contract_code;
@@ -681,7 +689,9 @@ class ContractsController extends Controller
                     'creator_id' => Auth::user()->id,
                     'status' => 1,
                     'count_recharge' => data_get($tuition_fee_info, 'stt'),
-                    'agreement_id' => $agreement_id
+                    'agreement_id' => $agreement_id,
+                    'book_receive' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_receive', 0) : 0,
+                    'book_delivered_date' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_delivered_date', null) : null
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                 $contract_code = config('app.prefix_contract_code') . $contract_code;
@@ -1316,6 +1326,7 @@ class ContractsController extends Controller
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_delivered_date' => data_get($request, 'book_delivered_date', null),
                     'book_receive_address' => data_get($request, 'book_receive_address', ''),
                     'contract_receive' => data_get($request, 'contract_receive', 0),
                     'group_type' => data_get($request, 'group_type', 0),
@@ -1508,6 +1519,7 @@ class ContractsController extends Controller
                     'start_date' => data_get($request, 'start_date'),
                     'note' => data_get($request, 'note'),
                     'book_receive' => data_get($request, 'book_receive', 0),
+                    'book_delivered_date' => data_get($request, 'book_delivered_date', null),
                     'book_receive_address' => data_get($request, 'book_receive_address', ''),
                     'contract_receive' => data_get($request, 'contract_receive', 0),
                     'group_type' => data_get($request, 'group_type', 0),

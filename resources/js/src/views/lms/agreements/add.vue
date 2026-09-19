@@ -266,6 +266,16 @@
                     @input="saveBookReceive"
                 ></vue-select>
             </div>
+            
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.book_receive_obj && agreement.book_receive_obj.value == 3">
+              <label>Ngày phát sách <span class="text-danger">(*)</span></label>
+              <datepicker class="w-full"
+                v-model="agreement.book_delivered_date"
+                placeholder="Chọn ngày phát sách"
+                :lang="datepickerOptions.lang"
+                @change="selectBookDeliveredDate"
+              />
+            </div>
 
             <!-- <div class="vx-col w-full mb-4">
               <label>Địa chỉ nhận sách</label>
@@ -494,6 +504,7 @@
           note:'',
           book_receive: 1,
           book_receive_obj: {label: 'Có nhận', value: 1},
+          book_delivered_date: null,
           book_receive_address: '',
           contract_receive: 1,
           contract_receive_obj: {label: 'Có nhận', value: 1},
@@ -701,6 +712,11 @@
           this.agreement.start_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      selectBookDeliveredDate(date){
+        if (date) {
+          this.agreement.book_delivered_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
       caculatorSession(){
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount) > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
         this.agreement.total_session = Number(this.agreement.tuition_fee_session);
@@ -708,6 +724,9 @@
       saveBookReceive(data = null){
         if (data && typeof data === 'object') {
           this.agreement.book_receive = data.value
+          if (data.value !== 3) {
+            this.agreement.book_delivered_date = null;
+          }
           if (data.value === 2) {
              const courseCount = (this.agreement.tuition_fee_type == 2 && this.agreement.tuition_fee_relation && this.agreement.tuition_fee_relation.length > 0) ? this.agreement.tuition_fee_relation.length : 1;
              this.agreement.discount_amount = Number(this.agreement.discount_amount || 0) + (courseCount * 100000);
@@ -865,6 +884,10 @@
         }
         if (this.agreement.start_date == "") {
           mess += " - Ngày dự kiến học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.agreement.book_receive == 3 && !this.agreement.book_delivered_date) {
+          mess += " - Ngày phát sách không được để trống<br/>";
           resp = false;
         }
         if (this.showPayment) {
