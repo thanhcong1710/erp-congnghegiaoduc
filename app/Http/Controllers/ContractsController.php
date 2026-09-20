@@ -439,7 +439,6 @@ class ContractsController extends Controller
                     'status' => 1,
                     'count_recharge' => data_get($tuition_fee_info, 'stt'),
                     'agreement_id' => $agreement_id,
-                    'book_receive' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_receive', 0) : 0,
                     'book_delivered_date' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_delivered_date', null) : null
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
@@ -647,7 +646,6 @@ class ContractsController extends Controller
                     'status' => 1,
                     'count_recharge' => 1,
                     'agreement_id' => $agreement_id,
-                    'book_receive' => data_get($request, 'book_receive', 0),
                     'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
@@ -690,7 +688,6 @@ class ContractsController extends Controller
                     'status' => 1,
                     'count_recharge' => data_get($tuition_fee_info, 'stt'),
                     'agreement_id' => $agreement_id,
-                    'book_receive' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_receive', 0) : 0,
                     'book_delivered_date' => data_get($tuition_fee_info, 'stt') == 1 ? data_get($request, 'book_delivered_date', null) : null
                 ), 'contracts');
                 $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
