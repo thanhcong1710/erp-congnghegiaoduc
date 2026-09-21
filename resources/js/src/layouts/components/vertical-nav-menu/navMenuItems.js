@@ -249,7 +249,7 @@ export default [
   {
     header: 'HRM',
     icon: 'UsersIcon',
-    // permission: 'HRM', // Temporarily disabled for testing
+    permission: 'hrm', // Temporarily disabled for testing
     items: [
       {
         url: '/hrm/departments',
