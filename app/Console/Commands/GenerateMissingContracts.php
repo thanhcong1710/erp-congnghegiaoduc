@@ -70,6 +70,14 @@ class GenerateMissingContracts extends Command
                         'count_recharge' => 1,
                         'agreement_id' => $agreement_id,
                         'book_delivered_date' => $agreement->book_delivered_date ?? null,
+                        'must_charge' => $tuition_fee_info->price,
+                        'init_tuition_fee_id' => $tuition_fee_info->id,
+                        'init_tuition_fee_amount' => $tuition_fee_info->price,
+                        'init_tuition_fee_session' => $tuition_fee_info->session,
+                        'total_charged' => 0,
+                        'debt_amount' => $tuition_fee_info->price,
+                        'total_sessions' => $tuition_fee_info->session,
+                        'real_sessions' => $tuition_fee_info->session,
                     ), 'contracts');
                     $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                     $contract_code = config('app.prefix_contract_code') . $contract_code;
@@ -79,7 +87,8 @@ class GenerateMissingContracts extends Command
                 }
             }
         } elseif ($agreement->type_fee == 2) {
-            $relation_tuition_fee = u::query("SELECT t.*, r.price_combo, r.stt FROM tuition_fee_relation AS r 
+            $relation_tuition_fee = u::query("SELECT t.*, r.price_combo, r.stt 
+            FROM tuition_fee_relation AS r 
                 LEFT JOIN tuition_fee AS t ON r.exchange_tuition_fee_id=t.id 
                 WHERE r.status=1 AND r.tuition_fee_id = " . $agreement->tuition_fee_id . "
                 ORDER BY r.stt ASC");
@@ -90,7 +99,7 @@ class GenerateMissingContracts extends Command
                         'type' => 1,
                         'student_id' => $agreement->student_id,
                         'branch_id' => $agreement->branch_id,
-                        'tuition_fee_id' => $agreement->tuition_fee_id,
+                        'tuition_fee_id' => $fee->tuition_fee_id,
                         'ec_id' => $agreement->ec_id,
                         'ec_leader_id' => $agreement->ec_leader_id,
                         'product_id' => $fee->product_id,
@@ -98,6 +107,14 @@ class GenerateMissingContracts extends Command
                         'count_recharge' => $fee->stt,
                         'agreement_id' => $agreement_id,
                         'book_delivered_date' => $fee->stt == 1 ? ($agreement->book_delivered_date ?? null) : null,
+                        'must_charge' => $fee->price_combo,
+                        'init_tuition_fee_id' => $fee->id,
+                        'init_tuition_fee_amount' => $fee->price_combo,
+                        'init_tuition_fee_session' => $fee->session,
+                        'total_charged' => 0,
+                        'debt_amount' => $fee->price_combo,
+                        'total_sessions' => $fee->session,
+                        'real_sessions' => $fee->session,
                     ), 'contracts');
                     $contract_code = str_pad((string) $contract_id, 6, '0', STR_PAD_LEFT);
                     $contract_code = config('app.prefix_contract_code') . $contract_code;
