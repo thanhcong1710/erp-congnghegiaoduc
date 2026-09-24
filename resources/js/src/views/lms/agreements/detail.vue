@@ -169,12 +169,12 @@
               />
             </div>
 
-            <div class="vx-col w-full mb-4">
-              <label>Địa chỉ nhận sách</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                v-model="agreement.book_receive_address"
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.book_receive == 3">
+              <label>Ngày phát sách</label>
+              <datepicker class="w-full"
+                v-model="agreement.book_delivered_date"
+                placeholder=""
+                :lang="datepickerOptions.lang"
                 disabled="true"
               />
             </div>
