@@ -1531,7 +1531,7 @@ class ContractsController extends Controller
                 
                 u::updateSimpleRow(['book_delivered_date' => null], ['agreement_id' => $agreement_id], 'contracts');
                 $first_contract = u::first("SELECT id FROM contracts WHERE agreement_id = $agreement_id ORDER BY count_recharge ASC, id ASC LIMIT 1");
-                if ($first_contract) {
+                if ($first_contract && data_get($request, 'book_delivered_date', null)) {
                     u::updateSimpleRow([
                         'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                     ], ['id' => $first_contract->id], 'contracts');
