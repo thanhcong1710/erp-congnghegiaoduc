@@ -99,7 +99,7 @@ class GenerateMissingContracts extends Command
                         'type' => 1,
                         'student_id' => $agreement->student_id,
                         'branch_id' => $agreement->branch_id,
-                        'tuition_fee_id' => $fee->tuition_fee_id,
+                        'tuition_fee_id' => $fee->id,
                         'ec_id' => $agreement->ec_id,
                         'ec_leader_id' => $agreement->ec_leader_id,
                         'product_id' => $fee->product_id,
@@ -121,6 +121,18 @@ class GenerateMissingContracts extends Command
                     u::updateSimpleRow(array('code' => $contract_code), array('id' => $contract_id), 'contracts');
                     u::addLogContracts($contract_id);
                     $created_count++;
+                } else {
+                    u::updateSimpleRow(array(
+                        'tuition_fee_id' => $fee->id,
+                        'must_charge' => $fee->price_combo,
+                        'init_tuition_fee_id' => $fee->id,
+                        'init_tuition_fee_amount' => $fee->price_combo,
+                        'init_tuition_fee_session' => $fee->session,
+                        'total_charged' => 0,
+                        'debt_amount' => $fee->price_combo,
+                        'total_sessions' => $fee->session,
+                        'real_sessions' => $fee->session,
+                    ),array('id'=>$existContract->id), 'contracts');
                 }
             }
         }

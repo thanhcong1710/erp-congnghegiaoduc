@@ -241,15 +241,25 @@
                 ></vue-select>
             </div>
 
-            <div class="vx-col w-full mb-4">
+            <div class="vx-col md:w-1/2 w-full mb-4" v-if="agreement.book_receive_obj && agreement.book_receive_obj.value == 3">
+              <label>Ngày phát sách <span class="text-danger">(*)</span></label>
+              <datepicker class="w-full"
+                v-model="agreement.book_delivered_date"
+                placeholder="Chọn ngày phát sách"
+                :lang="datepickerOptions.lang"
+                @change="selectBookDeliveredDate"
+              />
+            </div>
+
+            <!-- <div class="vx-col w-full mb-4">
               <label>Địa chỉ nhận sách</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 v-model="agreement.book_receive_address"
-                placeholder="Nhập địa chỉ nhẫn sách"
+                placeholder="Nhập địa chỉ nhận sách"
               />
-            </div>
+            </div> -->
 
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Đăng ký nhận hợp đồng</label>
@@ -727,6 +737,7 @@
           book_receive: 0,
           book_receive_obj: null,
           book_receive_address: '',
+          book_delivered_date: null,
           contract_receive: 0,
           contract_receive_obj: null,
           group_type: 0,
@@ -982,6 +993,7 @@
           // Load các trường mới
           this.agreement.book_receive = response.data.book_receive || 0
           this.agreement.book_receive_address = response.data.book_receive_address || ''
+          this.agreement.book_delivered_date = response.data.book_delivered_date || null
           this.agreement.contract_receive = response.data.contract_receive || 0
           this.agreement.group_type = response.data.group_type || 0
           
@@ -1076,6 +1088,11 @@
           this.agreement.start_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      selectBookDeliveredDate(date){
+        if (date) {
+          this.agreement.book_delivered_date = moment(date).format("YYYY-MM-DD");
+        }
+      },
       caculatorSession(){
         console.log(this.agreement);
         this.agreement.total_amount = Number(this.agreement.tuition_fee_amount)  > 0 ? Number(this.agreement.tuition_fee_amount) : 0;
@@ -1083,6 +1100,9 @@
       saveBookReceive(data = null){
         if (data && typeof data === 'object') {
           this.agreement.book_receive = data.value
+          if (data.value !== 3) {
+            this.agreement.book_delivered_date = null;
+          }
           if (data.value === 2) {
              const courseCount = this.productIdsOfNewFee && this.productIdsOfNewFee.length > 0 ? this.productIdsOfNewFee.length : (this.agreement.contracts ? this.agreement.contracts.length : 1);
              this.agreement.discount_amount = Number(this.agreement.discount_amount || 0) + (courseCount * 100000);
@@ -1166,6 +1186,10 @@
         }
         if (this.agreement.start_date == "") {
           mess += " - Ngày dự kiến học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.agreement.book_receive == 3 && !this.agreement.book_delivered_date) {
+          mess += " - Ngày phát sách không được để trống<br/>";
           resp = false;
         }
         if (!resp) {

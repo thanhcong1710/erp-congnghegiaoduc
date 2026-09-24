@@ -1349,6 +1349,7 @@ class ContractsController extends Controller
                                 'must_charge' => $tuition_fee_info->price,
                                 'updated_at' => date('Y-m-d H:i:s'),
                                 'updator_id' => Auth::user()->id,
+                                'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                             ], ['id' => $existContract->id], 'contracts');
 
                             u::addLogContracts($existContract->id);
@@ -1377,7 +1378,8 @@ class ContractsController extends Controller
                                 'creator_id' => Auth::user()->id,
                                 'status' => 1,
                                 'count_recharge' => 1,
-                                'agreement_id' => $agreement_id
+                                'agreement_id' => $agreement_id,
+                                'book_delivered_date' => data_get($request, 'book_delivered_date', null)
                             ], 'contracts');
 
                             u::updateSimpleRow(
@@ -1403,6 +1405,7 @@ class ContractsController extends Controller
                                 'must_charge' => $fee->price_combo,
                                 'updated_at' => now(),
                                 'updator_id' => Auth::user()->id,
+                                'book_delivered_date' => $fee->stt == 1 ? data_get($request, 'book_delivered_date', null) : null
                             ], ['id' => $existContract->id], 'contracts');
 
                             u::addLogContracts($existContract->id);
@@ -1426,7 +1429,8 @@ class ContractsController extends Controller
                                 'creator_id' => Auth::user()->id,
                                 'status' => 1,
                                 'count_recharge' => $fee->stt,
-                                'agreement_id' => $agreement_id
+                                'agreement_id' => $agreement_id,
+                                'book_delivered_date' => $fee->stt == 1 ? data_get($request, 'book_delivered_date', null) : null
                             ], 'contracts');
 
                             u::updateSimpleRow([
@@ -1524,6 +1528,14 @@ class ContractsController extends Controller
                     'updator_id' => Auth::user()->id,
                 ), array('id' => data_get($request, 'id')), 'agreements');
                 u::updateSimpleRow(['count_recharge' => $count_recharge], ['agreement_id' => $agreement_id], 'contracts');
+                
+                u::updateSimpleRow(['book_delivered_date' => null], ['agreement_id' => $agreement_id], 'contracts');
+                $first_contract = u::first("SELECT id FROM contracts WHERE agreement_id = $agreement_id ORDER BY count_recharge ASC, id ASC LIMIT 1");
+                if ($first_contract) {
+                    u::updateSimpleRow([
+                        'book_delivered_date' => data_get($request, 'book_delivered_date', null)
+                    ], ['id' => $first_contract->id], 'contracts');
+                }
                 u::addLogAgreements($agreement_id);
             }
 
