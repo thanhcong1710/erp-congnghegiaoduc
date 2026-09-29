@@ -13,7 +13,7 @@ class UpdateAgreementsData extends Command
      *
      * @var string
      */
-    protected $signature = 'erp:update-agreements-data';
+    protected $signature = 'erp:update-agreements-data {--student_id= : ID của học sinh để test}';
 
     /**
      * The console command description.
@@ -29,9 +29,21 @@ class UpdateAgreementsData extends Command
      */
     public function handle()
     {
+        $studentId = $this->option('student_id');
+
         $this->info("Bắt đầu cập nhật dữ liệu...");
         
         $this->info("1. Đang cập nhật last_pay_date và full_fee_date...");
+        
+        $whereUpdate = "a.status > 0";
+        $whereSelect = "status > 0";
+        $bindings = [];
+        if ($studentId) {
+            $whereUpdate .= " AND a.student_id = ?";
+            $whereSelect .= " AND student_id = ?";
+            $bindings[] = $studentId;
+        }
+
         DB::statement("
             UPDATE agreements a
             LEFT JOIN (
@@ -42,19 +54,19 @@ class UpdateAgreementsData extends Command
             ) p ON p.agreement_id = a.id
             SET a.last_pay_date = p.last_charge_date,
                 a.full_fee_date = CASE WHEN a.debt_amount = 0 THEN p.last_charge_date ELSE NULL END
-            WHERE a.status > 0
-        ");
+            WHERE $whereUpdate
+        ", $bindings);
 
         $this->info("2. Đang tải dữ liệu agreements...");
         $agreements = DB::select("
             SELECT id, student_id, full_fee_date
             FROM agreements
-            WHERE status > 0
+            WHERE $whereSelect
             ORDER BY 
                 CASE WHEN last_pay_date IS NULL THEN 1 ELSE 0 END, 
                 last_pay_date ASC, 
                 created_at ASC
-        ");
+        ", $bindings);
 
         $student_agreements = [];
         $all_agr_ids = [];
@@ -172,54 +184,56 @@ class UpdateAgreementsData extends Command
         }
 
         $this->info("4. Đang tính toán ngày học thứ 8, ngày học cuối (của gói trước) và chuẩn bị cập nhật...");
-        $updates = [];
-        foreach ($student_agreements as $student_id => $agrs) {
-            $first_agr = $agrs[0];
-            $first_agr_id = $first_agr->id;
+        
+        $get_8th_session_date = function($agr_id) use ($contracts_by_agr, &$holidays_cache, $schedules_by_class) {
+            if (!isset($contracts_by_agr[$agr_id]) || empty($contracts_by_agr[$agr_id])) {
+                return null;
+            }
+            $contract = $contracts_by_agr[$agr_id][0];
+
+            $branch_id = $contract->branch_id;
+            $product_id = $contract->product_id;
+            $cache_key = "{$branch_id}_{$product_id}";
             
-            $first_8th_session_date = null;
-
-            if (isset($contracts_by_agr[$first_agr_id]) && !empty($contracts_by_agr[$first_agr_id])) {
-                $first_contract = $contracts_by_agr[$first_agr_id][0];
-
-                $branch_id = $first_contract->branch_id;
-                $product_id = $first_contract->product_id;
-                $cache_key = "{$branch_id}_{$product_id}";
-                
-                if (!isset($holidays_cache[$cache_key])) {
-                    $holidays_cache[$cache_key] = u::getPublicHolidays($branch_id, $product_id);
-                }
-                
-                $holidays = $holidays_cache[$cache_key];
-                
-                $valid_schedules_first = [];
-                if (isset($schedules_by_class[$first_contract->class_id])) {
-                    foreach ($schedules_by_class[$first_contract->class_id] as $s_date) {
-                        if ($s_date >= $first_contract->enrolment_start_date) {
-                            $valid_schedules_first[] = $s_date;
-                        }
-                    }
-                }
-
-                $eighth_session = $valid_schedules_first[7] ?? null;
-
-                if ($eighth_session) {
-                    $first_8th_session_date = $eighth_session;
-                } else {
-                    if (!empty($first_contract->class_day)) {
-                        $arr_day = array_filter(explode(',', $first_contract->class_day));
-                        if (count($arr_day) > 0) {
-                            $eighth_session_info = u::calculatorSessionsByNumberOfSessions($first_contract->enrolment_start_date, 8, $holidays, $arr_day);
-                            $first_8th_session_date = data_get($eighth_session_info, 'end_date');
-                        } else {
-                            $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
-                        }
-                    } else {
-                        $first_8th_session_date = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+            if (!isset($holidays_cache[$cache_key])) {
+                $holidays_cache[$cache_key] = u::getPublicHolidays($branch_id, $product_id);
+            }
+            
+            $holidays = $holidays_cache[$cache_key];
+            
+            $valid_schedules = [];
+            if (isset($schedules_by_class[$contract->class_id])) {
+                foreach ($schedules_by_class[$contract->class_id] as $s_date) {
+                    if ($s_date >= $contract->enrolment_start_date) {
+                        $valid_schedules[] = $s_date;
                     }
                 }
             }
 
+            $eighth_session = $valid_schedules[7] ?? null;
+
+            if ($eighth_session) {
+                return $eighth_session;
+            } else {
+                if (!empty($contract->class_day)) {
+                    $arr_day = array_filter(explode(',', $contract->class_day));
+                    if (count($arr_day) > 0) {
+                        $eighth_session_info = u::calculatorSessionsByNumberOfSessions($contract->enrolment_start_date, 8, $holidays, $arr_day);
+                        return data_get($eighth_session_info, 'end_date');
+                    } else {
+                        return date('Y-m-d', strtotime($contract->enrolment_start_date . ' + 28 days'));
+                    }
+                } else {
+                    return date('Y-m-d', strtotime($contract->enrolment_start_date . ' + 28 days'));
+                }
+            }
+        };
+
+        $updates = [];
+        foreach ($student_agreements as $student_id => $agrs) {
+            $first_agr = $agrs[0];
+            
+            $current_8th_session_date = $get_8th_session_date($first_agr->id);
             $prev_agr_end_date = null;
 
             foreach ($agrs as $index => $agr) {
@@ -234,10 +248,11 @@ class UpdateAgreementsData extends Command
                 $count_recharge = 1;
                 if ($is_first_package === 1) {
                     $count_recharge = 0;
-                } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
-                    $count_recharge = 0;
                 } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
                     // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                    $count_recharge = 0;
+                    $current_8th_session_date = $get_8th_session_date($agr->id);
+                } else if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date <= $current_8th_session_date) {
                     $count_recharge = 0;
                 }
                 
@@ -245,7 +260,7 @@ class UpdateAgreementsData extends Command
                     'id' => $agr->id,
                     'is_first_package' => $is_first_package,
                     'count_recharge' => $count_recharge,
-                    'first_8th_session_date' => $first_8th_session_date,
+                    'first_8th_session_date' => $current_8th_session_date,
                     'end_session_date' => $agr_end_session_date,
                 ];
 
