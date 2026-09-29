@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\AddScheduleClass;
+use App\Console\Commands\AddMissingScheduleClass;
 use App\Console\Commands\AddScheduleHasStudent;
 use App\Console\Commands\AutoWithdraw;
 use App\Console\Commands\AutoWithdrawEnrollmentDeposit;
@@ -24,6 +25,7 @@ class Kernel extends ConsoleKernel
         ProcessDataScheduleHasStudent::class,
         AddScheduleHasStudent::class,
         AddScheduleClass::class,
+        AddMissingScheduleClass::class,
         JobsSendEmail::class,
         JobsProcessLockParent::class,
         AutoWithdrawEnrollmentDeposit::class,
