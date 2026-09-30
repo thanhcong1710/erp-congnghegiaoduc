@@ -69,17 +69,22 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC</label>
-              <vue-select
-                    v-if="!agreement.is_sale_role"
-                    label="label"
-                    placeholder="Chọn EC"
-                    :options="html.ec.list"
-                    v-model="html.ec.item"
-                    :searchable="true"
-                    @input="saveEC"
-                ></vue-select>
+              <div v-if="!agreement.is_sale_role">
+                <vue-select
+                      label="label"
+                      placeholder="Chọn EC"
+                      :options="html.ec.list"
+                      v-model="html.ec.item"
+                      :searchable="true"
+                      @input="saveEC"
+                      :disabled="isEcDisabled"
+                  ></vue-select>
+                  <div v-if="isEcDisabled" class="mt-1">
+                    <small class="text-danger"><i class="fa-solid fa-lock mr-1"></i> Đã chốt lương không được cập nhật EC</small>
+                  </div>
+              </div>
               <input
-                v-else
+                v-if="agreement.is_sale_role"
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
@@ -802,6 +807,16 @@
       this.loadDetail();
     },
     computed: {
+      isEcDisabled() {
+        if (!this.agreement || !this.agreement.salary_month) return false;
+        
+        let now = moment();
+        let closingMonth = now.date() < 5 
+          ? moment().subtract(2, 'months').format('YYYY-MM') 
+          : moment().subtract(1, 'months').format('YYYY-MM');
+
+        return moment(this.agreement.salary_month, 'YYYY-MM').isSameOrBefore(moment(closingMonth, 'YYYY-MM'));
+      },
       // =============================
       // product_id thuộc gói phí mới
       // =============================

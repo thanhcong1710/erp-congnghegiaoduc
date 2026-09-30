@@ -1546,6 +1546,20 @@ class ContractsController extends Controller
 
             // Update EC and EC Leader if provided (only for admin)
             if ($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) {
+                // Kiểm tra chốt lương
+                $salary_month = data_get($agreementInfo, 'salary_month');
+                if ($salary_month) {
+                    $day = (int) date('d');
+                    $month_diff = $day < 5 ? 2 : 1;
+                    $closing_month = date('Y-m', strtotime(date('Y-m-01') . " -$month_diff month"));
+                    if ($salary_month <= $closing_month) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Đã chốt lương không được cập nhật EC'
+                        ]);
+                    }
+                }
+
                 $ec_id = (int)$request->ec_id;
                 $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
                 if ($ec_info) {
