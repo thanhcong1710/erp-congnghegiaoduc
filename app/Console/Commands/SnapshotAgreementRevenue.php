@@ -57,10 +57,11 @@ class SnapshotAgreementRevenue extends Command
         DB::table('agreements_revenue_histories')->where('salary_month', $targetMonth)->delete();
 
         // Select all agreements where salary_month matches targetMonth
-        $agreements = DB::table('agreements')
-            ->select('id', 'must_charge', 'discount_amount', 'debt_amount')
-            ->where('salary_month', $targetMonth)
-            ->where('debt_amount', 0) // Salary calculated only when debt_amount = 0 (based on report25 logic)
+        $agreements = DB::table('agreements as a')
+            ->select('a.id', 'a.must_charge', 'a.discount_amount', 'a.debt_amount', 'a.tuition_fee_id', 'tf.number_of_months')
+            ->leftJoin('tuition_fee as tf', 'tf.id', '=', 'a.tuition_fee_id')
+            ->where('a.salary_month', $targetMonth)
+            ->where('a.debt_amount', 0) // Salary calculated only when debt_amount = 0 (based on report25 logic)
             ->get();
 
         $count = 0;
@@ -75,6 +76,8 @@ class SnapshotAgreementRevenue extends Command
                     'must_charge' => (float)$a->must_charge,
                     'discount_amount' => (float)$a->discount_amount,
                     'revenue_amount' => $revenue,
+                    'tuition_fee_id' => $a->tuition_fee_id,
+                    'separated_sales' => (float)$a->number_of_months,
                     'updated_at' => Carbon::now()
                 ]
             );

@@ -2222,6 +2222,12 @@ class ExportsController extends Controller
                  WHERE arh_prev.agreement_id = a.id 
                  AND arh_prev.salary_month < a.salary_month), 0)";
 
+        $expr_separated_sales = "tf.number_of_months";
+        $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0)";
+
         if ($salary_month === 'none') {
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
@@ -2234,6 +2240,12 @@ class ExportsController extends Controller
             $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
             $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
             $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < '$sm'), 0)";
+                 
+            $expr_separated_sales = "COALESCE(arh_current.separated_sales, tf.number_of_months)";
+            $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
                  FROM agreements_revenue_histories arh_prev 
                  WHERE arh_prev.agreement_id = a.id 
                  AND arh_prev.salary_month < '$sm'), 0)";
@@ -2281,7 +2293,7 @@ class ExportsController extends Controller
                 COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
                 COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
                 COUNT(a.id)                                            AS unseparated_sales,
-                SUM(tf.number_of_months)                               AS separated_sales,
+                SUM(COALESCE($expr_separated_sales, 0) - $expr_truy_thu_separated) AS separated_sales,
                 SUM(CASE WHEN a.count_recharge = 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS new_revenue,
                 SUM(CASE WHEN a.count_recharge > 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS uplv_revenue,
                 SUM($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) AS total_revenue
