@@ -1245,7 +1245,7 @@ class ContractsController extends Controller
                 $ec_leader_id = (int)$request->ec_leader_id;
                 if ($ec_id > 0) {
                     if (!$ec_leader_id) {
-                        die('234');
+                        die('2347');
                         $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
                         if ($ec_info) {
                             $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
