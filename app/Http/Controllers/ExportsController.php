@@ -9,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Illuminate\Http\Request;
 use App\Models\ProcessExcel;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ExportsController extends Controller
@@ -2232,10 +2233,21 @@ class ExportsController extends Controller
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
+            $today = Carbon::now();
+            if ($today->day <= 5) {
+                // Processing for the previous month
+                $targetMonth = $today->copy()->subMonth()->format('Y-m');
+            } else {
+                // Processing for the current month
+                $targetMonth = $today->format('Y-m');
+            }
+            if($salary_month == $targetMonth){
+               $cond .= " AND (a.salary_month = '$sm')";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
             
-            $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
-            
-            $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+            }
             
             $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
             $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
@@ -2882,10 +2894,21 @@ class ExportsController extends Controller
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
+            $today = Carbon::now();
+            if ($today->day <= 5) {
+                // Processing for the previous month
+                $targetMonth = $today->copy()->subMonth()->format('Y-m');
+            } else {
+                // Processing for the current month
+                $targetMonth = $today->format('Y-m');
+            }
+            if($salary_month == $targetMonth){
+               $cond .= " AND (a.salary_month = '$sm')";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
             
-            $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
-            
-            $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+            }
             
             $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
             $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
@@ -3253,10 +3276,21 @@ class ExportsController extends Controller
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
         } elseif ($salary_month !== '') {
             $sm = addslashes($salary_month);
+            $today = Carbon::now();
+            if ($today->day <= 5) {
+                // Processing for the previous month
+                $targetMonth = $today->copy()->subMonth()->format('Y-m');
+            } else {
+                // Processing for the current month
+                $targetMonth = $today->format('Y-m');
+            }
+            if($salary_month == $targetMonth){
+               $cond .= " AND (a.salary_month = '$sm')";
+            } else {
+                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
             
-            $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
-            
-            $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+            }
             
             $select_must_charge = "COALESCE(arh_current.must_charge, a.must_charge) AS must_charge";
             $select_discount = "COALESCE(arh_current.discount_amount, a.discount_amount) AS discount";
