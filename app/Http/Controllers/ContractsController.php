@@ -1243,6 +1243,7 @@ class ContractsController extends Controller
 
                 $ec_id = (int)$request->ec_id;
                 $ec_leader_id = (int)$request->ec_leader_id;
+                var_dump($ec_id,$ec_leader_id);die();
                 if ($ec_id > 0) {
                     if (!$ec_leader_id) {
                         $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
