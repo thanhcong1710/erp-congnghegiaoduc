@@ -1267,7 +1267,7 @@ class ContractsController extends Controller
                             'ec_id' => $ec_id,
                             'ec_leader_id' => $ec_leader_id,
                         ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
-                        die('234');
+                        var_dump($ec_id, $ec_leader_id);die('234');
                     }
                 }
             }
