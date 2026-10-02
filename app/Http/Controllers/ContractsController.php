@@ -1225,7 +1225,8 @@ class ContractsController extends Controller
                 );
             }
             // Update EC and EC Leader if provided (only for admin)
-            if ($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) {
+            if (($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) || 
+            ($request->has('ec_leader_id') && $request->ec_leader_id > 0 && $request->ec_leader_id != data_get($agreementInfo,'ec_leader_id'))) {
                 // Kiểm tra chốt lương
                 $salary_month = data_get($agreementInfo, 'salary_month');
                 if ($salary_month) {
