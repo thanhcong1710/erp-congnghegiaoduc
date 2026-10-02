@@ -1224,6 +1224,51 @@ class ContractsController extends Controller
                     'crm_parents'
                 );
             }
+            // Update EC and EC Leader if provided (only for admin)
+            if ($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) {
+                // Kiểm tra chốt lương
+                $salary_month = data_get($agreementInfo, 'salary_month');
+                if ($salary_month) {
+                    $day = (int) date('d');
+                    $month_diff = $day < 5 ? 2 : 1;
+                    $closing_month = date('Y-m', strtotime(date('Y-m-01') . " -$month_diff month"));
+                    if ($salary_month <= $closing_month) {
+                        return response()->json([
+                            'status' => 0,
+                            'message' => 'Đã chốt lương không được cập nhật EC'
+                        ]);
+                    }
+                }
+
+                $ec_id = (int)$request->ec_id;
+                $ec_leader_id = (int)$request->ec_leader_id;
+                if ($ec_id > 0) {
+                    if (!$ec_leader_id) {
+                        $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
+                        if ($ec_info) {
+                            $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
+                        }
+                    }
+                    
+                    if ($ec_leader_id) {
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['id' => $agreement_id], 'agreements');
+                        
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['agreement_id' => $agreement_id], 'contracts');
+    
+                        u::updateSimpleRow([
+                            'ec_id' => $ec_id,
+                            'ec_leader_id' => $ec_leader_id,
+                        ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
+                    }
+                }
+            }
+
             $updateChargesFee = false;
             if (data_get($agreementInfo, 'tuition_fee_id') != data_get($request, 'tuition_fee_id')) {
                 if ($is_sale) {
@@ -1544,50 +1589,7 @@ class ContractsController extends Controller
                 u::addLogAgreements($agreement_id);
             }
 
-            // Update EC and EC Leader if provided (only for admin)
-            if ($request->has('ec_id') && $request->ec_id > 0 && $request->ec_id != data_get($agreementInfo,'ec_id')) {
-                // Kiểm tra chốt lương
-                $salary_month = data_get($agreementInfo, 'salary_month');
-                if ($salary_month) {
-                    $day = (int) date('d');
-                    $month_diff = $day < 5 ? 2 : 1;
-                    $closing_month = date('Y-m', strtotime(date('Y-m-01') . " -$month_diff month"));
-                    if ($salary_month <= $closing_month) {
-                        return response()->json([
-                            'status' => 0,
-                            'message' => 'Đã chốt lương không được cập nhật EC'
-                        ]);
-                    }
-                }
-
-                $ec_id = (int)$request->ec_id;
-                $ec_leader_id = (int)$request->ec_leader_id;
-                if ($ec_id > 0) {
-                    if (!$ec_leader_id) {
-                        $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $ec_id);
-                        if ($ec_info) {
-                            $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
-                        }
-                    }
-                    
-                    if ($ec_leader_id) {
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['id' => $agreement_id], 'agreements');
-                        
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['agreement_id' => $agreement_id], 'contracts');
-    
-                        u::updateSimpleRow([
-                            'ec_id' => $ec_id,
-                            'ec_leader_id' => $ec_leader_id,
-                        ], ['student_id' => $agreementInfo->student_id], 'term_student_user');
-                    }
-                }
-            }
+            
 
             // Xếp lớp ngay khi nhập học (nếu chọn)
             $class_id = (int) data_get($request, 'class_id', 0);
