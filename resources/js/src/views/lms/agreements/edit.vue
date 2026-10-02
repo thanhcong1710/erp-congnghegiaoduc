@@ -94,7 +94,19 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC Leader</label>
+              <div v-if="!agreement.is_sale_role">
+                <vue-select
+                      label="label"
+                      placeholder="Chọn EC Leader"
+                      :options="html.ec_leader.list"
+                      v-model="html.ec_leader.item"
+                      :searchable="true"
+                      @input="saveECLeader"
+                      :disabled="isEcDisabled"
+                  ></vue-select>
+              </div>
               <input
+                v-if="agreement.is_sale_role"
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
@@ -708,6 +720,10 @@
             item: '',
             list: []
           },
+          ec_leader: {
+            item: '',
+            list: []
+          },
           classes: {
             item: '',
             list: []
@@ -1151,28 +1167,27 @@
         axios.g(`/api/users/get-data/users-manager`)
           .then(response => {
             this.html.ec.list = response.data.map(item => ({...item, label: item.label_name}))
+            this.html.ec_leader.list = response.data.map(item => ({...item, label: item.label_name}))
             if (this.agreement.ec_id) {
               this.html.ec.item = this.html.ec.list.find(e => e.id === this.agreement.ec_id);
+            }
+            if (this.agreement.ec_leader_id) {
+              this.html.ec_leader.item = this.html.ec_leader.list.find(e => e.id === this.agreement.ec_leader_id);
             }
           })
       },
       saveEC(data = null) {
         if (data && typeof data === 'object') {
           this.agreement.ec_id = data.id;
-          
-          axios.p('/api/lms/agreements/get-ec-leader', {
-            ec_id: data.id
-          }).then(response => {
-            if (response.data.status == 1 && response.data.data) {
-              this.agreement.ec_leader_id = response.data.data.id;
-              this.agreement.ec_leader_name = response.data.data.name;
-            } else {
-              this.agreement.ec_leader_id = data.id;
-              this.agreement.ec_leader_name = data.label_name;
-            }
-          });
         } else {
           this.agreement.ec_id = '';
+        }
+      },
+      saveECLeader(data = null) {
+        if (data && typeof data === 'object') {
+          this.agreement.ec_leader_id = data.id;
+          this.agreement.ec_leader_name = data.label_name;
+        } else {
           this.agreement.ec_leader_id = '';
           this.agreement.ec_leader_name = '';
         }
