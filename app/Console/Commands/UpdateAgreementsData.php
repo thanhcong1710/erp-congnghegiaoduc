@@ -328,6 +328,7 @@ class UpdateAgreementsData extends Command
         $bar->finish();
         $this->line("");
         $this->info("Hoàn tất cập nhật dữ liệu thành công!");
+        u::query("INSERT INTO log_jobs (`action`, created_at, `data`) VALUES ('UpdateAgreementsData','".date('Y-m-d H:i:s')."', '')");
         return 0;
     }
 }

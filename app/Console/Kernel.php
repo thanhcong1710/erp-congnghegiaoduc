@@ -11,6 +11,7 @@ use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
 use App\Console\Commands\SnapshotAgreementRevenue;
+use App\Console\Commands\UpdateAgreementsData;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -30,7 +31,8 @@ class Kernel extends ConsoleKernel
         JobsProcessLockParent::class,
         AutoWithdrawEnrollmentDeposit::class,
         AutoWithdraw::class,
-        SnapshotAgreementRevenue::class
+        SnapshotAgreementRevenue::class,
+        UpdateAgreementsData::class
     ];
 
     /**
@@ -49,6 +51,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('jobsProcessLockParent:command')->dailyAt('3:00'); 
         $schedule->command('autoWithdraw:process')->dailyAt('2:30')->withoutOverlapping();
         $schedule->command('snapshot:agreement-revenue')->dailyAt('23:45')->withoutOverlapping();
+        $schedule->command('erp:update-agreements-data')->dailyAt('23:50')->withoutOverlapping();
     }
 
     /**
