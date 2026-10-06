@@ -3270,6 +3270,11 @@ class ExportsController extends Controller
                  FROM agreements_revenue_histories arh_prev 
                  WHERE arh_prev.agreement_id = a.id 
                  AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+        $select_separated_sales = "tf.number_of_months AS separated_sales";
+        $select_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_separated";
 
         if ($salary_month === 'none') {
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
@@ -3295,6 +3300,11 @@ class ExportsController extends Controller
                     FROM agreements_revenue_histories arh_prev 
                     WHERE arh_prev.agreement_id = a.id 
                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+                $select_separated_sales = "COALESCE(arh_current.separated_sales, tf.number_of_months) AS separated_sales";
+                $select_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                    FROM agreements_revenue_histories arh_prev 
+                    WHERE arh_prev.agreement_id = a.id 
+                    AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_separated";
             }
         }
 
@@ -3309,12 +3319,15 @@ class ExportsController extends Controller
                 END AS ec_name,
                 $select_must_charge,
                 $select_discount,
+                $select_separated_sales,
+                $select_truy_thu_separated,
                 a.debt_amount,
                 s.source_id,
                 $select_truy_thu,
                 a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             $join_history
             WHERE $cond
         ";
@@ -3330,19 +3343,27 @@ class ExportsController extends Controller
 
             $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
             $luong_sale = 0;
+            $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
+            
             if ((float) $row->debt_amount == 0) {
                 if ((int) $row->source_id == 6) {
                     $rate = ($row->status_register == 'Mới') ? 0.05 : 0.03;
                 } else {
                     $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
                 $luong_sale = $doanh_so * $rate;
             }
+
+            $chua_tach = 1;
+            $da_tach = (float) $row->separated_sales - (float) $row->truy_thu_separated;
+            $doanh_thu = $doanh_so;
 
             if (!isset($grouped[$ec_name])) {
                 $grouped[$ec_name] = [
                     'ec_name' => $ec_name,
+                    'so_don_chua_tach' => 0,
+                    'so_don_da_tach' => 0,
+                    'doanh_thu' => 0,
                     'luong_sale' => 0,
                     'luong_cung' => 0,
                     'thuong_lead' => 0,
@@ -3356,9 +3377,13 @@ class ExportsController extends Controller
 
         $final_list = [];
         $sumSale = 0; $sumCung = 0; $sumLead = 0; $sumTeam = 0; $sumTong = 0;
+        $sumChuaTach = 0; $sumDaTach = 0; $sumDoanhThu = 0;
         foreach ($grouped as $g) {
             $g['tong_luong'] = $g['luong_sale'] + $g['luong_cung'] + $g['thuong_lead'] + $g['thuong_team'];
             $final_list[] = $g;
+            $sumChuaTach += $g['so_don_chua_tach'];
+            $sumDaTach += $g['so_don_da_tach'];
+            $sumDoanhThu += $g['doanh_thu'];
             $sumSale += $g['luong_sale'];
             $sumCung += $g['luong_cung'];
             $sumLead += $g['thuong_lead'];
@@ -3376,15 +3401,15 @@ class ExportsController extends Controller
 
         $title = 'BÁO CÁO TRẢ LƯƠNG SALE THEO TEAM';
         $sheet->setCellValue('A1', $title);
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:J1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 13],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension(1)->setRowHeight(28);
 
-        $headers = ['STT', 'TÊN THÀNH VIÊN', 'LƯƠNG SALE', 'LƯƠNG CỨNG', 'THƯỞNG LEAD', 'THƯỞNG TEAM', 'TỔNG LƯƠNG'];
-        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+        $headers = ['STT', 'TÊN THÀNH VIÊN', 'SỐ ĐƠN CHƯA TÁCH', 'SỐ ĐƠN ĐÃ TÁCH', 'DOANH THU', 'LƯƠNG SALE', 'LƯƠNG CỨNG', 'THƯỞNG LEAD', 'THƯỞNG TEAM', 'TỔNG LƯƠNG'];
+        $cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
 
         $hStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -3396,10 +3421,10 @@ class ExportsController extends Controller
         foreach ($headers as $i => $h) {
             $sheet->setCellValue($cols[$i] . '3', $h);
         }
-        $sheet->getStyle('A3:G3')->applyFromArray($hStyle);
+        $sheet->getStyle('A3:J3')->applyFromArray($hStyle);
         $sheet->getRowDimension(3)->setRowHeight(24);
 
-        $widths = [8, 30, 20, 20, 20, 20, 20];
+        $widths = [8, 30, 20, 20, 25, 20, 20, 20, 20, 20];
         foreach ($cols as $i => $c) {
             $sheet->getColumnDimension($c)->setWidth($widths[$i]);
         }
@@ -3414,18 +3439,22 @@ class ExportsController extends Controller
         foreach ($final_list as $idx => $item) {
             $sheet->setCellValue('A' . $rowIdx, $idx + 1);
             $sheet->setCellValue('B' . $rowIdx, $item['ec_name']);
-            $sheet->setCellValue('C' . $rowIdx, $item['luong_sale']);
-            $sheet->setCellValue('D' . $rowIdx, $item['luong_cung']);
-            $sheet->setCellValue('E' . $rowIdx, $item['thuong_lead']);
-            $sheet->setCellValue('F' . $rowIdx, $item['thuong_team']);
-            $sheet->setCellValue('G' . $rowIdx, $item['tong_luong']);
+            $sheet->setCellValue('C' . $rowIdx, $item['so_don_chua_tach']);
+            $sheet->setCellValue('D' . $rowIdx, $item['so_don_da_tach']);
+            $sheet->setCellValue('E' . $rowIdx, $item['doanh_thu']);
+            $sheet->setCellValue('F' . $rowIdx, $item['luong_sale']);
+            $sheet->setCellValue('G' . $rowIdx, $item['luong_cung']);
+            $sheet->setCellValue('H' . $rowIdx, $item['thuong_lead']);
+            $sheet->setCellValue('I' . $rowIdx, $item['thuong_team']);
+            $sheet->setCellValue('J' . $rowIdx, $item['tong_luong']);
 
-            $sheet->getStyle("A$rowIdx:G$rowIdx")->applyFromArray($borderStyle);
+            $sheet->getStyle("A$rowIdx:J$rowIdx")->applyFromArray($borderStyle);
             $sheet->getStyle("A$rowIdx")->applyFromArray($centerAlign);
             $sheet->getStyle("B$rowIdx")->applyFromArray($leftAlign);
             
-            $sheet->getStyle("C$rowIdx:G$rowIdx")->applyFromArray($rightAlign);
-            $sheet->getStyle("C$rowIdx:G$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+            $sheet->getStyle("E$rowIdx:J$rowIdx")->applyFromArray($rightAlign);
+            $sheet->getStyle("C$rowIdx:D$rowIdx")->applyFromArray($centerAlign);
+            $sheet->getStyle("E$rowIdx:J$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
 
             $rowIdx++;
         }
@@ -3433,20 +3462,24 @@ class ExportsController extends Controller
         // TONG row
         $sheet->mergeCells("A$rowIdx:B$rowIdx");
         $sheet->setCellValue('A' . $rowIdx, 'Tổng cộng');
-        $sheet->setCellValue('C' . $rowIdx, $sumSale);
-        $sheet->setCellValue('D' . $rowIdx, $sumCung);
-        $sheet->setCellValue('E' . $rowIdx, $sumLead);
-        $sheet->setCellValue('F' . $rowIdx, $sumTeam);
-        $sheet->setCellValue('G' . $rowIdx, $sumTong);
+        $sheet->setCellValue('C' . $rowIdx, $sumChuaTach);
+        $sheet->setCellValue('D' . $rowIdx, $sumDaTach);
+        $sheet->setCellValue('E' . $rowIdx, $sumDoanhThu);
+        $sheet->setCellValue('F' . $rowIdx, $sumSale);
+        $sheet->setCellValue('G' . $rowIdx, $sumCung);
+        $sheet->setCellValue('H' . $rowIdx, $sumLead);
+        $sheet->setCellValue('I' . $rowIdx, $sumTeam);
+        $sheet->setCellValue('J' . $rowIdx, $sumTong);
         
         $totalStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4F46E5']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT],
         ];
-        $sheet->getStyle("A$rowIdx:G$rowIdx")->applyFromArray($totalStyle);
+        $sheet->getStyle("A$rowIdx:J$rowIdx")->applyFromArray($totalStyle);
         $sheet->getStyle("A$rowIdx")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle("C$rowIdx:G$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
+        $sheet->getStyle("C$rowIdx:D$rowIdx")->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("E$rowIdx:J$rowIdx")->getNumberFormat()->setFormatCode($moneyFmt);
         $sheet->getRowDimension($rowIdx)->setRowHeight(22);
 
         $writer = new Xlsx($spreadsheet);

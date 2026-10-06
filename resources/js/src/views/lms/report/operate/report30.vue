@@ -81,6 +81,9 @@
             <tr>
               <th style="min-width:50px" class="text-center">STT</th>
               <th style="min-width:200px">TÊN THÀNH VIÊN</th>
+              <th style="min-width:120px" class="text-center">SỐ ĐƠN CHƯA TÁCH</th>
+              <th style="min-width:120px" class="text-center">SỐ ĐƠN ĐÃ TÁCH</th>
+              <th style="min-width:140px" class="text-right">DOANH THU</th>
               <th style="min-width:140px" class="text-right">LƯƠNG SALE</th>
               <th style="min-width:140px" class="text-right">LƯƠNG CỨNG</th>
               <th style="min-width:140px" class="text-right">THƯỞNG LEAD</th>
@@ -92,6 +95,9 @@
             <tr class="rpt-row" v-for="(row, idx) in datas" :key="idx">
               <td class="text-center">{{ idx + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
               <td class="student-name">{{ row.ec_name }}</td>
+              <td class="text-center num-cell">{{ row.so_don_chua_tach }}</td>
+              <td class="text-center num-cell">{{ row.so_don_da_tach }}</td>
+              <td class="text-right money-cell">{{ fmtMoney(row.doanh_thu) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.luong_sale) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.luong_cung) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(row.thuong_lead) }}</td>
@@ -100,6 +106,9 @@
             </tr>
             <tr v-if="summary" class="rpt-row bg-gray-100" style="font-weight:bold;">
               <td class="text-right" colspan="2" style="font-size: 16px;">Tổng cộng</td>
+              <td class="text-center num-cell">{{ summary.total_so_don_chua_tach }}</td>
+              <td class="text-center num-cell">{{ summary.total_so_don_da_tach }}</td>
+              <td class="text-right money-cell">{{ fmtMoney(summary.total_doanh_thu) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(summary.total_luong_sale) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(summary.total_luong_cung) }}</td>
               <td class="text-right money-cell">{{ fmtMoney(summary.total_thuong_lead) }}</td>
@@ -107,7 +116,7 @@
               <td class="text-right money-cell" style="color:#4f46e5;">{{ fmtMoney(summary.total_tong_luong) }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="7" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="10" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>
@@ -296,6 +305,7 @@
 .py-8 { padding:32px 0; }
 
 .money-cell  { font-weight:600; color:#374151; }
+.num-cell    { font-weight:600; color:#374151; }
 
 .multiselect { z-index:999; }
 </style>

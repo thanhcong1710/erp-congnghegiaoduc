@@ -2487,6 +2487,11 @@ class ReportsController extends Controller
                  FROM agreements_revenue_histories arh_prev 
                  WHERE arh_prev.agreement_id = a.id 
                  AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_doanh_so";
+        $select_separated_sales = "tf.number_of_months AS separated_sales";
+        $select_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                 FROM agreements_revenue_histories arh_prev 
+                 WHERE arh_prev.agreement_id = a.id 
+                 AND arh_prev.salary_month < a.salary_month), 0) AS truy_thu_separated";
 
         if ($salary_month === 'none') {
             $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
@@ -2512,6 +2517,11 @@ class ReportsController extends Controller
                     FROM agreements_revenue_histories arh_prev 
                     WHERE arh_prev.agreement_id = a.id 
                     AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_doanh_so";
+                $select_separated_sales = "COALESCE(arh_current.separated_sales, tf.number_of_months) AS separated_sales";
+                $select_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                    FROM agreements_revenue_histories arh_prev 
+                    WHERE arh_prev.agreement_id = a.id 
+                    AND arh_prev.salary_month < '$sm'), 0) AS truy_thu_separated";
             }
             
         }
@@ -2527,6 +2537,8 @@ class ReportsController extends Controller
                 END AS ec_name,
                 $select_must_charge,
                 $select_discount,
+                $select_separated_sales,
+                $select_truy_thu_separated,
                 a.debt_amount,
                 a.ec_id,
                 s.source_id,
@@ -2534,6 +2546,7 @@ class ReportsController extends Controller
                 a.id AS agreement_id
             FROM agreements AS a
             INNER JOIN students AS s ON s.id = a.student_id
+            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
             $join_history
             WHERE $cond
         ";
@@ -2541,6 +2554,9 @@ class ReportsController extends Controller
         $list = u::query($query);
         $grouped = [];
         $total_luong_sale = 0;
+        $total_so_don_chua_tach = 0;
+        $total_so_don_da_tach = 0;
+        $total_doanh_thu = 0;
 
         foreach ($list as &$row) {
             // Gói phí có giảm trừ >= 30% giá trị gói → không tính lương
@@ -2550,19 +2566,27 @@ class ReportsController extends Controller
 
             $ec_name = $row->ec_name ? $row->ec_name : 'Khác';
             $luong_sale = 0;
+            $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
+
             if ((float) $row->debt_amount == 0) {
                 if ((int) $row->source_id == 6) {
                     $rate = ($row->status_register == 'Mới') ? 0.05 : 0.03;
                 } else {
                     $rate = ($row->status_register == 'Mới') ? 0.10 : 0.06;
                 }
-                $doanh_so = ((float) $row->must_charge - (float) $row->discount) - (float) $row->truy_thu_doanh_so;
                 $luong_sale = $doanh_so * $rate;
             }
+
+            $chua_tach = 1;
+            $da_tach = (float) $row->separated_sales - (float) $row->truy_thu_separated;
+            $doanh_thu = $doanh_so;
 
             if (!isset($grouped[$ec_name])) {
                 $grouped[$ec_name] = [
                     'ec_name' => $ec_name,
+                    'so_don_chua_tach' => 0,
+                    'so_don_da_tach' => 0,
+                    'doanh_thu' => 0,
                     'luong_sale' => 0,
                     'luong_cung' => 0,
                     'thuong_lead' => 0,
@@ -2571,8 +2595,14 @@ class ReportsController extends Controller
                 ];
             }
 
+            $grouped[$ec_name]['so_don_chua_tach'] += $chua_tach;
+            $grouped[$ec_name]['so_don_da_tach'] += $da_tach;
+            $grouped[$ec_name]['doanh_thu'] += $doanh_thu;
             $grouped[$ec_name]['luong_sale'] += $luong_sale;
             $total_luong_sale += $luong_sale;
+            $total_so_don_chua_tach += $chua_tach;
+            $total_so_don_da_tach += $da_tach;
+            $total_doanh_thu += $doanh_thu;
         }
 
         $final_list = [];
@@ -2587,6 +2617,9 @@ class ReportsController extends Controller
         });
 
         $summary = [
+            'total_so_don_chua_tach' => $total_so_don_chua_tach,
+            'total_so_don_da_tach' => $total_so_don_da_tach,
+            'total_doanh_thu' => $total_doanh_thu,
             'total_luong_sale' => $total_luong_sale,
             'total_luong_cung' => 0,
             'total_thuong_lead' => 0,
