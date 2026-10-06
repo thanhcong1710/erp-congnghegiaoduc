@@ -1703,155 +1703,184 @@ class ReportsController extends Controller
             $cond .= " AND (SELECT MAX(charge_date) FROM payments p WHERE p.agreement_id = a.id) <= '$pay_end_date 23:59:59'";
         }
 
-        $join_history = "";
-        $expr_must_charge = "a.must_charge";
-        $expr_discount = "a.discount_amount";
-        $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
-                 FROM agreements_revenue_histories arh_prev 
-                 WHERE arh_prev.agreement_id = a.id 
-                 AND arh_prev.salary_month < a.salary_month), 0)";
-                 
-        $expr_separated_sales = "tf.number_of_months";
-        $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
-                 FROM agreements_revenue_histories arh_prev 
-                 WHERE arh_prev.agreement_id = a.id 
-                 AND arh_prev.salary_month < a.salary_month), 0)";
-
-        if ($salary_month === 'none') {
-            $cond .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
-        } elseif ($salary_month !== '') {
-            $sm = addslashes($salary_month);
-            $today = Carbon::now();
-            if ($today->day <= 5) {
-                // Processing for the previous month
-                $targetMonth = $today->copy()->subMonth()->format('Y-m');
-            } else {
-                // Processing for the current month
-                $targetMonth = $today->format('Y-m');
-            }
-            if($salary_month == $targetMonth){
-               $cond .= " AND (a.salary_month = '$sm')";
-            } else {
-                $cond .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
-            
-                $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
-                $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
-                $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
-                $expr_separated_sales = "COALESCE(arh_current.separated_sales, tf.number_of_months)";
-                $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
-                    FROM agreements_revenue_histories arh_prev 
-                    WHERE arh_prev.agreement_id = a.id 
-                    AND arh_prev.salary_month < '$sm'), 0)";
-                $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
-                    FROM agreements_revenue_histories arh_prev 
-                    WHERE arh_prev.agreement_id = a.id 
-                    AND arh_prev.salary_month < '$sm'), 0)";
-            }
-            
+        $salary_months = isset($request->salary_months) ? $request->salary_months : [];
+        if (empty($salary_months) && !empty($salary_month) && $salary_month !== 'none') {
+            $salary_months = [$salary_month];
+        }
+        if (empty($salary_months) && $salary_month === 'none') {
+            $salary_months = ['none'];
+        }
+        if (empty($salary_months) && $salary_month === '') {
+            $salary_months = [''];
         }
 
-        // Loại trừ gói phí có giảm trừ >= 30% giá trị gói
-        $cond .= " AND NOT (a.discount_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+        $final_result_map = [];
+        $sum = ['new_count' => 0, 'uplv_count' => 0, 'unseparated_sales' => 0, 'separated_sales' => 0, 'new_revenue' => 0.0, 'uplv_revenue' => 0.0, 'total_revenue' => 0.0, 'salary' => 0.0];
 
-        // ---- Main query: group theo team ----
-        $query = "
-            SELECT
-                ANY_VALUE(
-                    CONCAT(
-                        IF(s.source_id = 6, 'p_', ''),
+        foreach ($salary_months as $sm_iter) {
+            $cond_loop = $cond;
+            $join_history = "";
+            $expr_must_charge = "a.must_charge";
+            $expr_discount = "a.discount_amount";
+            $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < a.salary_month), 0)";
+                     
+            $expr_separated_sales = "tf.number_of_months";
+            $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                     FROM agreements_revenue_histories arh_prev 
+                     WHERE arh_prev.agreement_id = a.id 
+                     AND arh_prev.salary_month < a.salary_month), 0)";
+
+            if ($sm_iter === 'none') {
+                $cond_loop .= " AND (a.salary_month IS NULL OR a.salary_month = '') AND NOT EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id)";
+            } elseif ($sm_iter !== '') {
+                $sm = addslashes($sm_iter);
+                $today = Carbon::now();
+                if ($today->day <= 5) {
+                    $targetMonth = $today->copy()->subMonth()->format('Y-m');
+                } else {
+                    $targetMonth = $today->format('Y-m');
+                }
+                if($sm == $targetMonth){
+                   $cond_loop .= " AND (a.salary_month = '$sm')";
+                } else {
+                    $cond_loop .= " AND (a.salary_month = '$sm' OR EXISTS (SELECT 1 FROM agreements_revenue_histories arh WHERE arh.agreement_id = a.id AND arh.salary_month = '$sm'))";
+                
+                    $join_history = "LEFT JOIN agreements_revenue_histories arh_current ON arh_current.agreement_id = a.id AND arh_current.salary_month = '$sm'";
+                    $expr_must_charge = "COALESCE(arh_current.must_charge, a.must_charge)";
+                    $expr_discount = "COALESCE(arh_current.discount_amount, a.discount_amount)";
+                    $expr_separated_sales = "COALESCE(arh_current.separated_sales, tf.number_of_months)";
+                    $expr_truy_thu = "COALESCE((SELECT SUM(arh_prev.revenue_amount) 
+                        FROM agreements_revenue_histories arh_prev 
+                        WHERE arh_prev.agreement_id = a.id 
+                        AND arh_prev.salary_month < '$sm'), 0)";
+                    $expr_truy_thu_separated = "COALESCE((SELECT SUM(arh_prev.separated_sales) 
+                        FROM agreements_revenue_histories arh_prev 
+                        WHERE arh_prev.agreement_id = a.id 
+                        AND arh_prev.salary_month < '$sm'), 0)";
+                }
+            }
+
+            $cond_loop .= " AND NOT (a.discount_amount >= 0.3 * a.must_charge AND a.must_charge > 0)";
+
+            $query = "
+                SELECT
+                    ANY_VALUE(
+                        CONCAT(
+                            IF(s.source_id = 6, 'p_', ''),
+                            CASE
+                                WHEN s.source_id = 6 THEN
+                                    CASE
+                                        WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                                        WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                                        ELSE -1
+                                    END
+                                ELSE
+                                    COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
+                            END
+                        )
+                    ) AS team_user_id,
+                    ANY_VALUE(
                         CASE
                             WHEN s.source_id = 6 THEN
                                 CASE
-                                    WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
-                                    WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
-                                    ELSE -1
+                                    WHEN a.ec_leader_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id))
+                                    WHEN a.ec_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
+                                    ELSE 'PAGE - Khác (Không có team KD)'
                                 END
                             ELSE
-                                COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
+                                CASE
+                                    WHEN a.ec_leader_id IS NOT NULL AND a.ec_leader_id > 0 THEN
+                                        (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
+                                    WHEN a.ec_id IS NOT NULL AND a.ec_id > 0 THEN
+                                        (SELECT u.name FROM users u WHERE u.id = a.ec_id)
+                                    ELSE
+                                        'Khác (Không có team KD)'
+                                END
                         END
-                    )
-                ) AS team_user_id,
-                ANY_VALUE(
+                    )                                                       AS team_name,
+                    IF(s.source_id = 6, 1, 0)                               AS is_page,
+                    COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
+                    COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
+                    COUNT(a.id)                                            AS unseparated_sales,
+                    SUM(COALESCE($expr_separated_sales, 0) - $expr_truy_thu_separated) AS separated_sales,
+                    SUM(CASE WHEN a.count_recharge = 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS new_revenue,
+                    SUM(CASE WHEN a.count_recharge > 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS uplv_revenue,
+                    SUM($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) AS total_revenue
+                FROM agreements AS a
+                INNER JOIN students AS s ON s.id = a.student_id
+                LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
+                $join_history
+                WHERE $cond_loop
+                GROUP BY
+                    IF(s.source_id = 6, 1, 0),
                     CASE
                         WHEN s.source_id = 6 THEN
                             CASE
-                                WHEN a.ec_leader_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id))
-                                WHEN a.ec_id IN (38, 49, 58) THEN CONCAT('PAGE - ', (SELECT u.name FROM users u WHERE u.id = a.ec_id))
-                                ELSE 'PAGE - Khác (Không có team KD)'
+                                WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
+                                WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
+                                ELSE -1
                             END
                         ELSE
-                            CASE
-                                WHEN a.ec_leader_id IS NOT NULL AND a.ec_leader_id > 0 THEN
-                                    (SELECT u.name FROM users u WHERE u.id = a.ec_leader_id)
-                                WHEN a.ec_id IS NOT NULL AND a.ec_id > 0 THEN
-                                    (SELECT u.name FROM users u WHERE u.id = a.ec_id)
-                                ELSE
-                                    'Khác (Không có team KD)'
-                            END
+                            COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
                     END
-                )                                                       AS team_name,
-                IF(s.source_id = 6, 1, 0)                               AS is_page,
-                COUNT(CASE WHEN a.count_recharge = 0 THEN 1 END)       AS new_count,
-                COUNT(CASE WHEN a.count_recharge > 0 THEN 1 END)       AS uplv_count,
-                COUNT(a.id)                                            AS unseparated_sales,
-                SUM(COALESCE($expr_separated_sales, 0) - $expr_truy_thu_separated) AS separated_sales,
-                SUM(CASE WHEN a.count_recharge = 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS new_revenue,
-                SUM(CASE WHEN a.count_recharge > 0 THEN ($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) ELSE 0 END) AS uplv_revenue,
-                SUM($expr_must_charge - COALESCE($expr_discount, 0) - $expr_truy_thu) AS total_revenue
-            FROM agreements AS a
-            INNER JOIN students AS s ON s.id = a.student_id
-            LEFT JOIN tuition_fee AS tf ON tf.id = a.tuition_fee_id
-            $join_history
-            WHERE $cond
-            GROUP BY
-                IF(s.source_id = 6, 1, 0),
-                CASE
-                    WHEN s.source_id = 6 THEN
-                        CASE
-                            WHEN a.ec_leader_id IN (38, 49, 58) THEN a.ec_leader_id
-                            WHEN a.ec_id IN (38, 49, 58) THEN a.ec_id
-                            ELSE -1
-                        END
-                    ELSE
-                        COALESCE(NULLIF(a.ec_leader_id, 0), a.ec_id, -1)
-                END
-            ORDER BY team_name ASC
-        ";
+            ";
 
-        $rows = u::query($query);
+            $rows = u::query($query);
+            foreach ($rows as $row) {
+                $tid = $row->team_user_id;
+                if (!isset($final_result_map[$tid])) {
+                    $final_result_map[$tid] = [
+                        'team_user_id' => $tid,
+                        'team_name' => $row->team_name ?: '—',
+                        'is_page' => (int) ($row->is_page ?? 0),
+                        'new_count' => 0,
+                        'uplv_count' => 0,
+                        'unseparated_sales' => 0,
+                        'separated_sales' => 0,
+                        'new_revenue' => 0.0,
+                        'uplv_revenue' => 0.0,
+                        'total_revenue' => 0.0,
+                        'salary' => 0.0,
+                    ];
+                }
+                $final_result_map[$tid]['new_count'] += (int) $row->new_count;
+                $final_result_map[$tid]['uplv_count'] += (int) $row->uplv_count;
+                $final_result_map[$tid]['unseparated_sales'] += $row->unseparated_sales;
+                $final_result_map[$tid]['separated_sales'] += $row->separated_sales;
+                $final_result_map[$tid]['new_revenue'] += (float) $row->new_revenue;
+                $final_result_map[$tid]['uplv_revenue'] += (float) $row->uplv_revenue;
+                $final_result_map[$tid]['total_revenue'] += (float) $row->total_revenue;
+            }
+        }
 
         $result = [];
-        $sum = ['new_count' => 0, 'uplv_count' => 0, 'unseparated_sales' => 0, 'separated_sales' => 0, 'new_revenue' => 0.0, 'uplv_revenue' => 0.0, 'total_revenue' => 0.0, 'salary' => 0.0];
-
-        foreach ($rows as $row) {
-            $new_rev = (float) $row->new_revenue;
-            $uplv_rev = (float) $row->uplv_revenue;
-            $is_page = (int) ($row->is_page ?? 0);
+        foreach ($final_result_map as $item) {
+            $new_rev = $item['new_revenue'];
+            $uplv_rev = $item['uplv_revenue'];
+            $is_page = $item['is_page'];
             $new_rate = $is_page ? 0.05 : 0.10;
             $uplv_rate = $is_page ? 0.03 : 0.06;
             $salary = round($new_rev * $new_rate + $uplv_rev * $uplv_rate);
-
-            $result[] = [
-                'team_user_id' => $row->team_user_id,
-                'team_name' => $row->team_name ?: '—',
-                'new_count' => (int) $row->new_count,
-                'uplv_count' => (int) $row->uplv_count,
-                'unseparated_sales' => $row->unseparated_sales,
-                'separated_sales' => $row->separated_sales,
-                'new_revenue' => $new_rev,
-                'uplv_revenue' => $uplv_rev,
-                'total_revenue' => (float) $row->total_revenue,
-                'salary' => $salary,
-            ];
-            $sum['new_count'] += (int) $row->new_count;
-            $sum['uplv_count'] += (int) $row->uplv_count;
-            $sum['unseparated_sales'] += $row->unseparated_sales;
-            $sum['separated_sales'] += $row->separated_sales;
-            $sum['new_revenue'] += $new_rev;
-            $sum['uplv_revenue'] += $uplv_rev;
-            $sum['total_revenue'] += (float) $row->total_revenue;
+            
+            $item['salary'] = $salary;
+            $result[] = $item;
+            
+            $sum['new_count'] += $item['new_count'];
+            $sum['uplv_count'] += $item['uplv_count'];
+            $sum['unseparated_sales'] += $item['unseparated_sales'];
+            $sum['separated_sales'] += $item['separated_sales'];
+            $sum['new_revenue'] += $item['new_revenue'];
+            $sum['uplv_revenue'] += $item['uplv_revenue'];
+            $sum['total_revenue'] += $item['total_revenue'];
             $sum['salary'] += $salary;
         }
+
+        usort($result, function($a, $b) {
+            return strcmp($a['team_name'], $b['team_name']);
+        });
 
         return response()->json([
             'rows' => $result,

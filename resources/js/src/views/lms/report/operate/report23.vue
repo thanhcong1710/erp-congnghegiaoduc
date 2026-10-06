@@ -51,7 +51,7 @@
         <div>
           <label class="rpt-label">Tháng tính lương</label>
           <div class="flex items-center gap-2">
-            <date-picker v-model="searchData.salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="flex:1" :disabled="searchData.no_salary_month" :append-to-body="true"></date-picker>
+            <date-picker v-model="searchData.salary_month" type="month" range format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng" style="flex:1" :disabled="searchData.no_salary_month" :append-to-body="true"></date-picker>
             <vs-checkbox v-model="searchData.no_salary_month" style="margin:0">Chưa có</vs-checkbox>
           </div>
         </div>
@@ -215,10 +215,22 @@
           pay_end_date   = this.fmtDate(this.searchData.pay_date_range[1])
         }
         let salary_month = ''
+        let salary_months = []
         if (this.searchData.no_salary_month) {
           salary_month = 'none'
-        } else if (this.searchData.salary_month) {
+        } else if (Array.isArray(this.searchData.salary_month) && this.searchData.salary_month[0]) {
+          salary_month = this.searchData.salary_month.join(',')
+          let start = new Date(this.searchData.salary_month[0] + '-01')
+          let end = new Date(this.searchData.salary_month[1] + '-01')
+          while(start <= end) {
+             let y = start.getFullYear()
+             let m = String(start.getMonth() + 1).padStart(2, '0')
+             salary_months.push(`${y}-${m}`)
+             start.setMonth(start.getMonth() + 1)
+          }
+        } else if (this.searchData.salary_month && typeof this.searchData.salary_month === 'string') {
           salary_month = this.searchData.salary_month
+          salary_months = [salary_month]
         }
         return { 
           branch_id, 
@@ -229,7 +241,8 @@
           completion_status: this.searchData.completion_status_obj ? this.searchData.completion_status_obj.id : -1,
           pay_start_date,
           pay_end_date,
-          salary_month
+          salary_month,
+          salary_months
         }
       },
       getData() {
@@ -253,7 +266,14 @@
         if (p.completion_status !== -1) { keys.push('completion_status'); values.push(p.completion_status) }
         if (p.pay_start_date) { keys.push('pay_start_date'); values.push(p.pay_start_date) }
         if (p.pay_end_date)   { keys.push('pay_end_date');   values.push(p.pay_end_date) }
-        if (p.salary_month)   { keys.push('salary_month');   values.push(p.salary_month) }
+        
+        if (p.salary_months && p.salary_months.length > 0) { 
+            keys.push('salary_months'); 
+            values.push(p.salary_months.join('|')) 
+        } else if (p.salary_month) { 
+            keys.push('salary_month'); 
+            values.push(p.salary_month) 
+        }
         if (keys.length === 0) { keys.push('k'); values.push('v') }
         window.open(`/api/lms/exports/report23/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
       },
