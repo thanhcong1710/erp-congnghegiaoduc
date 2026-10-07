@@ -226,7 +226,10 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
+#page-teacher-payroll .multiselect {
+  z-index: 999;
+}
 th .vs-table-text {
   display: contents;
 }
