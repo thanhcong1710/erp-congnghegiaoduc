@@ -1061,14 +1061,19 @@ class ContractsController extends Controller
     public function delete(Request $request)
     {
         $cagreement_info = u::first("SELECT student_id, code FROM agreements WHERE id=$request->agreement_id");
-        u::updateSimpleRow(array('status' => 0), array('id' => $request->agreement_id), 'agreements');
-        $listContractDelete = u::query("SELECT id FROM contracts WHERE agreement_id=$request->agreement_id");
-        foreach ($listContractDelete as $contract) {
-            u::updateSimpleRow(array('status' => 0), array('id' => $contract->id), 'contracts');
-            u::addLogContracts($contract->id);
-        }
+        if($cagreement_info) {
+            u::query("DELETE FROM agreements WHERE id=".(int)$request->agreement_id);
+            // u::updateSimpleRow(array('status' => 0), array('id' => $request->agreement_id), 'agreements');
+            $listContractDelete = u::query("SELECT id FROM contracts WHERE agreement_id=$request->agreement_id");
+            foreach ($listContractDelete as $contract) {
+                u::query("DELETE FROM contracts WHERE id=".(int)$contract->id);
+                // u::updateSimpleRow(array('status' => 0), array('id' => $contract->id), 'contracts');
+                // u::addLogContracts($contract->id);
+            }
 
-        LogStudents::logAdd(data_get($cagreement_info, 'student_id'), 'Hủy hợp đồng nhập học - ' . data_get($cagreement_info, 'code'), Auth::user()->id);
+            LogStudents::logAdd(data_get($cagreement_info, 'student_id'), 'Hủy hợp đồng nhập học - ' . data_get($cagreement_info, 'code'), Auth::user()->id);
+        }
+        
         $result = array(
             'status' => 1,
             'message' => 'Hủy hợp đồng nhập học ' . data_get($cagreement_info, 'code') . ' thành công.'
