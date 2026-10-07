@@ -7,16 +7,16 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/3 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
+            <label for="" class="vs-input--label">Team giáo viên</label>
             <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
+                name="search_manager"
+                placeholder="Chọn team giáo viên"
+                v-model="searchData.manager_id"
+                :options="teacher_team_list"
                 label="name"
-                :close-on-select="false"
+                :close-on-select="true"
                 :hide-selected="true"
-                :multiple="true"
+                :multiple="false"
                 :searchable="true"
                 track-by="id"
                 selectedLabel="" selectLabel="" deselectLabel=""
@@ -29,7 +29,7 @@
             <vs-input class="w-full" placeholder="Nhập mã tên lớp, trợ giảng hoặc giáo viên" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/3 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian tạo</label>
+            <label for="" class="vs-input--label">Ngày học</label>
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
@@ -53,7 +53,7 @@
                   <th colspan="1" rowspan="1">Lớp</th>
                   <th colspan="1" rowspan="1" class="text-center">Ngày</th>
                   <th colspan="1" rowspan="1">Giáo viên</th>
-                  <th colspan="1" rowspan="1">Trợ giảng</th>
+                  <th colspan="1" rowspan="1">Team giáo viên</th>
                   <th colspan="1" rowspan="1" class="text-center">Điểm danh</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -65,7 +65,7 @@
                 <td class="td vs-table--td">{{item.class_name}}</td>
                 <td class="td vs-table--td text-center">{{item.class_date}}  <br> <strong class="text-primary">(Buổi {{item.subject_stt}})</strong></td>
                 <td class="td vs-table--td">{{item.teacher_name}}</td>
-                <td class="td vs-table--td">{{item.cm_name}}</td>
+                <td class="td vs-table--td">{{item.teacher_team}}</td>
                 <td class="td vs-table--td text-center">
                   <span class="font-medium" :class="item.present_count > 0 ? 'text-success' : 'text-gray-500'">{{item.present_count}}</span> / {{item.total_count}}
                 </td>
@@ -120,10 +120,9 @@
     },
     data() {
       return {
-        branch_list: [],
+        teacher_team_list: [],
         searchData: {
-          arr_branch: "",
-          branch_id:"",
+          manager_id: "",
           keyword: "",
           dateRange: [],
         },
@@ -172,17 +171,16 @@
       let from_date =  new Date();
       this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
       this.searchData.dateRange[1] = new Date();
-      axios.g(`/api/system/branches-has-user`)
+      axios.g(`/api/system/users?role_id=37`)
         .then(response => {
-        this.branch_list = response.data
+        this.teacher_team_list = response.data
       })
       this.getData();
     },
     methods: {
       reset() {
         this.searchData.keyword = ""
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
+        this.searchData.manager_id= ""
         this.searchData.pagination= this.pagination
         let from_date =  new Date();
         this.searchData.dateRange[0] = new Date(from_date.getFullYear(), from_date.getMonth() , 1);
@@ -190,19 +188,12 @@
         this.getData();
       },
       getData() {
-        const ids_branch = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.map(item => {
-            ids_branch.push(item.id)
-          })
-        }
-        this.searchData.branch_id = ids_branch
         const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
         const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
         
         const data = {
             keyword: this.searchData.keyword,
-            branch_id: this.searchData.branch_id,
+            manager_id: this.searchData.manager_id ? this.searchData.manager_id.id : '',
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,

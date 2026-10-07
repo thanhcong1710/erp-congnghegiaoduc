@@ -128,7 +128,7 @@ export default [
           // },
           {
             url: '/lms/teachers',
-            name: 'Giáo viên & trợ giảng',
+            name: 'Giáo viên',
             slug: 'lms-teachers',
             permission: 'lms_teachers',
           }

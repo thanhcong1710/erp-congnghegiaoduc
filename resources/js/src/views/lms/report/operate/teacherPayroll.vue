@@ -3,11 +3,29 @@
     <vx-card no-shadow class="mt-5">
       <div class="mb-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/2 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Nhập tên giáo viên, mã nhân viên, lớp" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/2 w-full mb-4">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label for="" class="vs-input--label">Team giáo viên</label>
+            <multiselect
+                name="search_manager"
+                placeholder="Chọn team giáo viên"
+                v-model="searchData.manager_id"
+                :options="teacher_team_list"
+                label="name"
+                :close-on-select="true"
+                :hide-selected="true"
+                :multiple="false"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Thời gian tính lương</label>
             <date-picker name="item-date" v-model="searchData.month" type="month" format="YYYY-MM" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng"></date-picker>
@@ -31,6 +49,7 @@
                   <th class="text-center">STT</th>
                   <th>Tên giáo viên</th>
                   <th>Mã nhân viên</th>
+                  <th>Team giáo viên</th>
                   <th>Lớp</th>
                   <th class="text-center">Số buổi</th>
                   <th class="text-right">Lương theo lớp</th>
@@ -41,13 +60,14 @@
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.teacher_name}}</td>
                 <td class="td vs-table--td">{{item.teacher_code}}</td>
+                <td class="td vs-table--td">{{item.teacher_team}}</td>
                 <td class="td vs-table--td">{{item.class_name}}</td>
                 <td class="td vs-table--td text-center">{{item.total_sessions}}</td>
                 <td class="td vs-table--td text-right font-medium text-success">{{item.salary | formatMoney}} VNĐ</td>
                 <td class="td vs-table--td text-right font-medium text-success">{{item.teacher_total_salary | formatMoney}} VNĐ</td>
               </tr>
               <tr v-if="listData.length === 0">
-                <td colspan="7" class="text-center p-5">Không có dữ liệu</td>
+                <td colspan="8" class="text-center p-5">Không có dữ liệu</td>
               </tr>
             </table>
           </div>
@@ -78,19 +98,23 @@
 
 <script>
 import DatePicker from "vue2-datepicker";
+import Multiselect from "vue-multiselect";
 import axios from '../../../../http/axios.js'
 import u from '../../../../until/helper.js';
 
 export default {
   components: {
-    DatePicker
+    DatePicker,
+    Multiselect
   },
   data() {
     return {
       searchData: {
         keyword: "",
+        manager_id: "",
         month: "",
       },
+      teacher_team_list: [],
       listData: [],
       total_salary: 0,
       limitSource: [20, 50, 100, 500],
@@ -115,6 +139,10 @@ export default {
     };
   },
   created() {
+    axios.g(`/api/system/users?role_id=37`)
+      .then(response => {
+      this.teacher_team_list = response.data
+    })
     this.resetDate();
     this.getData();
   },
@@ -124,6 +152,7 @@ export default {
     },
     reset() {
       this.searchData.keyword = "";
+      this.searchData.manager_id = "";
       this.resetDate();
       this.pagination.cpage = 1;
       this.getData();
@@ -143,6 +172,7 @@ export default {
 
       const data = {
         keyword: this.searchData.keyword,
+        manager_id: this.searchData.manager_id ? this.searchData.manager_id.id : '',
         start_date: startDate,
         end_date: endDate,
         pagination: this.pagination,
@@ -182,7 +212,8 @@ export default {
         endDate = u.dateToString(lastDay);
       }
       
-      let url = `/api/lms/exports/teacher-payroll?keyword=${this.searchData.keyword}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
+      let manager_id = this.searchData.manager_id ? this.searchData.manager_id.id : '';
+      let url = `/api/lms/exports/teacher-payroll?keyword=${this.searchData.keyword}&manager_id=${manager_id}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
       window.open(url, '_blank');
     }
   },

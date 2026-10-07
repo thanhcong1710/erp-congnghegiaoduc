@@ -15,7 +15,7 @@ class TeachersController extends Controller
 {
     public function list(Request $request)
     {
-        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $manager_id = isset($request->manager_id) ? (int)$request->manager_id : 0;
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
@@ -28,8 +28,8 @@ class TeachersController extends Controller
         $cond = " s.status = 1 ";
         $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
 
-        if (!empty($branch_id)) {
-            $cond .= " AND s.branch_id IN (".implode(",",$branch_id).") ";
+        if ($manager_id > 0) {
+            $cond .= " AND ut.manager_id = $manager_id ";
         }
         if ($keyword !== '') {
             $cond .= " AND (cl.cls_name LIKE '%$keyword%' OR ut.name LIKE '%$keyword%' OR uc.name LIKE '%$keyword%' 
@@ -46,6 +46,8 @@ class TeachersController extends Controller
         $user_id = Auth::user()->id;
         if (in_array($user_role, [36, 54])) {
             $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id) ";
+        } elseif ($user_role == 37) {
+            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id OR ut.manager_id = $user_id) ";
         }
 
         $order_by = " ORDER BY s.class_date DESC ";
@@ -59,6 +61,7 @@ class TeachersController extends Controller
         
         $list = u::query("SELECT s.id, s.class_date, s.subject_stt, cl.cls_name AS class_name,
                 CONCAT(ut.name, ' - ', ut.hrm_id) AS teacher_name,
+                (SELECT CONCAT(m.name, ' - ', m.hrm_id) FROM users m WHERE m.id = ut.manager_id) AS teacher_team,
                 CONCAT(uc.name, ' - ', uc.hrm_id) AS cm_name,
                 (SELECT name FROM branches WHERE id = s.branch_id) AS branch_name,
                 (SELECT COUNT(id) FROM schedule_has_student WHERE class_id = s.class_id AND class_date = s.class_date AND status=1) AS total_count,

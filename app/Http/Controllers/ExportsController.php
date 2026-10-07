@@ -4361,6 +4361,7 @@ class ExportsController extends Controller
         set_time_limit(300);
         ini_set('memory_limit', '-1');
         
+        $manager_id = isset($request->manager_id) ? (int)$request->manager_id : 0;
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
@@ -4369,8 +4370,14 @@ class ExportsController extends Controller
         
         $user_role = \Illuminate\Support\Facades\Auth::user()->role_id;
         $user_id = \Illuminate\Support\Facades\Auth::user()->id;
-        if ($user_role == 36) {
+        if (in_array($user_role, [36, 54])) {
             $cond .= " AND s.teacher_id = $user_id ";
+        } elseif ($user_role == 37) {
+            $cond .= " AND (s.teacher_id = $user_id OR ut.manager_id = $user_id) ";
+        }
+
+        if ($manager_id > 0) {
+            $cond .= " AND ut.manager_id = $manager_id ";
         }
 
         if ($keyword !== '') {
@@ -4386,6 +4393,7 @@ class ExportsController extends Controller
         $query = "SELECT s.teacher_id, s.class_id, 
                     ut.name AS teacher_name,
                     ut.hrm_id AS teacher_code,
+                    (SELECT CONCAT(m.name, ' - ', m.hrm_id) FROM users m WHERE m.id = ut.manager_id) AS teacher_team,
                     cl.cls_name AS class_name,
                     p.name AS product_name,
                     COUNT(s.id) AS total_sessions
@@ -4416,7 +4424,7 @@ class ExportsController extends Controller
 
         // ── Tiêu đề ──
         $sheet->setCellValue('A1', 'BÁO CÁO TÍNH LƯƠNG GIÁO VIÊN');
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:H1');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14],
             'alignment' => [
@@ -4428,7 +4436,7 @@ class ExportsController extends Controller
 
         // ── Header row ──
         $hRow = 2;
-        $hData = ['A' => 'STT', 'B' => 'Tên giáo viên', 'C' => 'Mã nhân viên', 'D' => 'Lớp', 'E' => 'Số buổi', 'F' => 'Lương theo lớp', 'G' => 'Lương Tổng'];
+        $hData = ['A' => 'STT', 'B' => 'Tên giáo viên', 'C' => 'Mã nhân viên', 'D' => 'Team giáo viên', 'E' => 'Lớp', 'F' => 'Số buổi', 'G' => 'Lương theo lớp', 'H' => 'Lương Tổng'];
         foreach ($hData as $col => $label) {
             $sheet->setCellValue($col . $hRow, $label);
         }
@@ -4436,10 +4444,11 @@ class ExportsController extends Controller
         $sheet->getColumnDimension('A')->setWidth(8);
         $sheet->getColumnDimension('B')->setWidth(28);
         $sheet->getColumnDimension('C')->setWidth(18);
-        $sheet->getColumnDimension('D')->setWidth(20);
-        $sheet->getColumnDimension('E')->setWidth(12);
-        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(25);
+        $sheet->getColumnDimension('E')->setWidth(20);
+        $sheet->getColumnDimension('F')->setWidth(12);
         $sheet->getColumnDimension('G')->setWidth(20);
+        $sheet->getColumnDimension('H')->setWidth(20);
 
         $hStyle = [
             'font' => ['bold' => true],
@@ -4447,7 +4456,7 @@ class ExportsController extends Controller
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
             'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
         ];
-        $sheet->getStyle('A2:G2')->applyFromArray($hStyle);
+        $sheet->getStyle('A2:H2')->applyFromArray($hStyle);
         $sheet->getRowDimension(2)->setRowHeight(22);
 
         $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
@@ -4460,12 +4469,13 @@ class ExportsController extends Controller
             $sheet->setCellValue('A' . $x, $i + 1);
             $sheet->setCellValue('B' . $x, $item->teacher_name);
             $sheet->setCellValue('C' . $x, $item->teacher_code);
-            $sheet->setCellValue('D' . $x, $item->class_name);
-            $sheet->setCellValue('E' . $x, $item->total_sessions);
-            $sheet->setCellValue('F' . $x, number_format($item->salary));
-            $sheet->setCellValue('G' . $x, number_format($teacher_totals[$item->teacher_id]));
+            $sheet->setCellValue('D' . $x, $item->teacher_team);
+            $sheet->setCellValue('E' . $x, $item->class_name);
+            $sheet->setCellValue('F' . $x, $item->total_sessions);
+            $sheet->setCellValue('G' . $x, number_format($item->salary));
+            $sheet->setCellValue('H' . $x, number_format($teacher_totals[$item->teacher_id]));
             
-            $sheet->getStyle('A' . $x . ':G' . $x)->applyFromArray($borderOnly);
+            $sheet->getStyle('A' . $x . ':H' . $x)->applyFromArray($borderOnly);
             $sheet->getRowDimension($x)->setRowHeight(23);
         }
 

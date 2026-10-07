@@ -3189,6 +3189,7 @@ class ReportsController extends Controller
 
     public function teacherPayroll(Request $request)
     {
+        $manager_id = isset($request->manager_id) ? (int)$request->manager_id : 0;
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
@@ -3204,8 +3205,14 @@ class ReportsController extends Controller
         $user_role = \Illuminate\Support\Facades\Auth::user()->role_id;
         $user_id = \Illuminate\Support\Facades\Auth::user()->id;
         // Role 36: Giáo viên -> chỉ xem bản ghi của mình
-        if ($user_role == 36) {
+        if (in_array($user_role, [36, 54])) {
             $cond .= " AND s.teacher_id = $user_id ";
+        } elseif ($user_role == 37) {
+            $cond .= " AND (s.teacher_id = $user_id OR ut.manager_id = $user_id) ";
+        }
+
+        if ($manager_id > 0) {
+            $cond .= " AND ut.manager_id = $manager_id ";
         }
 
         if ($keyword !== '') {
@@ -3221,6 +3228,7 @@ class ReportsController extends Controller
         $query = "SELECT s.teacher_id, s.class_id, 
                     ut.name AS teacher_name,
                     ut.hrm_id AS teacher_code,
+                    (SELECT CONCAT(m.name, ' - ', m.hrm_id) FROM users m WHERE m.id = ut.manager_id) AS teacher_team,
                     cl.cls_name AS class_name,
                     p.name AS product_name,
                     COUNT(s.id) AS total_sessions

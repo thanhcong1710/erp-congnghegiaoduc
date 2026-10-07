@@ -36,14 +36,7 @@
                   <span>{{schedule_info.teacher_name}}</span>
                 </div>
             </div>
-            <div class="vx-row mb-2">
-                <div class="vx-col sm:w-1/4 w-full text-gray-600 font-semibold text-right sm:text-right text-left">
-                  <span>Trợ giảng:</span>
-                </div>
-                <div class="vx-col sm:w-3/4 w-full">
-                  <span>{{schedule_info.ta_name}}</span>
-                </div>
-            </div>
+
             <div class="vx-row mb-2">
                 <div class="vx-col sm:w-1/4 w-full text-gray-600 font-semibold text-right sm:text-right text-left">
                   <span>Sỹ số:</span>
@@ -85,28 +78,15 @@
             ></vue-select>
           </div>
           <div class="vx-col sm:w-1/2 w-full mb-5">
-            <label class="text-sm font-semibold mb-2 block text-dark"><i class="fa-solid fa-user-tie mr-1 text-warning"></i> Trợ giảng</label>
-            <vue-select
-                label="label"
-                placeholder="Chọn trợ giảng"
-                :options="html.tas.list"
-                v-model="html.tas.item"
-                :searchable="true"
-                language="tv-VN"
-                @input="saveTA"
-                class="w-full"
-            ></vue-select>
+            <label class="text-sm font-semibold mb-2 block text-dark"><i class="fa-solid fa-video mr-1 text-danger"></i> Link Record</label>
+            <vs-input class="w-full" placeholder="Dán link record (Google Drive, Zoom...)" v-model="schedule_info.link_record" />
           </div>
         </div>
         
         <div class="vx-row">
-          <div class="vx-col sm:w-1/2 w-full mb-5">
+          <div class="vx-col w-full mb-5">
             <label class="text-sm font-semibold mb-2 block text-dark"><i class="fa-regular fa-comment-dots mr-1 text-success"></i> Ghi chú buổi học</label>
-            <vs-input class="w-full" placeholder="Nhập ghi chú" v-model="schedule_info.note" />
-          </div>
-          <div class="vx-col sm:w-1/2 w-full mb-5">
-            <label class="text-sm font-semibold mb-2 block text-dark"><i class="fa-solid fa-video mr-1 text-danger"></i> Link Record</label>
-            <vs-input class="w-full" placeholder="Dán link record (Google Drive, Zoom...)" v-model="schedule_info.link_record" />
+            <vs-textarea class="w-full" placeholder="Nhập ghi chú" v-model="schedule_info.note" />
           </div>
         </div>
 
@@ -238,10 +218,7 @@
           mess += " - Giáo viên không được để trống<br/>";
           resp = false;
         }
-        if (this.schedule_info.ta_id == "") {
-          mess += " - Trợ giảng không được để trống<br/>";
-          resp = false;
-        }
+
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
