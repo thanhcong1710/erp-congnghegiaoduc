@@ -240,10 +240,18 @@ class SystemController extends Controller
         }
 
         $current_user_id = Auth::user()->id;
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 37") || Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id IN (36, 54)") || in_array(Auth::user()->role_id, [36, 54]);
+        
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 69");
         $managerCond = '';
         if ($is_sale_leader && (in_array(68, $role_ids) || in_array(69, $role_ids))) {
             $managerCond = " AND (u.manager_id = $current_user_id OR u.id = $current_user_id) ";
+        } elseif ($is_teacher_leader && in_array(37, $role_ids)) {
+            $managerCond = " AND u.id = $current_user_id ";
+        } elseif ($is_teacher && in_array(37, $role_ids)) {
+            $teacher_manager_id = (int) Auth::user()->manager_id;
+            $managerCond = " AND u.id = " . ($teacher_manager_id ?: -1);
         }
 
         $data = u::query("

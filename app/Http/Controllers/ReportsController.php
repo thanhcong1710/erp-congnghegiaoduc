@@ -3202,13 +3202,14 @@ class ReportsController extends Controller
 
         $cond = " s.status = 1 ";
         
-        $user_role = \Illuminate\Support\Facades\Auth::user()->role_id;
         $user_id = \Illuminate\Support\Facades\Auth::user()->id;
-        // Role 36: Giáo viên -> chỉ xem bản ghi của mình
-        if (in_array($user_role, [36, 54])) {
-            $cond .= " AND s.teacher_id = $user_id ";
-        } elseif ($user_role == 37) {
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 37") || \Illuminate\Support\Facades\Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(\Illuminate\Support\Facades\Auth::user()->role_id, [36, 54]);
+        
+        if ($is_teacher_leader) {
             $cond .= " AND (s.teacher_id = $user_id OR ut.manager_id = $user_id) ";
+        } elseif ($is_teacher) {
+            $cond .= " AND s.teacher_id = $user_id ";
         }
 
         if ($manager_id > 0) {

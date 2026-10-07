@@ -42,12 +42,14 @@ class TeachersController extends Controller
             $cond .= " AND s.class_date >= '$start_date'";
         }
         
-        $user_role = Auth::user()->role_id;
         $user_id = Auth::user()->id;
-        if (in_array($user_role, [36, 54])) {
-            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id) ";
-        } elseif ($user_role == 37) {
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 37") || Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(Auth::user()->role_id, [36, 54]);
+
+        if ($is_teacher_leader) {
             $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id OR ut.manager_id = $user_id) ";
+        } elseif ($is_teacher) {
+            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id) ";
         }
 
         $order_by = " ORDER BY s.class_date DESC ";
@@ -77,6 +79,18 @@ class TeachersController extends Controller
 
     public function show(Request $request,$id)
     {
+        $user_id = Auth::user()->id;
+        $cond = " s.id=$id ";
+        
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 37") || Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(Auth::user()->role_id, [36, 54]);
+
+        if ($is_teacher_leader) {
+            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR c.teacher_id = $user_id OR c.ta_id = $user_id OR c.cm_id = $user_id OR (SELECT manager_id FROM users WHERE id = s.teacher_id) = $user_id) ";
+        } elseif ($is_teacher) {
+            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR c.teacher_id = $user_id OR c.ta_id = $user_id OR c.cm_id = $user_id) ";
+        }
+
         $data = u::first("SELECT s.*, 
                 (SELECT name FROM branches WHERE id=s.branch_id) AS branch_name,
                 c.cls_name AS class_name,
@@ -90,7 +104,11 @@ class TeachersController extends Controller
                 (SELECT sh.name FROM shifts sh LEFT JOIN sessions se ON se.shift_id = sh.id WHERE se.class_id = c.id AND se.status = 1 LIMIT 1) AS shift_text
             FROM schedules AS s 
             LEFT JOIN classes AS c ON c.id = s.class_id
-            WHERE s.id=$id");
+            WHERE $cond");
+
+        if (empty($data)) {
+            return response()->json((object)[]);
+        }
             
         // Fetch students for attendance
         $students = DB::table('schedule_has_student as shs')

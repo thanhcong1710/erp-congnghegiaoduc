@@ -1,7 +1,7 @@
 <template>
   <div id="page-teacher-payroll">
     <vx-card no-shadow class="mt-5">
-      <div class="mb-5">
+      <div class="mb-5" style="position: relative; z-index: 99;">
         <div class="vx-row">
           <div class="vx-col sm:w-1/3 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
