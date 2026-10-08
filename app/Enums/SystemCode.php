@@ -13,4 +13,5 @@ class SystemCode
     public const ROLE_TEACHER = '36';
     public const ROLE_TEACHER_LEADER = '37';
     public const ROLE_TA = '54';
+    public const ROLE_OPS = '16';
 }

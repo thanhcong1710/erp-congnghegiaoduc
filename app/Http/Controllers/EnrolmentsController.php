@@ -128,6 +128,7 @@ class EnrolmentsController extends Controller
         // Check current user's role for permission control
         $current_user_id = Auth::user()->id;
         $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+        $is_ops = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_OPS);
         $is_sale = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC);
         $is_sale_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_EC_LEADER);
 
@@ -139,7 +140,7 @@ class EnrolmentsController extends Controller
             'next_schedules' => $next_schedules,
             'user_role' => [
                 'user_id' => $current_user_id,
-                'is_admin' => !empty($is_admin),
+                'is_admin' => !empty($is_admin) || !empty($is_ops),
                 'is_sale' => !empty($is_sale),
                 'is_sale_leader' => !empty($is_sale_leader),
             ],
@@ -378,9 +379,10 @@ class EnrolmentsController extends Controller
 
         $current_user_id = Auth::user()->id;
         $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+        $is_ops = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_OPS);
 
         // Kiểm tra xem học sinh đã bắt đầu học chưa (done_sessions > 0)
-        if (empty($is_admin) && (int) data_get($contract, 'done_sessions', 0) > 0) {
+        if (empty($is_admin) && empty($is_ops) && (int) data_get($contract, 'done_sessions', 0) > 0) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Không thể xóa học sinh đã bắt đầu học khỏi lớp'
