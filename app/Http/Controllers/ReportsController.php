@@ -379,6 +379,7 @@ class ReportsController extends Controller
         $status = isset($request->status) ? $request->status : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $end_date = isset($request->end_date) ? $request->end_date : '';
+        $is_ta_assignment = isset($request->is_ta_assignment) ? $request->is_ta_assignment : 0;
 
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -408,14 +409,34 @@ class ReportsController extends Controller
             $cond .= " AND c.product_id = '$product_id' ";
         }
 
+        if ($is_ta_assignment) {
+            $cond .= " AND c.product_id NOT IN (28, 29) ";
+            $user = Auth::user();
+            $is_ta_role = false;
+            if ($user) {
+                $is_ta_role = DB::table('role_has_user')->where('user_id', $user->id)->where('role_id', 54)->exists();
+            }
+            if ($is_ta_role && $user) {
+                $cond .= " AND FIND_IN_SET('{$user->id}', c.ta_id) ";
+            }
+        }
+
         $having = "";
         if ($status !== '') {
-            if ($status == 'THIEU') {
-                $having = " AND (c.max_students - total_students) > 0 ";
-            } elseif ($status == 'THUA') {
-                $having = " AND (c.max_students - total_students) < 0 ";
-            } elseif ($status == 'DU') {
-                $having = " AND (c.max_students - total_students) = 0 ";
+            if ($is_ta_assignment) {
+                if ($status == 'DA_PHAN_CONG') {
+                    $cond .= " AND c.ta_id IS NOT NULL AND c.ta_id != '' ";
+                } elseif ($status == 'CHUA_PHAN_CONG') {
+                    $cond .= " AND (c.ta_id IS NULL OR c.ta_id = '') ";
+                }
+            } else {
+                if ($status == 'THIEU') {
+                    $having = " AND (c.max_students - total_students) > 0 ";
+                } elseif ($status == 'THUA') {
+                    $having = " AND (c.max_students - total_students) < 0 ";
+                } elseif ($status == 'DU') {
+                    $having = " AND (c.max_students - total_students) = 0 ";
+                }
             }
         }
 
@@ -458,15 +479,25 @@ class ReportsController extends Controller
                 $item->total_students = (int) $item->total_students;
                 $item->max_students = (int) $item->max_students;
                 $diff = $item->max_students - $item->total_students;
-                if ($diff > 0) {
-                    $item->status_text = 'THIẾU';
-                    $item->status_class = 'text-warning';
-                } elseif ($diff < 0) {
-                    $item->status_text = 'THỪA';
-                    $item->status_class = 'text-danger';
+                if ($is_ta_assignment) {
+                    if (empty($item->ta_id)) {
+                        $item->status_text = 'Chưa phân TG';
+                        $item->status_class = 'text-warning';
+                    } else {
+                        $item->status_text = 'Đã phân TG';
+                        $item->status_class = 'text-success';
+                    }
                 } else {
-                    $item->status_text = 'ĐỦ';
-                    $item->status_class = 'text-success';
+                    if ($diff > 0) {
+                        $item->status_text = 'THIẾU';
+                        $item->status_class = 'text-warning';
+                    } elseif ($diff < 0) {
+                        $item->status_text = 'THỪA';
+                        $item->status_class = 'text-danger';
+                    } else {
+                        $item->status_text = 'ĐỦ';
+                        $item->status_class = 'text-success';
+                    }
                 }
 
                 $days = [];
@@ -487,6 +518,12 @@ class ReportsController extends Controller
         }
 
         $data = u::makingPagination($list, $total->total, $page, $limit);
+        $user = Auth::user();
+        $is_ta_role = false;
+        if ($user) {
+            $is_ta_role = DB::table('role_has_user')->where('user_id', $user->id)->where('role_id', 54)->exists();
+        }
+        $data['is_ta'] = $is_ta_role;
         return response()->json($data);
     }
 

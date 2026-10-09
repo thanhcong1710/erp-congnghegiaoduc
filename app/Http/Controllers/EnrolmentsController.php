@@ -353,6 +353,7 @@ class EnrolmentsController extends Controller
             if(data_get($class_info, 'product_id') == 29 && data_get($agreement, 'id')){
                 ChargesController::processContractsByAgreement(data_get($agreement, 'id'));
             }
+            \App\Services\TATutoringService::generateTutorings($class_id);
         }
 
         $result = array(

@@ -250,6 +250,10 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('update-status/{id}', 'TeachingAssistantsController@updateStatus');
                 Route::get('all-active', 'TeachingAssistantsController@getAllActive');
                 Route::post('assign-class', 'TeachingAssistantsController@assignClassTA');
+                Route::post('group-tutorings', 'TeachingAssistantsController@listGroupTutorings');
+                Route::post('update-group-tutoring/{id}', 'TeachingAssistantsController@updateGroupTutoring');
+                Route::post('personal-tutorings', 'TeachingAssistantsController@listPersonalTutorings');
+                Route::post('update-personal-tutoring/{id}', 'TeachingAssistantsController@updatePersonalTutoring');
             });
             Route::prefix('reports')->group(function () {
                 Route::post('01', 'ReportsController@report01');

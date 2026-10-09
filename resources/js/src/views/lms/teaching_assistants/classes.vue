@@ -34,7 +34,6 @@
       <div class="rpt-actions mb-5">
         <vs-button class="rpt-btn" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
         <vs-button color="dark" type="border" class="rpt-btn" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
-        <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
         <span class="rpt-badge-count">{{ pagination.total }} lớp</span>
       </div>
 
@@ -43,9 +42,8 @@
           <thead>
             <tr>
               <th style="width:44px" class="text-center">STT</th>
-              <th>Trung tâm</th>
               <th>Mã lớp</th>
-              <th>Team / Sản phẩm</th>
+              <th>Sản phẩm</th>
               <th class="text-center">Sĩ số</th>
               <th class="text-center">Max</th>
               <th>Trạng thái</th>
@@ -54,14 +52,12 @@
               <th>Giáo viên</th>
               <th>Trợ giảng</th>
               <th>Loại lớp</th>
-              <th>Phòng học</th>
-              <th class="text-center">Thao tác</th>
+              <th class="text-center" v-if="!is_ta">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
               <td class="text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-              <td class="small">{{ item.branch_name }}</td>
               <td><span class="badge-code">{{ item.cls_name }}</span></td>
               <td>{{ item.product_name }}</td>
               <td class="text-center"><strong>{{ item.total_students }}</strong></td>
@@ -72,13 +68,13 @@
               <td>{{ item.teacher_name }}</td>
               <td>{{ item.ta_name }}</td>
               <td class="small">{{ item.is_online_text }}</td>
-              <td class="small">{{ item.room_name }}</td>
-              <td class="text-center">
+              <td class="text-center" v-if="!is_ta">
                 <vs-button size="small" color="primary" @click="openAssignModal(item)" title="Phân công trợ giảng">
                   <i class="fa fa-user-plus"></i>
                 </vs-button>
               </td>
             </tr>
+            <tr v-if="!datas.length"><td :colspan="is_ta ? 11 : 12" class="text-center p-4">Không có dữ liệu</td></tr>
           </tbody>
         </table>
       </div>
@@ -142,7 +138,7 @@
     data() {
       return {
         branch_list: [], products: [],
-        status_list: [ {id:'THIEU',label:'Thiếu'}, {id:'THUA',label:'Thừa'}, {id:'DU',label:'Đủ'} ],
+        status_list: [ {id:'DA_PHAN_CONG',label:'Đã phân TG'}, {id:'CHUA_PHAN_CONG',label:'Chưa phân TG'} ],
         searchData: { arr_branch:'', branch_id:'', keyword:'', dateRange:'', product:'', status:'' },
         datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
         datas: [],
@@ -151,12 +147,13 @@
         isAssignModalActive: false,
         selectedClass: null,
         ta_list: [],
-        selected_tas: []
+        selected_tas: [],
+        is_ta: false
       }
     },
     created() {
       axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
-      axios.g('/api/system/products').then(r => { this.products = r.data })
+      axios.g('/api/system/products').then(r => { this.products = r.data.filter(p => p.id != 28 && p.id != 29) })
       axios.g('/api/lms/teaching-assistants/all-active').then(r => { this.ta_list = r.data })
       this.getData()
     },
@@ -175,8 +172,8 @@
       },
       getStatusClass(text) {
         if (!text) return ''
-        if (text === 'Thiếu') return 'status-deposit'
-        if (text === 'Thừa') return 'status-inactive'
+        if (text === 'Chưa phân TG' || text === 'Thiếu') return 'status-inactive'
+        if (text === 'Đã phân TG') return 'status-active'
         return 'status-active'
       },
       openAssignModal(item) {
@@ -239,9 +236,15 @@
         this.searchData.branch_id = ids
         const start_date = this.searchData.dateRange && this.searchData.dateRange[0] ? this.fmtDate(this.searchData.dateRange[0]) : ''
         const end_date = this.searchData.dateRange && this.searchData.dateRange[1] ? this.fmtDate(this.searchData.dateRange[1]) : ''
-        const data = { keyword: this.searchData.keyword, branch_id: this.searchData.branch_id, product_id: this.searchData.product ? this.searchData.product.id : '', status: this.searchData.status ? this.searchData.status.id : '', start_date: start_date, end_date: end_date, pagination: this.pagination }
+        const data = { keyword: this.searchData.keyword, branch_id: this.searchData.branch_id, product_id: this.searchData.product ? this.searchData.product.id : '', status: this.searchData.status ? this.searchData.status.id : '', start_date: start_date, end_date: end_date, pagination: this.pagination, is_ta_assignment: 1 }
         this.$vs.loading()
-        axios.p('/api/lms/reports/active-classes', data).then(res => { this.$vs.loading.close(); this.datas = res.data.list; this.pagination = res.data.paging; setTimeout(() => { this.pagination.init = 1 }, 500) }).catch(e => { console.error(e); this.$vs.loading.close() })
+        axios.p('/api/lms/reports/active-classes', data).then(res => {
+          this.$vs.loading.close();
+          this.datas = res.data.list;
+          this.pagination = res.data.paging;
+          this.is_ta = res.data.is_ta || false;
+          setTimeout(() => { this.pagination.init = 1 }, 500)
+        }).catch(e => { console.error(e); this.$vs.loading.close() })
       },
       changePage() { if (this.pagination.init) this.getData() },
       changePageLimit(limit) { this.pagination.cpage = 1; this.pagination.limit = limit; this.getData() },
