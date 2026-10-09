@@ -1,0 +1,300 @@
+<template>
+  <div id="page-report-07">
+    <vx-card no-shadow class="rpt-card">
+      <div class="mb-6 flex items-center">
+        <div class="mr-3 flex items-center justify-center p-3 rounded-lg" style="background:rgba(79, 70, 229, 0.1); color:#4f46e5;">
+          <i class="fas fa-chalkboard-teacher text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold uppercase" style="color:#4f46e5; margin:0;">PHÂN LỚP TRỢ GIẢNG</h3>
+        </div>
+      </div>
+      <div class="rpt-filter-grid mb-5">
+        <div v-show="false">
+          <label class="rpt-label">Trung tâm</label>
+          <multiselect name="search_branch" placeholder="Chọn trung tâm" v-model="searchData.arr_branch" :options="branch_list" label="name" :close-on-select="false" :hide-selected="true" :multiple="true" :searchable="true" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Sản phẩm</label>
+          <multiselect name="search_product" placeholder="Chọn sản phẩm" v-model="searchData.product" :options="products" label="name" :close-on-select="true" :multiple="false" :searchable="true" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Trạng thái</label>
+          <multiselect name="search_status" placeholder="Chọn trạng thái" v-model="searchData.status" :options="status_list" label="label" :close-on-select="true" :multiple="false" :searchable="false" track-by="id" selectedLabel="" selectLabel="" deselectLabel=""><span slot="noResult">Không tìm thấy</span></multiselect>
+        </div>
+        <div>
+          <label class="rpt-label">Từ khóa</label>
+          <vs-input class="w-full" placeholder="Mã lớp, tên lớp" v-model="searchData.keyword"></vs-input>
+        </div>
+        <div>
+          <label class="rpt-label">Ngày khai giảng</label>
+          <date-picker style="width:100%" v-model="searchData.dateRange" type="date" range :clearable="true" format="YYYY-MM-DD" :lang="datepickerOptions.lang" placeholder="Từ ngày — Đến ngày"></date-picker>
+        </div>
+      </div>
+      <div class="rpt-actions mb-5">
+        <vs-button class="rpt-btn" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
+        <vs-button color="dark" type="border" class="rpt-btn" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+        <vs-button color="success" class="rpt-btn" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
+        <span class="rpt-badge-count">{{ pagination.total }} lớp</span>
+      </div>
+
+      <div class="rpt-table-wrap">
+        <table class="rpt-table">
+          <thead>
+            <tr>
+              <th style="width:44px" class="text-center">STT</th>
+              <th>Trung tâm</th>
+              <th>Mã lớp</th>
+              <th>Team / Sản phẩm</th>
+              <th class="text-center">Sĩ số</th>
+              <th class="text-center">Max</th>
+              <th>Trạng thái</th>
+              <th>Lịch học</th>
+              <th>Khai giảng</th>
+              <th>Giáo viên</th>
+              <th>Trợ giảng</th>
+              <th>Loại lớp</th>
+              <th>Phòng học</th>
+              <th class="text-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="rpt-row" v-for="(item, index) in datas" :key="index">
+              <td class="text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+              <td class="small">{{ item.branch_name }}</td>
+              <td><span class="badge-code">{{ item.cls_name }}</span></td>
+              <td>{{ item.product_name }}</td>
+              <td class="text-center"><strong>{{ item.total_students }}</strong></td>
+              <td class="text-center">{{ item.max_students }}</td>
+              <td><span class="status-badge" :class="getStatusClass(item.status_text)">{{ item.status_text }}</span></td>
+              <td class="small">{{ item.schedule_text }}</td>
+              <td class="small">{{ item.cls_startdate }}</td>
+              <td>{{ item.teacher_name }}</td>
+              <td>{{ item.ta_name }}</td>
+              <td class="small">{{ item.is_online_text }}</td>
+              <td class="small">{{ item.room_name }}</td>
+              <td class="text-center">
+                <vs-button size="small" color="primary" @click="openAssignModal(item)" title="Phân công trợ giảng">
+                  <i class="fa fa-user-plus"></i>
+                </vs-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="rpt-paging">
+        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4">
+          <div class="paging-limit-btn">
+            <span>{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} – {{ Math.min(pagination.cpage * pagination.limit, pagination.total) }} / {{ pagination.total }}</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </div>
+          <vs-dropdown-menu>
+            <vs-dropdown-item v-for="item in limitSource" :key="item" @click="changePageLimit(item)">{{ item }}</vs-dropdown-item>
+          </vs-dropdown-menu>
+        </vs-dropdown>
+        <vs-pagination style="width:calc(100% - 180px);" v-if="Math.ceil(pagination.total / pagination.limit) > 1" :total="Math.ceil(pagination.total / pagination.limit)" :max="7" v-model="pagination.cpage" @change="changePage()"/>
+      </div>
+    </vx-card>
+
+    <!-- Modal Phân công Trợ giảng -->
+    <vs-popup title="Phân công Trợ giảng" :active.sync="isAssignModalActive">
+      <div class="vx-row" v-if="selectedClass">
+        <div class="vx-col w-full mb-4">
+          <label class="vs-input--label">Lớp: <strong class="text-primary">{{ selectedClass.cls_name }}</strong> ({{ selectedClass.is_online == 1 ? 'Online' : 'Offline' }})</label>
+          <div class="mt-2 text-sm text-danger font-semibold">
+            * Lưu ý: Lớp {{ selectedClass.is_online == 1 ? 'Online chọn tối đa 1' : 'Offline chọn tối đa 2' }} Trợ giảng.
+          </div>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label class="vs-input--label">Chọn Trợ giảng</label>
+          <multiselect
+            v-model="selected_tas"
+            :options="ta_list"
+            label="full_name"
+            track-by="id"
+            :multiple="true"
+            :close-on-select="false"
+            :searchable="true"
+            placeholder="Tìm kiếm và chọn trợ giảng"
+          >
+            <span slot="noResult">Không tìm thấy</span>
+          </multiselect>
+        </div>
+      </div>
+      <div class="flex justify-end mt-4">
+        <vs-button color="dark" type="border" class="mr-2" @click="isAssignModalActive = false">Hủy</vs-button>
+        <vs-button color="primary" @click="saveAssignTA">Lưu thay đổi</vs-button>
+      </div>
+    </vs-popup>
+  </div>
+</template>
+
+<script>
+  import vSelect from 'vue-select'
+  import axios from '../../../http/axios.js'
+  import Multiselect from 'vue-multiselect'
+  import DatePicker from 'vue2-datepicker'
+  import u from '../../../until/helper.js'
+
+  export default {
+    components: { vSelect, Multiselect, DatePicker },
+    data() {
+      return {
+        branch_list: [], products: [],
+        status_list: [ {id:'THIEU',label:'Thiếu'}, {id:'THUA',label:'Thừa'}, {id:'DU',label:'Đủ'} ],
+        searchData: { arr_branch:'', branch_id:'', keyword:'', dateRange:'', product:'', status:'' },
+        datepickerOptions: { lang: { days:['CN','T2','T3','T4','T5','T6','T7'], months:['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] } },
+        datas: [],
+        limitSource: [20, 50, 100, 500],
+        pagination: { cpage:1, total:0, limit:20, init:0 },
+        isAssignModalActive: false,
+        selectedClass: null,
+        ta_list: [],
+        selected_tas: []
+      }
+    },
+    created() {
+      axios.g('/api/system/branches-has-user').then(r => { this.branch_list = r.data })
+      axios.g('/api/system/products').then(r => { this.products = r.data })
+      axios.g('/api/lms/teaching-assistants/all-active').then(r => { this.ta_list = r.data })
+      this.getData()
+    },
+    methods: {
+      fmtDate(d) {
+        if (!d) return ''
+        if (d instanceof Date) {
+          const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0')
+          return `${y}-${m}-${day}`
+        }
+        return d
+      },
+      reset() {
+        this.searchData = { arr_branch:'', branch_id:'', keyword:'', dateRange:'', product:'', status:'' }
+        this.getData()
+      },
+      getStatusClass(text) {
+        if (!text) return ''
+        if (text === 'Thiếu') return 'status-deposit'
+        if (text === 'Thừa') return 'status-inactive'
+        return 'status-active'
+      },
+      openAssignModal(item) {
+        this.selectedClass = item;
+        this.selected_tas = [];
+        if (item.ta_id) {
+          const taIds = item.ta_id.toString().split(',');
+          this.selected_tas = this.ta_list.filter(ta => taIds.includes(ta.id.toString()));
+        }
+        this.isAssignModalActive = true;
+      },
+      saveAssignTA() {
+        if (!this.selectedClass) return;
+        const maxTA = this.selectedClass.is_online == 1 ? 1 : 2;
+        if (this.selected_tas.length > maxTA) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: `Lớp ${this.selectedClass.is_online == 1 ? 'Online' : 'Offline'} chỉ được chọn tối đa ${maxTA} Trợ giảng!`,
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        this.$vs.loading();
+        const ta_ids = this.selected_tas.map(t => t.id);
+        axios.p('/api/lms/teaching-assistants/assign-class', {
+          class_id: this.selectedClass.id,
+          ta_id: ta_ids
+        }).then(response => {
+          this.$vs.loading.close();
+          if (response.data.status == 1) {
+            this.$vs.notify({
+              title: 'Thành công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+            this.isAssignModalActive = false;
+            this.getData();
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: response.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          }
+        }).catch(error => {
+          this.$vs.loading.close();
+          console.error(error);
+        });
+      },
+      getData() {
+        const ids = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => ids.push(i.id))
+        this.searchData.branch_id = ids
+        const start_date = this.searchData.dateRange && this.searchData.dateRange[0] ? this.fmtDate(this.searchData.dateRange[0]) : ''
+        const end_date = this.searchData.dateRange && this.searchData.dateRange[1] ? this.fmtDate(this.searchData.dateRange[1]) : ''
+        const data = { keyword: this.searchData.keyword, branch_id: this.searchData.branch_id, product_id: this.searchData.product ? this.searchData.product.id : '', status: this.searchData.status ? this.searchData.status.id : '', start_date: start_date, end_date: end_date, pagination: this.pagination }
+        this.$vs.loading()
+        axios.p('/api/lms/reports/active-classes', data).then(res => { this.$vs.loading.close(); this.datas = res.data.list; this.pagination = res.data.paging; setTimeout(() => { this.pagination.init = 1 }, 500) }).catch(e => { console.error(e); this.$vs.loading.close() })
+      },
+      changePage() { if (this.pagination.init) this.getData() },
+      changePageLimit(limit) { this.pagination.cpage = 1; this.pagination.limit = limit; this.getData() },
+      exportExcel() {
+        let keys = [], values = []
+        const ids = []
+        if (this.searchData.arr_branch && this.searchData.arr_branch.length) this.searchData.arr_branch.forEach(i => ids.push(i.id))
+        if (ids.length) { keys.push('branch_id'); values.push(ids.join('-')) }
+        if (this.searchData.keyword) { keys.push('keyword'); values.push(this.searchData.keyword) }
+        if (this.searchData.product) { keys.push('product_id'); values.push(this.searchData.product.id) }
+        if (this.searchData.status) { keys.push('status'); values.push(this.searchData.status.id) }
+        if (this.searchData.dateRange && this.searchData.dateRange[0]) {
+          keys.push('start_date')
+          values.push(this.fmtDate(this.searchData.dateRange[0]))
+        }
+        if (this.searchData.dateRange && this.searchData.dateRange[1]) {
+          keys.push('end_date')
+          values.push(this.fmtDate(this.searchData.dateRange[1]))
+        }
+        if (keys.length === 0) { keys.push('k'); values.push('v') }
+        window.open(`/api/lms/exports/active-classes/${keys.join(',')}/${values.join(',')}?token=${localStorage.getItem('accessToken')}`, '_blank')
+      }
+    }
+  }
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+#page-report-07 { font-family: 'Inter', sans-serif; }
+.rpt-header { display:flex; align-items:center; gap:16px; background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); color:white; padding:20px 24px; border-radius:12px; box-shadow:0 4px 20px rgba(79,70,229,.3); margin-bottom:20px; }
+.rpt-header__icon { font-size:26px; width:50px; height:50px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.rpt-header__title { font-size:1.05rem; font-weight:700; margin:0; }
+.rpt-header__sub { font-size:.82rem; opacity:.8; margin:3px 0 0; }
+.rpt-card { border-radius:12px !important; box-shadow:0 2px 16px rgba(0,0,0,.06) !important; }
+.rpt-filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+.rpt-label { display:block; font-size:.75rem; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.rpt-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.rpt-btn { border-radius:8px !important; }
+.rpt-badge-count { margin-left:auto; background:#eef2ff; color:#4338ca; padding:6px 14px; border-radius:20px; font-weight:600; font-size:.85rem; }
+.rpt-table-wrap { overflow-x:auto; max-height:75vh; overflow-y:auto; border-radius:10px; border:1px solid #e5e7eb; }
+.rpt-table { width:100%; border-collapse:collapse; font-size:15px; }
+.rpt-table thead tr { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
+.rpt-table thead th { color:white; font-weight:600; padding:11px 10px; white-space:nowrap; border:1px solid rgba(255,255,255,0.2);  font-size:15px; position:sticky; top:0; z-index:2;  background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); }
+.rpt-row { border-bottom:1px solid #f3f4f6; transition:background .15s; }
+.rpt-row:hover { background:#f8f7ff; }
+.rpt-row td { padding:9px 10px; vertical-align:middle; border:1px solid #e5e7eb; }
+.badge-code { background:#eef2ff; color:#4338ca; border-radius:6px; padding:2px 8px; font-size:15px; font-weight:600; }
+.status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:15px; font-weight:600; }
+.status-active { background:#dcfce7; color:#15803d; }
+.status-deposit { background:#dbeafe; color:#1d4ed8; }
+.status-inactive { background:#fee2e2; color:#b91c1c; }
+.small { font-size:15px; }
+.rpt-paging { display:flex; align-items:center; flex-wrap:wrap; margin-top:16px; }
+.paging-limit-btn { display:flex; align-items:center; gap:8px; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px; cursor:pointer; background:white; font-size:.85rem; font-weight:500; }
+.multiselect { z-index:999; }
+</style>

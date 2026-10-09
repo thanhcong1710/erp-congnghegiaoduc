@@ -47,9 +47,9 @@ class TeachersController extends Controller
         $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(Auth::user()->role_id, [36, 54]);
 
         if ($is_teacher_leader) {
-            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id OR ut.manager_id = $user_id) ";
+            $cond .= " AND (s.teacher_id = $user_id OR FIND_IN_SET($user_id, s.ta_id) OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR FIND_IN_SET($user_id, cl.ta_id) OR cl.cm_id = $user_id OR ut.manager_id = $user_id) ";
         } elseif ($is_teacher) {
-            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR cl.ta_id = $user_id OR cl.cm_id = $user_id) ";
+            $cond .= " AND (s.teacher_id = $user_id OR FIND_IN_SET($user_id, s.ta_id) OR s.cm_id = $user_id OR cl.teacher_id = $user_id OR FIND_IN_SET($user_id, cl.ta_id) OR cl.cm_id = $user_id) ";
         }
 
         $order_by = " ORDER BY s.class_date DESC ";
@@ -86,9 +86,9 @@ class TeachersController extends Controller
         $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(Auth::user()->role_id, [36, 54]);
 
         if ($is_teacher_leader) {
-            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR c.teacher_id = $user_id OR c.ta_id = $user_id OR c.cm_id = $user_id OR (SELECT manager_id FROM users WHERE id = s.teacher_id) = $user_id) ";
+            $cond .= " AND (s.teacher_id = $user_id OR FIND_IN_SET($user_id, s.ta_id) OR s.cm_id = $user_id OR c.teacher_id = $user_id OR FIND_IN_SET($user_id, c.ta_id) OR c.cm_id = $user_id OR (SELECT manager_id FROM users WHERE id = s.teacher_id) = $user_id) ";
         } elseif ($is_teacher) {
-            $cond .= " AND (s.teacher_id = $user_id OR s.ta_id = $user_id OR s.cm_id = $user_id OR c.teacher_id = $user_id OR c.ta_id = $user_id OR c.cm_id = $user_id) ";
+            $cond .= " AND (s.teacher_id = $user_id OR FIND_IN_SET($user_id, s.ta_id) OR s.cm_id = $user_id OR c.teacher_id = $user_id OR FIND_IN_SET($user_id, c.ta_id) OR c.cm_id = $user_id) ";
         }
 
         $data = u::first("SELECT s.*, 
@@ -98,7 +98,7 @@ class TeachersController extends Controller
                 c.max_students,
                 (SELECT COUNT(ct.id) FROM contracts ct WHERE ct.class_id = c.id AND ct.status IN (6,1)) AS num_students,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = s.teacher_id) AS teacher_name,
-                (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = s.ta_id) AS ta_name,
+                (SELECT GROUP_CONCAT(CONCAT(u.name, ' - ', u.hrm_id) SEPARATOR ', ') FROM users u WHERE FIND_IN_SET(u.id, s.ta_id)) AS ta_name,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.cm_id) AS cm_name,
                 (SELECT r.name FROM rooms r LEFT JOIN sessions se ON se.room_id = r.id WHERE se.class_id = c.id AND se.status = 1 LIMIT 1) AS room_text,
                 (SELECT sh.name FROM shifts sh LEFT JOIN sessions se ON se.shift_id = sh.id WHERE se.class_id = c.id AND se.status = 1 LIMIT 1) AS shift_text

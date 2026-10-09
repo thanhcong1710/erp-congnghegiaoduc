@@ -23,7 +23,7 @@ class ClassInfoController extends Controller
                 (SELECT COUNT(s.id) FROM contracts s WHERE s.class_id = c.id AND s.status IN (6,1)) AS enrolled_students,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.teacher_id) AS teacher_name,
                 (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.cm_id) AS cm_name,
-                (SELECT CONCAT(u.name, ' - ', u.hrm_id) FROM users u WHERE u.id = c.ta_id) AS ta_name,
+                (SELECT GROUP_CONCAT(CONCAT(u.name, ' - ', u.hrm_id) SEPARATOR ', ') FROM users u WHERE FIND_IN_SET(u.id, c.ta_id)) AS ta_name,
                 c.class_day,
                 c.product_id,
                 (SELECT p.name FROM products p WHERE p.id = c.product_id) AS product_name,

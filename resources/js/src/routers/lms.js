@@ -526,6 +526,58 @@ export default {
         },
       },
       {
+        path: "/lms/teaching-assistants",
+        name: "lms-teaching-assistants",
+        component: () => import("@/views/lms/teaching_assistants/index.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Danh sách trợ giảng", active: true },
+          ],
+          pageTitle: "Danh sách trợ giảng",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/teaching-assistants/classes",
+        name: "lms-teaching-assistants-classes",
+        component: () => import("@/views/lms/teaching_assistants/classes.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Phân Lớp TG", active: true },
+          ],
+          pageTitle: "Phân Lớp TG",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/teaching-assistants/group-tutor",
+        name: "lms-teaching-assistants-group-tutor",
+        component: () => import("@/views/lms/teaching_assistants/group_tutor.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Bổ trợ nhóm", active: true },
+          ],
+          pageTitle: "Bổ trợ nhóm",
+          rule: "editor",
+        },
+      },
+      {
+        path: "/lms/teaching-assistants/personal-tutor",
+        name: "lms-teaching-assistants-personal-tutor",
+        component: () => import("@/views/lms/teaching_assistants/personal_tutor.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            { title: "Bổ trợ 1:1", active: true },
+          ],
+          pageTitle: "Bổ trợ 1:1",
+          rule: "editor",
+        },
+      },
+      {
         path: "/lms/reports/operate/teacher-payroll",
         name: "lms-reports-teacher-payroll",
         component: () => import("@/views/lms/report/operate/teacherPayroll.vue"),

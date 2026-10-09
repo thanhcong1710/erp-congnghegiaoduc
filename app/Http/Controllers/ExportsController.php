@@ -338,7 +338,7 @@ class ExportsController extends Controller
                     b.name AS branch_name,
                     p.name AS product_name,
                     u_teacher.name AS teacher_name,
-                    u_ta.name AS ta_name,
+                    (SELECT GROUP_CONCAT(name SEPARATOR ', ') FROM users WHERE FIND_IN_SET(id, c.ta_id)) AS ta_name,
                     (SELECT name FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS shift_name,
                     (SELECT start_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS start_time,
                     (SELECT end_time FROM shifts WHERE id = (SELECT shift_id FROM sessions WHERE class_id = c.id LIMIT 1)) AS end_time,
@@ -348,7 +348,6 @@ class ExportsController extends Controller
                     LEFT JOIN branches AS b ON b.id = c.branch_id
                     LEFT JOIN products AS p ON p.id = c.product_id
                     LEFT JOIN users AS u_teacher ON u_teacher.id = c.teacher_id
-                    LEFT JOIN users AS u_ta ON u_ta.id = c.ta_id
                 WHERE $cond 
                 HAVING 1=1 $having
                 $order_by";

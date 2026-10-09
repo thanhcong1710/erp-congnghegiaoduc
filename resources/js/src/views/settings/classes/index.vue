@@ -147,6 +147,7 @@
                     :disabled="disabled_input"
                 ></vue-select>
             </div>
+            <!--
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Trợ giảng</label>
               <vue-select
@@ -160,6 +161,7 @@
                     :disabled="disabled_input"
                 ></vue-select>
             </div>
+            -->
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Trạng thái</label>
               <select class="vs-inputx vs-input--input normal" v-model="config.status" >

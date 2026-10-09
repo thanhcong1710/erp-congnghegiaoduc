@@ -243,6 +243,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'TeachersController@show');
                 Route::post('update', 'TeachersController@update');
             });
+            Route::prefix('teaching-assistants')->group(function () {
+                Route::post('list', 'TeachingAssistantsController@list');
+                Route::post('add', 'TeachingAssistantsController@store');
+                Route::post('update/{id}', 'TeachingAssistantsController@update');
+                Route::post('update-status/{id}', 'TeachingAssistantsController@updateStatus');
+                Route::get('all-active', 'TeachingAssistantsController@getAllActive');
+                Route::post('assign-class', 'TeachingAssistantsController@assignClassTA');
+            });
             Route::prefix('reports')->group(function () {
                 Route::post('01', 'ReportsController@report01');
                 Route::post('02a', 'ReportsController@report02a');

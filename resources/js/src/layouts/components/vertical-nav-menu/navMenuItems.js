@@ -135,6 +135,38 @@ export default [
         ]
       },
       {
+        url: null,
+        name: 'QL trợ giảng',
+        icon: 'UsersIcon',
+        permission: 'lms_teaching_assistants_classes',
+        submenu: [
+          {
+            url: '/lms/teaching-assistants',
+            name: 'Danh sách trợ giảng',
+            slug: 'lms-teaching-assistants',
+            permission: 'lms_teaching_assistants',
+          },
+          {
+            url: '/lms/teaching-assistants/classes',
+            name: 'Phân Lớp TG',
+            slug: 'lms-teaching-assistants-classes',
+            permission: 'lms_teaching_assistants_classes',
+          },
+          {
+            url: '/lms/teaching-assistants/group-tutor',
+            name: 'Bổ trợ nhóm',
+            slug: 'lms-teaching-assistants-group-tutor',
+            permission: 'lms_teaching_assistants_group_tutor',
+          },
+          {
+            url: '/lms/teaching-assistants/personal-tutor',
+            name: 'Bổ trợ 1:1',
+            slug: 'lms-teaching-assistants-personal-tutor',
+            permission: 'lms_teaching_assistants_personal_tutor',
+          }
+        ]
+      },
+      {
         url: '/lms/charges',
         name: 'Kế toán',
         icon: 'DollarSignIcon',
