@@ -833,6 +833,12 @@ class ExportsController extends Controller
         $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
         $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
 
+        $totalLeftAmount = 0;
+        $totalCharged = 0;
+        $totalMustCharge = 0;
+        $totalDebt = 0;
+        $totalLeftSessions = 0;
+        $totalSummarySessions = 0;
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
@@ -1163,6 +1169,11 @@ class ExportsController extends Controller
         $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
         $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
 
+        $totalContracts = 0;
+        $totalMustCharge = 0;
+        $totalCharged = 0;
+        $totalDebt = 0;
+        $totalLeftAmount = 0;
 
         for ($i = 0; $i < count($list); $i++) {
             $x = $i + 4;
