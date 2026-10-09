@@ -874,7 +874,8 @@ class ExportsController extends Controller
             $totalSummarySessions += $item->summary_sessions;
 
             $sheet->getStyle("A$x:T$x")->applyFromArray($borderOnly);
-            $sheet->getStyle("A$x,N$x:P$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("A$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("N$x:P$x")->applyFromArray($centerAlign);
             $sheet->getStyle("Q$x:T$x")->applyFromArray($rightAlign);
             foreach (['Q', 'R', 'S', 'T'] as $mc) {
                 $sheet->getStyle("$mc$x")->getNumberFormat()->setFormatCode('#,##0');
@@ -1044,8 +1045,10 @@ class ExportsController extends Controller
             $total_left_sessions_all += $item->left_sessions;
 
             $sheet->getStyle("A$x:N$x")->applyFromArray($borderOnly);
-            $sheet->getStyle("A$x,E$x:L$x")->applyFromArray($centerAlign);
-            $sheet->getStyle("I$x,M$x:N$x")->applyFromArray($rightAlign);
+            $sheet->getStyle("A$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("E$x:L$x")->applyFromArray($centerAlign);
+            $sheet->getStyle("I$x")->applyFromArray($rightAlign);
+            $sheet->getStyle("M$x:N$x")->applyFromArray($rightAlign);
             foreach (['I', 'M', 'N'] as $mc) {
                 $sheet->getStyle("$mc$x")->getNumberFormat()->setFormatCode('#,##0');
             $sheet->getStyle('A' . $x . ':' . $lastColStr . $x)->applyFromArray(['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]]);
@@ -1066,7 +1069,8 @@ class ExportsController extends Controller
         $sheet->setCellValue('N' . $tRow, $total_left_value_all);
         $tStyle = ['font' => ['bold' => true], 'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F0F0']], 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER], 'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'AAAAAA']]]];
         $sheet->getStyle("A$tRow:N$tRow")->applyFromArray($tStyle);
-        $sheet->getStyle("I$tRow,M$tRow:N$tRow")->applyFromArray($rightAlign);
+        $sheet->getStyle("I$tRow")->applyFromArray($rightAlign);
+        $sheet->getStyle("M$tRow:N$tRow")->applyFromArray($rightAlign);
         foreach (['I', 'M', 'N'] as $mc) {
             $sheet->getStyle("$mc$tRow")->getNumberFormat()->setFormatCode('#,##0');
         }
