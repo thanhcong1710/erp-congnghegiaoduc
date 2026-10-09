@@ -828,7 +828,60 @@ class ExportsController extends Controller
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH THU CHUA PHAN BO THEO HS', array ( 0 => 'BÁO CÁO DOANH THU CHƪa PHÂN BỔ THEO HỌC SINH',), array ());
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        $sheet->setCellValue('A1', 'BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO HỌC SINH');
+        $sheet->mergeCells('A1:T1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $hRow = 2;
+        $hData = [
+            'A' => 'STT', 'B' => 'Mã HS', 'C' => 'Tên HS', 'D' => 'SĐT', 'E' => 'Hợp đồng',
+            'F' => 'Trạng thái', 'G' => 'Trung tâm', 'H' => 'Sản phẩm', 'I' => 'Lớp', 'J' => 'Gói cước',
+            'K' => 'EC', 'L' => 'EC Leader', 'M' => 'CM', 'N' => 'Tổng buổi', 'O' => 'Đã học',
+            'P' => 'Còn lại', 'Q' => 'Phải đóng', 'R' => 'Đã thu', 'S' => 'Công nợ', 'T' => 'Số dư'
+        ];
+        foreach ($hData as $col => $label) {
+            $sheet->setCellValue($col . $hRow, $label);
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(15);
+        $sheet->getColumnDimension('C')->setWidth(25);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('G')->setWidth(25);
+        $sheet->getColumnDimension('H')->setWidth(20);
+        $sheet->getColumnDimension('I')->setWidth(20);
+        $sheet->getColumnDimension('J')->setWidth(25);
+        $sheet->getColumnDimension('K')->setWidth(20);
+        $sheet->getColumnDimension('L')->setWidth(20);
+        $sheet->getColumnDimension('M')->setWidth(20);
+        $sheet->getColumnDimension('N')->setWidth(12);
+        $sheet->getColumnDimension('O')->setWidth(12);
+        $sheet->getColumnDimension('P')->setWidth(12);
+        $sheet->getColumnDimension('Q')->setWidth(15);
+        $sheet->getColumnDimension('R')->setWidth(15);
+        $sheet->getColumnDimension('S')->setWidth(15);
+        $sheet->getColumnDimension('T')->setWidth(15);
+
+        $hStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->getStyle('A2:T2')->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
         $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
         $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
         $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
@@ -841,7 +894,7 @@ class ExportsController extends Controller
         $totalSummarySessions = 0;
 
         for ($i = 0; $i < count($list); $i++) {
-            $x = $i + 4;
+            $x = $i + 3;
             $item = $list[$i];
             $statusLabel = u::geLabelStatusContract($item->status);
 
@@ -879,10 +932,8 @@ class ExportsController extends Controller
             $sheet->getStyle("Q$x:T$x")->applyFromArray($rightAlign);
             foreach (['Q', 'R', 'S', 'T'] as $mc) {
                 $sheet->getStyle("$mc$x")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle('A' . $x . ':' . $lastColStr . $x)->applyFromArray(['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]]);
-            $sheet->getRowDimension($x)->setRowHeight(23);
             }
-            $sheet->getRowDimension($x)->setRowHeight(20);
+            $sheet->getRowDimension($x)->setRowHeight(23);
         }
 
         $tRow = count($list) + 3;
@@ -1168,7 +1219,45 @@ class ExportsController extends Controller
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO DOANH THU CHUA PHAN BO THEO TT', array ( 0 => 'BÁO CÁO DOANH THU CHƪa PHÂN BỔ THEO TRUNG TÂM',), array ( 0 => '8', 1 => '32', 2 => '16', 3 => '20', 4 => '20', 5 => '16', 6 => '22',));
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        $sheet->setCellValue('A1', 'BÁO CÁO DOANH THU CHƯA PHÂN BỔ THEO TRUNG TÂM');
+        $sheet->mergeCells('A1:G1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        $hRow = 2;
+        $hData = [
+            'A' => 'STT', 'B' => 'Trung tâm', 'C' => 'Số lượng HĐ',
+            'D' => 'Phải thu', 'E' => 'Đã thu', 'F' => 'Công nợ', 'G' => 'Số dư'
+        ];
+        foreach ($hData as $col => $label) {
+            $sheet->setCellValue($col . $hRow, $label);
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(32);
+        $sheet->getColumnDimension('C')->setWidth(16);
+        $sheet->getColumnDimension('D')->setWidth(20);
+        $sheet->getColumnDimension('E')->setWidth(20);
+        $sheet->getColumnDimension('F')->setWidth(16);
+        $sheet->getColumnDimension('G')->setWidth(22);
+
+        $hStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->getStyle('A2:G2')->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
         $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
         $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
         $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
@@ -1180,7 +1269,7 @@ class ExportsController extends Controller
         $totalLeftAmount = 0;
 
         for ($i = 0; $i < count($list); $i++) {
-            $x = $i + 4;
+            $x = $i + 3;
             $item = $list[$i];
             $sheet->setCellValue('A' . $x, $i + 1);
             $sheet->setCellValue('B' . $x, $item->branch_name);
@@ -1199,10 +1288,8 @@ class ExportsController extends Controller
             $sheet->getStyle("D$x:G$x")->applyFromArray($rightAlign);
             foreach (['D', 'E', 'F', 'G'] as $mc) {
                 $sheet->getStyle("$mc$x")->getNumberFormat()->setFormatCode('#,##0');
-            $sheet->getStyle('A' . $x . ':' . $lastColStr . $x)->applyFromArray(['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]]);
-            $sheet->getRowDimension($x)->setRowHeight(23);
             }
-            $sheet->getRowDimension($x)->setRowHeight(20);
+            $sheet->getRowDimension($x)->setRowHeight(23);
         }
 
         $tRow = count($list) + 3;
