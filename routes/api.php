@@ -285,10 +285,12 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('30', 'ReportsController@report30');
                 Route::post('refund-deposit', 'ReportsController@refundDepositReport');
                 Route::post('teacher-payroll', 'ReportsController@teacherPayroll');
+                Route::post('ta-payroll', 'ReportsController@taPayroll');
             });
             Route::prefix('exports')->group(function () {
                 Route::get('refund-deposit', 'ExportsController@refundDepositReport');
                 Route::get('teacher-payroll', 'ExportsController@teacherPayroll');
+                Route::get('ta-payroll', 'ExportsController@taPayroll');
                 Route::get('report01/{key}/{value}', 'ExportsController@report01');
                 Route::get('report02a/{key}/{value}', 'ExportsController@report02a');
                 Route::get('report02b/{key}/{value}', 'ExportsController@report02b');

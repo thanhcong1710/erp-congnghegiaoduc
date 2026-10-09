@@ -9,6 +9,7 @@ use App\Providers\UtilityServiceProvider as u;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {
@@ -523,7 +524,7 @@ class ReportsController extends Controller
         if ($user) {
             $is_ta_role = DB::table('role_has_user')->where('user_id', $user->id)->where('role_id', 54)->exists();
         }
-        $data['is_ta'] = $is_ta_role;
+        $data->is_ta = $is_ta_role;
         return response()->json($data);
     }
 
@@ -3347,5 +3348,132 @@ class ReportsController extends Controller
         }
 
         return $unit_price * $total_sessions;
+    }
+
+    public function taPayroll(Request $request)
+    {
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $class_name = isset($request->class_name) ? trim($request->class_name) : $keyword;
+        $ta_id = isset($request->ta_id) ? (int)$request->ta_id : 0;
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 50;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $user_id = $user ? $user->id : 0;
+        $is_ta_role = false;
+        if ($user) {
+            $is_ta_role = DB::table('role_has_user')->where('user_id', $user_id)->where('role_id', 54)->exists();
+        }
+
+        $cond = " t.lp_check_status = 'Đã check' ";
+        if ($is_ta_role && $user) {
+            $cond .= " AND t.ta_id = $user_id ";
+        } elseif ($ta_id > 0) {
+            $cond .= " AND t.ta_id = $ta_id ";
+        }
+
+        if ($class_name !== '') {
+            $cond .= " AND cl.cls_name LIKE '%$class_name%' ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND t.expected_date <= '$end_date' ";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND t.expected_date >= '$start_date' ";
+        }
+
+        $query = "SELECT 
+                    t.ta_id,
+                    t.class_id,
+                    u.name AS ta_name,
+                    u.hrm_id AS ta_code,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    SUM(CASE WHEN t.type = 'group' THEN 1 ELSE 0 END) AS group_sessions,
+                    SUM(CASE WHEN t.type = 'one_on_one' THEN 1 ELSE 0 END) AS one_on_one_sessions,
+                    COUNT(t.id) AS total_sessions
+            FROM (
+                SELECT id, ta_id, class_id, expected_date, lp_check_status, 'group' as type 
+                FROM ta_group_tutorings
+                UNION ALL
+                SELECT id, ta_id, class_id, expected_date, lp_check_status, 'one_on_one' as type 
+                FROM ta_one_on_one_tutorings
+            ) AS t
+            INNER JOIN users AS u ON u.id = t.ta_id
+            INNER JOIN classes AS cl ON cl.id = t.class_id
+            LEFT JOIN products AS p ON p.id = cl.product_id
+            WHERE $cond
+            GROUP BY t.ta_id, t.class_id
+            ORDER BY u.hrm_id ASC, cl.cls_name ASC";
+
+        $count_query = "SELECT COUNT(*) AS total FROM ($query) AS tbl";
+        $total = u::first($count_query);
+
+        $list = u::query($query . $limitation);
+        $all_records = u::query($query);
+
+        $ta_totals = [];
+        $total_all_sessions = 0;
+        $total_group_sessions = 0;
+        $total_one_on_one_sessions = 0;
+
+        foreach ($all_records as $item) {
+            $salary = self::calculateTASalary($item->product_name, $item->total_sessions);
+            if (!isset($ta_totals[$item->ta_id])) {
+                $ta_totals[$item->ta_id] = 0;
+            }
+            $ta_totals[$item->ta_id] += $salary;
+            $total_all_sessions += (int)$item->total_sessions;
+            $total_group_sessions += (int)$item->group_sessions;
+            $total_one_on_one_sessions += (int)$item->one_on_one_sessions;
+        }
+
+        foreach ($list as $k => $item) {
+            $unit_price = self::getTAUnitPrice($item->product_name);
+            $list[$k]->unit_price = $unit_price;
+            $list[$k]->salary = self::calculateTASalary($item->product_name, $item->total_sessions);
+            $list[$k]->ta_total_salary = isset($ta_totals[$item->ta_id]) ? $ta_totals[$item->ta_id] : 0;
+        }
+
+        return response()->json([
+            'list' => $list,
+            'summary' => [
+                'total_salary' => array_sum($ta_totals),
+                'total_sessions' => $total_all_sessions,
+                'total_group_sessions' => $total_group_sessions,
+                'total_one_on_one_sessions' => $total_one_on_one_sessions,
+                'total_tas' => count($ta_totals)
+            ],
+            'paging' => [
+                'total' => $total ? (int)$total->total : 0,
+                'cpage' => $page,
+                'limit' => $limit
+            ],
+            'is_ta' => $is_ta_role
+        ]);
+    }
+
+    public static function getTAUnitPrice($product_name)
+    {
+        $name = strtolower(trim($product_name));
+        if (strpos($name, 'pre-toeic') !== false || strpos($name, 'pre toeic') !== false) {
+            return 150000;
+        } elseif (strpos($name, 'level 1') !== false || strpos($name, 'level1') !== false) {
+            return 183000;
+        } elseif (strpos($name, 'level 2') !== false || strpos($name, 'level2') !== false) {
+            return 225000;
+        }
+        return 25000;
+    }
+
+    public static function calculateTASalary($product_name, $total_sessions)
+    {
+        return self::getTAUnitPrice($product_name) * $total_sessions;
     }
 }

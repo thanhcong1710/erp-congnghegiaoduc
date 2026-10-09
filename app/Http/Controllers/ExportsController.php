@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\ProcessExcel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ExportsController extends Controller
 {
@@ -4586,6 +4587,168 @@ class ExportsController extends Controller
         try {
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="Bao_cao_tinh_luong_giao_vien.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
+
+    public function taPayroll(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+        
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $class_name = isset($request->class_name) ? trim($request->class_name) : $keyword;
+        $ta_id = isset($request->ta_id) ? (int)$request->ta_id : 0;
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $user_id = $user ? $user->id : 0;
+        $is_ta_role = false;
+        if ($user) {
+            $is_ta_role = DB::table('role_has_user')->where('user_id', $user_id)->where('role_id', 54)->exists();
+        }
+
+        $cond = " t.lp_check_status = 'Đã check' ";
+        if ($is_ta_role && $user) {
+            $cond .= " AND t.ta_id = $user_id ";
+        } elseif ($ta_id > 0) {
+            $cond .= " AND t.ta_id = $ta_id ";
+        }
+
+        if ($class_name !== '') {
+            $cond .= " AND cl.cls_name LIKE '%$class_name%' ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND t.expected_date <= '$end_date' ";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND t.expected_date >= '$start_date' ";
+        }
+
+        $query = "SELECT 
+                    t.ta_id,
+                    t.class_id,
+                    u.name AS ta_name,
+                    u.hrm_id AS ta_code,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    SUM(CASE WHEN t.type = 'group' THEN 1 ELSE 0 END) AS group_sessions,
+                    SUM(CASE WHEN t.type = 'one_on_one' THEN 1 ELSE 0 END) AS one_on_one_sessions,
+                    COUNT(t.id) AS total_sessions
+            FROM (
+                SELECT id, ta_id, class_id, expected_date, lp_check_status, 'group' as type 
+                FROM ta_group_tutorings
+                UNION ALL
+                SELECT id, ta_id, class_id, expected_date, lp_check_status, 'one_on_one' as type 
+                FROM ta_one_on_one_tutorings
+            ) AS t
+            INNER JOIN users AS u ON u.id = t.ta_id
+            INNER JOIN classes AS cl ON cl.id = t.class_id
+            LEFT JOIN products AS p ON p.id = cl.product_id
+            WHERE $cond
+            GROUP BY t.ta_id, t.class_id
+            ORDER BY u.hrm_id ASC, cl.cls_name ASC";
+
+        $list = u::query($query);
+
+        $ta_totals = [];
+        foreach ($list as $item) {
+            $salary = \App\Http\Controllers\ReportsController::calculateTASalary($item->product_name, $item->total_sessions);
+            if (!isset($ta_totals[$item->ta_id])) {
+                $ta_totals[$item->ta_id] = 0;
+            }
+            $ta_totals[$item->ta_id] += $salary;
+            $item->unit_price = \App\Http\Controllers\ReportsController::getTAUnitPrice($item->product_name);
+            $item->salary = $salary;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        // Title
+        $sheet->setCellValue('A1', 'BÁO CÁO TÍNH LƯƠNG TRỢ GIẢNG');
+        $sheet->mergeCells('A1:K1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // Header row
+        $hRow = 2;
+        $hData = [
+            'A' => 'STT',
+            'B' => 'Tên trợ giảng',
+            'C' => 'Mã nhân viên',
+            'D' => 'Lớp',
+            'E' => 'Khóa học',
+            'F' => 'Số buổi BT nhóm',
+            'G' => 'Số buổi BT 1:1',
+            'H' => 'Tổng số buổi',
+            'I' => 'Đơn giá',
+            'J' => 'Lương theo lớp',
+            'K' => 'Lương Tổng'
+        ];
+        foreach ($hData as $col => $label) {
+            $sheet->setCellValue($col . $hRow, $label);
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(26);
+        $sheet->getColumnDimension('C')->setWidth(16);
+        $sheet->getColumnDimension('D')->setWidth(18);
+        $sheet->getColumnDimension('E')->setWidth(18);
+        $sheet->getColumnDimension('F')->setWidth(18);
+        $sheet->getColumnDimension('G')->setWidth(18);
+        $sheet->getColumnDimension('H')->setWidth(16);
+        $sheet->getColumnDimension('I')->setWidth(16);
+        $sheet->getColumnDimension('J')->setWidth(20);
+        $sheet->getColumnDimension('K')->setWidth(20);
+
+        $hStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->getStyle('A2:K2')->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+
+        // Data rows
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 3;
+            $item = $list[$i];
+            
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->ta_name);
+            $sheet->setCellValue('C' . $x, $item->ta_code);
+            $sheet->setCellValue('D' . $x, $item->class_name);
+            $sheet->setCellValue('E' . $x, $item->product_name);
+            $sheet->setCellValue('F' . $x, $item->group_sessions);
+            $sheet->setCellValue('G' . $x, $item->one_on_one_sessions);
+            $sheet->setCellValue('H' . $x, $item->total_sessions);
+            $sheet->setCellValue('I' . $x, number_format($item->unit_price));
+            $sheet->setCellValue('J' . $x, number_format($item->salary));
+            $sheet->setCellValue('K' . $x, number_format($ta_totals[$item->ta_id]));
+            
+            $sheet->getStyle('A' . $x . ':K' . $x)->applyFromArray($borderOnly);
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao_cao_tinh_luong_tro_giang.xlsx"');
             header('Cache-Control: max-age=0');
             $writer->save("php://output");
         } catch (Exception $exception) {

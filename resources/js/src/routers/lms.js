@@ -596,6 +596,24 @@ export default {
         },
       },
       {
+        path: "/lms/reports/operate/ta-payroll",
+        name: "lms-reports-ta-payroll",
+        component: () => import("@/views/lms/report/operate/taPayroll.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tính lương trợ giảng", active: true },
+          ],
+          pageTitle: "Báo cáo tính lương trợ giảng",
+          rule: "editor",
+          permission: "lms_reports_operate_22",
+        },
+      },
+      {
         path: "/lms/reports/operate",
         name: "lms-reports-operate",
         component: () => import("@/views/lms/report/operate/index.vue"),
