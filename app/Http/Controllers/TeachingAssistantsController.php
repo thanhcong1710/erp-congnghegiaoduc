@@ -232,7 +232,7 @@ class TeachingAssistantsController extends Controller
 
     public function getAllActive(Request $request)
     {
-        $list = TeachingAssistant::where('status', 1)->get(['id', 'full_name']);
+        $list = TeachingAssistant::where('status', 1)->get(['user_id as id', 'full_name']);
         return response()->json($list);
     }
 }
