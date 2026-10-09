@@ -664,7 +664,6 @@ export default {
   },
   created () {
     this.getTimeGreeting()
-    this.loadOverview()
     axios.g(`/api/system/branches-has-user`)
       .then(response => {
       this.branch_list = response.data

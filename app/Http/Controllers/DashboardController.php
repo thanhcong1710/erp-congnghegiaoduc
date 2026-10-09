@@ -14,15 +14,29 @@ class DashboardController extends Controller
 {
     public function overview(Request $request) {
         $user = Auth::user();
-        $userRoles = u::query("SELECT role_id FROM role_has_user WHERE user_id = {$user->id}");
+        $userRoles = u::query("SELECT r.id, r.name FROM role_has_user ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = {$user->id}");
         $roles = [];
+        $roleNames = [];
         foreach($userRoles as $ur) {
-            $roles[] = $ur->role_id;
+            $roles[] = (int)$ur->id;
+            $roleNames[] = strtolower($ur->name);
         }
 
-        $is_leader = in_array(69, $roles);
-        $is_sales = in_array(68, $roles);
-        $is_admin = !($is_leader || $is_sales) || in_array(1, $roles); 
+        $is_admin = in_array(999999, $roles) || in_array((int)SystemCode::ROLE_ADMIN, $roles) || in_array(1, $roles) || in_array('admin', $roleNames);
+        $is_leader = in_array(69, $roles) || in_array((int)SystemCode::ROLE_EC_LEADER, $roles) || in_array('ec_leader', $roleNames) || in_array('sale_leader', $roleNames);
+        $is_sales = in_array(68, $roles) || in_array((int)SystemCode::ROLE_EC, $roles) || in_array('ec', $roleNames) || in_array('sale', $roleNames);
+
+        $data = [
+            'roles' => $roles,
+            'is_admin' => $is_admin,
+            'is_leader' => $is_leader,
+            'is_sales' => $is_sales,
+        ];
+
+        // Nếu không thuộc role admin, sale, hoặc sale_leader thì chỉ hiển thị phần chào mừng
+        if (!$is_admin && !$is_leader && !$is_sales) {
+            return response()->json($data);
+        }
 
         // Base Condition for branch
         $req_branch_id = data_get($request, 'branch_id');
@@ -39,13 +53,6 @@ class DashboardController extends Controller
 
         $current_month_start = date('Y-m-01 00:00:00');
         $current_year_start = date('Y-01-01 00:00:00');
-
-        $data = [
-            'roles' => $roles,
-            'is_admin' => $is_admin,
-            'is_leader' => $is_leader,
-            'is_sales' => $is_sales,
-        ];
 
         // Prepare last 6 months dates
         $last_6_months_labels = [];
