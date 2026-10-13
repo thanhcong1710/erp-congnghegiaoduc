@@ -330,6 +330,20 @@ export default [
           { url: '/hrm/leaves', name: 'Đơn nghỉ phép', slug: 'hrm-leaves', permission: 'hrm' },
           { url: '/hrm/leave-types', name: 'Loại nghỉ phép', slug: 'hrm-leave-types', permission: 'hrm' },
         ]
+      },
+      {
+        url: '/hrm/contracts',
+        name: 'Quản lý Hợp đồng',
+        icon: 'FileTextIcon',
+        slug: 'hrm-contracts',
+        permission: 'hrm',
+      },
+      {
+        url: '/hrm/documents',
+        name: 'Lưu trữ Hồ sơ',
+        icon: 'FolderIcon',
+        slug: 'hrm-documents',
+        permission: 'hrm',
       }
     ]
   },

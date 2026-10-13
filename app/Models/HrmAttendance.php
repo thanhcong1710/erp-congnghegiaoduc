@@ -19,6 +19,8 @@ class HrmAttendance extends Model
         'check_out_location',
         'device_id',
         'status',
+        'attendance_status',
+        'penalty_amount',
         'note',
     ];
 

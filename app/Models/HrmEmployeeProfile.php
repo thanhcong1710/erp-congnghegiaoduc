@@ -11,6 +11,18 @@ class HrmEmployeeProfile extends Model
     protected $fillable = [
         'user_id',
         'employee_code',
+        'employee_type',
+        'probation_start_date',
+        'probation_end_date',
+        'work_status',
+        'resigned_date',
+        'resigned_reason',
+        'approval_status',
+        'created_by_user_id',
+        'profile_received_date',
+        'profile_status',
+        'missing_documents',
+        'profile_note',
         'department_id',
         'position_id',
         'job_level_id',
@@ -30,6 +42,28 @@ class HrmEmployeeProfile extends Model
         'bank_account',
         'bank_name',
     ];
+
+    protected $casts = [
+        'missing_documents' => 'array',
+    ];
+
+    /**
+     * Generate next sequential code like CHAM01, CHAM02...
+     */
+    public static function generateNextEmployeeCode()
+    {
+        $lastProfile = self::where('employee_code', 'LIKE', 'CHAM%')
+            ->orderByRaw('CAST(SUBSTRING(employee_code, 5) AS UNSIGNED) DESC')
+            ->first();
+
+        if (!$lastProfile || !$lastProfile->employee_code) {
+            return 'CHAM01';
+        }
+
+        $num = (int) substr($lastProfile->employee_code, 4);
+        $nextNum = $num + 1;
+        return 'CHAM' . str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+    }
 
     public function user()
     {

@@ -23,4 +23,19 @@ class HrmContract extends Model
     {
         return $this->belongsTo('App\User', 'user_id');
     }
+
+    public static function generateNextContractNumber()
+    {
+        $last = self::where('contract_number', 'LIKE', 'CHAM%')
+            ->orderByRaw('CAST(SUBSTRING(contract_number, 5) AS UNSIGNED) DESC')
+            ->first();
+
+        if (!$last || !$last->contract_number) {
+            return 'CHAM01';
+        }
+
+        $num = (int) substr($last->contract_number, 4);
+        $nextNum = $num + 1;
+        return 'CHAM' . str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+    }
 }

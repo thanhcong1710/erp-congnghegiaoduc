@@ -462,7 +462,13 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'Hrm\EmployeeProfileController@add');
                 Route::get('show/{id}', 'Hrm\EmployeeProfileController@show');
                 Route::post('update/{id}', 'Hrm\EmployeeProfileController@update');
+                Route::post('approve-ctv/{id}', 'Hrm\EmployeeProfileController@approveCtv');
+                Route::post('convert-fulltime/{id}', 'Hrm\EmployeeProfileController@convertToFulltime');
+                Route::post('update-work-status/{id}', 'Hrm\EmployeeProfileController@updateWorkStatus');
+                Route::post('update-documents/{id}', 'Hrm\EmployeeProfileController@updateProfileDocuments');
+                Route::post('documents-overview', 'Hrm\EmployeeProfileController@listDocumentsOverview');
                 Route::post('add-contract', 'Hrm\EmployeeProfileController@addContract');
+                Route::post('contracts-list', 'Hrm\EmployeeProfileController@listContracts');
                 Route::post('add-document', 'Hrm\EmployeeProfileController@addDocument');
             });
             Route::prefix('job-titles')->group(function () {
@@ -497,6 +503,10 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('update/{id}', 'Hrm\LeaveTypeController@update');
             });
             Route::prefix('attendances')->group(function () {
+                Route::post('daily-sheet', 'Hrm\AttendanceController@getDailyAttendanceSheet');
+                Route::post('update-status', 'Hrm\AttendanceController@updateAttendanceStatus');
+                Route::post('monthly-summary', 'Hrm\AttendanceController@getMonthlySummary');
+                Route::post('quick-search', 'Hrm\AttendanceController@quickSearchSummary');
                 Route::post('check-in', 'Hrm\AttendanceController@checkIn');
                 Route::post('check-out/{id}', 'Hrm\AttendanceController@checkOut');
             });
@@ -504,6 +514,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('list', 'Hrm\LeaveRequestController@list');
                 Route::post('add', 'Hrm\LeaveRequestController@add');
                 Route::post('approve/{id}', 'Hrm\LeaveRequestController@approve');
+                Route::post('balance', 'Hrm\LeaveRequestController@getLeaveBalance');
             });
         });
 

@@ -32,7 +32,8 @@ class Kernel extends ConsoleKernel
         AutoWithdrawEnrollmentDeposit::class,
         AutoWithdraw::class,
         SnapshotAgreementRevenue::class,
-        UpdateAgreementsData::class
+        UpdateAgreementsData::class,
+        \App\Console\Commands\PromoteProbationEmployees::class
     ];
 
     /**
@@ -43,6 +44,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('hrm:promote-probation')->dailyAt('00:00');
         $schedule->command('jobsSendEmail:command')->cron('* * * * *');
         $schedule->command('autoWithdrawEnrollmentDeposit:process')->dailyAt('23:55')->withoutOverlapping();
         $schedule->command('scheduleHasStudent:process')->dailyAt('00:05')->withoutOverlapping();

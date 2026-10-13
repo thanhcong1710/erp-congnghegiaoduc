@@ -10,17 +10,60 @@
         <!-- Tab 1: Thông tin chung -->
         <vs-tab label="Thông tin chung" icon="person">
           <div class="mt-4">
-            <div class="vx-row mb-4">
+            <div class="vx-row mb-4" v-if="!isEdit">
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="User ID (Tài khoản HT)" v-model="form.user_id" :disabled="isEdit" />
+                <vs-input class="w-full" label="Họ và tên nhân sự (*)" v-model="form.user_name" placeholder="Nguyễn Văn A" />
               </div>
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Mã nhân viên" v-model="form.employee_code" />
+                <vs-input class="w-full" label="Email đăng nhập (*)" v-model="form.email" placeholder="example@erp.local" />
               </div>
             </div>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Phòng ban</label>
+                <vs-input class="w-full" label="Mã nhân viên (Để trống sẽ tự sinh CHAMxx)" v-model="form.employee_code" placeholder="CHAM01" />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-base font-medium">Phân loại nhân sự (*)</label>
+                <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.employee_type">
+                  <option value="fulltime">Nhân sự Fulltime</option>
+                  <option value="ctv">Cộng tác viên (CTV)</option>
+                  <option value="probation">Thử việc</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Nếu là nhân sự thử việc -->
+            <div class="vx-row mb-4 p-3 bg-gray-50 border rounded" v-if="form.employee_type === 'probation'">
+              <div class="vx-col w-1/2">
+                <vs-input type="date" class="w-full" label="Ngày bắt đầu thử việc (*)" v-model="form.probation_start_date" />
+              </div>
+              <div class="vx-col w-1/2">
+                <vs-input type="date" class="w-full" label="Ngày kết thúc thử việc (*)" v-model="form.probation_end_date" />
+              </div>
+            </div>
+
+            <!-- Trạng thái hoạt động -->
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-base font-medium">Trạng thái hoạt động</label>
+                <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.work_status">
+                  <option value="working">Đang làm việc</option>
+                  <option value="resigned">Đã nghỉ việc</option>
+                </select>
+              </div>
+              <div class="vx-col w-1/2" v-if="form.work_status === 'resigned'">
+                <vs-input type="date" class="w-full" label="Ngày nghỉ việc" v-model="form.resigned_date" />
+              </div>
+            </div>
+            <div class="vx-row mb-4" v-if="form.work_status === 'resigned'">
+              <div class="vx-col w-full">
+                <vs-input class="w-full" label="Lý do nghỉ việc" v-model="form.resigned_reason" />
+              </div>
+            </div>
+
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-base font-medium">Phòng ban / Team</label>
                 <v-select class="w-full mt-1" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="name" />
               </div>
               <div class="vx-col w-1/2">
@@ -213,7 +256,15 @@ export default {
       documents: [],
       form: {
         user_id: null,
+        user_name: '',
+        email: '',
         employee_code: '',
+        employee_type: 'fulltime',
+        probation_start_date: '',
+        probation_end_date: '',
+        work_status: 'working',
+        resigned_date: '',
+        resigned_reason: '',
         department_id: null,
         job_title_id: null,
         job_level_id: null,

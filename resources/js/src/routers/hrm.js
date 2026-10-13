@@ -128,10 +128,16 @@ export default {
         meta: { pageTitle: 'Xếp ca', rule: 'editor' }
       },
       {
-        path: '/hrm/overtime',
-        name: 'hrm-overtime',
-        component: () => import('@/views/hrm/overtime/List.vue'),
-        meta: { pageTitle: 'Làm thêm giờ', rule: 'editor' }
+        path: '/hrm/contracts',
+        name: 'hrm-contracts',
+        component: () => import('@/views/hrm/contracts/List.vue'),
+        meta: { pageTitle: 'Quản lý Hợp đồng', rule: 'editor' }
+      },
+      {
+        path: '/hrm/documents',
+        name: 'hrm-documents',
+        component: () => import('@/views/hrm/documents/List.vue'),
+        meta: { pageTitle: 'Lưu trữ Hồ sơ', rule: 'editor' }
       }
     ]
   }
