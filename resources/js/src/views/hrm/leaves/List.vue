@@ -1,125 +1,189 @@
 <template>
-  <div>
-    <!-- Widget Hiển thị thông tin Phép năm của Nhân sự -->
+  <div id="page-hrm-leaves">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between mb-4">
+      <div class="mb-2 md:mb-0">
+        <h3 class="font-bold text-gray-800 flex items-center">
+          <feather-icon icon="CalendarIcon" class="mr-2 text-primary" /> Quản Lý Đơn Nghỉ Phép & Đổi Ca
+        </h3>
+        <p class="text-sm text-gray-500 mt-1">Gửi đơn xin nghỉ, đổi ca, chuyển off sang onl và phê duyệt theo quy định</p>
+      </div>
+      <div>
+        <vs-button class="p-3" color="success" type="border" @click="openPopup">
+          <i class="fa-solid fa-plus mr-2"></i> Tạo Đơn Xin Phép
+        </vs-button>
+      </div>
+    </div>
+
+    <!-- 3 Widget Số Phép Năm Chuẩn Style VxCard -->
     <div class="vx-row mb-4">
-      <div class="vx-col w-full md:w-1/3 mb-2">
-        <vx-card class="text-center bg-primary text-white">
-          <div class="p-3">
-            <h5 class="text-white mb-1">Phép năm được hưởng</h5>
-            <h2 class="text-white font-bold">{{ leaveBalance.total_days }} ngày</h2>
+      <div class="vx-col w-full md:w-1/3 mb-3 md:mb-0">
+        <vx-card class="border-t-4 border-solid border-primary" no-shadow>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-semibold text-gray-600 block mb-1">Phép năm được hưởng</span>
+              <h2 class="font-bold text-primary">{{ leaveBalance.total_days }} <span class="text-sm text-gray-500">ngày</span></h2>
+            </div>
+            <div class="p-3 bg-primary-light rounded-full text-primary">
+              <feather-icon icon="CalendarIcon" class="h-6 w-6" />
+            </div>
           </div>
         </vx-card>
       </div>
-      <div class="vx-col w-full md:w-1/3 mb-2">
-        <vx-card class="text-center bg-warning text-white">
-          <div class="p-3">
-            <h5 class="text-white mb-1">Đã sử dụng</h5>
-            <h2 class="text-white font-bold">{{ leaveBalance.used_days }} ngày</h2>
+
+      <div class="vx-col w-full md:w-1/3 mb-3 md:mb-0">
+        <vx-card class="border-t-4 border-solid border-warning" no-shadow>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-semibold text-gray-600 block mb-1">Đã sử dụng</span>
+              <h2 class="font-bold text-warning">{{ leaveBalance.used_days }} <span class="text-sm text-gray-500">ngày</span></h2>
+            </div>
+            <div class="p-3 bg-warning-light rounded-full text-warning">
+              <feather-icon icon="CheckCircleIcon" class="h-6 w-6" />
+            </div>
           </div>
         </vx-card>
       </div>
-      <div class="vx-col w-full md:w-1/3 mb-2">
-        <vx-card class="text-center bg-success text-white">
-          <div class="p-3">
-            <h5 class="text-white mb-1">Phép còn lại</h5>
-            <h2 class="text-white font-bold">{{ leaveBalance.remaining_days }} ngày</h2>
+
+      <div class="vx-col w-full md:w-1/3">
+        <vx-card class="border-t-4 border-solid border-success" no-shadow>
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-sm font-semibold text-gray-600 block mb-1">Số ngày phép còn lại</span>
+              <h2 class="font-bold text-success">{{ leaveBalance.remaining_days }} <span class="text-sm text-gray-500">ngày</span></h2>
+            </div>
+            <div class="p-3 bg-success-light rounded-full text-success">
+              <feather-icon icon="ClockIcon" class="h-6 w-6" />
+            </div>
           </div>
         </vx-card>
       </div>
     </div>
 
-    <vs-card>
+    <!-- Bảng danh sách đơn nghỉ phép -->
+    <vx-card no-shadow>
+      <!-- Bộ lọc và tìm kiếm -->
       <div class="flex flex-wrap items-center justify-between mb-4">
-        <div>
-          <h4>Quản lý Đơn nghỉ phép & Đổi ca</h4>
-          <span class="text-sm text-gray-500">Tạo đơn xin nghỉ, đổi ca, chuyển off sang onl và phê duyệt</span>
+        <div class="flex items-center mb-2 md:mb-0">
+          <span class="text-sm font-medium mr-2 text-gray-700">Trạng thái:</span>
+          <select v-model="filterStatus" @change="fetchLeaves" class="vs-inputx vs-input--input normal" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
+            <option value="all">-- Tất cả trạng thái --</option>
+            <option value="0">Chờ duyệt</option>
+            <option value="1">Đã phê duyệt</option>
+            <option value="2">Bị từ chối</option>
+          </select>
         </div>
-        <div class="flex space-x-2 mt-2 md:mt-0">
-          <vs-button color="success" @click="openPopup()"><i class="fa fa-plus"></i> Tạo đơn xin phép</vs-button>
+
+        <div class="con-input-search vs-table--search">
+          <input 
+            type="text" 
+            class="input-search vs-table--search-input" 
+            style="padding: 12px 36px 12px 14px; font-size: 13px; min-width: 250px;" 
+            placeholder="Tìm theo tên nhân viên..." 
+            v-model="searchKeyword" 
+            @input="fetchLeaves"
+          >
+          <i class="vs-icon notranslate icon-scale material-icons null" style="font-size: 20px;">search</i>
         </div>
       </div>
-      
-      <vs-table :data="leaves.data" search pagination :max-items="20">
-        <template slot="thead">
-          <vs-th>Mã NS</vs-th>
-          <vs-th>Người làm đơn</vs-th>
-          <vs-th>Loại yêu cầu</vs-th>
-          <vs-th>Thời gian</vs-th>
-          <vs-th>Số ngày</vs-th>
-          <vs-th>Lý do / Ca đổi</vs-th>
-          <vs-th>Trạng thái</vs-th>
-          <vs-th>Hình thức duyệt</vs-th>
-          <vs-th>Thao tác</vs-th>
-        </template>
-        <template slot-scope="{data}">
-          <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-            <vs-td>
-              <span class="font-bold text-primary">{{ tr.user ? (tr.user.hrm_id || '---') : '' }}</span>
-            </vs-td>
-            <vs-td>
-              <span class="font-medium text-gray-900">{{ tr.user ? tr.user.name : 'Unknown' }}</span>
-            </vs-td>
-            <vs-td>
-              <vs-chip :color="getRequestCategoryColor(tr.request_category)">
-                {{ getRequestCategoryText(tr.request_category) }}
-              </vs-chip>
-            </vs-td>
-            <vs-td>
-              <span class="text-sm">{{ tr.start_date }} <i class="fa fa-arrow-right text-xs text-gray-400"></i> {{ tr.end_date }}</span>
-            </vs-td>
-            <vs-td>
-              <span class="font-semibold">{{ tr.duration_days }} ngày</span>
-            </vs-td>
-            <vs-td>
-              <div>{{ tr.reason }}</div>
-              <div v-if="tr.target_shift_info" class="text-xs text-primary mt-1">
-                <strong>Ca đổi:</strong> {{ tr.target_shift_info }}
-              </div>
-            </vs-td>
-            <vs-td>
-              <vs-chip :color="tr.status === 1 ? 'success' : (tr.status === 2 ? 'danger' : 'warning')">
-                {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
-              </vs-chip>
-            </vs-td>
-            <vs-td>
-              <span v-if="tr.status === 1" class="font-semibold text-sm" :class="getApprovalTypeClass(tr.approval_type)">
-                {{ getApprovalTypeText(tr.approval_type) }}
-              </span>
-              <span v-else-if="tr.status === 2" class="text-danger text-sm">
-                {{ tr.rejection_reason || 'Từ chối' }}
-              </span>
-              <span v-else class="text-gray-400">---</span>
-            </vs-td>
-            <vs-td>
-              <div class="flex space-x-2">
-                <vs-button v-if="tr.status === 0" size="small" color="primary" @click="openApprovePopup(tr)">
-                  <i class="fa fa-check"></i> Duyệt đơn
-                </vs-button>
-              </div>
-            </vs-td>
-          </vs-tr>
-        </template>
-      </vs-table>
-    </vs-card>
+
+      <!-- Table chuẩn hệ thống -->
+      <div class="vs-component vs-con-table stripe vs-table-primary">
+        <div class="con-tablex vs-table--content">
+          <div class="vs-con-tbody vs-table--tbody">
+            <table class="vs-table vs-table--tbody-table">
+              <thead class="vs-table--thead">
+                <tr>
+                  <th width="5%" class="text-center">STT</th>
+                  <th width="12%">Mã NS</th>
+                  <th width="18%">Người làm đơn</th>
+                  <th width="15%">Loại yêu cầu</th>
+                  <th width="18%">Thời gian xin phép</th>
+                  <th width="8%" class="text-center">Số ngày</th>
+                  <th width="12%">Trạng thái</th>
+                  <th width="15%">Phê duyệt</th>
+                  <th width="10%" class="text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="tr-values vs-table--tr" v-for="(tr, index) in leaves.data" :key="index">
+                  <td class="td vs-table--td text-center">{{ index + 1 + ((leaves.current_page || 1) - 1) * (leaves.per_page || 20) }}</td>
+                  <td class="td vs-table--td font-bold text-primary">{{ tr.user ? (tr.user.hrm_id || '---') : '' }}</td>
+                  <td class="td vs-table--td font-semibold text-gray-900">{{ tr.user ? tr.user.name : 'Unknown' }}</td>
+                  <td class="td vs-table--td">
+                    <vs-chip :color="getRequestCategoryColor(tr.request_category)">
+                      {{ getRequestCategoryText(tr.request_category) }}
+                    </vs-chip>
+                  </td>
+                  <td class="td vs-table--td text-sm">
+                    <div>{{ tr.start_date }} <i class="fa fa-arrow-right text-xs text-gray-400"></i> {{ tr.end_date }}</div>
+                    <div class="text-xs text-gray-500 truncate" :title="tr.reason">Lý do: {{ tr.reason }}</div>
+                  </td>
+                  <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
+                  <td class="td vs-table--td">
+                    <vs-chip :color="tr.status === 1 ? 'success' : (tr.status === 2 ? 'danger' : 'warning')">
+                      {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
+                    </vs-chip>
+                  </td>
+                  <td class="td vs-table--td">
+                    <span v-if="tr.status === 1" class="font-semibold text-xs" :class="getApprovalTypeClass(tr.approval_type)">
+                      {{ getApprovalTypeText(tr.approval_type) }}
+                    </span>
+                    <span v-else-if="tr.status === 2" class="text-danger text-xs">
+                      {{ tr.rejection_reason || 'Từ chối' }}
+                    </span>
+                    <span v-else class="text-gray-400 text-xs">---</span>
+                  </td>
+                  <td class="td vs-table--td text-center list-action">
+                    <vs-button 
+                      v-if="tr.status === 0" 
+                      size="small" 
+                      color="primary" 
+                      type="filled"
+                      @click="openApprovePopup(tr)"
+                      title="Phê duyệt đơn"
+                    >
+                      <i class="fa-solid fa-check mr-1"></i> Duyệt
+                    </vs-button>
+                  </td>
+                </tr>
+                <tr v-if="!leaves.data || !leaves.data.length">
+                  <td colspan="9" class="text-center p-4 text-gray-500">Không có dữ liệu đơn nghỉ phép</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phân trang -->
+      <div class="flex flex-wrap items-center mt-5" v-if="leaves.total > leaves.per_page">
+        <vs-pagination
+          :total="Math.ceil(leaves.total / leaves.per_page)"
+          v-model="leaves.current_page"
+          @change="changePage"
+        />
+      </div>
+    </vx-card>
 
     <!-- Popup Create Leave Request -->
-    <vs-popup title="Tạo Đơn xin nghỉ / Đổi ca" :active.sync="popupActive">
+    <vs-popup title="TẠO ĐƠN XIN NGHỈ / ĐỔI CA" :active.sync="popupActive">
       <div class="p-4">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <label class="text-base font-medium">Loại yêu cầu (*)</label>
-            <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.request_category">
-              <option value="leave"> Xin nghỉ phép thường</option>
-              <option value="shift_change"> Xin đổi ca làm việc</option>
-              <option value="off_to_onl"> Xin chuyển làm Off sang Onl (Hưởng 50% lương)</option>
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Loại yêu cầu (*)</label>
+            <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.request_category">
+              <option value="leave">Xin nghỉ phép thường</option>
+              <option value="shift_change">Xin đổi ca làm việc</option>
+              <option value="off_to_onl">Xin chuyển làm Off sang Onl (Hưởng 50% lương)</option>
             </select>
           </div>
         </div>
 
         <div class="vx-row mb-4" v-if="form.request_category === 'leave'">
           <div class="vx-col w-full">
-            <label class="text-base font-medium">Loại nghỉ</label>
-            <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.leave_type_id">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Loại nghỉ phép</label>
+            <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.leave_type_id">
               <option :value="item.id" v-for="item in leaveTypes" :key="item.id">{{ item.name }}</option>
             </select>
           </div>
@@ -127,58 +191,63 @@
 
         <div class="vx-row mb-4">
           <div class="vx-col w-1/3">
-            <vs-input type="date" class="w-full" label="Từ ngày (*)" v-model="form.start_date" @change="calculateDays" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày (*)</label>
+            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" @change="calculateDays" />
           </div>
           <div class="vx-col w-1/3">
-            <vs-input type="date" class="w-full" label="Đến ngày (*)" v-model="form.end_date" @change="calculateDays" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày (*)</label>
+            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.end_date" @change="calculateDays" />
           </div>
           <div class="vx-col w-1/3">
-            <vs-input type="number" step="0.5" class="w-full" label="Số ngày nghỉ (*)" v-model="form.duration_days" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Số ngày (*)</label>
+            <input type="number" step="0.5" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.duration_days" />
           </div>
         </div>
 
         <div class="vx-row mb-4" v-if="form.request_category === 'shift_change'">
           <div class="vx-col w-full">
-            <vs-input class="w-full" label="Thông tin ca xin đổi (Ví dụ: Ca sáng sang ca chiều ngày...)" v-model="form.target_shift_info" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Thông tin ca xin đổi</label>
+            <input type="text" placeholder="Ví dụ: Xin đổi từ ca Sáng sang ca Chiều ngày 15/10" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.target_shift_info" />
           </div>
         </div>
 
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <vs-textarea label="Lý do chi tiết (*)" v-model="form.reason" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do chi tiết (*)</label>
+            <textarea placeholder="Nhập lý do xin nghỉ hoặc đổi ca..." rows="3" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.reason"></textarea>
           </div>
         </div>
 
-        <div class="vx-row">
+        <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="saveData()" color="success" class="mr-2"><i class="fa fa-paper-plane"></i> Gửi đơn</vs-button>
-            <vs-button @click="popupActive = false" color="dark" type="border"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button @click="saveData()" color="success" type="filled" class="p-3 mr-2"><i class="fa-solid fa-paper-plane mr-1"></i> Gửi Đơn</vs-button>
+            <vs-button @click="popupActive = false" color="dark" type="border" class="p-3"><i class="fa-solid fa-xmark mr-1"></i> Hủy</vs-button>
           </div>
         </div>
       </div>
     </vs-popup>
 
     <!-- Popup Phê duyệt của HR (Theo ảnh 2) -->
-    <vs-popup title="HR Phê duyệt Đơn xin phép" :active.sync="approvePopupActive">
+    <vs-popup title="PHÊ DUYỆT ĐƠN NGHỈ PHÉP" :active.sync="approvePopupActive">
       <div class="p-4" v-if="selectedLeave">
-        <p class="mb-4">
-          Phê duyệt đơn của nhân sự: <strong>{{ selectedLeave.user ? selectedLeave.user.name : '' }}</strong> 
+        <p class="mb-4 text-sm text-gray-700">
+          Phê duyệt đơn của nhân sự: <strong class="text-primary">{{ selectedLeave.user ? selectedLeave.user.name : '' }}</strong> 
           ({{ selectedLeave.duration_days }} ngày: {{ selectedLeave.start_date }} đến {{ selectedLeave.end_date }})
         </p>
 
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <label class="text-base font-medium mb-2 block">Lựa chọn phân loại phê duyệt của HR (*)</label>
+            <label class="text-sm font-semibold text-gray-800 mb-2 block">Lựa chọn phân loại phê duyệt của HR (*)</label>
             <div class="space-y-2">
-              <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" :class="{'border-success bg-green-50': approveForm.approval_type === 'approved'}">
+              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-success bg-green-50': approveForm.approval_type === 'approved'}">
                 <input type="radio" value="approved" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-success block">Đã duyệt</span>
-                  <span class="text-xs text-gray-500">Hưởng nguyên lương / Tự động trừ vào số ngày phép năm</span>
+                  <span class="text-xs text-gray-500">Hưởng 100% lương / Tự động trừ vào số ngày phép năm</span>
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" :class="{'border-warning bg-orange-50': approveForm.approval_type === 'half_salary'}">
+              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-warning bg-orange-50': approveForm.approval_type === 'half_salary'}">
                 <input type="radio" value="half_salary" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-warning block">50% lương</span>
@@ -186,7 +255,7 @@
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" :class="{'border-gray-500 bg-gray-50': approveForm.approval_type === 'late_unpaid'}">
+              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-gray-500 bg-gray-50': approveForm.approval_type === 'late_unpaid'}">
                 <input type="radio" value="late_unpaid" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-gray-700 block">Gửi đơn muộn (không lương)</span>
@@ -194,7 +263,7 @@
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50" :class="{'border-danger bg-red-50': approveForm.approval_type === 'rejected'}">
+              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-danger bg-red-50': approveForm.approval_type === 'rejected'}">
                 <input type="radio" value="rejected" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-danger block">Từ chối đơn</span>
@@ -207,14 +276,15 @@
 
         <div class="vx-row mb-4" v-if="approveForm.approval_type === 'rejected'">
           <div class="vx-col w-full">
-            <vs-textarea label="Lý do từ chối (*)" v-model="approveForm.rejection_reason" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do từ chối (*)</label>
+            <textarea placeholder="Nhập lý do từ chối..." rows="3" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="approveForm.rejection_reason"></textarea>
           </div>
         </div>
 
-        <div class="vx-row">
+        <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="submitApproval()" color="success" class="mr-2"><i class="fa fa-check"></i> Xác nhận duyệt</vs-button>
-            <vs-button @click="approvePopupActive = false" color="dark" type="border"><i class="fas fa-undo-alt"></i> Đóng</vs-button>
+            <vs-button @click="submitApproval()" color="success" type="filled" class="p-3 mr-2"><i class="fa-solid fa-check mr-1"></i> Xác Nhận Duyệt</vs-button>
+            <vs-button @click="approvePopupActive = false" color="dark" type="border" class="p-3"><i class="fa-solid fa-xmark mr-1"></i> Đóng</vs-button>
           </div>
         </div>
       </div>
@@ -228,8 +298,10 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
-      leaves: { data: [] },
+      leaves: { data: [], total: 0, per_page: 20, current_page: 1 },
       leaveTypes: [],
+      filterStatus: 'all',
+      searchKeyword: '',
       leaveBalance: {
         total_days: 12,
         used_days: 0,
@@ -278,12 +350,21 @@ export default {
     },
     fetchLeaves() {
       this.$vs.loading();
-      axios.p('/api/hrm/leaves/list', { limit: 20 }).then(res => {
+      axios.p('/api/hrm/leaves/list', { 
+        limit: 20,
+        page: this.leaves.current_page || 1,
+        status: this.filterStatus,
+        keyword: this.searchKeyword
+      }).then(res => {
         this.leaves = res.data;
         this.$vs.loading.close();
       }).catch(err => {
         this.$vs.loading.close();
       });
+    },
+    changePage(p) {
+      this.leaves.current_page = p;
+      this.fetchLeaves();
     },
     calculateDays() {
       if (this.form.start_date && this.form.end_date) {

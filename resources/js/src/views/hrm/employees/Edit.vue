@@ -1,30 +1,37 @@
 <template>
   <div>
-    <div class="flex items-center mb-4">
-      <vs-button color="dark" type="border"  @click="$router.push('/hrm/employees')" class="mr-4"><i class="fa fa-arrow-left"></i> Quay lại</vs-button>
-      <h4>{{ isEdit ? 'Cập nhật Hồ sơ Nhân viên' : 'Thêm mới Nhân viên' }}</h4>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center">
+        <vs-button color="dark" type="border" @click="$router.push('/hrm/employees')" class="p-3 mr-4">
+          <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+        </vs-button>
+        <h3 class="font-bold text-gray-800">{{ isEdit ? 'Cập Nhật Hồ Sơ Nhân Viên' : 'Thêm Mới Hồ Sơ Nhân Viên' }}</h3>
+      </div>
     </div>
 
-    <vs-card>
+    <vx-card no-shadow>
       <vs-tabs>
         <!-- Tab 1: Thông tin chung -->
-        <vs-tab label="Thông tin chung" icon="person">
+        <vs-tab label="Thông tin chung" icon-pack="feather" icon="icon-user">
           <div class="mt-4">
             <div class="vx-row mb-4" v-if="!isEdit">
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Họ và tên nhân sự (*)" v-model="form.user_name" placeholder="Nguyễn Văn A" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Họ và tên nhân sự (*)</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.user_name" placeholder="Nguyễn Văn A" />
               </div>
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Email đăng nhập (*)" v-model="form.email" placeholder="example@erp.local" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Email đăng nhập (*)</label>
+                <input type="email" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.email" placeholder="example@erp.local" />
               </div>
             </div>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Mã nhân viên (Để trống sẽ tự sinh CHAMxx)" v-model="form.employee_code" placeholder="CHAM01" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Mã nhân viên (Để trống tự sinh CHAMxx)</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_code" placeholder="CHAM01" />
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Phân loại nhân sự (*)</label>
-                <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.employee_type">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Phân loại nhân sự (*)</label>
+                <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_type">
                   <option value="fulltime">Nhân sự Fulltime</option>
                   <option value="ctv">Cộng tác viên (CTV)</option>
                   <option value="probation">Thử việc</option>
@@ -33,157 +40,201 @@
             </div>
 
             <!-- Nếu là nhân sự thử việc -->
-            <div class="vx-row mb-4 p-3 bg-gray-50 border rounded" v-if="form.employee_type === 'probation'">
+            <div class="vx-row mb-4 p-3 bg-gray-50 border border-gray-200 rounded" v-if="form.employee_type === 'probation'">
               <div class="vx-col w-1/2">
-                <vs-input type="date" class="w-full" label="Ngày bắt đầu thử việc (*)" v-model="form.probation_start_date" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày bắt đầu thử việc (*)</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.probation_start_date" />
               </div>
               <div class="vx-col w-1/2">
-                <vs-input type="date" class="w-full" label="Ngày kết thúc thử việc (*)" v-model="form.probation_end_date" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày kết thúc thử việc (*)</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.probation_end_date" />
               </div>
             </div>
 
             <!-- Trạng thái hoạt động -->
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Trạng thái hoạt động</label>
-                <select class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded" v-model="form.work_status">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Trạng thái hoạt động</label>
+                <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.work_status">
                   <option value="working">Đang làm việc</option>
                   <option value="resigned">Đã nghỉ việc</option>
                 </select>
               </div>
               <div class="vx-col w-1/2" v-if="form.work_status === 'resigned'">
-                <vs-input type="date" class="w-full" label="Ngày nghỉ việc" v-model="form.resigned_date" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nghỉ việc</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_date" />
               </div>
             </div>
             <div class="vx-row mb-4" v-if="form.work_status === 'resigned'">
               <div class="vx-col w-full">
-                <vs-input class="w-full" label="Lý do nghỉ việc" v-model="form.resigned_reason" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do nghỉ việc</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_reason" />
               </div>
             </div>
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Phòng ban / Team</label>
-                <v-select class="w-full mt-1" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="name" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Phòng ban / Team</label>
+                <v-select class="w-full" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="name" />
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Chức danh</label>
-                <v-select class="w-full mt-1" v-model="form.job_title_id" :options="jobTitles" :reduce="item => item.id" label="name" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Chức danh</label>
+                <v-select class="w-full" v-model="form.job_title_id" :options="jobTitles" :reduce="item => item.id" label="name" />
               </div>
             </div>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-base font-medium">Cấp bậc</label>
-                <v-select class="w-full mt-1" v-model="form.job_level_id" :options="jobLevels" :reduce="item => item.id" label="name" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Cấp bậc</label>
+                <v-select class="w-full" v-model="form.job_level_id" :options="jobLevels" :reduce="item => item.id" label="name" />
               </div>
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="CCCD/Passport" v-model="form.id_card_number" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" />
               </div>
             </div>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Số điện thoại" v-model="form.phone" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.phone" />
               </div>
               <div class="vx-col w-1/2">
-                <vs-input class="w-full" label="Địa chỉ" v-model="form.address" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Địa chỉ thường trú</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.address" />
               </div>
             </div>
-            <h5 class="mb-2 mt-6">Liên hệ khẩn cấp</h5>
+
+            <h5 class="mb-3 mt-6 font-bold text-gray-800 border-b pb-2">Liên hệ khẩn cấp</h5>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/3">
-                <vs-input class="w-full" label="Họ tên" v-model="form.emergency_contact_name" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Họ tên người liên hệ</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.emergency_contact_name" />
               </div>
               <div class="vx-col w-1/3">
-                <vs-input class="w-full" label="Số điện thoại" v-model="form.emergency_contact_phone" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.emergency_contact_phone" />
               </div>
               <div class="vx-col w-1/3">
-                <vs-input class="w-full" label="Quan hệ" v-model="form.emergency_contact_relation" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Quan hệ</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.emergency_contact_relation" />
               </div>
             </div>
             <div class="vx-row mt-6">
               <div class="vx-col w-full flex justify-end">
-                <vs-button @click="saveData()" color="primary">Lưu thay đổi</vs-button>
+                <vs-button @click="saveData()" color="success" type="filled" class="p-3"><i class="fa-solid fa-floppy-disk mr-2"></i> Lưu Thay Đổi</vs-button>
               </div>
             </div>
           </div>
         </vs-tab>
 
         <!-- Tab 2: Hợp đồng -->
-        <vs-tab label="Hợp đồng" icon="description" :disabled="!isEdit">
+        <vs-tab label="Hợp đồng" icon-pack="feather" icon="icon-file-text" :disabled="!isEdit">
           <div class="mt-4">
             <div class="flex justify-end mb-4">
-              <vs-button color="success" @click="showContractModal = true"><i class="fa fa-plus"></i> Thêm Hợp đồng</vs-button>
+              <vs-button color="success" type="border" class="p-3" @click="showContractModal = true"><i class="fa-solid fa-plus mr-2"></i> Thêm Hợp Đồng</vs-button>
             </div>
-            <vs-table :data="contracts">
-              <template slot="thead">
-                <vs-th>Số hợp đồng</vs-th>
-                <vs-th>Loại hợp đồng</vs-th>
-                <vs-th>Từ ngày</vs-th>
-                <vs-th>Đến ngày</vs-th>
-                <vs-th>Lương cơ bản</vs-th>
-              </template>
-              <template slot-scope="{data}">
-                <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-                  <vs-td>{{ tr.contract_number }}</vs-td>
-                  <vs-td>{{ tr.contract_type }}</vs-td>
-                  <vs-td>{{ tr.start_date }}</vs-td>
-                  <vs-td>{{ tr.end_date }}</vs-td>
-                  <vs-td>{{ tr.basic_salary | formatCurrency }}</vs-td>
-                </vs-tr>
-              </template>
-            </vs-table>
+            <div class="vs-component vs-con-table stripe vs-table-primary">
+              <div class="con-tablex vs-table--content">
+                <div class="vs-con-tbody vs-table--tbody">
+                  <table class="vs-table vs-table--tbody-table">
+                    <thead class="vs-table--thead">
+                      <tr>
+                        <th>Số hợp đồng</th>
+                        <th>Loại hợp đồng</th>
+                        <th>Từ ngày</th>
+                        <th>Đến ngày</th>
+                        <th>Lương cơ bản</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="tr-values vs-table--tr" v-for="(tr, index) in contracts" :key="index">
+                        <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
+                        <td class="td vs-table--td">{{ tr.contract_type }}</td>
+                        <td class="td vs-table--td">{{ tr.start_date }}</td>
+                        <td class="td vs-table--td">{{ tr.end_date || 'Không thời hạn' }}</td>
+                        <td class="td vs-table--td font-semibold">{{ tr.basic_salary | formatCurrency }}</td>
+                      </tr>
+                      <tr v-if="!contracts.length">
+                        <td colspan="5" class="text-center p-4 text-gray-500">Chưa có hợp đồng nào</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </vs-tab>
 
         <!-- Tab 3: Lịch sử công tác -->
-        <vs-tab label="Lịch sử công tác" icon="history" :disabled="!isEdit">
+        <vs-tab label="Lịch sử công tác" icon-pack="feather" icon="icon-activity" :disabled="!isEdit">
           <div class="mt-4">
-             <vs-table :data="history">
-              <template slot="thead">
-                <vs-th>Ngày hiệu lực</vs-th>
-                <vs-th>Loại</vs-th>
-                <vs-th>Ghi chú</vs-th>
-              </template>
-              <template slot-scope="{data}">
-                <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-                  <vs-td>{{ tr.effective_date }}</vs-td>
-                  <vs-td>{{ tr.type }}</vs-td>
-                  <vs-td>{{ tr.note }}</vs-td>
-                </vs-tr>
-              </template>
-            </vs-table>
+            <div class="vs-component vs-con-table stripe vs-table-primary">
+              <div class="con-tablex vs-table--content">
+                <div class="vs-con-tbody vs-table--tbody">
+                  <table class="vs-table vs-table--tbody-table">
+                    <thead class="vs-table--thead">
+                      <tr>
+                        <th>Ngày hiệu lực</th>
+                        <th>Loại điều chuyển</th>
+                        <th>Ghi chú</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="tr-values vs-table--tr" v-for="(tr, index) in history" :key="index">
+                        <td class="td vs-table--td">{{ tr.effective_date }}</td>
+                        <td class="td vs-table--td font-semibold">{{ tr.type }}</td>
+                        <td class="td vs-table--td">{{ tr.note }}</td>
+                      </tr>
+                      <tr v-if="!history.length">
+                        <td colspan="3" class="text-center p-4 text-gray-500">Chưa có lịch sử công tác</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </vs-tab>
 
         <!-- Tab 4: Tài liệu -->
-        <vs-tab label="Tài liệu" icon="folder" :disabled="!isEdit">
+        <vs-tab label="Tài liệu" icon-pack="feather" icon="icon-folder" :disabled="!isEdit">
           <div class="mt-4">
             <div class="flex justify-end mb-4">
-              <vs-button color="success" @click="showDocumentModal = true"><i class="fa fa-upload"></i> Tải lên Tài liệu</vs-button>
+              <vs-button color="success" type="border" class="p-3" @click="showDocumentModal = true"><i class="fa-solid fa-cloud-arrow-up mr-2"></i> Tải Lên Tài Liệu</vs-button>
             </div>
-             <vs-table :data="documents">
-              <template slot="thead">
-                <vs-th>Tên tài liệu</vs-th>
-                <vs-th>Loại</vs-th>
-                <vs-th>Ngày hết hạn</vs-th>
-                <vs-th>Thao tác</vs-th>
-              </template>
-              <template slot-scope="{data}">
-                <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-                  <vs-td>{{ tr.title }}</vs-td>
-                  <vs-td>{{ tr.document_type }}</vs-td>
-                  <vs-td>{{ tr.expiry_date }}</vs-td>
-                  <vs-td>
-                    <vs-button v-if="tr.file_path" size="small" :href="tr.file_path" target="_blank" color="primary"><i class="fa fa-download"></i> Tải xuống</vs-button>
-                    <span v-else class="text-gray-500">Chưa có link</span>
-                  </vs-td>
-                </vs-tr>
-              </template>
-            </vs-table>
+            <div class="vs-component vs-con-table stripe vs-table-primary">
+              <div class="con-tablex vs-table--content">
+                <div class="vs-con-tbody vs-table--tbody">
+                  <table class="vs-table vs-table--tbody-table">
+                    <thead class="vs-table--thead">
+                      <tr>
+                        <th>Tên tài liệu</th>
+                        <th>Loại tài liệu</th>
+                        <th>Ngày hết hạn</th>
+                        <th class="text-center">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="tr-values vs-table--tr" v-for="(tr, index) in documents" :key="index">
+                        <td class="td vs-table--td font-semibold">{{ tr.title }}</td>
+                        <td class="td vs-table--td">{{ tr.document_type }}</td>
+                        <td class="td vs-table--td">{{ tr.expiry_date || 'Không thời hạn' }}</td>
+                        <td class="td vs-table--td text-center">
+                          <vs-button v-if="tr.file_path" size="small" :href="tr.file_path" target="_blank" color="primary" type="border"><i class="fa-solid fa-download mr-1"></i> Tải về</vs-button>
+                          <span v-else class="text-gray-400 text-xs">Chưa có file</span>
+                        </td>
+                      </tr>
+                      <tr v-if="!documents.length">
+                        <td colspan="4" class="text-center p-4 text-gray-500">Chưa có tài liệu đính kèm</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
         </vs-tab>
       </vs-tabs>
-    </vs-card>
+    </vx-card>
 
     <!-- Modal Hợp đồng -->
     <vs-popup title="Thêm Hợp đồng mới" :active.sync="showContractModal">

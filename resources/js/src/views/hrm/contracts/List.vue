@@ -1,59 +1,97 @@
 <template>
-  <div>
-    <vs-card>
+  <div id="page-hrm-contracts">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between mb-4">
+      <div class="mb-2 md:mb-0">
+        <h3 class="font-bold text-gray-800 flex items-center">
+          <feather-icon icon="FileTextIcon" class="mr-2 text-primary" /> Quản Lý Hợp Đồng Lao Động
+        </h3>
+        <p class="text-sm text-gray-500 mt-1">Mã hợp đồng tự sinh theo format CHAM01, CHAM02... và đồng bộ theo nhân sự</p>
+      </div>
+      <div>
+        <vs-button class="p-3" color="success" type="border" @click="openAddModal">
+          <i class="fa-solid fa-plus mr-2"></i> Thêm Hợp Đồng Mới
+        </vs-button>
+      </div>
+    </div>
+
+    <vx-card no-shadow>
+      <!-- Toolbar tìm kiếm -->
       <div class="flex flex-wrap items-center justify-between mb-4">
-        <div>
-          <h4><i class="fa fa-file-contract text-primary mr-2"></i> Quản lý Hợp đồng Lao động</h4>
-          <span class="text-sm text-gray-500">Mã hợp đồng tự sinh theo format CHAM01, CHAM02... và đồng bộ theo nhân sự</span>
-        </div>
-        <div class="flex space-x-2 mt-2 md:mt-0">
-          <vs-button color="success" @click="openAddModal">
-            <i class="fa fa-plus"></i> Thêm Hợp đồng mới
-          </vs-button>
+        <div></div>
+        <div class="con-input-search vs-table--search">
+          <input 
+            type="text" 
+            class="input-search vs-table--search-input" 
+            style="padding: 12px 36px 12px 14px; font-size: 13px; min-width: 260px;" 
+            placeholder="Số hợp đồng, tên nhân sự..." 
+            v-model="searchKeyword" 
+            @input="fetchContracts"
+          >
+          <i class="vs-icon notranslate icon-scale material-icons null" style="font-size: 20px;">search</i>
         </div>
       </div>
 
-      <vs-table :data="contracts.data" search pagination :max-items="15">
-        <template slot="thead">
-          <vs-th>SỐ HỢP ĐỒNG</vs-th>
-          <vs-th>NHÂN SỰ</vs-th>
-          <vs-th>LOẠI HỢP ĐỒNG</vs-th>
-          <vs-th>TỪ NGÀY</vs-th>
-          <vs-th>ĐẾN NGÀY</vs-th>
-          <vs-th>LƯƠNG CƠ BẢN</vs-th>
-          <vs-th>TRẠNG THÁI</vs-th>
-        </template>
-        <template slot-scope="{data}">
-          <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-            <vs-td>
-              <span class="font-bold text-primary">{{ tr.contract_number }}</span>
-            </vs-td>
-            <vs-td class="font-medium text-gray-900">
-              {{ tr.user ? tr.user.name : 'N/A' }}
-            </vs-td>
-            <vs-td>{{ tr.contract_type }}</vs-td>
-            <vs-td>{{ tr.start_date }}</vs-td>
-            <vs-td>{{ tr.end_date || 'Không thời hạn' }}</vs-td>
-            <vs-td class="font-semibold">{{ tr.basic_salary | formatCurrency }}</vs-td>
-            <vs-td>
-              <vs-chip :color="tr.status === 1 ? 'success' : 'danger'">
-                {{ tr.status === 1 ? 'Hiệu lực' : 'Hết hiệu lực' }}
-              </vs-chip>
-            </vs-td>
-          </vs-tr>
-        </template>
-      </vs-table>
-    </vs-card>
+      <!-- Table chuẩn hệ thống -->
+      <div class="vs-component vs-con-table stripe vs-table-primary">
+        <div class="con-tablex vs-table--content">
+          <div class="vs-con-tbody vs-table--tbody">
+            <table class="vs-table vs-table--tbody-table">
+              <thead class="vs-table--thead">
+                <tr>
+                  <th width="5%" class="text-center">STT</th>
+                  <th width="15%">SỐ HỢP ĐỒNG</th>
+                  <th width="22%">NHÂN SỰ</th>
+                  <th width="18%">LOẠI HỢP ĐỒNG</th>
+                  <th width="12%">TỪ NGÀY</th>
+                  <th width="12%">ĐẾN NGÀY</th>
+                  <th width="14%">LƯƠNG CƠ BẢN</th>
+                  <th width="10%" class="text-center">TRẠNG THÁI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="tr-values vs-table--tr" v-for="(tr, index) in contracts.data" :key="index">
+                  <td class="td vs-table--td text-center">{{ index + 1 + ((contracts.current_page || 1) - 1) * (contracts.per_page || 20) }}</td>
+                  <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
+                  <td class="td vs-table--td font-semibold text-gray-900">{{ tr.user ? tr.user.name : 'N/A' }}</td>
+                  <td class="td vs-table--td">{{ tr.contract_type }}</td>
+                  <td class="td vs-table--td">{{ tr.start_date }}</td>
+                  <td class="td vs-table--td">{{ tr.end_date || 'Không thời hạn' }}</td>
+                  <td class="td vs-table--td font-semibold text-gray-800">{{ tr.basic_salary | formatCurrency }}</td>
+                  <td class="td vs-table--td text-center">
+                    <vs-chip :color="tr.status === 1 ? 'success' : 'danger'">
+                      {{ tr.status === 1 ? 'Hiệu lực' : 'Hết hạn' }}
+                    </vs-chip>
+                  </td>
+                </tr>
+                <tr v-if="!contracts.data || !contracts.data.length">
+                  <td colspan="8" class="text-center p-4 text-gray-500">Chưa có hợp đồng nào</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phân trang -->
+      <div class="flex flex-wrap items-center mt-5" v-if="contracts.total > contracts.per_page">
+        <vs-pagination
+          :total="Math.ceil(contracts.total / contracts.per_page)"
+          v-model="contracts.current_page"
+          @change="changePage"
+        />
+      </div>
+    </vx-card>
 
     <!-- Modal thêm hợp đồng mới -->
-    <vs-popup title="Thêm Hợp đồng mới" :active.sync="modalActive">
+    <vs-popup title="THÊM HỢP ĐỒNG MỚI" :active.sync="modalActive">
       <div class="p-4">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <label class="text-base font-medium">Chọn Nhân sự (*)</label>
-            <select v-model="form.user_id" class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Chọn Nhân sự (*)</label>
+            <select v-model="form.user_id" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;">
               <option :value="emp.user_id" v-for="emp in employees" :key="emp.id">
-                {{ emp.user ? emp.user.name : 'N/A' }} ({{ emp.employee_code }})
+                {{ emp.user ? emp.user.name : 'N/A' }} (Mã NS: {{ emp.employee_code }})
               </option>
             </select>
           </div>
@@ -61,11 +99,12 @@
 
         <div class="vx-row mb-4">
           <div class="vx-col w-1/2">
-            <vs-input class="w-full" label="Số hợp đồng (Để trống tự sinh CHAMxx)" v-model="form.contract_number" placeholder="CHAM01" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Số hợp đồng (Để trống tự sinh CHAMxx)</label>
+            <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="CHAM01" v-model="form.contract_number" />
           </div>
           <div class="vx-col w-1/2">
-            <label class="text-base font-medium">Loại hợp đồng (*)</label>
-            <select v-model="form.contract_type" class="vs-inputx vs-input--input normal w-full mt-1 p-2 border rounded">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Loại hợp đồng (*)</label>
+            <select v-model="form.contract_type" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;">
               <option value="Thử việc">Thử việc (2 tháng)</option>
               <option value="Hợp đồng 1 năm">Hợp đồng 1 năm</option>
               <option value="Hợp đồng 3 năm">Hợp đồng 3 năm</option>
@@ -77,23 +116,26 @@
 
         <div class="vx-row mb-4">
           <div class="vx-col w-1/2">
-            <vs-input type="date" class="w-full" label="Từ ngày (*)" v-model="form.start_date" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày (*)</label>
+            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" />
           </div>
           <div class="vx-col w-1/2">
-            <vs-input type="date" class="w-full" label="Đến ngày" v-model="form.end_date" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày</label>
+            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.end_date" />
           </div>
         </div>
 
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <vs-input type="number" class="w-full" label="Lương cơ bản (VNĐ)" v-model="form.basic_salary" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Lương cơ bản (VNĐ)</label>
+            <input type="number" placeholder="Nhập mức lương..." class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.basic_salary" />
           </div>
         </div>
 
-        <div class="vx-row">
+        <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="saveContract()" color="success" class="mr-2"><i class="fa fa-save"></i> Lưu hợp đồng</vs-button>
-            <vs-button @click="modalActive = false" color="dark" type="border"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button @click="saveContract()" color="success" type="filled" class="p-3 mr-2"><i class="fa-solid fa-floppy-disk mr-1"></i> Lưu Hợp Đồng</vs-button>
+            <vs-button @click="modalActive = false" color="dark" type="border" class="p-3"><i class="fa-solid fa-xmark mr-1"></i> Hủy</vs-button>
           </div>
         </div>
       </div>
@@ -107,8 +149,9 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
-      contracts: { data: [] },
+      contracts: { data: [], total: 0, per_page: 20, current_page: 1 },
       employees: [],
+      searchKeyword: '',
       modalActive: false,
       form: {
         user_id: null,
@@ -133,12 +176,19 @@ export default {
   methods: {
     fetchContracts() {
       this.$vs.loading();
-      axios.p('/api/hrm/employees/contracts-list', {}).then(res => {
+      axios.p('/api/hrm/employees/contracts-list', {
+        page: this.contracts.current_page || 1,
+        keyword: this.searchKeyword
+      }).then(res => {
         this.contracts = res.data;
         this.$vs.loading.close();
       }).catch(err => {
         this.$vs.loading.close();
       });
+    },
+    changePage(p) {
+      this.contracts.current_page = p;
+      this.fetchContracts();
     },
     fetchEmployees() {
       axios.p('/api/hrm/employees/list', {}).then(res => {
