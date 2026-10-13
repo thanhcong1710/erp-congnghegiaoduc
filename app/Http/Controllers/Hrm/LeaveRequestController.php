@@ -25,10 +25,10 @@ class LeaveRequestController extends Controller
 
         // Phân quyền:
         // Leader hoặc Nhân viên bình thường chỉ thấy đơn của chính mình (hoặc nhân sự team mình nếu là Leader)
-        if ($currentUser && method_exists($currentUser, 'hasRole')) {
-            $isHrOrAdmin = $currentUser->hasRole('admin') || $currentUser->hasRole('hr') || $currentUser->hasRole('accountant') || $currentUser->id == 1;
+        if ($currentUser) {
+            $isHrOrAdmin = $currentUser->isHrmAdmin();
             if (!$isHrOrAdmin) {
-                if ($currentUser->hasRole('leader')) {
+                if ($currentUser->isLeader()) {
                     $subordinateIds = explode(',', $currentUser->getStaffHasUser());
                     $query->whereIn('user_id', $subordinateIds);
                 } else {

@@ -80,6 +80,49 @@ class User extends Authenticatable implements JWTSubject
         'menuroles' => 'user',
     ];
 
+    public function hasRole($roles, $guard = null)
+    {
+        if (is_string($roles) && false !== strpos($roles, '|')) {
+            $roles = explode('|', $roles);
+        }
+
+        if (is_string($roles)) {
+            $roles = [$roles];
+        }
+
+        $userId = $this->id;
+        if (!$userId) {
+            return false;
+        }
+
+        return \Illuminate\Support\Facades\DB::table('role_has_user')
+            ->join('roles', 'roles.id', '=', 'role_has_user.role_id')
+            ->where('role_has_user.user_id', $userId)
+            ->where(function ($query) use ($roles) {
+                $query->whereIn('roles.name', $roles)
+                      ->orWhereIn('roles.code', $roles);
+            })
+            ->exists();
+    }
+
+    public function hasAnyRole(...$roles)
+    {
+        $roles = is_array($roles[0] ?? null) ? $roles[0] : $roles;
+        return $this->hasRole($roles);
+    }
+
+    public function isHrmAdmin()
+    {
+        if ($this->id == 1) return true;
+        return $this->hasAnyRole(['admin', 'ceo', 'ops', 999999, 686868, 16]) || $this->checkPermission('hrm');
+    }
+
+    public function isLeader()
+    {
+        return $this->hasAnyRole(['ec_leader', 'cm_leader', 'ta_leader', 'teacher_leader', 69, 56, 64, 37])
+            || self::where('manager_id', $this->id)->exists();
+    }
+
     public function checkPermission($permission)
     {
         $user_permission = u::first("SELECT pr.permission_id FROM permission_has_role AS pr 

@@ -37,9 +37,9 @@ class EmployeeProfileController extends Controller
 
         // Phân quyền dữ liệu nếu là Leader (không phải super-admin hoặc hr)
         $currentUser = Auth::user();
-        if ($currentUser && method_exists($currentUser, 'hasRole')) {
-            $isHrOrAdmin = $currentUser->hasRole('admin') || $currentUser->hasRole('hr') || $currentUser->hasRole('accountant') || $currentUser->id == 1;
-            if (!$isHrOrAdmin && $currentUser->hasRole('leader')) {
+        if ($currentUser) {
+            $isHrOrAdmin = $currentUser->isHrmAdmin();
+            if (!$isHrOrAdmin && $currentUser->isLeader()) {
                 // Leader chỉ xem thành viên team mình hoặc CTV do mình tạo
                 $subordinateIds = explode(',', $currentUser->getStaffHasUser());
                 $query->where(function ($q) use ($currentUser, $subordinateIds) {
@@ -107,7 +107,7 @@ class EmployeeProfileController extends Controller
         // Nếu là CTV được tạo bởi Leader
         $data['created_by_user_id'] = $currentUser ? $currentUser->id : null;
         if (!empty($data['employee_type']) && $data['employee_type'] === 'ctv') {
-            $isHrOrAdmin = $currentUser && ($currentUser->hasRole('admin') || $currentUser->hasRole('hr') || $currentUser->id == 1);
+            $isHrOrAdmin = $currentUser && $currentUser->isHrmAdmin();
             $data['approval_status'] = $isHrOrAdmin ? 1 : 0; // Nếu Lead tạo thì chờ HR duyệt
         } else {
             $data['approval_status'] = 1;

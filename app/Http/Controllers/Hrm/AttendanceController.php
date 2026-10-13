@@ -26,9 +26,9 @@ class AttendanceController extends Controller
             ->where('work_status', 'working');
 
         // Phân quyền nếu là Leader chỉ thấy nhân sự team mình
-        if ($currentUser && method_exists($currentUser, 'hasRole')) {
-            $isHrOrAdmin = $currentUser->hasRole('admin') || $currentUser->hasRole('hr') || $currentUser->hasRole('accountant') || $currentUser->id == 1;
-            if (!$isHrOrAdmin && $currentUser->hasRole('leader')) {
+        if ($currentUser) {
+            $isHrOrAdmin = $currentUser->isHrmAdmin();
+            if (!$isHrOrAdmin && $currentUser->isLeader()) {
                 $subordinateIds = explode(',', $currentUser->getStaffHasUser());
                 $query->whereIn('user_id', $subordinateIds);
             }
@@ -136,9 +136,9 @@ class AttendanceController extends Controller
 
         // Phân quyền Leader
         $currentUser = Auth::user();
-        if ($currentUser && method_exists($currentUser, 'hasRole')) {
-            $isHrOrAdmin = $currentUser->hasRole('admin') || $currentUser->hasRole('hr') || $currentUser->hasRole('accountant') || $currentUser->id == 1;
-            if (!$isHrOrAdmin && $currentUser->hasRole('leader')) {
+        if ($currentUser) {
+            $isHrOrAdmin = $currentUser->isHrmAdmin();
+            if (!$isHrOrAdmin && $currentUser->isLeader()) {
                 $subordinateIds = explode(',', $currentUser->getStaffHasUser());
                 $query->whereIn('user_id', $subordinateIds);
             }
