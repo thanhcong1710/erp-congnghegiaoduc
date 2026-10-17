@@ -19,4 +19,9 @@ class HrmJobTitle extends Model
     {
         return $this->belongsTo(HrmDepartment::class, 'department_id');
     }
+
+    public function employees()
+    {
+        return $this->hasMany(HrmEmployeeProfile::class, 'job_title_id');
+    }
 }

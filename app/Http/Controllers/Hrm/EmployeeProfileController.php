@@ -93,13 +93,18 @@ class EmployeeProfileController extends Controller
 
         // Xử lý tạo mới tài khoản User nếu cần
         if (empty($data['user_id']) && !empty($data['user_name'])) {
-            $email = !empty($data['email']) ? $data['email'] : strtolower($data['employee_code']) . '@erp.local';
+            $email = !empty($data['email']) ? trim($data['email']) : (strtolower($data['employee_code']) . '@erp.local');
+            if (empty($data['email'])) {
+                $count = User::where('email', $email)->count();
+                if ($count > 0) {
+                    $email = strtolower($data['employee_code']) . '_' . time() . '@erp.local';
+                }
+            }
             $newUser = User::create([
                 'name' => $data['user_name'],
                 'email' => $email,
                 'password' => bcrypt('12345678'),
                 'status' => 1,
-                'manager_id' => $currentUser ? $currentUser->id : 0,
             ]);
             $data['user_id'] = $newUser->id;
         }
@@ -157,6 +162,21 @@ class EmployeeProfileController extends Controller
                 $missingDocs = is_array($data['missing_documents']) ? $data['missing_documents'] : json_decode($data['missing_documents'], true);
                 $data['profile_status'] = empty($missingDocs) ? 'full' : 'missing';
             }
+
+            // Đồng bộ tên và email sang bảng User nếu có
+            if ($profile->user_id) {
+                $userUpdates = [];
+                if ($request->filled('user_name')) {
+                    $userUpdates['name'] = $request->user_name;
+                }
+                if ($request->filled('email')) {
+                    $userUpdates['email'] = trim($request->email);
+                }
+                if (!empty($userUpdates)) {
+                    User::where('id', $profile->user_id)->update($userUpdates);
+                }
+            }
+
             $profile->update($data);
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }

@@ -28,6 +28,7 @@ class HrmEmployeeProfile extends Model
         'job_level_id',
         'job_title_id',
         'id_card_number',
+        'id_card_date',
         'address',
         'phone',
         'emergency_contact_name',

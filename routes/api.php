@@ -477,6 +477,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'Hrm\JobTitleController@add');
                 Route::get('show/{id}', 'Hrm\JobTitleController@show');
                 Route::post('update/{id}', 'Hrm\JobTitleController@update');
+                Route::post('delete/{id?}', 'Hrm\JobTitleController@delete');
             });
             Route::prefix('job-levels')->group(function () {
                 Route::post('list', 'Hrm\JobLevelController@list');

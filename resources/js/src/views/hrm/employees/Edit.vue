@@ -14,27 +14,87 @@
         <!-- Tab 1: Thông tin chung -->
         <vs-tab label="Thông tin chung" icon-pack="feather" icon="icon-user">
           <div class="mt-4">
-            <div class="vx-row mb-4" v-if="!isEdit">
+            <h5 class="mb-3 font-bold text-gray-800 border-b pb-2 flex items-center">
+              <feather-icon icon="UserIcon" class="w-4 h-4 mr-2 text-primary" /> Thông tin cơ bản & Tài khoản
+            </h5>
+
+            <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Họ và tên nhân sự (*)</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.user_name" placeholder="Nguyễn Văn A" />
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Email đăng nhập (*)</label>
-                <input type="email" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.email" placeholder="example@erp.local" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Email đăng nhập / liên hệ</label>
+                <input type="email" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.email" placeholder="Không bắt buộc (để trống tự sinh theo mã NV)" />
               </div>
             </div>
+
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Mã nhân viên (Để trống tự sinh CHAMxx)</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_code" placeholder="CHAM01" />
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_code" placeholder="CHAM01" :disabled="isEdit" />
               </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày vào làm việc chính thức</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" />
+              </div>
+            </div>
+
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.dob" />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
+                <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.gender">
+                  <option :value="1">Nam</option>
+                  <option :value="2">Nữ</option>
+                  <option :value="3">Khác</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" placeholder="Số CCCD/CMND..." />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày cấp CCCD / CMND</label>
+                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_date" />
+              </div>
+            </div>
+
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.phone" placeholder="0987xxxxxx" />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Địa chỉ thường trú</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.address" placeholder="Địa chỉ nơi ở hiện tại..." />
+              </div>
+            </div>
+
+            <h5 class="mb-3 mt-6 font-bold text-gray-800 border-b pb-2 flex items-center">
+              <feather-icon icon="BriefcaseIcon" class="w-4 h-4 mr-2 text-primary" /> Phân loại & Vị trí công việc
+            </h5>
+
+            <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Phân loại nhân sự (*)</label>
                 <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_type">
                   <option value="fulltime">Nhân sự Fulltime</option>
                   <option value="ctv">Cộng tác viên (CTV)</option>
                   <option value="probation">Thử việc</option>
+                </select>
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Trạng thái hoạt động</label>
+                <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.work_status">
+                  <option value="working">Đang làm việc</option>
+                  <option value="resigned">Đã nghỉ việc</option>
                 </select>
               </div>
             </div>
@@ -51,59 +111,57 @@
               </div>
             </div>
 
-            <!-- Trạng thái hoạt động -->
-            <div class="vx-row mb-4">
+            <!-- Nếu đã nghỉ việc -->
+            <div class="vx-row mb-4 p-3 bg-red-50 border border-red-200 rounded" v-if="form.work_status === 'resigned'">
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Trạng thái hoạt động</label>
-                <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.work_status">
-                  <option value="working">Đang làm việc</option>
-                  <option value="resigned">Đã nghỉ việc</option>
-                </select>
-              </div>
-              <div class="vx-col w-1/2" v-if="form.work_status === 'resigned'">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nghỉ việc</label>
                 <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_date" />
               </div>
-            </div>
-            <div class="vx-row mb-4" v-if="form.work_status === 'resigned'">
-              <div class="vx-col w-full">
+              <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do nghỉ việc</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_reason" />
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_reason" placeholder="Lý do nghỉ việc..." />
               </div>
             </div>
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Phòng ban / Team</label>
-                <v-select class="w-full" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="name" />
+                <v-select class="w-full" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="displayName" placeholder="Chọn phòng ban / team..." />
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Chức danh</label>
-                <v-select class="w-full" v-model="form.job_title_id" :options="jobTitles" :reduce="item => item.id" label="name" />
-              </div>
-            </div>
-            <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Cấp bậc</label>
-                <v-select class="w-full" v-model="form.job_level_id" :options="jobLevels" :reduce="item => item.id" label="name" />
-              </div>
-              <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" />
-              </div>
-            </div>
-            <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.phone" />
-              </div>
-              <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Địa chỉ thường trú</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.address" />
+                <v-select class="w-full" v-model="form.job_title_id" :options="jobTitles" :reduce="item => item.id" label="name" placeholder="Chọn chức danh..." />
               </div>
             </div>
 
-            <h5 class="mb-3 mt-6 font-bold text-gray-800 border-b pb-2">Liên hệ khẩn cấp</h5>
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Cấp bậc năng lực</label>
+                <v-select class="w-full" v-model="form.job_level_id" :options="jobLevels" :reduce="item => item.id" label="name" placeholder="Chọn cấp bậc..." />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Lương cơ bản (VNĐ)</label>
+                <input type="number" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.base_salary" placeholder="0" />
+              </div>
+            </div>
+
+            <h5 class="mb-3 mt-6 font-bold text-gray-800 border-b pb-2 flex items-center">
+              <feather-icon icon="CreditCardIcon" class="w-4 h-4 mr-2 text-primary" /> Thông tin tài khoản ngân hàng
+            </h5>
+            <div class="vx-row mb-4">
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Số tài khoản ngân hàng</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.bank_account" placeholder="Số tài khoản..." />
+              </div>
+              <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngân hàng (Chi nhánh)</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.bank_name" placeholder="Ví dụ: Vietcombank, Techcombank..." />
+              </div>
+            </div>
+
+            <h5 class="mb-3 mt-6 font-bold text-gray-800 border-b pb-2 flex items-center">
+              <feather-icon icon="PhoneCallIcon" class="w-4 h-4 mr-2 text-primary" /> Liên hệ khẩn cấp
+            </h5>
             <div class="vx-row mb-4">
               <div class="vx-col w-1/3">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Họ tên người liên hệ</label>
@@ -118,9 +176,15 @@
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.emergency_contact_relation" />
               </div>
             </div>
-            <div class="vx-row mt-6">
+
+            <div class="vx-row mt-6 pt-3 border-t border-gray-200">
               <div class="vx-col w-full flex justify-end">
-                <vs-button @click="saveData()" color="success" type="filled" class="p-3"><i class="fa-solid fa-floppy-disk mr-2"></i> Lưu Thay Đổi</vs-button>
+                <vs-button @click="$router.push('/hrm/employees')" color="dark" type="border" class="mr-2 p-3">
+                  <i class="fa fa-times mr-1"></i> Hủy bỏ
+                </vs-button>
+                <vs-button @click="saveData()" color="primary" type="filled" class="p-3">
+                  <i class="fa-solid fa-floppy-disk mr-2"></i> {{ isEdit ? 'Lưu Thay Đổi' : 'Tạo Mới Nhân Sự' }}
+                </vs-button>
               </div>
             </div>
           </div>
@@ -311,6 +375,11 @@ export default {
         email: '',
         employee_code: '',
         employee_type: 'fulltime',
+        start_date: '',
+        dob: '',
+        gender: 1,
+        id_card_number: '',
+        id_card_date: '',
         probation_start_date: '',
         probation_end_date: '',
         work_status: 'working',
@@ -319,9 +388,11 @@ export default {
         department_id: null,
         job_title_id: null,
         job_level_id: null,
-        id_card_number: '',
         phone: '',
         address: '',
+        base_salary: 0,
+        bank_account: '',
+        bank_name: '',
         emergency_contact_name: '',
         emergency_contact_phone: '',
         emergency_contact_relation: '',
@@ -360,37 +431,95 @@ export default {
   },
   methods: {
     fetchOptions() {
-      axios.p('/api/hrm/departments/list').then(res => this.departments = res.data);
-      axios.p('/api/hrm/job-titles/list').then(res => this.jobTitles = res.data);
-      axios.p('/api/hrm/job-levels/list').then(res => this.jobLevels = res.data);
+      axios.p('/api/hrm/departments/list').then(res => {
+        this.departments = this.flattenDepartments(res.data || []);
+      });
+      axios.p('/api/hrm/job-titles/list').then(res => this.jobTitles = res.data || []);
+      axios.p('/api/hrm/job-levels/list').then(res => this.jobLevels = res.data || []);
+    },
+    flattenDepartments(deps, level = 0) {
+      let flat = [];
+      if (!Array.isArray(deps)) return flat;
+      deps.forEach(d => {
+        const prefix = level > 0 ? '— '.repeat(level) : '';
+        flat.push({
+          id: d.id,
+          name: d.name,
+          displayName: `${prefix}${d.name}`
+        });
+        if (d.children && d.children.length > 0) {
+          flat = flat.concat(this.flattenDepartments(d.children, level + 1));
+        }
+      });
+      return flat;
     },
     fetchEmployeeData() {
+      this.$vs.loading();
       axios.g(`/api/hrm/employees/show/${this.id}`).then(res => {
+        this.$vs.loading.close();
         if (res.data.profile) {
-          this.form = { ...res.data.profile };
+          this.form = { ...this.form, ...res.data.profile };
+          if (res.data.profile.user) {
+            this.form.user_name = res.data.profile.user.name || '';
+            this.form.email = res.data.profile.user.email || '';
+          }
           this.userId = this.form.user_id;
         }
         this.contracts = res.data.contracts || [];
         this.history = res.data.history || [];
         this.documents = res.data.documents || [];
       }).catch(err => {
+        this.$vs.loading.close();
         console.error(err);
       });
     },
     saveData() {
+      if (!this.form.user_name || this.form.user_name.trim() === '') {
+        this.$vs.notify({
+          title: 'Cảnh báo',
+          text: 'Vui lòng nhập Họ và tên nhân sự',
+          color: 'warning',
+          iconPack: 'feather',
+          icon: 'icon-alert-triangle'
+        });
+        return;
+      }
+
+      this.$vs.loading();
       let url = this.isEdit ? `/api/hrm/employees/update/${this.form.id}` : '/api/hrm/employees/add';
       
       axios.p(url, this.form).then(res => {
+        this.$vs.loading.close();
         if (res.data.status === 1) {
-          this.$vs.notify({title: 'Thành công', text: res.data.message, color: 'success'});
+          this.$vs.notify({
+            title: 'Thành công',
+            text: res.data.message || 'Lưu thông tin nhân viên thành công!',
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          });
           if (!this.isEdit) {
             this.$router.push('/hrm/employees');
           }
         } else {
-          this.$vs.notify({title: 'Lỗi', text: res.data.message || 'Lưu thất bại', color: 'danger'});
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: res.data.message || 'Lưu thất bại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
         }
       }).catch(err => {
-        this.$vs.notify({title: 'Lỗi', text: 'Có lỗi xảy ra', color: 'danger'});
+        this.$vs.loading.close();
+        console.error(err);
+        this.$vs.notify({
+          title: 'Lỗi',
+          text: 'Có lỗi xảy ra khi lưu thông tin nhân viên',
+          color: 'danger',
+          iconPack: 'feather',
+          icon: 'icon-alert-circle'
+        });
       });
     },
     saveContract() {
