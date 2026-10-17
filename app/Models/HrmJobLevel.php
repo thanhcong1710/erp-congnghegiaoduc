@@ -13,4 +13,9 @@ class HrmJobLevel extends Model
         'description',
         'status',
     ];
+
+    public function employees()
+    {
+        return $this->hasMany(HrmEmployeeProfile::class, 'job_level_id');
+    }
 }
