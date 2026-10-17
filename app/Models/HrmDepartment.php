@@ -41,4 +41,9 @@ class HrmDepartment extends Model
     {
         return $this->hasMany(HrmPosition::class, 'department_id');
     }
+
+    public function employees()
+    {
+        return $this->hasMany(HrmEmployeeProfile::class, 'department_id');
+    }
 }

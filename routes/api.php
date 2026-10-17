@@ -456,6 +456,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'Hrm\DepartmentController@add');
                 Route::get('show/{id}', 'Hrm\DepartmentController@show');
                 Route::post('update/{id}', 'Hrm\DepartmentController@update');
+                Route::post('delete/{id?}', 'Hrm\DepartmentController@delete');
             });
             Route::prefix('employees')->group(function () {
                 Route::post('list', 'Hrm\EmployeeProfileController@list');
