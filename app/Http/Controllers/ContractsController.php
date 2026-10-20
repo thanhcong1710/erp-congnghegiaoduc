@@ -960,12 +960,24 @@ class ContractsController extends Controller
     
     public function changeContractProduct(Request $request)
     {
+        $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+        $is_ketoan = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = 83");
+
+        if (empty($is_admin) && empty($is_ketoan)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này']);
+        }
+
         $contract_id = (int) $request->contract_id;
         $new_product_id = (int) $request->product_id;
         
         $contract = u::first("SELECT c.*, (SELECT name FROM products WHERE id=c.product_id) AS old_product_name FROM contracts c WHERE c.id = $contract_id");
         if (!$contract) {
             return response()->json(['status' => 0, 'message' => 'Không tìm thấy hợp đồng']);
+        }
+
+        if (!empty($contract->class_id)) {
+            return response()->json(['status' => 0, 'message' => 'Gói học phí đã được xếp vào lớp, không thể đổi sản phẩm']);
         }
         
         if ($contract->product_id == $new_product_id) {

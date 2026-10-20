@@ -33,6 +33,9 @@
                 <td class="td vs-table--td">
                   <p>Mã: <strong>{{ item.code }}</strong></p>
                   <p>Gói phí: {{ item.tuition_fee_name }}</p>
+                  <div v-if="item.product_id != item.original_product_id" style="font-size: 0.75rem; color: #ff9f43; font-style: italic; margin-top: 4px;">
+                    (đã đổi sang sản phẩm {{ item.current_product_name }})
+                  </div>
                   <p>Số buổi: {{ item.total_sessions }}</p>
                 </td>
 
@@ -54,9 +57,16 @@
                 </td>
 
                 <td class="td vs-table--td text-center">
-                  <vs-button size="small" icon style="font-size: 14px; padding: 8px;">
-                    <i class="fa fa-eye" @click="getSessions(item.id)"></i>
-                  </vs-button>
+                  <div class="flex items-center justify-center">
+                    <vx-tooltip text="Xem chi tiết" position="bottom" class="inline-block">
+                      <vs-button size="small" icon style="font-size: 14px; padding: 8px;" @click.stop="getSessions(item.id)">
+                        <i class="fa fa-eye"></i>
+                      </vs-button>
+                    </vx-tooltip>
+                    <vx-tooltip v-if="is_admin && (!item.class_id || item.class_id == 0)" text="Đổi sản phẩm" position="bottom" class="inline-block ml-2">
+                      <vs-button size="small" color="primary" type="filled" icon-pack="feather" icon="icon-edit" style="font-size: 14px; padding: 8px;" @click.stop="openChangeProductModal(item)"></vs-button>
+                    </vx-tooltip>
+                  </div>
                 </td>
               </tr>
           </table>
@@ -92,6 +102,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal đổi sản phẩm -->
+    <vs-popup title="Đổi sản phẩm cho gói phí" :active.sync="popupChangeProductActive">
+      <div v-if="changeProductData && changeProductData.contract" class="vx-row">
+        <div class="vx-col w-full mb-4">
+          <p class="mb-2">Gói học phí: <strong>{{ changeProductData.contract.tuition_fee_name }}</strong></p>
+          <label>Chọn sản phẩm mới</label>
+          <vue-select
+            label="name"
+            placeholder="Chọn sản phẩm mới"
+            :options="products"
+            v-model="changeProductData.new_product"
+            :searchable="true"
+          ></vue-select>
+        </div>
+        <div class="vx-col w-full text-right mt-4">
+          <vs-button color="dark" type="border" class="mr-2" @click="popupChangeProductActive = false">Hủy</vs-button>
+          <vs-button color="success" @click="submitChangeProduct" :disabled="changeProductCalling">Xác nhận đổi</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 </template>
 
@@ -118,13 +149,39 @@
         done_sessions:[],
         next_sessions:[],
         contract_info:{},
-        tmp_active:0
+        tmp_active:0,
+        is_admin: false,
+        products: [],
+        popupChangeProductActive: false,
+        changeProductCalling: false,
+        changeProductData: {
+          contract: null,
+          new_product: null
+        }
       }
     },
     async created() {
+      this.checkUserRole();
+      this.getProducts();
       this.getContracts();
     },
     methods: {
+      checkUserRole() {
+        axios.g('/api/system/current-user-role').then(response => {
+          if (response.data && response.data.is_admin) {
+            this.is_admin = true;
+          }
+        }).catch(err => {
+          console.log(err);
+        });
+      },
+      getProducts() {
+        axios.g('/api/system/products').then(response => {
+          this.products = response.data || [];
+        }).catch(err => {
+          console.log(err);
+        });
+      },
       getContracts(){
         const data = {
           student_id: this.student_info.id,
@@ -134,6 +191,9 @@
           .then((response) => {
             this.$vs.loading.close()
             this.contracts = response.data
+            if (response.data && response.data.length && response.data[0].is_admin !== undefined) {
+              this.is_admin = !!response.data[0].is_admin;
+            }
             this.getSessions(0)
           })
           .catch((error) => {
@@ -150,16 +210,77 @@
         axios.p('/api/lms/students/sessions', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contract_info = response.data.contract_info
-            this.done_sessions = response.data.done_sessions
-            this.next_sessions = response.data.next_sessions
-            this.tmp_active = this.contract_info.id
+            this.contract_info = response.data.contract_info || {}
+            this.done_sessions = response.data.done_sessions || []
+            this.next_sessions = response.data.next_sessions || []
+            this.tmp_active = this.contract_info ? this.contract_info.id : 0
           })
           .catch((error) => {
             console.log(error);
             this.$vs.loading.close();
           })
       },
+      openChangeProductModal(contract) {
+        let currentProduct = this.products.find(p => Number(p.id) === Number(contract.product_id));
+        this.changeProductData = {
+          contract: contract,
+          new_product: currentProduct || null
+        };
+        this.popupChangeProductActive = true;
+      },
+      submitChangeProduct() {
+        if (!this.changeProductData.new_product) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Vui lòng chọn sản phẩm mới',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        if (Number(this.changeProductData.new_product.id) === Number(this.changeProductData.contract.product_id)) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Sản phẩm mới phải khác sản phẩm hiện tại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+
+        this.changeProductCalling = true;
+        axios.p('/api/lms/agreements/change-contract-product', {
+          contract_id: this.changeProductData.contract.id,
+          product_id: this.changeProductData.new_product.id
+        }).then(res => {
+          this.changeProductCalling = false;
+          if (res.data.status === 1) {
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: res.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+            this.popupChangeProductActive = false;
+            this.getContracts();
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: res.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          }
+        }).catch(e => {
+          console.log(e);
+          this.changeProductCalling = false;
+        });
+      }
     }
   }
 </script>

@@ -6,6 +6,7 @@ use App\Models\LogParents;
 use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use App\Providers\CurlServiceProvider as curl;
+use App\Enums\SystemCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -386,9 +387,16 @@ class StudentsController extends Controller
     public function contracts(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $current_user_id = Auth::user()->id;
+        $is_admin = u::first("SELECT 1 FROM role_has_user WHERE user_id = $current_user_id AND role_id = " . SystemCode::ROLE_ADMIN);
+        $has_admin = !empty($is_admin);
+
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, 
                 c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type,
                 c.enrolment_start_date, c.enrolment_last_date, c.agreement_id, c.student_id,
+                c.class_id, c.product_id,
+                (SELECT product_id FROM tuition_fee WHERE id=c.tuition_fee_id) AS original_product_id,
+                (SELECT name FROM products WHERE id=c.product_id) AS current_product_name,
                 a.student_id AS agreement_student_id,
                 (SELECT CONCAT(name, ' - ', lms_code) FROM students WHERE id = a.student_id) AS transfer_from_student_name,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
@@ -404,6 +412,7 @@ class StudentsController extends Controller
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContract($row->status);
+            $list[$k]->is_admin = $has_admin;
         }
         return response()->json($list);
     }
