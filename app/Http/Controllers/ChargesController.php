@@ -117,6 +117,21 @@ class ChargesController extends Controller
 
         if ($request->type == 1) {
             $agreement_info = u::getObject(array('id' => $request->agreement_id), 'agreements');
+            if (!$agreement_info) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Hợp đồng không tồn tại.'
+                ]);
+            }
+
+            $errorMessage = $this->checkComboOverdue8thSession($agreement_info, $request->charge_date);
+            if ($errorMessage) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => $errorMessage
+                ]);
+            }
+
             u::insertSimpleRow(array(
                 'agreement_id' => data_get($request, 'agreement_id'),
                 'charge_amount' => data_get($request, 'amount'),
@@ -188,6 +203,13 @@ class ChargesController extends Controller
         }
 
         $agreement_info = u::getObject(array('id' => $request->agreement_id), 'agreements');
+        $errorMessage = $this->checkComboOverdue8thSession($agreement_info, $request->charge_date);
+        if ($errorMessage) {
+            return response()->json([
+                'status' => 0,
+                'message' => $errorMessage
+            ]);
+        }
         u::updateSimpleRow(array(
             'agreement_id' => data_get($request, 'agreement_id'),
             'charge_amount' => data_get($request, 'amount'),
@@ -994,4 +1016,84 @@ class ChargesController extends Controller
             'agreement' => $updatedAgreement,
         ]);
     }
+
+    private function checkComboOverdue8thSession($agreement_info, $charge_date = null)
+    {
+        if (!$agreement_info) {
+            return null;
+        }
+
+        // Kiểm tra nợ phí
+        $debt_amount = (int) data_get($agreement_info, 'debt_amount');
+        if ($debt_amount <= 0) {
+            return null;
+        }
+
+        // Kiểm tra gói combo: type_fee == 2
+        $is_combo = (int) data_get($agreement_info, 'type_fee') === 2;
+        if (!$is_combo && !empty($agreement_info->tuition_fee_id)) {
+            $tf = u::first("SELECT type_fee FROM tuition_fee WHERE id = " . (int)$agreement_info->tuition_fee_id);
+            if ($tf && (int)$tf->type_fee === 2) {
+                $is_combo = true;
+            }
+        }
+
+        if (!$is_combo) {
+            return null;
+        }
+
+        $agreement_id = (int) data_get($agreement_info, 'id');
+
+        // Kiểm tra gói đó có đang học không (có contract đang học status = 6)
+        $learning_contract = u::first("
+            SELECT id, class_id, status, done_sessions, enrolment_start_date 
+            FROM contracts 
+            WHERE agreement_id = $agreement_id 
+              AND status = 6
+            LIMIT 1
+        ");
+
+        if (!$learning_contract) {
+            return null;
+        }
+
+        // Kiểm tra đã qua buổi thứ 8 chưa
+        $first_8th = data_get($agreement_info, 'first_8th_session_date');
+        if (empty($first_8th)) {
+            u::updateAgreementFirst8thSessionDate($agreement_id);
+            $refreshed_agr = u::first("SELECT first_8th_session_date FROM agreements WHERE id = $agreement_id");
+            $first_8th = $refreshed_agr ? $refreshed_agr->first_8th_session_date : null;
+        }
+
+        $today = date('Y-m-d');
+        $check_date = !empty($charge_date) ? date('Y-m-d', strtotime($charge_date)) : $today;
+        $is_passed_8th = false;
+
+        // Nếu ngày buổi 8 nhỏ hơn ngày nộp hoặc ngày hiện tại => đã qua ngày buổi 8
+        if (!empty($first_8th) && ($check_date > $first_8th || $today > $first_8th)) {
+            $is_passed_8th = true;
+        }
+
+        // Hoặc contract đang học đã hoàn thành từ 8 buổi trở lên (done_sessions >= 8)
+        if (!$is_passed_8th) {
+            $has_done_8th = u::first("
+                SELECT id 
+                FROM contracts 
+                WHERE agreement_id = $agreement_id 
+                  AND status NOT IN (0, 8) 
+                  AND done_sessions >= 8 
+                LIMIT 1
+            ");
+            if ($has_done_8th) {
+                $is_passed_8th = true;
+            }
+        }
+
+        if ($is_passed_8th) {
+            return 'Gói combo đã học quá buổi 8 không được thu phí tiếp cần báo kế toán để hạ combo';
+        }
+
+        return null;
+    }
 }
+

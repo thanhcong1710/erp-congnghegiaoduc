@@ -390,6 +390,16 @@
         axios.p(`/api/lms/accounting/charges/add`, formData)
         .then((response) => {
           this.$vs.loading.close();
+          if (response && response.data && response.data.status === 0) {
+            this.$vs.notify({
+              title: 'Thất Bại',
+              text: response.data.message,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+            return;
+          }
           this.$vs.notify({
             title: 'Thành Công',
             text: response.data.message,
