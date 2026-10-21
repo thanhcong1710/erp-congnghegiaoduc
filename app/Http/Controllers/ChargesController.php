@@ -1057,34 +1057,70 @@ class ChargesController extends Controller
             return null;
         }
 
-        // Kiểm tra đã qua buổi thứ 8 chưa
-        $first_8th = data_get($agreement_info, 'first_8th_session_date');
-        if (empty($first_8th)) {
-            u::updateAgreementFirst8thSessionDate($agreement_id);
-            $refreshed_agr = u::first("SELECT first_8th_session_date FROM agreements WHERE id = $agreement_id");
-            $first_8th = $refreshed_agr ? $refreshed_agr->first_8th_session_date : null;
+        // 4. Lấy buổi học thứ 8 của CHÍNH gói hiện tại (không lấy từ gói trước)
+        $first_8th = null;
+        $first_contract = u::first("
+            SELECT c.id, c.enrolment_start_date, c.class_id, cls.class_day, cls.branch_id, cls.product_id
+            FROM contracts c
+            JOIN classes cls ON c.class_id = cls.id
+            WHERE c.agreement_id = $agreement_id 
+              AND c.status > 0 
+              AND c.class_id IS NOT NULL 
+              AND c.enrolment_start_date IS NOT NULL
+            ORDER BY c.enrolment_start_date ASC, c.id ASC
+            LIMIT 1
+        ");
+
+        if ($first_contract) {
+            $schedules = u::query("
+                SELECT class_date 
+                FROM schedules 
+                WHERE class_id = {$first_contract->class_id} 
+                  AND status = 1 
+                  AND class_date >= '{$first_contract->enrolment_start_date}' 
+                ORDER BY class_date ASC 
+                LIMIT 8
+            ");
+
+            if (count($schedules) >= 8) {
+                $first_8th = $schedules[7]->class_date;
+            } else {
+                $branch_id = (int)$first_contract->branch_id;
+                $product_id = (int)$first_contract->product_id;
+                $holidays = u::getPublicHolidays($branch_id, $product_id);
+                if (!empty($first_contract->class_day)) {
+                    $arr_day = array_filter(explode(',', $first_contract->class_day));
+                    if (count($arr_day) > 0) {
+                        $eighth_session_info = u::calculatorSessionsByNumberOfSessions($first_contract->enrolment_start_date, 8, $holidays, $arr_day);
+                        $first_8th = data_get($eighth_session_info, 'end_date');
+                    } else {
+                        $first_8th = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+                    }
+                } else {
+                    $first_8th = date('Y-m-d', strtotime($first_contract->enrolment_start_date . ' + 28 days'));
+                }
+            }
         }
 
         $today = date('Y-m-d');
         $check_date = !empty($charge_date) ? date('Y-m-d', strtotime($charge_date)) : $today;
         $is_passed_8th = false;
 
-        // Nếu ngày buổi 8 nhỏ hơn ngày nộp hoặc ngày hiện tại => đã qua ngày buổi 8
+        // Nếu ngày buổi 8 của gói hiện tại nhỏ hơn ngày nộp hoặc ngày hiện tại => đã qua ngày buổi 8
         if (!empty($first_8th) && ($check_date > $first_8th || $today > $first_8th)) {
             $is_passed_8th = true;
         }
 
-        // Hoặc contract đang học đã hoàn thành từ 8 buổi trở lên (done_sessions >= 8)
+        // Hoặc kiểm tra số buổi học thực tế của CHÍNH gói combo này:
+        // Nếu tổng done_sessions của các contract thuộc gói này >= 8 hoặc có contract thuộc gói này đã học >= 8 buổi
         if (!$is_passed_8th) {
-            $has_done_8th = u::first("
-                SELECT id 
+            $done_info = u::first("
+                SELECT SUM(done_sessions) AS total_done, MAX(done_sessions) AS max_done 
                 FROM contracts 
                 WHERE agreement_id = $agreement_id 
-                  AND status NOT IN (0, 8) 
-                  AND done_sessions >= 8 
-                LIMIT 1
+                  AND status NOT IN (0, 8)
             ");
-            if ($has_done_8th) {
+            if ($done_info && ($done_info->total_done >= 8 || $done_info->max_done >= 8)) {
                 $is_passed_8th = true;
             }
         }
