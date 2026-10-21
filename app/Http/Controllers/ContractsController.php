@@ -1306,14 +1306,18 @@ class ContractsController extends Controller
 
                 if ($new_debt_amount <= 0) {
                     $full_fee_date = $last_pay_date;
+                    $first_8th = data_get($agreementInfo, 'first_8th_session_date');
+                    if (empty($first_8th) && $agreementInfo->student_id) {
+                        $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
+                        $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                    }
                     if ($is_first_package == 1) {
-                        $count_recharge = 0;
-                    } else {
-                        $first_8th = data_get($agreementInfo, 'first_8th_session_date');
-                        if (empty($first_8th) && $agreementInfo->student_id) {
-                            $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
-                            $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                        if (!empty($first_8th) && $full_fee_date > $first_8th) {
+                            $count_recharge = 1;
+                        } else {
+                            $count_recharge = 0;
                         }
+                    } else {
                         if (!empty($first_8th) && $full_fee_date <= $first_8th) {
                             $count_recharge = 0;
                         } else {
@@ -1510,14 +1514,18 @@ class ContractsController extends Controller
 
                 if ($new_debt_amount <= 0) {
                     $full_fee_date = $last_pay_date;
+                    $first_8th = data_get($agreementInfo, 'first_8th_session_date');
+                    if (empty($first_8th) && $agreementInfo->student_id) {
+                        $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
+                        $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                    }
                     if ($is_first_package == 1) {
-                        $count_recharge = 0;
-                    } else {
-                        $first_8th = data_get($agreementInfo, 'first_8th_session_date');
-                        if (empty($first_8th) && $agreementInfo->student_id) {
-                            $first_agr_8th = u::first("SELECT first_8th_session_date FROM agreements WHERE student_id = {$agreementInfo->student_id} AND first_8th_session_date IS NOT NULL ORDER BY id ASC LIMIT 1");
-                            $first_8th = $first_agr_8th ? $first_agr_8th->first_8th_session_date : null;
+                        if (!empty($first_8th) && $full_fee_date > $first_8th) {
+                            $count_recharge = 1;
+                        } else {
+                            $count_recharge = 0;
                         }
+                    } else {
                         if (!empty($first_8th) && $full_fee_date <= $first_8th) {
                             $count_recharge = 0;
                         } else {

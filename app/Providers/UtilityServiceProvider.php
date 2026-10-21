@@ -1235,11 +1235,15 @@ class UtilityServiceProvider extends ServiceProvider
 
             $count_recharge = 1;
             if ($is_first_package === 1) {
-                $count_recharge = 0;
-            } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
-                $count_recharge = 0;
+                if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date > $first_8th_session_date) {
+                    $count_recharge = 1;
+                } else {
+                    $count_recharge = 0;
+                }
             } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
                 // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                $count_recharge = 0;
+            } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
                 $count_recharge = 0;
             }
 
