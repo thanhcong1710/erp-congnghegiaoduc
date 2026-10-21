@@ -1213,7 +1213,7 @@ class UtilityServiceProvider extends ServiceProvider
 
         // Tính end_session_date theo từng gói (gói trước gói cần update)
         $student_agreements = self::query("
-            SELECT id, student_id, full_fee_date
+            SELECT id, student_id, full_fee_date, count_recharge, is_lock_recharge
             FROM agreements
             WHERE status > 0 AND student_id = {$agreement->student_id}
             ORDER BY 
@@ -1233,18 +1233,23 @@ class UtilityServiceProvider extends ServiceProvider
             // Nếu là gói sau (index > 0) -> dùng ngày buổi học cuối của các contract thuộc gói liền trước (prev_agr_end_date)
             $agr_end_session_date = ($index === 0) ? $current_agr_end_date : $prev_agr_end_date;
 
-            $count_recharge = 1;
-            if ($is_first_package === 1) {
-                if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date > $first_8th_session_date) {
-                    $count_recharge = 1;
-                } else {
+            $count_recharge = (int)$agr->count_recharge;
+            if (!empty($agr->is_lock_recharge)) {
+                // Đã chốt tính lương, giữ nguyên count_recharge không tính toán lại
+            } else {
+                $count_recharge = 1;
+                if ($is_first_package === 1) {
+                    if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date > $first_8th_session_date) {
+                        $count_recharge = 1;
+                    } else {
+                        $count_recharge = 0;
+                    }
+                } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
+                    // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                    $count_recharge = 0;
+                } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
                     $count_recharge = 0;
                 }
-            } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
-                // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
-                $count_recharge = 0;
-            } else if ($agr->full_fee_date !== null && $first_8th_session_date !== null && $agr->full_fee_date <= $first_8th_session_date) {
-                $count_recharge = 0;
             }
 
             self::updateSimpleRow([

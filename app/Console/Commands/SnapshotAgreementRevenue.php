@@ -84,6 +84,16 @@ class SnapshotAgreementRevenue extends Command
             $count++;
         }
 
+        $today = Carbon::now();
+        $month_diff = $today->day < 5 ? 2 : 1;
+        $closing_month = $today->copy()->startOfMonth()->subMonths($month_diff)->format('Y-m');
+        if ($targetMonth <= $closing_month) {
+            DB::table('agreements')
+                ->where('salary_month', $targetMonth)
+                ->where('is_lock_recharge', 0)
+                ->update(['is_lock_recharge' => 1]);
+        }
+
         $this->info("Processed {$count} agreements for {$targetMonth}.");
 
         return 0;

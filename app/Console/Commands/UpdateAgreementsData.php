@@ -33,7 +33,21 @@ class UpdateAgreementsData extends Command
 
         $this->info("Bắt đầu cập nhật dữ liệu...");
         
-        $this->info("1. Đang cập nhật last_pay_date và full_fee_date...");
+        // 1. Chốt khóa count_recharge cho các hợp đồng đã chốt lương tính đến ngày 5 của tháng
+        $day = (int) date('d');
+        $month_diff = $day < 5 ? 2 : 1;
+        $closing_month = date('Y-m', strtotime(date('Y-m-01') . " -$month_diff month"));
+        $this->info("1. Chốt khóa count_recharge cho các hợp đồng đã chốt lương (tháng <= {$closing_month})...");
+        DB::statement("
+            UPDATE agreements 
+            SET is_lock_recharge = 1 
+            WHERE salary_month IS NOT NULL 
+              AND salary_month != '' 
+              AND salary_month <= ? 
+              AND is_lock_recharge = 0
+        ", [$closing_month]);
+
+        $this->info("2. Đang cập nhật last_pay_date và full_fee_date...");
         
         $whereUpdate = "a.status > 0";
         $whereSelect = "status > 0";
@@ -57,9 +71,9 @@ class UpdateAgreementsData extends Command
             WHERE $whereUpdate
         ", $bindings);
 
-        $this->info("2. Đang tải dữ liệu agreements...");
+        $this->info("3. Đang tải dữ liệu agreements...");
         $agreements = DB::select("
-            SELECT id, student_id, full_fee_date
+            SELECT id, student_id, full_fee_date, count_recharge, is_lock_recharge
             FROM agreements
             WHERE $whereSelect
             ORDER BY 
@@ -245,23 +259,28 @@ class UpdateAgreementsData extends Command
                 // Nếu là gói sau (index > 0) -> ngày buổi học cuối của gói liền trước (prev_agr_end_date)
                 $agr_end_session_date = ($index === 0) ? $current_agr_end_date : $prev_agr_end_date;
 
-                $count_recharge = 1;
-                if ($is_first_package === 1) {
-                    if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date > $current_8th_session_date) {
-                        $count_recharge = 1;
-                    } else {
+                $count_recharge = (int)$agr->count_recharge;
+                if (!empty($agr->is_lock_recharge)) {
+                    // Đã chốt tính lương, giữ nguyên count_recharge không tính toán lại
+                } else {
+                    $count_recharge = 1;
+                    if ($is_first_package === 1) {
+                        if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date > $current_8th_session_date) {
+                            $count_recharge = 1;
+                        } else {
+                            $count_recharge = 0;
+                        }
+                    } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
+                        // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
+                        $current_8th_session_date = $get_8th_session_date($agr->id);
+                        if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date > $current_8th_session_date) {
+                            $count_recharge = 1;
+                        } else {
+                            $count_recharge = 0;
+                        }
+                    } else if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date <= $current_8th_session_date) {
                         $count_recharge = 0;
                     }
-                } else if ($agr->full_fee_date !== null && $agr_end_session_date !== null && $agr->full_fee_date > date('Y-m-d', strtotime($agr_end_session_date . ' + 2 months'))) {
-                    // Ngày full fee > ngày buổi học cuối của gói liền trước + 2 tháng => học sinh quay lại sau thời gian dài => tính là mới
-                    $current_8th_session_date = $get_8th_session_date($agr->id);
-                    if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date > $current_8th_session_date) {
-                        $count_recharge = 1;
-                    } else {
-                        $count_recharge = 0;
-                    }
-                } else if ($agr->full_fee_date !== null && $current_8th_session_date !== null && $agr->full_fee_date <= $current_8th_session_date) {
-                    $count_recharge = 0;
                 }
                 
                 $updates[] = [

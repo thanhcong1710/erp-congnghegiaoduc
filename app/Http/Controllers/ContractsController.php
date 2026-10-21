@@ -1304,7 +1304,11 @@ class ContractsController extends Controller
                     }
                 }
 
-                if ($new_debt_amount <= 0) {
+                $is_lock_recharge = (int) data_get($agreementInfo, 'is_lock_recharge', 0);
+                if ($is_lock_recharge == 1) {
+                    $count_recharge = (int) data_get($agreementInfo, 'count_recharge');
+                    $full_fee_date = ($new_debt_amount <= 0) ? $last_pay_date : null;
+                } else if ($new_debt_amount <= 0) {
                     $full_fee_date = $last_pay_date;
                     $first_8th = data_get($agreementInfo, 'first_8th_session_date');
                     if (empty($first_8th) && $agreementInfo->student_id) {
@@ -1512,7 +1516,11 @@ class ContractsController extends Controller
                     }
                 }
 
-                if ($new_debt_amount <= 0) {
+                $is_lock_recharge = (int) data_get($agreementInfo, 'is_lock_recharge', 0);
+                if ($is_lock_recharge == 1) {
+                    $count_recharge = (int) data_get($agreementInfo, 'count_recharge');
+                    $full_fee_date = ($new_debt_amount <= 0) ? $last_pay_date : null;
+                } else if ($new_debt_amount <= 0) {
                     $full_fee_date = $last_pay_date;
                     $first_8th = data_get($agreementInfo, 'first_8th_session_date');
                     if (empty($first_8th) && $agreementInfo->student_id) {

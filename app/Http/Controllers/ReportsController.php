@@ -3164,6 +3164,16 @@ class ReportsController extends Controller
             $count++;
         }
 
+        $day = (int) date('d');
+        $month_diff = $day < 5 ? 2 : 1;
+        $closing_month = date('Y-m', strtotime(date('Y-m-01') . " -$month_diff month"));
+        if ($targetMonth <= $closing_month) {
+            \DB::table('agreements')
+                ->where('salary_month', $targetMonth)
+                ->where('is_lock_recharge', 0)
+                ->update(['is_lock_recharge' => 1]);
+        }
+
         return response()->json(['status' => 1, 'message' => "Đã đẩy lại $count bản ghi chốt lương cho tháng $targetMonth"]);
     }
 
