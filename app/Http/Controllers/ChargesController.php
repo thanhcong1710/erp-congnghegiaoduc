@@ -132,11 +132,20 @@ class ChargesController extends Controller
                 ]);
             }
 
+            $must_charge = (int) data_get($agreement_info, 'must_charge', 0);
+            $total_charged = (int) data_get($agreement_info, 'total_charged', 0);
+            $amount = (int) data_get($request, 'amount', 0);
+            $discount_amount = (int) data_get($agreement_info, 'discount_amount', 0);
+            $received_amount = (int) data_get($agreement_info, 'received_amount', 0);
+            $transferred_amount = (int) data_get($agreement_info, 'transferred_amount', 0);
+
+            $effective_debt = max(0, $must_charge - $total_charged - $amount - $discount_amount - $received_amount + $transferred_amount);
+
             u::insertSimpleRow(array(
                 'agreement_id' => data_get($request, 'agreement_id'),
-                'charge_amount' => data_get($request, 'amount'),
-                'debt_amount' => (int) data_get($agreement_info, 'must_charge') - (int) data_get($agreement_info, 'total_charged') - (int) data_get($request, 'amount'),
-                'total_charged' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($request, 'amount'),
+                'charge_amount' => $amount,
+                'debt_amount' => $effective_debt,
+                'total_charged' => $total_charged + $amount,
                 'charge_date' => data_get($request, 'charge_date'),
                 'method' => data_get($request, 'method'),
                 'note' => data_get($request, 'note'),
@@ -210,11 +219,20 @@ class ChargesController extends Controller
                 'message' => $errorMessage
             ]);
         }
+        $must_charge = (int) data_get($agreement_info, 'must_charge', 0);
+        $total_charged = (int) data_get($agreement_info, 'total_charged', 0);
+        $amount = (int) data_get($request, 'amount', 0);
+        $discount_amount = (int) data_get($agreement_info, 'discount_amount', 0);
+        $received_amount = (int) data_get($agreement_info, 'received_amount', 0);
+        $transferred_amount = (int) data_get($agreement_info, 'transferred_amount', 0);
+
+        $effective_debt = max(0, $must_charge - $total_charged - $amount - $discount_amount - $received_amount + $transferred_amount);
+
         u::updateSimpleRow(array(
             'agreement_id' => data_get($request, 'agreement_id'),
-            'charge_amount' => data_get($request, 'amount'),
-            'debt_amount' => (int) data_get($agreement_info, 'must_charge') - (int) data_get($agreement_info, 'total_charged') - (int) data_get($request, 'amount'),
-            'total_charged' => (int) data_get($agreement_info, 'total_charged') + (int) data_get($request, 'amount'),
+            'charge_amount' => $amount,
+            'debt_amount' => $effective_debt,
+            'total_charged' => $total_charged + $amount,
             'charge_date' => data_get($request, 'charge_date'),
             'method' => data_get($request, 'method'),
             'note' => data_get($request, 'note'),
@@ -937,9 +955,12 @@ class ChargesController extends Controller
 
         $must_charge = (int) data_get($agreement, 'must_charge');
         $total_charged = (int) data_get($agreement, 'total_charged');
+        $received_amount = (int) data_get($agreement, 'received_amount', 0);
+        $transferred_amount = (int) data_get($agreement, 'transferred_amount', 0);
 
         // Validate: discount không được vượt quá phần còn nợ
-        $max_discount = $must_charge - $total_charged;
+        $current_effective = $total_charged + $received_amount - $transferred_amount;
+        $max_discount = max(0, $must_charge - $current_effective);
         if ($discount_amount > $max_discount) {
             return response()->json([
                 'status' => 0,
@@ -947,7 +968,7 @@ class ChargesController extends Controller
             ], 422);
         }
 
-        $new_debt_amount = $must_charge - $total_charged - $discount_amount;
+        $new_debt_amount = max(0, $must_charge - $current_effective - $discount_amount);
 
         // ---- 1. Cập nhật agreements ----
         u::updateSimpleRow([

@@ -119,7 +119,7 @@
 
       <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
         <div class="vx-row">
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền phải đóng</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -129,7 +129,17 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
+            <label>Giảm trừ hoặc nhận từ gói khác</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              :value="discountAndReceived | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Tổng tiền đã thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -139,7 +149,7 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -148,7 +158,7 @@
               v-model="amount"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Công nợ</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -157,6 +167,17 @@
               :value="agreement_info.debt_amount | formatNumber"
               disabled="true"
             />
+          </div>
+          <div class="vx-col w-full mb-4" v-if="agreement_info.discount_amount > 0">
+            <vs-alert color="warning" active="true">
+              <span><strong>Đã giảm trừ: {{ agreement_info.discount_amount | formatNumber }} đ</strong></span>
+              <span v-if="agreement_info.discount_note"> — {{ agreement_info.discount_note }}</span>
+            </vs-alert>
+          </div>
+          <div class="vx-col w-full mb-4" v-if="agreement_info.received_amount > 0">
+            <vs-alert color="success" active="true">
+              <span><strong>Đã nhận từ gói khác: {{ agreement_info.received_amount | formatNumber }} đ</strong></span>
+            </vs-alert>
           </div>
           <div class="vx-col md:w-1/4 w-full mb-4">
             <label>Phương thức đóng phí</label>
@@ -284,6 +305,11 @@
         selectedFiles: []
       }
     },
+    computed: {
+      discountAndReceived() {
+        return (Number(this.agreement_info.discount_amount) || 0) + (Number(this.agreement_info.received_amount) || 0);
+      }
+    },
     created() {
       this.loadDetail();
     },
@@ -291,16 +317,23 @@
       amount: function (val) {
         if (this.agreement_info.must_charge) {
           const value = u.fmc(val)
-          const suma = value.n + parseInt(this.agreement_info.total_charged)
-          const debt = parseInt(this.agreement_info.must_charge) - parseInt(suma)
-          if (suma > parseInt(this.agreement_info.must_charge)) {
-            this.amount = parseInt(this.agreement_info.must_charge, 10) - parseInt(this.agreement_info.total_charged, 10)
-            this.amount = this.amount > 1000 && this.amount % 1000 > 0 ? ((this.amount / 1000) + 1) * 1000 : this.amount
+          const must = parseInt(this.agreement_info.must_charge) || 0
+          const charged = parseInt(this.agreement_info.total_charged) || 0
+          const discount = parseInt(this.agreement_info.discount_amount) || 0
+          const received = parseInt(this.agreement_info.received_amount) || 0
+          const transferred = parseInt(this.agreement_info.transferred_amount) || 0
+          const discountReceived = discount + received - transferred
+          const maxAmount = Math.max(0, must - charged - discountReceived)
+          if (value.n > maxAmount) {
+            const maxFmc = u.fmc(maxAmount)
+            this.amount = maxFmc.s
+            this.payment.amount = maxFmc.n
+            this.agreement_info.debt_amount = 0
           } else {
-            this.agreement_info.debt_amount = debt
+            this.agreement_info.debt_amount = Math.max(0, maxAmount - value.n)
             this.amount = value.s
+            this.payment.amount = value.n
           }
-          this.payment.amount = value.n
         }
       }
     },
@@ -340,6 +373,13 @@
           .then(response => {
           this.$vs.loading.close();
           this.agreement_info = response.data
+          const must = parseInt(this.agreement_info.must_charge) || 0
+          const charged = parseInt(this.agreement_info.total_charged) || 0
+          const discount = parseInt(this.agreement_info.discount_amount) || 0
+          const received = parseInt(this.agreement_info.received_amount) || 0
+          const transferred = parseInt(this.agreement_info.transferred_amount) || 0
+          const discountReceived = discount + received - transferred
+          this.agreement_info.debt_amount = Math.max(0, must - charged - discountReceived)
         })
       },
       save() {

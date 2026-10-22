@@ -119,7 +119,7 @@
       <div  v-if="payment.status==0">
       <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
         <div class="vx-row">
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền phải đóng</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -129,7 +129,17 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
+            <label>Giảm trừ hoặc nhận từ gói khác</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              :value="discountAndReceived | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Tổng tiền đã thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -139,7 +149,7 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -149,7 +159,7 @@
               :disabled="payment.status!=0 || !checkPermission('approve_add_fee')"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Công nợ</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -192,6 +202,12 @@
             <vs-alert color="warning" active="true">
               <span><strong>Đã giảm trừ: {{ agreement_info.discount_amount | formatNumber }} đ</strong></span>
               <span v-if="agreement_info.discount_note"> — {{ agreement_info.discount_note }}</span>
+            </vs-alert>
+          </div>
+          <!-- Hiển thị nhận từ gói khác -->
+          <div class="vx-col w-full mb-4" v-if="agreement_info.received_amount > 0">
+            <vs-alert color="success" active="true">
+              <span><strong>Đã nhận từ gói khác: {{ agreement_info.received_amount | formatNumber }} đ</strong></span>
             </vs-alert>
           </div>
           <div class="vx-col w-full mb-2" v-if="payment.status==0 && checkPermission('approve_add_fee')">
@@ -276,7 +292,7 @@
       <div v-else>
         <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
         <div class="vx-row">
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền phải đóng</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -286,7 +302,17 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
+            <label>Giảm trừ hoặc nhận từ gói khác</label>
+            <input
+              class="vs-inputx vs-input--input normal"
+              type="text"
+              name="title"
+              :value="discountAndReceived | formatNumber"
+              disabled="true"
+            />
+          </div>
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Tổng tiền đã thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -296,7 +322,7 @@
               disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Số tiền thu</label>
             <input
               class="vs-inputx vs-input--input normal"
@@ -306,12 +332,12 @@
               :disabled="true"
             />
           </div>
-          <div class="vx-col md:w-1/4 w-full mb-4">
+          <div class="vx-col md:w-1/5 w-full mb-4">
             <label>Công nợ</label>
             <input
               class="vs-inputx vs-input--input normal"
-              type="text"debt_amount
-              :value="payment.debt_amount - agreement_info.discount_amount | formatNumber"
+              type="text"
+              :value="approvedDebtAmount | formatNumber"
               disabled="true"
             />
           </div>
@@ -322,8 +348,11 @@
               <span v-if="agreement_info.discount_note"> — {{ agreement_info.discount_note }}</span>
             </vs-alert>
           </div>
-          <div class="vx-col w-full mb-2" v-if="payment.status==0 && checkPermission('approve_add_fee')">
-            <vs-divider />
+          <!-- Hiển thị nhận từ gói khác -->
+          <div class="vx-col w-full mb-4" v-if="agreement_info.received_amount > 0">
+            <vs-alert color="success" active="true">
+              <span><strong>Đã nhận từ gói khác: {{ agreement_info.received_amount | formatNumber }} đ</strong></span>
+            </vs-alert>
           </div>
           <!-- ======================== -->
           <div class="vx-col md:w-1/4 w-full mb-4">
@@ -478,27 +507,43 @@
         existingAttachments: []
       }
     },
+    computed: {
+      discountAndReceived() {
+        return (Number(this.agreement_info.discount_amount) || 0) + (Number(this.agreement_info.received_amount) || 0);
+      },
+      approvedDebtAmount() {
+        const must = parseInt(this.agreement_info.must_charge) || 0;
+        const total = parseInt(this.payment.total_charged) || 0;
+        const discount = parseInt(this.agreement_info.discount_amount) || 0;
+        const received = parseInt(this.agreement_info.received_amount) || 0;
+        const transferred = parseInt(this.agreement_info.transferred_amount) || 0;
+        return Math.max(0, must - total - discount - received + transferred);
+      }
+    },
     created() {
       this.loadDetail();
     },
     watch: {
       amount: function (val) {
         if (this.agreement_info.must_charge) {
-          const value     = u.fmc(val)
-          const must      = parseInt(this.agreement_info.must_charge)    || 0
-          const charged   = parseInt(this.agreement_info.total_charged)  || 0
-          const discount  = parseInt(this.discountAmount)                || 0
-          // Số tiền tối đa có thể thu = phần còn lại sau khi trừ giảm trừ
-          const maxAmount = must - charged - discount
-          const suma      = value.n + charged
+          const value       = u.fmc(val)
+          const must        = parseInt(this.agreement_info.must_charge)        || 0
+          const charged     = parseInt(this.agreement_info.total_charged)      || 0
+          const discount    = parseInt(this.discountAmount)                    || 0
+          const received    = parseInt(this.agreement_info.received_amount)    || 0
+          const transferred = parseInt(this.agreement_info.transferred_amount) || 0
+          const discountReceived = discount + received - transferred
+          // Số tiền tối đa có thể thu = phần còn lại sau khi trừ giảm trừ và nhận gói khác
+          const maxAmount   = Math.max(0, must - charged - discountReceived)
           if (value.n > maxAmount) {
             // Không cho vượt quá
-            this.amount = maxAmount > 0 ? maxAmount : 0
-            this.payment.amount = maxAmount > 0 ? maxAmount : 0
+            const maxFmc = u.fmc(maxAmount)
+            this.amount = maxFmc.s
+            this.payment.amount = maxFmc.n
             this.agreement_info.debt_amount = 0
           } else {
-            // debt = must - charged - amount - discount
-            this.agreement_info.debt_amount = must - suma - discount
+            // debt = must - charged - amount - discountReceived
+            this.agreement_info.debt_amount = Math.max(0, maxAmount - value.n)
             this.amount = value.s
             this.payment.amount = value.n
           }
@@ -506,18 +551,22 @@
       },
       discountAmount: function (val) {
         if (this.agreement_info.must_charge) {
-          const must      = parseInt(this.agreement_info.must_charge)    || 0
-          const charged   = parseInt(this.agreement_info.total_charged)  || 0
-          const amount    = parseInt(this.payment.amount)                || 0
-          const discount  = parseInt(val)                                || 0
+          const must        = parseInt(this.agreement_info.must_charge)        || 0
+          const charged     = parseInt(this.agreement_info.total_charged)      || 0
+          const amount      = parseInt(this.payment.amount)                    || 0
+          const discount    = parseInt(val)                                    || 0
+          const received    = parseInt(this.agreement_info.received_amount)    || 0
+          const transferred = parseInt(this.agreement_info.transferred_amount) || 0
+          const discountReceived = discount + received - transferred
           
-          const maxAmount = must - charged - discount
+          const maxAmount = Math.max(0, must - charged - discountReceived)
           if (amount > maxAmount) {
-            this.amount = maxAmount > 0 ? maxAmount : 0
-            this.payment.amount = maxAmount > 0 ? maxAmount : 0
+            const maxFmc = u.fmc(maxAmount)
+            this.amount = maxFmc.s
+            this.payment.amount = maxFmc.n
             this.agreement_info.debt_amount = 0
           } else {
-            this.agreement_info.debt_amount = must - charged - amount - discount
+            this.agreement_info.debt_amount = Math.max(0, maxAmount - amount)
           }
         }
       }
@@ -598,11 +647,13 @@
         let mess = '';
         let resp = true;
 
-        const must     = parseInt(this.agreement_info.must_charge)    || 0
-        const charged  = parseInt(this.agreement_info.total_charged)  || 0
-        const amount   = parseInt(this.payment.amount)                || 0
-        const debt     = parseInt(this.agreement_info.debt_amount)    || 0
-        const discount = parseInt(this.agreement_info.discount_amount)|| 0
+        const must        = parseInt(this.agreement_info.must_charge)        || 0
+        const charged     = parseInt(this.agreement_info.total_charged)      || 0
+        const amount      = parseInt(this.payment.amount)                    || 0
+        const debt        = parseInt(this.agreement_info.debt_amount)        || 0
+        const discount    = parseInt(this.agreement_info.discount_amount)    || 0
+        const received    = parseInt(this.agreement_info.received_amount)    || 0
+        const transferred = parseInt(this.agreement_info.transferred_amount) || 0
 
         if (!amount) {
           mess += ' - Số tiền thu không được để trống<br/>';
@@ -619,15 +670,16 @@
           resp = false;
         }
 
-        // Kiểm tra cân bằng: phải đóng = đã thu + số tiền thu + công nợ + giảm trừ
+        // Kiểm tra cân bằng: phải đóng = đã thu + số tiền thu + công nợ + giảm trừ/nhận từ gói khác
         if (resp) {
-          const balance = charged + amount + debt + discount
+          const discountReceived = discount + received - transferred
+          const balance = charged + amount + debt + discountReceived
           if (balance !== must) {
             mess += ` - Số liệu không cân bằng:<br/>`
               + `&nbsp;&nbsp;Đã thu: <b>${charged.toLocaleString('vi-VN')}</b>`
               + ` + Thu: <b>${amount.toLocaleString('vi-VN')}</b>`
               + ` + Công nợ: <b>${debt.toLocaleString('vi-VN')}</b>`
-              + ` + Giảm trừ: <b>${discount.toLocaleString('vi-VN')}</b>`
+              + ` + Giảm trừ/Nhận gói khác: <b>${discountReceived.toLocaleString('vi-VN')}</b>`
               + ` = <b>${balance.toLocaleString('vi-VN')}</b>`
               + ` ≠ phải đóng <b>${must.toLocaleString('vi-VN')}</b><br/>`
             resp = false;
