@@ -1,55 +1,74 @@
 <template>
-  <div class="vs-component vs-con-table stripe vs-table-primary">
-    <div class="con-tablex vs-table--content">
-      <div class="vs-con-tbody vs-table--tbody ">
-        <table class="vs-table vs-table--tbody-table">
-          <thead class="vs-table--thead">
-            <tr>
-              <th colspan="1" rowspan="1" class="text-center">STT</th>
-              <th colspan="1" rowspan="1">Học sinh</th>
-              <th colspan="1" rowspan="1">Trung tâm</th>
-              <th colspan="1" rowspan="1">Hợp đồng</th>
-              <th colspan="1" rowspan="1">Đóng phí</th>
-              <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
-              <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+  <div class="student-agreements-wrapper">
+    <div class="flex justify-between items-center mb-3">
+      <h5 class="m-0 font-bold">Danh sách hợp đồng</h5>
+      <vs-button 
+        color="primary" 
+        type="filled" 
+        icon-pack="feather" 
+        icon="icon-refresh-cw" 
+        size="small" 
+        @click="confirmUpdateRegisterStatus"
+      >
+        Cập nhật trạng thái đăng ký
+      </vs-button>
+    </div>
+    <div class="vs-component vs-con-table stripe vs-table-primary">
+      <div class="con-tablex vs-table--content">
+        <div class="vs-con-tbody vs-table--tbody ">
+          <table class="vs-table vs-table--tbody-table">
+            <thead class="vs-table--thead">
+              <tr>
+                <th colspan="1" rowspan="1" class="text-center">STT</th>
+                <th colspan="1" rowspan="1">Học sinh</th>
+                <th colspan="1" rowspan="1">Trung tâm</th>
+                <th colspan="1" rowspan="1">Hợp đồng</th>
+                <th colspan="1" rowspan="1">Đóng phí</th>
+                <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
+                <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreements" :key="index">
+              <td class="td vs-table--td text-center">{{ index + 1 }}</td>
+              <td class="td vs-table--td">
+                <p><strong>{{ item.name }}</strong></p>
+                <p>Mã: {{item.lms_code}}</p>
+              </td>
+              <td class="td vs-table--td">
+                <p><strong>{{ item.branch_name }}</strong></p>
+                <p>EC: {{ item.ec_name }}</p>
+              </td>
+              <td class="td vs-table--td">
+                <p>Mã:  <router-link target="_blank" :to="`/lms/agreements/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
+                <p>Gói phí: {{ item.tuition_fee_name }}</p>
+                <p>Trạng thái đăng ký: 
+                  <strong v-if="item.status_register === 'UP'" style="color: #7367f0; font-weight: bold; font-size: 13px;">UP</strong>
+                  <strong v-else style="color: #28c76f; font-weight: bold; font-size: 13px;">NEW</strong>
+                </p>
+              </td>
+              <td class="td vs-table--td">
+                <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
+                <p v-if="item.discount_amount > 0" style="color: #ff9f43;">Giảm trừ: -{{ item.discount_amount | formatMoney }}</p>
+                <p>Đã thu: <strong>{{ item.total_charged | formatMoney }}</strong></p>
+                <p v-if="item.received_amount > 0" class="font-medium" style="color: #28c76f;">+Nhận gói khác: {{ item.received_amount | formatMoney }}</p>
+                <p v-if="item.transferred_amount > 0" class="font-medium" style="color: #ea5455;">-Chuyển gói khác: {{ item.transferred_amount | formatMoney }}</p>
+                <p v-if="item.refunded_amount > 0" class="font-medium" style="color: #ea5455;">-Hoàn tiền: {{ item.refunded_amount | formatMoney }}</p>
+                <p>Công nợ: <span :class="{'text-danger font-bold': item.debt_amount > 0}">{{ item.debt_amount | formatMoney }}</span></p>
+                <p v-if="item.excess_amount > 0" class="font-bold" style="color: #28c76f;">Tiền thừa: {{ item.excess_amount | formatMoney }}</p>
+              </td>
+              <td class="td vs-table--td text-center">{{ item.label_status}}</td>
+              <td class="td vs-table--td text-center list-action"> 
+                  <router-link target="_blank" :to="`/lms/agreements/${item.agreement_id}/detail`" >
+                    <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+                  </router-link> 
+                  <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+              </td>
             </tr>
-          </thead>
-          <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in agreements" :key="index">
-            <td class="td vs-table--td text-center">{{ index + 1 }}</td>
-            <td class="td vs-table--td">
-              <p><strong>{{ item.name }}</strong></p>
-              <p>Mã: {{item.lms_code}}</p>
-            </td>
-            <td class="td vs-table--td">
-              <p><strong>{{ item.branch_name }}</strong></p>
-              <p>EC: {{ item.ec_name }}</p>
-            </td>
-            <td class="td vs-table--td">
-              <p>Mã:  <router-link target="_blank" :to="`/lms/agreements/${item.agreement_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-              <p>Gói phí: {{ item.tuition_fee_name }}</p>
-            </td>
-            <td class="td vs-table--td">
-              <p>Giá: <strong>{{ item.must_charge | formatMoney }}</strong></p>
-              <p v-if="item.discount_amount > 0" style="color: #ff9f43;">Giảm trừ: -{{ item.discount_amount | formatMoney }}</p>
-              <p>Đã thu: <strong>{{ item.total_charged | formatMoney }}</strong></p>
-              <p v-if="item.received_amount > 0" class="font-medium" style="color: #28c76f;">+Nhận gói khác: {{ item.received_amount | formatMoney }}</p>
-              <p v-if="item.transferred_amount > 0" class="font-medium" style="color: #ea5455;">-Chuyển gói khác: {{ item.transferred_amount | formatMoney }}</p>
-              <p v-if="item.refunded_amount > 0" class="font-medium" style="color: #ea5455;">-Hoàn tiền: {{ item.refunded_amount | formatMoney }}</p>
-              <p>Công nợ: <span :class="{'text-danger font-bold': item.debt_amount > 0}">{{ item.debt_amount | formatMoney }}</span></p>
-              <p v-if="item.excess_amount > 0" class="font-bold" style="color: #28c76f;">Tiền thừa: {{ item.excess_amount | formatMoney }}</p>
-            </td>
-            <td class="td vs-table--td text-center">{{ item.label_status}}</td>
-            <td class="td vs-table--td text-center list-action"> 
-                <router-link target="_blank" :to="`/lms/agreements/${item.agreement_id}/detail`" >
-                  <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                </router-link> 
-                <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
-            </td>
-          </tr>
-          <tr v-if="agreements.length === 0">
-            <td colspan="7" class="text-center py-4">Không có dữ liệu</td>
-          </tr>
-        </table>
+            <tr v-if="agreements.length === 0">
+              <td colspan="7" class="text-center py-4">Không có dữ liệu</td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -127,6 +146,47 @@
           })
         })
       },
+      confirmUpdateRegisterStatus () {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'primary',
+          title: 'Xác nhận',
+          text: 'Bạn có chắc chắn muốn cập nhật trạng thái đăng ký của tất cả bản ghi của học sinh này?',
+          accept: this.updateRegisterStatus,
+          acceptText: 'Cập nhật',
+          cancelText: 'Hủy'
+        })
+      },
+      updateRegisterStatus () {
+        const studentId = this.$route.params.id || (this.student_info ? this.student_info.id : null);
+        if (!studentId) {
+          return;
+        }
+        this.$vs.loading();
+        axios.p('/api/lms/agreements/update-register-status', { student_id: studentId })
+          .then((response) => {
+            this.$vs.loading.close();
+            this.getData();
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message || 'Cập nhật trạng thái đăng ký thành công',
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            });
+          })
+          .catch((error) => {
+            this.$vs.loading.close();
+            const msg = (error.response && error.response.data && error.response.data.message) ? error.response.data.message : 'Có lỗi xảy ra khi cập nhật';
+            this.$vs.notify({
+              title: 'Thất bại',
+              text: msg,
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            });
+          });
+      }
     }
   }
 </script>

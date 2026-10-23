@@ -849,17 +849,47 @@ class ContractsController extends Controller
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
                 (SELECT name FROM sources WHERE id = s.source_id) AS source_name,
                 c.must_charge, c.discount_amount, c.debt_amount, c.total_charged, c.transferred_amount, c.received_amount, c.status, c.student_id,
+                c.count_recharge,
+                IF(COALESCE(c.count_recharge, 0) > 0, 'UP', 'NEW') AS status_register,
                 (SELECT ABS(SUM(amount)) FROM payments WHERE agreement_id = c.id AND amount < 0) AS refunded_amount
             FROM agreements AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
+            $list[$k]->status_register = ((int)$row->count_recharge > 0) ? 'UP' : 'NEW';
             $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount;
             $list[$k]->excess_amount = $effective > (float)$row->must_charge ? ($effective - (float)$row->must_charge) : 0;
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
+    }
+
+    public function updateRegisterStatus(Request $request)
+    {
+        $student_id = (int)$request->student_id;
+        if (!$student_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không tìm thấy thông tin học sinh'
+            ], 422);
+        }
+
+        try {
+            \Illuminate\Support\Facades\Artisan::call('erp:update-agreements-data', [
+                '--student_id' => $student_id
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Cập nhật trạng thái đăng ký thành công'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function transferExcess(Request $request)

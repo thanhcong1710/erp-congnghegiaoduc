@@ -405,13 +405,15 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
                 (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name, c.id,
-                cl.cls_name 
+                cl.cls_name,
+                IF(COALESCE(a.count_recharge, 0) > 0, 'UP', 'NEW') AS status_register
             FROM contracts AS c
                 LEFT JOIN agreements AS a ON a.id = c.agreement_id
                 LEFT JOIN classes AS cl ON cl.id=c.class_id
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContract($row->status);
+            $list[$k]->status_register = ((int) data_get($row, 'count_recharge') > 0 || data_get($row, 'status_register') === 'UP') ? 'UP' : 'NEW';
             $list[$k]->is_admin = $has_admin;
         }
         return response()->json($list);
