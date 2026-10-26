@@ -107,6 +107,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('parents/change_status', 'ParentsController@changeStatus');
             Route::post('parents/change_level', 'ParentsController@changeLevel');
             Route::post('parents/assign', 'ParentsController@assign');
+            Route::post('parents/convert_to_student', 'ParentsController@convertToStudent');
             Route::post('parents/update_next_care_date', 'ParentsController@updateNextCareDate');
             Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
             Route::get('care/get_all_data/{parent_id}', 'ParentCareController@getAllDataByParent');

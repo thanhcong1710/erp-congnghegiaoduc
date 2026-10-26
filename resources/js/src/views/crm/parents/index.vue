@@ -185,9 +185,15 @@
                 <td class="td vs-table--td text-center">{{ item.last_time_care }}</td>
                 <td class="td vs-table--td text-center">{{ getStatusLabel(item.status)}}</td>
                 <td class="text-center list-action"> 
-                  <router-link :to="`/crm/parent/${item.id}/detail`" >
+                  <router-link :to="`/crm/parent/${item.id}/detail`" title="Chi tiết khách hàng">
                     <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
-                  </router-link>    
+                  </router-link>
+                  <router-link v-if="item.student_id > 0" :to="`/lms/students/${item.student_id}/detail`" title="Xem thông tin học sinh">
+                    <vs-button size="small" color="primary"><i class="fa fa-user-graduate"></i></vs-button>
+                  </router-link>
+                  <vs-button v-else size="small" color="success" title="Chuyển sang học sinh chính thức" @click="confirmConvertToStudent(item)">
+                    <i class="fa fa-user-plus"></i>
+                  </vs-button>
                 </td>
               </tr>
             </table>
@@ -263,6 +269,7 @@
     data() {
       return {
         checked_list: [],
+        selected_parent: null,
         activeItem: 0,    
         total:{
           total_0:0,
@@ -517,6 +524,55 @@
       getStatusLabel(statusId) {
         const status = this.statusOptions.find(s => s.id == statusId);
         return status ? status.name : statusId;
+      },
+      confirmConvertToStudent(item) {
+        this.selected_parent = item
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'success',
+          title: 'Xác nhận chuyển đổi',
+          text: `Bạn có chắc chắn muốn chuyển khách hàng "${item.name}" sang học sinh chính thức?`,
+          acceptText: 'Đồng ý',
+          cancelText: 'Hủy',
+          accept: this.convertToStudent
+        })
+      },
+      convertToStudent() {
+        if (!this.selected_parent) return
+        this.$vs.loading()
+        axios.p('/api/crm/parents/convert_to_student', { parent_id: this.selected_parent.id })
+          .then((response) => {
+            this.$vs.loading.close()
+            if (response.data.status === 1) {
+              this.$vs.notify({
+                title: 'Thành công',
+                text: response.data.message,
+                color: 'success',
+                iconPack: 'feather',
+                icon: 'icon-check'
+              })
+              this.selected_parent.student_id = response.data.student_id
+              this.selected_parent.lms_code = response.data.lms_code
+            } else {
+              this.$vs.notify({
+                title: 'Thất bại',
+                text: response.data.message,
+                color: 'danger',
+                iconPack: 'feather',
+                icon: 'icon-alert-circle'
+              })
+            }
+          })
+          .catch((e) => {
+            this.$vs.loading.close()
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: 'Có lỗi xảy ra khi chuyển sang học sinh chính thức',
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            })
+          })
       },
     },
     created() {

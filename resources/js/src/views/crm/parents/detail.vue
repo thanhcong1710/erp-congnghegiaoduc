@@ -22,6 +22,16 @@
                 <vs-button size="small" @click="callPhone(parent.mobile_2)"><i class="fa fa-phone"></i></vs-button>
                 <vs-button size="small" @click="showSendSms(parent.mobile_2)"><i class="fa fa-sms"></i></vs-button>
               </p>
+              <div class="mt-3">
+                <router-link v-if="parent.student_id > 0" :to="`/lms/students/${parent.student_id}/detail`">
+                  <vs-button size="small" color="primary">
+                    <i class="fa fa-user-graduate mr-1"></i> Xem thông tin học sinh
+                  </vs-button>
+                </router-link>
+                <vs-button v-else size="small" color="success" @click="confirmConvertToStudent">
+                  <i class="fa fa-user-plus mr-1"></i> Chuyển sang học sinh chính thức
+                </vs-button>
+              </div>
             </div>
           </div>
           <div class="vx-col md:w-1/3 w-full">
@@ -1702,6 +1712,54 @@
             })
           .catch((error)   => { console.log(error); this.$vs.loading.close(); })
         }
+      },
+      confirmConvertToStudent() {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'success',
+          title: 'Xác nhận chuyển đổi',
+          text: `Bạn có chắc chắn muốn chuyển khách hàng "${this.parent.name}" sang học sinh chính thức?`,
+          acceptText: 'Đồng ý',
+          cancelText: 'Hủy',
+          accept: this.convertToStudent
+        })
+      },
+      convertToStudent() {
+        this.$vs.loading()
+        axios.p('/api/crm/parents/convert_to_student', { parent_id: this.parent.id })
+          .then((response) => {
+            this.$vs.loading.close()
+            if (response.data.status === 1) {
+              this.$vs.notify({
+                title: 'Thành công',
+                text: response.data.message,
+                color: 'success',
+                iconPack: 'feather',
+                icon: 'icon-check'
+              })
+              this.parent.student_id = response.data.student_id
+              this.parent.lms_code = response.data.lms_code
+              this.loadDetail()
+            } else {
+              this.$vs.notify({
+                title: 'Thất bại',
+                text: response.data.message,
+                color: 'danger',
+                iconPack: 'feather',
+                icon: 'icon-alert-circle'
+              })
+            }
+          })
+          .catch((e) => {
+            this.$vs.loading.close()
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: 'Có lỗi xảy ra khi chuyển sang học sinh chính thức',
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-circle'
+            })
+          })
       },
     },
     filters: {

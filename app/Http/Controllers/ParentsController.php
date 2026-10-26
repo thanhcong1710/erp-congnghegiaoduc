@@ -7,7 +7,10 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx as x;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\LogParents;
+use App\Models\LogStudents;
+use App\Enums\SystemCode;
 
 class ParentsController extends Controller
 {
@@ -94,7 +97,9 @@ class ParentsController extends Controller
                 p.care_date AS last_time_care,
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name
+                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
+                p.student_id,
+                (SELECT lms_code FROM students WHERE id = p.student_id) AS lms_code
             FROM crm_parents AS p WHERE $cond $tmp_cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
 
@@ -256,7 +261,8 @@ class ParentsController extends Controller
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT title FROM jobs WHERE id=p.job_id) AS job_name,
                 (SELECT count(id) FROM crm_customer_care WHERE parent_id=p.id AND status=1) AS num_care,
-                (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care
+                (SELECT care_date FROM crm_customer_care WHERE parent_id=p.id  AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
+                (SELECT lms_code FROM students WHERE id = p.student_id) AS lms_code
             FROM crm_parents AS p WHERE id=$parent_id  $cond");
         return response()->json($data);
     }
@@ -531,5 +537,120 @@ class ParentsController extends Controller
                     (last_care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, last_care_date )> 15) 
                 ) ");
         return true;
+    }
+
+    public function convertToStudent(Request $request)
+    {
+        $parent_id = (int) $request->parent_id;
+        $parent = u::first("SELECT * FROM crm_parents WHERE id = $parent_id");
+        if (!$parent) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy thông tin khách hàng'
+            ]);
+        }
+
+        if (!empty($parent->student_id) && (int) $parent->student_id > 0) {
+            $student_exists = u::first("SELECT id, lms_code FROM students WHERE id = " . (int) $parent->student_id);
+            if ($student_exists) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => "Khách hàng này đã được tạo học sinh chính thức (Mã: {$student_exists->lms_code})",
+                    'student_id' => $student_exists->id,
+                    'lms_code' => $student_exists->lms_code
+                ]);
+            }
+        }
+
+        DB::beginTransaction();
+        try {
+            $branch_id = (int) $parent->branch_id;
+            if (!$branch_id && $parent->owner_id) {
+                $user_branch = u::first("SELECT branch_id FROM branch_has_user WHERE user_id = " . (int) $parent->owner_id);
+                $branch_id = $user_branch ? (int) $user_branch->branch_id : 0;
+            }
+            if (!$branch_id && Auth::check()) {
+                $cur_branch = u::first("SELECT branch_id FROM branch_has_user WHERE user_id = " . (int) Auth::user()->id);
+                $branch_id = $cur_branch ? (int) $cur_branch->branch_id : 0;
+            }
+
+            $arr_name = u::explodeName($parent->name);
+
+            $student_id = u::insertSimpleRow(array(
+                'lms_code' => '',
+                'name' => $parent->name,
+                'firstname' => data_get($arr_name, 'firstname'),
+                'midname' => data_get($arr_name, 'midname'),
+                'lastname' => data_get($arr_name, 'lastname'),
+                'gender' => !empty($parent->gender) ? $parent->gender : 'M',
+                'date_of_birth' => $parent->birthday,
+                'gud_mobile1' => $parent->mobile_1,
+                'gud_mobile2' => $parent->mobile_2,
+                'gud_name1' => $parent->name,
+                'gud_email1' => $parent->email,
+                'address' => $parent->address,
+                'province_id' => $parent->province_id,
+                'district_id' => $parent->district_id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'branch_id' => $branch_id,
+                'status' => 1,
+                'source_detail_id' => $parent->source_detail_id,
+                'source_id' => $parent->source_id,
+                'c2c_mobile' => $parent->c2c_mobile,
+                'note' => $parent->note,
+                'avatar_url' => !empty($parent->avatar_url) ? $parent->avatar_url : ($parent->gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')
+            ), 'students');
+
+            $last_lms_code = str_pad((string) $student_id, 6, '0', STR_PAD_LEFT);
+            $lms_code = config('app.prefix_student_code') . $last_lms_code;
+            u::updateSimpleRow(array('lms_code' => $lms_code), array('id' => $student_id), 'students');
+
+            $ceo_info = u::first("SELECT u.id FROM role_has_user AS ru 
+                LEFT JOIN roles AS r ON r.id = ru.role_id
+                LEFT JOIN users AS u ON u.id = ru.user_id
+                WHERE u.status=1 AND r.code ='" . SystemCode::ROLE_CEO_BRANCH . "'");
+
+            $input_ec_id = (int) data_get($parent, 'owner_id');
+            $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . $input_ec_id);
+            $ec_id = data_get($ec_info, 'id');
+            $ec_leader_id = data_get($ec_info, 'manager_id') ? data_get($ec_info, 'manager_id') : $ec_id;
+
+            u::insertSimpleRow(array(
+                'student_id' => $student_id,
+                'ec_id' => $ec_id,
+                'branch_id' => $branch_id,
+                'ceo_branch_id' => data_get($ceo_info, 'id'),
+                'ec_leader_id' => $ec_leader_id,
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'status' => 1
+            ), 'term_student_user');
+
+            u::updateSimpleRow(array('student_id' => $student_id), array('id' => $parent_id), 'crm_parents');
+
+            $crm_student = u::first("SELECT id FROM crm_students WHERE parent_id = $parent_id ORDER BY id ASC LIMIT 1");
+            if ($crm_student) {
+                u::updateSimpleRow(array('status' => 3, 'lms_id' => $student_id), array('id' => $crm_student->id), 'crm_students');
+            }
+
+            LogStudents::logAdd($student_id, 'Chuyển từ khách hàng CRM lên danh sách học sinh chính thức', Auth::user()->id);
+            LogParents::logAdd($parent_id, "Chuyển thành học sinh chính thức: {$parent->name} ($lms_code)", Auth::user()->id);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Chuyển khách hàng thành học sinh chính thức thành công (Mã: $lms_code)",
+                'student_id' => $student_id,
+                'lms_code' => $lms_code
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi xử lý: ' . $e->getMessage()
+            ]);
+        }
     }
 }
