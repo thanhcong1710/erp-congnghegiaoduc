@@ -998,8 +998,8 @@ class ExportsController extends Controller
             }
         }
 
-        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0 và theo branch map
-        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0, ngày CK > 01/03/2026 và theo branch map
+        $cond = " a.debt_amount = 0 AND a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ") AND COALESCE(a.full_fee_date, a.last_pay_date) > '2026-03-01'";
 
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
@@ -1010,18 +1010,33 @@ class ExportsController extends Controller
         }
 
         if ($start_date) {
-            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+            $cond .= " AND COALESCE(a.full_fee_date, a.last_pay_date) >= '$start_date'";
         }
         if ($end_date) {
-            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+            $cond .= " AND COALESCE(a.full_fee_date, a.last_pay_date) <= '$end_date'";
         }
 
         $order_by = " ORDER BY a.id DESC ";
 
-        // Lọc session school year thông qua join để lấy giá trị động
-        $schedule_cond = " c.id = shs.contract_id AND shs.status = 1 ";
+        $courseSessionsExpr = "IF(c.total_sessions > 0, c.total_sessions, IFNULL(c.summary_sessions, 0))";
         if ($school_year) {
-            $schedule_cond .= " AND YEAR(shs.class_date) = '" . $school_year . "' ";
+            $sy = addslashes($school_year);
+            $doneSessionsExpr = "SUM(
+                CASE
+                    WHEN c.id IS NULL THEN 0
+                    WHEN c.status = 7 AND YEAR(COALESCE(c.enrolment_start_date, a.start_date, a.full_fee_date)) = '$sy' AND YEAR(COALESCE(c.enrolment_last_date, c.enrolment_start_date, a.start_date, a.full_fee_date)) = '$sy'
+                        THEN $courseSessionsExpr
+                    ELSE (SELECT COUNT(shs.id) FROM schedule_has_student shs WHERE shs.contract_id = c.id AND shs.status = 1 AND YEAR(shs.class_date) = '$sy')
+                END
+            )";
+        } else {
+            $doneSessionsExpr = "SUM(
+                CASE
+                    WHEN c.id IS NULL THEN 0
+                    WHEN c.status = 7 THEN $courseSessionsExpr
+                    ELSE LEAST(IFNULL(c.done_sessions, 0), $courseSessionsExpr)
+                END
+            )";
         }
 
         // Query danh sách agreements (combo packages) có debt = 0 và lấy full fee_date (max charge_date)
@@ -1033,33 +1048,44 @@ class ExportsController extends Controller
                 t.name AS combo_name,
                 COUNT(DISTINCT c.id) AS total_courses,
                 MIN(c.enrolment_start_date) AS first_course_start_date,
-                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 AND type = 1 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
-                SUM(c.summary_sessions) AS total_sessions,
-                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+                COALESCE(a.full_fee_date, a.last_pay_date) AS full_fee_date,
+                SUM($courseSessionsExpr) AS total_sessions,
+                $doneSessionsExpr AS done_sessions
             FROM agreements AS a
                 LEFT JOIN students AS s ON s.id = a.student_id
                 LEFT JOIN tuition_fee AS t ON t.id = a.tuition_fee_id
-                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0, 8)
             WHERE $cond
-            GROUP BY a.id, a.must_charge, s.lms_code, s.name, t.name, a.id
+            GROUP BY a.id, a.must_charge, s.lms_code, s.name, t.name
             $order_by";
 
         $list = u::query($query);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $lastColStr = self::applyStandardTemplate($sheet, 'BAO CAO TIEN DO HOC SAU 01 NAM', array ( 0 => 'BÁO CÁO TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM',), array ());
+        $headers = [
+            'STT', 'Mã HV', 'Họ tên', 'Combo', 'Khóa', 'Bắt đầu', 'Full fee',
+            'Buổi', 'Học phí', 'Đã học', '%', 'Còn lại', 'Đã dùng', 'Còn lại'
+        ];
+        $colWidths = [8, 15, 25, 32, 10, 15, 15, 10, 16, 10, 10, 10, 16, 16];
+        $lastColStr = self::applyStandardTemplate($sheet, 'BÁO CÁO TỔNG HỢP TIẾN ĐỘ HỌC SAU 01 NĂM', $headers, $colWidths);
         $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
         $centerAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]];
         $rightAlign = ['alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT]];
 
+        $total_combo_fee_all = 0;
+        $total_sessions_all = 0;
+        $total_done_sessions_all = 0;
+        $total_used_value_all = 0;
+        $total_left_value_all = 0;
+        $total_left_sessions_all = 0;
 
         for ($i = 0; $i < count($list); $i++) {
-            $x = $i + 4;
+            $x = $i + 3;
             $item = $list[$i];
 
             $item->total_sessions = (int) $item->total_sessions;
-            $item->done_sessions = (int) $item->done_sessions;
+            $item->done_sessions = min((int) $item->done_sessions, $item->total_sessions);
             $item->left_sessions = max(0, $item->total_sessions - $item->done_sessions);
             $item->combo_fee = (float) $item->combo_fee;
 

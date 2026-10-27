@@ -891,8 +891,8 @@ class ReportsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
 
-        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0 và theo branch map
-        $cond = " a.debt_amount = 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        // Điều kiện cơ bản: Lấy agreements có debt_amount = 0, ngày CK > 01/03/2026 và theo branch map
+        $cond = " a.debt_amount = 0 AND a.status > 0 AND a.branch_id IN (" . Auth::user()->getBranchesHasUser() . ") AND COALESCE(a.full_fee_date, a.last_pay_date) > '2026-03-01'";
 
         if (!empty($branch_id)) {
             $cond .= " AND a.branch_id IN (" . implode(",", $branch_id) . ")";
@@ -903,19 +903,33 @@ class ReportsController extends Controller
         }
 
         if ($start_date) {
-            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date >= '$start_date')";
+            $cond .= " AND COALESCE(a.full_fee_date, a.last_pay_date) >= '$start_date'";
         }
         if ($end_date) {
-            $cond .= " AND a.id IN (SELECT agreement_id FROM payments WHERE debt = 0 AND charge_date <= '$end_date 23:59:59')";
+            $cond .= " AND COALESCE(a.full_fee_date, a.last_pay_date) <= '$end_date'";
         }
 
         $order_by = " ORDER BY a.id DESC ";
 
-        // Lọc session school year thông qua join để lấy giá trị động
-        $schedule_cond = " c.id = shs.contract_id AND shs.status = 1 ";
+        $courseSessionsExpr = "IF(c.total_sessions > 0, c.total_sessions, IFNULL(c.summary_sessions, 0))";
         if ($school_year) {
-            // Lọc theo năm học từ format date, ví dụ lấy trong khoảng năm
-            $schedule_cond .= " AND YEAR(shs.class_date) = '" . $school_year . "' ";
+            $sy = addslashes($school_year);
+            $doneSessionsExpr = "SUM(
+                CASE
+                    WHEN c.id IS NULL THEN 0
+                    WHEN c.status = 7 AND YEAR(COALESCE(c.enrolment_start_date, a.start_date, a.full_fee_date)) = '$sy' AND YEAR(COALESCE(c.enrolment_last_date, c.enrolment_start_date, a.start_date, a.full_fee_date)) = '$sy'
+                        THEN $courseSessionsExpr
+                    ELSE (SELECT COUNT(shs.id) FROM schedule_has_student shs WHERE shs.contract_id = c.id AND shs.status = 1 AND YEAR(shs.class_date) = '$sy')
+                END
+            )";
+        } else {
+            $doneSessionsExpr = "SUM(
+                CASE
+                    WHEN c.id IS NULL THEN 0
+                    WHEN c.status = 7 THEN $courseSessionsExpr
+                    ELSE LEAST(IFNULL(c.done_sessions, 0), $courseSessionsExpr)
+                END
+            )";
         }
 
         // Query danh sách agreements (combo packages) có debt = 0 và lấy full fee_date (max charge_date)
@@ -927,13 +941,13 @@ class ReportsController extends Controller
                 t.name AS combo_name,
                 COUNT(DISTINCT c.id) AS total_courses,
                 MIN(c.enrolment_start_date) AS first_course_start_date,
-                (SELECT charge_date FROM payments WHERE agreement_id = a.id AND debt = 0 AND type = 1 ORDER BY charge_date DESC LIMIT 1) AS full_fee_date,
-                SUM(c.summary_sessions) AS total_sessions,
-                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS done_sessions
+                COALESCE(a.full_fee_date, a.last_pay_date) AS full_fee_date,
+                SUM($courseSessionsExpr) AS total_sessions,
+                $doneSessionsExpr AS done_sessions
             FROM agreements AS a
                 LEFT JOIN students AS s ON s.id = a.student_id
                 LEFT JOIN tuition_fee AS t ON t.id = a.tuition_fee_id
-                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+                LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0, 8)
             WHERE $cond
             GROUP BY a.id
             $order_by $limitation";
@@ -949,7 +963,7 @@ class ReportsController extends Controller
 
         foreach ($list as $k => $row) {
             $row->total_sessions = (int) $row->total_sessions;
-            $row->done_sessions = (int) $row->done_sessions;
+            $row->done_sessions = min((int) $row->done_sessions, $row->total_sessions);
             $row->left_sessions = max(0, $row->total_sessions - $row->done_sessions);
             $row->combo_fee = (float) $row->combo_fee;
 
@@ -980,11 +994,11 @@ class ReportsController extends Controller
         $summaryQuery = "SELECT 
                 a.id as agreement_id,
                 a.must_charge as total_combo_fee_all,
-                SUM(c.summary_sessions) as total_sessions_all,
-                (SELECT COUNT(shs.id) FROM schedule_has_student shs INNER JOIN contracts c_inner ON c_inner.id = shs.contract_id WHERE c_inner.agreement_id = a.id AND shs.status = 1 " . ($school_year ? " AND YEAR(shs.class_date) = '$school_year'" : "") . ") AS total_done_sessions_all
+                SUM($courseSessionsExpr) as total_sessions_all,
+                $doneSessionsExpr AS total_done_sessions_all
             FROM agreements AS a
             LEFT JOIN students AS s ON s.id = a.student_id
-            LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0,1,7,8)
+            LEFT JOIN contracts AS c ON c.agreement_id = a.id AND c.status NOT IN (0, 8)
             WHERE $cond
             GROUP BY a.id";
 
@@ -996,12 +1010,13 @@ class ReportsController extends Controller
 
         foreach ($summaryDataSql as $sumRow) {
             $total_combo_fee_all += (float) $sumRow->total_combo_fee_all;
-            $total_sessions_all += (int) $sumRow->total_sessions_all;
-            $done_sessions = (int) $sumRow->total_done_sessions_all;
+            $sessions_all = (int) $sumRow->total_sessions_all;
+            $total_sessions_all += $sessions_all;
+            $done_sessions = min((int) $sumRow->total_done_sessions_all, $sessions_all);
             $total_done_sessions_all += $done_sessions;
 
-            if ($sumRow->total_sessions_all > 0) {
-                $total_used_value_all += round(((float) $sumRow->total_combo_fee_all * $done_sessions) / (int) $sumRow->total_sessions_all, 0);
+            if ($sessions_all > 0) {
+                $total_used_value_all += round(((float) $sumRow->total_combo_fee_all * $done_sessions) / $sessions_all, 0);
             }
         }
 

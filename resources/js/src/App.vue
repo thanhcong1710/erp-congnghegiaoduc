@@ -13,7 +13,7 @@
     <router-view @setAppClasses="setAppClasses" />
     
     <!-- AI Chatbot - Hiển thị ở mọi trang trừ login và print -->
-    <ai-chatbot v-if="isLoggedIn && shouldShowAiChat"></ai-chatbot>
+    <!-- <ai-chatbot v-if="isLoggedIn && shouldShowAiChat"></ai-chatbot> -->
   </div>
 </template>
 
