@@ -614,6 +614,24 @@ export default {
         },
       },
       {
+        path: "/lms/reports/operate/teacher-payroll-team",
+        name: "lms-reports-teacher-payroll-team",
+        component: () => import("@/views/lms/report/operate/teacherPayrollTeam.vue"),
+        meta: {
+          breadcrumb: [
+            { title: "Home", url: "/" },
+            {
+              title: "Danh sách báo cáo vận hành",
+              url: "/lms/reports/operate",
+            },
+            { title: "Báo cáo tổng hợp tính lương giáo viên theo team", active: true },
+          ],
+          pageTitle: "Báo cáo tổng hợp tính lương giáo viên theo team",
+          rule: "editor",
+          permission: "lms_reports_operate_23",
+        },
+      },
+      {
         path: "/lms/reports/operate",
         name: "lms-reports-operate",
         component: () => import("@/views/lms/report/operate/index.vue"),

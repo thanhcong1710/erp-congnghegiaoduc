@@ -1,0 +1,247 @@
+<template>
+  <div id="page-teacher-payroll-team">
+    <vx-card no-shadow class="mt-5">
+      <div class="mb-5" style="position: relative; z-index: 999;">
+        <div class="vx-row">
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label for="" class="vs-input--label">Từ khóa</label>
+            <vs-input class="w-full" placeholder="Nhập tên giáo viên, mã nhân viên, lớp, team" v-model="searchData.keyword" @keyup.enter="getData"></vs-input>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label for="" class="vs-input--label">Team giáo viên</label>
+            <multiselect
+                name="search_manager"
+                placeholder="Chọn team giáo viên"
+                v-model="searchData.manager_id"
+                :options="teacher_team_list"
+                label="name"
+                :close-on-select="true"
+                :hide-selected="true"
+                :multiple="false"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
+          <div class="vx-col sm:w-1/3 w-full mb-4">
+            <label for="" class="vs-input--label">Thời gian tính lương</label>
+            <date-picker name="item-date" v-model="searchData.month" type="month" format="YYYY-MM" style="width: 100%"
+              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng" :append-to-body="true"></date-picker>
+          </div>
+        </div>
+        <div class="vx-row mt-3">
+          <div class="vx-col w-full">
+            <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
+            <vs-button color="success" class="mr-3 mb-2" @click="exportExcel"><i class="fa fa-file-excel"></i> Xuất Excel</vs-button>
+            <vs-button color="dark" type="border" class="mb-2" @click="reset"><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-component vs-con-table stripe vs-table-primary">
+        <div class="con-tablex vs-table--content">
+          <div class="vs-con-tbody vs-table--tbody ">
+            <table class="vs-table vs-table--tbody-table">
+              <thead class="vs-table--thead">
+                <tr>
+                  <th class="text-center">STT</th>
+                  <th>Team giáo viên</th>
+                  <th class="text-center">Số giáo viên</th>
+                  <th class="text-center">Số lớp</th>
+                  <th class="text-center">Tổng số buổi</th>
+                  <th class="text-right">Tổng lương</th>
+                </tr>
+              </thead>
+              <tr class="tr-values vs-table--tr" v-for="(item, index) in listData" :key="index">
+                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
+                <td class="td vs-table--td font-medium">{{ item.teacher_team }}</td>
+                <td class="td vs-table--td text-center">{{ item.total_teachers }}</td>
+                <td class="td vs-table--td text-center">{{ item.total_classes }}</td>
+                <td class="td vs-table--td text-center">{{ item.total_sessions }}</td>
+                <td class="td vs-table--td text-right font-medium text-success">{{ item.total_salary | formatMoney }} VNĐ</td>
+              </tr>
+              <tr class="tr-values vs-table--tr" style="background-color: #f3f4f6; font-weight: bold;" v-if="listData.length > 0 && summary">
+                <td colspan="2" class="td vs-table--td text-center font-bold">Tổng cộng</td>
+                <td class="td vs-table--td text-center font-bold">{{ summary.total_teachers }}</td>
+                <td class="td vs-table--td text-center font-bold">{{ summary.total_classes }}</td>
+                <td class="td vs-table--td text-center font-bold">{{ summary.total_sessions }}</td>
+                <td class="td vs-table--td text-right font-bold text-success">{{ summary.total_salary | formatMoney }} VNĐ</td>
+              </tr>
+              <tr v-if="listData.length === 0">
+                <td colspan="6" class="text-center p-5">Không có dữ liệu</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center mt-5" v-if="listData.length > 0">
+        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
+          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
+            <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </div>
+          <vs-dropdown-menu>
+            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)">
+              <span>{{ item }}</span>
+            </vs-dropdown-item>
+          </vs-dropdown-menu>
+        </vs-dropdown>
+        <vs-pagination
+              style="width: calc(100% - 160px);"
+              v-if="Math.ceil(pagination.total / pagination.limit) > 1"
+              :total="Math.ceil(pagination.total / pagination.limit)"
+              :max="7"
+              v-model="pagination.cpage" @change="changePage()"/>
+      </div>
+    </vx-card>
+  </div>
+</template>
+
+<script>
+import DatePicker from "vue2-datepicker";
+import Multiselect from "vue-multiselect";
+import axios from '../../../../http/axios.js';
+import u from '../../../../until/helper.js';
+
+export default {
+  components: {
+    DatePicker,
+    Multiselect
+  },
+  data() {
+    return {
+      searchData: {
+        keyword: "",
+        manager_id: "",
+        month: "",
+      },
+      teacher_team_list: [],
+      listData: [],
+      summary: null,
+      limitSource: [20, 50, 100, 500],
+      pagination: {
+        cpage: 1,
+        total: 0,
+        limit: 20,
+        init: 0
+      },
+      datepickerOptions: {
+        closed: true,
+        value: "",
+        minDate: "",
+        lang: {
+          days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+          months: [
+            "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+            "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+          ]
+        }
+      },
+    };
+  },
+  created() {
+    axios.g(`/api/system/users?role_id=37`)
+      .then(response => {
+        const list = response.data || [];
+        list.push({ id: -1, name: 'Chưa có team' });
+        this.teacher_team_list = list;
+      });
+    this.resetDate();
+    this.getData();
+  },
+  methods: {
+    resetDate() {
+      this.searchData.month = new Date();
+    },
+    reset() {
+      this.searchData.keyword = "";
+      this.searchData.manager_id = "";
+      this.resetDate();
+      this.pagination.cpage = 1;
+      this.getData();
+    },
+    changePageLimit(limit) {
+      this.pagination.cpage = 1;
+      this.pagination.limit = limit;
+      this.getData();
+    },
+    getData() {
+      let startDate = '';
+      let endDate = '';
+      if (this.searchData.month) {
+        const d = new Date(this.searchData.month);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const firstDay = new Date(y, m, 1);
+        const lastDay = new Date(y, m + 1, 0);
+        startDate = u.dateToString(firstDay);
+        endDate = u.dateToString(lastDay);
+      }
+
+      const data = {
+        keyword: this.searchData.keyword,
+        manager_id: this.searchData.manager_id ? this.searchData.manager_id.id : '',
+        start_date: startDate,
+        end_date: endDate,
+        pagination: this.pagination,
+      };
+
+      this.$vs.loading();
+      axios.p('/api/lms/reports/teacher-payroll-team', data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.listData = response.data.list || [];
+          this.summary = response.data.summary || null;
+          this.pagination = response.data.paging;
+          setTimeout(() => {
+            this.pagination.init = 1;
+          }, 500);
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$vs.loading.close();
+        });
+    },
+    changePage() {
+      if (this.pagination.init) {
+        this.getData();
+      }
+    },
+    exportExcel() {
+      let startDate = '';
+      let endDate = '';
+      if (this.searchData.month) {
+        const d = new Date(this.searchData.month);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const firstDay = new Date(y, m, 1);
+        const lastDay = new Date(y, m + 1, 0);
+        startDate = u.dateToString(firstDay);
+        endDate = u.dateToString(lastDay);
+      }
+
+      let manager_id = this.searchData.manager_id ? this.searchData.manager_id.id : '';
+      let url = `/api/lms/exports/teacher-payroll-team?keyword=${encodeURIComponent(this.searchData.keyword)}&manager_id=${manager_id}&start_date=${startDate}&end_date=${endDate}&token=${localStorage.getItem('accessToken')}`;
+      window.open(url, '_blank');
+    }
+  },
+  filters: {
+    formatMoney(val) {
+      if (!val) return '0';
+      return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+  }
+};
+</script>
+
+<style>
+#page-teacher-payroll-team .multiselect {
+  z-index: 999;
+}
+th .vs-table-text {
+  display: contents;
+}
+</style>
+

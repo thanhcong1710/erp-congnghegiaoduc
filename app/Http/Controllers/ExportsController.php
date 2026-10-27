@@ -4755,4 +4755,200 @@ class ExportsController extends Controller
             throw $exception;
         }
     }
+
+    public function teacherPayrollTeam(Request $request)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '-1');
+
+        $manager_id = isset($request->manager_id) ? (int)$request->manager_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $cond = " s.status = 1 ";
+
+        $user_id = \Illuminate\Support\Facades\Auth::user()->id;
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 37") || \Illuminate\Support\Facades\Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(\Illuminate\Support\Facades\Auth::user()->role_id, [36, 54]);
+
+        if ($is_teacher_leader) {
+            $cond .= " AND (s.teacher_id = $user_id OR ut.manager_id = $user_id) ";
+        } elseif ($is_teacher) {
+            $cond .= " AND s.teacher_id = $user_id ";
+        }
+
+        if ($manager_id > 0) {
+            $cond .= " AND ut.manager_id = $manager_id ";
+        } elseif ($manager_id == -1) {
+            $cond .= " AND (ut.manager_id IS NULL OR ut.manager_id = 0) ";
+        }
+
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (cl.cls_name LIKE '%$kw%' OR ut.name LIKE '%$kw%' OR ut.hrm_id LIKE '%$kw%' OR EXISTS (SELECT 1 FROM users m WHERE m.id = ut.manager_id AND (m.name LIKE '%$kw%' OR m.hrm_id LIKE '%$kw%'))) ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND s.class_date <= '$end_date'";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND s.class_date >= '$start_date'";
+        }
+
+        $query = "SELECT s.teacher_id, s.class_id,
+                    ut.manager_id,
+                    ut.name AS teacher_name,
+                    ut.hrm_id AS teacher_code,
+                    (SELECT CONCAT(m.name, ' - ', m.hrm_id) FROM users m WHERE m.id = ut.manager_id) AS teacher_team,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    COUNT(s.id) AS total_sessions
+            FROM schedules AS s
+                INNER JOIN classes AS cl ON cl.id = s.class_id
+                LEFT JOIN products AS p ON p.id = cl.product_id
+                INNER JOIN users AS ut ON ut.id = s.teacher_id
+            WHERE $cond
+            GROUP BY s.teacher_id, s.class_id
+            ORDER BY CASE WHEN ut.manager_id IS NULL OR ut.manager_id = 0 THEN 1 ELSE 0 END ASC, ut.manager_id ASC, ut.hrm_id ASC, cl.cls_name ASC";
+
+        $all_records = u::query($query);
+
+        $teams = [];
+        $team_teachers = [];
+        $team_classes = [];
+
+        foreach ($all_records as $item) {
+            $team_key = $item->manager_id ? (int)$item->manager_id : 0;
+            $team_name = $item->teacher_team ? $item->teacher_team : 'Chưa có team';
+            $salary = \App\Http\Controllers\ReportsController::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+
+            if (!isset($teams[$team_key])) {
+                $teams[$team_key] = [
+                    'manager_id' => $team_key,
+                    'teacher_team' => $team_name,
+                    'total_teachers' => 0,
+                    'total_classes' => 0,
+                    'total_sessions' => 0,
+                    'total_salary' => 0,
+                ];
+                $team_teachers[$team_key] = [];
+                $team_classes[$team_key] = [];
+            }
+
+            $team_teachers[$team_key][$item->teacher_id] = true;
+            $team_classes[$team_key][$item->class_id] = true;
+            $teams[$team_key]['total_sessions'] += (int)$item->total_sessions;
+            $teams[$team_key]['total_salary'] += $salary;
+        }
+
+        $list = [];
+        $summary = [
+            'total_teachers' => 0,
+            'total_classes' => 0,
+            'total_sessions' => 0,
+            'total_salary' => 0,
+        ];
+
+        foreach ($teams as $team_key => $team) {
+            $team['total_teachers'] = count($team_teachers[$team_key]);
+            $team['total_classes'] = count($team_classes[$team_key]);
+            $list[] = (object)$team;
+
+            $summary['total_teachers'] += $team['total_teachers'];
+            $summary['total_classes'] += $team['total_classes'];
+            $summary['total_sessions'] += $team['total_sessions'];
+            $summary['total_salary'] += $team['total_salary'];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Calibri')->setSize(11);
+
+        // ── Tiêu đề ──
+        $sheet->setCellValue('A1', 'BÁO CÁO TỔNG HỢP TÍNH LƯƠNG GIÁO VIÊN THEO TEAM');
+        $sheet->mergeCells('A1:F1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ],
+        ]);
+        $sheet->getRowDimension(1)->setRowHeight(30);
+
+        // ── Header row ──
+        $hRow = 2;
+        $hData = [
+            'A' => 'STT',
+            'B' => 'Team giáo viên',
+            'C' => 'Số giáo viên',
+            'D' => 'Số lớp',
+            'E' => 'Tổng số buổi',
+            'F' => 'Tổng lương'
+        ];
+        foreach ($hData as $col => $label) {
+            $sheet->setCellValue($col . $hRow, $label);
+        }
+
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(32);
+        $sheet->getColumnDimension('C')->setWidth(16);
+        $sheet->getColumnDimension('D')->setWidth(16);
+        $sheet->getColumnDimension('E')->setWidth(18);
+        $sheet->getColumnDimension('F')->setWidth(24);
+
+        $hStyle = [
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E8E8E8']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ];
+        $sheet->getStyle('A2:F2')->applyFromArray($hStyle);
+        $sheet->getRowDimension(2)->setRowHeight(22);
+
+        $borderOnly = ['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]];
+
+        // ── Data rows ──
+        for ($i = 0; $i < count($list); $i++) {
+            $x = $i + 3;
+            $item = $list[$i];
+
+            $sheet->setCellValue('A' . $x, $i + 1);
+            $sheet->setCellValue('B' . $x, $item->teacher_team);
+            $sheet->setCellValue('C' . $x, $item->total_teachers);
+            $sheet->setCellValue('D' . $x, $item->total_classes);
+            $sheet->setCellValue('E' . $x, $item->total_sessions);
+            $sheet->setCellValue('F' . $x, number_format($item->total_salary));
+
+            $sheet->getStyle('A' . $x . ':F' . $x)->applyFromArray($borderOnly);
+            $sheet->getRowDimension($x)->setRowHeight(23);
+        }
+
+        // ── Dòng tổng ──
+        $totalRow = count($list) + 3;
+        $sheet->setCellValue('A' . $totalRow, 'Tổng cộng');
+        $sheet->mergeCells('A' . $totalRow . ':B' . $totalRow);
+        $sheet->setCellValue('C' . $totalRow, $summary['total_teachers']);
+        $sheet->setCellValue('D' . $totalRow, $summary['total_classes']);
+        $sheet->setCellValue('E' . $totalRow, $summary['total_sessions']);
+        $sheet->setCellValue('F' . $totalRow, number_format($summary['total_salary']));
+
+        $sheet->getStyle('A' . $totalRow . ':F' . $totalRow)->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F3F4F6']],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'BBBBBB']]],
+        ]);
+        $sheet->getStyle('A' . $totalRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getRowDimension($totalRow)->setRowHeight(25);
+
+        $writer = new Xlsx($spreadsheet);
+        try {
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="Bao_cao_tong_hop_tinh_luong_giao_vien_theo_team.xlsx"');
+            header('Cache-Control: max-age=0');
+            $writer->save("php://output");
+        } catch (Exception $exception) {
+            throw $exception;
+        }
+    }
 }

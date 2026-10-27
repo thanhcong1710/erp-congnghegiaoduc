@@ -3486,4 +3486,124 @@ class ReportsController extends Controller
     {
         return self::getTAUnitPrice($product_name) * $total_sessions;
     }
+
+    public function teacherPayrollTeam(Request $request)
+    {
+        $manager_id = isset($request->manager_id) ? (int)$request->manager_id : 0;
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 50;
+
+        $cond = " s.status = 1 ";
+
+        $user_id = \Illuminate\Support\Facades\Auth::user()->id;
+        $is_teacher_leader = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id = 37") || \Illuminate\Support\Facades\Auth::user()->role_id == 37;
+        $is_teacher = u::first("SELECT 1 FROM role_has_user WHERE user_id = $user_id AND role_id IN (36, 54)") || in_array(\Illuminate\Support\Facades\Auth::user()->role_id, [36, 54]);
+
+        if ($is_teacher_leader) {
+            $cond .= " AND (s.teacher_id = $user_id OR ut.manager_id = $user_id) ";
+        } elseif ($is_teacher) {
+            $cond .= " AND s.teacher_id = $user_id ";
+        }
+
+        if ($manager_id > 0) {
+            $cond .= " AND ut.manager_id = $manager_id ";
+        } elseif ($manager_id == -1) {
+            $cond .= " AND (ut.manager_id IS NULL OR ut.manager_id = 0) ";
+        }
+
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (cl.cls_name LIKE '%$kw%' OR ut.name LIKE '%$kw%' OR ut.hrm_id LIKE '%$kw%' OR EXISTS (SELECT 1 FROM users m WHERE m.id = ut.manager_id AND (m.name LIKE '%$kw%' OR m.hrm_id LIKE '%$kw%'))) ";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND s.class_date <= '$end_date'";
+        }
+        if ($start_date !== '') {
+            $cond .= " AND s.class_date >= '$start_date'";
+        }
+
+        $query = "SELECT s.teacher_id, s.class_id,
+                    ut.manager_id,
+                    ut.name AS teacher_name,
+                    ut.hrm_id AS teacher_code,
+                    (SELECT CONCAT(m.name, ' - ', m.hrm_id) FROM users m WHERE m.id = ut.manager_id) AS teacher_team,
+                    cl.cls_name AS class_name,
+                    p.name AS product_name,
+                    COUNT(s.id) AS total_sessions
+            FROM schedules AS s
+                INNER JOIN classes AS cl ON cl.id = s.class_id
+                LEFT JOIN products AS p ON p.id = cl.product_id
+                INNER JOIN users AS ut ON ut.id = s.teacher_id
+            WHERE $cond
+            GROUP BY s.teacher_id, s.class_id
+            ORDER BY CASE WHEN ut.manager_id IS NULL OR ut.manager_id = 0 THEN 1 ELSE 0 END ASC, ut.manager_id ASC, ut.hrm_id ASC, cl.cls_name ASC";
+
+        $all_records = u::query($query);
+
+        $teams = [];
+        $team_teachers = [];
+        $team_classes = [];
+
+        foreach ($all_records as $item) {
+            $team_key = $item->manager_id ? (int)$item->manager_id : 0;
+            $team_name = $item->teacher_team ? $item->teacher_team : 'Chưa có team';
+            $salary = self::calculateSalary($item->class_name, $item->product_name, $item->total_sessions);
+
+            if (!isset($teams[$team_key])) {
+                $teams[$team_key] = [
+                    'manager_id' => $team_key,
+                    'teacher_team' => $team_name,
+                    'total_teachers' => 0,
+                    'total_classes' => 0,
+                    'total_sessions' => 0,
+                    'total_salary' => 0,
+                ];
+                $team_teachers[$team_key] = [];
+                $team_classes[$team_key] = [];
+            }
+
+            $team_teachers[$team_key][$item->teacher_id] = true;
+            $team_classes[$team_key][$item->class_id] = true;
+            $teams[$team_key]['total_sessions'] += (int)$item->total_sessions;
+            $teams[$team_key]['total_salary'] += $salary;
+        }
+
+        $final_list = [];
+        $summary = [
+            'total_teachers' => 0,
+            'total_classes' => 0,
+            'total_sessions' => 0,
+            'total_salary' => 0,
+        ];
+
+        foreach ($teams as $team_key => $team) {
+            $team['total_teachers'] = count($team_teachers[$team_key]);
+            $team['total_classes'] = count($team_classes[$team_key]);
+            $final_list[] = $team;
+
+            $summary['total_teachers'] += $team['total_teachers'];
+            $summary['total_classes'] += $team['total_classes'];
+            $summary['total_sessions'] += $team['total_sessions'];
+            $summary['total_salary'] += $team['total_salary'];
+        }
+
+        $total_count = count($final_list);
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $paged_list = $limit > 0 ? array_slice($final_list, $offset, $limit) : $final_list;
+
+        return response()->json([
+            'list' => $paged_list,
+            'summary' => $summary,
+            'paging' => [
+                'total' => $total_count,
+                'cpage' => $page,
+                'limit' => $limit
+            ]
+        ]);
+    }
 }
