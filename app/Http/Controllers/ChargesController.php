@@ -1141,7 +1141,7 @@ class ChargesController extends Controller
                 WHERE agreement_id = $agreement_id 
                   AND status NOT IN (0, 8)
             ");
-            if ($done_info && ($done_info->total_done >= 8 || $done_info->max_done >= 8)) {
+            if ($done_info && ($done_info->total_done > 8 || $done_info->max_done > 8)) {
                 $is_passed_8th = true;
             }
         }
