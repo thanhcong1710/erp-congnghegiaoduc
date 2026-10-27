@@ -80,7 +80,7 @@
       <div class="mb-4 flex items-end gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200" v-if="(user_role.is_admin || user_role.is_accountant) && selected_items.length > 0">
         <div>
           <label class="rpt-label">Tháng tính lương cho {{ selected_items.length }} bản ghi đã chọn</label>
-          <date-picker style="width:250px" v-model="batch_salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng tính lương"></date-picker>
+          <date-picker style="width:250px" v-model="batch_salary_month" type="month" format="YYYY-MM" value-type="format" :lang="dpLang" placeholder="Chọn tháng tính lương" :append-to-body="true"></date-picker>
         </div>
         <vs-button color="primary" class="rpt-btn" @click="updateBatchDate"><i class="fas fa-save"></i> Cập nhật</vs-button>
       </div>

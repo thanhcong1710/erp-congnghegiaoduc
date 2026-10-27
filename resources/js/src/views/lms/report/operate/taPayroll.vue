@@ -1,7 +1,7 @@
 <template>
   <div id="page-ta-payroll">
     <vx-card no-shadow class="mt-5">
-      <div class="mb-5" style="position: relative; z-index: 99;">
+      <div class="mb-5" style="position: relative; z-index: 999;">
         <div class="vx-row">
           <div :class="is_ta ? 'vx-col sm:w-1/2 w-full mb-4' : 'vx-col sm:w-1/3 w-full mb-4'">
             <label class="vs-input--label">Lớp</label>
@@ -27,7 +27,7 @@
           <div :class="is_ta ? 'vx-col sm:w-1/2 w-full mb-4' : 'vx-col sm:w-1/3 w-full mb-4'">
             <label class="vs-input--label">Thời gian tính lương</label>
             <date-picker name="item-date" v-model="searchData.month" type="month" format="YYYY-MM" style="width: 100%"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng"></date-picker>
+              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng" :append-to-body="true"></date-picker>
           </div>
         </div>
         <div class="vx-row mt-3">

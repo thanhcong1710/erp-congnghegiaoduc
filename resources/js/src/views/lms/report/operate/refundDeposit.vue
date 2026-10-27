@@ -12,7 +12,7 @@
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Tháng hoàn tiền</label>
             <date-picker name="item-date" v-model="searchData.month" format="YYYY-MM" value-type="format" style="width: 100%" type="month"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng"></date-picker>
+              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn tháng" :append-to-body="true"></date-picker>
           </div>
         </div>
         <div class="vx-row mt-3">
