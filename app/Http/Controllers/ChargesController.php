@@ -1123,18 +1123,16 @@ class ChargesController extends Controller
             }
         }
 
-        $today = date('Y-m-d');
-        $check_date = !empty($charge_date) ? date('Y-m-d', strtotime($charge_date)) : $today;
+        $check_date = !empty($charge_date) ? date('Y-m-d', strtotime($charge_date)) : date('Y-m-d');
         $is_passed_8th = false;
 
-        // Nếu ngày buổi 8 của gói hiện tại nhỏ hơn ngày nộp hoặc ngày hiện tại => đã qua ngày buổi 8
-        if (!empty($first_8th) && ($check_date > $first_8th || $today > $first_8th)) {
-            $is_passed_8th = true;
-        }
-
-        // Hoặc kiểm tra số buổi học thực tế của CHÍNH gói combo này:
-        // Nếu tổng done_sessions của các contract thuộc gói này >= 8 hoặc có contract thuộc gói này đã học >= 8 buổi
-        if (!$is_passed_8th) {
+        // Kiểm tra theo ngày nộp tiền (charge_date): nếu ngày nộp lớn hơn ngày buổi 8 => đã quá hạn buổi 8
+        if (!empty($first_8th)) {
+            if ($check_date > $first_8th) {
+                $is_passed_8th = true;
+            }
+        } else {
+            // Trường hợp không xác định được ngày buổi 8 theo lịch thì kiểm tra số buổi học thực tế > 8 buổi
             $done_info = u::first("
                 SELECT SUM(done_sessions) AS total_done, MAX(done_sessions) AS max_done 
                 FROM contracts 
