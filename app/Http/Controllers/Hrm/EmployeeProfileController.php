@@ -91,7 +91,8 @@ class EmployeeProfileController extends Controller
             $data['employee_code'] = HrmEmployeeProfile::generateNextEmployeeCode();
         }
 
-        // Xử lý tạo mới tài khoản User nếu cần
+        // Tạm thời comment phần tự động tạo tài khoản User theo yêu cầu
+        /*
         if (empty($data['user_id']) && !empty($data['user_name'])) {
             $email = !empty($data['email']) ? trim($data['email']) : (strtolower($data['employee_code']) . '@erp.local');
             if (empty($data['email'])) {
@@ -108,6 +109,7 @@ class EmployeeProfileController extends Controller
             ]);
             $data['user_id'] = $newUser->id;
         }
+        */
 
         // Nếu là CTV được tạo bởi Leader
         $data['created_by_user_id'] = $currentUser ? $currentUser->id : null;
