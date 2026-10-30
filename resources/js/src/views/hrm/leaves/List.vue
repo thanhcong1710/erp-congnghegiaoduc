@@ -102,7 +102,7 @@
                   <th width="8%" class="text-center">Số ngày</th>
                   <th width="12%">Trạng thái</th>
                   <th width="15%">Phê duyệt</th>
-                  <th width="10%" class="text-center">Thao tác</th>
+                  <th width="80" class="text-center" style="white-space: nowrap;">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,11 +139,10 @@
                       v-if="tr.status === 0" 
                       size="small" 
                       color="primary" 
-                      type="filled"
                       @click="openApprovePopup(tr)"
                       title="Phê duyệt đơn"
                     >
-                      <i class="fa-solid fa-check mr-1"></i> Duyệt
+                      <i class="fa-solid fa-check"></i>
                     </vs-button>
                   </td>
                 </tr>

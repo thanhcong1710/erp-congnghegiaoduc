@@ -98,7 +98,7 @@
                   <th width="13%">Phân loại</th>
                   <th width="15%">Thời gian thử việc</th>
                   <th width="12%">Trạng thái</th>
-                  <th width="10%" class="text-center">Thao tác</th>
+                  <th width="120" class="text-center" style="white-space: nowrap;">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,7 +142,7 @@
                       {{ tr.resigned_reason }}
                     </div>
                   </td>
-                  <td class="td vs-table--td text-center list-action">
+                  <td class="td vs-table--td text-center list-action" style="white-space: nowrap;">
                     <!-- Nút HR duyệt CTV -->
                     <vs-button 
                       v-if="tr.employee_type === 'ctv' && tr.approval_status === 0" 

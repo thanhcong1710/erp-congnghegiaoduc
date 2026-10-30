@@ -14,7 +14,7 @@
           <vs-th>Lý do</vs-th>
           <vs-th>Trạng thái</vs-th>
           <vs-th>Người duyệt</vs-th>
-          <vs-th>Thao tác</vs-th>
+          <vs-th width="80" class="text-center">Thao tác</vs-th>
         </template>
         <template slot-scope="{data}">
           <vs-tr :key="indextr" v-for="(tr, indextr) in data">
@@ -28,9 +28,9 @@
               </vs-chip>
             </vs-td>
             <vs-td>{{ data[indextr].approver ? data[indextr].approver.name : 'Chưa có' }}</vs-td>
-            <vs-td>
+            <vs-td class="text-center list-action">
               <vs-dropdown vs-trigger-click>
-                <vs-button size="small"   color="dark"><i class="fa-solid fa-ellipsis-v"></i></vs-button>
+                <vs-button size="small" color="dark"><i class="fa-solid fa-ellipsis-v"></i></vs-button>
                 <vs-dropdown-menu>
                   <vs-dropdown-item @click="updateStatus(data[indextr].id, 1)">Phê duyệt</vs-dropdown-item>
                   <vs-dropdown-item @click="updateStatus(data[indextr].id, 2)">Từ chối</vs-dropdown-item>

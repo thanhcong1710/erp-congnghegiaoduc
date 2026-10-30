@@ -49,7 +49,7 @@
                   <th width="14%">NGÀY NHẬN HỒ SƠ</th>
                   <th width="12%">THÔNG TIN HỒ SƠ</th>
                   <th width="20%">GHI CHÚ (THIẾU GIẤY TỜ GÌ...)</th>
-                  <th width="10%" class="text-center">THAO TÁC</th>
+                  <th width="80" class="text-center" style="white-space: nowrap;">THAO TÁC</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,8 +73,8 @@
                     </div>
                   </td>
                   <td class="td vs-table--td text-center list-action">
-                    <vs-button size="small" color="primary" type="filled" @click="openEditModal(tr)">
-                      <i class="fa-solid fa-pen-to-square mr-1"></i> Cập nhật
+                    <vs-button size="small" color="primary" @click="openEditModal(tr)" title="Cập nhật hồ sơ">
+                      <i class="fa-solid fa-pen-to-square"></i>
                     </vs-button>
                   </td>
                 </tr>

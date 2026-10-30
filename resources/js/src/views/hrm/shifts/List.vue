@@ -13,7 +13,7 @@
           <vs-th>Giờ kết thúc</vs-th>
           <vs-th>Đi muộn cho phép (phút)</vs-th>
           <vs-th>Trạng thái</vs-th>
-          <vs-th>Thao tác</vs-th>
+          <vs-th width="80" class="text-center">Thao tác</vs-th>
         </template>
         <template slot-scope="{data}">
           <vs-tr :key="indextr" v-for="(tr, indextr) in data">
@@ -26,8 +26,8 @@
                 {{ data[indextr].status === 1 ? 'Hoạt động' : 'Tạm dừng' }}
               </vs-chip>
             </vs-td>
-            <vs-td>
-              <vs-button size="small"   color="success" @click="openPopup(data[indextr])"><i class="fa fa-edit"></i></vs-button>
+            <vs-td class="text-center list-action">
+              <vs-button size="small" color="success" @click="openPopup(data[indextr])" title="Chỉnh sửa"><i class="fa fa-edit"></i></vs-button>
             </vs-td>
           </vs-tr>
         </template>
