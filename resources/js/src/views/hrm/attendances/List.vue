@@ -97,6 +97,16 @@
                   <option :value="dept.id" v-for="dept in departments" :key="dept.id">{{ dept.name }}</option>
                 </select>
               </div>
+              <div class="con-input-search vs-table--search mr-3 mb-2">
+                <input 
+                  type="text" 
+                  class="input-search vs-table--search-input" 
+                  style="padding: 8px 30px 8px 12px; font-size: 13px; min-width: 200px;" 
+                  placeholder="Lọc tên, mã NS..." 
+                  v-model="dailySearchKeyword" 
+                >
+                <i class="vs-icon notranslate icon-scale material-icons null" style="font-size: 18px;">search</i>
+              </div>
             </div>
             <div class="mb-2">
               <vs-button class="p-3" color="success" type="filled" @click="saveDailyAttendance">
@@ -121,8 +131,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="tr-values vs-table--tr" v-for="(tr, index) in dailyRecords" :key="index">
-                      <td class="td vs-table--td text-center">{{ index + 1 }}</td>
+                    <tr class="tr-values vs-table--tr" v-for="(tr, index) in paginatedDailyRecords" :key="tr.user_id || tr.employee_id || index">
+                      <td class="td vs-table--td text-center">{{ (dailyPage - 1) * dailyPerPage + index + 1 }}</td>
                       <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                       <td class="td vs-table--td font-semibold text-gray-900">{{ tr.name }}</td>
                       <td class="td vs-table--td">{{ tr.team_name }}</td>
@@ -158,6 +168,25 @@
               </div>
             </div>
           </div>
+
+          <!-- Phân trang Tab 1 -->
+          <div class="flex flex-wrap items-center justify-between mt-5" v-if="filteredDailyRecords.length > 0">
+            <div class="text-sm text-gray-600 mb-2 md:mb-0">
+              Hiển thị <strong>{{ filteredDailyRecords.length ? (dailyPage - 1) * dailyPerPage + 1 : 0 }}</strong> - <strong>{{ Math.min(dailyPage * dailyPerPage, filteredDailyRecords.length) }}</strong> trong tổng số <strong>{{ filteredDailyRecords.length }}</strong> nhân sự
+            </div>
+            <div class="flex items-center" v-if="filteredDailyRecords.length > dailyPerPage">
+              <span class="text-sm text-gray-600 mr-2">Mỗi trang:</span>
+              <select v-model="dailyPerPage" @change="dailyPage = 1" class="vs-inputx vs-input--input normal mr-4" style="padding: 6px 10px; font-size: 13px;">
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+              <vs-pagination
+                :total="totalDailyPages"
+                v-model="dailyPage"
+              />
+            </div>
+          </div>
         </vx-card>
       </vs-tab>
 
@@ -179,6 +208,16 @@
                   <option :value="2026">2026</option>
                   <option :value="2027">2027</option>
                 </select>
+              </div>
+              <div class="con-input-search vs-table--search mr-3 mb-2">
+                <input 
+                  type="text" 
+                  class="input-search vs-table--search-input" 
+                  style="padding: 8px 30px 8px 12px; font-size: 13px; min-width: 200px;" 
+                  placeholder="Lọc tên, mã NS..." 
+                  v-model="monthlySearchKeyword" 
+                >
+                <i class="vs-icon notranslate icon-scale material-icons null" style="font-size: 18px;">search</i>
               </div>
             </div>
             <div class="text-sm font-semibold text-primary mb-2">
@@ -206,8 +245,8 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="tr-values vs-table--tr" v-for="(tr, index) in monthlySummary" :key="index">
-                      <td class="td vs-table--td text-center">{{ index + 1 }}</td>
+                    <tr class="tr-values vs-table--tr" v-for="(tr, index) in paginatedMonthlySummary" :key="tr.user_id || tr.employee_id || index">
+                      <td class="td vs-table--td text-center">{{ (monthlyPage - 1) * monthlyPerPage + index + 1 }}</td>
                       <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                       <td class="td vs-table--td font-semibold text-gray-900">{{ tr.name }}</td>
                       <td class="td vs-table--td">{{ tr.team_name }}</td>
@@ -218,12 +257,31 @@
                       <td class="td vs-table--td text-center font-semibold text-danger">{{ tr.unexcused_absent_days }} ngày</td>
                       <td class="td vs-table--td text-center font-semibold text-dark">{{ tr.late_submitted_count }} lần</td>
                     </tr>
-                    <tr v-if="!monthlySummary.length">
+                    <tr v-if="!filteredMonthlySummary.length">
                       <td colspan="10" class="text-center p-4 text-gray-500">Chưa có dữ liệu tổng hợp</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+          <!-- Phân trang Tab 2 -->
+          <div class="flex flex-wrap items-center justify-between mt-5" v-if="filteredMonthlySummary.length > 0">
+            <div class="text-sm text-gray-600 mb-2 md:mb-0">
+              Hiển thị <strong>{{ filteredMonthlySummary.length ? (monthlyPage - 1) * monthlyPerPage + 1 : 0 }}</strong> - <strong>{{ Math.min(monthlyPage * monthlyPerPage, filteredMonthlySummary.length) }}</strong> trong tổng số <strong>{{ filteredMonthlySummary.length }}</strong> nhân sự
+            </div>
+            <div class="flex items-center" v-if="filteredMonthlySummary.length > monthlyPerPage">
+              <span class="text-sm text-gray-600 mr-2">Mỗi trang:</span>
+              <select v-model="monthlyPerPage" @change="monthlyPage = 1" class="vs-inputx vs-input--input normal mr-4" style="padding: 6px 10px; font-size: 13px;">
+                <option :value="20">20</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+              <vs-pagination
+                :total="totalMonthlyPages"
+                v-model="monthlyPage"
+              />
             </div>
           </div>
         </vx-card>
@@ -242,14 +300,62 @@ export default {
       selectedDepartment: '',
       departments: [],
       dailyRecords: [],
+      dailySearchKeyword: '',
+      dailyPage: 1,
+      dailyPerPage: 20,
       selectedMonth: new Date().getMonth() + 1,
       selectedYear: new Date().getFullYear(),
       monthlySummary: [],
+      monthlySearchKeyword: '',
+      monthlyPage: 1,
+      monthlyPerPage: 20,
       standardDays: 26,
       quickSearchKeyword: '',
       quickSearchModalActive: false,
       quickSearchResult: null,
     };
+  },
+  watch: {
+    dailySearchKeyword() {
+      this.dailyPage = 1;
+    },
+    monthlySearchKeyword() {
+      this.monthlyPage = 1;
+    }
+  },
+  computed: {
+    filteredDailyRecords() {
+      if (!this.dailySearchKeyword) return this.dailyRecords;
+      const kw = this.dailySearchKeyword.toLowerCase().trim();
+      return this.dailyRecords.filter(r => 
+        (r.name && r.name.toLowerCase().includes(kw)) ||
+        (r.employee_code && r.employee_code.toLowerCase().includes(kw)) ||
+        (r.team_name && r.team_name.toLowerCase().includes(kw))
+      );
+    },
+    paginatedDailyRecords() {
+      const start = (this.dailyPage - 1) * this.dailyPerPage;
+      return this.filteredDailyRecords.slice(start, start + this.dailyPerPage);
+    },
+    totalDailyPages() {
+      return Math.ceil(this.filteredDailyRecords.length / this.dailyPerPage) || 1;
+    },
+    filteredMonthlySummary() {
+      if (!this.monthlySearchKeyword) return this.monthlySummary;
+      const kw = this.monthlySearchKeyword.toLowerCase().trim();
+      return this.monthlySummary.filter(r => 
+        (r.name && r.name.toLowerCase().includes(kw)) ||
+        (r.employee_code && r.employee_code.toLowerCase().includes(kw)) ||
+        (r.team_name && r.team_name.toLowerCase().includes(kw))
+      );
+    },
+    paginatedMonthlySummary() {
+      const start = (this.monthlyPage - 1) * this.monthlyPerPage;
+      return this.filteredMonthlySummary.slice(start, start + this.monthlyPerPage);
+    },
+    totalMonthlyPages() {
+      return Math.ceil(this.filteredMonthlySummary.length / this.monthlyPerPage) || 1;
+    }
   },
   created() {
     this.fetchDepartments();

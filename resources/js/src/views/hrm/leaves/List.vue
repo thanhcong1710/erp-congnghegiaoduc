@@ -108,8 +108,8 @@
               <tbody>
                 <tr class="tr-values vs-table--tr" v-for="(tr, index) in leaves.data" :key="index">
                   <td class="td vs-table--td text-center">{{ index + 1 + ((leaves.current_page || 1) - 1) * (leaves.per_page || 20) }}</td>
-                  <td class="td vs-table--td font-bold text-primary">{{ tr.user ? (tr.user.hrm_id || '---') : '' }}</td>
-                  <td class="td vs-table--td font-semibold text-gray-900">{{ tr.user ? tr.user.name : 'Unknown' }}</td>
+                  <td class="td vs-table--td font-bold text-primary">{{ tr.employee ? tr.employee.employee_code : (tr.user ? (tr.user.hrm_id || '---') : '') }}</td>
+                  <td class="td vs-table--td font-semibold text-gray-900">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'Unknown') }}</td>
                   <td class="td vs-table--td">
                     <vs-chip :color="getRequestCategoryColor(tr.request_category)">
                       {{ getRequestCategoryText(tr.request_category) }}

@@ -38,7 +38,7 @@
             class="py-2 px-3"
             @click="setFilterType('fulltime')"
           >
-            Fulltime
+            Fulltime ({{ countFulltime }})
           </vs-button>
           <vs-button 
             :type="filterType === 'ctv' ? 'filled' : 'border'" 
@@ -47,7 +47,7 @@
             class="py-2 px-3"
             @click="setFilterType('ctv')"
           >
-            Cộng tác viên (CTV)
+            Cộng tác viên ({{ countCtv }})
           </vs-button>
           <vs-button 
             :type="filterType === 'probation' ? 'filled' : 'border'" 
@@ -56,7 +56,7 @@
             class="py-2 px-3"
             @click="setFilterType('probation')"
           >
-            Thử việc
+            Thử việc ({{ countProbation }})
           </vs-button>
         </div>
 
@@ -102,8 +102,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr class="tr-values vs-table--tr" v-for="(tr, index) in filteredEmployees" :key="index">
-                  <td class="td vs-table--td text-center">{{ index + 1 }}</td>
+                <tr class="tr-values vs-table--tr" v-for="(tr, index) in paginatedEmployees" :key="tr.id || index">
+                  <td class="td vs-table--td text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                   <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                   <td class="td vs-table--td">
                     <div class="font-semibold text-gray-900">{{ tr.full_name || (tr.user ? tr.user.name : '') }}</div>
@@ -181,6 +181,26 @@
           </div>
         </div>
       </div>
+
+      <!-- Phân trang -->
+      <div class="flex flex-wrap items-center justify-between mt-5" v-if="filteredEmployees.length > 0">
+        <div class="text-sm text-gray-600 mb-2 md:mb-0">
+          Hiển thị <strong>{{ filteredEmployees.length ? (currentPage - 1) * perPage + 1 : 0 }}</strong> - <strong>{{ Math.min(currentPage * perPage, filteredEmployees.length) }}</strong> trong tổng số <strong>{{ filteredEmployees.length }}</strong> nhân sự
+        </div>
+        <div class="flex items-center" v-if="filteredEmployees.length > perPage">
+          <span class="text-sm text-gray-600 mr-2">Mỗi trang:</span>
+          <select v-model="perPage" @change="currentPage = 1" class="vs-inputx vs-input--input normal mr-4" style="padding: 6px 10px; font-size: 13px;">
+            <option :value="10">10</option>
+            <option :value="20">20</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+          <vs-pagination
+            :total="totalPages"
+            v-model="currentPage"
+          />
+        </div>
+      </div>
     </vx-card>
 
     <!-- Modal Cập nhật trạng thái hoạt động (Đang làm / Đã nghỉ) -->
@@ -242,16 +262,45 @@ export default {
         work_status: 'working',
         resigned_date: '',
         resigned_reason: ''
-      }
+      },
+      currentPage: 1,
+      perPage: 20
     };
   },
+  watch: {
+    filterType() {
+      this.currentPage = 1;
+    },
+    filterWorkStatus() {
+      this.currentPage = 1;
+    },
+    searchKeyword() {
+      this.currentPage = 1;
+    }
+  },
   computed: {
+    countFulltime() {
+      return this.employees.filter(e => e.employee_type === 'fulltime').length;
+    },
+    countCtv() {
+      return this.employees.filter(e => e.employee_type === 'ctv').length;
+    },
+    countProbation() {
+      return this.employees.filter(e => e.employee_type === 'probation').length;
+    },
     filteredEmployees() {
       let list = this.employees;
       if (this.filterType !== 'all') {
         list = list.filter(emp => emp.employee_type === this.filterType);
       }
       return list;
+    },
+    paginatedEmployees() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.filteredEmployees.slice(start, start + this.perPage);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredEmployees.length / this.perPage) || 1;
     }
   },
   created() {

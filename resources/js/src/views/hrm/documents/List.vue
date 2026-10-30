@@ -53,8 +53,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr class="tr-values vs-table--tr" v-for="(tr, index) in documentsList" :key="index">
-                  <td class="td vs-table--td text-center">{{ index + 1 }}</td>
+                <tr class="tr-values vs-table--tr" v-for="(tr, index) in paginatedDocuments" :key="tr.id || index">
+                  <td class="td vs-table--td text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                   <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                   <td class="td vs-table--td font-bold uppercase text-gray-900">{{ tr.user_name }}</td>
                   <td class="td vs-table--td">{{ tr.team_name }}</td>
@@ -84,6 +84,26 @@
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- Phân trang -->
+      <div class="flex flex-wrap items-center justify-between mt-5" v-if="documentsList.length > 0">
+        <div class="text-sm text-gray-600 mb-2 md:mb-0">
+          Hiển thị <strong>{{ documentsList.length ? (currentPage - 1) * perPage + 1 : 0 }}</strong> - <strong>{{ Math.min(currentPage * perPage, documentsList.length) }}</strong> trong tổng số <strong>{{ documentsList.length }}</strong> hồ sơ
+        </div>
+        <div class="flex items-center" v-if="documentsList.length > perPage">
+          <span class="text-sm text-gray-600 mr-2">Mỗi trang:</span>
+          <select v-model="perPage" @change="currentPage = 1" class="vs-inputx vs-input--input normal mr-4" style="padding: 6px 10px; font-size: 13px;">
+            <option :value="10">10</option>
+            <option :value="20">20</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+          <vs-pagination
+            :total="totalPages"
+            v-model="currentPage"
+          />
         </div>
       </div>
     </vx-card>
@@ -169,8 +189,27 @@ export default {
         { key: 'vneid', label: 'Thông tin cư trú trên VNeID' },
         { key: 'cccd_cong_chung', label: 'CCCD công chứng' },
         { key: 'so_yeu_ly_lich', label: 'Sơ yếu lý lịch' }
-      ]
+      ],
+      currentPage: 1,
+      perPage: 20
     };
+  },
+  watch: {
+    filterStatus() {
+      this.currentPage = 1;
+    },
+    searchKeyword() {
+      this.currentPage = 1;
+    }
+  },
+  computed: {
+    paginatedDocuments() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.documentsList.slice(start, start + this.perPage);
+    },
+    totalPages() {
+      return Math.ceil(this.documentsList.length / this.perPage) || 1;
+    }
   },
   created() {
     this.fetchDocuments();

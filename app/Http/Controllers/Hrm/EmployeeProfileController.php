@@ -360,13 +360,19 @@ class EmployeeProfileController extends Controller
      */
     public function listContracts(Request $request)
     {
-        $query = HrmContract::with(['user']);
+        $query = HrmContract::with(['user', 'employee.department']);
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where('contract_number', 'like', "%{$kw}%")
-                ->orWhereHas('user', function ($q) use ($kw) {
-                    $q->where('name', 'like', "%{$kw}%");
-                });
+            $query->where(function ($q) use ($kw) {
+                $q->where('contract_number', 'like', "%{$kw}%")
+                    ->orWhereHas('user', function ($sub) use ($kw) {
+                        $sub->where('name', 'like', "%{$kw}%");
+                    })
+                    ->orWhereHas('employee', function ($sub) use ($kw) {
+                        $sub->where('full_name', 'like', "%{$kw}%")
+                            ->orWhere('employee_code', 'like', "%{$kw}%");
+                    });
+            });
         }
         $contracts = $query->orderBy('id', 'desc')->paginate($request->limit ?: 20);
         return response()->json($contracts);

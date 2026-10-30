@@ -10,7 +10,7 @@ class ShiftAssignmentController extends Controller
 {
     public function list(Request $request)
     {
-        $assignments = HrmShiftAssignment::with(['user', 'shift'])->orderBy('date', 'desc')->get();
+        $assignments = HrmShiftAssignment::with(['user', 'employee', 'shift'])->orderBy('date', 'desc')->get();
         return response()->json($assignments);
     }
 

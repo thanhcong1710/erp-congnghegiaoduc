@@ -15,7 +15,7 @@
         </template>
         <template slot-scope="{data}">
           <vs-tr :key="indextr" v-for="(tr, indextr) in data">
-            <vs-td>{{ data[indextr].user ? data[indextr].user.name : '' }}</vs-td>
+            <vs-td>{{ data[indextr].employee ? data[indextr].employee.full_name : (data[indextr].user ? data[indextr].user.name : '') }}</vs-td>
             <vs-td>{{ data[indextr].shift ? data[indextr].shift.name : '' }}</vs-td>
             <vs-td>{{ data[indextr].date }}</vs-td>
             <vs-td>

@@ -21,7 +21,7 @@ class LeaveRequestController extends Controller
         $limit = $request->limit ? (int)$request->limit : 20;
         $currentUser = Auth::user();
 
-        $query = HrmLeaveRequest::with(['user', 'leaveType', 'managerApprover', 'hrApprover']);
+        $query = HrmLeaveRequest::with(['user', 'employee', 'leaveType', 'managerApprover', 'hrApprover']);
 
         // Phân quyền:
         // Leader hoặc Nhân viên bình thường chỉ thấy đơn của chính mình (hoặc nhân sự team mình nếu là Leader)
@@ -43,9 +43,14 @@ class LeaveRequestController extends Controller
 
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->whereHas('user', function ($q) use ($kw) {
-                $q->where('name', 'like', "%{$kw}%")
-                  ->orWhere('email', 'like', "%{$kw}%");
+            $query->where(function ($q) use ($kw) {
+                $q->whereHas('user', function ($sub) use ($kw) {
+                    $sub->where('name', 'like', "%{$kw}%")
+                        ->orWhere('email', 'like', "%{$kw}%");
+                })->orWhereHas('employee', function ($sub) use ($kw) {
+                    $sub->where('full_name', 'like', "%{$kw}%")
+                        ->orWhere('employee_code', 'like', "%{$kw}%");
+                });
             });
         }
 

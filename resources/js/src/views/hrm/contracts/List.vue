@@ -41,27 +41,34 @@
                 <tr>
                   <th width="5%" class="text-center">STT</th>
                   <th width="15%">SỐ HỢP ĐỒNG</th>
-                  <th width="22%">NHÂN SỰ</th>
-                  <th width="18%">LOẠI HỢP ĐỒNG</th>
+                  <th width="20%">NHÂN SỰ</th>
+                  <th width="15%">LOẠI HỢP ĐỒNG</th>
                   <th width="12%">TỪ NGÀY</th>
                   <th width="12%">ĐẾN NGÀY</th>
-                  <th width="14%">LƯƠNG CƠ BẢN</th>
-                  <th width="10%" class="text-center">TRẠNG THÁI</th>
+                  <th width="11%">LƯƠNG CƠ BẢN</th>
+                  <th width="110" class="text-center" style="white-space: nowrap;">TRẠNG THÁI</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="tr-values vs-table--tr" v-for="(tr, index) in contracts.data" :key="index">
                   <td class="td vs-table--td text-center">{{ index + 1 + ((contracts.current_page || 1) - 1) * (contracts.per_page || 20) }}</td>
                   <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
-                  <td class="td vs-table--td font-semibold text-gray-900">{{ tr.user ? tr.user.name : 'N/A' }}</td>
+                  <td class="td vs-table--td">
+                    <div class="font-semibold text-gray-900">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'N/A') }}</div>
+                    <div v-if="tr.employee && tr.employee.employee_code" class="text-xs text-gray-500 font-normal">Mã NS: {{ tr.employee.employee_code }}</div>
+                  </td>
                   <td class="td vs-table--td">{{ tr.contract_type }}</td>
                   <td class="td vs-table--td">{{ tr.start_date }}</td>
                   <td class="td vs-table--td">{{ tr.end_date || 'Không thời hạn' }}</td>
                   <td class="td vs-table--td font-semibold text-gray-800">{{ tr.basic_salary | formatCurrency }}</td>
-                  <td class="td vs-table--td text-center">
-                    <vs-chip :color="tr.status === 1 ? 'success' : 'danger'">
+                  <td class="td vs-table--td text-center" style="white-space: nowrap;">
+                    <span 
+                      class="inline-block px-3 py-1 text-xs font-semibold rounded-full" 
+                      :class="tr.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                      style="white-space: nowrap; line-height: 1.4;"
+                    >
                       {{ tr.status === 1 ? 'Hiệu lực' : 'Hết hạn' }}
-                    </vs-chip>
+                    </span>
                   </td>
                 </tr>
                 <tr v-if="!contracts.data || !contracts.data.length">
@@ -89,9 +96,9 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Chọn Nhân sự (*)</label>
-            <select v-model="form.user_id" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;">
-              <option :value="emp.user_id" v-for="emp in employees" :key="emp.id">
-                {{ emp.user ? emp.user.name : 'N/A' }} (Mã NS: {{ emp.employee_code }})
+            <select v-model="form.employee_id" @change="onEmployeeChange" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;">
+              <option :value="emp.id" v-for="emp in employees" :key="emp.id">
+                {{ emp.full_name || (emp.user ? emp.user.name : 'N/A') }} (Mã NS: {{ emp.employee_code }})
               </option>
             </select>
           </div>
@@ -154,6 +161,7 @@ export default {
       searchKeyword: '',
       modalActive: false,
       form: {
+        employee_id: null,
         user_id: null,
         contract_number: '',
         contract_type: 'Hợp đồng 1 năm',
@@ -194,13 +202,20 @@ export default {
       axios.p('/api/hrm/employees/list', {}).then(res => {
         this.employees = res.data || [];
         if (this.employees.length > 0) {
-          this.form.user_id = this.employees[0].user_id;
+          this.form.employee_id = this.employees[0].id;
+          this.form.user_id = this.employees[0].user_id || null;
         }
       });
     },
+    onEmployeeChange() {
+      const found = this.employees.find(e => e.id === this.form.employee_id);
+      this.form.user_id = found && found.user_id ? found.user_id : null;
+    },
     openAddModal() {
+      const firstEmp = this.employees.length > 0 ? this.employees[0] : null;
       this.form = {
-        user_id: this.employees.length > 0 ? this.employees[0].user_id : null,
+        employee_id: firstEmp ? firstEmp.id : null,
+        user_id: firstEmp && firstEmp.user_id ? firstEmp.user_id : null,
         contract_number: '',
         contract_type: 'Hợp đồng 1 năm',
         start_date: new Date().toISOString().split('T')[0],
@@ -210,7 +225,7 @@ export default {
       this.modalActive = true;
     },
     saveContract() {
-      if (!this.form.user_id || !this.form.start_date) {
+      if ((!this.form.employee_id && !this.form.user_id) || !this.form.start_date) {
         this.$vs.notify({ title: 'Lỗi', text: 'Vui lòng chọn nhân sự và ngày bắt đầu hợp đồng', color: 'danger' });
         return;
       }
