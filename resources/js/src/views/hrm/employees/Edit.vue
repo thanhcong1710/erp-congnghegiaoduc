@@ -459,10 +459,8 @@ export default {
         this.$vs.loading.close();
         if (res.data.profile) {
           this.form = { ...this.form, ...res.data.profile };
-          if (res.data.profile.user) {
-            this.form.user_name = res.data.profile.user.name || '';
-            this.form.email = res.data.profile.user.email || '';
-          }
+          this.form.user_name = res.data.profile.full_name || (res.data.profile.user ? res.data.profile.user.name : '');
+          this.form.email = res.data.profile.email || (res.data.profile.user ? res.data.profile.user.email : '');
           this.userId = this.form.user_id;
         }
         this.contracts = res.data.contracts || [];

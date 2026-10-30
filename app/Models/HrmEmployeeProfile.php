@@ -11,6 +11,8 @@ class HrmEmployeeProfile extends Model
     protected $fillable = [
         'user_id',
         'employee_code',
+        'full_name',
+        'email',
         'employee_type',
         'probation_start_date',
         'probation_end_date',

@@ -9,6 +9,7 @@ class HrmAttendance extends Model
     protected $table = 'hrm_attendances';
 
     protected $fillable = [
+        'employee_id',
         'user_id',
         'date',
         'check_in',
@@ -23,6 +24,11 @@ class HrmAttendance extends Model
         'penalty_amount',
         'note',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(HrmEmployeeProfile::class, 'employee_id');
+    }
 
     public function user()
     {

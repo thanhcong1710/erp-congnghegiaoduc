@@ -9,6 +9,7 @@ class HrmLeaveRequest extends Model
     protected $table = 'hrm_leave_requests';
 
     protected $fillable = [
+        'employee_id',
         'user_id',
         'type',
         'leave_type_id',

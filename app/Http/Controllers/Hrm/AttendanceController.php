@@ -40,20 +40,39 @@ class AttendanceController extends Controller
 
         $employees = $query->get();
 
-        // Lấy các bản ghi điểm danh hiện có trong ngày
+        // Lấy các bản ghi điểm danh hiện có trong ngày (theo employee_id hoặc user_id)
+        $empIds = $employees->pluck('id')->filter()->all();
+        $userIds = $employees->pluck('user_id')->filter()->all();
+
         $attendances = HrmAttendance::where('date', $date)
-            ->whereIn('user_id', $employees->pluck('user_id'))
-            ->get()
-            ->keyBy('user_id');
+            ->where(function ($q) use ($empIds, $userIds) {
+                if (!empty($empIds)) {
+                    $q->whereIn('employee_id', $empIds);
+                }
+                if (!empty($userIds)) {
+                    $q->orWhereIn('user_id', $userIds);
+                }
+            })
+            ->get();
+
+        $attByEmp = [];
+        foreach ($attendances as $att) {
+            if ($att->employee_id) {
+                $attByEmp['emp_' . $att->employee_id] = $att;
+            }
+            if ($att->user_id) {
+                $attByEmp['user_' . $att->user_id] = $att;
+            }
+        }
 
         $result = [];
         foreach ($employees as $emp) {
-            $att = $attendances->get($emp->user_id);
+            $att = $attByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($attByEmp['user_' . $emp->user_id] ?? null) : null);
             $result[] = [
                 'employee_profile_id' => $emp->id,
                 'user_id' => $emp->user_id,
                 'employee_code' => $emp->employee_code,
-                'name' => $emp->user ? $emp->user->name : 'N/A',
+                'name' => $emp->full_name ?: ($emp->user ? $emp->user->name : 'N/A'),
                 'team_name' => $emp->department ? $emp->department->name : 'N/A',
                 'attendance_id' => $att ? $att->id : null,
                 'date' => $date,
@@ -83,14 +102,22 @@ class AttendanceController extends Controller
 
         $date = $request->date;
         foreach ($request->records as $item) {
-            if (empty($item['user_id'])) continue;
+            $empId = $item['employee_profile_id'] ?? null;
+            $userId = $item['user_id'] ?? null;
+            if (!$empId && !$userId) continue;
+
+            $condition = ['date' => $date];
+            if ($empId) {
+                $condition['employee_id'] = $empId;
+            } else {
+                $condition['user_id'] = $userId;
+            }
 
             HrmAttendance::updateOrCreate(
+                $condition,
                 [
-                    'user_id' => $item['user_id'],
-                    'date' => $date
-                ],
-                [
+                    'employee_id' => $empId,
+                    'user_id' => $userId,
                     'attendance_status' => $item['attendance_status'] ?? 'present',
                     'note' => $item['note'] ?? null,
                 ]
@@ -146,13 +173,25 @@ class AttendanceController extends Controller
 
         $employees = $query->get();
 
+        $empIds = $employees->pluck('id')->filter()->all();
+        $userIds = $employees->pluck('user_id')->filter()->all();
+
         $attendances = HrmAttendance::whereBetween('date', [$startDate, $endDate])
-            ->whereIn('user_id', $employees->pluck('user_id'))
+            ->where(function ($q) use ($empIds, $userIds) {
+                if (!empty($empIds)) {
+                    $q->whereIn('employee_id', $empIds);
+                }
+                if (!empty($userIds)) {
+                    $q->orWhereIn('user_id', $userIds);
+                }
+            })
             ->get();
 
         $summary = [];
         foreach ($employees as $emp) {
-            $userAtts = $attendances->where('user_id', $emp->user_id);
+            $userAtts = $attendances->filter(function($att) use ($emp) {
+                return ($att->employee_id && $att->employee_id == $emp->id) || ($emp->user_id && $att->user_id == $emp->user_id);
+            });
 
             $workedDays = $userAtts->where('attendance_status', 'present')->count();
             $lateFined = $userAtts->where('attendance_status', 'late_fined')->count();
@@ -161,9 +200,10 @@ class AttendanceController extends Controller
             $lateSubmitted = $userAtts->where('attendance_status', 'late_submitted')->count();
 
             $summary[] = [
+                'employee_profile_id' => $emp->id,
                 'user_id' => $emp->user_id,
                 'employee_code' => $emp->employee_code,
-                'name' => $emp->user ? $emp->user->name : 'N/A',
+                'name' => $emp->full_name ?: ($emp->user ? $emp->user->name : 'N/A'),
                 'team_name' => $emp->department ? $emp->department->name : 'N/A',
                 'standard_days' => $standardWorkDays,
                 'worked_days' => $workedDays,
@@ -184,13 +224,6 @@ class AttendanceController extends Controller
 
     /**
      * Tra cứu nhanh theo Tên, SĐT, hoặc Mã nhân sự:
-     * Nguyễn Văn A
-     * Công chuẩn: 20
-     * Đã làm: 16
-     * Đi muộn: 2 lần
-     * Nghỉ phép: 1 ngày
-     * Nghỉ không phép: 1
-     * Gửi đơn muộn: 0
      */
     public function quickSearchSummary(Request $request)
     {
@@ -209,6 +242,8 @@ class AttendanceController extends Controller
         $profile = HrmEmployeeProfile::with(['user', 'department'])
             ->where('employee_code', $keyword)
             ->orWhere('phone', $keyword)
+            ->orWhere('full_name', 'like', "%{$keyword}%")
+            ->orWhere('email', 'like', "%{$keyword}%")
             ->orWhereHas('user', function ($q) use ($keyword) {
                 $q->where('name', 'like', "%{$keyword}%")
                   ->orWhere('email', 'like', "%{$keyword}%");
@@ -230,7 +265,12 @@ class AttendanceController extends Controller
             $current->addDay();
         }
 
-        $userAtts = HrmAttendance::where('user_id', $profile->user_id)
+        $userAtts = HrmAttendance::where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere('user_id', $profile->user_id);
+                }
+            })
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
@@ -243,7 +283,7 @@ class AttendanceController extends Controller
         return response()->json([
             'status' => 1,
             'data' => [
-                'name' => $profile->user ? $profile->user->name : 'N/A',
+                'name' => $profile->full_name ?: ($profile->user ? $profile->user->name : 'N/A'),
                 'employee_code' => $profile->employee_code,
                 'phone' => $profile->phone,
                 'team_name' => $profile->department ? $profile->department->name : 'N/A',

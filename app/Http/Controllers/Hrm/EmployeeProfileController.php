@@ -69,6 +69,8 @@ class EmployeeProfileController extends Controller
             $kw = trim($request->keyword);
             $query->where(function ($q) use ($kw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
+                  ->orWhere('full_name', 'like', "%{$kw}%")
+                  ->orWhere('email', 'like', "%{$kw}%")
                   ->orWhere('phone', 'like', "%{$kw}%")
                   ->orWhereHas('user', function ($sub) use ($kw) {
                       $sub->where('name', 'like', "%{$kw}%")
@@ -89,6 +91,14 @@ class EmployeeProfileController extends Controller
         // Tự sinh mã nhân sự nếu chưa có (format: CHAM01, CHAM02...)
         if (empty($data['employee_code'])) {
             $data['employee_code'] = HrmEmployeeProfile::generateNextEmployeeCode();
+        }
+
+        // Lưu trực tiếp họ tên và email vào profile độc lập
+        if ($request->filled('user_name')) {
+            $data['full_name'] = $request->user_name;
+        }
+        if ($request->filled('email')) {
+            $data['email'] = trim($request->email);
         }
 
         // Tạm thời comment phần tự động tạo tài khoản User theo yêu cầu
@@ -163,6 +173,13 @@ class EmployeeProfileController extends Controller
             if (isset($data['missing_documents'])) {
                 $missingDocs = is_array($data['missing_documents']) ? $data['missing_documents'] : json_decode($data['missing_documents'], true);
                 $data['profile_status'] = empty($missingDocs) ? 'full' : 'missing';
+            }
+
+            if ($request->filled('user_name')) {
+                $data['full_name'] = $request->user_name;
+            }
+            if ($request->filled('email')) {
+                $data['email'] = trim($request->email);
             }
 
             // Đồng bộ tên và email sang bảng User nếu có
@@ -267,6 +284,8 @@ class EmployeeProfileController extends Controller
             $kw = trim($request->keyword);
             $query->where(function ($q) use ($kw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
+                  ->orWhere('full_name', 'like', "%{$kw}%")
+                  ->orWhere('email', 'like', "%{$kw}%")
                   ->orWhereHas('user', function ($sub) use ($kw) {
                       $sub->where('name', 'like', "%{$kw}%");
                   });
@@ -280,7 +299,7 @@ class EmployeeProfileController extends Controller
             return [
                 'id' => $item->id,
                 'employee_code' => $item->employee_code,
-                'user_name' => $item->user ? $item->user->name : 'N/A',
+                'user_name' => $item->full_name ?: ($item->user ? $item->user->name : 'N/A'),
                 'team_name' => $item->department ? $item->department->name : 'Chưa phân team',
                 'profile_received_date' => $item->profile_received_date,
                 'profile_status' => $item->profile_status, // full: Đã đủ, missing: Thiếu

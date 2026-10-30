@@ -9,6 +9,7 @@ class HrmContract extends Model
     protected $table = 'hrm_contracts';
 
     protected $fillable = [
+        'employee_id',
         'user_id',
         'contract_number',
         'contract_type',
@@ -18,6 +19,11 @@ class HrmContract extends Model
         'file_path',
         'status',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(HrmEmployeeProfile::class, 'employee_id');
+    }
 
     public function user()
     {

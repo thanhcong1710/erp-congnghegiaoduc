@@ -9,8 +9,13 @@ class HrmShiftAssignment extends Model
     protected $table = 'hrm_shift_assignments';
 
     protected $fillable = [
-        'user_id', 'shift_id', 'date', 'is_overtime'
+        'employee_id', 'user_id', 'shift_id', 'date', 'is_overtime'
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(HrmEmployeeProfile::class, 'employee_id');
+    }
 
     public function user()
     {

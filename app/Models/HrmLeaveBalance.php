@@ -9,8 +9,13 @@ class HrmLeaveBalance extends Model
     protected $table = 'hrm_leave_balances';
 
     protected $fillable = [
-        'user_id', 'leave_type_id', 'year', 'total_days', 'used_days'
+        'employee_id', 'user_id', 'leave_type_id', 'year', 'total_days', 'used_days'
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(HrmEmployeeProfile::class, 'employee_id');
+    }
 
     public function user()
     {

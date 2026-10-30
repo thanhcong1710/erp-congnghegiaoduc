@@ -106,8 +106,8 @@
                   <td class="td vs-table--td text-center">{{ index + 1 }}</td>
                   <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                   <td class="td vs-table--td">
-                    <div class="font-semibold text-gray-900">{{ tr.user ? tr.user.name : '' }}</div>
-                    <div class="text-xs text-gray-500">{{ tr.phone || tr.user.email }}</div>
+                    <div class="font-semibold text-gray-900">{{ tr.full_name || (tr.user ? tr.user.name : '') }}</div>
+                    <div class="text-xs text-gray-500">{{ tr.phone || tr.email || (tr.user ? tr.user.email : '') }}</div>
                   </td>
                   <td class="td vs-table--td">{{ tr.department ? tr.department.name : 'Chưa phân bổ' }}</td>
                   <td class="td vs-table--td">
@@ -187,7 +187,7 @@
     <vs-popup title="CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG" :active.sync="statusModalActive">
       <div class="p-4" v-if="selectedEmployee">
         <p class="mb-4 text-sm text-gray-700">
-          Nhân sự: <strong class="text-primary">{{ selectedEmployee.user ? selectedEmployee.user.name : '' }}</strong> (Mã NS: {{ selectedEmployee.employee_code }})
+          Nhân sự: <strong class="text-primary">{{ selectedEmployee.full_name || (selectedEmployee.user ? selectedEmployee.user.name : '') }}</strong> (Mã NS: {{ selectedEmployee.employee_code }})
         </p>
         
         <div class="vx-row mb-4">

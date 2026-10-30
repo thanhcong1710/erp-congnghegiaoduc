@@ -9,6 +9,7 @@ class HrmEmployeeDocument extends Model
     protected $table = 'hrm_employee_documents';
 
     protected $fillable = [
+        'employee_id',
         'user_id',
         'document_type',
         'title',
