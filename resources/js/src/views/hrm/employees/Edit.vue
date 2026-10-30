@@ -521,11 +521,12 @@ export default {
       });
     },
     saveContract() {
-      if(!this.userId) {
-        this.$vs.notify({title: 'Lỗi', text: 'Không xác định được User ID', color: 'danger'});
+      if(!this.id) {
+        this.$vs.notify({title: 'Lỗi', text: 'Không xác định được Nhân sự', color: 'danger'});
         return;
       }
-      this.contractForm.user_id = this.userId;
+      this.contractForm.employee_id = this.id;
+      this.contractForm.user_id = this.userId || null;
       axios.p('/api/hrm/employees/add-contract', this.contractForm).then(res => {
         if (res.data.status === 1) {
           this.$vs.notify({title: 'Thành công', text: res.data.message, color: 'success'});
@@ -557,13 +558,16 @@ export default {
       }
     },
     saveDocument() {
-      if(!this.userId) {
-        this.$vs.notify({title: 'Lỗi', text: 'Không xác định được User ID', color: 'danger'});
+      if(!this.id) {
+        this.$vs.notify({title: 'Lỗi', text: 'Không xác định được Nhân sự', color: 'danger'});
         return;
       }
       
       const formData = new FormData();
-      formData.append('user_id', this.userId);
+      formData.append('employee_id', this.id);
+      if (this.userId) {
+        formData.append('user_id', this.userId);
+      }
       formData.append('title', this.documentForm.title);
       formData.append('document_type', this.documentForm.document_type);
       if (this.documentForm.expiry_date) {

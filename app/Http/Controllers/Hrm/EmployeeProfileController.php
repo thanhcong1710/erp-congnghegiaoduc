@@ -44,7 +44,7 @@ class EmployeeProfileController extends Controller
                 $subordinateIds = explode(',', $currentUser->getStaffHasUser());
                 $query->where(function ($q) use ($currentUser, $subordinateIds) {
                     $q->whereIn('user_id', $subordinateIds)
-                      ->orWhere('created_by_user_id', $currentUser->id);
+                        ->orWhere('created_by_user_id', $currentUser->id);
                 });
             }
         }
@@ -69,21 +69,21 @@ class EmployeeProfileController extends Controller
             $kw = trim($request->keyword);
             $query->where(function ($q) use ($kw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
-                  ->orWhere('full_name', 'like', "%{$kw}%")
-                  ->orWhere('email', 'like', "%{$kw}%")
-                  ->orWhere('phone', 'like', "%{$kw}%")
-                  ->orWhereHas('user', function ($sub) use ($kw) {
-                      $sub->where('name', 'like', "%{$kw}%")
-                          ->orWhere('email', 'like', "%{$kw}%");
-                  });
+                    ->orWhere('full_name', 'like', "%{$kw}%")
+                    ->orWhere('email', 'like', "%{$kw}%")
+                    ->orWhere('phone', 'like', "%{$kw}%")
+                    ->orWhereHas('user', function ($sub) use ($kw) {
+                        $sub->where('name', 'like', "%{$kw}%")
+                            ->orWhere('email', 'like', "%{$kw}%");
+                    });
             });
         }
 
         $employees = $query->orderBy('id', 'desc')->get();
         return response()->json($employees);
     }
-    
-    public function add(Request $request) 
+
+    public function add(Request $request)
     {
         $data = $request->all();
         $currentUser = Auth::user();
@@ -138,25 +138,49 @@ class EmployeeProfileController extends Controller
 
         $profile = HrmEmployeeProfile::create($data);
         return response()->json([
-            'status' => 1, 
-            'message' => 'Thêm thông tin nhân viên thành công', 
+            'status' => 1,
+            'message' => 'Thêm thông tin nhân viên thành công',
             'data' => $profile
         ]);
     }
-    
-    public function show($id) 
+
+    public function show($id)
     {
-        $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->where('user_id', $id)->first();
+        $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->find($id);
         if (!$profile) {
-            $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->find($id);
+            $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->where('user_id', $id)->first();
         }
-        
-        $userId = $profile ? $profile->user_id : $id;
-        
-        $history = HrmEmploymentHistory::where('user_id', $userId)->orderBy('effective_date', 'desc')->get();
-        $documents = HrmEmployeeDocument::where('user_id', $userId)->get();
-        $contracts = HrmContract::where('user_id', $userId)->orderBy('start_date', 'desc')->get();
-        
+
+        $empId = $profile ? $profile->id : null;
+        $userId = $profile ? $profile->user_id : null;
+
+        $history = HrmEmploymentHistory::where(function ($q) use ($empId, $userId) {
+            if ($empId)
+                $q->where('employee_id', $empId);
+            if ($userId)
+                $q->orWhere('user_id', $userId);
+            if (!$empId && !$userId)
+                $q->whereRaw('1=0');
+        })->orderBy('effective_date', 'desc')->get();
+
+        $documents = HrmEmployeeDocument::where(function ($q) use ($empId, $userId) {
+            if ($empId)
+                $q->where('employee_id', $empId);
+            if ($userId)
+                $q->orWhere('user_id', $userId);
+            if (!$empId && !$userId)
+                $q->whereRaw('1=0');
+        })->get();
+
+        $contracts = HrmContract::where(function ($q) use ($empId, $userId) {
+            if ($empId)
+                $q->where('employee_id', $empId);
+            if ($userId)
+                $q->orWhere('user_id', $userId);
+            if (!$empId && !$userId)
+                $q->whereRaw('1=0');
+        })->orderBy('start_date', 'desc')->get();
+
         return response()->json([
             'profile' => $profile,
             'history' => $history,
@@ -164,8 +188,8 @@ class EmployeeProfileController extends Controller
             'contracts' => $contracts
         ]);
     }
-    
-    public function update(Request $request, $id) 
+
+    public function update(Request $request, $id)
     {
         $profile = HrmEmployeeProfile::find($id);
         if ($profile) {
@@ -284,11 +308,11 @@ class EmployeeProfileController extends Controller
             $kw = trim($request->keyword);
             $query->where(function ($q) use ($kw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
-                  ->orWhere('full_name', 'like', "%{$kw}%")
-                  ->orWhere('email', 'like', "%{$kw}%")
-                  ->orWhereHas('user', function ($sub) use ($kw) {
-                      $sub->where('name', 'like', "%{$kw}%");
-                  });
+                    ->orWhere('full_name', 'like', "%{$kw}%")
+                    ->orWhere('email', 'like', "%{$kw}%")
+                    ->orWhereHas('user', function ($sub) use ($kw) {
+                        $sub->where('name', 'like', "%{$kw}%");
+                    });
             });
         }
         if ($request->filled('profile_status') && $request->profile_status !== 'all') {
@@ -314,16 +338,19 @@ class EmployeeProfileController extends Controller
     /**
      * Thêm Hợp đồng (tự sinh mã CHAM01, CHAM02... nếu trống)
      */
-    public function addContract(Request $request) 
+    public function addContract(Request $request)
     {
         $data = $request->all();
         if (empty($data['contract_number'])) {
             $data['contract_number'] = HrmContract::generateNextContractNumber();
         }
+        if (!empty($data['employee_profile_id']) && empty($data['employee_id'])) {
+            $data['employee_id'] = $data['employee_profile_id'];
+        }
         $contract = HrmContract::create($data);
         return response()->json([
-            'status' => 1, 
-            'message' => 'Đã thêm hợp đồng thành công', 
+            'status' => 1,
+            'message' => 'Đã thêm hợp đồng thành công',
             'data' => $contract
         ]);
     }
@@ -337,15 +364,15 @@ class EmployeeProfileController extends Controller
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
             $query->where('contract_number', 'like', "%{$kw}%")
-                  ->orWhereHas('user', function ($q) use ($kw) {
-                      $q->where('name', 'like', "%{$kw}%");
-                  });
+                ->orWhereHas('user', function ($q) use ($kw) {
+                    $q->where('name', 'like', "%{$kw}%");
+                });
         }
         $contracts = $query->orderBy('id', 'desc')->paginate($request->limit ?: 20);
         return response()->json($contracts);
     }
 
-    public function addDocument(Request $request) 
+    public function addDocument(Request $request)
     {
         $paths = [];
         if ($request->hasFile('attachments')) {
@@ -355,12 +382,14 @@ class EmployeeProfileController extends Controller
                 $paths[] = '/uploads/documents/' . $filename;
             }
         }
-        
+
         $docs = [];
+        $empId = $request->employee_id ?: ($request->employee_profile_id ?: null);
         if (count($paths) > 0) {
             foreach ($paths as $index => $path) {
                 $docTitle = count($paths) > 1 ? $request->title . ' - Phần ' . ($index + 1) : $request->title;
                 $docs[] = HrmEmployeeDocument::create([
+                    'employee_id' => $empId,
                     'user_id' => $request->user_id,
                     'title' => $docTitle,
                     'document_type' => $request->document_type,
@@ -369,7 +398,11 @@ class EmployeeProfileController extends Controller
                 ]);
             }
         } else {
-            $docs[] = HrmEmployeeDocument::create($request->except('attachments'));
+            $docData = $request->except('attachments');
+            if ($empId) {
+                $docData['employee_id'] = $empId;
+            }
+            $docs[] = HrmEmployeeDocument::create($docData);
         }
 
         return response()->json(['status' => 1, 'message' => 'Đã tải lên tài liệu thành công', 'data' => $docs]);
