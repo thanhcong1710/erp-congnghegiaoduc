@@ -8,8 +8,12 @@ use App\Models\HrmLeaveRequest;
 use App\Models\HrmLeaveBalance;
 use App\Models\HrmLeaveType;
 use App\Models\HrmAttendance;
+use App\Models\HrmEmployeeProfile;
+use App\Models\HrmDepartment;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LeaveRequestController extends Controller
 {
@@ -193,5 +197,300 @@ class LeaveRequestController extends Controller
                 'remaining_days' => (float)$remainingDays,
             ]
         ]);
+    }
+
+    /**
+     * Bảng tổng hợp số dư và tình hình nghỉ phép của TẤT CẢ nhân sự trong công ty
+     */
+    public function allBalances(Request $request)
+    {
+        try {
+            $year = $request->year ? (int)$request->year : 2026;
+            $limit = $request->limit ? (int)$request->limit : 20;
+            $departmentId = $request->department_id;
+            $keyword = trim($request->keyword ?? '');
+
+            // Query nhân sự có hồ sơ profile
+            $query = HrmEmployeeProfile::with(['department', 'user']);
+
+            if ($departmentId && $departmentId !== 'all') {
+                $query->where('department_id', $departmentId);
+            }
+
+            if ($keyword !== '') {
+                $asciiKw = \Illuminate\Support\Str::ascii($keyword);
+                $query->where(function ($q) use ($keyword, $asciiKw) {
+                    $q->where('full_name', 'like', "%{$keyword}%")
+                        ->orWhere('full_name', 'like', "%{$asciiKw}%")
+                        ->orWhere('employee_code', 'like', "%{$keyword}%");
+                });
+            }
+
+            // Lấy toàn bộ balances của năm đó để tính stats
+            $allBalances = HrmLeaveBalance::where('year', $year)->get()->keyBy('employee_id');
+
+            // Thống kê toàn công ty
+            $totalCompanyUsedDays = $allBalances->sum('used_days');
+            $overLimitCount = $allBalances->where('used_days', '>', 12)->count();
+            $outOfLeaveCount = $allBalances->filter(function ($b) {
+                return $b->used_days >= ($b->total_days ?: 12);
+            })->count();
+
+            // Phân trang danh sách nhân sự
+            $paginated = $query->orderBy('id', 'desc')->paginate($limit);
+
+            $data = [];
+            foreach ($paginated->items() as $index => $profile) {
+                $balance = $allBalances->get($profile->id);
+                $totalDays = $balance ? (float)$balance->total_days : 12.0;
+                $usedDays = $balance ? (float)$balance->used_days : 0.0;
+
+                // Nếu chưa có balance mà có leave requests đã duyệt thì tính
+                if (!$balance) {
+                    $usedDays = (float)HrmLeaveRequest::where(function ($q) use ($profile) {
+                        $q->where('employee_id', $profile->id);
+                        if ($profile->user_id) {
+                            $q->orWhere('user_id', $profile->user_id);
+                        }
+                    })->whereYear('start_date', $year)
+                      ->where('status', 1)
+                      ->sum('duration_days');
+                }
+
+                $remainingDays = max(0, $totalDays - $usedDays);
+                $overDays = max(0, $usedDays - $totalDays);
+
+                // Lấy 3 đợt nghỉ gần nhất
+                $recentLeaves = HrmLeaveRequest::where(function ($q) use ($profile) {
+                    $q->where('employee_id', $profile->id);
+                    if ($profile->user_id) {
+                        $q->orWhere('user_id', $profile->user_id);
+                    }
+                })->whereYear('start_date', $year)
+                  ->where('status', 1)
+                  ->orderBy('start_date', 'desc')
+                  ->limit(3)
+                  ->get(['id', 'start_date', 'end_date', 'duration_days', 'reason', 'approval_type']);
+
+                $data[] = [
+                    'id' => $profile->id,
+                    'user_id' => $profile->user_id,
+                    'employee_code' => $profile->employee_code ?: 'CHAM' . str_pad($profile->id, 3, '0', STR_PAD_LEFT),
+                    'full_name' => $profile->full_name,
+                    'department_id' => $profile->department_id,
+                    'department_name' => $profile->department ? $profile->department->name : 'Chưa phân bổ',
+                    'work_status' => $profile->work_status ?: 'working',
+                    'total_days' => $totalDays,
+                    'used_days' => $usedDays,
+                    'remaining_days' => $remainingDays,
+                    'over_days' => $overDays,
+                    'is_over_limit' => $overDays > 0,
+                    'is_out_of_leave' => $remainingDays <= 0 && $usedDays > 0,
+                    'recent_leaves' => $recentLeaves,
+                ];
+            }
+
+            // Lấy danh sách phòng ban cho bộ lọc
+            $departments = HrmDepartment::select('id', 'name')->orderBy('name', 'asc')->get();
+
+            return response()->json([
+                'status' => 1,
+                'year' => $year,
+                'stats' => [
+                    'total_employees' => $paginated->total(),
+                    'total_company_used_days' => (float)$totalCompanyUsedDays,
+                    'over_limit_count' => $overLimitCount,
+                    'out_of_leave_count' => $outOfLeaveCount,
+                ],
+                'departments' => $departments,
+                'pagination' => [
+                    'total' => $paginated->total(),
+                    'per_page' => $paginated->perPage(),
+                    'current_page' => $paginated->currentPage(),
+                    'last_page' => $paginated->lastPage(),
+                ],
+                'data' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Chi tiết toàn bộ lịch sử nghỉ phép của một nhân viên cụ thể
+     */
+    public function employeeLeaveHistory(Request $request, $employeeId)
+    {
+        try {
+            $year = $request->year ? (int)$request->year : 2026;
+            $profile = HrmEmployeeProfile::with(['department', 'user'])->findOrFail($employeeId);
+
+            $leavesQuery = HrmLeaveRequest::with(['leaveType', 'hrApprover'])
+                ->where(function ($q) use ($profile) {
+                    $q->where('employee_id', $profile->id);
+                    if ($profile->user_id) {
+                        $q->orWhere('user_id', $profile->user_id);
+                    }
+                });
+
+            if ($year) {
+                $leavesQuery->whereYear('start_date', $year);
+            }
+
+            $leaves = $leavesQuery->orderBy('start_date', 'desc')->get();
+
+            $balance = HrmLeaveBalance::where('employee_id', $profile->id)
+                ->where('year', $year)
+                ->first();
+
+            $totalDays = $balance ? (float)$balance->total_days : 12.0;
+            $usedDays = (float)$leaves->where('status', 1)->sum('duration_days');
+            $remainingDays = max(0, $totalDays - $usedDays);
+
+            return response()->json([
+                'status' => 1,
+                'employee' => [
+                    'id' => $profile->id,
+                    'employee_code' => $profile->employee_code,
+                    'full_name' => $profile->full_name,
+                    'department_name' => $profile->department ? $profile->department->name : 'Chưa phân bổ',
+                    'work_status' => $profile->work_status,
+                ],
+                'summary' => [
+                    'year' => $year,
+                    'total_days' => $totalDays,
+                    'used_days' => $usedDays,
+                    'remaining_days' => $remainingDays,
+                    'over_days' => max(0, $usedDays - $totalDays),
+                    'total_requests' => $leaves->count(),
+                ],
+                'leaves' => $leaves,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Import danh sách nghỉ phép tự do từ bảng tính / raw text
+     */
+    public function importRawLeaves(Request $request)
+    {
+        try {
+            $rows = $request->rows;
+            if (!is_array($rows) || empty($rows)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Dữ liệu import rỗng hoặc không đúng định dạng!'
+                ]);
+            }
+
+            $deptMap = [
+                'Sale' => 5,
+                'Đào tạo' => 7,
+                'Marketing' => 9,
+                'Khối văn phòng' => 6,
+            ];
+
+            $importedCount = 0;
+            $updatedProfiles = [];
+
+            DB::beginTransaction();
+
+            foreach ($rows as $row) {
+                $rawName = trim($row['name'] ?? '');
+                if (!$rawName) continue;
+
+                $cleanName = \Normalizer::normalize($rawName, \Normalizer::FORM_C);
+                $cleanName = mb_convert_case(preg_replace('/\s+/', ' ', $cleanName), MB_CASE_TITLE, "UTF-8");
+
+                // Tìm hoặc tạo Profile
+                $profile = HrmEmployeeProfile::where('full_name', $cleanName)
+                    ->orWhere('full_name', 'like', '%' . $cleanName . '%')
+                    ->first();
+
+                if (!$profile) {
+                    $profile = new HrmEmployeeProfile();
+                    $profile->employee_code = HrmEmployeeProfile::generateNextEmployeeCode();
+                    $profile->full_name = $cleanName;
+                    $deptName = trim($row['dept'] ?? '');
+                    $profile->department_id = $deptMap[$deptName] ?? 6;
+                    $profile->work_status = (isset($row['note']) && strpos($row['note'], 'Đã nghỉ') !== false) ? 'resigned' : 'working';
+                    $profile->save();
+                }
+
+                $days = (float)str_replace(',', '.', $row['days'] ?? 1);
+                $dateStr = trim($row['date'] ?? '');
+                $year = 2026;
+
+                // Chuẩn hóa ngày
+                if (strpos($dateStr, '-') !== false) {
+                    $dParts = explode('-', $dateStr);
+                    $start = Carbon::createFromFormat('d/m/Y', trim($dParts[0]))->format('Y-m-d');
+                    $end = Carbon::createFromFormat('d/m/Y', trim($dParts[1]))->format('Y-m-d');
+                    $year = Carbon::parse($start)->year;
+                } else {
+                    $cleanDate = preg_replace('/(\d{1,2}\/\d{1,2})$/', '$1/2026', $dateStr);
+                    $start = Carbon::createFromFormat('d/m/Y', $cleanDate)->format('Y-m-d');
+                    $end = $start;
+                    $year = Carbon::parse($start)->year;
+                }
+
+                $note = trim($row['note'] ?? '');
+                $approvalType = (strpos($note, 'Gửi đơn muộn') !== false) ? 'late_unpaid' : 'approved';
+
+                $req = new HrmLeaveRequest();
+                $req->employee_id = $profile->id;
+                $req->user_id = $profile->user_id ?: 1;
+                $req->leave_type_id = 1;
+                $req->type = 'vacation';
+                $req->request_category = 'leave';
+                $req->start_date = $start;
+                $req->end_date = $end;
+                $req->duration_days = $days;
+                $req->reason = $note ?: 'Nghỉ phép import theo kế hoạch';
+                $req->status = 1;
+                $req->approval_type = $approvalType;
+                $req->approved_by = Auth::id() ?: 1;
+                $req->hr_approved_by = Auth::id() ?: 1;
+                $req->save();
+
+                $importedCount++;
+                $updatedProfiles[$profile->id] = $year;
+            }
+
+            // Đồng bộ lại balance
+            foreach ($updatedProfiles as $empId => $yr) {
+                $totalUsed = (float)HrmLeaveRequest::where('employee_id', $empId)
+                    ->whereYear('start_date', $yr)
+                    ->where('status', 1)
+                    ->sum('duration_days');
+
+                $bal = HrmLeaveBalance::firstOrNew(['employee_id' => $empId, 'year' => $yr]);
+                $bal->total_days = 12.0;
+                $bal->used_days = $totalUsed;
+                $bal->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Đã import thành công {$importedCount} dòng nghỉ phép!",
+                'count' => $importedCount,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi import: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

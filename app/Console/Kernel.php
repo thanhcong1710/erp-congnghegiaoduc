@@ -33,7 +33,8 @@ class Kernel extends ConsoleKernel
         AutoWithdraw::class,
         SnapshotAgreementRevenue::class,
         UpdateAgreementsData::class,
-        \App\Console\Commands\PromoteProbationEmployees::class
+        \App\Console\Commands\PromoteProbationEmployees::class,
+        \App\Console\Commands\HrmImportLeavePlanCommand::class
     ];
 
     /**
