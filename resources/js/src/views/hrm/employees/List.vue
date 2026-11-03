@@ -74,7 +74,7 @@
             <input 
               type="text" 
               class="input-search vs-table--search-input" 
-              style="padding: 12px 36px 12px 14px; font-size: 13px; min-width: 240px;" 
+              style="padding: 12px 36px 12px 36px !important; font-size: 13px; min-width: 240px;" 
               placeholder="Mã, tên, số điện thoại..." 
               v-model="searchKeyword" 
               @input="fetchEmployees"

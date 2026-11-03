@@ -17,7 +17,7 @@
             type="text"
             class="input-search vs-table--search-input"
             style="
-              padding: 12px 36px 12px 14px;
+              padding: 12px 36px 12px 36px !important;
               font-size: 13px;
               min-width: 260px;
             "
@@ -382,7 +382,7 @@
                   type="text"
                   class="input-search vs-table--search-input"
                   style="
-                    padding: 8px 30px 8px 12px;
+                    padding: 8px 30px 8px 36px !important;
                     font-size: 13px;
                     min-width: 200px;
                   "

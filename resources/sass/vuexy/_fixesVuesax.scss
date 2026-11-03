@@ -739,3 +739,15 @@
 .view-upload {
   z-index: 52000;
 }
+
+// ======================================================================================
+// Search input fixes
+// ======================================================================================
+.con-input-search .input-search,
+.con-input-search .vs-table--search-input,
+.vs-table--search .input-search,
+.vs-table--search-input,
+.input-search {
+  padding-left: 36px !important;
+}
+

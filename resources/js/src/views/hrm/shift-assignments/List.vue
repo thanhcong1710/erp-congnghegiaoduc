@@ -60,12 +60,12 @@
         <div>
           <label class="text-xs font-semibold text-gray-600 block mb-1">Tìm kiếm nhân sự</label>
           <div class="relative w-full">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400" style="z-index: 2;">
               <i class="fa-solid fa-magnifying-glass text-sm"></i>
             </div>
             <input 
               type="text" 
-              class="custom-filter-input pl-9 pr-8" 
+              class="custom-filter-input search-input-padding" 
               placeholder="Nhập tên, mã NV, SĐT..." 
               v-model="searchKeyword" 
               @keyup.enter="fetchData"
@@ -438,6 +438,9 @@ export default {
         targetText = `${this.selectedEmployeeIds.length} nhân sự đã chọn`;
       }
 
+      // Ẩn modal chọn ca để tránh đè lên popup confirm
+      this.popupActive = false;
+
       this.$vs.dialog({
         type: 'confirm',
         color: 'primary',
@@ -447,6 +450,9 @@ export default {
         cancelText: 'Hủy bỏ',
         accept: () => {
           this.executeSave();
+        },
+        cancel: () => {
+          this.popupActive = true;
         }
       });
     },
@@ -506,6 +512,11 @@ export default {
 .custom-filter-input:focus {
   border-color: #7367f0;
   box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+}
+
+.search-input-padding {
+  padding-left: 36px !important;
+  padding-right: 32px !important;
 }
 
 .bg-primary-light {

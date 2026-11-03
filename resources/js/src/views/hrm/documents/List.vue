@@ -26,7 +26,7 @@
           <input 
             type="text" 
             class="input-search vs-table--search-input" 
-            style="padding: 12px 36px 12px 14px; font-size: 13px; min-width: 260px;" 
+            style="padding: 12px 36px 12px 36px !important; font-size: 13px; min-width: 260px;" 
             placeholder="Mã nhân sự, họ tên..." 
             v-model="searchKeyword" 
             @input="fetchDocuments"

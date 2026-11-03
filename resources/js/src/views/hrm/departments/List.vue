@@ -122,7 +122,7 @@
           <input 
             type="text" 
             class="input-search vs-table--search-input" 
-            style="padding: 10px 32px 10px 14px; font-size: 13px; min-width: 260px;" 
+            style="padding: 10px 32px 10px 36px !important; font-size: 13px; min-width: 260px;" 
             placeholder="Tìm theo tên phòng ban, mô tả..." 
             v-model="searchKeyword"
           >
