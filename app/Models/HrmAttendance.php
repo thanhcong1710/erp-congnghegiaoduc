@@ -10,6 +10,7 @@ class HrmAttendance extends Model
 
     protected $fillable = [
         'employee_id',
+        'shift_id',
         'user_id',
         'date',
         'check_in',
@@ -28,6 +29,11 @@ class HrmAttendance extends Model
     public function employee()
     {
         return $this->belongsTo(HrmEmployeeProfile::class, 'employee_id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(HrmShift::class, 'shift_id');
     }
 
     public function user()

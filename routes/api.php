@@ -498,6 +498,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::prefix('shift-assignments')->group(function () {
                 Route::post('list', 'Hrm\ShiftAssignmentController@list');
                 Route::post('add', 'Hrm\ShiftAssignmentController@add');
+                Route::post('batch-assign', 'Hrm\ShiftAssignmentController@batchAssign');
             });
             Route::prefix('overtime')->group(function () {
                 Route::post('list', 'Hrm\OvertimeRequestController@list');
