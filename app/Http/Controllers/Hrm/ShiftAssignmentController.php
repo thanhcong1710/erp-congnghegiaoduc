@@ -48,12 +48,15 @@ class ShiftAssignmentController extends Controller
         // Tìm kiếm theo từ khóa (tên, mã NV, SĐT)
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where(function ($q) use ($kw) {
+            $asciiKw = \Illuminate\Support\Str::ascii($kw);
+            $query->where(function ($q) use ($kw, $asciiKw) {
                 $q->where('full_name', 'like', "%{$kw}%")
+                  ->orWhere('full_name', 'like', "%{$asciiKw}%")
                   ->orWhere('employee_code', 'like', "%{$kw}%")
                   ->orWhere('phone', 'like', "%{$kw}%")
-                  ->orWhereHas('user', function ($uq) use ($kw) {
-                      $uq->where('name', 'like', "%{$kw}%");
+                  ->orWhereHas('user', function ($uq) use ($kw, $asciiKw) {
+                      $uq->where('name', 'like', "%{$kw}%")
+                         ->orWhere('name', 'like', "%{$asciiKw}%");
                   });
             });
         }

@@ -43,12 +43,15 @@ class LeaveRequestController extends Controller
 
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where(function ($q) use ($kw) {
-                $q->whereHas('user', function ($sub) use ($kw) {
+            $asciiKw = \Illuminate\Support\Str::ascii($kw);
+            $query->where(function ($q) use ($kw, $asciiKw) {
+                $q->whereHas('user', function ($sub) use ($kw, $asciiKw) {
                     $sub->where('name', 'like', "%{$kw}%")
+                        ->orWhere('name', 'like', "%{$asciiKw}%")
                         ->orWhere('email', 'like', "%{$kw}%");
-                })->orWhereHas('employee', function ($sub) use ($kw) {
+                })->orWhereHas('employee', function ($sub) use ($kw, $asciiKw) {
                     $sub->where('full_name', 'like', "%{$kw}%")
+                        ->orWhere('full_name', 'like', "%{$asciiKw}%")
                         ->orWhere('employee_code', 'like', "%{$kw}%");
                 });
             });

@@ -67,13 +67,16 @@ class EmployeeProfileController extends Controller
         // Tìm kiếm từ khóa
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where(function ($q) use ($kw) {
+            $asciiKw = \Illuminate\Support\Str::ascii($kw);
+            $query->where(function ($q) use ($kw, $asciiKw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
                     ->orWhere('full_name', 'like', "%{$kw}%")
+                    ->orWhere('full_name', 'like', "%{$asciiKw}%")
                     ->orWhere('email', 'like', "%{$kw}%")
                     ->orWhere('phone', 'like', "%{$kw}%")
-                    ->orWhereHas('user', function ($sub) use ($kw) {
+                    ->orWhereHas('user', function ($sub) use ($kw, $asciiKw) {
                         $sub->where('name', 'like', "%{$kw}%")
+                            ->orWhere('name', 'like', "%{$asciiKw}%")
                             ->orWhere('email', 'like', "%{$kw}%");
                     });
             });
@@ -306,12 +309,16 @@ class EmployeeProfileController extends Controller
         $query = HrmEmployeeProfile::with(['user', 'department']);
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where(function ($q) use ($kw) {
+            $asciiKw = \Illuminate\Support\Str::ascii($kw);
+            $query->where(function ($q) use ($kw, $asciiKw) {
                 $q->where('employee_code', 'like', "%{$kw}%")
                     ->orWhere('full_name', 'like', "%{$kw}%")
+                    ->orWhere('full_name', 'like', "%{$asciiKw}%")
                     ->orWhere('email', 'like', "%{$kw}%")
-                    ->orWhereHas('user', function ($sub) use ($kw) {
-                        $sub->where('name', 'like', "%{$kw}%");
+                    ->orWhere('phone', 'like', "%{$kw}%")
+                    ->orWhereHas('user', function ($sub) use ($kw, $asciiKw) {
+                        $sub->where('name', 'like', "%{$kw}%")
+                            ->orWhere('name', 'like', "%{$asciiKw}%");
                     });
             });
         }
@@ -363,13 +370,16 @@ class EmployeeProfileController extends Controller
         $query = HrmContract::with(['user', 'employee.department']);
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
-            $query->where(function ($q) use ($kw) {
+            $asciiKw = \Illuminate\Support\Str::ascii($kw);
+            $query->where(function ($q) use ($kw, $asciiKw) {
                 $q->where('contract_number', 'like', "%{$kw}%")
-                    ->orWhereHas('user', function ($sub) use ($kw) {
-                        $sub->where('name', 'like', "%{$kw}%");
+                    ->orWhereHas('user', function ($sub) use ($kw, $asciiKw) {
+                        $sub->where('name', 'like', "%{$kw}%")
+                            ->orWhere('name', 'like', "%{$asciiKw}%");
                     })
-                    ->orWhereHas('employee', function ($sub) use ($kw) {
+                    ->orWhereHas('employee', function ($sub) use ($kw, $asciiKw) {
                         $sub->where('full_name', 'like', "%{$kw}%")
+                            ->orWhere('full_name', 'like', "%{$asciiKw}%")
                             ->orWhere('employee_code', 'like', "%{$kw}%");
                     });
             });

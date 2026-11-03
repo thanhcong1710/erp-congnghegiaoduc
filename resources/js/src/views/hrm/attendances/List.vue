@@ -12,25 +12,15 @@
         </p>
       </div>
       <div class="flex items-center flex-wrap">
-        <div class="con-input-search vs-table--search mr-3">
+        <div class="mr-3 mb-2 md:mb-0">
           <input
             type="text"
-            class="input-search vs-table--search-input"
-            style="
-              padding: 12px 36px 12px 36px !important;
-              font-size: 13px;
-              min-width: 260px;
-            "
+            class="vs-inputx vs-input--input normal"
+            style="padding: 10px 14px; font-size: 13px; min-width: 260px;"
             placeholder="Tìm theo Tên, SĐT, Mã NS..."
             v-model="quickSearchKeyword"
             @keyup.enter="handleQuickSearch"
           />
-          <i
-            class="vs-icon notranslate icon-scale material-icons null"
-            style="font-size: 20px; cursor: pointer"
-            @click="handleQuickSearch"
-            >search</i
-          >
         </div>
         <vs-button
           color="primary"
@@ -378,23 +368,14 @@
                   <option :value="2027">2027</option>
                 </select>
               </div>
-              <div class="con-input-search vs-table--search mr-3 mb-2">
+              <div class="mr-3 mb-2">
                 <input
                   type="text"
-                  class="input-search vs-table--search-input"
-                  style="
-                    padding: 8px 30px 8px 36px !important;
-                    font-size: 13px;
-                    min-width: 200px;
-                  "
+                  class="vs-inputx vs-input--input normal"
+                  style="padding: 8px 14px; font-size: 13px; min-width: 200px;"
                   placeholder="Lọc tên, mã NS..."
                   v-model="monthlySearchKeyword"
                 />
-                <i
-                  class="vs-icon notranslate icon-scale material-icons null"
-                  style="font-size: 18px"
-                  >search</i
-                >
               </div>
             </div>
             <div class="text-sm font-semibold text-primary mb-2">

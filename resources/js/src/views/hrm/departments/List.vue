@@ -118,15 +118,14 @@
         </div>
 
         <!-- Search Input -->
-        <div class="con-input-search vs-table--search">
+        <div class="mb-2 md:mb-0">
           <input 
             type="text" 
-            class="input-search vs-table--search-input" 
-            style="padding: 10px 32px 10px 36px !important; font-size: 13px; min-width: 260px;" 
+            class="vs-inputx vs-input--input normal" 
+            style="padding: 10px 14px; font-size: 13px; min-width: 260px;" 
             placeholder="Tìm theo tên phòng ban, mô tả..." 
             v-model="searchKeyword"
           >
-          <i class="vs-icon notranslate icon-scale material-icons null" style="font-size: 18px;">search</i>
         </div>
       </div>
 

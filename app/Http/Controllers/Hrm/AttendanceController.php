@@ -311,6 +311,7 @@ class AttendanceController extends Controller
     public function quickSearchSummary(Request $request)
     {
         $keyword = trim($request->keyword);
+        $asciiKw = \Illuminate\Support\Str::ascii($keyword);
         if (!$keyword) {
             return response()->json(['status' => 0, 'message' => 'Vui lòng nhập từ khóa tìm kiếm']);
         }
@@ -323,13 +324,17 @@ class AttendanceController extends Controller
 
         // Tìm nhân sự
         $profile = HrmEmployeeProfile::with(['user', 'department'])
-            ->where('employee_code', $keyword)
-            ->orWhere('phone', $keyword)
-            ->orWhere('full_name', 'like', "%{$keyword}%")
-            ->orWhere('email', 'like', "%{$keyword}%")
-            ->orWhereHas('user', function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%");
+            ->where(function ($q) use ($keyword, $asciiKw) {
+                $q->where('employee_code', $keyword)
+                    ->orWhere('phone', $keyword)
+                    ->orWhere('full_name', 'like', "%{$keyword}%")
+                    ->orWhere('full_name', 'like', "%{$asciiKw}%")
+                    ->orWhere('email', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', function ($uq) use ($keyword, $asciiKw) {
+                        $uq->where('name', 'like', "%{$keyword}%")
+                            ->orWhere('name', 'like', "%{$asciiKw}%")
+                            ->orWhere('email', 'like', "%{$keyword}%");
+                    });
             })
             ->first();
 
