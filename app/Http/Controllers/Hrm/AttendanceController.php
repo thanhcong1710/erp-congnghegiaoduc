@@ -24,7 +24,7 @@ class AttendanceController extends Controller
         $date = $request->date ?: date('Y-m-d');
         $currentUser = Auth::user();
 
-        $query = HrmEmployeeProfile::with(['user', 'department'])
+        $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
         // Phân quyền nếu là Leader chỉ thấy nhân sự team mình
@@ -98,7 +98,7 @@ class AttendanceController extends Controller
             $att = $attByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($attByEmp['user_' . $emp->user_id] ?? null) : null);
             $asn = $assignByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($assignByEmp['user_' . $emp->user_id] ?? null) : null);
 
-            // Ca làm việc: ưu tiên ca đã lưu trong bản ghi điểm danh, nếu chưa lưu thì lấy ca xếp trong ngày
+            // Ca làm việc: ưu tiên ca đã lưu trong bản ghi điểm danh, nếu chưa lưu thì lấy ca xếp trong ngày hoặc ca áp dụng của nhân sự
             $shiftId = null;
             $shiftName = null;
             if ($att && $att->shift_id) {
@@ -107,6 +107,9 @@ class AttendanceController extends Controller
             } elseif ($asn && $asn->shift_id) {
                 $shiftId = $asn->shift_id;
                 $shiftName = $asn->shift ? $asn->shift->name : ($allShifts[$shiftId]->name ?? null);
+            } elseif ($emp->shift_id) {
+                $shiftId = $emp->shift_id;
+                $shiftName = $emp->shift ? $emp->shift->name : ($allShifts[$shiftId]->name ?? null);
             }
 
             // Lọc theo ca làm việc nếu request có truyền shift_id
@@ -172,7 +175,7 @@ class AttendanceController extends Controller
             // Lấy ca làm việc từ record gửi lên
             $shiftId = !empty($item['shift_id']) ? $item['shift_id'] : null;
 
-            // Nếu record chưa có shift_id, tìm từ bảng xếp ca
+            // Nếu record chưa có shift_id, tìm từ bảng xếp ca hoặc ca áp dụng của nhân sự
             if (!$shiftId) {
                 $asn = HrmShiftAssignment::where('date', $date)
                     ->where(function ($q) use ($empId, $userId) {
@@ -184,6 +187,11 @@ class AttendanceController extends Controller
                     ->first();
                 if ($asn) {
                     $shiftId = $asn->shift_id;
+                } elseif ($empId) {
+                    $empProfile = HrmEmployeeProfile::find($empId);
+                    if ($empProfile) {
+                        $shiftId = $empProfile->shift_id;
+                    }
                 }
             }
 
@@ -233,7 +241,7 @@ class AttendanceController extends Controller
             $current->addDay();
         }
 
-        $query = HrmEmployeeProfile::with(['user', 'department'])
+        $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
         // Phân quyền Leader

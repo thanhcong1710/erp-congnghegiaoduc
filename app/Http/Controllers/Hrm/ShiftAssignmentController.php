@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Auth;
 class ShiftAssignmentController extends Controller
 {
     /**
-     * Lấy danh sách nhân viên kèm ca làm việc trong ngày
+     * Lấy danh sách nhân viên kèm ca làm việc áp dụng hiện tại (áp dụng đến khi thay đổi)
      */
     public function list(Request $request)
     {
-        $date = $request->date ?: date('Y-m-d');
         $currentUser = Auth::user();
 
-        $query = HrmEmployeeProfile::with(['user', 'department'])
+        $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
         // Phân quyền nếu là Leader chỉ thấy nhân sự team mình
@@ -32,10 +31,21 @@ class ShiftAssignmentController extends Controller
             }
         }
 
+        // Lọc theo phòng ban
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
         }
 
+        // Lọc theo ca làm việc
+        if ($request->filled('shift_id')) {
+            if ($request->shift_id === 'unassigned') {
+                $query->whereNull('shift_id');
+            } else {
+                $query->where('shift_id', $request->shift_id);
+            }
+        }
+
+        // Tìm kiếm theo từ khóa (tên, mã NV, SĐT)
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
             $query->where(function ($q) use ($kw) {
@@ -50,36 +60,8 @@ class ShiftAssignmentController extends Controller
 
         $employees = $query->orderBy('full_name', 'asc')->get();
 
-        $empIds = $employees->pluck('id')->filter()->all();
-        $userIds = $employees->pluck('user_id')->filter()->all();
-
-        // Lấy danh sách xếp ca trong ngày
-        $assignments = HrmShiftAssignment::with('shift')
-            ->where('date', $date)
-            ->where(function ($q) use ($empIds, $userIds) {
-                if (!empty($empIds)) {
-                    $q->whereIn('employee_id', $empIds);
-                }
-                if (!empty($userIds)) {
-                    $q->orWhereIn('user_id', $userIds);
-                }
-            })
-            ->get();
-
-        $assignByEmp = [];
-        foreach ($assignments as $asn) {
-            if ($asn->employee_id) {
-                $assignByEmp['emp_' . $asn->employee_id] = $asn;
-            }
-            if ($asn->user_id) {
-                $assignByEmp['user_' . $asn->user_id] = $asn;
-            }
-        }
-
         $result = [];
         foreach ($employees as $emp) {
-            $asn = $assignByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($assignByEmp['user_' . $emp->user_id] ?? null) : null);
-
             $result[] = [
                 'employee_id' => $emp->id,
                 'user_id' => $emp->user_id,
@@ -87,88 +69,73 @@ class ShiftAssignmentController extends Controller
                 'name' => $emp->full_name ?: ($emp->user ? $emp->user->name : 'N/A'),
                 'department_id' => $emp->department_id,
                 'team_name' => $emp->department ? $emp->department->name : 'N/A',
-                'assignment_id' => $asn ? $asn->id : null,
-                'shift_id' => $asn ? $asn->shift_id : null,
-                'shift_name' => ($asn && $asn->shift) ? $asn->shift->name : null,
-                'shift_start_time' => ($asn && $asn->shift) ? $asn->shift->start_time : null,
-                'shift_end_time' => ($asn && $asn->shift) ? $asn->shift->end_time : null,
-                'is_overtime' => $asn ? (int)$asn->is_overtime : 0,
-                'date' => $date,
+                'shift_id' => $emp->shift_id,
+                'shift_name' => $emp->shift ? $emp->shift->name : null,
+                'shift_start_time' => $emp->shift ? $emp->shift->start_time : null,
+                'shift_end_time' => $emp->shift ? $emp->shift->end_time : null,
+                'updated_at' => $emp->updated_at ? $emp->updated_at->format('d/m/Y H:i') : null,
             ];
         }
 
         return response()->json([
             'status' => 1,
-            'date' => $date,
             'data' => $result
         ]);
     }
 
     /**
-     * Cập nhật ca làm việc hàng loạt hoặc 1 nhân sự
+     * Cập nhật ca làm việc áp dụng cho 1 hoặc nhiều nhân sự (áp dụng đến khi có thay đổi)
      */
     public function batchAssign(Request $request)
     {
         $request->validate([
             'employee_ids' => 'required|array|min:1',
-            'shift_id' => 'required|integer',
-            'date' => 'required|date',
+            'shift_id' => 'required|integer|exists:hrm_shifts,id',
         ]);
 
         $employeeIds = $request->employee_ids;
         $shiftId = (int)$request->shift_id;
-        $date = $request->date;
-        $isOvertime = $request->boolean('is_overtime') || $request->input('is_overtime') == 1 ? 1 : 0;
+        $today = date('Y-m-d');
 
-        $employees = HrmEmployeeProfile::whereIn('id', $employeeIds)->get()->keyBy('id');
+        // Cập nhật trực tiếp ca làm việc vào profile nhân viên
+        HrmEmployeeProfile::whereIn('id', $employeeIds)->update([
+            'shift_id' => $shiftId,
+        ]);
 
-        $count = 0;
-        foreach ($employeeIds as $empId) {
-            $emp = $employees->get($empId);
-            $userId = $emp ? $emp->user_id : null;
-
-            HrmShiftAssignment::updateOrCreate(
-                [
-                    'employee_id' => $empId,
-                    'date' => $date,
-                ],
-                [
-                    'user_id' => $userId,
-                    'shift_id' => $shiftId,
-                    'is_overtime' => $isOvertime,
-                ]
-            );
-
-            // Đồng bộ sang bảng điểm danh nếu đã tồn tại bản ghi điểm danh trong ngày
-            HrmAttendance::where('date', $date)
-                ->where(function ($q) use ($empId, $userId) {
-                    $q->where('employee_id', $empId);
-                    if ($userId) {
-                        $q->orWhere('user_id', $userId);
-                    }
-                })
-                ->update(['shift_id' => $shiftId]);
-
-            $count++;
+        // Lưu lịch sử xếp ca vào hrm_shift_assignments
+        $employees = HrmEmployeeProfile::whereIn('id', $employeeIds)->get();
+        foreach ($employees as $emp) {
+            HrmShiftAssignment::create([
+                'employee_id' => $emp->id,
+                'user_id' => $emp->user_id,
+                'shift_id' => $shiftId,
+                'date' => $today,
+                'is_overtime' => 0
+            ]);
         }
+
+        // Cập nhật điểm danh hôm nay nếu đã có bản ghi
+        HrmAttendance::where('date', $today)
+            ->whereIn('employee_id', $employeeIds)
+            ->update(['shift_id' => $shiftId]);
 
         $shift = HrmShift::find($shiftId);
         $shiftName = $shift ? $shift->name : "ID #$shiftId";
+        $count = count($employeeIds);
 
         return response()->json([
             'status' => 1,
-            'message' => "Đã xếp ca '{$shiftName}' thành công cho {$count} nhân sự ngày {$date}."
+            'message' => "Đã xếp ca '{$shiftName}' thành công cho {$count} nhân sự (áp dụng đến khi thay đổi)."
         ]);
     }
 
     /**
-     * Thêm đơn lẻ (tương thích ngược)
+     * Thêm / cập nhật đơn lẻ (tương thích ngược)
      */
     public function add(Request $request)
     {
         $request->validate([
-            'shift_id' => 'required',
-            'date' => 'required|date',
+            'shift_id' => 'required|integer|exists:hrm_shifts,id',
         ]);
 
         $empId = $request->employee_id;
@@ -179,42 +146,28 @@ class ShiftAssignmentController extends Controller
             if ($emp) {
                 $empId = $emp->id;
             }
-        } elseif ($empId && !$userId) {
-            $emp = HrmEmployeeProfile::find($empId);
-            if ($emp) {
-                $userId = $emp->user_id;
-            }
         }
 
-        if (!$empId && !$userId) {
+        if (!$empId) {
             return response()->json(['status' => 0, 'message' => 'Vui lòng cung cấp nhân viên'], 422);
         }
 
-        $condition = ['date' => $request->date];
-        if ($empId) {
-            $condition['employee_id'] = $empId;
-        } else {
-            $condition['user_id'] = $userId;
-        }
+        HrmEmployeeProfile::where('id', $empId)->update([
+            'shift_id' => $request->shift_id,
+        ]);
 
-        $assignment = HrmShiftAssignment::updateOrCreate(
-            $condition,
-            [
-                'employee_id' => $empId,
-                'user_id' => $userId,
-                'shift_id' => $request->shift_id,
-                'is_overtime' => $request->boolean('is_overtime') || $request->input('is_overtime') == 1 ? 1 : 0,
-            ]
-        );
+        $assignment = HrmShiftAssignment::create([
+            'employee_id' => $empId,
+            'user_id' => $userId,
+            'shift_id' => $request->shift_id,
+            'date' => date('Y-m-d'),
+            'is_overtime' => 0,
+        ]);
 
-        // Đồng bộ điểm danh nếu có
-        HrmAttendance::where('date', $request->date)
-            ->where(function ($q) use ($empId, $userId) {
-                if ($empId) $q->where('employee_id', $empId);
-                if ($userId) $q->orWhere('user_id', $userId);
-            })
+        HrmAttendance::where('date', date('Y-m-d'))
+            ->where('employee_id', $empId)
             ->update(['shift_id' => $request->shift_id]);
 
-        return response()->json(['status' => 1, 'message' => 'Xếp ca thành công', 'data' => $assignment]);
+        return response()->json(['status' => 1, 'message' => 'Cập nhật ca làm việc thành công', 'data' => $assignment]);
     }
 }

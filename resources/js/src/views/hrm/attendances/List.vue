@@ -185,23 +185,20 @@
                   <option value="unassigned">-- Chưa có ca --</option>
                 </select>
               </div>
-              <div class="con-input-search vs-table--search mr-3 mb-2">
+              <div class="relative mr-3 mb-2" style="min-width: 220px;">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </div>
                 <input
                   type="text"
-                  class="input-search vs-table--search-input"
+                  class="vs-inputx vs-input--input normal w-full pl-8 pr-3"
                   style="
-                    padding: 8px 30px 8px 12px;
+                    padding: 8px 12px 8px 30px;
                     font-size: 13px;
-                    min-width: 200px;
                   "
                   placeholder="Lọc tên, mã NS..."
                   v-model="dailySearchKeyword"
                 />
-                <i
-                  class="vs-icon notranslate icon-scale material-icons null"
-                  style="font-size: 18px"
-                  >search</i
-                >
               </div>
             </div>
             <div class="mb-2">

@@ -26,6 +26,7 @@ class HrmEmployeeProfile extends Model
         'missing_documents',
         'profile_note',
         'department_id',
+        'shift_id',
         'position_id',
         'job_level_id',
         'job_title_id',
@@ -76,6 +77,11 @@ class HrmEmployeeProfile extends Model
     public function department()
     {
         return $this->belongsTo(HrmDepartment::class, 'department_id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(HrmShift::class, 'shift_id');
     }
 
     public function position()
