@@ -268,6 +268,7 @@
                           style="padding: 8px 12px; font-size: 13px"
                           :style="getStatusStyle(tr.attendance_status)"
                         >
+                          <option value="not_checked">⚪ Chưa điểm danh</option>
                           <option value="present">✓ Có mặt / Đúng giờ</option>
                           <option value="leave_approved">📅 Đã gửi phép</option>
                           <option value="unexcused_absent">
@@ -679,6 +680,8 @@ export default {
     },
     getStatusStyle(status) {
       switch (status) {
+        case 'not_checked':
+          return 'color: #6e6b7b; border-color: #d8d6de; background-color: #f8f9fa;';
         case 'present':
           return 'color: #28c76f; border-color: #28c76f; background-color: #f0fdf4;';
         case 'leave_approved':
@@ -690,7 +693,7 @@ export default {
         case 'late_submitted':
           return 'color: #82868b; border-color: #82868b; background-color: #f9fafb;';
         default:
-          return '';
+          return 'color: #6e6b7b; border-color: #d8d6de; background-color: #f8f9fa;';
       }
     }
   }

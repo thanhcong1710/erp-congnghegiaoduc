@@ -134,8 +134,8 @@ class AttendanceController extends Controller
                 'date' => $date,
                 'shift_id' => $shiftId,
                 'shift_name' => $shiftName,
-                // present, leave_approved, unexcused_absent, late_fined, late_submitted
-                'attendance_status' => $att ? $att->attendance_status : 'present',
+                // not_checked, present, leave_approved, unexcused_absent, late_fined, late_submitted
+                'attendance_status' => $att ? $att->attendance_status : 'not_checked',
                 'check_in' => $att ? $att->check_in : null,
                 'check_out' => $att ? $att->check_out : null,
                 'note' => $att ? $att->note : '',
@@ -201,7 +201,7 @@ class AttendanceController extends Controller
                     'employee_id' => $empId,
                     'user_id' => $userId,
                     'shift_id' => $shiftId,
-                    'attendance_status' => $item['attendance_status'] ?? 'present',
+                    'attendance_status' => $item['attendance_status'] ?? 'not_checked',
                     'note' => $item['note'] ?? null,
                 ]
             );
