@@ -1510,11 +1510,31 @@ class ContractsController extends Controller
                         // xác định status theo số buổi đã học
                         $newStatus = (int) ($contract->done_sessions ?? 0) > 0 ? 8 : 0;
 
-                        u::updateSimpleRow([
+                        $updateOldContract = [
                             'status' => $newStatus,
                             'updated_at' => date('Y-m-d H:i:s'),
                             'updator_id' => Auth::user()->id
-                        ], [
+                        ];
+
+                        if (!empty($contract->class_id)) {
+                            $updateOldContract['class_id'] = null;
+                            $updateOldContract['enrolment_start_date'] = null;
+                            $updateOldContract['enrolment_last_date'] = null;
+
+                            // Xóa lịch học phát sinh (nếu có) và ghi log rời lớp
+                            u::query("DELETE FROM schedule_has_student WHERE contract_id = " . (int) $contract->id);
+                            $class_info = u::getObject(['id' => $contract->class_id], 'classes');
+                            if ($class_info) {
+                                LogStudents::logAdd(
+                                    $contract->student_id,
+                                    'Rút khỏi lớp ' . data_get($class_info, 'cls_name') . ' do đổi gói học phí',
+                                    Auth::user()->id
+                                );
+                            }
+                            LogClassStudent::logAction($contract->class_id, $contract->student_id, $contract->id, 0, Auth::user()->id);
+                        }
+
+                        u::updateSimpleRow($updateOldContract, [
                             'id' => $contract->id
                         ], 'contracts');
 
