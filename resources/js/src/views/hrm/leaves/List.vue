@@ -87,13 +87,13 @@
 
         <!-- Bảng danh sách & Bộ lọc -->
         <vx-card no-shadow>
-          <!-- Toolbar Lọc -->
-          <div class="flex flex-wrap items-center justify-between mb-4">
-            <div class="flex flex-wrap items-center mb-2 md:mb-0">
+          <!-- Toolbar Lọc chuẩn form control -->
+          <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+            <div class="flex flex-wrap items-center gap-3">
               <!-- Chọn năm -->
-              <div class="mr-3 mb-2 flex items-center">
-                <span class="text-sm font-medium mr-2 text-gray-700">Năm:</span>
-                <select v-model="filterYear" @change="fetchAllBalances" class="vs-inputx vs-input--input normal" style="padding: 9px 12px; font-size: 13px; width: 100px;">
+              <div class="flex items-center">
+                <span class="text-sm font-semibold mr-2 text-gray-700 whitespace-no-wrap">Năm:</span>
+                <select v-model="filterYear" @change="fetchAllBalances" class="filter-select" style="width: 100px;">
                   <option value="2026">2026</option>
                   <option value="2025">2025</option>
                   <option value="2024">2024</option>
@@ -101,9 +101,9 @@
               </div>
 
               <!-- Chọn phòng ban -->
-              <div class="mr-3 mb-2 flex items-center">
-                <span class="text-sm font-medium mr-2 text-gray-700">Phòng ban:</span>
-                <select v-model="filterDepartment" @change="fetchAllBalances" class="vs-inputx vs-input--input normal" style="padding: 9px 12px; font-size: 13px; min-width: 170px;">
+              <div class="flex items-center">
+                <span class="text-sm font-semibold mr-2 text-gray-700 whitespace-no-wrap">Phòng ban:</span>
+                <select v-model="filterDepartment" @change="fetchAllBalances" class="filter-select" style="min-width: 180px;">
                   <option value="all">-- Tất cả phòng ban --</option>
                   <option :value="dept.id" v-for="dept in departments" :key="dept.id">{{ dept.name }}</option>
                 </select>
@@ -111,90 +111,95 @@
             </div>
 
             <!-- Tìm kiếm & Nút xuất file -->
-            <div class="flex items-center mb-2 md:mb-0">
-              <input 
-                type="text" 
-                class="vs-inputx vs-input--input normal mr-2" 
-                style="padding: 9px 12px; font-size: 13px; min-width: 240px;" 
-                placeholder="Tìm họ tên, mã nhân sự..." 
-                v-model="searchStaffKeyword" 
-                @input="onSearchStaffInput"
-              >
-              <vs-button color="primary" type="border" class="p-2" @click="fetchAllBalances" title="Làm mới">
-                <feather-icon icon="RefreshCwIcon" class="h-4 w-4" />
-              </vs-button>
-              <vs-button color="dark" type="border" class="p-2 ml-2" @click="exportToExcel" title="Xuất Excel bảng này">
+            <div class="flex items-center flex-wrap gap-2">
+              <div class="relative">
+                <input 
+                  type="text" 
+                  class="filter-input" 
+                  style="min-width: 250px; padding-left: 32px;" 
+                  placeholder="Tìm họ tên, mã nhân sự..." 
+                  v-model="searchStaffKeyword" 
+                  @input="onSearchStaffInput"
+                >
+                <i class="fa-solid fa-magnifying-glass absolute text-gray-400" style="left: 10px; top: 12px; font-size: 12px;"></i>
+              </div>
+
+              <button class="btn-tool-action" @click="fetchAllBalances" title="Tải lại dữ liệu">
+                <feather-icon icon="RefreshCwIcon" class="h-4 w-4 text-gray-600" />
+              </button>
+
+              <button class="btn-excel-export" @click="exportToExcel" title="Xuất dữ liệu Excel">
                 <i class="fa-solid fa-file-excel mr-1 text-success"></i> Xuất Excel
-              </vs-button>
+              </button>
             </div>
           </div>
 
           <!-- Bảng Danh Sách Quỹ Phép Toàn Bộ Nhân Sự (Khớp Bảng 2) -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
+          <div class="vs-component vs-con-table stripe vs-table-primary overflow-x-auto">
             <div class="con-tablex vs-table--content">
               <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table">
+                <table class="vs-table vs-table--tbody-table w-full">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th width="4%" class="text-center">STT</th>
-                      <th width="10%">Mã NS</th>
-                      <th width="18%">Họ và tên</th>
-                      <th width="15%">Phòng ban</th>
-                      <th width="10%" class="text-center">Phép năm</th>
-                      <th width="10%" class="text-center">Đã sử dụng</th>
-                      <th width="10%" class="text-center">Còn lại</th>
-                      <th width="13%" class="text-center">Tình trạng</th>
-                      <th width="10%" class="text-center" style="white-space: nowrap;">Thao tác</th>
+                      <th style="width: 50px;" class="text-center">STT</th>
+                      <th style="width: 100px;">Mã NS</th>
+                      <th style="min-width: 180px;">Họ và tên</th>
+                      <th style="min-width: 160px;">Phòng ban</th>
+                      <th style="width: 110px;" class="text-center">Phép năm</th>
+                      <th style="width: 110px;" class="text-center">Đã sử dụng</th>
+                      <th style="width: 100px;" class="text-center">Còn lại</th>
+                      <th style="width: 130px;" class="text-center">Tình trạng</th>
+                      <th style="width: 120px;" class="text-center">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr class="tr-values vs-table--tr" v-for="(emp, index) in staffBalances.data" :key="emp.id">
-                      <td class="td vs-table--td text-center">
+                      <td class="td vs-table--td text-center text-gray-500 font-medium">
                         {{ index + 1 + ((staffBalances.pagination.current_page || 1) - 1) * (staffBalances.pagination.per_page || 20) }}
                       </td>
                       <td class="td vs-table--td">
-                        <span class="font-bold text-primary">{{ emp.employee_code }}</span>
+                        <span class="emp-code-badge">{{ emp.employee_code }}</span>
                       </td>
-                      <td class="td vs-table--td font-semibold text-gray-900 cursor-pointer hover:text-primary" @click="viewEmployeeHistory(emp)">
-                        {{ emp.full_name }}
-                        <span v-if="emp.work_status === 'resigned'" class="ml-1 text-xs text-danger font-normal">(Đã nghỉ)</span>
+                      <td class="td vs-table--td">
+                        <div class="font-semibold text-gray-900 cursor-pointer hover:text-primary transition" @click="viewEmployeeHistory(emp)">
+                          {{ emp.full_name }}
+                          <span v-if="emp.work_status === 'resigned'" class="ml-1 text-xs text-danger font-normal bg-red-50 px-1 py-0.5 rounded border border-red-200">Đã thôi việc</span>
+                        </div>
                       </td>
-                      <td class="td vs-table--td text-sm text-gray-700">
+                      <td class="td vs-table--td text-sm text-gray-600">
                         {{ emp.department_name }}
                       </td>
-                      <td class="td vs-table--td text-center font-semibold text-gray-600">
+                      <td class="td vs-table--td text-center font-semibold text-gray-700">
                         {{ emp.total_days }} ngày
                       </td>
-                      <td class="td vs-table--td text-center font-bold text-warning">
+                      <td class="td vs-table--td text-center font-bold text-warning" style="font-size: 14px;">
                         {{ emp.used_days }} ngày
                       </td>
-                      <td class="td vs-table--td text-center font-bold" :class="emp.remaining_days > 0 ? 'text-success' : 'text-danger'">
+                      <td class="td vs-table--td text-center font-bold" :class="emp.remaining_days > 0 ? 'text-success' : 'text-danger'" style="font-size: 14px;">
                         {{ emp.remaining_days }} ngày
                       </td>
                       <td class="td vs-table--td text-center">
-                        <vs-chip v-if="emp.is_over_limit" color="danger">
+                        <span v-if="emp.is_over_limit" class="status-tag status-danger">
                           Vượt +{{ emp.over_days }} ngày
-                        </vs-chip>
-                        <vs-chip v-else-if="emp.is_out_of_leave" color="warning">
+                        </span>
+                        <span v-else-if="emp.is_out_of_leave" class="status-tag status-warning">
                           Đã hết phép
-                        </vs-chip>
-                        <vs-chip v-else-if="emp.used_days > 0" color="success">
+                        </span>
+                        <span v-else-if="emp.used_days > 0" class="status-tag status-success">
                           Bình thường
-                        </vs-chip>
-                        <vs-chip v-else color="dark">
+                        </span>
+                        <span v-else class="status-tag status-gray">
                           Chưa nghỉ
-                        </vs-chip>
+                        </span>
                       </td>
-                      <td class="td vs-table--td text-center list-action">
-                        <vs-button 
-                          size="small" 
-                          color="primary" 
-                          type="border"
+                      <td class="td vs-table--td text-center">
+                        <button 
+                          class="btn-detail-history"
                           @click="viewEmployeeHistory(emp)"
                           title="Xem chi tiết các đợt nghỉ phép"
                         >
                           <i class="fa-solid fa-clock-rotate-left mr-1"></i> Chi tiết
-                        </vs-button>
+                        </button>
                       </td>
                     </tr>
                     <tr v-if="!staffBalances.data || !staffBalances.data.length">
@@ -207,7 +212,7 @@
           </div>
 
           <!-- Phân trang nhân sự -->
-          <div class="flex flex-wrap items-center justify-between mt-5" v-if="staffBalances.pagination.total > staffBalances.pagination.per_page">
+          <div class="flex flex-wrap items-center justify-between mt-5 pt-3 border-t border-gray-100" v-if="staffBalances.pagination.total > staffBalances.pagination.per_page">
             <div class="text-sm text-gray-500">
               Hiển thị {{ staffBalances.data.length }} / {{ staffBalances.pagination.total }} nhân sự
             </div>
@@ -229,7 +234,7 @@
           <div class="flex flex-wrap items-center justify-between mb-4">
             <div class="flex items-center mb-2 md:mb-0">
               <span class="text-sm font-medium mr-2 text-gray-700">Trạng thái:</span>
-              <select v-model="filterStatus" @change="fetchLeaves" class="vs-inputx vs-input--input normal" style="padding: 9px 12px; font-size: 13px; min-width: 170px;">
+              <select v-model="filterStatus" @change="fetchLeaves" class="filter-select" style="min-width: 170px;">
                 <option value="all">-- Tất cả trạng thái --</option>
                 <option value="0">Chờ duyệt</option>
                 <option value="1">Đã phê duyệt</option>
@@ -240,8 +245,8 @@
             <div class="mb-2 md:mb-0">
               <input 
                 type="text" 
-                class="vs-inputx vs-input--input normal" 
-                style="padding: 9px 12px; font-size: 13px; min-width: 250px;" 
+                class="filter-input" 
+                style="min-width: 250px;" 
                 placeholder="Tìm theo tên nhân viên..." 
                 v-model="searchKeyword" 
                 @input="fetchLeaves"
@@ -250,10 +255,10 @@
           </div>
 
           <!-- Table danh sách đơn -->
-          <div class="vs-component vs-con-table stripe vs-table-primary">
+          <div class="vs-component vs-con-table stripe vs-table-primary overflow-x-auto">
             <div class="con-tablex vs-table--content">
               <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table">
+                <table class="vs-table vs-table--tbody-table w-full">
                   <thead class="vs-table--thead">
                     <tr>
                       <th width="5%" class="text-center">STT</th>
@@ -262,7 +267,7 @@
                       <th width="15%">Loại yêu cầu</th>
                       <th width="18%">Thời gian xin phép</th>
                       <th width="8%" class="text-center">Số ngày</th>
-                      <th width="12%">Trạng thái</th>
+                      <th width="12%" class="text-center">Trạng thái</th>
                       <th width="15%">Phê duyệt</th>
                       <th width="80" class="text-center" style="white-space: nowrap;">Thao tác</th>
                     </tr>
@@ -282,7 +287,7 @@
                         <div class="text-xs text-gray-500 truncate" :title="tr.reason">Lý do: {{ tr.reason }}</div>
                       </td>
                       <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
-                      <td class="td vs-table--td">
+                      <td class="td vs-table--td text-center">
                         <vs-chip :color="tr.status === 1 ? 'success' : (tr.status === 2 ? 'danger' : 'warning')">
                           {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
                         </vs-chip>
@@ -332,88 +337,133 @@
     <!-- ========================================== -->
     <!-- POPUP 1: CHI TIẾT LỊCH SỬ NGHỈ PHÉP NHÂN SỰ -->
     <!-- ========================================== -->
-    <vs-popup :title="popupHistoryTitle" :active.sync="popupHistoryActive" class="popup-leave-history">
-      <div class="p-4" v-if="selectedStaffHistory">
-        <!-- Tóm tắt số ngày phép của nhân viên này -->
-        <div class="vx-row mb-4">
-          <div class="vx-col w-1/4">
-            <div class="p-3 bg-blue-50 border border-blue-200 rounded text-center">
-              <span class="text-xs text-gray-600 block">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
-              <span class="text-xl font-bold text-primary">{{ selectedStaffHistory.summary.total_days }} ngày</span>
+    <vs-popup 
+      :title="popupHistoryTitle" 
+      :active.sync="popupHistoryActive" 
+      class="popup-leave-history modal-custom-leave"
+    >
+      <div class="popup-history-container" v-if="selectedStaffHistory">
+        <!-- Thông tin nhân sự -->
+        <div class="emp-info-banner mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="avatar-box mr-3">
+                <i class="fa-solid fa-user text-primary text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-gray-900 leading-tight">{{ selectedStaffHistory.employee.full_name }}</h4>
+                <div class="text-xs text-gray-500 mt-0.5">
+                  Mã NS: <span class="font-semibold text-primary">{{ selectedStaffHistory.employee.employee_code }}</span>
+                  <span class="mx-2">•</span>
+                  Phòng ban: <span class="font-semibold text-gray-700">{{ selectedStaffHistory.employee.department_name }}</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="vx-col w-1/4">
-            <div class="p-3 bg-yellow-50 border border-yellow-200 rounded text-center">
-              <span class="text-xs text-gray-600 block">Đã sử dụng</span>
-              <span class="text-xl font-bold text-warning">{{ selectedStaffHistory.summary.used_days }} ngày</span>
-            </div>
-          </div>
-          <div class="vx-col w-1/4">
-            <div class="p-3 bg-green-50 border border-green-200 rounded text-center">
-              <span class="text-xs text-gray-600 block">Còn lại</span>
-              <span class="text-xl font-bold text-success">{{ selectedStaffHistory.summary.remaining_days }} ngày</span>
-            </div>
-          </div>
-          <div class="vx-col w-1/4">
-            <div class="p-3 border rounded text-center" :class="selectedStaffHistory.summary.over_days > 0 ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'">
-              <span class="text-xs text-gray-600 block">Vượt phép</span>
-              <span class="text-xl font-bold" :class="selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
-                {{ selectedStaffHistory.summary.over_days }} ngày
+            <div>
+              <span v-if="selectedStaffHistory.employee.work_status === 'resigned'" class="status-tag status-danger">
+                Đã thôi việc
+              </span>
+              <span v-else class="status-tag status-success">
+                Đang làm việc
               </span>
             </div>
           </div>
         </div>
 
-        <h5 class="font-bold text-gray-800 mb-2 flex items-center">
-          <i class="fa-solid fa-list-check mr-2 text-primary"></i> Lịch Sử Chi Tiết Từng Đợt Nghỉ ({{ selectedStaffHistory.leaves.length }} đợt)
-        </h5>
+        <!-- 4 Card Tóm tắt số ngày phép của nhân viên -->
+        <div class="grid grid-cols-4 gap-3 mb-5">
+          <div class="summary-card card-blue">
+            <span class="summary-label">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
+            <span class="summary-value text-primary">{{ selectedStaffHistory.summary.total_days }} <small class="text-xs font-normal">ngày</small></span>
+          </div>
 
-        <!-- Table chi tiết các đợt nghỉ -->
-        <div class="vs-component vs-con-table stripe vs-table-primary">
-          <div class="con-tablex vs-table--content">
-            <div class="vs-con-tbody vs-table--tbody" style="max-height: 400px; overflow-y: auto;">
-              <table class="vs-table vs-table--tbody-table">
-                <thead class="vs-table--thead">
-                  <tr>
-                    <th width="6%" class="text-center">STT</th>
-                    <th width="24%">Thời gian nghỉ</th>
-                    <th width="12%" class="text-center">Số ngày</th>
-                    <th width="28%">Lý do / Ghi chú</th>
-                    <th width="18%">Chế độ phê duyệt</th>
-                    <th width="12%" class="text-center">Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(lv, idx) in selectedStaffHistory.leaves" :key="lv.id">
-                    <td class="text-center">{{ idx + 1 }}</td>
-                    <td>
-                      <div class="font-semibold text-gray-900">{{ lv.start_date }}</div>
-                      <div class="text-xs text-gray-400" v-if="lv.start_date !== lv.end_date">đến {{ lv.end_date }}</div>
-                    </td>
-                    <td class="text-center font-bold text-primary">{{ lv.duration_days }}</td>
-                    <td class="text-sm text-gray-700">{{ lv.reason || '---' }}</td>
-                    <td>
-                      <span class="text-xs font-semibold" :class="getApprovalTypeClass(lv.approval_type)">
-                        {{ getApprovalTypeText(lv.approval_type) }}
-                      </span>
-                    </td>
-                    <td class="text-center">
-                      <vs-chip :color="lv.status === 1 ? 'success' : (lv.status === 2 ? 'danger' : 'warning')">
-                        {{ lv.status === 1 ? 'Đã duyệt' : (lv.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
-                      </vs-chip>
-                    </td>
-                  </tr>
-                  <tr v-if="!selectedStaffHistory.leaves.length">
-                    <td colspan="6" class="text-center p-3 text-gray-400">Chưa có lịch sử nghỉ phép nào trong năm này</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="summary-card card-orange">
+            <span class="summary-label">Đã sử dụng</span>
+            <span class="summary-value text-warning">{{ selectedStaffHistory.summary.used_days }} <small class="text-xs font-normal">ngày</small></span>
+          </div>
+
+          <div class="summary-card card-green">
+            <span class="summary-label">Số ngày còn lại</span>
+            <span class="summary-value text-success">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
+          </div>
+
+          <div class="summary-card" :class="selectedStaffHistory.summary.over_days > 0 ? 'card-red' : 'card-gray'">
+            <span class="summary-label">Vượt hạn mức</span>
+            <span class="summary-value" :class="selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
+              {{ selectedStaffHistory.summary.over_days }} <small class="text-xs font-normal">ngày</small>
+            </span>
           </div>
         </div>
 
-        <div class="flex justify-end mt-4">
-          <vs-button color="dark" type="border" @click="popupHistoryActive = false">Đóng</vs-button>
+        <!-- Tiêu đề danh sách -->
+        <div class="flex items-center justify-between mb-2">
+          <h5 class="font-bold text-gray-800 text-sm flex items-center">
+            <i class="fa-solid fa-calendar-days mr-2 text-primary"></i> 
+            Chi tiết các đợt nghỉ phép ({{ selectedStaffHistory.leaves.length }} đợt)
+          </h5>
+        </div>
+
+        <!-- Table chi tiết các đợt nghỉ -->
+        <div class="history-table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;" class="text-center">STT</th>
+                <th style="width: 140px;">Thời gian nghỉ</th>
+                <th style="width: 90px;" class="text-center">Số ngày</th>
+                <th style="min-width: 180px;">Lý do / Ghi chú</th>
+                <th style="width: 170px;">Chế độ phê duyệt</th>
+                <th style="width: 105px;" class="text-center">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(lv, idx) in selectedStaffHistory.leaves" :key="lv.id">
+                <td class="text-center text-gray-500 font-medium">{{ idx + 1 }}</td>
+                <td>
+                  <div class="font-semibold text-gray-900 text-sm">{{ lv.start_date }}</div>
+                  <div class="text-xs text-gray-400" v-if="lv.start_date !== lv.end_date">đến {{ lv.end_date }}</div>
+                </td>
+                <td class="text-center">
+                  <span class="day-badge">{{ lv.duration_days }}</span>
+                </td>
+                <td class="text-sm text-gray-700">
+                  {{ lv.reason || '---' }}
+                </td>
+                <td>
+                  <span v-if="lv.approval_type === 'approved'" class="mode-badge mode-approved">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Hưởng 100% lương
+                  </span>
+                  <span v-else-if="lv.approval_type === 'late_unpaid'" class="mode-badge mode-late">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Gửi muộn (trừ lương)
+                  </span>
+                  <span v-else-if="lv.approval_type === 'half_salary'" class="mode-badge mode-half">
+                    <i class="fa-solid fa-circle-half-stroke mr-1"></i> Hưởng 50% lương
+                  </span>
+                  <span v-else-if="lv.approval_type === 'rejected'" class="mode-badge mode-rejected">
+                    <i class="fa-solid fa-circle-xmark mr-1"></i> Từ chối
+                  </span>
+                  <span v-else class="text-gray-400 text-xs">---</span>
+                </td>
+                <td class="text-center">
+                  <span v-if="lv.status === 1" class="status-tag status-success">Đã duyệt</span>
+                  <span v-else-if="lv.status === 2" class="status-tag status-danger">Từ chối</span>
+                  <span v-else class="status-tag status-warning">Chờ duyệt</span>
+                </td>
+              </tr>
+              <tr v-if="!selectedStaffHistory.leaves.length">
+                <td colspan="6" class="text-center p-4 text-gray-400 text-sm">
+                  Chưa có lịch sử nghỉ phép nào trong năm này
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer button -->
+        <div class="flex justify-end mt-4 pt-3 border-t border-gray-100">
+          <button class="btn-close-modal" @click="popupHistoryActive = false">
+            <i class="fa-solid fa-xmark mr-1"></i> Đóng
+          </button>
         </div>
       </div>
     </vs-popup>
@@ -421,19 +471,19 @@
     <!-- ========================================== -->
     <!-- POPUP 2: IMPORT BẢNG NGHỈ PHÉP TỰ ĐỘNG -->
     <!-- ========================================== -->
-    <vs-popup title="IMPORT BẢNG KẾ HOẠCH NGHỈ PHÉP TỪ EXCEL" :active.sync="popupImportActive">
+    <vs-popup title="IMPORT BẢNG KẾ HOẠCH NGHỈ PHÉP TỪ EXCEL" :active.sync="popupImportActive" class="modal-custom-leave">
       <div class="p-3">
         <p class="text-sm text-gray-600 mb-2">
           Dán các dòng copy trực tiếp từ Excel / Google Sheet vào khung dưới đây theo thứ tự cột:
           <br>
-          <code class="text-xs bg-gray-100 p-1 rounded font-mono text-primary font-bold">
+          <code class="text-xs bg-gray-100 p-1.5 rounded font-mono text-primary font-bold inline-block mt-1">
             [Họ và tên] [Tab] [Số ngày] [Tab] [Ngày] [Tab] [Chức vụ] [Tab] [Phòng ban] [Tab] [Ghi chú]
           </code>
         </p>
 
         <textarea 
           rows="7" 
-          class="vs-inputx vs-input--input normal w-full font-mono text-xs" 
+          class="filter-input w-full font-mono text-xs" 
           placeholder="Dán dữ liệu các dòng copy từ Excel tại đây..."
           v-model="rawImportText"
           @input="parseImportText"
@@ -446,26 +496,26 @@
             </span>
           </div>
 
-          <div style="max-height: 200px; overflow-y: auto;" class="border rounded">
+          <div style="max-height: 200px; overflow-y: auto;" class="border rounded-lg border-gray-200">
             <table class="w-full text-xs">
               <thead class="bg-gray-100 text-gray-600">
                 <tr>
-                  <th class="p-1">#</th>
-                  <th class="p-1 text-left">Họ tên</th>
-                  <th class="p-1 text-center">Số ngày</th>
-                  <th class="p-1 text-left">Ngày</th>
-                  <th class="p-1 text-left">Phòng ban</th>
-                  <th class="p-1 text-left">Ghi chú</th>
+                  <th class="p-2 text-center" style="width: 40px;">#</th>
+                  <th class="p-2 text-left">Họ tên</th>
+                  <th class="p-2 text-center">Số ngày</th>
+                  <th class="p-2 text-left">Ngày</th>
+                  <th class="p-2 text-left">Phòng ban</th>
+                  <th class="p-2 text-left">Ghi chú</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, rIdx) in parsedRows.slice(0, 50)" :key="rIdx" class="border-t">
-                  <td class="p-1 text-center">{{ rIdx + 1 }}</td>
-                  <td class="p-1 font-semibold">{{ row.name }}</td>
-                  <td class="p-1 text-center font-bold text-primary">{{ row.days }}</td>
-                  <td class="p-1">{{ row.date }}</td>
-                  <td class="p-1">{{ row.dept }}</td>
-                  <td class="p-1 text-gray-500">{{ row.note }}</td>
+                <tr v-for="(row, rIdx) in parsedRows.slice(0, 50)" :key="rIdx" class="border-t border-gray-100">
+                  <td class="p-2 text-center text-gray-400">{{ rIdx + 1 }}</td>
+                  <td class="p-2 font-semibold text-gray-800">{{ row.name }}</td>
+                  <td class="p-2 text-center font-bold text-primary">{{ row.days }}</td>
+                  <td class="p-2 text-gray-600">{{ row.date }}</td>
+                  <td class="p-2 text-gray-600">{{ row.dept }}</td>
+                  <td class="p-2 text-gray-500">{{ row.note }}</td>
                 </tr>
               </tbody>
             </table>
@@ -475,17 +525,17 @@
           </p>
         </div>
 
-        <div class="flex justify-end mt-4">
+        <div class="flex justify-end mt-4 pt-3 border-t border-gray-100">
           <vs-button 
             color="success" 
             type="filled" 
-            class="mr-2"
+            class="mr-2 p-2.5 px-4"
             :disabled="!parsedRows.length || isImporting"
             @click="submitImport"
           >
             <i class="fa-solid fa-cloud-arrow-up mr-1"></i> {{ isImporting ? 'Đang Import...' : 'Xác Nhận Import' }}
           </vs-button>
-          <vs-button color="dark" type="border" @click="popupImportActive = false">Hủy</vs-button>
+          <button class="btn-close-modal" @click="popupImportActive = false">Hủy</button>
         </div>
       </div>
     </vs-popup>
@@ -498,7 +548,7 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Loại yêu cầu (*)</label>
-            <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.request_category">
+            <select class="filter-select w-full" v-model="form.request_category">
               <option value="leave">Xin nghỉ phép thường</option>
               <option value="shift_change">Xin đổi ca làm việc</option>
               <option value="off_to_onl">Xin chuyển làm Off sang Onl (Hưởng 50% lương)</option>
@@ -509,7 +559,7 @@
         <div class="vx-row mb-4" v-if="form.request_category === 'leave'">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Loại nghỉ phép</label>
-            <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.leave_type_id">
+            <select class="filter-select w-full" v-model="form.leave_type_id">
               <option :value="item.id" v-for="item in leaveTypes" :key="item.id">{{ item.name }}</option>
             </select>
           </div>
@@ -518,36 +568,36 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày (*)</label>
-            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" @change="calculateDays" />
+            <input type="date" class="filter-input w-full" v-model="form.start_date" @change="calculateDays" />
           </div>
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày (*)</label>
-            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.end_date" @change="calculateDays" />
+            <input type="date" class="filter-input w-full" v-model="form.end_date" @change="calculateDays" />
           </div>
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Số ngày (*)</label>
-            <input type="number" step="0.5" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.duration_days" />
+            <input type="number" step="0.5" class="filter-input w-full" v-model="form.duration_days" />
           </div>
         </div>
 
         <div class="vx-row mb-4" v-if="form.request_category === 'shift_change'">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Thông tin ca xin đổi</label>
-            <input type="text" placeholder="Ví dụ: Xin đổi từ ca Sáng sang ca Chiều ngày 15/10" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.target_shift_info" />
+            <input type="text" placeholder="Ví dụ: Xin đổi từ ca Sáng sang ca Chiều ngày 15/10" class="filter-input w-full" v-model="form.target_shift_info" />
           </div>
         </div>
 
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do chi tiết (*)</label>
-            <textarea placeholder="Nhập lý do xin nghỉ hoặc đổi ca..." rows="3" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.reason"></textarea>
+            <textarea placeholder="Nhập lý do xin nghỉ hoặc đổi ca..." rows="3" class="filter-input w-full" v-model="form.reason"></textarea>
           </div>
         </div>
 
         <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="saveData()" color="success" type="filled" class="p-3 mr-2"><i class="fa-solid fa-paper-plane mr-1"></i> Gửi Đơn</vs-button>
-            <vs-button @click="popupActive = false" color="dark" type="border" class="p-3"><i class="fa-solid fa-xmark mr-1"></i> Hủy</vs-button>
+            <vs-button @click="saveData()" color="success" type="filled" class="p-2.5 px-4 mr-2"><i class="fa-solid fa-paper-plane mr-1"></i> Gửi Đơn</vs-button>
+            <button class="btn-close-modal" @click="popupActive = false">Hủy</button>
           </div>
         </div>
       </div>
@@ -567,7 +617,7 @@
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-800 mb-2 block">Lựa chọn phân loại phê duyệt của HR (*)</label>
             <div class="space-y-2">
-              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-success bg-green-50': approveForm.approval_type === 'approved'}">
+              <label class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50" :class="{'border-success bg-green-50': approveForm.approval_type === 'approved'}">
                 <input type="radio" value="approved" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-success block">Đã duyệt</span>
@@ -575,7 +625,7 @@
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-warning bg-orange-50': approveForm.approval_type === 'half_salary'}">
+              <label class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50" :class="{'border-warning bg-orange-50': approveForm.approval_type === 'half_salary'}">
                 <input type="radio" value="half_salary" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-warning block">50% lương</span>
@@ -583,7 +633,7 @@
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-gray-500 bg-gray-50': approveForm.approval_type === 'late_unpaid'}">
+              <label class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50" :class="{'border-gray-500 bg-gray-50': approveForm.approval_type === 'late_unpaid'}">
                 <input type="radio" value="late_unpaid" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-gray-700 block">Gửi đơn muộn (không lương)</span>
@@ -591,7 +641,7 @@
                 </div>
               </label>
 
-              <label class="flex items-center p-3 border rounded cursor-pointer transition hover:bg-gray-50" :class="{'border-danger bg-red-50': approveForm.approval_type === 'rejected'}">
+              <label class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50" :class="{'border-danger bg-red-50': approveForm.approval_type === 'rejected'}">
                 <input type="radio" value="rejected" v-model="approveForm.approval_type" class="mr-3" />
                 <div>
                   <span class="font-bold text-danger block">Từ chối đơn</span>
@@ -605,14 +655,14 @@
         <div class="vx-row mb-4" v-if="approveForm.approval_type === 'rejected'">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do từ chối (*)</label>
-            <textarea placeholder="Nhập lý do từ chối..." rows="3" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="approveForm.rejection_reason"></textarea>
+            <textarea placeholder="Nhập lý do từ chối..." rows="3" class="filter-input w-full" v-model="approveForm.rejection_reason"></textarea>
           </div>
         </div>
 
         <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="submitApproval()" color="success" type="filled" class="p-3 mr-2"><i class="fa-solid fa-check mr-1"></i> Xác Nhận Duyệt</vs-button>
-            <vs-button @click="approvePopupActive = false" color="dark" type="border" class="p-3"><i class="fa-solid fa-xmark mr-1"></i> Đóng</vs-button>
+            <vs-button @click="submitApproval()" color="success" type="filled" class="p-2.5 px-4 mr-2"><i class="fa-solid fa-check mr-1"></i> Xác Nhận Duyệt</vs-button>
+            <button class="btn-close-modal" @click="approvePopupActive = false">Đóng</button>
           </div>
         </div>
       </div>
@@ -684,7 +734,7 @@ export default {
   },
   computed: {
     popupHistoryTitle() {
-      if (!this.selectedStaffHistory) return 'CHI TIẾT LỊCH SỬ NGHỈ PHÉP';
+      if (!this.selectedStaffHistory) return 'LỊCH SỬ NGHỈ PHÉP NHÂN SỰ';
       return `LỊCH SỬ NGHỈ PHÉP - ${this.selectedStaffHistory.employee.full_name} (${this.selectedStaffHistory.employee.employee_code})`;
     }
   },
@@ -778,7 +828,6 @@ export default {
       lines.forEach(line => {
         const parts = line.split('\t').map(s => s.trim());
         if (parts.length >= 3) {
-          // Find parts
           let name = parts[0] || parts[1];
           let days = parts[1] || parts[2];
           let date = parts[2] || parts[3];
@@ -976,11 +1025,295 @@ export default {
 </script>
 
 <style scoped>
-.list-action button {
-  padding: 6px 10px !important;
-  font-size: 12px;
+/* Controls lọc */
+.filter-select, .filter-input {
+  height: 38px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #4b5563;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.15s ease-in-out;
 }
-.popup-leave-history .vs-popup {
-  width: 850px !important;
+.filter-select:focus, .filter-input:focus {
+  border-color: #7367f0;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15);
+}
+
+.btn-tool-action {
+  height: 38px;
+  width: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-tool-action:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.btn-excel-export {
+  height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-excel-export:hover {
+  background: #f9fafb;
+  border-color: #10b981;
+  color: #059669;
+}
+
+/* Badge Mã nhân viên */
+.emp-code-badge {
+  font-weight: 700;
+  color: #7367f0;
+  background-color: #f3f2fe;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+/* Nút Chi tiết không bao giờ bị vỡ dòng */
+.btn-detail-history {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #7367f0 !important;
+  background-color: #f5f4ff !important;
+  border: 1px solid #d8d4fc !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  line-height: 1.4 !important;
+}
+.btn-detail-history:hover {
+  background-color: #7367f0 !important;
+  color: #ffffff !important;
+  border-color: #7367f0 !important;
+}
+
+/* Tags trạng thái đẹp mắt */
+.status-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.status-success {
+  color: #15803d;
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+}
+.status-danger {
+  color: #b91c1c;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+}
+.status-warning {
+  color: #b45309;
+  background-color: #fef3c7;
+  border: 1px solid #fde68a;
+}
+.status-gray {
+  color: #4b5563;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+
+/* POPUP CHI TIẾT LỊCH SỬ NGHỈ */
+.popup-history-container {
+  padding: 10px;
+}
+.emp-info-banner {
+  padding: 12px 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+.avatar-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #eeedfd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summary-card {
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+.summary-value {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.card-blue {
+  background-color: #f0f7ff;
+  border-color: #cfe2ff;
+}
+.card-orange {
+  background-color: #fffbf0;
+  border-color: #fde8b3;
+}
+.card-green {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+.card-red {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+.card-gray {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+/* Bảng chi tiết trong popup */
+.history-table-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.history-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+.history-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+.history-table tr:hover {
+  background-color: #fbfcfe;
+}
+
+.day-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4338ca;
+  background-color: #e0e7ff;
+  border-radius: 4px;
+}
+
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.mode-approved {
+  color: #15803d;
+  background-color: #f0fdf4;
+}
+.mode-late {
+  color: #c2410c;
+  background-color: #fff7ed;
+}
+.mode-half {
+  color: #b45309;
+  background-color: #fffbeb;
+}
+.mode-rejected {
+  color: #b91c1c;
+  background-color: #fef2f2;
+}
+
+.btn-close-modal {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-close-modal:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+</style>
+
+<!-- CSS Toàn cục cho Modal Vuesax không bị scoped chặn -->
+<style>
+.modal-custom-leave.con-vs-popup .vs-popup {
+  width: 860px !important;
+  max-width: 95vw !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+.modal-custom-leave .vs-popup--header {
+  padding: 16px 20px !important;
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+.modal-custom-leave .vs-popup--title h3 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  letter-spacing: 0.2px !important;
+}
+.modal-custom-leave .vs-popup--content {
+  padding: 16px 20px !important;
 }
 </style>
