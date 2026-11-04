@@ -283,7 +283,7 @@
                         </vs-chip>
                       </td>
                       <td class="td vs-table--td text-sm">
-                        <div>{{ tr.start_date }} <i class="fa fa-arrow-right text-xs text-gray-400"></i> {{ tr.end_date }}</div>
+                        <div>{{ tr.start_date | formatDateView }} <i class="fa fa-arrow-right text-xs text-gray-400"></i> {{ tr.end_date | formatDateView }}</div>
                         <div class="text-xs text-gray-500 truncate" :title="tr.reason">Lý do: {{ tr.reason }}</div>
                       </td>
                       <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
@@ -568,11 +568,11 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày (*)</label>
-            <input type="date" class="filter-input w-full" v-model="form.start_date" @change="calculateDays" />
+            <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" @on-change="calculateDays" class="filter-input w-full" placeholder="dd/mm/yyyy" />
           </div>
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày (*)</label>
-            <input type="date" class="filter-input w-full" v-model="form.end_date" @change="calculateDays" />
+            <flat-pickr v-model="form.end_date" :config="flatpickrDateConfig" @on-change="calculateDays" class="filter-input w-full" placeholder="dd/mm/yyyy" />
           </div>
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Số ngày (*)</label>
@@ -677,6 +677,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       // Tab 1: Quản lý Quỹ phép Toàn Nhân Sự
       filterYear: '2026',
       filterDepartment: 'all',

@@ -36,14 +36,14 @@
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày vào làm việc chính thức</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" />
+                <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
             </div>
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.dob" />
+                <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
@@ -62,7 +62,7 @@
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày cấp CCCD / CMND</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_date" />
+                <flat-pickr v-model="form.id_card_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
             </div>
 
@@ -103,11 +103,11 @@
             <div class="vx-row mb-4 p-3 bg-gray-50 border border-gray-200 rounded" v-if="form.employee_type === 'probation'">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày bắt đầu thử việc (*)</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.probation_start_date" />
+                <flat-pickr v-model="form.probation_start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày kết thúc thử việc (*)</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.probation_end_date" />
+                <flat-pickr v-model="form.probation_end_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
             </div>
 
@@ -115,7 +115,7 @@
             <div class="vx-row mb-4 p-3 bg-red-50 border border-red-200 rounded" v-if="form.work_status === 'resigned'">
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nghỉ việc</label>
-                <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_date" />
+                <flat-pickr v-model="form.resigned_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do nghỉ việc</label>
@@ -213,8 +213,8 @@
                       <tr class="tr-values vs-table--tr" v-for="(tr, index) in contracts" :key="index">
                         <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
                         <td class="td vs-table--td">{{ tr.contract_type }}</td>
-                        <td class="td vs-table--td">{{ tr.start_date }}</td>
-                        <td class="td vs-table--td">{{ tr.end_date || 'Không thời hạn' }}</td>
+                        <td class="td vs-table--td">{{ tr.start_date | formatDateView }}</td>
+                        <td class="td vs-table--td">{{ tr.end_date ? (tr.end_date | formatDateView) : 'Không thời hạn' }}</td>
                         <td class="td vs-table--td font-semibold">{{ tr.basic_salary | formatCurrency }}</td>
                       </tr>
                       <tr v-if="!contracts.length">
@@ -305,8 +305,14 @@
       <div class="mb-4">
         <vs-input class="w-full mb-4" label="Số hợp đồng" v-model="contractForm.contract_number" />
         <vs-input class="w-full mb-4" label="Loại hợp đồng (Ví dụ: Thử việc, 1 năm)" v-model="contractForm.contract_type" />
-        <vs-input type="date" class="w-full mb-4" label="Từ ngày" v-model="contractForm.start_date" />
-        <vs-input type="date" class="w-full mb-4" label="Đến ngày" v-model="contractForm.end_date" />
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày</label>
+          <flat-pickr v-model="contractForm.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+        </div>
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày</label>
+          <flat-pickr v-model="contractForm.end_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+        </div>
         <vs-input type="number" class="w-full mb-4" label="Lương cơ bản" v-model="contractForm.basic_salary" />
       </div>
       <div class="flex justify-end">
@@ -319,7 +325,10 @@
       <div class="mb-4">
         <vs-input class="w-full mb-4" label="Tên tài liệu" v-model="documentForm.title" />
         <vs-input class="w-full mb-4" label="Loại tài liệu (Ví dụ: CCCD, Hợp đồng, Bằng cấp)" v-model="documentForm.document_type" />
-        <vs-input type="date" class="w-full mb-4" label="Ngày hết hạn (Nếu có)" v-model="documentForm.expiry_date" />
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày hết hạn (Nếu có)</label>
+          <flat-pickr v-model="documentForm.expiry_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+        </div>
         <div class="vx-col w-full mb-4">
           <label class="text-base font-medium">Đính kèm tài liệu (Có thể chọn nhiều file)</label>
           <input 
@@ -360,6 +369,12 @@ export default {
   },
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       isEdit: false,
       id: null,
       userId: null,

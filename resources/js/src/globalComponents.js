@@ -27,6 +27,10 @@ Vue.component(VxInputGroup.name, VxInputGroup)
 // v-select component
 import vSelect from 'vue-select'
 
+// flat-pickr component
+import flatPickr from 'vue-flatpickr-component'
+import 'flatpickr/dist/flatpickr.css'
+
 // Set the components prop default to return our fresh components
 vSelect.props.components.default = () => ({
   Deselect: {
@@ -48,3 +52,4 @@ vSelect.props.components.default = () => ({
 })
 
 Vue.component(vSelect)
+Vue.component('flat-pickr', flatPickr)

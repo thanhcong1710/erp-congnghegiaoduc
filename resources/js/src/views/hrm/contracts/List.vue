@@ -57,8 +57,8 @@
                     <div v-if="tr.employee && tr.employee.employee_code" class="text-xs text-gray-500 font-normal">Mã NS: {{ tr.employee.employee_code }}</div>
                   </td>
                   <td class="td vs-table--td">{{ tr.contract_type }}</td>
-                  <td class="td vs-table--td">{{ tr.start_date }}</td>
-                  <td class="td vs-table--td">{{ tr.end_date || 'Không thời hạn' }}</td>
+                  <td class="td vs-table--td">{{ tr.start_date | formatDateView }}</td>
+                  <td class="td vs-table--td">{{ tr.end_date ? (tr.end_date | formatDateView) : 'Không thời hạn' }}</td>
                   <td class="td vs-table--td font-semibold text-gray-800">{{ tr.basic_salary | formatCurrency }}</td>
                   <td class="td vs-table--td text-center" style="white-space: nowrap;">
                     <span 
@@ -123,11 +123,11 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-1/2">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Từ ngày (*)</label>
-            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.start_date" />
+            <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
           </div>
           <div class="vx-col w-1/2">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày</label>
-            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.end_date" />
+            <flat-pickr v-model="form.end_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
           </div>
         </div>
 
@@ -155,6 +155,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       contracts: { data: [], total: 0, per_page: 20, current_page: 1 },
       employees: [],
       searchKeyword: '',

@@ -57,7 +57,7 @@
                   <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
                   <td class="td vs-table--td font-bold uppercase text-gray-900">{{ tr.user_name }}</td>
                   <td class="td vs-table--td">{{ tr.team_name }}</td>
-                  <td class="td vs-table--td">{{ tr.profile_received_date || 'Chưa nhận' }}</td>
+                  <td class="td vs-table--td">{{ tr.profile_received_date ? (tr.profile_received_date | formatDateView) : 'Chưa nhận' }}</td>
                   <td class="td vs-table--td">
                     <vs-chip :color="tr.profile_status === 'full' ? 'success' : 'danger'">
                       {{ tr.profile_status === 'full' ? 'Đã đủ' : 'Thiếu' }}
@@ -118,7 +118,7 @@
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nhận hồ sơ</label>
-            <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="editForm.profile_received_date" />
+            <flat-pickr v-model="editForm.profile_received_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
           </div>
         </div>
 
@@ -172,6 +172,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       documentsList: [],
       filterStatus: 'all',
       searchKeyword: '',

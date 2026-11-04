@@ -126,12 +126,13 @@
                 <span class="text-sm font-medium mr-2 text-gray-700"
                   >Ngày:</span
                 >
-                <input
-                  type="date"
+                <flat-pickr
                   v-model="selectedDate"
-                  @change="fetchDailySheet"
+                  :config="flatpickrDateConfig"
+                  @on-change="fetchDailySheet"
                   class="vs-inputx vs-input--input normal"
                   style="padding: 8px 12px; font-size: 13px; width: 160px"
+                  placeholder="dd/mm/yyyy"
                 />
               </div>
               <div class="mr-3 mb-2 flex items-center">
@@ -514,6 +515,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       selectedDate: new Date().toISOString().split('T')[0],
       selectedDepartment: '',
       selectedShift: '',

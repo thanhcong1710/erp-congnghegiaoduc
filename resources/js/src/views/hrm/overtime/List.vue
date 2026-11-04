@@ -19,7 +19,7 @@
         <template slot-scope="{data}">
           <vs-tr :key="indextr" v-for="(tr, indextr) in data">
             <vs-td>{{ data[indextr].user ? data[indextr].user.name : data[indextr].user_id }}</vs-td>
-            <vs-td>{{ data[indextr].date }}</vs-td>
+            <vs-td>{{ data[indextr].date | formatDateView }}</vs-td>
             <vs-td>{{ data[indextr].start_time }} - {{ data[indextr].end_time }}</vs-td>
             <vs-td>{{ data[indextr].reason }}</vs-td>
             <vs-td>
@@ -51,7 +51,8 @@
         </div>
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <vs-input type="date" class="w-full" label="Ngày OT (*)" v-model="form.date" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày OT (*)</label>
+            <flat-pickr v-model="form.date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
           </div>
         </div>
         <div class="vx-row mb-4">
@@ -83,6 +84,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       requests: [],
       popupActive: false,
       form: { user_id: '', date: '', start_time: '', end_time: '', reason: '' }

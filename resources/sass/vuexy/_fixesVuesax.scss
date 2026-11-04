@@ -751,3 +751,12 @@
   padding-left: 36px !important;
 }
 
+// Flatpickr global fixes
+.flatpickr-calendar {
+  z-index: 100000 !important;
+}
+.flatpickr-input[readonly] {
+  background-color: #ffffff;
+}
+
+

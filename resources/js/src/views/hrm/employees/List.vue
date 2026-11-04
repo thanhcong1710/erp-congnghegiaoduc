@@ -119,8 +119,8 @@
                   </td>
                   <td class="td vs-table--td text-xs">
                     <div v-if="tr.employee_type === 'probation'">
-                      <div>Từ: <strong>{{ tr.probation_start_date || '---' }}</strong></div>
-                      <div>Đến: <strong>{{ tr.probation_end_date || '---' }}</strong></div>
+                      <div>Từ: <strong>{{ tr.probation_start_date ? (tr.probation_start_date | formatDateView) : '---' }}</strong></div>
+                      <div>Đến: <strong>{{ tr.probation_end_date ? (tr.probation_end_date | formatDateView) : '---' }}</strong></div>
                       <vs-button 
                         size="small" 
                         color="success" 
@@ -236,7 +236,13 @@
           <div class="vx-row mb-4">
             <div class="vx-col w-full">
               <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nghỉ việc</label>
-              <input type="date" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="statusForm.resigned_date" />
+              <flat-pickr
+                v-model="statusForm.resigned_date"
+                :config="flatpickrDateConfig"
+                class="vs-inputx vs-input--input normal w-full"
+                style="padding: 10px 14px; font-size: 13px;"
+                placeholder="dd/mm/yyyy"
+              />
             </div>
           </div>
           <div class="vx-row mb-4">
@@ -264,6 +270,12 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      flatpickrDateConfig: {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true
+      },
       employees: [],
       filterType: 'all',
       filterWorkStatus: 'all',
