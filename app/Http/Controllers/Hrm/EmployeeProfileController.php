@@ -83,7 +83,12 @@ class EmployeeProfileController extends Controller
         }
 
         $employees = $query->orderBy('id', 'desc')->get();
-        return response()->json($employees);
+        $canDelete = $currentUser ? $currentUser->canDeleteHrmEmployee() : false;
+        return response()->json([
+            'status' => 1,
+            'can_delete' => $canDelete,
+            'data' => $employees
+        ]);
     }
 
     public function add(Request $request)
@@ -422,5 +427,82 @@ class EmployeeProfileController extends Controller
         }
 
         return response()->json(['status' => 1, 'message' => 'Đã tải lên tài liệu thành công', 'data' => $docs]);
+    }
+
+    /**
+     * Xóa nhân viên (chỉ áp dụng cho Admin và Kế toán để xóa bản ghi import nhầm)
+     */
+    public function delete(Request $request, $id = null)
+    {
+        $currentUser = Auth::user();
+        if (!$currentUser || !$currentUser->canDeleteHrmEmployee()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn không có quyền xóa nhân sự. Chức năng này chỉ áp dụng cho Quản trị viên (Admin) và Kế toán.'
+            ], 403);
+        }
+
+        $empId = $id ?: $request->id;
+        $profile = HrmEmployeeProfile::find($empId);
+        if (!$profile) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy hồ sơ nhân sự cần xóa'
+            ], 404);
+        }
+
+        $empName = $profile->full_name ?: ($profile->user ? $profile->user->name : $profile->employee_code);
+
+        \DB::beginTransaction();
+        try {
+            $userId = $profile->user_id;
+
+            // Xóa dữ liệu liên quan do import nhầm để dọn dẹp sạch sẽ
+            \App\Models\HrmAttendance::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            \App\Models\HrmShiftAssignment::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            \App\Models\HrmContract::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            \App\Models\HrmEmployeeDocument::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            \App\Models\HrmEmploymentHistory::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            \App\Models\HrmLeaveRequest::where('employee_id', $empId)
+                ->when($userId, function ($q) use ($userId) {
+                    $q->orWhere('user_id', $userId);
+                })->delete();
+
+            // Xóa profile nhân viên
+            $profile->delete();
+
+            \DB::commit();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Đã xóa nhân viên '{$empName}' thành công."
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi khi xóa nhân sự: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

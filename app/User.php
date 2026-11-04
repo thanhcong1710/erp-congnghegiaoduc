@@ -117,6 +117,14 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasAnyRole(['admin', 'ceo', 'ops', 999999, 686868, 16]) || $this->checkPermission('hrm');
     }
 
+    public function canDeleteHrmEmployee()
+    {
+        if ($this->id == 1) return true;
+        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+            || $this->checkPermission('hrm_delete_employee')
+            || $this->checkPermission('hrm');
+    }
+
     public function isLeader()
     {
         return $this->hasAnyRole(['ec_leader', 'cm_leader', 'ta_leader', 'teacher_leader', 69, 56, 64, 37])
@@ -125,10 +133,12 @@ class User extends Authenticatable implements JWTSubject
 
     public function checkPermission($permission)
     {
+        $userId = $this->id ?: (Auth::check() ? Auth::id() : null);
+        if (!$userId) return false;
         $user_permission = u::first("SELECT pr.permission_id FROM permission_has_role AS pr 
             LEFT JOIN role_has_user AS r ON r.role_id=pr.role_id 
             LEFT JOIN permissions AS p ON p.id = pr.permission_id
-            WHERE r.user_id = " . Auth::user()->id . " AND p.name = '$permission'");
+            WHERE r.user_id = " . $userId . " AND p.name = '$permission'");
 
         return empty($user_permission) ? false : true;
     }

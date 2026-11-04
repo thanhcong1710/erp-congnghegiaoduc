@@ -467,6 +467,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add', 'Hrm\EmployeeProfileController@add');
                 Route::get('show/{id}', 'Hrm\EmployeeProfileController@show');
                 Route::post('update/{id}', 'Hrm\EmployeeProfileController@update');
+                Route::post('delete/{id?}', 'Hrm\EmployeeProfileController@delete');
                 Route::post('approve-ctv/{id}', 'Hrm\EmployeeProfileController@approveCtv');
                 Route::post('convert-fulltime/{id}', 'Hrm\EmployeeProfileController@convertToFulltime');
                 Route::post('update-work-status/{id}', 'Hrm\EmployeeProfileController@updateWorkStatus');

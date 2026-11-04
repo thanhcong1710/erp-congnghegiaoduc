@@ -170,6 +170,19 @@
                     <router-link :to="`/hrm/employees/edit/${tr.id}`">
                       <vs-button size="small" color="success" title="Chỉnh sửa"><i class="fa-solid fa-edit"></i></vs-button>
                     </router-link>
+
+                    <!-- Nút xóa nhân sự (chỉ hiển thị cho Admin và Kế toán) -->
+                    <vs-button 
+                      v-if="canDeleteEmployee"
+                      size="small" 
+                      color="danger" 
+                      type="filled" 
+                      class="ml-1"
+                      @click="confirmDeleteEmployee(tr)" 
+                      title="Xóa nhân sự (chỉ Admin/Kế toán)"
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </vs-button>
                   </td>
                 </tr>
                 <tr v-if="!filteredEmployees.length">
@@ -257,6 +270,7 @@ export default {
       searchKeyword: '',
       statusModalActive: false,
       selectedEmployee: null,
+      canDeleteServer: null,
       statusForm: {
         work_status: 'working',
         resigned_date: '',
@@ -300,6 +314,12 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredEmployees.length / this.perPage) || 1;
+    },
+    canDeleteEmployee() {
+      if (this.canDeleteServer !== null) {
+        return this.canDeleteServer;
+      }
+      return this.checkCanDeleteLocal();
     }
   },
   created() {
@@ -315,11 +335,66 @@ export default {
         work_status: this.filterWorkStatus,
         keyword: this.searchKeyword
       }).then(res => {
-        this.employees = res.data || [];
+        if (res.data && res.data.data) {
+          this.employees = res.data.data;
+          this.canDeleteServer = typeof res.data.can_delete !== 'undefined' ? !!res.data.can_delete : null;
+        } else if (Array.isArray(res.data)) {
+          this.employees = res.data;
+        } else {
+          this.employees = [];
+        }
         this.$vs.loading.close();
       }).catch(err => {
         this.$vs.loading.close();
         console.error(err);
+      });
+    },
+    checkCanDeleteLocal() {
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.uid === 1 || user.id === 1) return true;
+      const roleName = (user.roleName || '').toLowerCase();
+      if (
+        roleName.includes('quản trị') ||
+        roleName.includes('admin') ||
+        roleName.includes('kế toán') ||
+        roleName.includes('account') ||
+        roleName.includes('giám đốc') ||
+        roleName.includes('ceo')
+      ) {
+        return true;
+      }
+      return false;
+    },
+    confirmDeleteEmployee(emp) {
+      const empName = emp.full_name || (emp.user ? emp.user.name : emp.employee_code);
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: 'Xác nhận xóa nhân sự',
+        text: `Bạn có chắc chắn muốn xóa nhân sự "${empName}" (Mã NS: ${emp.employee_code || '---'}) không? Dữ liệu chấm công, xếp ca và hồ sơ liên quan sẽ được xóa sạch. Thao tác này không thể hoàn tác.`,
+        acceptText: 'Đồng ý xóa',
+        cancelText: 'Hủy bỏ',
+        accept: () => {
+          this.executeDeleteEmployee(emp.id);
+        }
+      });
+    },
+    executeDeleteEmployee(id) {
+      this.$vs.loading();
+      axios.p(`/api/hrm/employees/delete/${id}`).then(res => {
+        this.$vs.loading.close();
+        if (res.data.status === 1) {
+          this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+          this.fetchEmployees();
+        } else {
+          this.$vs.notify({ title: 'Lỗi', text: res.data.message || 'Không thể xóa nhân sự', color: 'danger' });
+        }
+      }).catch(err => {
+        this.$vs.loading.close();
+        const msg = err.response && err.response.data && err.response.data.message 
+          ? err.response.data.message 
+          : 'Lỗi khi xóa nhân sự';
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
       });
     },
     getEmployeeTypeText(type) {
