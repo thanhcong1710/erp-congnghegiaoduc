@@ -1,17 +1,13 @@
 <template>
   <div id="page-login">
-    <!-- Real STEMKey Classroom Background Image -->
+    <!-- Real STEMKey 2026 Homepage Hero Background -->
     <div class="login-bg-image"></div>
     <div class="login-bg-overlay"></div>
 
-    <!-- Background tech grid pattern -->
-    <div class="login-grid-pattern"></div>
+    <!-- Soft glow orb on bottom right -->
+    <div class="glow-orb glow-orb-stem"></div>
 
-    <!-- Ambient glow orbs in STEMKey brand colors -->
-    <div class="glow-orb glow-orb-1"></div>
-    <div class="glow-orb glow-orb-2"></div>
-
-    <!-- Login card -->
+    <!-- Login card container - Aligned to left on PC -->
     <div class="login-card-container">
       <!-- Top brand accent stripe (STEMKey Blue -> Green) -->
       <div class="card-accent-stripe"></div>
@@ -74,79 +70,67 @@ export default {
 <style lang="scss">
 #page-login {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #00133a;
+  padding: 20px;
+
+  /* On desktop/PC: align login form towards the left side */
+  @media (min-width: 992px) {
+    justify-content: flex-start;
+    padding-left: clamp(40px, 8vw, 130px);
+  }
 
   .login-bg-image {
     position: absolute;
     inset: 0;
-    background-image: url('/images/pages/stemkey-login-bg.jpg');
+    background-image: url('/images/pages/stemkey-homepage-hero-2026.webp');
     background-size: cover;
-    background-position: center center;
+    background-position: center right;
     background-repeat: no-repeat;
-    transform: scale(1.03);
-    filter: brightness(0.9);
+    filter: brightness(0.98);
   }
 
+  /* Lớp phủ mờ nhẹ để thấy rõ ảnh nền */
   .login-bg-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      135deg,
-      rgba(0, 19, 58, 0.78) 0%,
-      rgba(0, 35, 105, 0.65) 50%,
-      rgba(4, 45, 115, 0.75) 100%
+      90deg,
+      rgba(0, 20, 60, 0.28) 0%,
+      rgba(0, 35, 105, 0.12) 45%,
+      rgba(0, 0, 0, 0.04) 100%
     );
-    backdrop-filter: blur(2px);
-  }
-
-  .login-grid-pattern {
-    position: absolute;
-    inset: 0;
     pointer-events: none;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
-    background-size: 32px 32px;
   }
 
-  .glow-orb {
+  .glow-orb-stem {
     position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(50px);
-  }
-
-  .glow-orb-1 {
-    top: -80px;
-    left: -80px;
+    bottom: -100px;
+    right: -80px;
     width: 480px;
     height: 480px;
-    background: radial-gradient(circle, rgba(36, 104, 214, 0.35), transparent 70%);
-  }
-
-  .glow-orb-2 {
-    bottom: -80px;
-    right: -60px;
-    width: 460px;
-    height: 460px;
-    background: radial-gradient(circle, rgba(53, 182, 63, 0.28), transparent 70%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(53, 182, 63, 0.15), transparent 70%);
+    pointer-events: none;
+    filter: blur(50px);
   }
 
   .login-card-container {
     position: relative;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: 24px;
     padding: 38px 40px;
     width: 100%;
     max-width: 440px;
-    margin: 20px;
-    box-shadow: 0 30px 90px rgba(0, 15, 45, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.35);
+    box-shadow: 0 25px 70px rgba(0, 20, 60, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.85);
     overflow: hidden;
   }
 
@@ -165,6 +149,7 @@ export default {
     padding: 12px 14px !important;
     font-size: 14px !important;
     transition: border-color .2s, box-shadow .2s !important;
+    background: #ffffff !important;
     &:focus {
       border-color: #2468d6 !important;
       box-shadow: 0 0 0 3px rgba(36, 104, 214, 0.14) !important;
@@ -197,6 +182,7 @@ export default {
   .vs-button-border {
     border-color: #2468d6 !important;
     color: #2468d6 !important;
+    background: transparent !important;
     &:hover {
       background: rgba(36, 104, 214, 0.08) !important;
     }
