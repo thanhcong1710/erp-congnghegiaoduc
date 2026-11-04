@@ -34,7 +34,7 @@
             <img
               src="@assets/images/logo/stemkey-logo.png"
               alt="STEMKey Education"
-              style="height: 56px; width: auto; max-width: 110px; object-fit: contain; margin-right: 8px;"
+              style="height: 56px; width: auto; object-fit: contain; margin-right: 8px;"
             />
             <!-- <div v-show="isMouseEnter || !reduce">
               <div style="font-size: 16px; font-weight: 800; color: #002369; letter-spacing: -0.3px; line-height: 1.2;">STEMKey</div>

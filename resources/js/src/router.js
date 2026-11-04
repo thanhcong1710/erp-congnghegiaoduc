@@ -66,6 +66,12 @@ const router = new Router({
           }
         },
         {
+          path: '/admin/dashboard/report',
+          name: 'dashboard-detail-report',
+          component: () => import('./views/DashboardDetailReport.vue'),
+          meta: { rule: 'editor', pageTitle: 'Chi tiết Dashboard' }
+        },
+        {
           path: '/ai-admin',
           name: 'ai-admin',
           component: () => import('@/components/AiAdminPanel.vue'),
