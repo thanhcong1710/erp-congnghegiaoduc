@@ -26,3 +26,5 @@ public/js/app.js
 public/js
 public/static/upload
 public/css/*.css
+public/css/app.css
+public/css/main.css
