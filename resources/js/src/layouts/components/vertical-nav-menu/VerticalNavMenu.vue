@@ -31,20 +31,15 @@
 
           <!-- Logo -->
           <router-link tag="div" class="vx-logo cursor-pointer flex items-center" to="/">
-            <!-- Logo E gradient -->
-            <div style="
-              width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
-              background: linear-gradient(135deg, #2563eb, #06b6d4);
-              display: flex; align-items: center; justify-content: center;
-              font-size: 22px; font-weight: 900; color: white;
-              font-family: 'Arial Black', Arial, sans-serif;
-              box-shadow: 0 4px 14px rgba(37,99,235,.4);
-              margin-right: 10px;
-            ">E</div>
-            <div v-show="isMouseEnter || !reduce">
-              <div style="font-size: 20px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; line-height: 1.2;">Edu-ERP</div>
-              <div style="font-size: 10px; color: #94a3b8; font-weight: 500; letter-spacing: 0.03em;">Công Nghệ Giáo Dục</div>
-            </div>
+            <img
+              src="@assets/images/logo/stemkey-logo.png"
+              alt="STEMKey Education"
+              style="height: 56px; width: auto; max-width: 110px; object-fit: contain; margin-right: 8px;"
+            />
+            <!-- <div v-show="isMouseEnter || !reduce">
+              <div style="font-size: 16px; font-weight: 800; color: #002369; letter-spacing: -0.3px; line-height: 1.2;">STEMKey</div>
+              <div style="font-size: 9.5px; color: #35b63f; font-weight: 700; letter-spacing: 0.04em;">Tư Duy • Công Nghệ</div>
+            </div> -->
           </router-link>
           <!-- /Logo -->
 
