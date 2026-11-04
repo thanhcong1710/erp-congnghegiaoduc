@@ -125,6 +125,23 @@ class User extends Authenticatable implements JWTSubject
             || $this->checkPermission('hrm');
     }
 
+    public function canApproveHrmOnlineRegistration()
+    {
+        if ($this->id == 1) return true;
+        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+            || $this->checkPermission('hrm_approve_online')
+            || $this->checkPermission('hrm');
+    }
+
+    public function canApproveHrmLeave()
+    {
+        if ($this->id == 1) return true;
+        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+            || $this->isLeader()
+            || $this->checkPermission('hrm_approve_leave')
+            || $this->checkPermission('hrm');
+    }
+
     public function isLeader()
     {
         return $this->hasAnyRole(['ec_leader', 'cm_leader', 'ta_leader', 'teacher_leader', 69, 56, 64, 37])

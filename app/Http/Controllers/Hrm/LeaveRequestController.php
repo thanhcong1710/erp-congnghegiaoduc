@@ -62,7 +62,9 @@ class LeaveRequestController extends Controller
         }
 
         $leaves = $query->orderBy('id', 'desc')->paginate($limit);
-        return response()->json($leaves);
+        $data = $leaves->toArray();
+        $data['can_approve'] = $currentUser ? $currentUser->canApproveHrmLeave() : false;
+        return response()->json($data);
     }
 
     /**
@@ -80,6 +82,8 @@ class LeaveRequestController extends Controller
 
             $leave = new HrmLeaveRequest();
             $leave->user_id = $userId;
+            $empProfile = HrmEmployeeProfile::where('user_id', $userId)->first();
+            $leave->employee_id = $request->employee_id ?: ($empProfile ? $empProfile->id : null);
             $leave->leave_type_id = $request->leave_type_id ?: null;
             $leave->type = $request->request_category ?: 'leave';
             $leave->request_category = $request->request_category ?: 'leave'; // leave, shift_change, off_to_onl
@@ -113,7 +117,34 @@ class LeaveRequestController extends Controller
     public function approve(Request $request, $id)
     {
         try {
+            $currentUser = Auth::user();
+            if (!$currentUser) {
+                return response()->json(['status' => 0, 'message' => 'Vui lòng đăng nhập'], 401);
+            }
+
             $leave = HrmLeaveRequest::findOrFail($id);
+
+            // Kiểm tra quyền phê duyệt đơn nghỉ phép: Admin, Kế toán hoặc Leader
+            $canApprove = $currentUser->canApproveHrmLeave();
+            if (!$canApprove) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền phê duyệt! Chỉ Kế toán, Admin hoặc Quản lý trực tiếp mới có quyền duyệt đơn nghỉ phép.'
+                ], 403);
+            }
+
+            // Nếu là Leader, kiểm tra xem nhân viên có thuộc quyền quản lý không
+            $isHrOrAdmin = $currentUser->isHrmAdmin() || $currentUser->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16]);
+            if (!$isHrOrAdmin && $currentUser->isLeader()) {
+                $subordinateIds = array_filter(explode(',', $currentUser->getStaffHasUser()));
+                if (!in_array($leave->user_id, $subordinateIds)) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Bạn chỉ có quyền phê duyệt đơn nghỉ phép của nhân viên trong team mình quản lý!'
+                    ], 403);
+                }
+            }
+
             $approvalType = $request->approval_type ?: 'approved'; // approved, half_salary, late_unpaid, rejected
 
             if ($approvalType === 'rejected') {
@@ -136,7 +167,10 @@ class LeaveRequestController extends Controller
                     $balance->save();
                 }
 
-                // Tự động cập nhật bảng điểm danh trong khoảng ngày nghỉ
+                // Tự động cập nhật bảng điểm danh trong khoảng ngày nghỉ cho cả employee_id và user_id
+                $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
+                $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
+
                 $currentDay = Carbon::parse($leave->start_date);
                 $endDay = Carbon::parse($leave->end_date);
                 while ($currentDay->lte($endDay)) {
@@ -146,15 +180,28 @@ class LeaveRequestController extends Controller
                         $attStatus = 'late_submitted';
                     }
 
+                    $condition = ['date' => $dateStr];
+                    if ($empId) {
+                        $condition['employee_id'] = $empId;
+                    } else {
+                        $condition['user_id'] = $leave->user_id;
+                    }
+
                     HrmAttendance::updateOrCreate(
-                        ['user_id' => $leave->user_id, 'date' => $dateStr],
-                        ['attendance_status' => $attStatus, 'note' => 'Theo đơn xin phép #' . $leave->id]
+                        $condition,
+                        [
+                            'employee_id' => $empId,
+                            'user_id' => $leave->user_id,
+                            'attendance_status' => $attStatus,
+                            'note' => 'Theo đơn xin phép #' . $leave->id
+                        ]
                     );
                     $currentDay->addDay();
                 }
             }
 
-            $leave->hr_approved_by = Auth::id();
+            $leave->hr_approved_by = $currentUser->id;
+            $leave->approved_by = $currentUser->id;
             $leave->save();
 
             return response()->json([

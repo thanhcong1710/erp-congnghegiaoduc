@@ -100,6 +100,14 @@
             <div
               class="p-3 bg-white rounded shadow-sm flex justify-between items-center"
             >
+              <span class="text-gray-600">Làm Online:</span>
+              <span class="font-bold text-purple-600 text-base"
+                >{{ quickSearchResult.online_days || 0 }} ngày</span
+              >
+            </div>
+            <div
+              class="p-3 bg-white rounded shadow-sm flex justify-between items-center"
+            >
               <span class="text-gray-600">Gửi đơn muộn:</span>
               <span class="font-bold text-dark text-base"
                 >{{ quickSearchResult.late_submitted_count }} lần</span
@@ -192,7 +200,17 @@
                 />
               </div>
             </div>
-            <div class="mb-2">
+            <div class="mb-2 flex items-center">
+              <router-link to="/hrm/leaves" class="mr-2">
+                <vs-button class="p-3" color="warning" type="border">
+                  <i class="fa-solid fa-calendar-days mr-2"></i> Đơn Nghỉ Phép
+                </vs-button>
+              </router-link>
+              <router-link to="/hrm/online-registrations" class="mr-2">
+                <vs-button class="p-3" color="primary" type="border">
+                  <i class="fa-solid fa-laptop mr-2"></i> Đăng Ký Làm Online
+                </vs-button>
+              </router-link>
               <vs-button
                 class="p-3"
                 color="success"
@@ -253,23 +271,76 @@
                         </select>
                       </td>
                       <td class="td vs-table--td">
-                        <select
-                          v-model="tr.attendance_status"
-                          class="vs-inputx vs-input--input normal w-full font-semibold"
-                          style="padding: 8px 12px; font-size: 13px"
-                          :style="getStatusStyle(tr.attendance_status)"
-                        >
-                          <option value="not_checked">⚪ Chưa điểm danh</option>
-                          <option value="present">✓ Có mặt / Đúng giờ</option>
-                          <option value="leave_approved">📅 Đã gửi phép</option>
-                          <option value="unexcused_absent">
-                            ✗ Vắng k phép
-                          </option>
-                          <option value="late_fined">
-                            ⏱ Đi muộn (đã nộp phạt)
-                          </option>
-                          <option value="late_submitted">⚠ Gửi đơn muộn</option>
-                        </select>
+                        <!-- Trường hợp 1: Nhân viên có đơn nghỉ phép ĐÃ ĐƯỢC DUYỆT (khóa mặc định để tránh điểm danh nhầm) -->
+                        <div v-if="tr.is_leave_approved && !tr.override_edit" class="flex flex-col">
+                          <div class="flex items-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700 border border-blue-300 w-max">
+                              <i class="fa-solid fa-calendar-check mr-1.5"></i> Nghỉ phép (Đã duyệt)
+                            </span>
+                            <button
+                              type="button"
+                              @click="$set(tr, 'override_edit', true)"
+                              class="ml-2 text-gray-400 hover:text-primary text-xs"
+                              title="Mở khóa nếu muốn chỉnh sửa điểm danh thủ công"
+                            >
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                          </div>
+                          <span class="text-xs text-gray-500 mt-1 italic font-normal truncate max-w-xs" :title="tr.leave_reason">
+                            {{ tr.leave_reason ? 'Lý do: ' + tr.leave_reason : 'Đã duyệt đơn nghỉ phép' }}
+                          </span>
+                        </div>
+
+                        <!-- Trường hợp 2: Nhân viên làm Online (ca online hoặc có đơn online đã duyệt) -->
+                        <div v-else-if="tr.is_online && !tr.override_edit" class="flex flex-col">
+                          <div class="flex items-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-purple-100 text-purple-700 border border-purple-300 w-max">
+                              <i class="fa-solid fa-laptop mr-1.5"></i> Làm Online
+                            </span>
+                            <button
+                              type="button"
+                              @click="$set(tr, 'override_edit', true)"
+                              class="ml-2 text-gray-400 hover:text-primary text-xs"
+                              title="Mở khóa nếu muốn chỉnh sửa điểm danh thủ công"
+                            >
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                          </div>
+                          <span class="text-xs text-gray-500 mt-1 italic font-normal" :title="tr.online_reason">
+                            {{ tr.online_reason || 'Không cần điểm danh' }}
+                          </span>
+                        </div>
+
+                        <!-- Trường hợp 3: Điểm danh bình thường hoặc khi mở khóa chỉnh sửa -->
+                        <div v-else>
+                          <select
+                            v-model="tr.attendance_status"
+                            class="vs-inputx vs-input--input normal w-full font-semibold"
+                            style="padding: 8px 12px; font-size: 13px"
+                            :style="getStatusStyle(tr.attendance_status)"
+                          >
+                            <option value="not_checked">⚪ Chưa điểm danh</option>
+                            <option value="present">✓ Có mặt / Đúng giờ</option>
+                            <option value="leave_approved">📅 Đã gửi phép</option>
+                            <option value="unexcused_absent">
+                              ✗ Vắng k phép
+                            </option>
+                            <option value="late_fined">
+                              ⏱ Đi muộn (đã nộp phạt)
+                            </option>
+                            <option value="late_submitted">⚠ Gửi đơn muộn</option>
+                            <option value="online">🌐 Làm Online</option>
+                          </select>
+                          <div v-if="tr.override_edit" class="text-right mt-1">
+                            <button
+                              type="button"
+                              @click="$set(tr, 'override_edit', false)"
+                              class="text-xs text-primary hover:underline"
+                            >
+                              Khóa lại
+                            </button>
+                          </div>
+                        </div>
                       </td>
                       <td class="td vs-table--td">
                         <input
@@ -395,15 +466,16 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th width="5%" class="text-center">STT</th>
-                      <th width="10%">Mã NS</th>
-                      <th width="18%">Họ và tên</th>
-                      <th width="15%">Team</th>
-                      <th width="10%" class="text-center">Công chuẩn</th>
-                      <th width="10%" class="text-center">Đã làm</th>
-                      <th width="10%" class="text-center">Đi muộn</th>
-                      <th width="10%" class="text-center">Nghỉ phép</th>
-                      <th width="12%" class="text-center">Vắng k phép</th>
+                      <th width="4%" class="text-center">STT</th>
+                      <th width="9%">Mã NS</th>
+                      <th width="16%">Họ và tên</th>
+                      <th width="14%">Team</th>
+                      <th width="9%" class="text-center">Công chuẩn</th>
+                      <th width="9%" class="text-center">Đã làm</th>
+                      <th width="10%" class="text-center">Làm Online</th>
+                      <th width="9%" class="text-center">Đi muộn</th>
+                      <th width="9%" class="text-center">Nghỉ phép</th>
+                      <th width="11%" class="text-center">Vắng k phép</th>
                       <th width="10%" class="text-center">Gửi muộn</th>
                     </tr>
                   </thead>
@@ -432,6 +504,12 @@
                         {{ tr.worked_days }}
                       </td>
                       <td
+                        class="td vs-table--td text-center font-bold"
+                        style="color: #7c3aed;"
+                      >
+                        {{ tr.online_days || 0 }} ngày
+                      </td>
+                      <td
                         class="td vs-table--td text-center font-semibold text-warning"
                       >
                         {{ tr.late_fined_count }} lần
@@ -453,7 +531,7 @@
                       </td>
                     </tr>
                     <tr v-if="!filteredMonthlySummary.length">
-                      <td colspan="10" class="text-center p-4 text-gray-500">
+                      <td colspan="11" class="text-center p-4 text-gray-500">
                         Chưa có dữ liệu tổng hợp
                       </td>
                     </tr>
@@ -680,6 +758,8 @@ export default {
           return 'color: #ff9f43; border-color: #ff9f43; background-color: #fffbeb;';
         case 'late_submitted':
           return 'color: #82868b; border-color: #82868b; background-color: #f9fafb;';
+        case 'online':
+          return 'color: #7c3aed; border-color: #a78bfa; background-color: #f5f3ff;';
         default:
           return 'color: #6e6b7b; border-color: #d8d6de; background-color: #f8f9fa;';
       }

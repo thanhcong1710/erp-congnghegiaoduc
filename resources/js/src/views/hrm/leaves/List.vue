@@ -303,14 +303,15 @@
                       </td>
                       <td class="td vs-table--td text-center list-action">
                         <vs-button 
-                          v-if="tr.status === 0" 
+                          v-if="tr.status === 0 && canApprove" 
                           size="small" 
                           color="primary" 
                           @click="openApprovePopup(tr)"
                           title="Phê duyệt đơn"
                         >
-                          <i class="fa-solid fa-check"></i>
+                          <i class="fa-solid fa-check mr-1"></i> Duyệt
                         </vs-button>
+                        <span v-else-if="tr.status === 0" class="text-xs text-gray-400 italic">Chờ duyệt</span>
                       </td>
                     </tr>
                     <tr v-if="!leaves.data || !leaves.data.length">
@@ -705,6 +706,7 @@ export default {
       searchKeyword: '',
       leaves: { data: [], total: 0, per_page: 20, current_page: 1 },
       leaveTypes: [],
+      canApprove: false,
 
       // Popup Chi tiết Lịch sử Nghỉ phép
       popupHistoryActive: false,
@@ -910,6 +912,9 @@ export default {
         limit: 20 
       }).then(res => {
         this.leaves = res.data;
+        if (typeof res.data.can_approve !== 'undefined') {
+          this.canApprove = !!res.data.can_approve;
+        }
       }).catch(err => console.error(err));
     },
 

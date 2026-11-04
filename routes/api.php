@@ -528,6 +528,13 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('employee-history/{employeeId}', 'Hrm\LeaveRequestController@employeeLeaveHistory');
                 Route::post('import-raw', 'Hrm\LeaveRequestController@importRawLeaves');
             });
+            Route::prefix('online-registrations')->group(function () {
+                Route::post('list', 'Hrm\OnlineRegistrationController@index');
+                Route::post('store', 'Hrm\OnlineRegistrationController@store');
+                Route::post('approve/{id}', 'Hrm\OnlineRegistrationController@approve');
+                Route::post('reject/{id}', 'Hrm\OnlineRegistrationController@reject');
+                Route::post('delete/{id}', 'Hrm\OnlineRegistrationController@destroy');
+            });
         });
 
         // AI Chatbot Routes

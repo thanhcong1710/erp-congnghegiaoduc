@@ -9,6 +9,7 @@ use App\Models\HrmEmployeeProfile;
 use App\Models\HrmLeaveRequest;
 use App\Models\HrmShift;
 use App\Models\HrmShiftAssignment;
+use App\Models\HrmOnlineRegistration;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -91,6 +92,53 @@ class AttendanceController extends Controller
             }
         }
 
+        // Lấy danh sách đăng ký làm online ĐÃ ĐƯỢC DUYỆT (status = 1) vào ngày này
+        $onlineRegistrations = HrmOnlineRegistration::where('date', $date)
+            ->where('status', 1)
+            ->where(function ($q) use ($empIds, $userIds) {
+                if (!empty($empIds)) {
+                    $q->whereIn('employee_id', $empIds);
+                }
+                if (!empty($userIds)) {
+                    $q->orWhereIn('user_id', $userIds);
+                }
+            })
+            ->get();
+
+        $onlineRegByEmp = [];
+        foreach ($onlineRegistrations as $reg) {
+            if ($reg->employee_id) {
+                $onlineRegByEmp['emp_' . $reg->employee_id] = $reg;
+            }
+            if ($reg->user_id) {
+                $onlineRegByEmp['user_' . $reg->user_id] = $reg;
+            }
+        }
+
+        // Lấy danh sách đơn nghỉ phép ĐÃ ĐƯỢC DUYỆT (status = 1) rơi vào ngày này
+        $approvedLeaves = HrmLeaveRequest::where('status', 1)
+            ->where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->where(function ($q) use ($empIds, $userIds) {
+                if (!empty($empIds)) {
+                    $q->whereIn('employee_id', $empIds);
+                }
+                if (!empty($userIds)) {
+                    $q->orWhereIn('user_id', $userIds);
+                }
+            })
+            ->get();
+
+        $leaveByEmp = [];
+        foreach ($approvedLeaves as $lv) {
+            if ($lv->employee_id) {
+                $leaveByEmp['emp_' . $lv->employee_id] = $lv;
+            }
+            if ($lv->user_id) {
+                $leaveByEmp['user_' . $lv->user_id] = $lv;
+            }
+        }
+
         $allShifts = HrmShift::where('status', 1)->get()->keyBy('id');
 
         $result = [];
@@ -112,6 +160,14 @@ class AttendanceController extends Controller
                 $shiftName = $emp->shift ? $emp->shift->name : ($allShifts[$shiftId]->name ?? null);
             }
 
+            // Kiểm tra làm Online:
+            // 1. Ca làm việc có tên chứa 'Online' hoặc 'online'
+            // 2. Hoặc nhân viên có đơn đăng ký làm online ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó
+            $isShiftOnline = ($shiftName && mb_stripos($shiftName, 'online') !== false);
+            $onlineReg = $onlineRegByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($onlineRegByEmp['user_' . $emp->user_id] ?? null) : null);
+            $isOnline = $isShiftOnline || !empty($onlineReg);
+            $onlineReason = $isShiftOnline ? 'Ca làm việc Online' : ($onlineReg ? 'Đã duyệt đăng ký làm Online' : null);
+
             // Lọc theo ca làm việc nếu request có truyền shift_id
             if ($request->filled('shift_id')) {
                 if ($request->shift_id == 'unassigned') {
@@ -121,6 +177,23 @@ class AttendanceController extends Controller
                     if ($shiftId != $request->shift_id)
                         continue;
                 }
+            }
+
+            // Kiểm tra nghỉ phép ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó
+            $leaveReq = $leaveByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($leaveByEmp['user_' . $emp->user_id] ?? null) : null);
+            $isLeaveApproved = !empty($leaveReq);
+            $leaveReason = $leaveReq ? $leaveReq->reason : null;
+            $leaveApprovalType = $leaveReq ? $leaveReq->approval_type : null;
+
+            // Trạng thái điểm danh:
+            // 1. Ưu tiên Nghỉ phép đã duyệt: tự động mang trạng thái 'leave_approved' (hoặc 'late_submitted')
+            // 2. Tiếp theo: Online -> tự động mang trạng thái 'online'
+            // 3. Mặc định: lấy từ bản ghi attendance hoặc 'not_checked'
+            $attendanceStatus = $att ? $att->attendance_status : 'not_checked';
+            if ($isLeaveApproved) {
+                $attendanceStatus = ($leaveApprovalType === 'late_unpaid') ? 'late_submitted' : 'leave_approved';
+            } elseif ($isOnline) {
+                $attendanceStatus = 'online';
             }
 
             $result[] = [
@@ -134,8 +207,13 @@ class AttendanceController extends Controller
                 'date' => $date,
                 'shift_id' => $shiftId,
                 'shift_name' => $shiftName,
-                // not_checked, present, leave_approved, unexcused_absent, late_fined, late_submitted
-                'attendance_status' => $att ? $att->attendance_status : 'not_checked',
+                'is_online' => $isOnline,
+                'online_reason' => $onlineReason,
+                'is_leave_approved' => $isLeaveApproved,
+                'leave_reason' => $leaveReason,
+                'leave_approval_type' => $leaveApprovalType,
+                // not_checked, online, present, leave_approved, unexcused_absent, late_fined, late_submitted
+                'attendance_status' => $attendanceStatus,
                 'check_in' => $att ? $att->check_in : null,
                 'check_out' => $att ? $att->check_out : null,
                 'note' => $att ? $att->note : '',
@@ -195,13 +273,20 @@ class AttendanceController extends Controller
                 }
             }
 
+            $statusToSave = $item['attendance_status'] ?? 'not_checked';
+            if (!empty($item['is_leave_approved'])) {
+                $statusToSave = ($item['leave_approval_type'] ?? '') === 'late_unpaid' ? 'late_submitted' : 'leave_approved';
+            } elseif (!empty($item['is_online'])) {
+                $statusToSave = 'online';
+            }
+
             HrmAttendance::updateOrCreate(
                 $condition,
                 [
                     'employee_id' => $empId,
                     'user_id' => $userId,
                     'shift_id' => $shiftId,
-                    'attendance_status' => $item['attendance_status'] ?? 'not_checked',
+                    'attendance_status' => $statusToSave,
                     'note' => $item['note'] ?? null,
                 ]
             );
@@ -270,6 +355,19 @@ class AttendanceController extends Controller
             })
             ->get();
 
+        // Lấy danh sách đăng ký làm online ĐÃ DUYỆT trong tháng
+        $approvedOnlineRegs = HrmOnlineRegistration::whereBetween('date', [$startDate, $endDate])
+            ->where('status', 1)
+            ->where(function ($q) use ($empIds, $userIds) {
+                if (!empty($empIds)) {
+                    $q->whereIn('employee_id', $empIds);
+                }
+                if (!empty($userIds)) {
+                    $q->orWhereIn('user_id', $userIds);
+                }
+            })
+            ->get();
+
         $summary = [];
         foreach ($employees as $emp) {
             $userAtts = $attendances->filter(function ($att) use ($emp) {
@@ -282,14 +380,32 @@ class AttendanceController extends Controller
             $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count();
             $lateSubmitted = $userAtts->where('attendance_status', 'late_submitted')->count();
 
+            // Tính số ngày làm online:
+            $isPermanentOnline = ($emp->shift && mb_stripos($emp->shift->name, 'online') !== false);
+            if ($isPermanentOnline) {
+                $onlineDays = $standardWorkDays;
+            } else {
+                $userOnlineRegs = $approvedOnlineRegs->filter(function ($r) use ($emp) {
+                    return ($r->employee_id && $r->employee_id == $emp->id) || ($emp->user_id && $r->user_id == $emp->user_id);
+                })->map(function ($r) {
+                    return Carbon::parse($r->date)->format('Y-m-d');
+                });
+                $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
+                    return Carbon::parse($a->date)->format('Y-m-d');
+                });
+                $onlineDays = $userOnlineRegs->merge($attOnlineDates)->unique()->count();
+            }
+
             $summary[] = [
                 'employee_profile_id' => $emp->id,
                 'user_id' => $emp->user_id,
                 'employee_code' => $emp->employee_code,
                 'name' => $emp->full_name ?: ($emp->user ? $emp->user->name : 'N/A'),
                 'team_name' => $emp->department ? $emp->department->name : 'N/A',
+                'is_permanent_online' => $isPermanentOnline,
                 'standard_days' => $standardWorkDays,
                 'worked_days' => $workedDays,
+                'online_days' => $onlineDays,
                 'late_fined_count' => $lateFined,
                 'leave_approved_days' => $leaveApproved,
                 'unexcused_absent_days' => $unexcusedAbsent,
@@ -323,7 +439,7 @@ class AttendanceController extends Controller
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
 
         // Tìm nhân sự
-        $profile = HrmEmployeeProfile::with(['user', 'department'])
+        $profile = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where(function ($q) use ($keyword, $asciiKw) {
                 $q->where('employee_code', $keyword)
                     ->orWhere('phone', $keyword)
@@ -368,6 +484,26 @@ class AttendanceController extends Controller
         $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count();
         $lateSubmitted = $userAtts->where('attendance_status', 'late_submitted')->count();
 
+        // Tính số ngày làm online:
+        $isPermanentOnline = ($profile->shift && mb_stripos($profile->shift->name, 'online') !== false);
+        if ($isPermanentOnline) {
+            $onlineDays = $standardWorkDays;
+        } else {
+            $userOnlineRegs = HrmOnlineRegistration::where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) $q->orWhere('user_id', $profile->user_id);
+            })
+                ->whereBetween('date', [$startDate, $endDate])
+                ->where('status', 1)
+                ->get()
+                ->map(function ($r) { return Carbon::parse($r->date)->format('Y-m-d'); });
+
+            $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
+                return Carbon::parse($a->date)->format('Y-m-d');
+            });
+            $onlineDays = $userOnlineRegs->merge($attOnlineDates)->unique()->count();
+        }
+
         return response()->json([
             'status' => 1,
             'data' => [
@@ -379,6 +515,7 @@ class AttendanceController extends Controller
                 'year' => (int) $year,
                 'standard_days' => $standardWorkDays,
                 'worked_days' => $workedDays,
+                'online_days' => $onlineDays,
                 'late_fined_count' => $lateFined,
                 'leave_approved_days' => $leaveApproved,
                 'unexcused_absent_days' => $unexcusedAbsent,

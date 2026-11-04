@@ -116,6 +116,12 @@ export default {
         meta: { pageTitle: 'Bảng chấm công', rule: 'editor' }
       },
       {
+        path: '/hrm/online-registrations',
+        name: 'hrm-online-registrations',
+        component: () => import('@/views/hrm/online-registrations/List.vue'),
+        meta: { pageTitle: 'Đăng ký làm Online', rule: 'editor' }
+      },
+      {
         path: '/hrm/shifts',
         name: 'hrm-shifts',
         component: () => import('@/views/hrm/shifts/List.vue'),

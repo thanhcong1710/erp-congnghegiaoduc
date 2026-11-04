@@ -317,6 +317,7 @@ export default [
         icon: 'ClockIcon',
         submenu: [
           { url: '/hrm/attendances', name: 'Bảng chấm công', slug: 'hrm-attendances', permission: 'hrm' },
+          { url: '/hrm/online-registrations', name: 'Đăng ký làm Online', slug: 'hrm-online-registrations', permission: 'hrm' },
           { url: '/hrm/shifts', name: 'Ca làm việc', slug: 'hrm-shifts', permission: 'hrm' },
           { url: '/hrm/shift-assignments', name: 'Xếp ca', slug: 'hrm-shift-assignments', permission: 'hrm' },
           { url: '/hrm/overtime', name: 'Làm thêm giờ', slug: 'hrm-overtime', permission: 'hrm' },
