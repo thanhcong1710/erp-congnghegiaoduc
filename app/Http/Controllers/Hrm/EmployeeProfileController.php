@@ -8,6 +8,8 @@ use App\Models\HrmEmployeeProfile;
 use App\Models\HrmEmploymentHistory;
 use App\Models\HrmEmployeeDocument;
 use App\Models\HrmContract;
+use App\Models\HrmDepartment;
+use App\Services\Hrm\HrmScopeService;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,19 +37,9 @@ class EmployeeProfileController extends Controller
 
         $query = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel']);
 
-        // Phân quyền dữ liệu nếu là Leader (không phải super-admin hoặc hr)
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
         $currentUser = Auth::user();
-        if ($currentUser) {
-            $isHrOrAdmin = $currentUser->isHrmAdmin();
-            if (!$isHrOrAdmin && $currentUser->isLeader()) {
-                // Leader chỉ xem thành viên team mình hoặc CTV do mình tạo
-                $subordinateIds = explode(',', $currentUser->getStaffHasUser());
-                $query->where(function ($q) use ($currentUser, $subordinateIds) {
-                    $q->whereIn('user_id', $subordinateIds)
-                        ->orWhere('created_by_user_id', $currentUser->id);
-                });
-            }
-        }
+        $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
         // Lọc theo loại nhân sự
         if ($request->filled('employee_type') && $request->employee_type !== 'all') {
@@ -160,6 +152,11 @@ class EmployeeProfileController extends Controller
             $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->where('user_id', $id)->first();
         }
 
+        $currentUser = Auth::user();
+        if ($profile && !HrmScopeService::canAccessProfile($currentUser, $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền truy cập hồ sơ nhân sự này!'], 403);
+        }
+
         $empId = $profile ? $profile->id : null;
         $userId = $profile ? $profile->user_id : null;
 
@@ -201,38 +198,44 @@ class EmployeeProfileController extends Controller
     public function update(Request $request, $id)
     {
         $profile = HrmEmployeeProfile::find($id);
-        if ($profile) {
-            $data = $request->all();
-            if (isset($data['missing_documents'])) {
-                $missingDocs = is_array($data['missing_documents']) ? $data['missing_documents'] : json_decode($data['missing_documents'], true);
-                $data['profile_status'] = empty($missingDocs) ? 'full' : 'missing';
-            }
+        if (!$profile) {
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy hồ sơ'], 404);
+        }
 
+        $currentUser = Auth::user();
+        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền chỉnh sửa hồ sơ nhân sự này!'], 403);
+        }
+
+        $data = $request->all();
+        if (isset($data['missing_documents'])) {
+            $missingDocs = is_array($data['missing_documents']) ? $data['missing_documents'] : json_decode($data['missing_documents'], true);
+            $data['profile_status'] = empty($missingDocs) ? 'full' : 'missing';
+        }
+
+        if ($request->filled('user_name')) {
+            $data['full_name'] = $request->user_name;
+        }
+        if ($request->filled('email')) {
+            $data['email'] = trim($request->email);
+        }
+
+        // Đồng bộ tên và email sang bảng User nếu có
+        if ($profile->user_id) {
+            $userUpdates = [];
             if ($request->filled('user_name')) {
-                $data['full_name'] = $request->user_name;
+                $userUpdates['name'] = $request->user_name;
             }
             if ($request->filled('email')) {
-                $data['email'] = trim($request->email);
+                $userUpdates['email'] = trim($request->email);
             }
-
-            // Đồng bộ tên và email sang bảng User nếu có
-            if ($profile->user_id) {
-                $userUpdates = [];
-                if ($request->filled('user_name')) {
-                    $userUpdates['name'] = $request->user_name;
-                }
-                if ($request->filled('email')) {
-                    $userUpdates['email'] = trim($request->email);
-                }
-                if (!empty($userUpdates)) {
-                    User::where('id', $profile->user_id)->update($userUpdates);
-                }
+            if (!empty($userUpdates)) {
+                User::where('id', $profile->user_id)->update($userUpdates);
             }
-
-            $profile->update($data);
-            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
         }
-        return response()->json(['status' => 0, 'message' => 'Không tìm thấy hồ sơ'], 404);
+
+        $profile->update($data);
+        return response()->json(['status' => 1, 'message' => 'Cập nhật thành công']);
     }
 
     /**
@@ -272,6 +275,11 @@ class EmployeeProfileController extends Controller
     public function updateWorkStatus(Request $request, $id)
     {
         $profile = HrmEmployeeProfile::findOrFail($id);
+        $currentUser = Auth::user();
+        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật trạng thái nhân sự này!'], 403);
+        }
+
         $profile->work_status = $request->work_status; // 'working' or 'resigned'
         if ($request->work_status === 'resigned') {
             $profile->resigned_reason = $request->resigned_reason;
@@ -294,6 +302,11 @@ class EmployeeProfileController extends Controller
     public function updateProfileDocuments(Request $request, $id)
     {
         $profile = HrmEmployeeProfile::findOrFail($id);
+        $currentUser = Auth::user();
+        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật hồ sơ giấy tờ này!'], 403);
+        }
+
         $missing = $request->missing_documents ?: [];
         $profile->profile_received_date = $request->profile_received_date;
         $profile->missing_documents = $missing;
@@ -313,6 +326,8 @@ class EmployeeProfileController extends Controller
     public function listDocumentsOverview(Request $request)
     {
         $query = HrmEmployeeProfile::with(['user', 'department']);
+        $currentUser = Auth::user();
+        $query = HrmScopeService::applyProfileScope($query, $currentUser);
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
             $asciiKw = \Illuminate\Support\Str::ascii($kw);
@@ -374,6 +389,20 @@ class EmployeeProfileController extends Controller
     public function listContracts(Request $request)
     {
         $query = HrmContract::with(['user', 'employee.department']);
+        $currentUser = Auth::user();
+        if ($currentUser && !HrmScopeService::isHrmAdmin($currentUser)) {
+            $subordinateUserIds = HrmScopeService::getSubordinateUserIds($currentUser);
+            $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
+            $query->where(function ($q) use ($currentUser, $subordinateUserIds, $accessibleDeptIds) {
+                $q->whereIn('user_id', $subordinateUserIds)
+                  ->orWhere('user_id', $currentUser->id);
+                if (!empty($accessibleDeptIds)) {
+                    $q->orWhereHas('employee', function ($eq) use ($accessibleDeptIds) {
+                        $eq->whereIn('department_id', $accessibleDeptIds);
+                    });
+                }
+            });
+        }
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);
             $asciiKw = \Illuminate\Support\Str::ascii($kw);

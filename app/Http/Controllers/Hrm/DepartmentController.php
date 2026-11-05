@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\HrmDepartment;
 use App\Models\HrmEmployeeProfile;
 use App\Models\HrmJobTitle;
+use App\Services\Hrm\HrmScopeService;
+use Illuminate\Support\Facades\Auth;
 
 class DepartmentController extends Controller
 {
@@ -34,6 +36,9 @@ class DepartmentController extends Controller
     }
     
     public function add(Request $request) {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên HRM mới có quyền thêm phòng ban!'], 403);
+        }
         $department = HrmDepartment::create($request->all());
         return response()->json(['status' => 1, 'message' => 'Thêm phòng ban thành công!', 'data' => $department]);
     }
@@ -44,6 +49,9 @@ class DepartmentController extends Controller
     }
     
     public function update(Request $request, $id) {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên HRM mới có quyền cập nhật phòng ban!'], 403);
+        }
         $department = HrmDepartment::find($id);
         if ($department) {
             $department->update($request->all());
@@ -53,6 +61,9 @@ class DepartmentController extends Controller
     }
 
     public function delete(Request $request, $id = null) {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên HRM mới có quyền xóa phòng ban!'], 403);
+        }
         $id = $id ?: $request->input('id');
         $department = HrmDepartment::find($id);
         if (!$department) {

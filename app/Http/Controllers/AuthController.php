@@ -174,7 +174,19 @@ class AuthController extends Controller
                 'note' => $user->note,
                 'gender' => $user->gender,
                 'roleName' => $user->role_name,
-                'permissions' => u::getPermissions($user->id)
+                'is_leader' => method_exists($user, 'isLeader') ? $user->isLeader() : false,
+                'is_hrm_admin' => method_exists($user, 'isHrmAdmin') ? $user->isHrmAdmin() : false,
+                'permissions' => (function () use ($user) {
+                    $perms = u::getPermissions($user->id);
+                    if ($user->id == 1 || $user->isHrmAdmin() || $user->isLeader()) {
+                        foreach (['hrm', 'hrm_employees', 'hrm_leaves'] as $p) {
+                            if (!in_array($p, $perms, true)) {
+                                $perms[] = $p;
+                            }
+                        }
+                    }
+                    return $perms;
+                })()
             ]
         ]);
     }

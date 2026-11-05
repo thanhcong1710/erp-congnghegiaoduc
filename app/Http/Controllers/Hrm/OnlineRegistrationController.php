@@ -8,6 +8,7 @@ use App\Models\HrmOnlineRegistration;
 use App\Models\HrmEmployeeProfile;
 use App\Models\HrmAttendance;
 use App\Models\HrmShift;
+use App\Services\Hrm\HrmScopeService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -31,26 +32,8 @@ class OnlineRegistrationController extends Controller
             'creator'
         ]);
 
-        // Phân quyền dữ liệu
-        if ($currentUser && !$canApprove) {
-            if ($currentUser->isLeader()) {
-                // Leader xem nhân viên trong team
-                $subordinateIds = array_filter(explode(',', $currentUser->getStaffHasUser()));
-                $query->where(function ($q) use ($currentUser, $subordinateIds) {
-                    $q->where('user_id', $currentUser->id)
-                      ->orWhereIn('user_id', $subordinateIds);
-                });
-            } else {
-                // Nhân viên chỉ xem đơn của chính mình
-                $empProfile = HrmEmployeeProfile::where('user_id', $currentUser->id)->first();
-                $query->where(function ($q) use ($currentUser, $empProfile) {
-                    $q->where('user_id', $currentUser->id);
-                    if ($empProfile) {
-                        $q->orWhere('employee_id', $empProfile->id);
-                    }
-                });
-            }
-        }
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
+        $query = HrmScopeService::applyOnlineRegistrationScope($query, $currentUser);
 
         // Filter theo Tháng / Năm
         if ($request->filled('month') && $request->filled('year')) {

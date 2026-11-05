@@ -8,6 +8,7 @@ use App\Models\HrmShiftAssignment;
 use App\Models\HrmEmployeeProfile;
 use App\Models\HrmAttendance;
 use App\Models\HrmShift;
+use App\Services\Hrm\HrmScopeService;
 use Illuminate\Support\Facades\Auth;
 
 class ShiftAssignmentController extends Controller
@@ -22,14 +23,8 @@ class ShiftAssignmentController extends Controller
         $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
-        // Phân quyền nếu là Leader chỉ thấy nhân sự team mình
-        if ($currentUser) {
-            $isHrOrAdmin = $currentUser->isHrmAdmin();
-            if (!$isHrOrAdmin && $currentUser->isLeader()) {
-                $subordinateIds = explode(',', $currentUser->getStaffHasUser());
-                $query->whereIn('user_id', $subordinateIds);
-            }
-        }
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
+        $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
         // Lọc theo phòng ban
         if ($request->filled('department_id')) {
@@ -97,6 +92,18 @@ class ShiftAssignmentController extends Controller
         ]);
 
         $employeeIds = $request->employee_ids;
+        $currentUser = Auth::user();
+
+        // Kiểm tra quyền: Nếu không phải Admin thì chỉ phân ca cho nhân sự thuộc quyền quản lý
+        if ($currentUser && !HrmScopeService::isHrmAdmin($currentUser)) {
+            $employeeIds = HrmScopeService::applyProfileScope(HrmEmployeeProfile::whereIn('id', $employeeIds), $currentUser)->pluck('id')->all();
+            if (empty($employeeIds)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền phân ca cho các nhân sự này!'
+                ], 403);
+            }
+        }
         $shiftId = (int)$request->shift_id;
         $today = date('Y-m-d');
 

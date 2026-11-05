@@ -10,6 +10,7 @@ use App\Models\HrmLeaveType;
 use App\Models\HrmAttendance;
 use App\Models\HrmEmployeeProfile;
 use App\Models\HrmDepartment;
+use App\Services\Hrm\HrmScopeService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -27,19 +28,8 @@ class LeaveRequestController extends Controller
 
         $query = HrmLeaveRequest::with(['user', 'employee', 'leaveType', 'managerApprover', 'hrApprover']);
 
-        // Phân quyền:
-        // Leader hoặc Nhân viên bình thường chỉ thấy đơn của chính mình (hoặc nhân sự team mình nếu là Leader)
-        if ($currentUser) {
-            $isHrOrAdmin = $currentUser->isHrmAdmin();
-            if (!$isHrOrAdmin) {
-                if ($currentUser->isLeader()) {
-                    $subordinateIds = explode(',', $currentUser->getStaffHasUser());
-                    $query->whereIn('user_id', $subordinateIds);
-                } else {
-                    $query->where('user_id', $currentUser->id);
-                }
-            }
-        }
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
+        $query = HrmScopeService::applyLeaveScope($query, $currentUser);
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -133,14 +123,19 @@ class LeaveRequestController extends Controller
                 ], 403);
             }
 
-            // Nếu là Leader, kiểm tra xem nhân viên có thuộc quyền quản lý không
-            $isHrOrAdmin = $currentUser->isHrmAdmin() || $currentUser->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16]);
-            if (!$isHrOrAdmin && $currentUser->isLeader()) {
-                $subordinateIds = array_filter(explode(',', $currentUser->getStaffHasUser()));
-                if (!in_array($leave->user_id, $subordinateIds)) {
+            // Nếu không phải Admin, kiểm tra xem nhân viên có thuộc quyền quản lý hoặc phòng ban quản lý không
+            if (!HrmScopeService::isHrmAdmin($currentUser)) {
+                $subordinateIds = HrmScopeService::getSubordinateUserIds($currentUser);
+                $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
+
+                $empDeptId = $leave->employee ? $leave->employee->department_id : null;
+                $canApprove = in_array((int)$leave->user_id, $subordinateIds, true)
+                    || ($empDeptId && in_array((int)$empDeptId, $accessibleDeptIds, true));
+
+                if (!$canApprove) {
                     return response()->json([
                         'status' => 0,
-                        'message' => 'Bạn chỉ có quyền phê duyệt đơn nghỉ phép của nhân viên trong team mình quản lý!'
+                        'message' => 'Bạn chỉ có quyền phê duyệt đơn nghỉ phép của nhân viên thuộc team hoặc phòng ban mình quản lý!'
                     ], 403);
                 }
             }
@@ -259,6 +254,7 @@ class LeaveRequestController extends Controller
 
             // Query nhân sự có hồ sơ profile
             $query = HrmEmployeeProfile::with(['department', 'user']);
+            $query = HrmScopeService::applyProfileScope($query, Auth::user());
 
             if ($departmentId && $departmentId !== 'all') {
                 $query->where('department_id', $departmentId);

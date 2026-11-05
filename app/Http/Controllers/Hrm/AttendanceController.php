@@ -10,6 +10,7 @@ use App\Models\HrmLeaveRequest;
 use App\Models\HrmShift;
 use App\Models\HrmShiftAssignment;
 use App\Models\HrmOnlineRegistration;
+use App\Services\Hrm\HrmScopeService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -28,14 +29,8 @@ class AttendanceController extends Controller
         $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
-        // Phân quyền nếu là Leader chỉ thấy nhân sự team mình
-        if ($currentUser) {
-            $isHrOrAdmin = $currentUser->isHrmAdmin();
-            if (!$isHrOrAdmin && $currentUser->isLeader()) {
-                $subordinateIds = explode(',', $currentUser->getStaffHasUser());
-                $query->whereIn('user_id', $subordinateIds);
-            }
-        }
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
+        $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
         if ($request->filled('department_id')) {
             $query->where('department_id', $request->department_id);
@@ -326,18 +321,12 @@ class AttendanceController extends Controller
             $current->addDay();
         }
 
+        $currentUser = Auth::user();
         $query = HrmEmployeeProfile::with(['user', 'department', 'shift'])
             ->where('work_status', 'working');
 
-        // Phân quyền Leader
-        $currentUser = Auth::user();
-        if ($currentUser) {
-            $isHrOrAdmin = $currentUser->isHrmAdmin();
-            if (!$isHrOrAdmin && $currentUser->isLeader()) {
-                $subordinateIds = explode(',', $currentUser->getStaffHasUser());
-                $query->whereIn('user_id', $subordinateIds);
-            }
-        }
+        // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
+        $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
         $employees = $query->get();
 
@@ -456,6 +445,10 @@ class AttendanceController extends Controller
 
         if (!$profile) {
             return response()->json(['status' => 0, 'message' => 'Không tìm thấy nhân sự phù hợp']);
+        }
+
+        if (!HrmScopeService::canAccessProfile(Auth::user(), $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền truy cập dữ liệu chấm công của nhân sự này'], 403);
         }
 
         // Tính công chuẩn tháng
