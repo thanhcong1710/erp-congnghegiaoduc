@@ -90,14 +90,15 @@
             <table class="vs-table vs-table--tbody-table">
               <thead class="vs-table--thead">
                 <tr>
-                  <th width="5%" class="text-center">STT</th>
-                  <th width="10%">Mã NS</th>
-                  <th width="20%">Họ và tên</th>
-                  <th width="15%">Team / Bộ phận</th>
-                  <th width="13%">Phân loại</th>
-                  <th width="15%">Thời gian thử việc</th>
-                  <th width="12%">Trạng thái</th>
-                  <th width="120" class="text-center" style="white-space: nowrap;">Thao tác</th>
+                  <th width="4%" class="text-center">STT</th>
+                  <th width="9%">Mã NS</th>
+                  <th width="16%">Họ và tên</th>
+                  <th width="15%">Mã đăng nhập</th>
+                  <th width="13%">Team / Bộ phận</th>
+                  <th width="11%">Phân loại</th>
+                  <th width="13%">Thời gian thử việc</th>
+                  <th width="9%">Trạng thái</th>
+                  <th width="10%" class="text-center" style="white-space: nowrap;">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,6 +108,54 @@
                   <td class="td vs-table--td">
                     <div class="font-semibold text-gray-900">{{ tr.full_name || (tr.user ? tr.user.name : '') }}</div>
                     <div class="text-xs text-gray-500">{{ tr.phone || tr.email || (tr.user ? tr.user.email : '') }}</div>
+                  </td>
+                  <td class="td vs-table--td">
+                    <!-- Đã có tài khoản User -->
+                    <div v-if="tr.user" class="flex items-center justify-between">
+                      <div>
+                        <span class="font-bold text-success text-sm flex items-center" title="Mã đăng nhập hệ thống">
+                          <i class="fa-solid fa-key text-xs mr-1 text-success"></i>
+                          {{ tr.user.hrm_id || '---' }}
+                        </span>
+                        <div class="text-xs text-gray-600 truncate" style="max-width: 140px;" :title="tr.user.name + (tr.user.email ? ' (' + tr.user.email + ')' : '')">
+                          {{ tr.user.name }}
+                        </div>
+                      </div>
+                      <div class="flex items-center ml-1">
+                        <button 
+                          type="button" 
+                          class="text-primary hover:text-primary-dark p-1 text-xs" 
+                          title="Đổi tài khoản liên kết"
+                          @click="openLinkUserModal(tr)"
+                        >
+                          <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button 
+                          type="button" 
+                          class="text-danger hover:text-danger-dark p-1 text-xs ml-1" 
+                          title="Hủy liên kết tài khoản"
+                          @click="confirmUnlinkUser(tr)"
+                        >
+                          <i class="fa-solid fa-link-slash"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Chưa liên kết tài khoản -->
+                    <div v-else class="flex flex-col items-start">
+                      <span class="text-xs text-gray-400 mb-1 flex items-center">
+                        <i class="fa-regular fa-circle-question mr-1"></i> Chưa liên kết
+                      </span>
+                      <vs-button 
+                        size="small" 
+                        color="primary" 
+                        type="border" 
+                        class="py-1 px-2 text-xs"
+                        @click="openLinkUserModal(tr)"
+                      >
+                        <i class="fa-solid fa-link mr-1"></i> Link tài khoản
+                      </vs-button>
+                    </div>
                   </td>
                   <td class="td vs-table--td">{{ tr.department ? tr.department.name : 'Chưa phân bổ' }}</td>
                   <td class="td vs-table--td">
@@ -186,7 +235,7 @@
                   </td>
                 </tr>
                 <tr v-if="!filteredEmployees.length">
-                  <td colspan="8" class="text-center p-4 text-gray-500">Không có dữ liệu nhân sự</td>
+                  <td colspan="9" class="text-center p-4 text-gray-500">Không có dữ liệu nhân sự</td>
                 </tr>
               </tbody>
             </table>
@@ -261,13 +310,88 @@
         </div>
       </div>
     </vs-popup>
+
+    <!-- Modal Liên kết tài khoản User (Quan hệ 1 - 1) -->
+    <vs-popup title="LIÊN KẾT TÀI KHOẢN ĐĂNG NHẬP (QUAN HỆ 1 - 1)" :active.sync="linkUserModalActive">
+      <div class="p-3" v-if="selectedEmployeeForLink">
+        <div class="bg-gray-100 p-3 rounded mb-4 border border-gray-200">
+          <div class="text-sm text-gray-800">
+            Nhân sự: <strong class="text-primary font-bold">{{ selectedEmployeeForLink.full_name || (selectedEmployeeForLink.user ? selectedEmployeeForLink.user.name : '') }}</strong> 
+            (Mã NS: <strong class="text-dark">{{ selectedEmployeeForLink.employee_code }}</strong>)
+          </div>
+          <div class="text-xs text-gray-600 mt-1 flex flex-wrap gap-4">
+            <span>Email: <strong>{{ selectedEmployeeForLink.email || 'Chưa có' }}</strong></span>
+            <span>SĐT: <strong>{{ selectedEmployeeForLink.phone || 'Chưa có' }}</strong></span>
+          </div>
+          <div class="text-xs mt-2 pt-2 border-t border-gray-300">
+            Trạng thái hiện tại: 
+            <span v-if="selectedEmployeeForLink.user" class="text-success font-semibold">
+              <i class="fa-solid fa-circle-check mr-1"></i> Đang liên kết với <strong>{{ selectedEmployeeForLink.user.name }}</strong> (Mã ĐN: {{ selectedEmployeeForLink.user.hrm_id }})
+            </span>
+            <span v-else class="text-warning font-semibold">
+              <i class="fa-solid fa-circle-exclamation mr-1"></i> Chưa liên kết với tài khoản User nào
+            </span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">
+            Chọn tài khoản User hệ thống (*)
+          </label>
+          <p class="text-xs text-gray-500 mb-2">
+            <i class="fa-solid fa-circle-info text-primary mr-1"></i>
+            Chỉ hiển thị các tài khoản chưa liên kết với nhân sự nào khác (1 nhân sự = 1 tài khoản).
+          </p>
+          <div v-if="loadingAvailableUsers" class="p-3 text-center text-gray-500 text-sm">
+            <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải danh sách tài khoản khả dụng...
+          </div>
+          <v-select 
+            v-else
+            class="w-full"
+            v-model="selectedUserId" 
+            :options="availableUsers" 
+            :reduce="item => item.id" 
+            label="displayName" 
+            placeholder="Tìm theo tên, mã ĐN (hrm_id), email hoặc SĐT..."
+          >
+            <template slot="no-options">
+              Không tìm thấy tài khoản khả dụng nào phù hợp
+            </template>
+          </v-select>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-5">
+          <vs-button 
+            @click="saveLinkUser()" 
+            color="success" 
+            type="filled" 
+            class="p-3 mr-2"
+            :disabled="!selectedUserId"
+          >
+            <i class="fa-solid fa-floppy-disk mr-1"></i> Xác Nhận Liên Kết
+          </vs-button>
+          <vs-button 
+            @click="linkUserModalActive = false" 
+            color="dark" 
+            type="border" 
+            class="p-3"
+          >
+            Hủy
+          </vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 </template>
 
 <script>
 import axios from '../../../http/axios.js';
+import vSelect from 'vue-select';
 
 export default {
+  components: {
+    'v-select': vSelect
+  },
   data() {
     return {
       flatpickrDateConfig: {
@@ -289,7 +413,12 @@ export default {
         resigned_reason: ''
       },
       currentPage: 1,
-      perPage: 20
+      perPage: 20,
+      linkUserModalActive: false,
+      selectedEmployeeForLink: null,
+      selectedUserId: null,
+      availableUsers: [],
+      loadingAvailableUsers: false
     };
   },
   watch: {
@@ -470,6 +599,93 @@ export default {
       }).catch(err => {
         this.$vs.loading.close();
         this.$vs.notify({ title: 'Lỗi', text: 'Cập nhật thất bại', color: 'danger' });
+      });
+    },
+    openLinkUserModal(emp) {
+      this.selectedEmployeeForLink = emp;
+      this.selectedUserId = emp.user_id || (emp.user ? emp.user.id : null);
+      this.availableUsers = [];
+      this.linkUserModalActive = true;
+      this.loadAvailableUsers(emp.id);
+    },
+    loadAvailableUsers(employeeId) {
+      this.loadingAvailableUsers = true;
+      axios.p('/api/hrm/employees/available-users', { employee_id: employeeId })
+        .then(res => {
+          this.loadingAvailableUsers = false;
+          if (res.data && res.data.data) {
+            this.availableUsers = res.data.data;
+            // Nếu chưa có user_id và có gợi ý trùng khớp, tự động chọn gợi ý đầu tiên
+            if (!this.selectedUserId) {
+              const suggested = this.availableUsers.find(u => u.is_suggested);
+              if (suggested) {
+                this.selectedUserId = suggested.id;
+              }
+            }
+          }
+        })
+        .catch(err => {
+          this.loadingAvailableUsers = false;
+          console.error(err);
+          this.$vs.notify({ title: 'Lỗi', text: 'Không thể tải danh sách tài khoản khả dụng', color: 'danger' });
+        });
+    },
+    saveLinkUser() {
+      if (!this.selectedUserId) {
+        this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng chọn tài khoản User cần liên kết', color: 'warning' });
+        return;
+      }
+      this.$vs.loading();
+      axios.p(`/api/hrm/employees/link-user/${this.selectedEmployeeForLink.id}`, {
+        user_id: this.selectedUserId
+      }).then(res => {
+        this.$vs.loading.close();
+        if (res.data && res.data.status === 1) {
+          this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+          this.linkUserModalActive = false;
+          this.fetchEmployees();
+        } else {
+          this.$vs.notify({ title: 'Lỗi', text: res.data.message || 'Liên kết thất bại', color: 'danger' });
+        }
+      }).catch(err => {
+        this.$vs.loading.close();
+        const msg = err.response && err.response.data && err.response.data.message 
+          ? err.response.data.message 
+          : 'Lỗi khi liên kết tài khoản';
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
+      });
+    },
+    confirmUnlinkUser(emp) {
+      const empName = emp.full_name || (emp.user ? emp.user.name : emp.employee_code);
+      const userName = emp.user ? `${emp.user.name} (${emp.user.hrm_id})` : 'tài khoản hiện tại';
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'warning',
+        title: 'Xác nhận hủy liên kết tài khoản',
+        text: `Bạn có chắc muốn hủy liên kết tài khoản "${userName}" khỏi nhân sự "${empName}" không? Sau khi hủy, nhân sự này sẽ không thể đăng nhập bằng mã tài khoản cũ nữa cho đến khi được liên kết lại.`,
+        acceptText: 'Đồng ý hủy',
+        cancelText: 'Đóng',
+        accept: () => {
+          this.executeUnlinkUser(emp.id);
+        }
+      });
+    },
+    executeUnlinkUser(employeeId) {
+      this.$vs.loading();
+      axios.p(`/api/hrm/employees/unlink-user/${employeeId}`).then(res => {
+        this.$vs.loading.close();
+        if (res.data && res.data.status === 1) {
+          this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+          this.fetchEmployees();
+        } else {
+          this.$vs.notify({ title: 'Lỗi', text: res.data.message || 'Hủy liên kết thất bại', color: 'danger' });
+        }
+      }).catch(err => {
+        this.$vs.loading.close();
+        const msg = err.response && err.response.data && err.response.data.message 
+          ? err.response.data.message 
+          : 'Lỗi khi hủy liên kết tài khoản';
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
       });
     }
   }

@@ -77,7 +77,8 @@ class EmployeeProfileController extends Controller
                     ->orWhereHas('user', function ($sub) use ($kw, $asciiKw) {
                         $sub->where('name', 'like', "%{$kw}%")
                             ->orWhere('name', 'like', "%{$asciiKw}%")
-                            ->orWhere('email', 'like', "%{$kw}%");
+                            ->orWhere('email', 'like', "%{$kw}%")
+                            ->orWhere('hrm_id', 'like', "%{$kw}%");
                     });
             });
         }
@@ -504,5 +505,137 @@ class EmployeeProfileController extends Controller
                 'message' => 'Lỗi khi xóa nhân sự: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Lấy danh sách tài khoản User khả dụng để liên kết với nhân sự HRM
+     * Đảm bảo nguyên tắc 1-1: 1 nhân sự ứng với 1 tài khoản và ngược lại
+     */
+    public function getAvailableUsers(Request $request)
+    {
+        $employeeId = $request->employee_id;
+        $profile = null;
+        if ($employeeId) {
+            $profile = HrmEmployeeProfile::find($employeeId);
+        }
+
+        // Lấy danh sách ID của các user đã được map với profile KHÁC profile hiện tại
+        $takenUserIds = HrmEmployeeProfile::whereNotNull('user_id')
+            ->when($employeeId, function ($q) use ($employeeId) {
+                $q->where('id', '!=', $employeeId);
+            })
+            ->pluck('user_id')
+            ->toArray();
+
+        // Lấy danh sách users khả dụng (chưa bị ai map, hoặc đang map đúng profile này)
+        $query = User::whereNull('deleted_at')
+            ->whereNotIn('id', $takenUserIds);
+
+        if ($request->filled('keyword')) {
+            $kw = trim($request->keyword);
+            $query->where(function ($q) use ($kw) {
+                $q->where('name', 'like', "%{$kw}%")
+                    ->orWhere('hrm_id', 'like', "%{$kw}%")
+                    ->orWhere('email', 'like', "%{$kw}%")
+                    ->orWhere('phone', 'like', "%{$kw}%");
+            });
+        }
+
+        $users = $query->orderBy('name', 'asc')->get()->map(function ($u) use ($profile) {
+            $isCurrent = $profile && $profile->user_id == $u->id;
+            $isEmailMatch = $profile && !empty($profile->email) && strtolower(trim($profile->email)) === strtolower(trim($u->email));
+            $isPhoneMatch = $profile && !empty($profile->phone) && !empty($u->phone) && preg_replace('/[^0-9]/', '', $profile->phone) === preg_replace('/[^0-9]/', '', $u->phone);
+
+            $tag = '';
+            if ($isCurrent) {
+                $tag = ' [ĐANG LIÊN KẾT]';
+            } elseif ($isEmailMatch && $isPhoneMatch) {
+                $tag = ' (Gợi ý: Trùng Email & SĐT)';
+            } elseif ($isEmailMatch) {
+                $tag = ' (Gợi ý: Trùng Email)';
+            } elseif ($isPhoneMatch) {
+                $tag = ' (Gợi ý: Trùng SĐT)';
+            }
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'hrm_id' => $u->hrm_id,
+                'email' => $u->email,
+                'phone' => $u->phone,
+                'role_name' => $u->role_name,
+                'is_current' => $isCurrent,
+                'is_suggested' => ($isEmailMatch || $isPhoneMatch),
+                'displayName' => "[{$u->hrm_id}] {$u->name} - {$u->email}" . ($u->phone ? " ({$u->phone})" : "") . $tag
+            ];
+        });
+
+        // Sắp xếp: Đang liên kết hoặc Gợi ý lên đầu
+        $sortedUsers = $users->sortByDesc(function ($u) {
+            if ($u['is_current']) return 2;
+            if ($u['is_suggested']) return 1;
+            return 0;
+        })->values();
+
+        return response()->json([
+            'status' => 1,
+            'data' => $sortedUsers
+        ]);
+    }
+
+    /**
+     * Thực hiện liên kết hồ sơ nhân sự với tài khoản User
+     * Ràng buộc nghiêm ngặt: 1 nhân sự <-> 1 tài khoản
+     */
+    public function linkUser(Request $request, $id)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id'
+        ]);
+
+        $profile = HrmEmployeeProfile::findOrFail($id);
+        $userId = (int) $request->user_id;
+
+        // KIỂM TRA QUAN HỆ 1-1 CHẶT CHẼ
+        $existingProfile = HrmEmployeeProfile::where('user_id', $userId)
+            ->where('id', '!=', $id)
+            ->first();
+
+        if ($existingProfile) {
+            return response()->json([
+                'status' => 0,
+                'message' => "Tài khoản này đã được liên kết với nhân sự '{$existingProfile->full_name}' (Mã NS: {$existingProfile->employee_code}). Mỗi tài khoản chỉ được liên kết với 1 nhân sự duy nhất."
+            ]);
+        }
+
+        $user = User::findOrFail($userId);
+
+        $profile->user_id = $userId;
+        $profile->save();
+
+        $profile->load('user');
+
+        return response()->json([
+            'status' => 1,
+            'message' => "Đã liên kết nhân sự '{$profile->full_name}' với tài khoản '{$user->name}' (Mã ĐN: {$user->hrm_id}) thành công.",
+            'data' => $profile
+        ]);
+    }
+
+    /**
+     * Hủy liên kết tài khoản User khỏi hồ sơ nhân sự
+     */
+    public function unlinkUser(Request $request, $id)
+    {
+        $profile = HrmEmployeeProfile::findOrFail($id);
+        $oldUserId = $profile->user_id;
+        $profile->user_id = null;
+        $profile->save();
+
+        return response()->json([
+            'status' => 1,
+            'message' => "Đã hủy liên kết tài khoản khỏi nhân sự '{$profile->full_name}' thành công.",
+            'data' => $profile
+        ]);
     }
 }

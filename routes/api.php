@@ -476,6 +476,9 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('add-contract', 'Hrm\EmployeeProfileController@addContract');
                 Route::post('contracts-list', 'Hrm\EmployeeProfileController@listContracts');
                 Route::post('add-document', 'Hrm\EmployeeProfileController@addDocument');
+                Route::post('available-users', 'Hrm\EmployeeProfileController@getAvailableUsers');
+                Route::post('link-user/{id}', 'Hrm\EmployeeProfileController@linkUser');
+                Route::post('unlink-user/{id}', 'Hrm\EmployeeProfileController@unlinkUser');
             });
             Route::prefix('job-titles')->group(function () {
                 Route::post('list', 'Hrm\JobTitleController@list');
