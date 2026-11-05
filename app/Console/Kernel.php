@@ -34,7 +34,8 @@ class Kernel extends ConsoleKernel
         SnapshotAgreementRevenue::class,
         UpdateAgreementsData::class,
         \App\Console\Commands\PromoteProbationEmployees::class,
-        \App\Console\Commands\HrmImportLeavePlanCommand::class
+        \App\Console\Commands\HrmImportLeavePlanCommand::class,
+        \App\Console\Commands\HrmMapUsersCommand::class
     ];
 
     /**

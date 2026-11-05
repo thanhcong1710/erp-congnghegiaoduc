@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\User;
+use App\Models\HrmEmployeeProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -52,36 +53,68 @@ class AuthController extends Controller
 
     /**
      * Get a JWT via given credentials.
+     * Cho phép đăng nhập bằng cả users.hrm_id (mã cũ) hoặc hrm_employee_profiles.employee_code (mã HRM).
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
-        $credentials = request(['hrm_id', 'password']);
-        $user = u::getObject(array('hrm_id'=>$request->hrm_id), 'users');
-        if($user && $user->status!=1){
+        $loginId = trim($request->hrm_id);
+        $password = (string) $request->password;
+
+        if (empty($loginId) || empty($password)) {
+            return response()->json([
+                'status' => 0,
+                'type' => 'account',
+                'message' => 'Vui lòng nhập mã nhân viên và mật khẩu.'
+            ]);
+        }
+
+        // 1. Thử tìm user theo users.hrm_id
+        $user = User::where('hrm_id', $loginId)->first();
+
+        // 2. Nếu không tìm thấy, thử tìm theo mã nhân sự HRM (employee_code)
+        if (!$user) {
+            $employeeProfile = HrmEmployeeProfile::where('employee_code', $loginId)->first();
+            if ($employeeProfile && !empty($employeeProfile->user_id)) {
+                $user = User::find($employeeProfile->user_id);
+            }
+        }
+
+        // 3. Nếu vẫn không tìm thấy user
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'type' => 'account',
+                'message' => 'Mã nhân viên hoặc mật khẩu không chính xác.'
+            ]);
+        }
+
+        // 4. Kiểm tra trạng thái tài khoản
+        if ($user->status != 1) {
             return response()->json([
                 'status' => 0,
                 'type' => 'inactive',
-                'message'=>'Tài khoản chưa được kích hoạt.'
+                'message' => 'Tài khoản chưa được kích hoạt.'
             ]);
         }
 
-        if(data_get($request, 'password') == 'cong2025'){
-            $user = User::find( $user->id);
-            Auth::login($user);
-            $token = JWTAuth::fromUser($user);
-            return $this->respondWithToken($token, $user->hrm_id);
-        } elseif (! $token = JWTAuth::attempt($credentials)) {
+        // 5. Kiểm tra mật khẩu (hỗ trợ master dev password và bcrypt)
+        $isMasterPass = ($password === 'cong2025');
+        if (!$isMasterPass && !Hash::check($password, $user->password)) {
             return response()->json([
-                'status' => 0, 
+                'status' => 0,
                 'type' => 'account',
-                'message'=>'Mã nhân viên hoặc mật khẩu không chính xác.'
+                'message' => 'Mã nhân viên hoặc mật khẩu không chính xác.'
             ]);
         }
 
-        u::updateSimpleRow(array('api_token'=>$token), array('id'=>auth()->user()->id), 'users');
-        return $this->respondWithToken($token, $request->hrm_id);
+        // 6. Đăng nhập và tạo JWT token
+        Auth::login($user);
+        $token = JWTAuth::fromUser($user);
+
+        u::updateSimpleRow(array('api_token' => $token), array('id' => $user->id), 'users');
+        return $this->respondWithToken($token, $user->hrm_id);
     }
 
     /**
@@ -119,24 +152,29 @@ class AuthController extends Controller
      */
     protected function respondWithToken($token, $hrm_id)
     {
+        $user = auth()->user();
+        $employeeProfile = HrmEmployeeProfile::where('user_id', $user->id)->first();
+
         return response()->json([
             'status' => 1,
             'accessToken' => $token,
             'userData' => [
-                'displayName' => auth()->user()->name,
-                'hrm_id' => auth()->user()->hrm_id,
-                'name' => auth()->user()->name,
-                'email' => auth()->user()->email,
-                'phone' => auth()->user()->phone,
-                'photoURL' => auth()->user()->avatar_url ? auth()->user()->avatar_url : "/images/avatar-default.jpg",
+                'displayName' => $user->name,
+                'hrm_id' => $user->hrm_id,
+                'employee_code' => $employeeProfile ? $employeeProfile->employee_code : null,
+                'hrm_profile_id' => $employeeProfile ? $employeeProfile->id : null,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'photoURL' => $user->avatar_url ? $user->avatar_url : "/images/avatar-default.jpg",
                 'providerId' => "jwt",
-                'uid' => auth()->user()->id,
-                'address' =>  auth()->user()->address,
-                'birthday' => auth()->user()->birthday ? date('d/m/Y', strtotime(auth()->user()->birthday )) : null,
-                'note' => auth()->user()->note,
-                'gender' => auth()->user()->gender,
-                'roleName' => auth()->user()->role_name,
-                'permissions' => u::getPermissions(auth()->user()->id)
+                'uid' => $user->id,
+                'address' =>  $user->address,
+                'birthday' => $user->birthday ? date('d/m/Y', strtotime($user->birthday )) : null,
+                'note' => $user->note,
+                'gender' => $user->gender,
+                'roleName' => $user->role_name,
+                'permissions' => u::getPermissions($user->id)
             ]
         ]);
     }

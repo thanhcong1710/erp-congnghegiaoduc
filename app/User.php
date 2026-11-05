@@ -199,4 +199,12 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne('App\Models\AiUserPermission', 'user_id');
     }
+
+    /**
+     * HRM Employee Profile relationship
+     */
+    public function hrmProfile()
+    {
+        return $this->hasOne('App\Models\HrmEmployeeProfile', 'user_id');
+    }
 }
