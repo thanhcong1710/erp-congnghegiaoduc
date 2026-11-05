@@ -26,16 +26,19 @@
     <!-- Main Report -->
     <div v-else-if="reportData" id="printable-report" class="bg-white text-black p-6 mx-auto w-full max-w-4xl shadow border border-gray-200 print:shadow-none print:border-none print:p-0">
       <!-- Header Banner -->
-      <div class="bg-yellow-500 text-white p-5 rounded-t-lg print:rounded-none flex flex-wrap justify-between items-center">
-        <div>
-          <h2 class="text-2xl font-black uppercase tracking-wider drop-shadow">ĐÁNH GIÁ CUỐI KỲ IG.BH</h2>
-          <p class="text-xs text-yellow-100 uppercase mt-0.5">BÁO CÁO NĂNG LỰC TOÀN DIỆN 12 TUẦN</p>
+      <div class="bg-[#fdb913] text-white p-5 rounded-t-lg print:rounded-none flex flex-wrap justify-between items-center">
+        <div class="flex items-center gap-4">
+          <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="h-10 w-auto bg-white/20 rounded px-1.5 py-0.5 object-contain" />
+          <div>
+            <h2 class="text-2xl font-black uppercase tracking-wider drop-shadow">ĐÁNH GIÁ CUỐI KỲ IG.BH</h2>
+            <p class="text-xs text-yellow-100 uppercase mt-0.5">BÁO CÁO NĂNG LỰC TOÀN DIỆN 12 TUẦN</p>
+          </div>
         </div>
-        <div class="bg-white text-yellow-800 font-bold text-xs px-4 py-2 rounded-full shadow mt-2 sm:mt-0">
+        <div class="bg-white text-yellow-800 font-bold text-xs px-4 py-2 rounded-full shadow mt-2 sm:mt-0 flex items-center gap-2">
           <span>{{ reportData.result.stu_nm }}</span>
-          <span class="mx-2">|</span>
+          <span>|</span>
           <span>{{ reportData.result.class_nm || '-' }}</span>
-          <span class="mx-2">|</span>
+          <span>|</span>
           <span>{{ reportData.result.date_of_birth || '-' }}</span>
         </div>
       </div>
@@ -249,17 +252,22 @@ export default {
 
 <style scoped>
 @media print {
-  body * {
-    visibility: hidden;
+  header, aside, nav, .print\:hidden, .vs-navbar, .the-navbar {
+    display: none !important;
   }
-  #printable-report, #printable-report * {
-    visibility: visible;
+  body, #app, .content-area__content {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
   #printable-report {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 </style>

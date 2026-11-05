@@ -88,6 +88,13 @@
                   <td class="text-center">
                     <div class="flex justify-center items-center gap-2">
                       <router-link
+                        :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`"
+                        class="btn-action text-info mr-2"
+                        title="Xem báo cáo & In PDF"
+                      >
+                        <i class="feather icon-file-text text-lg"></i>
+                      </router-link>
+                      <router-link
                         :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`"
                         class="btn-action text-primary mr-2"
                         title="Chấm điểm / Cập nhật"

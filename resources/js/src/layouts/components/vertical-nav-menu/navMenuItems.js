@@ -152,38 +152,6 @@ export default [
         ]
       },
       {
-        url: null,
-        name: 'Bài test & Đánh giá',
-        icon: 'CheckSquareIcon',
-        submenu: [
-          {
-            url: '/lms/evaluations/ucrea',
-            name: 'Đánh giá UCREA',
-            slug: 'lms-evaluations-ucrea',
-          },
-          {
-            url: '/lms/evaluations/igbh/diagnostic',
-            name: 'IG.BH Khảo sát đầu vào',
-            slug: 'lms-evaluations-igbh-diagnostic',
-          },
-          {
-            url: '/lms/evaluations/igbh/weekly',
-            name: 'IG.BH Đánh giá tuần',
-            slug: 'lms-evaluations-igbh-weekly',
-          },
-          {
-            url: '/lms/evaluations/igbh/summative',
-            name: 'IG.BH Đánh giá tổng kết',
-            slug: 'lms-evaluations-igbh-summative-classes',
-          },
-          {
-            url: '/lms/evaluations/tests',
-            name: 'Danh mục bài kiểm tra',
-            slug: 'lms-evaluations-tests',
-          }
-        ]
-      },
-      {
         url: '/lms/charges',
         name: 'Kế toán',
         icon: 'DollarSignIcon',
@@ -245,6 +213,58 @@ export default [
           // }
         ],
       },
+    ]
+  },
+  {
+    header: 'TEST & ĐÁNH GIÁ',
+    icon: 'CheckSquareIcon',
+    items: [
+      {
+        url: null,
+        name: 'QUẢN LÝ UCREA',
+        icon: 'StarIcon',
+        slug: 'lms-evaluations-ucrea-group',
+        submenu: [
+          {
+            url: '/lms/evaluations/ucrea/tests',
+            name: 'Bài kiểm tra UCREA',
+            slug: 'lms-evaluations-ucrea-tests',
+          },
+          {
+            url: '/lms/evaluations/ucrea',
+            name: 'Đánh giá UCREA',
+            slug: 'lms-evaluations-ucrea',
+          }
+        ]
+      },
+      {
+        url: null,
+        name: 'QUẢN LÝ IG.BH',
+        icon: 'BarChart2Icon',
+        slug: 'lms-evaluations-igbh-group',
+        submenu: [
+          {
+            url: '/lms/evaluations/igbh/tests',
+            name: 'Bài kiểm tra IG.BH',
+            slug: 'lms-evaluations-igbh-tests',
+          },
+          {
+            url: '/lms/evaluations/igbh/diagnostic',
+            name: 'Bài kiểm tra đầu vào IG.BH',
+            slug: 'lms-evaluations-igbh-diagnostic',
+          },
+          {
+            url: '/lms/evaluations/igbh/weekly',
+            name: 'ĐG Tuần IG.BH',
+            slug: 'lms-evaluations-igbh-weekly',
+          },
+          {
+            url: '/lms/evaluations/igbh/summative',
+            name: 'ĐG Cuối kỳ IG.BH',
+            slug: 'lms-evaluations-igbh-summative-classes',
+          }
+        ]
+      }
     ]
   },
   {

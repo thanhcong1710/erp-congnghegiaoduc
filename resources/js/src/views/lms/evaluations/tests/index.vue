@@ -3,10 +3,10 @@
     <vx-card no-shadow class="mt-5">
       <div class="flex flex-wrap justify-between items-center mb-5">
         <div>
-          <h4 class="font-bold text-xl">Danh Mục Bài Kiểm Tra (LMS Tests)</h4>
-          <p class="text-sm text-gray-500">Danh mục 59+ đề thi, rubric và bài khảo sát năng lực UCREA & IG.BH</p>
+          <h4 class="font-bold text-xl">{{ pageTitle }}</h4>
+          <p class="text-sm text-gray-500">Xem và tải tài liệu đề thi, cấu hình bài khảo sát năng lực</p>
         </div>
-        <div class="flex border rounded overflow-hidden">
+        <div class="flex border rounded overflow-hidden" v-if="!routeFilterType">
           <button
             class="px-4 py-2 text-sm font-medium"
             :class="selectedType === '' ? 'bg-primary text-white' : 'bg-white text-gray-700'"
@@ -61,7 +61,7 @@
                   <th>Mã bài test</th>
                   <th>Level</th>
                   <th class="text-center">Test Seq</th>
-                  <th class="text-center">Tài liệu</th>
+                  <th class="text-center">Tài liệu đề thi</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,10 +81,39 @@
                   <td><vs-chip color="dark">{{ item.level_cd || '-' }}</vs-chip></td>
                   <td class="text-center font-bold text-gray-700">{{ item.test_seq }}</td>
                   <td class="text-center">
-                    <a v-if="item.pdf_url" :href="item.pdf_url" target="_blank" class="text-primary" title="Xem đề PDF">
-                      <i class="feather icon-file-text text-lg"></i>
-                    </a>
-                    <span v-else class="text-gray-400">-</span>
+                    <div class="flex items-center justify-center gap-2">
+                      <!-- Local PDF View -->
+                      <a
+                        v-if="item.local_pdf_path"
+                        :href="`/${item.local_pdf_path}`"
+                        target="_blank"
+                        class="p-1.5 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition mr-2"
+                        title="Xem đề PDF (tab mới)"
+                      >
+                        <i class="feather icon-eye text-base"></i>
+                      </a>
+                      <!-- Local PDF Download -->
+                      <a
+                        v-if="item.local_pdf_path"
+                        :href="`/${item.local_pdf_path}`"
+                        download
+                        class="p-1.5 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                        title="Tải về file PDF"
+                      >
+                        <i class="feather icon-download text-base"></i>
+                      </a>
+                      <!-- Fallback External Link -->
+                      <a
+                        v-else-if="item.pdf_url"
+                        :href="item.pdf_url"
+                        target="_blank"
+                        class="text-primary text-xs underline"
+                        title="Link LMS"
+                      >
+                        Link LMS
+                      </a>
+                      <span v-else class="text-gray-400">-</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -117,6 +146,7 @@ export default {
   data() {
     return {
       selectedType: '',
+      routeFilterType: '',
       search: '',
       loading: false,
       tests: [],
@@ -127,10 +157,39 @@ export default {
       }
     }
   },
+  computed: {
+    pageTitle() {
+      if (this.selectedType === 'UCREA') return 'Bài Kiểm Tra UCREA'
+      if (this.selectedType === 'IG.BH') return 'Bài Kiểm Tra IG.BH'
+      return 'Danh Mục Bài Kiểm Tra (LMS Tests)'
+    }
+  },
   created() {
+    this.checkRouteType()
     this.fetchData()
   },
+  watch: {
+    '$route.path'() {
+      this.checkRouteType()
+      this.fetchData()
+    }
+  },
   methods: {
+    checkRouteType() {
+      if (this.$route.meta && this.$route.meta.filterType) {
+        this.routeFilterType = this.$route.meta.filterType
+        this.selectedType = this.$route.meta.filterType
+      } else if (this.$route.path.includes('/ucrea/')) {
+        this.routeFilterType = 'UCREA'
+        this.selectedType = 'UCREA'
+      } else if (this.$route.path.includes('/igbh/')) {
+        this.routeFilterType = 'IG.BH'
+        this.selectedType = 'IG.BH'
+      } else {
+        this.routeFilterType = ''
+        this.selectedType = ''
+      }
+    },
     setType(type) {
       this.selectedType = type
       this.pagination.current_page = 1
@@ -166,3 +225,8 @@ export default {
 }
 </script>
 
+<style scoped>
+.vs-table th, .vs-table td {
+  padding: 10px 14px;
+}
+</style>

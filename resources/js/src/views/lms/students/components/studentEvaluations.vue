@@ -101,10 +101,16 @@
             <td class="border p-2 text-center">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
             <td class="border p-2 text-center">
               <router-link
+                :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`"
+                class="text-info font-bold hover:underline mr-2"
+              >
+                Báo cáo
+              </router-link>
+              <router-link
                 :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`"
                 class="text-primary font-bold hover:underline"
               >
-                Chấm / Chi tiết
+                Chấm
               </router-link>
             </td>
           </tr>

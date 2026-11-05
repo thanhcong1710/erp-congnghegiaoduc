@@ -565,6 +565,20 @@ export default {
       },
       // Evaluations & Tests Routes (UCREA & IG.BH)
       {
+        path: '/lms/evaluations/ucrea/tests',
+        name: 'lms-evaluations-ucrea-tests',
+        component: () => import('@/views/lms/evaluations/tests/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Bài kiểm tra UCREA', active: true }
+          ],
+          pageTitle: 'Bài kiểm tra UCREA',
+          filterType: 'UCREA',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/evaluations/ucrea',
         name: 'lms-evaluations-ucrea',
         component: () => import('@/views/lms/evaluations/ucrea/index.vue'),
@@ -606,6 +620,20 @@ export default {
         }
       },
       {
+        path: '/lms/evaluations/igbh/tests',
+        name: 'lms-evaluations-igbh-tests',
+        component: () => import('@/views/lms/evaluations/tests/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Bài kiểm tra IG.BH', active: true }
+          ],
+          pageTitle: 'Bài kiểm tra IG.BH',
+          filterType: 'IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/evaluations/igbh/diagnostic',
         name: 'lms-evaluations-igbh-diagnostic',
         component: () => import('@/views/lms/evaluations/igbh/diagnostic/index.vue'),
@@ -629,6 +657,20 @@ export default {
             { title: 'Chấm điểm khảo sát', active: true }
           ],
           pageTitle: 'Chấm điểm khảo sát IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/diagnostic/report/:id',
+        name: 'lms-evaluations-igbh-diagnostic-report',
+        component: () => import('@/views/lms/evaluations/igbh/diagnostic/report.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Khảo sát đầu vào IG.BH', url: '/lms/evaluations/igbh/diagnostic' },
+            { title: 'Báo cáo năng lực đầu vào', active: true }
+          ],
+          pageTitle: 'Báo cáo khảo sát IG.BH',
           rule: 'editor'
         }
       },
