@@ -255,34 +255,48 @@ class IgbhSummativeEvaluationController extends Controller
             return response()->json(['message' => 'Not found'], 404);
         }
 
-        $details = DB::table('igbh_summative_result_details')
-            ->where('summative_result_id', $id)
+        $testObj = DB::table('lms_tests')->where('test_seq', $result->test_seq)->first();
+        if (!$testObj) {
+            $testObj = DB::table('igbh_tests')->where('test_seq', $result->test_seq)->first();
+        }
+        $result->test_nm = $testObj ? ($testObj->name ?? $testObj->test_nm) : null;
+        $result->level_cd = $testObj ? $testObj->level_cd : null;
+
+        $subjectiveDetails = DB::table('igbh_summative_result_details')
+            ->where('summative_result_id', $result->id)
+            ->orderBy('sort_no')
             ->get();
+
+        $analysis = $result->subjective_analysis ? json_decode($result->subjective_analysis, true) : null;
 
         $themes = DB::table('igbh_summative_themes')
             ->where('test_seq', $result->test_seq)
             ->orderBy('sort_no')
             ->get();
 
-        $weeklyEvals = DB::table('igbh_weekly_eval_details as d')
-            ->join('igbh_weekly_evals as e', 'd.weekly_eval_id', '=', 'e.id')
-            ->where(function ($q) use ($result) {
-                if ($result->student_id) {
-                    $q->where('d.student_id', $result->student_id)
-                        ->orWhere('d.stu_seq', $result->stu_seq);
-                } else {
-                    $q->where('d.stu_seq', $result->stu_seq);
-                }
-            })
-            ->select('d.*', 'e.each_cd')
-            ->get()
-            ->keyBy('each_cd');
+        $weeklyData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $eachCd = 'SE' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $theme = $themes->firstWhere('sort_no', $i);
+            $foundDetail = $subjectiveDetails->firstWhere('sort_no', $i + 5);
+
+            $weeklyData[] = [
+                'sort_no' => $i,
+                'each_cd' => $eachCd,
+                'max_score' => $theme ? $theme->theme_point : 3,
+                'workbook' => $foundDetail ? $foundDetail->score : null,
+            ];
+        }
 
         return response()->json([
+            'status' => 'success',
+            'student_info' => $result,
+            'subjective_data' => $subjectiveDetails,
+            'weekly_data' => $weeklyData,
+            'teacher_comment' => $analysis['teacher_comment'] ?? '',
             'result' => $result,
-            'details' => $details,
-            'themes' => $themes,
-            'weekly_evals' => $weeklyEvals
+            'details' => $subjectiveDetails,
+            'themes' => $themes
         ]);
     }
 
@@ -294,8 +308,11 @@ class IgbhSummativeEvaluationController extends Controller
         }
 
         $request->validate([
+            'subjective_data' => 'nullable|array',
+            'weekly_data' => 'nullable|array',
             'subjective_questions' => 'nullable|array',
             'workbook_scores' => 'nullable|array',
+            'teacher_comment' => 'nullable|string',
             'subjective_analysis' => 'nullable|array',
             'eval_dt' => 'nullable|date',
             'status' => 'nullable|string'
@@ -308,8 +325,30 @@ class IgbhSummativeEvaluationController extends Controller
             $totalScore = 0;
             $insertData = [];
 
-            // 1. Save Subjective Questions (1-5)
-            if ($request->has('subjective_questions')) {
+            // Case A: LMS format (subjective_data 1-5 + weekly_data 6-17)
+            if ($request->has('subjective_data')) {
+                foreach ($request->subjective_data as $sub) {
+                    $c = floatval($sub['concept'] ?? 0);
+                    $s = floatval($sub['strategy'] ?? 0);
+                    $calc = floatval($sub['calculation'] ?? 0);
+                    $e = floatval($sub['expression'] ?? 0);
+                    $score = ($c + $s + $calc + $e) / 4;
+                    $totalScore += $score;
+
+                    $insertData[] = [
+                        'summative_result_id' => $id,
+                        'sort_no' => $sub['sort_no'],
+                        'max_score' => 6,
+                        'score' => $score,
+                        'concept' => $c,
+                        'strategy' => $s,
+                        'calculation' => $calc,
+                        'expression' => $e,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+            } elseif ($request->has('subjective_questions')) {
                 foreach ($request->subjective_questions as $q) {
                     $score = floatval($q['score'] ?? 0);
                     $totalScore += $score;
@@ -328,8 +367,27 @@ class IgbhSummativeEvaluationController extends Controller
                 }
             }
 
-            // 2. Save Workbook Scores (sort_no 6-17)
-            if ($request->has('workbook_scores')) {
+            // Workbook scores (sort_no 6-17)
+            if ($request->has('weekly_data')) {
+                foreach ($request->weekly_data as $wd) {
+                    if (isset($wd['workbook']) && $wd['workbook'] !== null && $wd['workbook'] !== '') {
+                        $wbScore = floatval($wd['workbook']);
+                        $totalScore += $wbScore;
+                        $insertData[] = [
+                            'summative_result_id' => $id,
+                            'sort_no' => $wd['sort_no'] + 5,
+                            'max_score' => $wd['max_score'] ?? 3,
+                            'score' => $wbScore,
+                            'concept' => null,
+                            'strategy' => null,
+                            'calculation' => null,
+                            'expression' => null,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+                }
+            } elseif ($request->has('workbook_scores')) {
                 foreach ($request->workbook_scores as $wb) {
                     $score = floatval($wb['score'] ?? 0);
                     $totalScore += $score;
@@ -359,17 +417,22 @@ class IgbhSummativeEvaluationController extends Controller
 
             if ($request->filled('eval_dt')) $updateData['eval_dt'] = $request->eval_dt;
             if ($request->filled('status')) $updateData['status'] = $request->status;
-            if ($request->has('subjective_analysis')) {
+
+            if ($request->has('teacher_comment')) {
+                $updateData['subjective_analysis'] = json_encode([
+                    'teacher_comment' => $request->teacher_comment
+                ], JSON_UNESCAPED_UNICODE);
+            } elseif ($request->has('subjective_analysis')) {
                 $updateData['subjective_analysis'] = json_encode($request->subjective_analysis, JSON_UNESCAPED_UNICODE);
             }
 
             DB::table('igbh_summative_results')->where('id', $id)->update($updateData);
 
             DB::commit();
-            return response()->json(['message' => 'Lưu đánh giá tổng kết thành công']);
+            return response()->json(['status' => 'success', 'message' => 'Lưu đánh giá tổng kết thành công']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
