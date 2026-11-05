@@ -400,12 +400,12 @@ export default [
       },
     ]
   },
-  {
-    url: '/ai-admin',
-    name: 'Quản lý AI',
-    icon: 'CpuIcon',
-    slug: 'ai-admin',
-    permission: 'ai_admin',
-  },
+  // {
+  //   url: '/ai-admin',
+  //   name: 'Quản lý AI',
+  //   icon: 'CpuIcon',
+  //   slug: 'ai-admin',
+  //   permission: 'ai_admin',
+  // },
 ]
 

@@ -12,8 +12,8 @@
   <div id="app" :class="vueAppClasses">
     <router-view @setAppClasses="setAppClasses" />
     
-    <!-- AI Chatbot - Hiển thị ở mọi trang -->
-    <ai-chatbot v-if="isLoggedIn"></ai-chatbot>
+    <!-- AI Chatbot - Tạm ẩn theo yêu cầu -->
+    <!-- <ai-chatbot v-if="isLoggedIn"></ai-chatbot> -->
   </div>
 </template>
 
