@@ -168,6 +168,61 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('enrolments/add-student', 'EnrolmentsController@addStudent');
             Route::post('enrolments/withdraw', 'EnrolmentsController@withdraw');
             Route::post('enrolments/get-contract-join', 'EnrolmentsController@getContractJoin');
+
+            // Evaluations & Tests (UCREA & IG.BH)
+            Route::prefix('evaluations')->group(function () {
+                Route::get('tests', 'Lms\LmsTestConfigController@index');
+                Route::get('configs/{testSeq}', 'Lms\LmsTestConfigController@getConfig');
+                Route::post('configs/{testSeq}', 'Lms\LmsTestConfigController@updateConfig');
+
+                // UCREA
+                Route::prefix('ucrea')->group(function () {
+                    Route::get('results', 'Lms\UcreaEvaluationController@getResults');
+                    Route::get('init-data', 'Lms\UcreaEvaluationController@getInitData');
+                    Route::get('results/{id}', 'Lms\UcreaEvaluationController@getResultDetail');
+                    Route::post('results', 'Lms\UcreaEvaluationController@createResult');
+                    Route::post('results/{id}/grade', 'Lms\UcreaEvaluationController@saveGrade');
+                    Route::delete('results/{id}', 'Lms\UcreaEvaluationController@deleteResult');
+                });
+
+                // IG.BH Diagnostic
+                Route::prefix('igbh')->group(function () {
+                    Route::get('results', 'Lms\IgbhEvaluationController@getResults');
+                    Route::get('init-data', 'Lms\IgbhEvaluationController@getInitData');
+                    Route::get('results/{id}', 'Lms\IgbhEvaluationController@getResultDetail');
+                    Route::post('results', 'Lms\IgbhEvaluationController@createResult');
+                    Route::post('results/{id}/grade', 'Lms\IgbhEvaluationController@saveGrade');
+                    Route::delete('results/{id}', 'Lms\IgbhEvaluationController@deleteResult');
+                });
+
+                // IG.BH Weekly
+                Route::prefix('weekly')->group(function () {
+                    Route::get('results', 'Lms\IgbhWeeklyEvaluationController@getResults');
+                    Route::get('init-data', 'Lms\IgbhWeeklyEvaluationController@getInitData');
+                    Route::post('existing-weeks', 'Lms\IgbhWeeklyEvaluationController@getExistingWeeks');
+                    Route::post('results', 'Lms\IgbhWeeklyEvaluationController@createResult');
+                    Route::get('results/{id}', 'Lms\IgbhWeeklyEvaluationController@getResultDetail');
+                    Route::post('results/{id}/grade', 'Lms\IgbhWeeklyEvaluationController@saveGrade');
+                    Route::post('results/{id}/status', 'Lms\IgbhWeeklyEvaluationController@updateStatus');
+                    Route::delete('results/{id}', 'Lms\IgbhWeeklyEvaluationController@deleteResult');
+                });
+
+                // IG.BH Summative
+                Route::prefix('summative')->group(function () {
+                    Route::get('classes', 'Lms\IgbhClassSummativeEvaluationController@getResults');
+                    Route::get('classes/init-data', 'Lms\IgbhClassSummativeEvaluationController@getInitData');
+                    Route::post('classes', 'Lms\IgbhClassSummativeEvaluationController@createResult');
+                    Route::get('classes/{id}', 'Lms\IgbhClassSummativeEvaluationController@getClassData');
+                    Route::post('classes/{id}/status', 'Lms\IgbhClassSummativeEvaluationController@updateStatus');
+                    Route::delete('classes/{id}', 'Lms\IgbhClassSummativeEvaluationController@deleteResult');
+
+                    Route::get('results', 'Lms\IgbhSummativeEvaluationController@getResults');
+                    Route::get('results/{id}/report', 'Lms\IgbhSummativeEvaluationController@getReport');
+                    Route::get('results/{id}/form', 'Lms\IgbhSummativeEvaluationController@getFormData');
+                    Route::post('results/{id}/grade', 'Lms\IgbhSummativeEvaluationController@saveFormData');
+                    Route::delete('results/{id}', 'Lms\IgbhSummativeEvaluationController@deleteResult');
+                });
+            });
             Route::post('enrolments/contract-join', 'EnrolmentsController@contractJoin');
 
             Route::post('reserves/list', 'ReservesController@list');
