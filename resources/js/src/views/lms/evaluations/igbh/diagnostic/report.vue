@@ -1445,21 +1445,69 @@ export default {
   background-color: #fef2f2 !important;
 }
 
+</style>
+
+<style>
 /* ============================================================
-   HIGH-PRECISION PRINT STYLES
+   HIGH-PRECISION PRINT STYLES (UNSCOPED FOR FULL LAYOUT OVERRIDE)
    ============================================================ */
 @media print {
-  /* Hide all external application elements */
-  body, html, #app, .content-area__content, .layout--vertical-nav-menu, .router-view {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
+  header,
+  aside,
+  nav,
+  footer,
+  .v-nav-menu,
+  .v-nav-menu-swipe-area,
+  .vx-navbar-wrapper,
+  .the-navbar,
+  .the-navbar-vertical,
+  .the-navbar-horizontal,
+  .the-footer,
+  .the-customizer,
+  .vx-tour,
+  #content-overlay,
+  .content-area__header,
+  .print-hide,
+  .action-toolbar,
+  .vs-sidebar,
+  .vs-sidebar--background,
+  #btnVNavMenuMinToggler {
+    display: none !important;
+    visibility: hidden !important;
   }
 
-  header, aside, nav, .print-hide, .vs-navbar, .the-navbar, .vx-navbar, .vs-sidebar, .v-nav-menu {
-    display: none !important;
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  #app,
+  .layout--main,
+  #content-area,
+  .content-wrapper,
+  .router-view,
+  .router-content {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    left: 0 !important;
+    top: 0 !important;
+  }
+
+  #content-area {
+    margin-left: 0 !important;
+    padding: 0 !important;
   }
 
   .igbh-report-wrapper {
@@ -1469,19 +1517,24 @@ export default {
   }
 
   .report-document {
-    max-width: 100% !important;
+    max-width: 820px !important;
     width: 100% !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 
   .report-sheet {
     box-shadow: none !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 0 !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
+    padding: 24px 28px !important;
     page-break-after: always !important;
     break-after: page !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
   }
 
   .sheet-page-2 {
@@ -1490,7 +1543,6 @@ export default {
     margin-top: 0 !important;
   }
 
-  /* Force background colors and exact borders when printing */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -1499,7 +1551,7 @@ export default {
 
   @page {
     size: A4 portrait;
-    margin: 0.8cm 0.6cm;
+    margin: 0.6cm;
   }
 }
 </style>
