@@ -563,6 +563,170 @@ export default {
           rule: 'editor'
         }
       },
+      // Evaluations & Tests Routes (UCREA & IG.BH)
+      {
+        path: '/lms/evaluations/ucrea',
+        name: 'lms-evaluations-ucrea',
+        component: () => import('@/views/lms/evaluations/ucrea/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá năng lực UCREA', active: true }
+          ],
+          pageTitle: 'Đánh giá năng lực UCREA',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/ucrea/form/:id',
+        name: 'lms-evaluations-ucrea-form',
+        component: () => import('@/views/lms/evaluations/ucrea/form.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá năng lực UCREA', url: '/lms/evaluations/ucrea' },
+            { title: 'Chấm điểm Rubric', active: true }
+          ],
+          pageTitle: 'Chấm điểm Rubric UCREA',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/ucrea/report/:id',
+        name: 'lms-evaluations-ucrea-report',
+        component: () => import('@/views/lms/evaluations/ucrea/report.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá năng lực UCREA', url: '/lms/evaluations/ucrea' },
+            { title: 'Báo cáo năng lực & Radar chart', active: true }
+          ],
+          pageTitle: 'Báo cáo năng lực UCREA',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/diagnostic',
+        name: 'lms-evaluations-igbh-diagnostic',
+        component: () => import('@/views/lms/evaluations/igbh/diagnostic/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Khảo sát đầu vào (IG.BH Diagnostic)', active: true }
+          ],
+          pageTitle: 'Khảo sát đầu vào IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/diagnostic/form/:id',
+        name: 'lms-evaluations-igbh-diagnostic-form',
+        component: () => import('@/views/lms/evaluations/igbh/diagnostic/form.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Khảo sát đầu vào IG.BH', url: '/lms/evaluations/igbh/diagnostic' },
+            { title: 'Chấm điểm khảo sát', active: true }
+          ],
+          pageTitle: 'Chấm điểm khảo sát IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/weekly',
+        name: 'lms-evaluations-igbh-weekly',
+        component: () => import('@/views/lms/evaluations/igbh/weekly/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tuần (IG.BH Weekly)', active: true }
+          ],
+          pageTitle: 'Đánh giá tuần IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/weekly/form/:id',
+        name: 'lms-evaluations-igbh-weekly-form',
+        component: () => import('@/views/lms/evaluations/igbh/weekly/form.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tuần IG.BH', url: '/lms/evaluations/igbh/weekly' },
+            { title: 'Chấm điểm lớp', active: true }
+          ],
+          pageTitle: 'Chấm điểm đánh giá tuần',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/summative',
+        name: 'lms-evaluations-igbh-summative-classes',
+        component: () => import('@/views/lms/evaluations/igbh/summative/classes.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tổng kết kỳ (IG.BH Summative)', active: true }
+          ],
+          pageTitle: 'Đánh giá tổng kết kỳ IG.BH',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/summative/students',
+        name: 'lms-evaluations-igbh-summative-students',
+        component: () => import('@/views/lms/evaluations/igbh/summative/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tổng kết lớp', url: '/lms/evaluations/igbh/summative' },
+            { title: 'Danh sách học sinh', active: true }
+          ],
+          pageTitle: 'Danh sách học sinh tổng kết kỳ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/summative/form/:id',
+        name: 'lms-evaluations-igbh-summative-form',
+        component: () => import('@/views/lms/evaluations/igbh/summative/form.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tổng kết', url: '/lms/evaluations/igbh/summative' },
+            { title: 'Chấm bài thi cuối kỳ', active: true }
+          ],
+          pageTitle: 'Chấm bài thi tổng kết kỳ',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/igbh/summative/report/:id',
+        name: 'lms-evaluations-igbh-summative-report',
+        component: () => import('@/views/lms/evaluations/igbh/summative/report.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Đánh giá tổng kết', url: '/lms/evaluations/igbh/summative' },
+            { title: 'Báo cáo 12 tuần & Radar chart', active: true }
+          ],
+          pageTitle: 'Báo cáo tổng kết 12 tuần',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/evaluations/tests',
+        name: 'lms-evaluations-tests',
+        component: () => import('@/views/lms/evaluations/tests/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh mục bài kiểm tra', active: true }
+          ],
+          pageTitle: 'Danh mục bài kiểm tra',
+          rule: 'editor'
+        }
+      },
       {
         path: '/lms/teachers',
         name: 'lms-teachers',

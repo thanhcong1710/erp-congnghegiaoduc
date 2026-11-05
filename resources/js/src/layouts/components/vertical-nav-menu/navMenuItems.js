@@ -152,6 +152,38 @@ export default [
         ]
       },
       {
+        url: null,
+        name: 'Bài test & Đánh giá',
+        icon: 'CheckSquareIcon',
+        submenu: [
+          {
+            url: '/lms/evaluations/ucrea',
+            name: 'Đánh giá UCREA',
+            slug: 'lms-evaluations-ucrea',
+          },
+          {
+            url: '/lms/evaluations/igbh/diagnostic',
+            name: 'IG.BH Khảo sát đầu vào',
+            slug: 'lms-evaluations-igbh-diagnostic',
+          },
+          {
+            url: '/lms/evaluations/igbh/weekly',
+            name: 'IG.BH Đánh giá tuần',
+            slug: 'lms-evaluations-igbh-weekly',
+          },
+          {
+            url: '/lms/evaluations/igbh/summative',
+            name: 'IG.BH Đánh giá tổng kết',
+            slug: 'lms-evaluations-igbh-summative-classes',
+          },
+          {
+            url: '/lms/evaluations/tests',
+            name: 'Danh mục bài kiểm tra',
+            slug: 'lms-evaluations-tests',
+          }
+        ]
+      },
+      {
         url: '/lms/charges',
         name: 'Kế toán',
         icon: 'DollarSignIcon',

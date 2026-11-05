@@ -87,6 +87,11 @@
             <student-assessments :student_info="student_info" />
           </div>
         </vs-tab>
+        <vs-tab label="Bài test (IG.BH & UCREA)">
+          <div class="tab-text">
+            <student-evaluations :student_info="student_info" />
+          </div>
+        </vs-tab>
         <vs-tab label="Lịch sử">
           <div class="tab-text">
             <student-logs :student_info="student_info" />
@@ -118,6 +123,7 @@
   import studentAssessments from './components/studentAssessments.vue'
   import studentOperating from './components/studentOperating.vue'
   import studentFiles from './components/studentFiles.vue'
+  import studentEvaluations from './components/studentEvaluations.vue'
 
   export default {
     components: {
@@ -131,7 +137,8 @@
       studentSessions,
       studentAssessments,
       studentOperating,
-      studentFiles
+      studentFiles,
+      studentEvaluations
     },
     data() {
       return {

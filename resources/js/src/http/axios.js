@@ -34,6 +34,39 @@ const p = (link, params = null) => new Promise((resolve, reject) => {
     reject('Request url is not valid')
   }
 })
+const del = (link, params = null) => new Promise((resolve, reject) => {
+  if (typeof link === 'string') {
+    axios.delete(link, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+      },
+      params: params
+    }).then(response => {
+      resolve(response)
+    }).catch(e => {
+      processAuthen(e);
+    })
+  } else {
+    reject('Request url is not valid')
+  }
+})
+
+const put = (link, params = null) => new Promise((resolve, reject) => {
+  if (typeof link === 'string') {
+    axios.put(link, params, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    }).then(response => {
+      resolve(response)
+    }).catch(e => {
+      processAuthen(e);
+    })
+  } else {
+    reject('Request url is not valid')
+  }
+})
+
 function processAuthen(error) {
   // console.log(error.response.headers);
   try {
@@ -47,5 +80,7 @@ function processAuthen(error) {
 }
 export default {
   g,
-  p
+  p,
+  del,
+  put
 }
