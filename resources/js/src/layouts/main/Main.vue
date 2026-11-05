@@ -280,6 +280,30 @@ export default {
       this.hideScrollToTop = val
     },
     updateMenu(){
+      // Auto-sanitize stale permissions from localStorage/AppActiveUser
+      const user = this.$store.state.AppActiveUser || {}
+      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager']
+      const isRealHrmAdmin = user.id === 1 || 
+        user.is_hrm_admin === true || 
+        (user.roleName && adminRoleNames.includes(user.roleName.toLowerCase())) ||
+        (user.role_name && adminRoleNames.includes(user.role_name.toLowerCase()))
+
+      if (!isRealHrmAdmin && Array.isArray(user.permissions)) {
+        const hrmAdminIdx = user.permissions.indexOf('hrm_admin')
+        if (hrmAdminIdx !== -1) {
+          user.permissions.splice(hrmAdminIdx, 1)
+          try {
+            const raw = localStorage.getItem('userInfo')
+            if (raw) {
+              const parsed = JSON.parse(raw)
+              parsed.permissions = user.permissions
+              parsed.is_hrm_admin = false
+              localStorage.setItem('userInfo', JSON.stringify(parsed))
+            }
+          } catch (e) {}
+        }
+      }
+
       const new_list = []
       this.navMenuItems.map(item => {
         if ( typeof item.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item.permission)) {

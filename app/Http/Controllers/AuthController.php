@@ -186,11 +186,11 @@ class AuthController extends Controller
                         if (!in_array('hrm', $perms, true)) {
                             $perms[] = 'hrm';
                         }
-                    } elseif ($user->isLeader()) {
+                    } else {
+                        $perms = array_values(array_diff($perms, ['hrm_admin']));
                         if (!in_array('hrm', $perms, true)) {
                             $perms[] = 'hrm';
                         }
-                        $perms = array_values(array_diff($perms, ['hrm_admin']));
                     }
                     return $perms;
                 })()

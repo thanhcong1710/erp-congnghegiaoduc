@@ -14,7 +14,8 @@ export default {
             { title: 'Cơ cấu tổ chức', active: true }
           ],
           pageTitle: 'Cơ cấu tổ chức',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm_admin'
         }
       },
       {
@@ -28,7 +29,8 @@ export default {
             { title: 'Cấp bậc', active: true },
           ],
           pageTitle: 'Quản lý Cấp bậc',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm_admin'
         },
       },
       {
@@ -42,7 +44,8 @@ export default {
             { title: 'Chức danh', active: true },
           ],
           pageTitle: 'Quản lý Chức danh',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm_admin'
         },
       },
       {
@@ -56,7 +59,8 @@ export default {
             { title: 'Nhân viên', active: true },
           ],
           pageTitle: 'Danh sách Nhân viên',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm'
         },
       },
       {
@@ -71,7 +75,8 @@ export default {
             { title: 'Thêm mới', active: true },
           ],
           pageTitle: 'Thêm mới Hồ sơ Nhân viên',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm_admin'
         },
       },
       {
@@ -86,7 +91,8 @@ export default {
             { title: 'Cập nhật', active: true },
           ],
           pageTitle: 'Hồ sơ Nhân viên',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm_admin'
         },
       },
       {
@@ -100,50 +106,51 @@ export default {
             { title: 'Nghỉ phép', active: true }
           ],
           pageTitle: 'Quản lý nghỉ phép',
-          rule: 'editor'
+          rule: 'editor',
+          permission: 'hrm'
         }
       },
       {
         path: '/hrm/leave-types',
         name: 'hrm-leave-types',
         component: () => import('@/views/hrm/leave-types/List.vue'),
-        meta: { pageTitle: 'Loại nghỉ phép', rule: 'editor' }
+        meta: { pageTitle: 'Loại nghỉ phép', rule: 'editor', permission: 'hrm_admin' }
       },
       {
         path: '/hrm/attendances',
         name: 'hrm-attendances',
         component: () => import('@/views/hrm/attendances/List.vue'),
-        meta: { pageTitle: 'Bảng chấm công', rule: 'editor' }
+        meta: { pageTitle: 'Bảng chấm công', rule: 'editor', permission: 'hrm' }
       },
       {
         path: '/hrm/online-registrations',
         name: 'hrm-online-registrations',
         component: () => import('@/views/hrm/online-registrations/List.vue'),
-        meta: { pageTitle: 'Đăng ký làm Online', rule: 'editor' }
+        meta: { pageTitle: 'Đăng ký làm Online', rule: 'editor', permission: 'hrm' }
       },
       {
         path: '/hrm/shifts',
         name: 'hrm-shifts',
         component: () => import('@/views/hrm/shifts/List.vue'),
-        meta: { pageTitle: 'Ca làm việc', rule: 'editor' }
+        meta: { pageTitle: 'Ca làm việc', rule: 'editor', permission: 'hrm_admin' }
       },
       {
         path: '/hrm/shift-assignments',
         name: 'hrm-shift-assignments',
         component: () => import('@/views/hrm/shift-assignments/List.vue'),
-        meta: { pageTitle: 'Xếp ca', rule: 'editor' }
+        meta: { pageTitle: 'Xếp ca', rule: 'editor', permission: 'hrm_admin' }
       },
       {
         path: '/hrm/contracts',
         name: 'hrm-contracts',
         component: () => import('@/views/hrm/contracts/List.vue'),
-        meta: { pageTitle: 'Quản lý Hợp đồng', rule: 'editor' }
+        meta: { pageTitle: 'Quản lý Hợp đồng', rule: 'editor', permission: 'hrm_admin' }
       },
       {
         path: '/hrm/documents',
         name: 'hrm-documents',
         component: () => import('@/views/hrm/documents/List.vue'),
-        meta: { pageTitle: 'Lưu trữ Hồ sơ', rule: 'editor' }
+        meta: { pageTitle: 'Lưu trữ Hồ sơ', rule: 'editor', permission: 'hrm_admin' }
       }
     ]
   }
