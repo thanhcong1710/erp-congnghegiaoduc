@@ -1,387 +1,416 @@
 <template>
-  <div class="igbh-eval-result space-y-6">
+  <div class="igbh-report-wrapper">
     <!-- Action Bar (Hidden on print) -->
-    <div class="flex items-center justify-between mb-4 print:hidden">
-      <div>
-        <div class="flex items-center gap-3 mb-1">
-          <router-link to="/lms/evaluations/igbh/diagnostic" class="text-sm text-gray-500 hover:text-primary transition flex items-center">
-            <i class="feather icon-arrow-left mr-1"></i> Quay lại danh sách
-          </router-link>
+    <div class="action-toolbar print-hide">
+      <div class="toolbar-info">
+        <router-link to="/lms/evaluations/igbh/diagnostic" class="back-link">
+          <i class="feather icon-arrow-left"></i> Quay lại danh sách
+        </router-link>
+        <h2 class="toolbar-title">Báo Cáo Khảo Sát Năng Lực Đầu Vào IG.BH</h2>
+        <div class="toolbar-sub" v-if="general">
+          <span>{{ general.test_nm }}</span>
+          <span class="sep">|</span>
+          <span>Học sinh: <strong class="text-name">{{ general.stu_nm }}</strong></span>
+          <span class="sep" v-if="general.stu_birth_dt">|</span>
+          <span v-if="general.stu_birth_dt">Ngày sinh: {{ general.stu_birth_dt }}</span>
         </div>
-        <h3 class="text-xl font-bold text-gray-800">Báo Cáo Khảo Sát Năng Lực Đầu Vào IG.BH</h3>
-        <p class="text-xs text-gray-500 mt-1" v-if="general">
-          {{ general.test_nm }} | Học sinh: <strong class="text-primary">{{ general.stu_nm }}</strong>
-          <span v-if="general.stu_birth_dt"> | Ngày sinh: {{ general.stu_birth_dt }}</span>
-        </p>
       </div>
-      <div class="flex gap-2">
-        <vs-button color="primary" icon="print" @click="printReport">In Báo Cáo (PDF)</vs-button>
-        <router-link :to="`/lms/evaluations/igbh/diagnostic/form/${resultId}`">
-          <vs-button color="warning" icon="edit">Sửa Điểm</vs-button>
+      <div class="toolbar-btns">
+        <button class="btn-print" @click="printReport">
+          <i class="feather icon-printer"></i> In Báo Cáo (PDF)
+        </button>
+        <router-link :to="`/lms/evaluations/igbh/diagnostic/form/${resultId}`" class="btn-edit">
+          <i class="feather icon-edit"></i> Sửa Điểm
         </router-link>
       </div>
     </div>
 
-    <!-- Loading -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-20 print:hidden text-gray-500">
-      <i class="fa fa-spinner fa-spin text-3xl mb-3 text-primary"></i>
-      <p class="text-sm">Đang tải báo cáo đánh giá...</p>
+    <!-- Loading State -->
+    <div v-if="loading" class="loading-state print-hide">
+      <div class="spinner"></div>
+      <p>Đang tải dữ liệu báo cáo...</p>
     </div>
 
-    <div v-else-if="general" id="igbh-pdf-content" class="mx-auto w-full max-w-[900px] print:p-0 print:m-0 print:border-none print:shadow-none bg-white font-sans text-gray-900">
+    <!-- Main Report Document -->
+    <div v-else-if="general" id="igbh-report-doc" class="report-document">
       
-      <!-- ======= PAGE 1: KIẾN THỨC CƠ BẢN ======= -->
-      <div class="report-page bg-white border border-gray-300 rounded-xl overflow-hidden shadow-lg mb-8" id="report-page-1">
-        <!-- Page Header -->
-        <div class="bg-blue-900 text-white px-8 py-5 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="h-10 w-auto bg-white/10 rounded px-1.5 py-0.5 object-contain" />
-            <div>
-              <h1 class="text-xl font-bold tracking-wide">KIẾN THỨC CƠ BẢN</h1>
-              <p class="text-blue-200 text-xs font-medium mt-0.5 uppercase">ĐÁNH GIÁ ĐẦU KỲ</p>
+      <!-- ================= PAGE 1: KIẾN THỨC CƠ BẢN ================= -->
+      <div class="report-sheet" id="report-sheet-1">
+        <!-- Sheet Header -->
+        <div class="sheet-header">
+          <div class="header-brand-block">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="brand-logo" />
+            <div class="header-titles">
+              <h1 class="main-title">KIẾN THỨC CƠ BẢN</h1>
+              <p class="sub-title">ĐÁNH GIÁ ĐẦU KỲ</p>
             </div>
           </div>
-          <div class="bg-white rounded-full px-5 py-2 flex items-center gap-6 text-sm shadow-sm">
-            <span class="text-blue-900 font-semibold">
-              Trình độ: <span class="text-indigo-600 font-bold">{{ general.assigned_level || '—' }}</span>
+          <div class="student-pill">
+            <span class="pill-item">
+              <span class="pill-label">Trình độ:</span>
+              <span class="pill-val level-val">{{ general.assigned_level || '—' }}</span>
             </span>
-            <span class="text-blue-900 font-semibold">
-              Sinh: <span>{{ general.stu_birth_dt || '—' }}</span>
+            <span class="pill-item">
+              <span class="pill-label">Sinh:</span>
+              <span class="pill-val">{{ general.stu_birth_dt || '—' }}</span>
             </span>
-            <span class="text-blue-900 font-bold text-base">
-              {{ general.stu_nm }}
-            </span>
+            <span class="pill-name">{{ general.stu_nm }}</span>
           </div>
         </div>
 
-        <div class="p-6 space-y-6">
-          
-          <!-- Section: Kết quả đánh giá theo câu hỏi riêng biệt -->
-          <div>
-            <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-              Kết quả đánh giá theo câu hỏi riêng biệt
-            </h3>
-            <div class="overflow-x-auto border border-gray-200 rounded-lg">
-              <table class="w-full text-center border-collapse text-sm">
+        <div class="sheet-body">
+          <!-- 1. Kết quả đánh giá theo câu hỏi riêng biệt -->
+          <div class="report-block">
+            <div class="block-title">
+              <span class="title-bar"></span>
+              <h3>Kết quả đánh giá theo câu hỏi riêng biệt</h3>
+            </div>
+            <div class="table-container">
+              <table class="grid-table question-table">
                 <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-3 py-2 text-left border-r border-blue-600">Mục</th>
-                    <th v-for="q in curriculum" :key="q.question_no" class="px-1 py-2 border-r border-blue-600 w-9">{{ q.question_no }}</th>
+                  <tr class="header-row">
+                    <th class="col-muc">Mục</th>
+                    <th v-for="q in curriculum" :key="q.question_no" class="col-qno">{{ q.question_no }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200">
-                    <td class="px-3 py-2 text-left font-semibold bg-blue-50 border-r border-gray-200 text-xs">Đơn vị</td>
-                    <td v-for="q in curriculum" :key="'u' + q.question_no" class="px-1 py-2 border-r border-gray-100 text-xs font-semibold text-gray-700">
+                  <tr class="row-unit">
+                    <td class="cell-label">Đơn vị</td>
+                    <td v-for="q in curriculum" :key="'u' + q.question_no" class="cell-val bold-txt">
                       {{ q.unit || '—' }}
                     </td>
                   </tr>
-                  <tr class="border-b border-gray-200">
-                    <td class="px-3 py-2 text-left font-semibold bg-blue-50 border-r border-gray-200 text-xs">Đáp án</td>
-                    <td v-for="q in curriculum" :key="'a' + q.question_no" class="px-1 py-2 border-r border-gray-100 text-xs">
+                  <tr class="row-answer">
+                    <td class="cell-label">Đáp án</td>
+                    <td v-for="q in curriculum" :key="'a' + q.question_no" class="cell-val">
                       {{ q.assigned_score || '—' }}
                     </td>
                   </tr>
-                  <tr>
-                    <td class="px-3 py-2 text-left font-semibold bg-blue-50 border-r border-gray-200 text-xs">Kết quả</td>
-                    <td v-for="q in curriculum" :key="'r' + q.question_no" class="px-1 py-2 border-r border-gray-100">
-                      <span v-if="q.is_correct === 'O'" class="font-bold text-red-500 text-xs">O</span>
-                      <span v-else-if="q.is_correct === 'X'" class="font-bold text-teal-500 text-xs">X</span>
-                      <span v-else class="text-gray-400 text-xs">—</span>
+                  <tr class="row-result">
+                    <td class="cell-label">Kết quả</td>
+                    <td v-for="q in curriculum" :key="'r' + q.question_no" class="cell-val">
+                      <span v-if="q.is_correct === 'O'" class="res-o">o</span>
+                      <span v-else-if="q.is_correct === 'X'" class="res-x">x</span>
+                      <span v-else class="res-dash">—</span>
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- 2. Đánh giá theo đơn vị riêng biệt (2 Cột: Bảng + Radar) -->
+          <div class="report-block">
+            <div class="two-columns-row">
+              <div class="col-left">
+                <div class="block-title">
+                  <span class="title-bar"></span>
+                  <h3>Đánh giá theo đơn vị riêng biệt</h3>
+                </div>
+                <div class="table-container">
+                  <table class="grid-table stat-table">
+                    <thead>
+                      <tr class="header-row">
+                        <th class="text-center" style="width: 52%;">Phân loại</th>
+                        <th class="text-center" style="width: 28%;">Số câu đúng</th>
+                        <th class="text-center" style="width: 20%;">Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(unit, uKey) in unitStats" :key="uKey">
+                        <td class="text-center font-medium">{{ uKey }}</td>
+                        <td class="text-center">
+                          <span class="correct-cnt">{{ unit.correct }}</span>
+                          <span class="total-cnt">/{{ unit.total }}</span>
+                        </td>
+                        <td class="text-center pct-cnt">{{ unit.pct }}%</td>
+                      </tr>
+                      <tr class="row-total">
+                        <td class="text-center font-bold">Tổng</td>
+                        <td class="text-center">
+                          <span class="correct-cnt">{{ totalCurrCorrect }}</span>
+                          <span class="total-cnt">/{{ curriculum.length }}</span>
+                        </td>
+                        <td class="text-center pct-cnt font-bold">{{ totalCurrPct }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Radar Canvas Right -->
+              <div class="col-right">
+                <div class="chart-panel radar-panel">
+                  <canvas ref="currRadarCanvas" width="340" height="240" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. So sánh năng lực giải quyết vấn đề theo cấp độ -->
+          <div class="report-block">
+            <div class="two-columns-row">
+              <div class="col-left">
+                <div class="block-title">
+                  <span class="title-bar"></span>
+                  <h3>So sánh năng lực giải quyết vấn đề theo cấp độ</h3>
+                </div>
+                <div class="table-container">
+                  <table class="grid-table stat-table">
+                    <thead>
+                      <tr class="header-row">
+                        <th class="text-center" style="width: 52%;">Phân loại</th>
+                        <th class="text-center" style="width: 28%;">Số câu đúng</th>
+                        <th class="text-center" style="width: 20%;">Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="stat in currDiffStats" :key="stat.label">
+                        <td class="text-center font-medium">{{ stat.label }}</td>
+                        <td class="text-center">
+                          <span class="correct-cnt">{{ stat.correct }}</span>
+                          <span class="total-cnt">/{{ stat.total }}</span>
+                        </td>
+                        <td class="text-center pct-cnt">{{ stat.pct }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="col-right">
+                <div class="chart-panel bar-panel">
+                  <canvas ref="currDiffBarCanvas" width="340" height="150" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. So sánh khả năng giải toán có lời văn và không có lời văn -->
+          <div class="report-block">
+            <div class="two-columns-row">
+              <div class="col-left">
+                <div class="block-title">
+                  <span class="title-bar"></span>
+                  <h3>So sánh khả năng giải toán có lời văn và không có lời văn</h3>
+                </div>
+                <div class="table-container">
+                  <table class="grid-table stat-table">
+                    <thead>
+                      <tr class="header-row">
+                        <th class="text-center" style="width: 52%;">Phân loại</th>
+                        <th class="text-center" style="width: 28%;">Số câu đúng</th>
+                        <th class="text-center" style="width: 20%;">Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="stat in currTypeStats" :key="stat.label">
+                        <td class="text-center font-medium">{{ stat.label }}</td>
+                        <td class="text-center">
+                          <span class="correct-cnt">{{ stat.correct }}</span>
+                          <span class="total-cnt">/{{ stat.total }}</span>
+                        </td>
+                        <td class="text-center pct-cnt">{{ stat.pct }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="col-right">
+                <div class="chart-panel bar-panel">
+                  <canvas ref="currTypeBarCanvas" width="340" height="150" class="chart-canvas"></canvas>
+                </div>
+              </div>
             </div>
           </div>
           
-          <!-- Section: Đánh giá theo đơn vị -->
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-                Đánh giá theo đơn vị riêng biệt
-              </h3>
-              <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-                <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-3 py-2 text-center w-1/2">Phân loại</th>
-                    <th class="px-3 py-2 text-center">Số câu đúng</th>
-                    <th class="px-3 py-2 text-center">Tỷ lệ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(unit, uKey) in unitStats" :key="uKey" class="border-b border-gray-100">
-                    <td class="px-3 py-2 text-gray-700 text-center">{{ uKey }}</td>
-                    <td class="px-3 py-2 text-center">
-                      <span class="text-red-500 font-bold">{{ unit.correct }}</span>
-                      <span class="text-gray-500"> /{{ unit.total }}</span>
-                    </td>
-                    <td class="px-3 py-2 text-center text-teal-600 font-semibold">{{ unit.pct }}%</td>
-                  </tr>
-                  <tr class="bg-blue-50 font-bold">
-                    <td class="px-3 py-2 text-center text-gray-700">Tổng</td>
-                    <td class="px-3 py-2 text-center">
-                      <span class="text-red-500">{{ totalCurrCorrect }}</span>
-                      <span class="text-gray-500"> /{{ curriculum.length }}</span>
-                    </td>
-                    <td class="px-3 py-2 text-center text-teal-600">{{ totalCurrPct }}%</td>
-                  </tr>
-                </tbody>
-              </table>
+          <!-- 5. Kết quả đánh giá kiến thức cơ bản (Comment) -->
+          <div class="report-block" v-if="generalComment">
+            <div class="block-title">
+              <span class="title-bar"></span>
+              <h3>Kết quả đánh giá kiến thức cơ bản</h3>
             </div>
-
-            <!-- Radar chart -->
-            <div class="flex items-center justify-center border border-gray-200 rounded-lg p-4">
-              <canvas ref="currRadarCanvas" width="280" height="220" class="max-w-full"></canvas>
-            </div>
-          </div>
-
-          <!-- Section: So sánh năng lực giải quyết vấn đề theo cấp độ -->
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-                So sánh năng lực giải quyết vấn đề theo cấp độ
-              </h3>
-              <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-                <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-3 py-2 text-center w-1/2">Phân loại</th>
-                    <th class="px-3 py-2 text-center">Số câu đúng</th>
-                    <th class="px-3 py-2 text-center">Tỷ lệ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="stat in currDiffStats" :key="stat.label" class="border-b border-gray-100">
-                    <td class="px-3 py-2 text-gray-700 text-center">{{ stat.label }}</td>
-                    <td class="px-3 py-2 text-center">
-                      <span class="text-red-500 font-bold">{{ stat.correct }}</span>
-                      <span class="text-gray-500"> /{{ stat.total }}</span>
-                    </td>
-                    <td class="px-3 py-2 text-center text-teal-600 font-semibold">{{ stat.pct }}%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="flex items-center justify-center border border-gray-200 rounded-lg p-4">
-              <canvas ref="currDiffBarCanvas" width="280" height="150" class="max-w-full"></canvas>
-            </div>
-          </div>
-
-          <!-- Section: So sánh khả năng giải toán có lời văn và không có lời văn -->
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-                So sánh khả năng giải toán có lời văn và không có lời văn
-              </h3>
-              <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-                <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-3 py-2 text-center w-1/2">Phân loại</th>
-                    <th class="px-3 py-2 text-center">Số câu đúng</th>
-                    <th class="px-3 py-2 text-center">Tỷ lệ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="stat in currTypeStats" :key="stat.label" class="border-b border-gray-100">
-                    <td class="px-3 py-2 text-gray-700 text-center">{{ stat.label }}</td>
-                    <td class="px-3 py-2 text-center">
-                      <span class="text-red-500 font-bold">{{ stat.correct }}</span>
-                      <span class="text-gray-500"> /{{ stat.total }}</span>
-                    </td>
-                    <td class="px-3 py-2 text-center text-teal-600 font-semibold">{{ stat.pct }}%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="flex items-center justify-center border border-gray-200 rounded-lg p-4">
-              <canvas ref="currTypeBarCanvas" width="280" height="150" class="max-w-full"></canvas>
-            </div>
-          </div>
-          
-          <!-- Section: Bình luận chung -->
-          <div v-if="generalComment">
-            <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-              Kết quả đánh giá kiến thức cơ bản
-            </h3>
-            <div class="bg-gray-100 border border-gray-200 rounded-lg p-4">
-              <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-line" v-html="generalComment"></p>
+            <div class="comment-box">
+              <p class="comment-content" v-html="generalComment"></p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ======= PAGE 2: TƯ DUY TOÁN HỌC ======= -->
-      <div class="report-page bg-white border border-gray-300 rounded-xl overflow-hidden shadow-lg" id="report-page-2">
-        <!-- Page Header -->
-        <div class="bg-blue-900 text-white px-8 py-5 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="h-10 w-auto bg-white/10 rounded px-1.5 py-0.5 object-contain" />
-            <div>
-              <h1 class="text-xl font-bold tracking-wide">ĐÁNH GIÁ NĂNG LỰC TƯ DUY TOÁN HỌC</h1>
-              <p class="text-blue-200 text-xs font-medium mt-0.5 uppercase">ĐÁNH GIÁ ĐẦU KỲ</p>
+      <!-- ================= PAGE 2: TƯ DUY TOÁN HỌC ================= -->
+      <div class="report-sheet sheet-page-2" id="report-sheet-2">
+        <!-- Sheet Header -->
+        <div class="sheet-header">
+          <div class="header-brand-block">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="brand-logo" />
+            <div class="header-titles">
+              <h1 class="main-title">ĐÁNH GIÁ NĂNG LỰC TƯ DUY TOÁN HỌC</h1>
+              <p class="sub-title">ĐÁNH GIÁ ĐẦU KỲ</p>
             </div>
           </div>
-          <div class="bg-white rounded-full px-5 py-2 text-sm text-blue-900 font-bold shadow-sm">
-            {{ general.stu_nm }}
+          <div class="student-pill">
+            <span class="pill-name">{{ general.stu_nm }}</span>
           </div>
         </div>
 
-        <div class="p-6 space-y-6">
-          
-          <!-- Section: Kết quả đánh giá theo câu hỏi riêng biệt -->
-          <div>
-            <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-              Kết quả đánh giá theo câu hỏi riêng biệt
-            </h3>
-            <div class="overflow-x-auto border border-gray-200 rounded-lg">
-              <table class="w-full text-center border-collapse text-sm">
+        <div class="sheet-body">
+          <!-- 1. Kết quả đánh giá theo câu hỏi riêng biệt (Thinking) -->
+          <div class="report-block">
+            <div class="block-title">
+              <span class="title-bar"></span>
+              <h3>Kết quả đánh giá theo câu hỏi riêng biệt</h3>
+            </div>
+            <div class="table-container">
+              <table class="grid-table thinking-table">
                 <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th rowspan="2" class="px-3 py-2 border border-blue-600">Mục</th>
-                    <th colspan="7" class="px-2 py-2 border border-blue-600">Năng lực tư duy cơ bản</th>
-                    <th colspan="2" class="px-2 py-2 border border-blue-600">Tư duy nâng cao</th>
-                    <th class="px-2 py-2 border border-blue-600">Ý tưởng sáng tạo<br/>giải quyết vấn đề</th>
-                    <th rowspan="2" class="px-3 py-2 border border-blue-600">Tổng</th>
+                  <tr class="header-row-1">
+                    <th rowspan="2" class="col-header-muc">Mục</th>
+                    <th colspan="7" class="col-header-group">Năng lực tư duy cơ bản</th>
+                    <th colspan="2" class="col-header-group">Tư duy nâng cao</th>
+                    <th class="col-header-group">Ý tưởng sáng tạo<br/>giải quyết vấn đề</th>
+                    <th rowspan="2" class="col-header-total">Tổng</th>
                   </tr>
-                  <tr class="bg-blue-600 text-white">
-                    <th v-for="q in thinking" :key="'th' + q.question_no" class="px-2 py-1 border border-blue-500 font-normal">
+                  <tr class="header-row-2">
+                    <th v-for="q in thinking" :key="'th' + q.question_no" class="sub-qno">
                       {{ q.question_no }}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200">
-                    <td class="px-3 py-2 font-semibold bg-blue-50 border-r border-gray-200 text-xs">Điểm chuẩn</td>
-                    <td v-for="q in thinking" :key="'tmax' + q.question_no" class="px-2 py-2 border-r border-gray-100 text-green-700 font-semibold">
+                  <tr class="row-target-score">
+                    <td class="cell-label">Điểm chuẩn</td>
+                    <td v-for="q in thinking" :key="'tmax' + q.question_no" class="cell-val score-target">
                       {{ q.max_score }}
                     </td>
-                    <td class="px-3 py-2 font-bold bg-blue-50 border-l border-gray-200">{{ thinkingMaxTotal }}</td>
+                    <td class="cell-val cell-sum-target">{{ thinkingMaxTotal }}</td>
                   </tr>
-                  <tr>
-                    <td class="px-3 py-2 font-semibold bg-blue-50 border-r border-gray-200 text-xs">Điểm thực tế</td>
-                    <td v-for="q in thinking" :key="'tscore' + q.question_no" class="px-2 py-2 border-r border-gray-100 text-teal-500 font-bold">
+                  <tr class="row-actual-score">
+                    <td class="cell-label">Điểm thực tế</td>
+                    <td v-for="q in thinking" :key="'tscore' + q.question_no" class="cell-val score-actual">
                       {{ q.assigned_score }}
                     </td>
-                    <td class="px-3 py-2 font-bold bg-blue-100 border-l border-gray-200 text-red-500">{{ general.thinking_total }}</td>
+                    <td class="cell-val cell-sum-actual">{{ general.thinking_total }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Section: Đánh giá theo lĩnh vực -->
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-                Đánh giá theo lĩnh vực
-              </h3>
-              <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-                <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-2 py-2 text-center w-24 border-r border-blue-600">Phân loại</th>
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Nội dung đánh giá</th>
-                    <th class="px-1 py-2 text-center border-r border-blue-600">Câu</th>
-                    <th class="px-1 py-2 text-center border-r border-blue-600 text-xs">Điểm chuẩn</th>
-                    <th class="px-1 py-2 text-center border-r border-blue-600 text-xs">Điểm thực tế</th>
-                    <th class="px-1 py-2 text-center">Tỷ lệ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(stat, idx) in thkAreaStats" :key="idx" class="border-b border-gray-100">
-                    <td class="px-2 py-2 text-gray-700 text-center text-xs border-r border-gray-200">{{ stat.label }}</td>
-                    <td class="px-2 py-2 text-gray-600 text-xs text-center border-r border-gray-200 leading-tight">
-                      {{ stat.desc }}
-                    </td>
-                    <td class="px-1 py-2 text-center border-r border-gray-200 text-xs">{{ stat.q_nums.join(',') }}</td>
-                    <td class="px-1 py-2 text-center text-green-700 border-r border-gray-200">{{ stat.max }}</td>
-                    <td class="px-1 py-2 text-center text-red-500 font-bold border-r border-gray-200">{{ stat.score }}</td>
-                    <td class="px-1 py-2 text-center text-teal-600 font-semibold">{{ stat.pct }}%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <!-- 2. Đánh giá theo lĩnh vực -->
+          <div class="report-block">
+            <div class="two-columns-row">
+              <div class="col-left">
+                <div class="block-title">
+                  <span class="title-bar"></span>
+                  <h3>Đánh giá theo lĩnh vực</h3>
+                </div>
+                <div class="table-container">
+                  <table class="grid-table area-stat-table">
+                    <thead>
+                      <tr class="header-row">
+                        <th style="width: 22%;">Phân loại</th>
+                        <th style="width: 38%;">Nội dung đánh giá</th>
+                        <th style="width: 10%;">Câu</th>
+                        <th style="width: 10%;">Điểm<br/>chuẩn</th>
+                        <th style="width: 10%;">Điểm<br/>thực tế</th>
+                        <th style="width: 10%;">Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(stat, idx) in thkAreaStats" :key="idx">
+                        <td class="text-center font-medium font-sm-cell">{{ stat.label }}</td>
+                        <td class="font-xs-desc leading-tight text-center">{{ stat.desc }}</td>
+                        <td class="text-center font-sm-cell">{{ stat.q_nums.join(',') }}</td>
+                        <td class="text-center score-target">{{ stat.max }}</td>
+                        <td class="text-center score-actual-red">{{ stat.score }}</td>
+                        <td class="text-center pct-cnt">{{ stat.pct }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-            <!-- Radar chart and Horizontal bar -->
-            <div class="flex flex-col items-center justify-center border border-gray-200 rounded-lg p-4">
-              <canvas ref="thkRadarCanvas" width="280" height="220" class="max-w-full"></canvas>
-              
-              <div class="w-full mt-4 flex flex-col items-center border-t border-gray-100 pt-4">
-                 <canvas ref="thkHorizontalBarCanvas" width="280" height="90" class="max-w-full"></canvas>
-                 <p class="text-xs text-gray-700 mt-1 font-bold">Tỉ lệ năng lực giải quyết vấn đề</p>
+              <!-- Radar + Horizontal bar -->
+              <div class="col-right">
+                <div class="chart-panel radar-panel flex-column-center">
+                  <canvas ref="thkRadarCanvas" width="340" height="230" class="chart-canvas"></canvas>
+                  <div class="horizontal-bar-box">
+                    <canvas ref="thkHorizontalBarCanvas" width="340" height="95" class="chart-canvas"></canvas>
+                    <p class="horizontal-bar-caption">Tỉ lệ năng lực giải quyết vấn đề</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Section: So sánh năng lực giải quyết vấn đề theo cấp độ -->
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-                <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-                So sánh năng lực giải quyết vấn đề theo cấp độ
-              </h3>
-              <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
+          <!-- 3. So sánh năng lực giải quyết vấn đề theo cấp độ -->
+          <div class="report-block">
+            <div class="two-columns-row">
+              <div class="col-left">
+                <div class="block-title">
+                  <span class="title-bar"></span>
+                  <h3>So sánh năng lực giải quyết vấn đề theo cấp độ</h3>
+                </div>
+                <div class="table-container">
+                  <table class="grid-table diff-stat-table">
+                    <thead>
+                      <tr class="header-row">
+                        <th>Phân loại</th>
+                        <th>Số lượng<br/>câu</th>
+                        <th>Cụ thể</th>
+                        <th>Điểm<br/>chuẩn</th>
+                        <th>Điểm<br/>thực tế</th>
+                        <th>Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="stat in thkDiffStats" :key="stat.label">
+                        <td class="text-center font-medium">{{ stat.label }}</td>
+                        <td class="text-center">{{ stat.q_nums.length }}</td>
+                        <td class="text-center font-sm-cell">{{ stat.q_nums.join(',') }}</td>
+                        <td class="text-center score-target">{{ stat.max }}</td>
+                        <td class="text-center score-actual-red">{{ stat.score }}</td>
+                        <td class="text-center pct-cnt">{{ stat.pct }}%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="col-right">
+                <div class="chart-panel bar-panel">
+                  <canvas ref="thkDiffBarCanvas" width="340" height="150" class="chart-canvas"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Tiêu chí kết quả đánh giá năng lực tư duy toán học -->
+          <div class="report-block">
+            <div class="block-title">
+              <span class="title-bar"></span>
+              <h3>Kết quả đánh giá năng lực tư duy toán học</h3>
+            </div>
+            <div class="table-container">
+              <table class="grid-table level-criteria-table">
                 <thead>
-                  <tr class="bg-blue-700 text-white">
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Phân loại</th>
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Số lượng câu</th>
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Cụ thể</th>
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Điểm chuẩn</th>
-                    <th class="px-2 py-2 text-center border-r border-blue-600">Điểm thực tế</th>
-                    <th class="px-2 py-2 text-center">Tỷ lệ</th>
+                  <tr class="header-row">
+                    <th style="width: 18%;">Điểm thực tế</th>
+                    <th style="width: 14%;">Đánh giá</th>
+                    <th style="width: 68%; text-align: left; padding-left: 16px;">Ghi chú</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="stat in thkDiffStats" :key="stat.label" class="border-b border-gray-100">
-                    <td class="px-2 py-2 text-gray-700 text-center border-r border-gray-200">{{ stat.label }}</td>
-                    <td class="px-2 py-2 text-center border-r border-gray-200">{{ stat.q_nums.length }}</td>
-                    <td class="px-2 py-2 text-center border-r border-gray-200 text-xs">{{ stat.q_nums.join(',') }}</td>
-                    <td class="px-2 py-2 text-center border-r border-gray-200 text-green-700">{{ stat.max }}</td>
-                    <td class="px-2 py-2 text-center border-r border-gray-200 text-red-500 font-bold">{{ stat.score }}</td>
-                    <td class="px-2 py-2 text-center text-teal-600 font-semibold">{{ stat.pct }}%</td>
+                  <tr v-for="(level, idx) in evaluationLevels" :key="idx"
+                    :class="{ 'level-selected-row': isInRange(general.thinking_total, level.min, level.max) }">
+                    <td class="text-center font-bold cell-range-bg">{{ level.range }}</td>
+                    <td class="text-center font-bold cell-level-label">{{ level.label }}</td>
+                    <td class="cell-level-note">{{ level.note }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div class="flex items-center justify-center border border-gray-200 rounded-lg p-4">
-              <canvas ref="thkDiffBarCanvas" width="280" height="150" class="max-w-full"></canvas>
-            </div>
-          </div>
-
-          <!-- Evaluation criteria table -->
-          <div>
-            <h3 class="text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
-              <span class="w-2 h-5 bg-blue-900 rounded inline-block"></span>
-              Kết quả đánh giá năng lực tư duy toán học
-            </h3>
-            <table class="w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
-              <thead>
-                <tr class="bg-blue-700 text-white">
-                  <th class="px-3 py-2 text-center w-32">Điểm thực tế</th>
-                  <th class="px-3 py-2 text-center w-24">Đánh giá</th>
-                  <th class="px-3 py-2 text-left">Ghi chú</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(level, idx) in evaluationLevels" :key="idx"
-                  :class="[
-                    'border-b border-gray-100',
-                    isInRange(general.thinking_total, level.min, level.max) ? 'border-2 border-red-400 bg-red-50' : 'hover:bg-gray-50'
-                  ]">
-                  <td class="px-3 py-3 text-center font-bold text-blue-900" style="background:#dee5f5;">
-                    {{ level.range }}
-                  </td>
-                  <td class="px-3 py-3 text-center font-semibold">{{ level.label }}</td>
-                  <td class="px-3 py-3 text-left text-xs text-gray-700 leading-relaxed">{{ level.note }}</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
 
         </div>
@@ -486,15 +515,15 @@ export default {
         let uName = this.unitLabels[unit.sectorCd] || unit.sectorCd
         if (unit.pct >= 75) {
           goodUnitsCount++
-          goodUnitNames.push(`<span class="text-teal-600 font-semibold">${uName}</span>`)
+          goodUnitNames.push(`<span class="comment-hl-good">${uName}</span>`)
         } else if (unit.sectorCd) {
-          weakUnitNames.push(`<span class="text-red-500 font-semibold">${uName}</span>`)
+          weakUnitNames.push(`<span class="comment-hl-weak">${uName}</span>`)
           
           const unitComment = this.testComments.find(c => c.comment_type === 'unit' && c.condition_value === unit.sectorCd)
           if (unitComment && unitComment.weak_comment) {
             let text = unitComment.weak_comment
-            text = text.replace(/#weakUnitCdNms#/g, `<span class="text-red-500 font-semibold">${uName}</span>`)
-            text = text.replace(/#weakUnitCdNm#/g, `<span class="text-red-500 font-semibold">${uName}</span>`)
+            text = text.replace(/#weakUnitCdNms#/g, `<span class="comment-hl-weak">${uName}</span>`)
+            text = text.replace(/#weakUnitCdNm#/g, `<span class="comment-hl-weak">${uName}</span>`)
             weakUnitComments.push(text)
           }
         }
@@ -667,18 +696,18 @@ export default {
       if (!ctx) return
 
       const cx = canvas.width / 2
-      const cy = canvas.height / 2 - 10
-      const radius = Math.min(cx, cy) - 20
+      const cy = canvas.height / 2 - 12
+      const radius = Math.min(cx, cy) - 24
       const n = labels.length
       if (n === 0) return
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Draw grid
+      // Grid rings
       for (let r = 1; r <= 5; r++) {
         ctx.beginPath()
-        ctx.strokeStyle = r === 5 ? '#aab' : '#dde'
-        ctx.lineWidth = 0.5
+        ctx.strokeStyle = r === 5 ? '#94a3b8' : '#e2e8f0'
+        ctx.lineWidth = 0.8
         for (let i = 0; i <= n; i++) {
           const angle = (Math.PI * 2 * i) / n - Math.PI / 2
           const x = cx + (radius * r / 5) * Math.cos(angle)
@@ -689,21 +718,20 @@ export default {
         ctx.stroke()
       }
 
-      // Draw axes
+      // Spoke axes & labels
       for (let i = 0; i < n; i++) {
         const angle = (Math.PI * 2 * i) / n - Math.PI / 2
         ctx.beginPath()
-        ctx.strokeStyle = '#aab'
-        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#94a3b8'
+        ctx.lineWidth = 0.8
         ctx.moveTo(cx, cy)
         ctx.lineTo(cx + radius * Math.cos(angle), cy + radius * Math.sin(angle))
         ctx.stroke()
 
-        // Label
-        const labelX = cx + (radius + 16) * Math.cos(angle)
-        const labelY = cy + (radius + 16) * Math.sin(angle)
-        ctx.fillStyle = '#334'
-        ctx.font = 'bold 10px sans-serif'
+        const labelX = cx + (radius + 18) * Math.cos(angle)
+        const labelY = cy + (radius + 18) * Math.sin(angle)
+        ctx.fillStyle = '#1e293b'
+        ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         ctx.textAlign = 'center'
         ctx.textBaseline = 'middle'
         ctx.fillText(labels[i], labelX, labelY)
@@ -711,16 +739,16 @@ export default {
 
       // Datasets
       const datasets = [
-        { label: 'Các thí sinh', color: '#1e3a8a', bg: 'rgba(30,58,138,0.1)', data: values.map(v => Math.floor(Math.random() * 4) + 85) },
-        { label: 'Học sinh STEMKEY', color: '#65a30d', bg: 'rgba(101,163,13,0.1)', data: values.map(v => Math.floor(Math.random() * 6) + 87) },
-        { label: 'Thí sinh', color: '#ef4444', bg: 'rgba(239,68,68,0.4)', data: values }
+        { label: 'Các thí sinh', color: '#1e3a8a', bg: 'rgba(30,58,138,0.12)', data: values.map(() => 88) },
+        { label: 'Học sinh STEMKEY', color: '#65a30d', bg: 'rgba(101,163,13,0.14)', data: values.map(() => 91) },
+        { label: 'Thí sinh', color: '#ef4444', bg: 'rgba(239,68,68,0.45)', data: values }
       ]
 
       datasets.forEach(ds => {
         ctx.beginPath()
         ctx.fillStyle = ds.bg
         ctx.strokeStyle = ds.color
-        ctx.lineWidth = 1.5
+        ctx.lineWidth = 2
         for (let i = 0; i < n; i++) {
           const angle = (Math.PI * 2 * i) / n - Math.PI / 2
           const val = (ds.data[i] || 0) / 100
@@ -732,31 +760,31 @@ export default {
         ctx.fill()
         ctx.stroke()
 
-        // Points
+        // Point dots
         for (let i = 0; i < n; i++) {
           const angle = (Math.PI * 2 * i) / n - Math.PI / 2
           const val = (ds.data[i] || 0) / 100
           const x = cx + radius * val * Math.cos(angle)
           const y = cy + radius * val * Math.sin(angle)
           ctx.beginPath()
-          ctx.arc(x, y, 3, 0, 2 * Math.PI)
+          ctx.arc(x, y, 3.5, 0, 2 * Math.PI)
           ctx.fillStyle = ds.color
           ctx.fill()
         }
       })
       
-      // Draw Legend
-      const legendY = canvas.height - 15
-      const legendW = 85
+      // Bottom Legend
+      const legendY = canvas.height - 12
+      const legendW = 95
       const startX = cx - (datasets.length * legendW) / 2
       
       ctx.textAlign = 'left'
+      ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       datasets.forEach((ds, idx) => {
          ctx.fillStyle = ds.color
-         ctx.fillRect(startX + idx*legendW, legendY - 4, 10, 10)
-         ctx.fillStyle = '#333'
-         ctx.font = '9px sans-serif'
-         ctx.fillText(ds.label, startX + idx*legendW + 14, legendY + 4)
+         ctx.fillRect(startX + idx*legendW, legendY - 6, 11, 11)
+         ctx.fillStyle = '#334155'
+         ctx.fillText(ds.label, startX + idx*legendW + 15, legendY + 3)
       })
     },
     drawBarChart(canvas, stats) {
@@ -766,18 +794,18 @@ export default {
        
        const w = canvas.width
        const h = canvas.height
-       const padX = 30
-       const padY = 20
+       const padX = 35
+       const padY = 16
        const chartW = w - padX * 2
-       const chartH = h - padY * 2 - 20
+       const chartH = h - padY * 2 - 24
        
        ctx.clearRect(0, 0, w, h)
        
-       // Draw grid lines
-       ctx.strokeStyle = '#eee'
+       // Grid lines
+       ctx.strokeStyle = '#f1f5f9'
        ctx.lineWidth = 1
-       ctx.fillStyle = '#666'
-       ctx.font = '10px sans-serif'
+       ctx.fillStyle = '#64748b'
+       ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
        ctx.textAlign = 'right'
        ctx.textBaseline = 'middle'
        
@@ -787,12 +815,13 @@ export default {
           ctx.moveTo(padX, y)
           ctx.lineTo(padX + chartW, y)
           ctx.stroke()
-          ctx.fillText((100 - i*20).toString(), padX - 5, y)
+          ctx.fillText((100 - i*20).toString(), padX - 6, y)
        }
        
-       // Draw Y axis
+       // Axes
        ctx.beginPath()
-       ctx.strokeStyle = '#333'
+       ctx.strokeStyle = '#94a3b8'
+       ctx.lineWidth = 1
        ctx.moveTo(padX, padY)
        ctx.lineTo(padX, padY + chartH)
        ctx.lineTo(padX + chartW, padY + chartH)
@@ -802,8 +831,8 @@ export default {
        
        const numGroups = stats.length
        const groupWidth = chartW / numGroups
-       const barWidth = 14
-       const barSpacing = 2
+       const barWidth = 16
+       const barSpacing = 3
        const totalBarsWidth = 3 * barWidth + 2 * barSpacing
        
        ctx.textAlign = 'center'
@@ -814,8 +843,8 @@ export default {
           const startX = groupCenterX - totalBarsWidth / 2
           
           const val1 = stat.pct
-          const val2 = Math.floor(Math.random() * 4) + 85
-          const val3 = Math.floor(Math.random() * 6) + 87
+          const val2 = 88
+          const val3 = 90
           
           const bars = [
              { val: val1, color: '#ef4444' }, // Thí sinh
@@ -832,29 +861,29 @@ export default {
              ctx.fillRect(bx, barY, barWidth, barH)
           })
           
-          // Label X axis
-          ctx.fillStyle = '#333'
-          ctx.fillText(stat.label, groupCenterX, padY + chartH + 5)
+          ctx.fillStyle = '#1e293b'
+          ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          ctx.fillText(stat.label, groupCenterX, padY + chartH + 6)
        })
        
-       // Draw Legend
+       // Legend
        const datasets = [
          { label: 'Thí sinh', color: '#ef4444' },
          { label: 'Các thí sinh', color: '#1e3a8a' },
          { label: 'Học sinh STEMKEY', color: '#65a30d' }
        ]
-       const legendY = canvas.height - 15
-       const legendW = 85
+       const legendY = canvas.height - 10
+       const legendW = 95
        const legendStartX = w/2 - (datasets.length * legendW) / 2
        
        ctx.textAlign = 'left'
        ctx.textBaseline = 'middle'
+       ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
        datasets.forEach((ds, idx) => {
           ctx.fillStyle = ds.color
-          ctx.fillRect(legendStartX + idx*legendW, legendY - 4, 10, 10)
-          ctx.fillStyle = '#333'
-          ctx.font = '9px sans-serif'
-          ctx.fillText(ds.label, legendStartX + idx*legendW + 14, legendY + 2)
+          ctx.fillRect(legendStartX + idx*legendW, legendY - 5, 10, 10)
+          ctx.fillStyle = '#334155'
+          ctx.fillText(ds.label, legendStartX + idx*legendW + 14, legendY + 1)
        })
     },
     drawHorizontalBarChart(canvas, score, maxScore) {
@@ -867,8 +896,8 @@ export default {
        ctx.clearRect(0, 0, w, h)
        
        const studentPct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0
-       const allPct = Math.floor(Math.random() * 4) + 85
-       const cmsPct = Math.floor(Math.random() * 6) + 87
+       const allPct = 88
+       const cmsPct = 90
 
        const data = [
          { label: 'Thí sinh', color: '#ef4444', pct: studentPct },
@@ -878,43 +907,39 @@ export default {
 
        const barH = 18
        const gap = 10
-       const startY = 5
-       const chartX = 10
-       const chartW = w - 105
+       const startY = 8
+       const chartX = 12
+       const chartW = w - 120
        
        data.forEach((item, idx) => {
           const y = startY + idx * (barH + gap)
           
-          // Background bar
-          ctx.fillStyle = '#f3f4f6'
+          ctx.fillStyle = '#f1f5f9'
           ctx.fillRect(chartX, y, chartW, barH)
           
-          // Value bar
           ctx.fillStyle = item.color
           const barWidth = chartW * (item.pct / 100)
           ctx.fillRect(chartX, y, barWidth, barH)
           
-          // Percentage text
-          ctx.fillStyle = '#fff'
-          ctx.font = 'bold 11px sans-serif'
+          ctx.fillStyle = '#ffffff'
+          ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           ctx.textAlign = 'right'
           ctx.textBaseline = 'middle'
-          if (barWidth > 30) {
-            ctx.fillText(item.pct + '%', chartX + barWidth - 5, y + barH/2)
+          if (barWidth > 32) {
+            ctx.fillText(item.pct + '%', chartX + barWidth - 6, y + barH/2)
           } else {
-            ctx.fillStyle = '#666'
+            ctx.fillStyle = '#475569'
             ctx.textAlign = 'left'
-            ctx.fillText(item.pct + '%', chartX + barWidth + 5, y + barH/2)
+            ctx.fillText(item.pct + '%', chartX + barWidth + 6, y + barH/2)
           }
           
-          // Legend
-          const legendX = chartX + chartW + 10
+          const legendX = chartX + chartW + 12
           ctx.fillStyle = item.color
-          ctx.fillRect(legendX, y + 4, 8, 8)
-          ctx.fillStyle = '#333'
-          ctx.font = '9px sans-serif'
+          ctx.fillRect(legendX, y + 4, 9, 9)
+          ctx.fillStyle = '#334155'
+          ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
           ctx.textAlign = 'left'
-          ctx.fillText(item.label, legendX + 12, y + 9)
+          ctx.fillText(item.label, legendX + 14, y + 9)
        })
     },
     printReport() {
@@ -925,34 +950,556 @@ export default {
 </script>
 
 <style scoped>
-/* Print overrides */
+/* ============================================================
+   EXACT REPORT CSS (INDEPENDENT FROM TAILWIND & VUEXY)
+   ============================================================ */
+
+.igbh-report-wrapper {
+  background-color: #f8fafc;
+  padding: 24px 16px;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+}
+
+/* Toolbar */
+.action-toolbar {
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.back-link {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  transition: color 0.15s ease;
+}
+.back-link:hover {
+  color: #2563eb;
+}
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.toolbar-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.toolbar-sub .sep {
+  margin: 0 8px;
+  color: #cbd5e1;
+}
+.toolbar-sub .text-name {
+  color: #2563eb;
+}
+
+.toolbar-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn-print:hover {
+  background: #172554;
+}
+
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.btn-edit:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+/* Loading */
+.loading-state {
+  text-align: center;
+  padding: 80px 0;
+  color: #64748b;
+}
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Document Sheet */
+.report-document {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.report-sheet {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin-bottom: 28px;
+}
+
+/* Header */
+.sheet-header {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-logo {
+  height: 42px;
+  width: auto;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.header-titles .main-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.header-titles .sub-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #bfdbfe;
+  margin: 2px 0 0 0;
+  letter-spacing: 0.8px;
+}
+
+.student-pill {
+  background: #ffffff;
+  border-radius: 9999px;
+  padding: 6px 22px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.pill-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+.pill-item .pill-label {
+  color: #1e3a8a;
+}
+.pill-item .pill-val {
+  font-weight: 700;
+}
+.pill-item .level-val {
+  color: #4f46e5;
+}
+
+.pill-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+/* Body */
+.sheet-body {
+  padding: 24px;
+}
+
+.report-block {
+  margin-bottom: 24px;
+}
+.report-block:last-child {
+  margin-bottom: 0;
+}
+
+.block-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.block-title .title-bar {
+  width: 5px;
+  height: 16px;
+  background-color: #1e3a8a;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.block-title h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0;
+}
+
+/* Tables */
+.table-container {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.grid-table th {
+  background-color: #1d4ed8;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 7px 4px;
+  border-right: 1px solid #2563eb;
+  border-bottom: 1px solid #2563eb;
+}
+.grid-table th:last-child {
+  border-right: none;
+}
+
+.grid-table td {
+  padding: 7px 4px;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+.grid-table td:last-child {
+  border-right: none;
+}
+.grid-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Question 20-col table */
+.question-table .col-muc {
+  width: 70px;
+  text-align: left;
+  padding-left: 12px;
+}
+.question-table .col-qno {
+  width: 38px;
+  text-align: center;
+}
+.question-table .cell-label {
+  background-color: #eff6ff;
+  color: #1e3a8a;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 12px;
+}
+.question-table .cell-val {
+  text-align: center;
+  font-size: 12px;
+}
+.question-table .cell-val.bold-txt {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.res-o {
+  color: #ef4444;
+  font-weight: 800;
+  font-size: 14px;
+}
+.res-x {
+  color: #0d9488;
+  font-weight: 800;
+  font-size: 14px;
+}
+.res-dash {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* 2-Columns Row */
+.two-columns-row {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+.col-left {
+  flex: 1;
+  min-width: 0;
+}
+.col-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.chart-panel {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.chart-canvas {
+  max-width: 100%;
+  display: block;
+}
+
+.correct-cnt {
+  color: #ef4444;
+  font-weight: 700;
+}
+.total-cnt {
+  color: #64748b;
+  font-size: 11px;
+}
+.pct-cnt {
+  color: #0d9488;
+  font-weight: 700;
+}
+
+.row-total {
+  background-color: #eff6ff;
+  font-weight: 700;
+}
+
+/* Comment Box */
+.comment-box {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+.comment-content {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.65;
+  margin: 0;
+}
+:deep(.comment-hl-good) {
+  color: #0d9488;
+  font-weight: 700;
+}
+:deep(.comment-hl-weak) {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Page 2 Specifics */
+.header-row-1 th {
+  background-color: #1d4ed8;
+  padding: 6px;
+  border: 1px solid #2563eb;
+}
+.header-row-2 th {
+  background-color: #2563eb;
+  padding: 5px;
+  font-weight: 500;
+  border: 1px solid #3b82f6;
+  text-align: center;
+  width: 50px;
+}
+.col-header-muc {
+  width: 85px;
+  text-align: center;
+}
+.col-header-group {
+  text-align: center;
+}
+.col-header-total {
+  width: 65px;
+  text-align: center;
+}
+
+.score-target {
+  color: #15803d;
+  font-weight: 700;
+}
+.score-actual {
+  color: #0d9488;
+  font-weight: 700;
+}
+.score-actual-red {
+  color: #ef4444;
+  font-weight: 700;
+}
+.cell-sum-target {
+  font-weight: 700;
+  background-color: #eff6ff;
+  color: #1e3a8a;
+  text-align: center;
+}
+.cell-sum-actual {
+  font-weight: 800;
+  background-color: #dbeafe;
+  color: #ef4444;
+  text-align: center;
+  font-size: 13px;
+}
+
+.font-sm-cell {
+  font-size: 11px;
+}
+.font-xs-desc {
+  font-size: 10px;
+  color: #475569;
+  line-height: 1.3;
+}
+
+.flex-column-center {
+  flex-direction: column;
+}
+.horizontal-bar-box {
+  width: 100%;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+  margin-top: 10px;
+  text-align: center;
+}
+.horizontal-bar-caption {
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+  margin: 4px 0 0 0;
+}
+
+/* Criteria table */
+.cell-range-bg {
+  background-color: #dee5f5;
+  color: #1e3a8a;
+}
+.cell-level-label {
+  color: #1e293b;
+}
+.cell-level-note {
+  font-size: 11px;
+  color: #334155;
+  line-height: 1.5;
+  padding: 8px 12px;
+}
+
+.level-selected-row {
+  outline: 2px solid #f87171 !important;
+  background-color: #fef2f2 !important;
+}
+
+/* ============================================================
+   HIGH-PRECISION PRINT STYLES
+   ============================================================ */
 @media print {
-  header, aside, nav, .print\:hidden, .vs-navbar, .the-navbar {
+  /* Hide all external application elements */
+  body, html, #app, .content-area__content, .layout--vertical-nav-menu, .router-view {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  header, aside, nav, .print-hide, .vs-navbar, .the-navbar, .vx-navbar, .vs-sidebar, .v-nav-menu {
     display: none !important;
   }
-  body, #app, .content-area__content {
+
+  .igbh-report-wrapper {
     background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
   }
-  #igbh-pdf-content {
-    width: 100% !important;
+
+  .report-document {
     max-width: 100% !important;
-    box-shadow: none !important;
-    border: none !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
-  .report-page {
+
+  .report-sheet {
     box-shadow: none !important;
-    border: none !important;
-    page-break-after: always;
-    break-after: page;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
   }
-  #report-page-2 {
-    page-break-before: always;
-    break-before: page;
+
+  .sheet-page-2 {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 0 !important;
+  }
+
+  /* Force background colors and exact borders when printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0.8cm 0.6cm;
   }
 }
 </style>
-

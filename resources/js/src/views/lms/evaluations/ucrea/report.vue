@@ -1,201 +1,208 @@
 <template>
-  <div class="ucrea-report-view space-y-6">
+  <div class="ucrea-report-wrapper">
     <!-- Action buttons (Hidden on print) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 print:hidden">
-      <div>
-        <div class="flex items-center gap-3 mb-1">
-          <router-link to="/lms/evaluations/ucrea" class="text-sm text-gray-500 hover:text-primary transition flex items-center">
-            <i class="feather icon-arrow-left mr-1"></i> Quay lại danh sách
-          </router-link>
+    <div class="action-toolbar print-hide">
+      <div class="toolbar-info">
+        <router-link to="/lms/evaluations/ucrea" class="back-link">
+          <i class="feather icon-arrow-left"></i> Quay lại danh sách
+        </router-link>
+        <h2 class="toolbar-title">Báo Cáo Đánh Giá Năng Lực UCREA</h2>
+        <div class="toolbar-sub" v-if="result">
+          <span>{{ result.general.test_nm }}</span>
+          <span class="sep">|</span>
+          <span>Học sinh: <strong class="text-name">{{ result.general.stu_nm }}</strong></span>
+          <span class="sep" v-if="result.general.class_nm">|</span>
+          <span v-if="result.general.class_nm">Lớp: {{ result.general.class_nm }}</span>
         </div>
-        <h3 class="text-xl font-bold text-gray-800">Báo Cáo Đánh Giá Năng Lực UCREA</h3>
-        <p class="text-xs text-gray-500 mt-1" v-if="result">
-          {{ result.general.test_nm }} | Học sinh: <strong class="text-primary">{{ result.general.stu_nm }}</strong>
-        </p>
       </div>
-      <div v-if="result" class="flex items-center gap-2">
-        <vs-button color="primary" icon="print" @click="exportPdf">In Báo Cáo (PDF)</vs-button>
-        <router-link :to="`/lms/evaluations/ucrea/form/${result.general.id}`">
-          <vs-button color="warning" icon="edit">Sửa Điểm</vs-button>
+      <div class="toolbar-btns" v-if="result">
+        <button class="btn-print" @click="exportPdf">
+          <i class="feather icon-printer"></i> In Báo Cáo (PDF)
+        </button>
+        <router-link :to="`/lms/evaluations/ucrea/form/${result.general.id}`" class="btn-edit">
+          <i class="feather icon-edit"></i> Sửa Điểm
         </router-link>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-500 print:hidden">
-      <i class="fa fa-spinner fa-spin text-3xl mb-3 text-primary"></i>
-      <p class="text-sm">Đang tải báo cáo đánh giá...</p>
+    <div v-if="loading" class="loading-state print-hide">
+      <div class="spinner"></div>
+      <p>Đang tải dữ liệu báo cáo UCREA...</p>
     </div>
 
-    <!-- MAIN REPORT (Screen and Print) -->
-    <div v-else-if="result" id="pdf-content" class="bg-white text-black p-6 mx-auto w-full max-w-[900px] shadow-md print:shadow-none print:p-0 print:m-0 text-[12px] leading-relaxed font-sans border border-gray-200 print:border-none">
+    <!-- MAIN REPORT DOCUMENT -->
+    <div v-else-if="result" id="ucrea-report-doc" class="report-document">
       
-      <!-- PAGE 1 -->
-      <div class="page-container bg-white pb-8">
+      <!-- ================= PAGE 1 ================= -->
+      <div class="report-sheet" id="ucrea-sheet-1">
         
-        <!-- Header (Dark blue background with white pill student info) -->
-        <div class="bg-[#1b3664] text-white px-6 py-4 flex flex-col md:flex-row md:items-center justify-between rounded-t-lg print:rounded-none">
-          <div class="flex items-center gap-4">
-            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="h-10 w-auto bg-white/10 rounded px-1.5 py-0.5 object-contain" />
-            <div class="text-left border-l border-white/20 pl-4">
-               <p class="text-[9px] uppercase text-white/70 font-semibold mb-0 leading-none">Ucrea Assessment</p>
-               <h2 class="text-[16px] font-bold text-[#f5c518] uppercase tracking-wide leading-none mt-1">{{ reportData.name || 'ĐÁNH GIÁ ĐẦU KỲ' }}</h2>
+        <!-- Header -->
+        <div class="sheet-header">
+          <div class="header-brand-block">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="brand-logo" />
+            <div class="header-titles">
+              <p class="super-title">UCREA ASSESSMENT</p>
+              <h1 class="main-title">{{ reportData.name || 'ĐÁNH GIÁ ĐẦU KỲ' }}</h1>
             </div>
           </div>
           <!-- White pill student info -->
-          <div class="bg-white text-[#1b3664] font-bold text-[11px] px-4 py-1.5 rounded-full mt-2 md:mt-0 shadow-sm flex items-center gap-2">
-             <span>{{ result.general.stu_nm }}</span>
-             <span>|</span>
+          <div class="student-pill">
+             <span class="pill-name">{{ result.general.stu_nm }}</span>
+             <span class="pill-sep">|</span>
              <span>{{ result.general.gender_nm || 'Nam' }}</span>
-             <span>|</span>
+             <span class="pill-sep">|</span>
              <span>{{ result.general.age_nm || '3 Tuổi' }}</span>
-             <span>|</span>
+             <span class="pill-sep">|</span>
              <span>{{ result.general.class_nm || '-' }}</span>
           </div>
         </div>
 
-        <div class="mt-6 px-2">
+        <div class="sheet-body">
           <!-- 1. Lĩnh vực đánh giá -->
-          <h2 class="text-base font-extrabold text-[#1b3664] mb-3 border-b-2 border-[#1b3664] pb-1">Lĩnh vực đánh giá</h2>
-          <div class="grid grid-cols-12 gap-4 mb-8">
-            <div class="col-span-7">
-              <table class="w-full border-collapse border border-gray-200">
+          <div class="section-title-wrap">
+            <h2 class="section-title">Lĩnh vực đánh giá</h2>
+          </div>
+          
+          <div class="two-col-layout mb-24">
+            <div class="col-7">
+              <table class="ucrea-grid-table">
                 <tbody>
-                  <tr class="border-b border-gray-200">
-                    <td class="p-2.5 text-center font-bold text-gray-700 w-[25%] bg-gray-50">Tư duy cơ bản</td>
-                    <td class="p-2.5 text-gray-600 text-[11px]">Đánh giá sự chú ý và tập trung, quan sát và ghi nhớ, đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
-                  </tr>
-                  <tr class="border-b border-gray-200">
-                    <td class="p-2.5 text-center font-bold text-gray-700 bg-gray-50">Tư duy toán học</td>
-                    <td class="p-2.5 text-gray-600 text-[11px]">Đánh giá năng lực về số và phép toán, không gian, đo lường, kiểu mẫu, thống kê; đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
-                  </tr>
-                  <tr class="border-b border-gray-200">
-                    <td class="p-2.5 text-center font-bold text-gray-700 bg-gray-50">Tư duy logic</td>
-                    <td class="p-2.5 text-gray-600 text-[11px]">Đánh giá sự hiểu biết, áp dụng, phân tích và tổng hợp; đó là các thành phần của kỹ năng tư duy logic, kỹ năng cốt lõi để phát triển tư duy.</td>
+                  <tr>
+                    <td class="cell-category-label">Tư duy cơ bản</td>
+                    <td class="cell-category-desc">Đánh giá sự chú ý và tập trung, quan sát và ghi nhớ, đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
                   </tr>
                   <tr>
-                    <td class="p-2.5 text-center font-bold text-gray-700 bg-gray-50">Tư duy sáng tạo</td>
-                    <td class="p-2.5 text-gray-600 text-[11px]">Đánh giá sự lưu loát, linh hoạt, độc đáo và tinh tế, đó là những kỹ năng cần thiết cho tư duy đa dạng và sâu sắc.</td>
+                    <td class="cell-category-label">Tư duy toán học</td>
+                    <td class="cell-category-desc">Đánh giá năng lực về số và phép toán, không gian, đo lường, kiểu mẫu, thống kê; đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-category-label">Tư duy logic</td>
+                    <td class="cell-category-desc">Đánh giá sự hiểu biết, áp dụng, phân tích và tổng hợp; đó là các thành phần của kỹ năng tư duy logic, kỹ năng cốt lõi để phát triển tư duy.</td>
+                  </tr>
+                  <tr>
+                    <td class="cell-category-label">Tư duy sáng tạo</td>
+                    <td class="cell-category-desc">Đánh giá sự lưu loát, linh hoạt, độc đáo và tinh tế, đó là những kỹ năng cần thiết cho tư duy đa dạng và sâu sắc.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
             
-            <div class="col-span-5">
-              <table class="w-full border-collapse border border-gray-200 text-center text-[11px]">
+            <div class="col-5">
+              <table class="ucrea-grid-table text-center">
                 <thead>
-                  <tr class="bg-[#e86036] text-white">
-                    <th colspan="3" class="p-2 font-bold text-xs uppercase">Tiêu chuẩn và cấp độ</th>
+                  <tr class="header-row-orange">
+                    <th colspan="3" class="text-center font-bold">Tiêu chuẩn và cấp độ</th>
                   </tr>
-                  <tr class="bg-gray-100 text-gray-700 border-b border-gray-200">
-                    <th class="p-1.5 font-semibold w-1/3 border-r border-gray-200">Tiêu chuẩn</th>
-                    <th class="p-1.5 font-semibold w-1/3 border-r border-gray-200">Cấp độ</th>
-                    <th class="p-1.5 font-semibold w-1/3">Điểm</th>
+                  <tr class="sub-header-row">
+                    <th style="width: 33%;">Tiêu chuẩn</th>
+                    <th style="width: 33%;">Cấp độ</th>
+                    <th style="width: 34%;">Điểm</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200"><td class="p-1.5 border-r border-gray-200 font-medium text-gray-700">Vượt trội</td><td class="p-1.5 border-r border-gray-200 font-bold text-gray-800">S</td><td class="p-1.5 text-gray-500">91~100</td></tr>
-                  <tr class="border-b border-gray-200"><td class="p-1.5 border-r border-gray-200 font-medium text-gray-700">Rất tốt</td><td class="p-1.5 border-r border-gray-200 font-bold text-gray-800">A</td><td class="p-1.5 text-gray-500">71~90</td></tr>
-                  <tr class="border-b border-gray-200"><td class="p-1.5 border-r border-gray-200 font-medium text-gray-700">Trung bình</td><td class="p-1.5 border-r border-gray-200 font-bold text-gray-800">B</td><td class="p-1.5 text-gray-500">41~70</td></tr>
-                  <tr><td class="p-1.5 border-r border-gray-200 font-medium text-gray-700">Yếu</td><td class="p-1.5 border-r border-gray-200 font-bold text-gray-800">C</td><td class="p-1.5 text-gray-500">0~40</td></tr>
+                  <tr><td class="font-medium text-slate-700">Vượt trội</td><td class="font-bold text-slate-800">S</td><td class="text-slate-500">91~100</td></tr>
+                  <tr><td class="font-medium text-slate-700">Rất tốt</td><td class="font-bold text-slate-800">A</td><td class="text-slate-500">71~90</td></tr>
+                  <tr><td class="font-medium text-slate-700">Trung bình</td><td class="font-bold text-slate-800">B</td><td class="text-slate-500">41~70</td></tr>
+                  <tr><td class="font-medium text-slate-700">Yếu</td><td class="font-bold text-slate-800">C</td><td class="text-slate-500">0~40</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
           <!-- 2. Kết quả đánh giá -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between border-b-2 border-[#1b3664] pb-1 mb-4 print:border-b-2">
-            <h2 class="text-base font-extrabold text-[#1b3664] mb-0 border-none pb-0">Kết quả đánh giá</h2>
+          <div class="section-title-wrap flex-between">
+            <h2 class="section-title mb-0">Kết quả đánh giá</h2>
             
             <!-- Checkboxes for related tests -->
-            <div class="flex items-center gap-4 text-[11px] font-bold text-gray-700 mt-2 md:mt-0 print:hidden" v-if="allTests.length">
+            <div class="test-period-checkboxes print-hide" v-if="allTests.length">
               <label v-for="t in allTests" :key="t.test_cd" 
-                     class="flex items-center gap-1.5" 
-                     :class="{ 'cursor-pointer': t.hasData && !t.isCurrent, 'opacity-40 cursor-not-allowed': !t.hasData, 'cursor-not-allowed': t.isCurrent }">
+                     class="checkbox-label"
+                     :class="{ 'disabled-label': !t.hasData || t.isCurrent }">
                 <input type="checkbox" 
                        :value="t.dataId" 
                        v-model="selectedTestIds" 
                        @change="initCharts" 
                        :disabled="!t.hasData || t.isCurrent"
-                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-70">
-                <span class="uppercase">{{ t.name }}</span>
+                       class="check-input">
+                <span class="check-text uppercase">{{ t.name }}</span>
               </label>
             </div>
           </div>
           
-          <!-- Tư duy cơ bản -->
-          <div class="grid-section grid grid-cols-12 gap-4 mb-8 items-center">
-            <!-- Chart Left -->
-            <div class="chart-container col-span-5 relative h-[250px] w-full border border-gray-100 rounded-lg p-1">
-               <div ref="chart1" class="w-full h-full"></div>
+          <!-- Section: Tư duy cơ bản -->
+          <div class="two-col-layout mb-24 align-center">
+            <div class="col-5">
+              <div class="chart-box">
+                <div ref="chart1" class="chart-canvas-el"></div>
+              </div>
             </div>
-            <!-- Table Right -->
-            <div class="col-span-7">
-              <table class="w-full border-collapse border border-[#0050a0] text-center text-[11px] shadow-sm">
+            <div class="col-7">
+              <table class="ucrea-score-table">
                 <thead>
-                  <tr class="bg-[#0050a0] text-white">
-                    <th class="font-bold p-2 border-r border-white/20 w-[25%] text-left pl-3">Lĩnh vực chi tiết</th>
-                    <th class="font-bold p-2 border-r border-white/20 text-left pl-3">Nội dung chi tiết</th>
-                    <th class="font-bold p-2 w-[15%]">Cấp độ</th>
+                  <tr class="header-row-blue">
+                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
+                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
+                    <th style="width: 15%; text-align: center;">Cấp độ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Năng lực chú ý</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng tập trung quan sát để giải quyết vấn đề.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Năng lực chú ý') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Năng lực chú ý</td>
+                    <td class="cell-skill-desc">Khả năng tập trung quan sát để giải quyết vấn đề.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Năng lực chú ý') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Năng lực quan sát</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng quan sát tỉ mỉ một sự vật nào đó.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Năng lực quan sát') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Năng lực quan sát</td>
+                    <td class="cell-skill-desc">Khả năng quan sát tỉ mỉ một sự vật nào đó.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Năng lực quan sát') }}</td>
                   </tr>
-                  <tr class="bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Năng lực ghi nhớ</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng ghi nhớ một thông tin mới về sự vật, sự việc.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Năng lực ghi nhớ') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Năng lực ghi nhớ</td>
+                    <td class="cell-skill-desc">Khả năng ghi nhớ một thông tin mới về sự vật, sự việc.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Năng lực ghi nhớ') }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Tư duy toán học -->
-          <div class="grid-section grid grid-cols-12 gap-4 mb-6 items-center">
-            <!-- Chart Left -->
-            <div class="chart-container col-span-5 relative h-[250px] w-full border border-gray-100 rounded-lg p-1">
-               <div ref="chart2" class="w-full h-full"></div>
+          <!-- Section: Tư duy toán học -->
+          <div class="two-col-layout mb-20 align-center">
+            <div class="col-5">
+              <div class="chart-box">
+                <div ref="chart2" class="chart-canvas-el"></div>
+              </div>
             </div>
-            <!-- Table Right -->
-            <div class="col-span-7">
-              <table class="w-full border-collapse border border-[#0050a0] text-center text-[11px] shadow-sm">
+            <div class="col-7">
+              <table class="ucrea-score-table">
                 <thead>
-                  <tr class="bg-[#0050a0] text-white">
-                    <th class="font-bold p-2 border-r border-white/20 w-[25%] text-left pl-3">Lĩnh vực chi tiết</th>
-                    <th class="font-bold p-2 border-r border-white/20 text-left pl-3">Nội dung chi tiết</th>
-                    <th class="font-bold p-2 w-[15%]">Cấp độ</th>
+                  <tr class="header-row-blue">
+                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
+                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
+                    <th style="width: 15%; text-align: center;">Cấp độ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Số và tính toán</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng hiểu những khái niệm về tính toán cơ bản, hiểu được ý nghĩa của toán học trong đời sống sinh hoạt hàng ngày.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Số và tính toán') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Số và tính toán</td>
+                    <td class="cell-skill-desc">Khả năng hiểu những khái niệm về tính toán cơ bản, hiểu được ý nghĩa của toán học trong đời sống sinh hoạt hàng ngày.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Số và tính toán') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Hình học không gian</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng nhận biết vị trí và hướng trong không gian và hiểu biết về hình dạng.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Hình học không gian') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Hình học không gian</td>
+                    <td class="cell-skill-desc">Khả năng nhận biết vị trí và hướng trong không gian và hiểu biết về hình dạng.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Hình học không gian') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Đo lường</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng thể hiện số lượng bằng cách sử dụng số và so sánh các đồ vật với nhau.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Đo lường') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Đo lường</td>
+                    <td class="cell-skill-desc">Khả năng thể hiện số lượng bằng cách sử dụng số và so sánh các đồ vật với nhau.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Đo lường') }}</td>
                   </tr>
-                  <tr class="bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Kiểu mẫu</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng nhận diện và dự đoán mối quan hệ mang tính quy luật của đồ vật.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Kiểu mẫu') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Kiểu mẫu</td>
+                    <td class="cell-skill-desc">Khả năng nhận diện và dự đoán mối quan hệ mang tính quy luật của đồ vật.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Kiểu mẫu') }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -205,90 +212,90 @@
         </div>
       </div>
 
-      <!-- PAGE BREAK -->
-      <div class="page-break-element"></div>
+      <!-- PAGE BREAK DIVIDER -->
+      <div class="page-break-divider"></div>
 
-      <!-- PAGE 2 -->
-      <div class="page-container bg-white pb-8 pt-6">
-        <div class="mt-4 px-2">
-          <!-- Tư duy logic -->
-          <div class="grid-section grid grid-cols-12 gap-4 mb-8 items-center">
-            <!-- Chart Left -->
-            <div class="chart-container col-span-5 relative h-[250px] w-full border border-gray-100 rounded-lg p-1">
-               <div ref="chart3" class="w-full h-full"></div>
+      <!-- ================= PAGE 2 ================= -->
+      <div class="report-sheet sheet-page-2" id="ucrea-sheet-2">
+        <div class="sheet-body pt-24">
+          <!-- Section: Tư duy logic -->
+          <div class="two-col-layout mb-24 align-center">
+            <div class="col-5">
+              <div class="chart-box">
+                <div ref="chart3" class="chart-canvas-el"></div>
+              </div>
             </div>
-            <!-- Table Right -->
-            <div class="col-span-7">
-              <table class="w-full border-collapse border border-[#0050a0] text-center text-[11px] shadow-sm">
+            <div class="col-7">
+              <table class="ucrea-score-table">
                 <thead>
-                  <tr class="bg-[#0050a0] text-white">
-                    <th class="font-bold p-2 border-r border-white/20 w-[25%] text-left pl-3">Lĩnh vực chi tiết</th>
-                    <th class="font-bold p-2 border-r border-white/20 text-left pl-3">Nội dung chi tiết</th>
-                    <th class="font-bold p-2 w-[15%]">Cấp độ</th>
+                  <tr class="header-row-blue">
+                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
+                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
+                    <th style="width: 15%; text-align: center;">Cấp độ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Hiểu biết</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng phân tích những dự kiện liên quan và hiểu về vấn đề cần giải quyết.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Hiểu biết') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Hiểu biết</td>
+                    <td class="cell-skill-desc">Khả năng phân tích những dự kiện liên quan và hiểu về vấn đề cần giải quyết.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Hiểu biết') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Ứng dụng</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng vận dụng linh hoạt những vấn đề đã học vào thực hành thực tế.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Ứng dụng') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Ứng dụng</td>
+                    <td class="cell-skill-desc">Khả năng vận dụng linh hoạt những vấn đề đã học vào thực hành thực tế.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Ứng dụng') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Phân tích</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Năng lực so sánh các thuộc tính và khái quát hóa vấn đề.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Phân tích') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Phân tích</td>
+                    <td class="cell-skill-desc">Năng lực so sánh các thuộc tính và khái quát hóa vấn đề.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Phân tích') }}</td>
                   </tr>
-                  <tr v-if="!isL1L2" class="bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tổng hợp</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng phân tích tình huống và giải quyết toàn diện vấn đề.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Tổng hợp') }}</td>
+                  <tr v-if="!isL1L2" class="row-odd">
+                    <td class="cell-skill-name">Tổng hợp</td>
+                    <td class="cell-skill-desc">Khả năng phân tích tình huống và giải quyết toàn diện vấn đề.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Tổng hợp') }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Tư duy sáng tạo -->
-          <div class="grid-section grid grid-cols-12 gap-4 mb-10 items-center">
-            <!-- Chart Left -->
-            <div class="chart-container col-span-5 relative h-[250px] w-full border border-gray-100 rounded-lg p-1">
-               <div ref="chart4" class="w-full h-full"></div>
+          <!-- Section: Tư duy sáng tạo -->
+          <div class="two-col-layout mb-28 align-center">
+            <div class="col-5">
+              <div class="chart-box">
+                <div ref="chart4" class="chart-canvas-el"></div>
+              </div>
             </div>
-            <!-- Table Right -->
-            <div class="col-span-7">
-              <table class="w-full border-collapse border border-[#0050a0] text-center text-[11px] shadow-sm">
+            <div class="col-7">
+              <table class="ucrea-score-table">
                 <thead>
-                  <tr class="bg-[#0050a0] text-white">
-                    <th class="font-bold p-2 border-r border-white/20 w-[25%] text-left pl-3">Lĩnh vực chi tiết</th>
-                    <th class="font-bold p-2 border-r border-white/20 text-left pl-3">Nội dung chi tiết</th>
-                    <th class="font-bold p-2 w-[15%]">Cấp độ</th>
+                  <tr class="header-row-blue">
+                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
+                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
+                    <th style="width: 15%; text-align: center;">Cấp độ</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Sự trôi chảy</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng thể hiện nhiều ý tưởng mới lạ.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Sự trôi chảy') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Sự trôi chảy</td>
+                    <td class="cell-skill-desc">Khả năng thể hiện nhiều ý tưởng mới lạ.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Sự trôi chảy') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tính linh hoạt</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng tìm và giải quyết vấn đề và những ý tưởng đa dạng bằng cách vận dụng một đối tượng thống nhất.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Tính linh hoạt') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Tính linh hoạt</td>
+                    <td class="cell-skill-desc">Khả năng tìm và giải quyết vấn đề và những ý tưởng đa dạng bằng cách vận dụng một đối tượng thống nhất.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Tính linh hoạt') }}</td>
                   </tr>
-                  <tr class="border-b border-gray-200 bg-white">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tính độc đáo</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng đưa ra một ý tưởng độc đáo và mới lạ hoặc hoàn toàn khác biệt.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Tính độc đáo') }}</td>
+                  <tr class="row-even">
+                    <td class="cell-skill-name">Tính độc đáo</td>
+                    <td class="cell-skill-desc">Khả năng đưa ra một ý tưởng độc đáo và mới lạ hoặc hoàn toàn khác biệt.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Tính độc đáo') }}</td>
                   </tr>
-                  <tr class="bg-[#f4f7fa]">
-                    <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tính chính xác</td>
-                    <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">Khả năng bổ sung thêm những điểm chi tiết của ý tưởng có tính phức tạp cao.</td>
-                    <td class="p-2.5 font-bold text-gray-800">{{ getGrade('Tính chính xác') }}</td>
+                  <tr class="row-odd">
+                    <td class="cell-skill-name">Tính chính xác</td>
+                    <td class="cell-skill-desc">Khả năng bổ sung thêm những điểm chi tiết của ý tưởng có tính phức tạp cao.</td>
+                    <td class="cell-skill-grade">{{ getGrade('Tính chính xác') }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -296,56 +303,58 @@
           </div>
 
           <!-- 3. Đánh giá tổng quát -->
-          <div class="overall-section">
-            <h2 class="text-base font-extrabold text-[#1b3664] mb-4 border-b-2 border-[#1b3664] pb-1">Đánh giá tổng quát</h2>
-            <div class="grid-section grid grid-cols-12 gap-4 items-center">
-              <!-- Chart Left -->
-              <div class="overall-chart-container col-span-5 relative h-[270px] w-full border border-gray-100 rounded-lg p-1">
-                 <div ref="chartOverall" class="w-full h-full"></div>
+          <div class="overall-section-wrap">
+            <div class="section-title-wrap">
+              <h2 class="section-title">Đánh giá tổng quát</h2>
+            </div>
+            <div class="two-col-layout align-center">
+              <div class="col-5">
+                <div class="chart-box chart-overall-box">
+                  <div ref="chartOverall" class="chart-canvas-el"></div>
+                </div>
               </div>
-              <!-- Table Right -->
-              <div class="col-span-7">
-                <table class="w-full border-collapse border border-[#e86036] text-center text-[11px] shadow-sm">
+              <div class="col-7">
+                <table class="ucrea-summary-table">
                   <thead>
-                    <tr class="bg-[#e86036] text-white">
-                      <th class="font-bold p-2 border-r border-white/20 w-[20%] text-left pl-3">Lĩnh vực</th>
-                      <th class="font-bold p-2 border-r border-white/20 text-left pl-3">Nội dung</th>
-                      <th class="font-bold p-2 w-[15%]">Trung bình</th>
-                      <th class="font-bold p-2 w-[20%]">Bình quân của tất cả HS</th>
+                    <tr class="header-row-orange">
+                      <th style="width: 22%; text-align: left; padding-left: 12px;">Lĩnh vực</th>
+                      <th style="width: 48%; text-align: left; padding-left: 12px;">Nội dung</th>
+                      <th style="width: 15%;">Trung bình</th>
+                      <th style="width: 15%;">Bình quân<br/>tất cả HS</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr class="border-b border-gray-200 bg-[#fef6ef]">
-                      <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tư duy cơ bản</td>
-                      <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">
-                        Tư duy cơ bản của học sinh {{ result.general.stu_nm }} ở mức độ <span class="text-[#dc3545] font-bold">{{ getGradeLabel(getGrade('Tư duy cơ bản')) }}</span>.
+                    <tr class="row-peach">
+                      <td class="cell-skill-name">Tư duy cơ bản</td>
+                      <td class="cell-skill-desc">
+                        Tư duy cơ bản của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy cơ bản')) }}</strong>.
                       </td>
-                      <td class="border-r border-gray-200 p-2.5 font-bold text-gray-800">{{ getGrade('Tư duy cơ bản') }}</td>
-                      <td class="p-2.5 text-gray-500">B</td>
+                      <td class="cell-skill-grade">{{ getGrade('Tư duy cơ bản') }}</td>
+                      <td class="cell-peer-avg">B</td>
                     </tr>
-                    <tr class="border-b border-gray-200 bg-white">
-                      <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tư duy toán học</td>
-                      <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">
-                        Tư duy toán học của học sinh {{ result.general.stu_nm }} ở mức độ <span class="text-[#dc3545] font-bold">{{ getGradeLabel(getGrade('Tư duy toán học')) }}</span>.
+                    <tr class="row-white">
+                      <td class="cell-skill-name">Tư duy toán học</td>
+                      <td class="cell-skill-desc">
+                        Tư duy toán học của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy toán học')) }}</strong>.
                       </td>
-                      <td class="border-r border-gray-200 p-2.5 font-bold text-gray-800">{{ getGrade('Tư duy toán học') }}</td>
-                      <td class="p-2.5 text-gray-500">B</td>
+                      <td class="cell-skill-grade">{{ getGrade('Tư duy toán học') }}</td>
+                      <td class="cell-peer-avg">B</td>
                     </tr>
-                    <tr class="border-b border-gray-200 bg-[#fef6ef]">
-                      <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tư duy logic</td>
-                      <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">
-                        Tư duy logic của học sinh {{ result.general.stu_nm }} ở mức độ <span class="text-[#dc3545] font-bold">{{ getGradeLabel(getGrade('Tư duy logic')) }}</span>.
+                    <tr class="row-peach">
+                      <td class="cell-skill-name">Tư duy logic</td>
+                      <td class="cell-skill-desc">
+                        Tư duy logic của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy logic')) }}</strong>.
                       </td>
-                      <td class="border-r border-gray-200 p-2.5 font-bold text-gray-800">{{ getGrade('Tư duy logic') }}</td>
-                      <td class="p-2.5 text-gray-500">B</td>
+                      <td class="cell-skill-grade">{{ getGrade('Tư duy logic') }}</td>
+                      <td class="cell-peer-avg">B</td>
                     </tr>
-                    <tr class="bg-white">
-                      <td class="border-r border-gray-200 p-2.5 text-left font-bold text-gray-700 pl-3">Tư duy sáng tạo</td>
-                      <td class="border-r border-gray-200 p-2.5 text-left text-gray-600">
-                        Tư duy sáng tạo của học sinh {{ result.general.stu_nm }} ở mức độ <span class="text-[#dc3545] font-bold">{{ getGradeLabel(getGrade('Tư duy sáng tạo')) }}</span>.
+                    <tr class="row-white">
+                      <td class="cell-skill-name">Tư duy sáng tạo</td>
+                      <td class="cell-skill-desc">
+                        Tư duy sáng tạo của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy sáng tạo')) }}</strong>.
                       </td>
-                      <td class="border-r border-gray-200 p-2.5 font-bold text-gray-800">{{ getGrade('Tư duy sáng tạo') }}</td>
-                      <td class="p-2.5 text-gray-500">B</td>
+                      <td class="cell-skill-grade">{{ getGrade('Tư duy sáng tạo') }}</td>
+                      <td class="cell-peer-avg">B</td>
                     </tr>
                   </tbody>
                 </table>
@@ -478,20 +487,20 @@ export default {
       if (selectedData.length === 0) return
 
       const getColor = (test_cd) => {
-          if (test_cd === 'TT001') return '#cccccc' // Đầu kỳ
-          if (test_cd === 'TT002') return '#003366' // Giữa kỳ
-          if (test_cd === 'TT003') return '#8cc63f' // Cuối kỳ
-          return '#dc3545'
+          if (test_cd === 'TT001') return '#cbd5e1' // Đầu kỳ (Xám)
+          if (test_cd === 'TT002') return '#1e3a8a' // Giữa kỳ (Xanh đậm)
+          if (test_cd === 'TT003') return '#84cc16' // Cuối kỳ (Xanh lá)
+          return '#ef4444'
       }
 
       const legendData = selectedData.map(t => t.name)
-      const legendTopRight = { top: 0, right: 0, data: legendData, itemGap: 5, itemWidth: 15, itemHeight: 10, textStyle: { fontSize: 10, color: '#666' } }
+      const legendTopRight = { top: 0, right: 0, data: legendData, itemGap: 6, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 10, color: '#64748b' } }
 
       const commonOpts = {
-        grid: { top: 30, bottom: 25, left: 25, right: 5 },
+        grid: { top: 32, bottom: 25, left: 28, right: 8 },
         tooltip: { trigger: 'axis' },
-        yAxis: { type: 'value', max: 100, axisLabel: { fontSize: 10 }, splitLine: { lineStyle: { color: '#eee' } } },
-        xAxis: { type: 'category', axisLabel: { interval: 0, fontSize: 9, width: 50, overflow: 'break' }, axisTick: { show: false } },
+        yAxis: { type: 'value', max: 100, axisLabel: { fontSize: 10, color: '#64748b' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+        xAxis: { type: 'category', axisLabel: { interval: 0, fontSize: 9, color: '#334155' }, axisTick: { show: false } },
         animation: false
       }
 
@@ -500,14 +509,14 @@ export default {
       const c1 = echarts.getInstanceByDom(this.$refs.chart1) || echarts.init(this.$refs.chart1)
       c1.setOption({
         ...commonOpts,
-        title: { text: 'Tư duy cơ bản', left: 'center', textStyle: { fontSize: 13, color: '#333', fontWeight: 'bold' } },
+        title: { text: 'Tư duy cơ bản', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
         legend: legendTopRight,
         xAxis: { ...commonOpts.xAxis, data: ['Năng lực\nchú ý', 'Năng lực\nquan sát', 'Năng lực\nghi nhớ'] },
         series: selectedData.map(t => ({
           name: t.name,
           type: 'bar',
           data: [t.reportData.sk11, t.reportData.sk12, t.reportData.sk13],
-          barMaxWidth: 20,
+          barMaxWidth: 18,
           itemStyle: { color: getColor(t.test_cd) }
         }))
       }, true)
@@ -517,7 +526,7 @@ export default {
       const c2 = echarts.getInstanceByDom(this.$refs.chart2) || echarts.init(this.$refs.chart2)
       c2.setOption({
         ...commonOpts,
-        title: { text: 'Tư duy toán học', left: 'center', textStyle: { fontSize: 13, color: '#333', fontWeight: 'bold' } },
+        title: { text: 'Tư duy toán học', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
         legend: legendTopRight,
         xAxis: { ...commonOpts.xAxis, data: mathData },
         series: selectedData.map(t => {
@@ -526,7 +535,7 @@ export default {
             name: t.name,
             type: 'bar',
             data: data,
-            barMaxWidth: 20,
+            barMaxWidth: 18,
             itemStyle: { color: getColor(t.test_cd) }
           }
         })
@@ -540,7 +549,7 @@ export default {
       const c3 = echarts.getInstanceByDom(this.$refs.chart3) || echarts.init(this.$refs.chart3)
       c3.setOption({
         ...commonOpts,
-        title: { text: 'Tư duy logic', left: 'center', textStyle: { fontSize: 13, color: '#333', fontWeight: 'bold' } },
+        title: { text: 'Tư duy logic', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
         legend: legendTopRight,
         xAxis: { ...commonOpts.xAxis, data: logicData },
         series: selectedData.map(t => {
@@ -552,7 +561,7 @@ export default {
             name: t.name,
             type: 'bar',
             data: data,
-            barMaxWidth: 20,
+            barMaxWidth: 18,
             itemStyle: { color: getColor(t.test_cd) }
           }
         })
@@ -562,14 +571,14 @@ export default {
       const c4 = echarts.getInstanceByDom(this.$refs.chart4) || echarts.init(this.$refs.chart4)
       c4.setOption({
         ...commonOpts,
-        title: { text: 'Tư duy sáng tạo', left: 'center', textStyle: { fontSize: 13, color: '#333', fontWeight: 'bold' } },
+        title: { text: 'Tư duy sáng tạo', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
         legend: legendTopRight,
         xAxis: { ...commonOpts.xAxis, data: ['Sự\ntrôi chảy', 'Tính\nlinh hoạt', 'Tính\nđộc đáo', 'Tính\nchính xác'] },
         series: selectedData.map(t => ({
           name: t.name,
           type: 'bar',
           data: [t.reportData.sk31, t.reportData.sk32, t.reportData.sk33, t.reportData.sk34],
-          barMaxWidth: 20,
+          barMaxWidth: 18,
           itemStyle: { color: getColor(t.test_cd) }
         }))
       }, true)
@@ -589,24 +598,23 @@ export default {
           name: t.name,
           type: 'bar',
           data: [avg1, avg2, avg3, avg4],
-          barMaxWidth: 20,
+          barMaxWidth: 18,
           itemStyle: { color: getColor(t.test_cd) }
         }
       })
       
-      // Keep average line/bar
       overallSeries.push({
          name: 'Bình quân tất cả HS', 
          type: 'bar', 
          data: [66, 71, 69, 61], 
-         barMaxWidth: 20, 
-         itemStyle: { color: '#f39c12' }
+         barMaxWidth: 18, 
+         itemStyle: { color: '#f59e0b' }
       })
 
       cOverall.setOption({
         ...commonOpts,
-        title: { text: 'Bình quân tổng quát', left: 'center', textStyle: { fontSize: 13, color: '#333', fontWeight: 'bold' } },
-        legend: { top: 0, right: 0, data: [...legendData, 'Bình quân tất cả HS'], itemGap: 5, itemWidth: 15, itemHeight: 10, textStyle: { fontSize: 10, color: '#666' } },
+        title: { text: 'Bình quân tổng quát', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+        legend: { top: 0, right: 0, data: [...legendData, 'Bình quân tất cả HS'], itemGap: 5, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 9, color: '#64748b' } },
         xAxis: { ...commonOpts.xAxis, data: ['Tư duy\ncơ bản', 'Tư duy\ntoán học', 'Tư duy\nlogic', 'Tư duy\nsáng tạo'] },
         series: overallSeries
       }, true)
@@ -618,35 +626,430 @@ export default {
 </script>
 
 <style scoped>
+/* ============================================================
+   EXACT UCREA REPORT CSS (INDEPENDENT FROM TAILWIND & VUEXY)
+   ============================================================ */
+
+.ucrea-report-wrapper {
+  background-color: #f8fafc;
+  padding: 24px 16px;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1e293b;
+}
+
+/* Toolbar */
+.action-toolbar {
+  max-width: 900px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.back-link {
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.back-link:hover { color: #2563eb; }
+
+.toolbar-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.toolbar-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.toolbar-sub .sep { margin: 0 8px; color: #cbd5e1; }
+.toolbar-sub .text-name { color: #2563eb; }
+
+.toolbar-btns { display: flex; gap: 10px; }
+
+.btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1e3a8a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-print:hover { background: #172554; }
+
+.btn-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.btn-edit:hover { background: #eff6ff; }
+
+/* Loading */
+.loading-state { text-align: center; padding: 80px 0; color: #64748b; }
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Report Document */
+.report-document {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.report-sheet {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+}
+
+/* Header */
+.sheet-header {
+  background-color: #1b3664;
+  color: #ffffff;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-brand-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.brand-logo {
+  height: 44px;
+  width: auto;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 6px;
+  border-radius: 6px;
+  object-fit: contain;
+}
+
+.header-titles {
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  padding-left: 14px;
+}
+
+.header-titles .super-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+  margin: 0;
+  line-height: 1;
+}
+
+.header-titles .main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f5c518;
+  letter-spacing: 0.5px;
+  margin: 4px 0 0 0;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.student-pill {
+  background: #ffffff;
+  color: #1b3664;
+  font-weight: 700;
+  font-size: 12px;
+  border-radius: 9999px;
+  padding: 7px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.student-pill .pill-name { font-size: 13px; font-weight: 800; }
+.student-pill .pill-sep { color: #cbd5e1; }
+
+/* Sheet Body */
+.sheet-body {
+  padding: 24px;
+}
+
+/* Section Title */
+.section-title-wrap {
+  border-bottom: 2px solid #1b3664;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+}
+.section-title-wrap.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1b3664;
+  margin: 0;
+}
+
+/* Checkboxes */
+.test-period-checkboxes {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.checkbox-label.disabled-label {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.check-input {
+  accent-color: #2563eb;
+  width: 14px;
+  height: 14px;
+}
+.check-text {
+  color: #334155;
+}
+
+/* 2-Column Layout */
+.two-col-layout {
+  display: flex;
+  gap: 20px;
+}
+.two-col-layout.align-center {
+  align-items: center;
+}
+.two-col-layout.mb-24 { margin-bottom: 24px; }
+.two-col-layout.mb-20 { margin-bottom: 20px; }
+.two-col-layout.mb-28 { margin-bottom: 28px; }
+
+.col-7 {
+  flex: 7;
+  min-width: 0;
+}
+.col-5 {
+  flex: 5;
+  min-width: 0;
+}
+
+/* Tables */
+.ucrea-grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+  font-size: 11px;
+}
+.ucrea-grid-table td, .ucrea-grid-table th {
+  padding: 7px 10px;
+  border: 1px solid #e2e8f0;
+}
+.cell-category-label {
+  width: 25%;
+  text-align: center;
+  font-weight: 700;
+  color: #334155;
+  background-color: #f8fafc;
+}
+.cell-category-desc {
+  color: #475569;
+  line-height: 1.45;
+}
+
+.header-row-orange th {
+  background-color: #e86036;
+  color: #ffffff;
+  padding: 8px;
+  font-size: 12px;
+}
+.sub-header-row th {
+  background-color: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* Chart Box */
+.chart-box {
+  width: 100%;
+  height: 240px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px;
+  background: #ffffff;
+  position: relative;
+}
+.chart-overall-box {
+  height: 260px;
+}
+.chart-canvas-el {
+  width: 100%;
+  height: 100%;
+}
+
+/* Score Tables */
+.ucrea-score-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #0050a0;
+  font-size: 11px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+.header-row-blue th {
+  background-color: #0050a0;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+.header-row-blue th:last-child { border-right: none; }
+
+.ucrea-score-table td {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+}
+.row-even { background-color: #ffffff; }
+.row-odd { background-color: #f4f7fa; }
+
+.cell-skill-name {
+  font-weight: 700;
+  color: #1e293b;
+  padding-left: 12px !important;
+}
+.cell-skill-desc {
+  color: #475569;
+  line-height: 1.4;
+  padding-left: 12px !important;
+}
+.cell-skill-grade {
+  text-align: center;
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 13px;
+}
+
+/* Summary Table */
+.ucrea-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e86036;
+  font-size: 11px;
+}
+.ucrea-summary-table td {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+}
+.row-peach { background-color: #fef6ef; }
+.row-white { background-color: #ffffff; }
+.grade-label-red { color: #dc3545; font-weight: 700; }
+.cell-peer-avg {
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.page-break-divider {
+  height: 12px;
+}
+.sheet-page-2 {
+  margin-top: 20px;
+}
+.pt-24 { padding-top: 24px; }
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
 @media print {
-  header, aside, nav, .print\:hidden, .vs-navbar, .the-navbar {
+  body, html, #app, .content-area__content, .layout--vertical-nav-menu, .router-view {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  header, aside, nav, .print-hide, .vs-navbar, .the-navbar, .vx-navbar, .vs-sidebar, .v-nav-menu {
     display: none !important;
   }
-  body, #app, .content-area__content {
+
+  .ucrea-report-wrapper {
     background: #ffffff !important;
     padding: 0 !important;
     margin: 0 !important;
   }
-  #pdf-content {
-    width: 100% !important;
+
+  .report-document {
     max-width: 100% !important;
-    box-shadow: none !important;
-    border: none !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
   }
-  .page-container {
-    page-break-after: always;
-    break-after: page;
+
+  .report-sheet {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
   }
-  .page-break-element {
-    page-break-before: always;
-    break-before: page;
-    height: 0;
+
+  .sheet-page-2 {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 0 !important;
   }
-}
-.page-break-element {
-  height: 20px;
-  background-color: transparent;
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0.8cm 0.6cm;
+  }
 }
 </style>
