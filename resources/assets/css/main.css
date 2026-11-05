@@ -380,7 +380,20 @@ th .sort-th, th .vs-table-text{
 display: contents;
 }
 .multiselect{
-z-index: 999;
+  position: relative !important;
+  z-index: 1000 !important;
+}
+.multiselect--active{
+  z-index: 10000 !important;
+}
+.multiselect__content-wrapper{
+  z-index: 10000 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+}
+.filter-row,
+.vx-row.filter-row {
+  position: relative;
+  z-index: 500;
 }
 .td.vs-table--td{
 vertical-align: top;

@@ -17,7 +17,7 @@
       </div>
 
       <!-- Filters -->
-      <div class="vx-row mb-4">
+      <div class="vx-row mb-4 filter-row" style="position: relative; z-index: 500;">
         <div class="vx-col sm:w-1/4 w-full mb-2">
           <label class="vs-input--label">Lớp học</label>
           <multiselect
@@ -351,4 +351,13 @@ export default {
   }
 }
 </script>
+
+<style>
+#igbh-class-summative-list .multiselect--active {
+  z-index: 10000 !important;
+}
+#igbh-class-summative-list .multiselect__content-wrapper {
+  z-index: 10000 !important;
+}
+</style>
 
