@@ -8,7 +8,7 @@
         </h3>
         <p class="text-sm text-gray-500 mt-1">Phân loại Fulltime, CTV, Thử việc & theo dõi trạng thái hoạt động</p>
       </div>
-      <div>
+      <div v-if="isHrmAdmin">
         <router-link :to="'/hrm/employees/add'">
           <vs-button class="p-3" color="success" type="border">
             <i class="fa-solid fa-user-plus mr-2"></i> Thêm Nhân Sự Mới
@@ -147,6 +147,7 @@
                         <i class="fa-regular fa-circle-question mr-1"></i> Chưa liên kết
                       </span>
                       <vs-button 
+                        v-if="isHrmAdmin"
                         size="small" 
                         color="primary" 
                         type="border" 
@@ -171,6 +172,7 @@
                       <div>Từ: <strong>{{ tr.probation_start_date ? (tr.probation_start_date | formatDateView) : '---' }}</strong></div>
                       <div>Đến: <strong>{{ tr.probation_end_date ? (tr.probation_end_date | formatDateView) : '---' }}</strong></div>
                       <vs-button 
+                        v-if="isHrmAdmin"
                         size="small" 
                         color="success" 
                         type="border" 
@@ -193,7 +195,7 @@
                   <td class="td vs-table--td text-center list-action" style="white-space: nowrap;">
                     <!-- Nút HR duyệt CTV -->
                     <vs-button 
-                      v-if="tr.employee_type === 'ctv' && tr.approval_status === 0" 
+                      v-if="isHrmAdmin && tr.employee_type === 'ctv' && tr.approval_status === 0" 
                       size="small" 
                       color="primary" 
                       class="mr-1"
@@ -205,6 +207,7 @@
 
                     <!-- Nút đổi trạng thái hoạt động -->
                     <vs-button 
+                      v-if="isHrmAdmin"
                       size="small" 
                       color="warning" 
                       type="border" 
@@ -215,9 +218,14 @@
                       <i class="fa-solid fa-user-clock"></i>
                     </vs-button>
 
-                    <!-- Nút sửa hồ sơ -->
-                    <router-link :to="`/hrm/employees/edit/${tr.id}`">
+                    <!-- Nút sửa hồ sơ (chỉ Admin/HR) -->
+                    <router-link v-if="isHrmAdmin" :to="`/hrm/employees/edit/${tr.id}`">
                       <vs-button size="small" color="success" title="Chỉnh sửa"><i class="fa-solid fa-edit"></i></vs-button>
+                    </router-link>
+
+                    <!-- Nút xem hồ sơ (Dành cho role khác chỉ view) -->
+                    <router-link v-else :to="`/hrm/employees/edit/${tr.id}?mode=view`">
+                      <vs-button size="small" color="primary" type="border" title="Xem chi tiết hồ sơ"><i class="fa-solid fa-eye"></i></vs-button>
                     </router-link>
 
                     <!-- Nút xóa nhân sự (chỉ hiển thị cho Admin và Kế toán) -->
@@ -407,6 +415,7 @@ export default {
       statusModalActive: false,
       selectedEmployee: null,
       canDeleteServer: null,
+      isHrmAdminServer: null,
       statusForm: {
         work_status: 'working',
         resigned_date: '',
@@ -461,6 +470,15 @@ export default {
         return this.canDeleteServer;
       }
       return this.checkCanDeleteLocal();
+    },
+    isHrmAdmin() {
+      if (this.isHrmAdminServer !== null) {
+        return this.isHrmAdminServer;
+      }
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin) return true;
+      if (user.permissions && user.permissions.includes('hrm_admin')) return true;
+      return false;
     }
   },
   created() {
@@ -479,6 +497,7 @@ export default {
         if (res.data && res.data.data) {
           this.employees = res.data.data;
           this.canDeleteServer = typeof res.data.can_delete !== 'undefined' ? !!res.data.can_delete : null;
+          this.isHrmAdminServer = typeof res.data.is_hrm_admin !== 'undefined' ? !!res.data.is_hrm_admin : null;
         } else if (Array.isArray(res.data)) {
           this.employees = res.data;
         } else {

@@ -288,21 +288,21 @@ export default [
         name: 'Cơ cấu tổ chức',
         icon: 'BriefcaseIcon',
         slug: 'hrm-departments',
-        permission: 'hrm',
+        permission: 'hrm_admin',
       },
       {
         url: '/hrm/job-levels',
         name: 'Cấp bậc',
         icon: 'BarChart2Icon',
         slug: 'hrm-job-levels',
-        permission: 'hrm',
+        permission: 'hrm_admin',
       },
       {
         url: '/hrm/job-titles',
         name: 'Chức danh',
         icon: 'AwardIcon',
         slug: 'hrm-job-titles',
-        permission: 'hrm',
+        permission: 'hrm_admin',
       },
       {
         url: '/hrm/employees',
@@ -318,9 +318,9 @@ export default [
         submenu: [
           { url: '/hrm/attendances', name: 'Bảng chấm công', slug: 'hrm-attendances', permission: 'hrm' },
           { url: '/hrm/online-registrations', name: 'Đăng ký làm Online', slug: 'hrm-online-registrations', permission: 'hrm' },
-          { url: '/hrm/shifts', name: 'Ca làm việc', slug: 'hrm-shifts', permission: 'hrm' },
-          { url: '/hrm/shift-assignments', name: 'Xếp ca', slug: 'hrm-shift-assignments', permission: 'hrm' },
-          { url: '/hrm/overtime', name: 'Làm thêm giờ', slug: 'hrm-overtime', permission: 'hrm' },
+          { url: '/hrm/shifts', name: 'Ca làm việc', slug: 'hrm-shifts', permission: 'hrm_admin' },
+          { url: '/hrm/shift-assignments', name: 'Xếp ca', slug: 'hrm-shift-assignments', permission: 'hrm_admin' },
+          { url: '/hrm/overtime', name: 'Làm thêm giờ', slug: 'hrm-overtime', permission: 'hrm_admin' },
         ]
       },
       {
@@ -329,7 +329,7 @@ export default [
         icon: 'CalendarIcon',
         submenu: [
           { url: '/hrm/leaves', name: 'Đơn nghỉ phép', slug: 'hrm-leaves', permission: 'hrm' },
-          { url: '/hrm/leave-types', name: 'Loại nghỉ phép', slug: 'hrm-leave-types', permission: 'hrm' },
+          { url: '/hrm/leave-types', name: 'Loại nghỉ phép', slug: 'hrm-leave-types', permission: 'hrm_admin' },
         ]
       },
       {
@@ -337,14 +337,14 @@ export default [
         name: 'Quản lý Hợp đồng',
         icon: 'FileTextIcon',
         slug: 'hrm-contracts',
-        permission: 'hrm',
+        permission: 'hrm_admin',
       },
       {
         url: '/hrm/documents',
         name: 'Lưu trữ Hồ sơ',
         icon: 'FolderIcon',
         slug: 'hrm-documents',
-        permission: 'hrm',
+        permission: 'hrm_admin',
       }
     ]
   },

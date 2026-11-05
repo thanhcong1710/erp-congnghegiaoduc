@@ -212,6 +212,7 @@
                 </vs-button>
               </router-link>
               <vs-button
+                v-if="isHrmAdmin"
                 class="p-3"
                 color="success"
                 type="filled"
@@ -298,6 +299,7 @@
                               <i class="fa-solid fa-laptop mr-1.5"></i> Làm Online
                             </span>
                             <button
+                              v-if="isHrmAdmin"
                               type="button"
                               @click="$set(tr, 'override_edit', true)"
                               class="ml-2 text-gray-400 hover:text-primary text-xs"
@@ -315,6 +317,7 @@
                         <div v-else>
                           <select
                             v-model="tr.attendance_status"
+                            :disabled="!isHrmAdmin"
                             class="vs-inputx vs-input--input normal w-full font-semibold"
                             style="padding: 8px 12px; font-size: 13px"
                             :style="getStatusStyle(tr.attendance_status)"
@@ -331,7 +334,7 @@
                             <option value="late_submitted">⚠ Gửi đơn muộn</option>
                             <option value="online">🌐 Làm Online</option>
                           </select>
-                          <div v-if="tr.override_edit" class="text-right mt-1">
+                          <div v-if="tr.override_edit && isHrmAdmin" class="text-right mt-1">
                             <button
                               type="button"
                               @click="$set(tr, 'override_edit', false)"
@@ -346,6 +349,7 @@
                         <input
                           type="text"
                           v-model="tr.note"
+                          :disabled="!isHrmAdmin"
                           placeholder="Nhập ghi chú..."
                           class="vs-inputx vs-input--input normal w-full"
                           style="padding: 8px 12px; font-size: 13px"
@@ -661,6 +665,12 @@ export default {
     },
     totalMonthlyPages() {
       return Math.ceil(this.filteredMonthlySummary.length / this.monthlyPerPage) || 1;
+    },
+    isHrmAdmin() {
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin) return true;
+      if (user.permissions && user.permissions.includes('hrm_admin')) return true;
+      return false;
     }
   },
   created() {

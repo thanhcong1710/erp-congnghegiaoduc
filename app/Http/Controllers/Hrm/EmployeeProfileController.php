@@ -77,17 +77,26 @@ class EmployeeProfileController extends Controller
 
         $employees = $query->orderBy('id', 'desc')->get();
         $canDelete = $currentUser ? $currentUser->canDeleteHrmEmployee() : false;
+        $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
         return response()->json([
             'status' => 1,
             'can_delete' => $canDelete,
+            'is_hrm_admin' => $isHrmAdmin,
             'data' => $employees
         ]);
     }
 
     public function add(Request $request)
     {
-        $data = $request->all();
         $currentUser = Auth::user();
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn chỉ có quyền xem danh sách nhân sự, không có quyền thêm mới!'
+            ], 403);
+        }
+
+        $data = $request->all();
 
         // Tự sinh mã nhân sự nếu chưa có (format: CHAM01, CHAM02...)
         if (empty($data['employee_code'])) {
@@ -197,14 +206,14 @@ class EmployeeProfileController extends Controller
 
     public function update(Request $request, $id)
     {
+        $currentUser = Auth::user();
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn chỉ có quyền xem thông tin nhân sự, không có quyền chỉnh sửa!'], 403);
+        }
+
         $profile = HrmEmployeeProfile::find($id);
         if (!$profile) {
             return response()->json(['status' => 0, 'message' => 'Không tìm thấy hồ sơ'], 404);
-        }
-
-        $currentUser = Auth::user();
-        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
-            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền chỉnh sửa hồ sơ nhân sự này!'], 403);
         }
 
         $data = $request->all();
@@ -243,6 +252,11 @@ class EmployeeProfileController extends Controller
      */
     public function approveCtv(Request $request, $id)
     {
+        $currentUser = Auth::user();
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền phê duyệt CTV!'], 403);
+        }
+
         $profile = HrmEmployeeProfile::findOrFail($id);
         $profile->approval_status = 1;
         $profile->save();
@@ -258,6 +272,11 @@ class EmployeeProfileController extends Controller
      */
     public function convertToFulltime(Request $request, $id)
     {
+        $currentUser = Auth::user();
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền chuyển nhân sự Fulltime!'], 403);
+        }
+
         $profile = HrmEmployeeProfile::findOrFail($id);
         $profile->employee_type = 'fulltime';
         $profile->save();
@@ -270,16 +289,16 @@ class EmployeeProfileController extends Controller
 
     /**
      * Cập nhật trạng thái làm việc (Đang làm việc / Đã nghỉ)
-     * Lead hoặc HR đều có thể cập nhật
+     * Chỉ Quản lý HRM hoặc Admin
      */
     public function updateWorkStatus(Request $request, $id)
     {
-        $profile = HrmEmployeeProfile::findOrFail($id);
         $currentUser = Auth::user();
-        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
-            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật trạng thái nhân sự này!'], 403);
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền cập nhật trạng thái hoạt động!'], 403);
         }
 
+        $profile = HrmEmployeeProfile::findOrFail($id);
         $profile->work_status = $request->work_status; // 'working' or 'resigned'
         if ($request->work_status === 'resigned') {
             $profile->resigned_reason = $request->resigned_reason;
@@ -301,11 +320,12 @@ class EmployeeProfileController extends Controller
      */
     public function updateProfileDocuments(Request $request, $id)
     {
-        $profile = HrmEmployeeProfile::findOrFail($id);
         $currentUser = Auth::user();
-        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
-            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền cập nhật hồ sơ giấy tờ này!'], 403);
+        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền cập nhật checklist hồ sơ!'], 403);
         }
+
+        $profile = HrmEmployeeProfile::findOrFail($id);
 
         $missing = $request->missing_documents ?: [];
         $profile->profile_received_date = $request->profile_received_date;
@@ -618,6 +638,10 @@ class EmployeeProfileController extends Controller
      */
     public function linkUser(Request $request, $id)
     {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền liên kết tài khoản!'], 403);
+        }
+
         $request->validate([
             'user_id' => 'required|integer|exists:users,id'
         ]);
@@ -656,6 +680,10 @@ class EmployeeProfileController extends Controller
      */
     public function unlinkUser(Request $request, $id)
     {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên hoặc Quản lý HRM mới có quyền hủy liên kết tài khoản!'], 403);
+        }
+
         $profile = HrmEmployeeProfile::findOrFail($id);
         $oldUserId = $profile->user_id;
         $profile->user_id = null;

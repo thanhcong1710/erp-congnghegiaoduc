@@ -35,7 +35,9 @@ class Kernel extends ConsoleKernel
         UpdateAgreementsData::class,
         \App\Console\Commands\PromoteProbationEmployees::class,
         \App\Console\Commands\HrmImportLeavePlanCommand::class,
-        \App\Console\Commands\HrmMapUsersCommand::class
+        \App\Console\Commands\HrmMapUsersCommand::class,
+        \App\Console\Commands\HrmApplyMappedUsersCommand::class,
+        \App\Console\Commands\HrmAssignManagerCommand::class
     ];
 
     /**

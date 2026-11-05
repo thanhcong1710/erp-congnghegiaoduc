@@ -226,6 +226,13 @@ class AttendanceController extends Controller
      */
     public function updateAttendanceStatus(Request $request)
     {
+        if (!HrmScopeService::isHrmAdmin(Auth::user())) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn chỉ có quyền xem bảng chấm công, không có quyền chỉnh sửa điểm danh!'
+            ], 403);
+        }
+
         $request->validate([
             'date' => 'required|date',
             'records' => 'required|array',

@@ -66,6 +66,17 @@ class LeaveRequestController extends Controller
             $currentUser = Auth::user();
             $userId = $request->user_id ?: ($currentUser ? $currentUser->id : 1);
 
+            // Kiểm tra phạm vi: Chỉ được tạo đơn cho bản thân hoặc cấp dưới
+            if ($currentUser && (int)$userId !== (int)$currentUser->id) {
+                $targetProfile = HrmEmployeeProfile::where('user_id', $userId)->first();
+                if ($targetProfile && !HrmScopeService::canAccessProfile($currentUser, $targetProfile)) {
+                    return response()->json([
+                        'status' => 0,
+                        'message' => 'Bạn chỉ có quyền tạo đơn cho chính mình hoặc nhân viên cấp dưới thuộc quyền quản lý!'
+                    ], 403);
+                }
+            }
+
             $startDate = Carbon::parse($request->start_date);
             $endDate = Carbon::parse($request->end_date);
             $durationDays = $request->duration_days ?: (max(1, $startDate->diffInDays($endDate) + 1));

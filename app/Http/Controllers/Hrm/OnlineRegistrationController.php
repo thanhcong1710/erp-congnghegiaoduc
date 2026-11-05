@@ -143,6 +143,14 @@ class OnlineRegistrationController extends Controller
             ], 422);
         }
 
+        // Kiểm tra phạm vi: Chỉ được đăng ký cho bản thân hoặc nhân sự cấp dưới
+        if ($currentUser && !HrmScopeService::canAccessProfile($currentUser, $employee)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn chỉ có quyền đăng ký làm online cho chính mình hoặc nhân viên cấp dưới thuộc quyền quản lý!'
+            ], 403);
+        }
+
         // Kiểm tra ca làm việc của nhân sự
         if ($employee->shift && mb_stripos($employee->shift->name, 'online') !== false) {
             return response()->json([
