@@ -258,6 +258,7 @@
                       <td class="td vs-table--td">
                         <select
                           v-model="tr.shift_id"
+                          :disabled="!isHrmAdmin"
                           class="vs-inputx vs-input--input normal w-full font-medium"
                           style="padding: 8px 10px; font-size: 13px"
                         >
@@ -279,6 +280,7 @@
                               <i class="fa-solid fa-calendar-check mr-1.5"></i> Nghỉ phép (Đã duyệt)
                             </span>
                             <button
+                              v-if="isHrmAdmin"
                               type="button"
                               @click="$set(tr, 'override_edit', true)"
                               class="ml-2 text-gray-400 hover:text-primary text-xs"
@@ -622,6 +624,7 @@ export default {
       quickSearchKeyword: '',
       quickSearchModalActive: false,
       quickSearchResult: null,
+      isHrmAdminServer: null,
     };
   },
   watch: {
@@ -667,9 +670,14 @@ export default {
       return Math.ceil(this.filteredMonthlySummary.length / this.monthlyPerPage) || 1;
     },
     isHrmAdmin() {
+      if (this.isHrmAdminServer !== null) {
+        return this.isHrmAdminServer;
+      }
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin) return true;
-      if (user.permissions && user.permissions.includes('hrm_admin')) return true;
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager'];
+      const roleName = (user.roleName || user.role_name || '').toLowerCase();
+      if (adminRoleNames.includes(roleName)) return true;
       return false;
     }
   },
@@ -702,6 +710,7 @@ export default {
         shift_id: this.selectedShift || null
       }).then(res => {
         this.dailyRecords = res.data.data || [];
+        this.isHrmAdminServer = typeof res.data.is_hrm_admin !== 'undefined' ? !!res.data.is_hrm_admin : null;
         this.$vs.loading.close();
       }).catch(err => {
         this.$vs.loading.close();

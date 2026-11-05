@@ -217,6 +217,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'date' => $date,
+            'is_hrm_admin' => HrmScopeService::isHrmAdmin($currentUser),
             'data' => $result
         ]);
     }

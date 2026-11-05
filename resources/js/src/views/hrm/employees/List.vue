@@ -121,7 +121,7 @@
                           {{ tr.user.name }}
                         </div>
                       </div>
-                      <div class="flex items-center ml-1">
+                      <div class="flex items-center ml-1" v-if="isHrmAdmin">
                         <button 
                           type="button" 
                           class="text-primary hover:text-primary-dark p-1 text-xs" 
@@ -223,10 +223,17 @@
                       <vs-button size="small" color="success" title="Chỉnh sửa"><i class="fa-solid fa-edit"></i></vs-button>
                     </router-link>
 
-                    <!-- Nút xem hồ sơ (Dành cho role khác chỉ view) -->
-                    <router-link v-else :to="`/hrm/employees/edit/${tr.id}?mode=view`">
-                      <vs-button size="small" color="primary" type="border" title="Xem chi tiết hồ sơ"><i class="fa-solid fa-eye"></i></vs-button>
-                    </router-link>
+                    <!-- Nút xem hồ sơ (Dành cho role khác chỉ view danh sách) -->
+                    <vs-button 
+                      v-else 
+                      size="small" 
+                      color="primary" 
+                      type="border" 
+                      title="Xem chi tiết hồ sơ"
+                      @click="openViewModal(tr)"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                    </vs-button>
 
                     <!-- Nút xóa nhân sự (chỉ hiển thị cho Admin và Kế toán) -->
                     <vs-button 
@@ -389,6 +396,64 @@
         </div>
       </div>
     </vs-popup>
+
+    <!-- Modal Xem Chi Tiết Nhân Sự (Dành cho Non-Admin chỉ xem) -->
+    <vs-popup title="CHI TIẾT HỒ SƠ NHÂN SỰ" :active.sync="viewModalActive">
+      <div v-if="viewingEmployee" class="p-2">
+        <div class="flex items-center mb-4 pb-3 border-b border-gray-200">
+          <div class="h-12 w-12 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-lg mr-3">
+            {{ (viewingEmployee.full_name || 'NV').charAt(0) }}
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800">{{ viewingEmployee.full_name || (viewingEmployee.user ? viewingEmployee.user.name : '---') }}</h4>
+            <p class="text-xs text-gray-500">Mã nhân sự: <strong class="text-primary">{{ viewingEmployee.employee_code || '---' }}</strong></p>
+          </div>
+        </div>
+
+        <div class="vx-row">
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Số điện thoại:</span>
+            <span class="font-medium text-gray-800">{{ viewingEmployee.phone || '---' }}</span>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Email:</span>
+            <span class="font-medium text-gray-800">{{ viewingEmployee.email || (viewingEmployee.user ? viewingEmployee.user.email : '---') }}</span>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Phòng ban / Team:</span>
+            <span class="font-medium text-gray-800">{{ viewingEmployee.department ? viewingEmployee.department.name : 'Chưa phân bổ' }}</span>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Chức danh / Cấp bậc:</span>
+            <span class="font-medium text-gray-800">{{ (viewingEmployee.job_title ? viewingEmployee.job_title.name : '---') }} / {{ (viewingEmployee.job_level ? viewingEmployee.job_level.name : '---') }}</span>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Phân loại nhân sự:</span>
+            <vs-chip :color="getEmployeeTypeColor(viewingEmployee.employee_type)">
+              {{ getEmployeeTypeText(viewingEmployee.employee_type) }}
+            </vs-chip>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Trạng thái:</span>
+            <vs-chip :color="viewingEmployee.work_status === 'working' ? 'success' : 'danger'">
+              {{ viewingEmployee.work_status === 'working' ? 'Đang làm việc' : 'Đã nghỉ việc' }}
+            </vs-chip>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Ngày bắt đầu làm việc:</span>
+            <span class="font-medium text-gray-800">{{ viewingEmployee.start_date ? (viewingEmployee.start_date | formatDateView) : '---' }}</span>
+          </div>
+          <div class="vx-col w-full md:w-1/2 mb-3">
+            <span class="text-xs text-gray-500 block">Tài khoản HRM:</span>
+            <span class="font-medium text-success">{{ viewingEmployee.user ? (viewingEmployee.user.hrm_id + ' - ' + viewingEmployee.user.name) : 'Chưa liên kết' }}</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-4 pt-3 border-t border-gray-200">
+          <vs-button @click="viewModalActive = false" color="dark" type="border" class="p-2 px-4">Đóng</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 </template>
 
@@ -427,7 +492,9 @@ export default {
       selectedEmployeeForLink: null,
       selectedUserId: null,
       availableUsers: [],
-      loadingAvailableUsers: false
+      loadingAvailableUsers: false,
+      viewModalActive: false,
+      viewingEmployee: null
     };
   },
   watch: {
@@ -466,6 +533,7 @@ export default {
       return Math.ceil(this.filteredEmployees.length / this.perPage) || 1;
     },
     canDeleteEmployee() {
+      if (!this.isHrmAdmin) return false;
       if (this.canDeleteServer !== null) {
         return this.canDeleteServer;
       }
@@ -476,8 +544,10 @@ export default {
         return this.isHrmAdminServer;
       }
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin) return true;
-      if (user.permissions && user.permissions.includes('hrm_admin')) return true;
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager'];
+      const roleName = (user.roleName || user.role_name || '').toLowerCase();
+      if (adminRoleNames.includes(roleName)) return true;
       return false;
     }
   },
@@ -485,6 +555,10 @@ export default {
     this.fetchEmployees();
   },
   methods: {
+    openViewModal(emp) {
+      this.viewingEmployee = emp;
+      this.viewModalActive = true;
+    },
     setFilterType(type) {
       this.filterType = type;
     },

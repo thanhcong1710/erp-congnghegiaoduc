@@ -188,7 +188,7 @@
                     <div class="flex items-center justify-center space-x-1">
                       <!-- Nút Duyệt cho Kế toán & Admin -->
                       <vs-button
-                        v-if="canApprove && tr.status === 0"
+                        v-if="canApproveRegistration && tr.status === 0"
                         size="small"
                         color="success"
                         type="flat"
@@ -201,7 +201,7 @@
 
                       <!-- Nút Từ chối cho Kế toán & Admin -->
                       <vs-button
-                        v-if="canApprove && tr.status === 0"
+                        v-if="canApproveRegistration && tr.status === 0"
                         size="small"
                         color="danger"
                         type="flat"
@@ -214,7 +214,7 @@
 
                       <!-- Nút Xóa -->
                       <vs-button
-                        v-if="canApprove || tr.status === 0"
+                        v-if="canApproveRegistration || (tr.status === 0 && canDeleteRegistration(tr))"
                         size="small"
                         color="danger"
                         type="flat"
@@ -506,6 +506,14 @@ export default {
     },
     totalPages() {
       return Math.ceil(this.filteredList.length / this.perPage) || 1;
+    },
+    canApproveRegistration() {
+      if (!this.canApprove) return false;
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager'];
+      const roleName = (user.roleName || user.role_name || '').toLowerCase();
+      return adminRoleNames.includes(roleName);
     }
   },
   created() {
@@ -514,6 +522,12 @@ export default {
     this.fetchRegistrations();
   },
   methods: {
+    canDeleteRegistration(tr) {
+      if (this.canApproveRegistration) return true;
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      const currentUserId = user ? (user.id || user.uid) : null;
+      return tr.status === 0 && currentUserId && (tr.user_id == currentUserId || tr.created_by == currentUserId);
+    },
     fetchDepartments() {
       axios.p('/api/hrm/departments/list', { limit: 100 }).then(res => {
         this.departments = res.data.data || [];
