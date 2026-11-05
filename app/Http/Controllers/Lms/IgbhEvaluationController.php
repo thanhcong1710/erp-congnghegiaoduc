@@ -141,11 +141,15 @@ class IgbhEvaluationController extends Controller
             'status' => 'success',
             'data' => [
                 'general' => $result,
+                'details' => $details,
                 'curriculum' => $curriculum,
                 'thinking' => $thinking,
                 'config' => $config ? json_decode($config->sectors, true) : null,
+                'test_config' => $config,
                 'questions' => $questions,
-                'comments' => $comments
+                'test_questions' => $questions,
+                'comments' => $comments,
+                'test_comments' => $comments
             ]
         ]);
     }

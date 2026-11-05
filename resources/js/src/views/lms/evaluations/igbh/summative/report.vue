@@ -198,24 +198,29 @@ export default {
       const id = this.$route.params.id
       axios.g(`/api/lms/evaluations/summative/results/${id}/report`).then(res => {
         this.loading = false
-        if (res && res.data && res.data.status === 'success') {
-          this.reportData = res.data.data
-          this.teacherComment = this.reportData.result.teacher_comment || ''
-          this.$nextTick(() => {
-            this.initCharts()
-          })
+        if (res && res.data) {
+          const d = res.data.data || res.data
+          if (d && (d.result || d.report_data)) {
+            this.reportData = d
+            const subAnalysis = d.subjective_analysis || (d.result && d.result.subjective_analysis ? (typeof d.result.subjective_analysis === 'string' ? JSON.parse(d.result.subjective_analysis) : d.result.subjective_analysis) : null)
+            this.teacherComment = (subAnalysis && subAnalysis.teacher_comment) ? subAnalysis.teacher_comment : (d.result ? (d.result.teacher_comment || '') : '')
+            this.$nextTick(() => {
+              this.initCharts()
+            })
+          }
         }
       }).catch(err => {
         this.loading = false
+        console.error('Fetch summative report error', err)
       })
     },
     initCharts() {
       if (!this.reportData) return
 
       // Chart 1: Thái độ
-      if (this.$refs.chartAttitude) {
+      if (this.$refs.chartAttitude && this.reportData.avg_attitude) {
         const c1 = echarts.getInstanceByDom(this.$refs.chartAttitude) || echarts.init(this.$refs.chartAttitude)
-        const att = this.reportData.avg_attitude
+        const att = this.reportData.avg_attitude || { listen: 0, join: 0, express: 0, coop: 0 }
         c1.setOption({
           radar: {
             indicator: [
@@ -230,7 +235,7 @@ export default {
           series: [{
             type: 'radar',
             data: [{
-              value: [att.listen, att.join, att.express, att.coop],
+              value: [att.listen || 0, att.join || 0, att.express || 0, att.coop || 0],
               areaStyle: { color: 'rgba(234, 88, 12, 0.25)' },
               itemStyle: { color: '#ea580c' }
             }]
@@ -239,9 +244,9 @@ export default {
       }
 
       // Chart 2: Phát hiện
-      if (this.$refs.chartDetection) {
+      if (this.$refs.chartDetection && this.reportData.avg_detection) {
         const c2 = echarts.getInstanceByDom(this.$refs.chartDetection) || echarts.init(this.$refs.chartDetection)
-        const det = this.reportData.avg_detection
+        const det = this.reportData.avg_detection || { normal: 0, leadersh: 0, math: 0, creative: 0 }
         c2.setOption({
           radar: {
             indicator: [
@@ -256,9 +261,9 @@ export default {
           series: [{
             type: 'radar',
             data: [{
-              value: [det.normal, det.leadersh, det.math, det.creative],
-              areaStyle: { color: 'rgba(217, 119, 6, 0.25)' },
-              itemStyle: { color: '#d97706' }
+              value: [det.normal || 0, det.leadersh || 0, det.math || 0, det.creative || 0],
+              areaStyle: { color: 'rgba(37, 99, 235, 0.25)' },
+              itemStyle: { color: '#2563eb' }
             }]
           }]
         })

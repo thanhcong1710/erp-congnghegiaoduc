@@ -237,6 +237,17 @@ class IgbhSummativeEvaluationController extends Controller
         $subjectiveAnalysis = $result->subjective_analysis ? json_decode($result->subjective_analysis, true) : null;
 
         return response()->json([
+            'status' => 'success',
+            'data' => [
+                'result' => $result,
+                'report_data' => $reportData,
+                'avg_attitude' => $avgAttitude,
+                'avg_detection' => $avgDetection,
+                'total_workbook' => $totalWorkbook,
+                'max_workbook' => $maxWorkbook,
+                'subjective_details' => $subjectiveDetails,
+                'subjective_analysis' => $subjectiveAnalysis
+            ],
             'result' => $result,
             'report_data' => $reportData,
             'avg_attitude' => $avgAttitude,

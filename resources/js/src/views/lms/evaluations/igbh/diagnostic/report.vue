@@ -628,14 +628,24 @@ export default {
       axios.g(`/api/lms/evaluations/igbh/results/${this.resultId}`).then(res => {
         this.loading = false
         if (res && res.data && res.data.status === 'success') {
-          const { general, details, test_config, test_questions, test_comments } = res.data.data
+          const d = res.data.data
+          const general = d.general
+          const details = d.details || (d.curriculum && d.thinking ? [...d.curriculum, ...d.thinking] : (d.curriculum || []))
+          const test_config = d.test_config || d.config
+          const test_questions = d.test_questions || d.questions || []
+          const test_comments = d.test_comments || d.comments || []
+
           this.general = general
           this.testComments = test_comments || []
           
-          if (test_config && test_config.sectors) {
-             try {
+          if (test_config) {
+            if (test_config.sectors) {
+              try {
                 this.unitLabels = typeof test_config.sectors === 'string' ? JSON.parse(test_config.sectors) : test_config.sectors
-             } catch (e) {}
+              } catch (e) {}
+            } else if (typeof test_config === 'object') {
+              this.unitLabels = test_config
+            }
           }
 
           const currConfigs = test_questions ? test_questions.filter(q => q.question_type === 'curriculum') : []
@@ -643,7 +653,7 @@ export default {
 
           this.curriculum = Array.from({ length: currLength }, (_, i) => {
             const no = i + 1
-            const q = details.find(d => d.question_type === 'curriculum' && parseInt(d.question_no) === no)
+            const q = (details && Array.isArray(details)) ? details.find(d => d.question_type === 'curriculum' && parseInt(d.question_no) === no) : null
             const conf = currConfigs.find(c => c.sort_no === no)
             return {
               question_no: no,
@@ -661,11 +671,11 @@ export default {
 
           this.thinking = Array.from({ length: thkLength }, (_, i) => {
             const no = i + 1
-            const q = details.find(d => d.question_type === 'thinking' && parseInt(d.question_no) === no)
+            const q = (details && Array.isArray(details)) ? details.find(d => d.question_type === 'thinking' && parseInt(d.question_no) === no) : null
             const conf = thkConfigs.find(c => c.sort_no === no)
             let areas = []
             if (conf && conf.areas) {
-               try { areas = typeof conf.areas === 'string' ? JSON.parse(conf.areas) : conf.areas } catch(e) {}
+              try { areas = typeof conf.areas === 'string' ? JSON.parse(conf.areas) : conf.areas } catch(e) {}
             }
             return {
               question_no: no,
@@ -678,16 +688,29 @@ export default {
 
           // Draw charts
           this.$nextTick(() => {
-            this.drawRadarChart(this.$refs.currRadarCanvas, Object.keys(this.unitStats), Object.values(this.unitStats).map(s => s.pct))
-            this.drawRadarChart(this.$refs.thkRadarCanvas, this.thkAreaStats.map(s => s.label.split('.')[0]), this.thkAreaStats.map(s => s.pct))
-            this.drawHorizontalBarChart(this.$refs.thkHorizontalBarCanvas, this.general.thinking_total, this.thinkingMaxTotal)
-            this.drawBarChart(this.$refs.currDiffBarCanvas, this.currDiffStats)
-            this.drawBarChart(this.$refs.currTypeBarCanvas, this.currTypeStats)
-            this.drawBarChart(this.$refs.thkDiffBarCanvas, this.thkDiffStats)
+            if (this.$refs.currRadarCanvas) {
+              this.drawRadarChart(this.$refs.currRadarCanvas, Object.keys(this.unitStats), Object.values(this.unitStats).map(s => s.pct))
+            }
+            if (this.$refs.thkRadarCanvas) {
+              this.drawRadarChart(this.$refs.thkRadarCanvas, this.thkAreaStats.map(s => s.label.split('.')[0]), this.thkAreaStats.map(s => s.pct))
+            }
+            if (this.$refs.thkHorizontalBarCanvas && this.general) {
+              this.drawHorizontalBarChart(this.$refs.thkHorizontalBarCanvas, this.general.thinking_total, this.thinkingMaxTotal)
+            }
+            if (this.$refs.currDiffBarCanvas) {
+              this.drawBarChart(this.$refs.currDiffBarCanvas, this.currDiffStats)
+            }
+            if (this.$refs.currTypeBarCanvas) {
+              this.drawBarChart(this.$refs.currTypeBarCanvas, this.currTypeStats)
+            }
+            if (this.$refs.thkDiffBarCanvas) {
+              this.drawBarChart(this.$refs.thkDiffBarCanvas, this.thkDiffStats)
+            }
           })
         }
       }).catch(err => {
         this.loading = false
+        console.error('Fetch detail error:', err)
       })
     },
     drawRadarChart(canvas, labels, values) {

@@ -505,119 +505,128 @@ export default {
       }
 
       // 1. Tư duy cơ bản
-      if (!this.$refs.chart1) return
-      const c1 = echarts.getInstanceByDom(this.$refs.chart1) || echarts.init(this.$refs.chart1)
-      c1.setOption({
-        ...commonOpts,
-        title: { text: 'Tư duy cơ bản', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-        legend: legendTopRight,
-        xAxis: { ...commonOpts.xAxis, data: ['Năng lực\nchú ý', 'Năng lực\nquan sát', 'Năng lực\nghi nhớ'] },
-        series: selectedData.map(t => ({
-          name: t.name,
-          type: 'bar',
-          data: [t.reportData.sk11, t.reportData.sk12, t.reportData.sk13],
-          barMaxWidth: 18,
-          itemStyle: { color: getColor(t.test_cd) }
-        }))
-      }, true)
+      if (this.$refs.chart1) {
+        const c1 = echarts.getInstanceByDom(this.$refs.chart1) || echarts.init(this.$refs.chart1)
+        c1.setOption({
+          ...commonOpts,
+          title: { text: 'Tư duy cơ bản', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+          legend: legendTopRight,
+          xAxis: { ...commonOpts.xAxis, data: ['Năng lực\nchú ý', 'Năng lực\nquan sát', 'Năng lực\nghi nhớ'] },
+          series: selectedData.map(t => ({
+            name: t.name,
+            type: 'bar',
+            data: [t.reportData.sk11, t.reportData.sk12, t.reportData.sk13],
+            barMaxWidth: 18,
+            itemStyle: { color: getColor(t.test_cd) }
+          }))
+        }, true)
+      }
 
       // 2. Tư duy toán học
-      let mathData = ['Số và\ntính toán', 'Hình học\nkhông gian', 'Đo lường', 'Kiểu mẫu']
-      const c2 = echarts.getInstanceByDom(this.$refs.chart2) || echarts.init(this.$refs.chart2)
-      c2.setOption({
-        ...commonOpts,
-        title: { text: 'Tư duy toán học', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-        legend: legendTopRight,
-        xAxis: { ...commonOpts.xAxis, data: mathData },
-        series: selectedData.map(t => {
-          let data = [t.reportData.kn11, t.reportData.kn12, t.reportData.kn13, t.reportData.kn14]
-          return {
-            name: t.name,
-            type: 'bar',
-            data: data,
-            barMaxWidth: 18,
-            itemStyle: { color: getColor(t.test_cd) }
-          }
-        })
-      }, true)
+      if (this.$refs.chart2) {
+        let mathData = ['Số và\ntính toán', 'Hình học\nkhông gian', 'Đo lường', 'Kiểu mẫu']
+        const c2 = echarts.getInstanceByDom(this.$refs.chart2) || echarts.init(this.$refs.chart2)
+        c2.setOption({
+          ...commonOpts,
+          title: { text: 'Tư duy toán học', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+          legend: legendTopRight,
+          xAxis: { ...commonOpts.xAxis, data: mathData },
+          series: selectedData.map(t => {
+            let data = [t.reportData.kn11, t.reportData.kn12, t.reportData.kn13, t.reportData.kn14]
+            return {
+              name: t.name,
+              type: 'bar',
+              data: data,
+              barMaxWidth: 18,
+              itemStyle: { color: getColor(t.test_cd) }
+            }
+          })
+        }, true)
+      }
 
       // 3. Tư duy logic
-      let logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích', 'Tổng hợp']
-      if (this.isL1L2) {
-          logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích']
+      if (this.$refs.chart3) {
+        let logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích', 'Tổng hợp']
+        if (this.isL1L2) {
+            logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích']
+        }
+        const c3 = echarts.getInstanceByDom(this.$refs.chart3) || echarts.init(this.$refs.chart3)
+        c3.setOption({
+          ...commonOpts,
+          title: { text: 'Tư duy logic', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+          legend: legendTopRight,
+          xAxis: { ...commonOpts.xAxis, data: logicData },
+          series: selectedData.map(t => {
+            let data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23, t.reportData.sk24]
+            if (this.isL1L2) {
+               data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23]
+            }
+            return {
+              name: t.name,
+              type: 'bar',
+              data: data,
+              barMaxWidth: 18,
+              itemStyle: { color: getColor(t.test_cd) }
+            }
+          })
+        }, true)
       }
-      const c3 = echarts.getInstanceByDom(this.$refs.chart3) || echarts.init(this.$refs.chart3)
-      c3.setOption({
-        ...commonOpts,
-        title: { text: 'Tư duy logic', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-        legend: legendTopRight,
-        xAxis: { ...commonOpts.xAxis, data: logicData },
-        series: selectedData.map(t => {
-          let data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23, t.reportData.sk24]
-          if (this.isL1L2) {
-             data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23]
-          }
+
+      // 4. Tư duy sáng tạo
+      if (this.$refs.chart4) {
+        const c4 = echarts.getInstanceByDom(this.$refs.chart4) || echarts.init(this.$refs.chart4)
+        c4.setOption({
+          ...commonOpts,
+          title: { text: 'Tư duy sáng tạo', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+          legend: legendTopRight,
+          xAxis: { ...commonOpts.xAxis, data: ['Sự\ntrôi chảy', 'Tính\nlinh hoạt', 'Tính\nđộc đáo', 'Tính\nchính xác'] },
+          series: selectedData.map(t => ({
+            name: t.name,
+            type: 'bar',
+            data: [t.reportData.sk31, t.reportData.sk32, t.reportData.sk33, t.reportData.sk34],
+            barMaxWidth: 18,
+            itemStyle: { color: getColor(t.test_cd) }
+          }))
+        }, true)
+      }
+
+      // 5. Đánh giá tổng quát
+      if (this.$refs.chartOverall) {
+        const cOverall = echarts.getInstanceByDom(this.$refs.chartOverall) || echarts.init(this.$refs.chartOverall)
+        
+        const overallSeries = selectedData.map(t => {
+          const rd = t.reportData
+          const avg1 = Math.round((Number(rd.sk11 || 0) + Number(rd.sk12 || 0) + Number(rd.sk13 || 0)) / 3)
+          const avg2 = Math.round((Number(rd.kn11 || 0) + Number(rd.kn12 || 0) + Number(rd.kn13 || 0) + Number(rd.kn14 || 0)) / 4)
+          const avg3 = this.isL1L2 ?
+              Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0)) / 3) :
+              Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0) + Number(rd.sk24 || 0)) / 4)
+          const avg4 = Math.round((Number(rd.sk31 || 0) + Number(rd.sk32 || 0) + Number(rd.sk33 || 0) + Number(rd.sk34 || 0)) / 4)
           return {
             name: t.name,
             type: 'bar',
-            data: data,
+            data: [avg1, avg2, avg3, avg4],
             barMaxWidth: 18,
             itemStyle: { color: getColor(t.test_cd) }
           }
         })
-      }, true)
+        
+        overallSeries.push({
+           name: 'Bình quân tất cả HS', 
+           type: 'bar', 
+           data: [66, 71, 69, 61], 
+           barMaxWidth: 18, 
+           itemStyle: { color: '#f59e0b' }
+        })
 
-      // 4. Tư duy sáng tạo
-      const c4 = echarts.getInstanceByDom(this.$refs.chart4) || echarts.init(this.$refs.chart4)
-      c4.setOption({
-        ...commonOpts,
-        title: { text: 'Tư duy sáng tạo', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-        legend: legendTopRight,
-        xAxis: { ...commonOpts.xAxis, data: ['Sự\ntrôi chảy', 'Tính\nlinh hoạt', 'Tính\nđộc đáo', 'Tính\nchính xác'] },
-        series: selectedData.map(t => ({
-          name: t.name,
-          type: 'bar',
-          data: [t.reportData.sk31, t.reportData.sk32, t.reportData.sk33, t.reportData.sk34],
-          barMaxWidth: 18,
-          itemStyle: { color: getColor(t.test_cd) }
-        }))
-      }, true)
-
-      // 5. Đánh giá tổng quát
-      const cOverall = echarts.getInstanceByDom(this.$refs.chartOverall) || echarts.init(this.$refs.chartOverall)
-      
-      const overallSeries = selectedData.map(t => {
-        const rd = t.reportData
-        const avg1 = Math.round((Number(rd.sk11 || 0) + Number(rd.sk12 || 0) + Number(rd.sk13 || 0)) / 3)
-        const avg2 = Math.round((Number(rd.kn11 || 0) + Number(rd.kn12 || 0) + Number(rd.kn13 || 0) + Number(rd.kn14 || 0)) / 4)
-        const avg3 = this.isL1L2 ?
-            Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0)) / 3) :
-            Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0) + Number(rd.sk24 || 0)) / 4)
-        const avg4 = Math.round((Number(rd.sk31 || 0) + Number(rd.sk32 || 0) + Number(rd.sk33 || 0) + Number(rd.sk34 || 0)) / 4)
-        return {
-          name: t.name,
-          type: 'bar',
-          data: [avg1, avg2, avg3, avg4],
-          barMaxWidth: 18,
-          itemStyle: { color: getColor(t.test_cd) }
-        }
-      })
-      
-      overallSeries.push({
-         name: 'Bình quân tất cả HS', 
-         type: 'bar', 
-         data: [66, 71, 69, 61], 
-         barMaxWidth: 18, 
-         itemStyle: { color: '#f59e0b' }
-      })
-
-      cOverall.setOption({
-        ...commonOpts,
-        title: { text: 'Bình quân tổng quát', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-        legend: { top: 0, right: 0, data: [...legendData, 'Bình quân tất cả HS'], itemGap: 5, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 9, color: '#64748b' } },
-        xAxis: { ...commonOpts.xAxis, data: ['Tư duy\ncơ bản', 'Tư duy\ntoán học', 'Tư duy\nlogic', 'Tư duy\nsáng tạo'] },
-        series: overallSeries
-      }, true)
+        cOverall.setOption({
+          ...commonOpts,
+          title: { text: 'Bình quân tổng quát', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
+          legend: { top: 0, right: 0, data: [...legendData, 'Bình quân tất cả HS'], itemGap: 5, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 9, color: '#64748b' } },
+          xAxis: { ...commonOpts.xAxis, data: ['Tư duy\ncơ bản', 'Tư duy\ntoán học', 'Tư duy\nlogic', 'Tư duy\nsáng tạo'] },
+          series: overallSeries
+        }, true)
+      }
 
       this.charts = [c1, c2, c3, c4, cOverall]
     }
