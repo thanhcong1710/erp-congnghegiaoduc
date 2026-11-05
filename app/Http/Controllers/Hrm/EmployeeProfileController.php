@@ -35,7 +35,7 @@ class EmployeeProfileController extends Controller
         // Tự động kiểm tra chuyển thử việc -> fulltime nếu hết hạn
         $this->autoPromoteProbationEmployees();
 
-        $query = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel']);
+        $query = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel', 'shift']);
 
         // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
         $currentUser = Auth::user();

@@ -398,59 +398,178 @@
     </vs-popup>
 
     <!-- Modal Xem Chi Tiết Nhân Sự (Dành cho Non-Admin chỉ xem) -->
-    <vs-popup title="CHI TIẾT HỒ SƠ NHÂN SỰ" :active.sync="viewModalActive">
-      <div v-if="viewingEmployee" class="p-2">
-        <div class="flex items-center mb-4 pb-3 border-b border-gray-200">
-          <div class="h-12 w-12 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-lg mr-3">
-            {{ (viewingEmployee.full_name || 'NV').charAt(0) }}
+    <vs-popup title="THÔNG TIN HỒ SƠ NHÂN SỰ" :active.sync="viewModalActive">
+      <div v-if="viewingEmployee" class="p-1">
+        
+        <!-- Header Card: Avatar + Tên + Badge trạng thái -->
+        <div class="p-4 rounded-lg bg-gray-50 border border-gray-200 mb-4 flex flex-wrap items-center justify-between">
+          <div class="flex items-center">
+            <div class="h-16 w-16 rounded-full flex items-center justify-center font-bold text-2xl text-white shadow-md mr-4" style="background: linear-gradient(135deg, #014CCC 0%, #3b82f6 100%);">
+              {{ (viewingEmployee.full_name || 'NV').trim().charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <div class="flex items-center flex-wrap gap-2">
+                <h3 class="font-bold text-gray-900 text-lg mb-0">{{ viewingEmployee.full_name || (viewingEmployee.user ? viewingEmployee.user.name : '---') }}</h3>
+                <span class="inline-block px-2.5 py-0.5 rounded text-xs font-bold bg-primary text-white">
+                  {{ viewingEmployee.employee_code || '---' }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1 mb-0 flex items-center gap-2">
+                <span><i class="fa-solid fa-sitemap mr-1 text-primary"></i> {{ viewingEmployee.department ? viewingEmployee.department.name : 'Chưa phân bổ' }}</span>
+                <span>•</span>
+                <span><i class="fa-solid fa-briefcase mr-1 text-primary"></i> {{ (viewingEmployee.job_title ? viewingEmployee.job_title.name : 'Nhân viên') }}</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 class="font-bold text-gray-800">{{ viewingEmployee.full_name || (viewingEmployee.user ? viewingEmployee.user.name : '---') }}</h4>
-            <p class="text-xs text-gray-500">Mã nhân sự: <strong class="text-primary">{{ viewingEmployee.employee_code || '---' }}</strong></p>
+          <div class="flex items-center gap-2 mt-2 sm:mt-0">
+            <vs-chip :color="getEmployeeTypeColor(viewingEmployee.employee_type)">
+              {{ getEmployeeTypeText(viewingEmployee.employee_type) }}
+            </vs-chip>
+            <vs-chip :color="viewingEmployee.work_status === 'working' ? 'success' : 'danger'">
+              <i class="fa-solid fa-circle text-xs mr-1"></i>
+              {{ viewingEmployee.work_status === 'working' ? 'Đang làm việc' : 'Đã nghỉ việc' }}
+            </vs-chip>
           </div>
         </div>
 
         <div class="vx-row">
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Số điện thoại:</span>
-            <span class="font-medium text-gray-800">{{ viewingEmployee.phone || '---' }}</span>
+          <!-- Cột 1: Thông tin công việc -->
+          <div class="vx-col w-full md:w-1/2 mb-4">
+            <div class="p-3.5 rounded-lg border border-gray-200 bg-white h-full shadow-sm">
+              <h5 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 flex items-center">
+                <i class="fa-solid fa-id-badge text-primary mr-2"></i> Thông tin công việc & Vị trí
+              </h5>
+              <div class="space-y-2.5 text-sm">
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Phòng ban / Team:</span>
+                  <span class="font-semibold text-gray-800">{{ viewingEmployee.department ? viewingEmployee.department.name : '---' }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Chức danh:</span>
+                  <span class="font-semibold text-gray-800">{{ viewingEmployee.job_title ? viewingEmployee.job_title.name : '---' }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Cấp bậc:</span>
+                  <span class="font-semibold text-gray-800">{{ viewingEmployee.job_level ? viewingEmployee.job_level.name : '---' }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Ca làm việc:</span>
+                  <span class="font-semibold text-primary">{{ viewingEmployee.shift ? viewingEmployee.shift.name : 'Chưa xếp ca' }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Ngày vào làm:</span>
+                  <span class="font-semibold text-gray-800">{{ formatDateDisplay(viewingEmployee.start_date) }}</span>
+                </div>
+                <div v-if="viewingEmployee.employee_type === 'probation'" class="flex justify-between items-center py-1">
+                  <span class="text-xs text-gray-500">Thời gian thử việc:</span>
+                  <span class="font-semibold text-warning text-xs">
+                    {{ formatDateDisplay(viewingEmployee.probation_start_date) }} - {{ formatDateDisplay(viewingEmployee.probation_end_date) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Email:</span>
-            <span class="font-medium text-gray-800">{{ viewingEmployee.email || (viewingEmployee.user ? viewingEmployee.user.email : '---') }}</span>
+
+          <!-- Cột 2: Thông tin cá nhân & Liên hệ -->
+          <div class="vx-col w-full md:w-1/2 mb-4">
+            <div class="p-3.5 rounded-lg border border-gray-200 bg-white h-full shadow-sm">
+              <h5 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-3 pb-2 border-b border-gray-100 flex items-center">
+                <i class="fa-solid fa-user text-success mr-2"></i> Thông tin cá nhân & Liên hệ
+              </h5>
+              <div class="space-y-2.5 text-sm">
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Số điện thoại:</span>
+                  <a v-if="viewingEmployee.phone" :href="'tel:' + viewingEmployee.phone" class="font-semibold text-primary hover:underline flex items-center">
+                    <i class="fa-solid fa-phone text-xs mr-1 text-success"></i> {{ viewingEmployee.phone }}
+                  </a>
+                  <span v-else class="text-gray-400">---</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Email:</span>
+                  <a v-if="viewingEmployee.email || (viewingEmployee.user && viewingEmployee.user.email)" :href="'mailto:' + (viewingEmployee.email || viewingEmployee.user.email)" class="font-semibold text-primary hover:underline text-xs flex items-center">
+                    <i class="fa-solid fa-envelope text-xs mr-1 text-danger"></i> {{ viewingEmployee.email || viewingEmployee.user.email }}
+                  </a>
+                  <span v-else class="text-gray-400">---</span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Ngày sinh & Giới tính:</span>
+                  <span class="font-semibold text-gray-800">
+                    {{ formatDateDisplay(viewingEmployee.dob) }} ({{ getGenderText(viewingEmployee.gender) }})
+                  </span>
+                </div>
+                <div class="flex justify-between items-center py-1 border-b border-dashed border-gray-100">
+                  <span class="text-xs text-gray-500">Số CCCD / CMND:</span>
+                  <span class="font-semibold text-gray-800">{{ viewingEmployee.id_card_number || '---' }}</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                  <span class="text-xs text-gray-500">Địa chỉ hiện tại:</span>
+                  <span class="font-semibold text-gray-800 text-xs text-right max-w-xs truncate" :title="viewingEmployee.address">
+                    {{ viewingEmployee.address || '---' }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <!-- Hàng 2: Tài khoản hệ thống & Người liên hệ khẩn cấp -->
           <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Phòng ban / Team:</span>
-            <span class="font-medium text-gray-800">{{ viewingEmployee.department ? viewingEmployee.department.name : 'Chưa phân bổ' }}</span>
+            <div class="p-3.5 rounded-lg border border-gray-200 bg-white shadow-sm">
+              <h5 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-2 pb-2 border-b border-gray-100 flex items-center">
+                <i class="fa-solid fa-key text-warning mr-2"></i> Tài khoản hệ thống
+              </h5>
+              <div v-if="viewingEmployee.user" class="space-y-1.5 text-xs">
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Mã đăng nhập:</span>
+                  <span class="font-bold text-success">{{ viewingEmployee.user.hrm_id || '---' }}</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Tên tài khoản:</span>
+                  <span class="font-medium text-gray-800">{{ viewingEmployee.user.name }}</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Email đăng nhập:</span>
+                  <span class="font-medium text-gray-700">{{ viewingEmployee.user.email }}</span>
+                </div>
+              </div>
+              <div v-else class="text-xs text-gray-400 italic py-2">
+                <i class="fa-regular fa-circle-question mr-1"></i> Chưa liên kết với tài khoản User hệ thống
+              </div>
+            </div>
           </div>
+
           <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Chức danh / Cấp bậc:</span>
-            <span class="font-medium text-gray-800">{{ (viewingEmployee.job_title ? viewingEmployee.job_title.name : '---') }} / {{ (viewingEmployee.job_level ? viewingEmployee.job_level.name : '---') }}</span>
-          </div>
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Phân loại nhân sự:</span>
-            <vs-chip :color="getEmployeeTypeColor(viewingEmployee.employee_type)">
-              {{ getEmployeeTypeText(viewingEmployee.employee_type) }}
-            </vs-chip>
-          </div>
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Trạng thái:</span>
-            <vs-chip :color="viewingEmployee.work_status === 'working' ? 'success' : 'danger'">
-              {{ viewingEmployee.work_status === 'working' ? 'Đang làm việc' : 'Đã nghỉ việc' }}
-            </vs-chip>
-          </div>
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Ngày bắt đầu làm việc:</span>
-            <span class="font-medium text-gray-800">{{ viewingEmployee.start_date ? (viewingEmployee.start_date | formatDateView) : '---' }}</span>
-          </div>
-          <div class="vx-col w-full md:w-1/2 mb-3">
-            <span class="text-xs text-gray-500 block">Tài khoản HRM:</span>
-            <span class="font-medium text-success">{{ viewingEmployee.user ? (viewingEmployee.user.hrm_id + ' - ' + viewingEmployee.user.name) : 'Chưa liên kết' }}</span>
+            <div class="p-3.5 rounded-lg border border-gray-200 bg-white shadow-sm">
+              <h5 class="font-bold text-gray-800 text-xs uppercase tracking-wider mb-2 pb-2 border-b border-gray-100 flex items-center">
+                <i class="fa-solid fa-shield-heart text-danger mr-2"></i> Liên hệ khẩn cấp
+              </h5>
+              <div v-if="viewingEmployee.emergency_contact_name || viewingEmployee.emergency_contact_phone" class="space-y-1.5 text-xs">
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Người liên hệ:</span>
+                  <span class="font-semibold text-gray-800">{{ viewingEmployee.emergency_contact_name || '---' }}</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Số điện thoại:</span>
+                  <a v-if="viewingEmployee.emergency_contact_phone" :href="'tel:' + viewingEmployee.emergency_contact_phone" class="font-bold text-danger hover:underline">
+                    {{ viewingEmployee.emergency_contact_phone }}
+                  </a>
+                  <span v-else>---</span>
+                </div>
+                <div class="flex justify-between py-1">
+                  <span class="text-gray-500">Mối quan hệ:</span>
+                  <span class="font-medium text-gray-700">{{ viewingEmployee.emergency_contact_relation || '---' }}</span>
+                </div>
+              </div>
+              <div v-else class="text-xs text-gray-400 italic py-2">
+                Chưa cập nhật thông tin liên hệ khẩn cấp
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="flex justify-end mt-4 pt-3 border-t border-gray-200">
-          <vs-button @click="viewModalActive = false" color="dark" type="border" class="p-2 px-4">Đóng</vs-button>
+          <vs-button @click="viewModalActive = false" color="dark" type="border" class="p-2.5 px-6 font-semibold">
+            Đóng
+          </vs-button>
         </div>
       </div>
     </vs-popup>
@@ -460,6 +579,7 @@
 <script>
 import axios from '../../../http/axios.js';
 import vSelect from 'vue-select';
+import moment from 'moment';
 
 export default {
   components: {
@@ -555,6 +675,18 @@ export default {
     this.fetchEmployees();
   },
   methods: {
+    formatDateDisplay(val) {
+      if (!val || val === '0' || val === '0000-00-00' || val === '0000-00-00 00:00:00') return '---';
+      const m = moment(val);
+      return m.isValid() ? m.format('DD/MM/YYYY') : '---';
+    },
+    getGenderText(g) {
+      if (!g) return '---';
+      const s = String(g).toLowerCase().trim();
+      if (s === 'male' || s === 'nam' || s === '1') return 'Nam';
+      if (s === 'female' || s === 'nu' || s === 'nữ' || s === '0') return 'Nữ';
+      return 'Khác';
+    },
     openViewModal(emp) {
       this.viewingEmployee = emp;
       this.viewModalActive = true;

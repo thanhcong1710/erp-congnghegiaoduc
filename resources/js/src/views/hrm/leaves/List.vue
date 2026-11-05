@@ -24,7 +24,7 @@
       <!-- ========================================== -->
       <!-- TAB 1: BẢNG TỔNG HỢP QUỸ PHÉP TOÀN NHÂN SỰ -->
       <!-- ========================================== -->
-      <vs-tab label="Quản lý quỹ phép năm (Toàn nhân sự)" icon-pack="feather" icon="icon-users">
+      <vs-tab label="Quản lý quỹ phép năm" icon-pack="feather" icon="icon-users">
         
         <!-- 4 Thẻ KPI thống kê chuẩn hệ thống -->
         <div class="vx-row mt-4 mb-4">
@@ -46,7 +46,7 @@
             <vx-card class="border-t-4 border-solid border-warning" no-shadow>
               <div class="flex items-center justify-between">
                 <div>
-                  <span class="text-xs font-semibold text-gray-600 uppercase block mb-1">Tổng ngày nghỉ toàn cty</span>
+                  <span class="text-xs font-semibold text-gray-600 uppercase block mb-1">Tổng ngày đã nghỉ</span>
                   <h2 class="font-bold text-warning">{{ stats.total_company_used_days || 0 }} <span class="text-xs text-gray-500 font-normal">ngày</span></h2>
                 </div>
                 <div class="p-3 bg-warning-light rounded-full text-warning">

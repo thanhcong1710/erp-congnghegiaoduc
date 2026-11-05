@@ -280,15 +280,49 @@ class LeaveRequestController extends Controller
                 });
             }
 
-            // Lấy toàn bộ balances của năm đó để tính stats
-            $allBalances = HrmLeaveBalance::where('year', $year)->get()->keyBy('employee_id');
+            // Lấy toàn bộ profiles trong phạm vi query để tính thống kê chuẩn xác theo danh sách hiển thị
+            $allScopedProfiles = (clone $query)->get();
+            $scopedEmpIds = $allScopedProfiles->pluck('id')->filter()->toArray();
+            $scopedUserIds = $allScopedProfiles->pluck('user_id')->filter()->toArray();
 
-            // Thống kê toàn công ty
-            $totalCompanyUsedDays = $allBalances->sum('used_days');
-            $overLimitCount = $allBalances->where('used_days', '>', 12)->count();
-            $outOfLeaveCount = $allBalances->filter(function ($b) {
-                return $b->used_days >= ($b->total_days ?: 12);
-            })->count();
+            $allBalances = HrmLeaveBalance::where('year', $year)
+                ->whereIn('employee_id', $scopedEmpIds)
+                ->get()
+                ->keyBy('employee_id');
+
+            // Lấy leave requests đã duyệt trong năm cho các nhân sự này
+            $scopedLeaveRequests = HrmLeaveRequest::where('status', 1)
+                ->whereYear('start_date', $year)
+                ->where(function ($q) use ($scopedEmpIds, $scopedUserIds) {
+                    $q->whereIn('employee_id', $scopedEmpIds)
+                      ->orWhereIn('user_id', $scopedUserIds);
+                })
+                ->get(['employee_id', 'user_id', 'duration_days']);
+
+            $totalScopedUsedDays = 0.0;
+            $overLimitCount = 0;
+            $outOfLeaveCount = 0;
+
+            foreach ($allScopedProfiles as $profile) {
+                $balance = $allBalances->get($profile->id);
+                $totalDays = $balance ? (float)$balance->total_days : 12.0;
+                if ($balance && $balance->used_days !== null) {
+                    $used = (float)$balance->used_days;
+                } else {
+                    $used = (float)$scopedLeaveRequests->filter(function ($lr) use ($profile) {
+                        return ($lr->employee_id && $lr->employee_id == $profile->id)
+                            || ($profile->user_id && $lr->user_id == $profile->user_id);
+                    })->sum('duration_days');
+                }
+
+                $totalScopedUsedDays += $used;
+                if ($used > 12) {
+                    $overLimitCount++;
+                }
+                if ($used >= $totalDays && $used > 0) {
+                    $outOfLeaveCount++;
+                }
+            }
 
             // Phân trang danh sách nhân sự
             $paginated = $query->orderBy('id', 'desc')->paginate($limit);
@@ -352,7 +386,7 @@ class LeaveRequestController extends Controller
                 'year' => $year,
                 'stats' => [
                     'total_employees' => $paginated->total(),
-                    'total_company_used_days' => (float)$totalCompanyUsedDays,
+                    'total_company_used_days' => (float)$totalScopedUsedDays,
                     'over_limit_count' => $overLimitCount,
                     'out_of_leave_count' => $outOfLeaveCount,
                 ],
