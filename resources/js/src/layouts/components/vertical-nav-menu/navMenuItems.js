@@ -427,5 +427,12 @@ export default [
   //   slug: 'ai-admin',
   //   permission: 'ai_admin',
   // },
+  {
+    url: '/guide/index.html',
+    name: 'Hướng dẫn sử dụng',
+    slug: 'external',
+    icon: 'BookOpenIcon',
+    target: '_blank'
+  }
 ]
 

@@ -18,29 +18,29 @@ class BranchTransfersController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $status = isset($request->status) ? $request->status : [];
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " t.status > 0 ";
-        $cond .= " AND (t.from_branch_id IN (" . Auth::user()->getBranchesHasUser().") OR t.to_branch_id IN (" . Auth::user()->getBranchesHasUser()."))";
+        $cond .= " AND (t.from_branch_id IN (" . Auth::user()->getBranchesHasUser() . ") OR t.to_branch_id IN (" . Auth::user()->getBranchesHasUser() . "))";
 
         if (!empty($branch_id)) {
-            $cond .= " AND (t.from_branch_id IN (".implode(",",$branch_id).") OR t.to_branch_id IN (".implode(",",$branch_id)."))";
+            $cond .= " AND (t.from_branch_id IN (" . implode(",", $branch_id) . ") OR t.to_branch_id IN (" . implode(",", $branch_id) . "))";
         }
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
         if (!empty($status)) {
-            $cond .= " AND t.status IN (".implode(",",$status).")";
+            $cond .= " AND t.status IN (" . implode(",", $status) . ")";
         }
-        
+
         $order_by = " ORDER BY t.id DESC ";
 
         $total = u::first("SELECT count(t.id) AS total 
             FROM branch_transfer AS t LEFT JOIN students AS s ON s.id=t.student_id WHERE $cond");
-        
+
         $list = u::query("SELECT t.id, s.name, s.lms_code, t.status, t.note,
                 (SELECT name FROM branches WHERE id= t.from_branch_id) AS from_branch_name,
                 (SELECT name FROM branches WHERE id= t.to_branch_id) AS to_branch_name,
@@ -51,7 +51,8 @@ class BranchTransfersController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
-    public function searchStudent(Request $request){
+    public function searchStudent(Request $request)
+    {
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
@@ -63,10 +64,11 @@ class BranchTransfersController extends Controller
                 WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%')
                 AND s.status>0 ");
         return response()->json($data);
-    }  
+    }
 
-    public function getDataFromContractActive (Request $request){
-        $student_id = data_get($request,'student_id');
+    public function getDataFromContractActive(Request $request)
+    {
+        $student_id = data_get($request, 'student_id');
         $contracts = u::query("SELECT c.id AS contract_id, c.total_charged, c.summary_sessions,c.real_sessions, c.branch_id, c.product_id,
                 c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date,
                 (SELECT class_day FROM classes WHERE id=c.class_id) AS class_day,
@@ -75,25 +77,26 @@ class BranchTransfersController extends Controller
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c WHERE c.student_id =$student_id AND c.status!=7");
         return response()->json($contracts);
-    }  
+    }
 
-    public function getDataContractActiveByTransferDate(Request $request){
+    public function getDataContractActiveByTransferDate(Request $request)
+    {
         $transfer_date = data_get($request, 'transfer_date');
         $from_contracts = data_get($request, 'from_contracts');
         $to_contracts = [];
-        foreach($from_contracts AS $k=> $contract){
-            $contract = (object)$contract;
-            if(data_get($contract, 'class_id')){
-                $holidays = u::getPublicHolidays(data_get($contract,'branch_id'), data_get($contract,'product_id'));
+        foreach ($from_contracts as $k => $contract) {
+            $contract = (object) $contract;
+            if (data_get($contract, 'class_id')) {
+                $holidays = u::getPublicHolidays(data_get($contract, 'branch_id'), data_get($contract, 'product_id'));
                 $contract_id = data_get($contract, 'contract_id') ?? data_get($contract, 'id');
                 $reserved_dates = u::getReservedDates_transfer($contract_id);
                 if (!empty($reserved_dates)) {
                     $holidays = array_merge($holidays, $reserved_dates);
                 }
-                $arr_day = explode(",",data_get($contract, 'class_day'));
-                $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d',strtotime($transfer_date)-24*3600), $holidays, $arr_day);
-                $contract->done_sessions = $contract->done_sessions + (int)data_get($data_sessions, 'total', 0);
-                $contract->left_sessions = $contract->left_sessions - (int)data_get($data_sessions, 'total', 0);
+                $arr_day = explode(",", data_get($contract, 'class_day'));
+                $data_sessions = u::calculatorSessions(date('Y-m-d'), date('Y-m-d', strtotime($transfer_date) - 24 * 3600), $holidays, $arr_day);
+                $contract->done_sessions = $contract->done_sessions + (int) data_get($data_sessions, 'total', 0);
+                $contract->left_sessions = $contract->left_sessions - (int) data_get($data_sessions, 'total', 0);
                 $contract->left_sessions = $contract->left_sessions > 0 ? $contract->left_sessions : 0;
             }
             $to_contracts[$k] = $contract;
@@ -101,37 +104,38 @@ class BranchTransfersController extends Controller
         return response()->json($to_contracts);
     }
 
-    public function add(Request $request){
-        $branch_transfer = data_get($request,'branch_transfer'); 
-        $transfer_date =  data_get($branch_transfer,'transfer_date'); 
-        $from_contracts = data_get($request,'from_contracts');
+    public function add(Request $request)
+    {
+        $branch_transfer = data_get($request, 'branch_transfer');
+        $transfer_date = data_get($branch_transfer, 'transfer_date');
+        $from_contracts = data_get($request, 'from_contracts');
         $list_contract_id = "";
-        foreach($from_contracts AS $contract){
-            $list_contract_id.= $list_contract_id ? ",".data_get($contract, 'contract_id') : data_get($contract, 'contract_id');
+        foreach ($from_contracts as $contract) {
+            $list_contract_id .= $list_contract_id ? "," . data_get($contract, 'contract_id') : data_get($contract, 'contract_id');
         }
-        
+
         $branch_transfer_id = u::insertSimpleRow(array(
-            'student_id' => data_get($branch_transfer,'student_id'),
-            'list_contract_id' =>  $list_contract_id,
-            'from_branch_id'=>data_get($branch_transfer,'branch_id'),
-            'to_branch_id' => data_get($branch_transfer,'to_branch_id'),
+            'student_id' => data_get($branch_transfer, 'student_id'),
+            'list_contract_id' => $list_contract_id,
+            'from_branch_id' => data_get($branch_transfer, 'branch_id'),
+            'to_branch_id' => data_get($branch_transfer, 'to_branch_id'),
             'creator_id' => Auth::user()->id,
             'created_at' => date('Y-m-d H:i:s'),
-            'status' => 1,  
-            'note' => data_get($branch_transfer,'note'),
+            'status' => 1,
+            'note' => data_get($branch_transfer, 'note'),
             'transfer_date' => $transfer_date,
             'meta_data' => json_encode($request->input())
         ), 'branch_transfer');
-        
+
         $result = array(
             'status' => 1,
             'message' => 'Thêm mới chuyển trung tâm thành công'
         );
 
         return response()->json($result);
-    } 
+    }
 
-    public function show(Request $request,$branch_transfer_id)
+    public function show(Request $request, $branch_transfer_id)
     {
         $data = u::first("SELECT t.* , 
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.creator_id) AS creator_name,
@@ -144,15 +148,16 @@ class BranchTransfersController extends Controller
         return response()->json($data);
     }
 
-    public function approve(Request $request){
-        $branch_transfer_id = data_get($request,'branch_transfer_id');
-        $approve = data_get($request,'approve');
-        $comment = data_get($request,'comment');
-        $branch_transfer_info = u::getObject(array('id'=>$branch_transfer_id), 'branch_transfer');
-        $result=[];
-        if($branch_transfer_info){
-            if(!$approve){
-                if(data_get($branch_transfer_info, 'status') ==1){
+    public function approve(Request $request)
+    {
+        $branch_transfer_id = data_get($request, 'branch_transfer_id');
+        $approve = data_get($request, 'approve');
+        $comment = data_get($request, 'comment');
+        $branch_transfer_info = u::getObject(array('id' => $branch_transfer_id), 'branch_transfer');
+        $result = [];
+        if ($branch_transfer_info) {
+            if (!$approve) {
+                if (data_get($branch_transfer_info, 'status') == 1) {
                     u::updateSimpleRow(array(
                         'status' => 2,
                         'from_approver_id' => Auth::user()->id,
@@ -160,8 +165,8 @@ class BranchTransfersController extends Controller
                         'from_approve_comment' => $comment,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
-                    ),array('id'=>$branch_transfer_id),'branch_transfer');
-                }else{
+                    ), array('id' => $branch_transfer_id), 'branch_transfer');
+                } else {
                     u::updateSimpleRow(array(
                         'status' => 4,
                         'to_approver_id' => Auth::user()->id,
@@ -169,15 +174,15 @@ class BranchTransfersController extends Controller
                         'to_approve_comment' => $comment,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
-                    ),array('id'=>$branch_transfer_id),'branch_transfer');
+                    ), array('id' => $branch_transfer_id), 'branch_transfer');
                 }
-                
+
                 $result = array(
                     'status' => 1,
                     'message' => 'Từ chối phê duyệt chuyển trung tâm thành công.'
                 );
-            }else{
-                if(data_get($branch_transfer_info, 'status') == 1){
+            } else {
+                if (data_get($branch_transfer_info, 'status') == 1) {
                     u::updateSimpleRow(array(
                         'status' => 3,
                         'from_approver_id' => Auth::user()->id,
@@ -185,8 +190,8 @@ class BranchTransfersController extends Controller
                         'from_approve_comment' => $comment,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
-                    ),array('id'=>$branch_transfer_id),'branch_transfer');
-                }else{
+                    ), array('id' => $branch_transfer_id), 'branch_transfer');
+                } else {
                     u::updateSimpleRow(array(
                         'status' => 5,
                         'to_approver_id' => Auth::user()->id,
@@ -194,18 +199,18 @@ class BranchTransfersController extends Controller
                         'to_approve_comment' => $comment,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'updator_id' => Auth::user()->id,
-                    ),array('id'=>$branch_transfer_id),'branch_transfer');
+                    ), array('id' => $branch_transfer_id), 'branch_transfer');
 
-                    if(data_get($branch_transfer_info, 'transfer_date') > date('Y-m-d')){
+                    if (data_get($branch_transfer_info, 'transfer_date') > date('Y-m-d')) {
                         u::insertSimpleRow(array(
-                            'student_id'=>data_get($branch_transfer_info, 'student_id'),
-                            'data_id'=>$branch_transfer_id,
+                            'student_id' => data_get($branch_transfer_info, 'student_id'),
+                            'data_id' => $branch_transfer_id,
                             'type' => 3,
                             'status' => 1,
                             'created_at' => date('Y-m-d H:i:s'),
                             'processed_at' => data_get($branch_transfer_info, 'transfer_date')
-                        ),'student_waitting_process');
-                    }else{
+                        ), 'student_waitting_process');
+                    } else {
                         self::processBranchTransfer($branch_transfer_id);
                     }
                 }
@@ -214,48 +219,50 @@ class BranchTransfersController extends Controller
         return response()->json($result);
     }
 
-    public static function processBranchTransfer($branch_transfer_id){
+    public static function processBranchTransfer($branch_transfer_id)
+    {
         $branch_transfer_info = u::first("SELECT t.student_id, t.from_branch_id, t.to_branch_id,
                 (SELECT name FROM branches WHERE id=t.from_branch_id) AS from_branch_name,
                 (SELECT name FROM branches WHERE id=t.to_branch_id) AS to_branch_name, creator_id
             FROM branch_transfer AS t  WHERE t.id = $branch_transfer_id");
         $student_id = data_get($branch_transfer_info, 'student_id');
         $list_contract_active = u::query("SELECT id, `status` FROM contracts WHERE student_id = $student_id AND status!=7");
-        foreach($list_contract_active AS $contract){
-            if($contract->status == 6){
+        foreach ($list_contract_active as $contract) {
+            if ($contract->status == 6) {
                 u::updateSimpleRow(array(
-                    'status'=> 4,
-                    'class_id'=>null,
-                    'branch_id'=> data_get($branch_transfer_info, 'to_branch_id'),
-                    'cm_id'=> null,
-                    'cm_leader_id'=>null,
+                    'status' => 4,
+                    'class_id' => null,
+                    'branch_id' => data_get($branch_transfer_info, 'to_branch_id'),
+                    'cm_id' => null,
+                    'cm_leader_id' => null,
                     'updated_at' => date('Y-m-d H:i:s'),
-                ), array('id'=>$contract->id),'contracts');
-            }else{
+                ), array('id' => $contract->id), 'contracts');
+            } else {
                 u::updateSimpleRow(array(
-                    'branch_id'=> data_get($branch_transfer_info, 'to_branch_id'),
+                    'branch_id' => data_get($branch_transfer_info, 'to_branch_id'),
                     'updated_at' => date('Y-m-d H:i:s')
-                ), array('id'=>$contract->id),'contracts');
+                ), array('id' => $contract->id), 'contracts');
             }
             u::addLogContracts($contract->id);
         }
 
         u::updateSimpleRow(array(
-            'cm_id'=> null,
-            'teacher_id'=>null,
+            'cm_id' => null,
+            'teacher_id' => null,
             'cm_leader_id' => null,
             'branch_id' => data_get($branch_transfer_info, 'to_branch_id'),
             'updated_at' => date('Y-m-d H:i:s'),
-        ), array('student_id'=>$student_id), 'term_student_user');
+        ), array('student_id' => $student_id), 'term_student_user');
         u::updateSimpleRow(array(
-            'status'=> 6,
+            'status' => 6,
             'updated_at' => date('Y-m-d H:i:s')
-        ), array('id'=>$branch_transfer_id), 'branch_transfer');
+        ), array('id' => $branch_transfer_id), 'branch_transfer');
         LogStudents::logAdd($student_id, "Chuyển từ $branch_transfer_info->from_branch_name sang $branch_transfer_info->to_branch_name", $branch_transfer_info->creator_id);
         return true;
     }
 
-    public function getLogsByStudent(Request $request, $student_id){
+    public function getLogsByStudent(Request $request, $student_id)
+    {
         $data = u::query("SELECT t.id, t.status, t.transfer_date,
                 (SELECT name FROM branches WHERE id=t.from_branch_id) AS from_branch_name,
                 (SELECT name FROM branches WHERE id=t.to_branch_id) AS to_branch_name

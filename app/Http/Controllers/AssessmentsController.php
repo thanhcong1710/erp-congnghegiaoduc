@@ -16,27 +16,27 @@ class AssessmentsController extends Controller
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " a.status = 1 ";
-        
+
         if ($keyword !== '') {
             $cond .= " AND (s.name LIKE '%$keyword%' OR s.lms_code LIKE '%$keyword%')";
         }
-        $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
 
         if (!empty($branch_id)) {
-            $cond .= " AND s.branch_id IN (".implode(",",$branch_id).")";
+            $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        
+
         $order_by = " ORDER BY a.id DESC ";
 
         $total = u::first("SELECT count(a.id) AS total 
             FROM assessments AS a LEFT JOIN students AS s On s.id= a.student_id  WHERE $cond");
-        
+
         $list = u::query("SELECT a.* ,s.name, s.lms_code
             FROM assessments AS a LEFT JOIN students AS s On s.id= a.student_id 
             WHERE $cond $order_by $limitation");
@@ -44,7 +44,8 @@ class AssessmentsController extends Controller
         return response()->json($data);
     }
 
-    public function searchStudent(Request $request){
+    public function searchStudent(Request $request)
+    {
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
@@ -64,11 +65,11 @@ class AssessmentsController extends Controller
     {
         $assessment_id = u::insertSimpleRow(array(
             'student_id' => data_get($request, 'assessment.student_id'),
-            'title' => data_get($request, 'assessment.title'), 
+            'title' => data_get($request, 'assessment.title'),
             'description' => data_get($request, 'assessment.description'),
-            'created_at'=>date('Y-m-d H:i:s'),
-            'creator_id'=>Auth::user()->id,
-            'status' =>  1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'status' => 1,
             'meta_data' => json_encode($request->input())
         ), 'assessments');
 
@@ -79,21 +80,22 @@ class AssessmentsController extends Controller
         return response()->json($result);
     }
 
-    public function delete(Request $request){
+    public function delete(Request $request)
+    {
         $assessment_id = data_get($request, 'assessment_id');
         u::updateSimpleRow(array(
             'status' => 0,
-            'updated_at'=>date('Y-m-d H:i:s'),
-            'updator_id'=>Auth::user()->id,
-        ),array('id'=>$assessment_id), 'assessments');
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ), array('id' => $assessment_id), 'assessments');
         $result = array(
             'status' => 1,
             'message' => 'Xóa nhận xét & đánh giá thành công.'
         );
         return response()->json($result);
-    } 
+    }
 
-    public function show(Request $request,$id)
+    public function show(Request $request, $id)
     {
         $data = u::first("SELECT a.*, (SELECT name FROM branches WHERE id=a.branch_id) AS branch_name FROM assessments AS a WHERE id = $id");
         $data->meta_data = $data->meta_data ? json_decode($data->meta_data) : '';
@@ -103,11 +105,11 @@ class AssessmentsController extends Controller
     public function update(Request $request)
     {
         u::updateSimpleRow(array(
-            'title' => data_get($request, 'title'), 
+            'title' => data_get($request, 'title'),
             'description' => data_get($request, 'description'),
-            'updated_at'=>date('Y-m-d H:i:s'),
-            'updator_id'=>Auth::user()->id,
-        ),array('id'=>data_get($request, 'id')), 'assessments');
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+        ), array('id' => data_get($request, 'id')), 'assessments');
         $result = array(
             'status' => 1,
             'message' => 'Cập nhật thông tin nhận xét & đánh giá thành công'

@@ -13,11 +13,11 @@ class StudentsController extends Controller
 {
     public function add(Request $request)
     {
-        if($request->id>0){
+        if ($request->id > 0) {
             $pre_student_info = u::first("SELECT * FROM crm_students WHERE id= $request->id");
             $data_update = array(
-                'parent_id'=>$request->parent_id,
-                'name'=>$request->name,
+                'parent_id' => $request->parent_id,
+                'name' => $request->name,
                 'gender' => $request->gender,
                 'birthday' => $request->birthday,
                 'school_level' => $request->school_level,
@@ -26,24 +26,24 @@ class StudentsController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
             );
-            u::updateSimpleRow($data_update,array('id'=>$request->id), 'crm_students');
-            LogParents::logUpdateStudentInfo($pre_student_info,$data_update,Auth::user()->id);
-            $result =(object)array(
-                'status'=>1,
-                'message'=>'Cập nhật học sinh thành công'
+            u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_students');
+            LogParents::logUpdateStudentInfo($pre_student_info, $data_update, Auth::user()->id);
+            $result = (object) array(
+                'status' => 1,
+                'message' => 'Cập nhật học sinh thành công'
             );
             return response()->json($result);
-        }else{
+        } else {
             $exit = u::first("SELECT * FROM crm_students WHERE parent_id= $request->parent_id AND name LIKE '%$request->name%'");
-            if($exit) {
-                $result =(object)array(
-                    'status'=>0,
-                    'message'=>'Học sinh đã tồn tại'
+            if ($exit) {
+                $result = (object) array(
+                    'status' => 0,
+                    'message' => 'Học sinh đã tồn tại'
                 );
-            }else{
+            } else {
                 $data = u::insertSimpleRow(array(
-                    'parent_id'=>$request->parent_id,
-                    'name'=>$request->name,
+                    'parent_id' => $request->parent_id,
+                    'name' => $request->name,
                     'gender' => $request->gender,
                     'birthday' => $request->birthday,
                     'school_level' => $request->school_level,
@@ -53,60 +53,62 @@ class StudentsController extends Controller
                     'creator_id' => Auth::user()->id,
                 ), 'crm_students');
                 $content = "Thêm mới học sinh: $request->name (ID: $data)";
-                LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
-                $result =(object)array(
-                    'status'=>1,
-                    'message'=>'Thêm mới học sinh thành công'
+                LogParents::logAdd($request->parent_id, $content, Auth::user()->id);
+                $result = (object) array(
+                    'status' => 1,
+                    'message' => 'Thêm mới học sinh thành công'
                 );
             }
-            
+
             return response()->json($result);
         }
     }
-    public function getAllDataByParent($parent_id){
+    public function getAllDataByParent($parent_id)
+    {
         $data = u::query("SELECT s.*, (SELECT name FROM users WHERE id=s.creator_id) AS creator_name,
                 (SELECT name FROM branches WHERE id=s.checkin_branch_id) AS checkin_branch_name,
                 (SELECT name FROM products WHERE id=s.type_product) AS checkin_product_name
             FROM crm_students AS s WHERE s.parent_id=$parent_id ORDER BY s.id DESC");
         return response()->json($data);
     }
-    public function checkin(Request $request){
+    public function checkin(Request $request)
+    {
         $data_update = array(
-            'checkin_at'=>$request->checkin_at,
+            'checkin_at' => $request->checkin_at,
             'checkin_owner_id' => $request->owner_id,
-            'checkin_branch_id'=>$request->branch_id,
+            'checkin_branch_id' => $request->branch_id,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'type_product'=>$request->type_product,
+            'type_product' => $request->type_product,
             'status' => 1, // 
         );
-        u::updateSimpleRow($data_update,array('id'=>$request->student_id), 'crm_students');
-        $is_update = isset($request->is_update) ? (int)$request->is_update : 0;
-        $lastCheckin =u::first("SELECT id FROM crm_student_checkin WHERE crm_student_id = $request->student_id ORDER BY id DESC");
+        u::updateSimpleRow($data_update, array('id' => $request->student_id), 'crm_students');
+        $is_update = isset($request->is_update) ? (int) $request->is_update : 0;
+        $lastCheckin = u::first("SELECT id FROM crm_student_checkin WHERE crm_student_id = $request->student_id ORDER BY id DESC");
         if ($is_update && $lastCheckin) {
             u::updateSimpleRow(array(
-                'checkin_at'=>$request->checkin_at,
+                'checkin_at' => $request->checkin_at,
                 'checkin_owner_id' => $request->owner_id,
-                'checkin_branch_id'=>$request->branch_id,
+                'checkin_branch_id' => $request->branch_id,
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
-                'type_product'=>$request->type_product,
-            ),array('id'=> data_get($lastCheckin,'id')), 'crm_student_checkin');
+                'type_product' => $request->type_product,
+            ), array('id' => data_get($lastCheckin, 'id')), 'crm_student_checkin');
         } else {
             u::insertSimpleRow(array(
                 'crm_student_id' => $request->student_id,
-                'checkin_at'=>$request->checkin_at,
+                'checkin_at' => $request->checkin_at,
                 'checkin_owner_id' => $request->owner_id,
-                'checkin_branch_id'=>$request->branch_id,
+                'checkin_branch_id' => $request->branch_id,
                 'created_at' => date('Y-m-d H:i:s'),
                 'creator_id' => Auth::user()->id,
-                'type_product'=>$request->type_product,
+                'type_product' => $request->type_product,
                 'status' => 1, // 
             ), 'crm_student_checkin');
         }
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Lưu thông tin checkin thành công'
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Lưu thông tin checkin thành công'
         );
         return response()->json($result);
     }
@@ -118,51 +120,51 @@ class StudentsController extends Controller
         $status = isset($request->status) ? $request->status : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " s.status > 0 ";
-        $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
-        
+        $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+
         if (!empty($status)) {
             $cond_status = "";
-            foreach($status AS $s){
-                if($s == 1){
+            foreach ($status as $s) {
+                if ($s == 1) {
                     $qu = " (c.type=0 AND c.status NOT IN(6,7)) ";
-                }elseif($s == 2){
-                    $qu = " (c.type=0 AND c.status =6) "; 
-                }elseif($s == 3){
+                } elseif ($s == 2) {
+                    $qu = " (c.type=0 AND c.status =6) ";
+                } elseif ($s == 3) {
                     $qu = " (c.type=0 AND c.status =7) ";
-                }elseif($s == 4){
+                } elseif ($s == 4) {
                     $qu = " (c.type=1 AND c.status =1) ";
-                }elseif($s == 5){
+                } elseif ($s == 5) {
                     $qu = " (c.type=1 AND c.status =2) ";
-                }elseif($s == 6){
+                } elseif ($s == 6) {
                     $qu = " (c.type=1 AND c.status IN (3,4,5)) ";
-                }elseif($s == 7){
+                } elseif ($s == 7) {
                     $qu = " (c.type=1 AND c.status =6) ";
-                }elseif($s == 8){
+                } elseif ($s == 8) {
                     $qu = " (c.type=1 AND c.status =8) ";
                 }
-                $cond_status.= $cond_status ? " OR ".$qu : $qu; 
+                $cond_status .= $cond_status ? " OR " . $qu : $qu;
             }
             $cond .= " AND ($cond_status)";
         }
         if (!empty($branch_id)) {
-            $cond .= " AND s.branch_id IN (".implode(",",$branch_id).")";
+            $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-        
+
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.lms_id LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
         }
-        
+
         $order_by = " ORDER BY s.id DESC ";
 
         $total = u::first("SELECT count(s.id) AS total FROM students AS s 
             LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id) WHERE $cond");
-        
+
         $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, s.avatar_url,s.lms_id,
                 (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
@@ -177,14 +179,14 @@ class StudentsController extends Controller
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) 
                 AND $cond $order_by $limitation");
-        foreach($list AS $k=> $row){
+        foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
 
-    public function show(Request $request,$student_id)
+    public function show(Request $request, $student_id)
     {
         $data = u::first("SELECT s.*, c.init_total_charged, c.type AS contract_type, c.status AS contract_status,
                 c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,
@@ -201,12 +203,12 @@ class StudentsController extends Controller
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) AND s.id=$student_id");
         $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
-        if ( $data->real_sessions > $data->done_sessions) {
-            $data->left_amount =  $data->left_sessions ? round($data->total_charged * ($data->left_sessions -  $data->done_sessions) / $data->left_sessions) : 0;
+        if ($data->real_sessions > $data->done_sessions) {
+            $data->left_amount = $data->left_sessions ? round($data->total_charged * ($data->left_sessions - $data->done_sessions) / $data->left_sessions) : 0;
         } else {
-            $data->left_amount =  0;
+            $data->left_amount = 0;
         }
-        
+
         return response()->json($data);
     }
 
@@ -215,11 +217,11 @@ class StudentsController extends Controller
         $pre_student_info = u::first("SELECT * FROM students WHERE id = $request->id");
         $arr_name = u::explodeName(data_get($request, 'name'));
         $data_update = array(
-            'name'=>$request->name,
+            'name' => $request->name,
             'firstname' => data_get($arr_name, 'firstname'),
             'midname' => data_get($arr_name, 'midname'),
             'lastname' => data_get($arr_name, 'lastname'),
-            'date_of_birth'=>$request->date_of_birth,
+            'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,
@@ -244,10 +246,10 @@ class StudentsController extends Controller
             $data_update['lms_id'] = data_get($request, 'lms_id');
         }
         $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'students');
-        $ec_id =data_get($request, 'ec_id');
-        $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)$ec_id);
-        $cm_id =data_get($request, 'cm_id');
-        $cm_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = ".(int)$cm_id);
+        $ec_id = data_get($request, 'ec_id');
+        $ec_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int) $ec_id);
+        $cm_id = data_get($request, 'cm_id');
+        $cm_info = u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int) $cm_id);
         u::updateSimpleRow([
             'ec_id' => data_get($ec_info, 'id'),
             'ec_leader_id' => data_get($ec_info, 'manager_id'),
@@ -255,24 +257,25 @@ class StudentsController extends Controller
             'cm_leader_id' => data_get($cm_info, 'manager_id'),
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-        ],array('student_id' => $request->id),'term_student_user');
-        LogStudents::logUpdateInfo($pre_student_info,$data_update,Auth::user()->id);
+        ], array('student_id' => $request->id), 'term_student_user');
+        LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
         $lmsController = new LMSController();
         $lmsController->addOrUpdateStudent($request->id);
-        $result =(object)array(
-            'status'=>1,
-            'message'=>'Cập nhật học sinh thành công'
+        $result = (object) array(
+            'status' => 1,
+            'message' => 'Cập nhật học sinh thành công'
         );
         return response()->json($result);
     }
 
-    public function searchContract(Request $request){
+    public function searchContract(Request $request)
+    {
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $is_renew = $request->is_renew;
         if ($is_renew) {
             $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0 ) > 0";
-        } else{
+        } else {
             $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0) = 0";
         }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
@@ -288,30 +291,30 @@ class StudentsController extends Controller
                 (SELECT enrolment_start_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_start_date
             FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
                 WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') $cond");
-        foreach($data AS $k=> $row){
-            if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d')))) ) {
+        foreach ($data as $k => $row) {
+            if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime('-3 month', strtotime(date('Y-m-d'))))) {
                 $data[$k]->disabled_trial = 1;
-            } elseif ($data[$k]->trial_enrolment_start_date && (strtotime($data[$k]->trial_enrolment_start_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d'))))) {
+            } elseif ($data[$k]->trial_enrolment_start_date && (strtotime($data[$k]->trial_enrolment_start_date) > strtotime('-3 month', strtotime(date('Y-m-d'))))) {
                 $data[$k]->disabled_trial = 1;
             }
         }
         return response()->json($data);
-    } 
+    }
 
     public function logs(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " l.status = 1 AND l.student_id = $student_id";
-        
+
         $order_by = " ORDER BY l.id DESC ";
 
         $total = u::first("SELECT count(l.id) AS total FROM student_logs AS l WHERE $cond");
-        
+
         $list = u::query("SELECT l.created_at, l.content, CONCAT(u.name, ' - ', u.hrm_id) AS creator_name 
             FROM student_logs AS l
             LEFT  JOIN users AS u ON u.id=l.creator_id
@@ -336,7 +339,7 @@ class StudentsController extends Controller
                 (SELECT class_date FROM schedule_has_student WHERE contract_id =c.id ORDER BY class_date LIMIT 1 ) AS enrolment_start_date, c.enrolment_last_date
             FROM contracts AS c
             WHERE c.status>0 AND c.student_id= $student_id ORDER BY c.count_recharge DESC");
-        foreach($list AS $k=> $row){
+        foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
         }
         return response()->json($list);
@@ -351,12 +354,12 @@ class StudentsController extends Controller
                 IF((SELECT count(id) FROM contracts WHERe student_id=$student_id AND status!=7)>0,
                     (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =$student_id),
                     (SELECT max(count_recharge) FROM contracts WHERE student_id =$student_id))  AND c.student_id=$student_id");
-        if($contract_active){
+        if ($contract_active) {
             $done_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, s.status, s.attendance_status, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id 
                 WHERE s.contract_id = $contract_active->id");
             $limit = $contract_active->summary_sessions - count($done_sessions);
             $limit = $limit > 0 ? $limit : 0;
-            if($contract_active->class_id){
+            if ($contract_active->class_id) {
                 $next_sessions = u::query("SELECT s.class_date, sj.code, s.subject_stt, (SELECT cls_name FROM classes WHERE id=s.class_id) AS cls_name FROM schedules AS s LEFT JOIN subjects AS sj ON s.subject_id = sj.id
                     WHERE s.class_id = $contract_active->class_id AND s.class_date > CURRENT_DATE ORDER BY s.class_date LIMIT $limit");
             }
@@ -372,22 +375,22 @@ class StudentsController extends Controller
     public function assessments(Request $request)
     {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " a.status = 1 AND a.student_id = $student_id";
-        
+
         $order_by = " ORDER BY a.id DESC ";
 
         $total = u::first("SELECT count(a.id) AS total FROM assessments AS a WHERE $cond");
-        
+
         $list = u::query("SELECT a.created_at, a.description, a.title, CONCAT(u.name, ' - ', u.hrm_id) AS creator_name 
             FROM assessments AS a
             LEFT  JOIN users AS u ON u.id=a.creator_id
             WHERE $cond $order_by $limitation");
-        foreach($list AS $k=>$row){
+        foreach ($list as $k => $row) {
             $list[$k]->description = nl2br($row->description);
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
@@ -423,19 +426,20 @@ class StudentsController extends Controller
         ]);
     }
 
-    public function uploadAvatar(Request $request){
+    public function uploadAvatar(Request $request)
+    {
         $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : '';
         $total = count($_FILES['files']['name']);
-        if ($total > 0){
+        if ($total > 0) {
             $tmpFilePath = $_FILES['files']['tmp_name'][0];
-            if ($tmpFilePath != ""){
-                $dir = __DIR__.'/../../../public/static/upload/avatar_students/'. date('Y_m').'/';
-                if(!file_exists($dir)){
+            if ($tmpFilePath != "") {
+                $dir = __DIR__ . '/../../../public/static/upload/avatar_students/' . date('Y_m') . '/';
+                if (!file_exists($dir)) {
                     mkdir($dir);
                 }
                 $newFilePath = $dir . $_FILES['files']['name'][0];
                 $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                $dir_file_insert = str_replace(__DIR__ . '/../../../public', '', $newFilePath);
                 move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
@@ -452,7 +456,8 @@ class StudentsController extends Controller
             'message' => 'Upload avatar thất bại vui lòng kiểm tra dung lượng và định dạng file.',
         ]);
     }
-    public function getFile (Request $request){
+    public function getFile(Request $request)
+    {
         $student_id = isset($request->student_id) ? $request->student_id : 0;
         $data = u::query("SELECT *
             FROM file_has_student
@@ -500,23 +505,25 @@ class StudentsController extends Controller
             'message' => 'Upload file thành công.',
         ]);
     }
-    public function deleteFile(Request $request){
+    public function deleteFile(Request $request)
+    {
         u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-            'status'=>0
-        ),['id'=>$request->id], 'file_has_student');
+            'status' => 0
+        ), ['id' => $request->id], 'file_has_student');
         return response()->json([
             'status' => 1,
             'message' => 'Xoá file thành công.',
         ]);
     }
-    public function validateLMS(Request $request){
+    public function validateLMS(Request $request)
+    {
         $student_id = $request->student_id;
         $lms_id = $request->lms_id;
-        if($student_id && $lms_id){
+        if ($student_id && $lms_id) {
             $check = u::first("SELECT id FROM students WHERE  lms_id='$lms_id' && id != $student_id");
-            if($check){
+            if ($check) {
                 return response()->json([
                     'status' => 0,
                     'message' => 'Mã học sinh đã tồn tại trong hệ thống.'

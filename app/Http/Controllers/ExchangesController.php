@@ -17,20 +17,20 @@ class ExchangesController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
-        $pagination = (object)$request->pagination;
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
-        $offset = $page == 1 ? 0 : $limit * ($page-1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
-        $cond = " e.branch_id IN (" . Auth::user()->getBranchesHasUser().") ";
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " e.branch_id IN (" . Auth::user()->getBranchesHasUser() . ") ";
 
         if (!empty($branch_id)) {
-            $cond .= " AND e.branch_id IN (".implode(",",$branch_id).") ";
+            $cond .= " AND e.branch_id IN (" . implode(",", $branch_id) . ") ";
         }
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') ";
         }
-        
+
         $order_by = " ORDER BY e.id DESC ";
 
         $total = u::first("SELECT count(e.id) AS total 
@@ -38,7 +38,7 @@ class ExchangesController extends Controller
                 LEFT JOIN students AS s ON s.id=e.student_id 
                 LEFT JOIN contracts AS c ON e.contract_id = c.id
             WHERE $cond");
-        
+
         $list = u::query("SELECT s.name, s.lms_code, c.code AS contract_code,
                 (SELECT name FROM branches WHERE id= e.branch_id) AS branch_name,
                 (SELECT name FROM tuition_fee WHERE id= e.from_tuition_fee_id) AS from_tuition_fee_name,
@@ -53,7 +53,8 @@ class ExchangesController extends Controller
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
     }
-    public function searchStudent(Request $request){
+    public function searchStudent(Request $request)
+    {
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
@@ -65,10 +66,11 @@ class ExchangesController extends Controller
                 WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%')
                 AND s.status>0 ");
         return response()->json($data);
-    }  
+    }
 
-    public function getDataFromContractActive (Request $request){
-        $student_id = data_get($request,'student_id');
+    public function getDataFromContractActive(Request $request)
+    {
+        $student_id = data_get($request, 'student_id');
         $contracts = u::query("SELECT c.id AS contract_id, c.total_charged, c.summary_sessions,c.real_sessions, c.branch_id, c.product_id,
                 c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date,
                 (SELECT class_day FROM classes WHERE id=c.class_id) AS class_day,
@@ -76,17 +78,18 @@ class ExchangesController extends Controller
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c WHERE c.student_id =$student_id AND c.status!=7 AND c.class_id IS NULL");
-        foreach ($contracts AS $k=> $contract){
+        foreach ($contracts as $k => $contract) {
             $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
-            $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
+            $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0;
             $contracts[$k]->left_amount = $left_real_amount;
         }
         return response()->json($contracts);
-    }  
+    }
 
-    public function getDataContractExchange(Request $request){
+    public function getDataContractExchange(Request $request)
+    {
         $to_product_id = data_get($request, 'to_product_id');
-        $student_id = data_get($request,'student_id');
+        $student_id = data_get($request, 'student_id');
         $contracts = u::query("SELECT c.id AS contract_id, c.total_charged, c.summary_sessions,c.real_sessions, c.branch_id, c.product_id,
                 c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date,c.tuition_fee_id,
                 (SELECT class_day FROM classes WHERE id=c.class_id) AS class_day,
@@ -99,15 +102,15 @@ class ExchangesController extends Controller
         $contract_exchange = 0;
         foreach ($contracts as $k => $contract) {
             $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
-            $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
+            $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0;
             $contracts[$k]->left_amount = $left_real_amount;
-            if(data_get($contract, 'class_id')){
+            if (data_get($contract, 'class_id')) {
                 $to_contracts[$k] = $contracts[$k];
                 $contract_in_class++;
             } else {
-                if($to_product_id != $contracts[$k]->product_id){
+                if ($to_product_id != $contracts[$k]->product_id) {
                     $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id, $left_real_sessions);
-                    if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                    if (data_get($data_calc_transfer, 'receive_tuition_fee.id')) {
                         //Áp dụng quy đổi ngang số buổi
                         $to_contracts[$k] = $contracts[$k];
                         $to_contracts[$k]->tuition_fee_id = data_get($data_calc_transfer, 'receive_tuition_fee.id');
@@ -123,15 +126,16 @@ class ExchangesController extends Controller
             }
         }
         return response()->json([
-            'contract_exchange' => $contract_exchange, 
+            'contract_exchange' => $contract_exchange,
             'to_contracts' => $to_contracts
         ]);
     }
-    
-    public function add(Request $request){
-        $exchange = data_get($request,'exchange'); 
+
+    public function add(Request $request)
+    {
+        $exchange = data_get($request, 'exchange');
         $to_product_id = data_get($exchange, 'to_product_id');
-        $student_id = data_get($exchange,'student_id');
+        $student_id = data_get($exchange, 'student_id');
         $contracts = u::query("SELECT c.id, c.id AS contract_id, c.total_charged, c.summary_sessions,c.real_sessions, c.branch_id, c.product_id,
                 c.bonus_sessions, c.done_sessions, c.left_sessions,c.class_id, c.code, c.enrolment_start_date, c.enrolment_last_date,c.tuition_fee_id,
                 (SELECT class_day FROM classes WHERE id=c.class_id) AS class_day,
@@ -139,15 +143,15 @@ class ExchangesController extends Controller
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c WHERE c.student_id =$student_id AND c.status!=7 AND c.class_id IS NULL");
-        foreach ($contracts AS $k => $contract){
-            if($to_product_id != $contract->product_id){
+        foreach ($contracts as $k => $contract) {
+            if ($to_product_id != $contract->product_id) {
                 $left_real_sessions = $contract->real_sessions > $contract->done_sessions ? $contract->real_sessions - $contract->done_sessions : 0;
-                $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0; 
+                $left_real_amount = $contract->real_sessions ? ceil($left_real_sessions * ($contract->total_charged / $contract->real_sessions)) : 0;
                 $data_calc_transfer = u::calcTransferTuitionFeeForTuitionTransfer($contract->tuition_fee_id, $left_real_amount, $contract->branch_id, $to_product_id, $left_real_sessions);
-                if(data_get($data_calc_transfer, 'receive_tuition_fee.id')){
+                if (data_get($data_calc_transfer, 'receive_tuition_fee.id')) {
                     $bonus_sessions = $contract->bonus_sessions > $contract->left_sessions ? $contract->left_sessions : $contract->bonus_sessions;
                     u::updateSimpleRow(array(
-                        'product_id'=> $to_product_id,
+                        'product_id' => $to_product_id,
                         'program_id' => NULL,
                         'tuition_fee_id' => data_get($data_calc_transfer, 'receive_tuition_fee.id'),
                         'total_charged' => data_get($data_calc_transfer, 'transfer_amount', 0),
@@ -160,7 +164,7 @@ class ExchangesController extends Controller
                         'updator_id' => Auth::user()->id,
                         'updated_at' => date('Y-m-d H:i:s'),
                         'action' => 'contract_exchange_product_id'
-                    ), array('id'=>$contract->id),'contracts');
+                    ), array('id' => $contract->id), 'contracts');
 
                     u::addLogContracts($contract->id);
                     u::insertSimpleRow(array(
@@ -180,12 +184,12 @@ class ExchangesController extends Controller
                 }
             }
         }
-        
+
         $result = array(
             'status' => 1,
             'message' => 'Thực hiện quy đổi thành công'
         );
 
         return response()->json($result);
-    } 
+    }
 }
