@@ -282,26 +282,31 @@ export default {
     updateMenu(){
       // Auto-sanitize stale permissions from localStorage/AppActiveUser
       const user = this.$store.state.AppActiveUser || {}
-      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager']
+      const adminRoleNames = ['admin', 'hrm_manager']
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase()
       const isRealHrmAdmin = user.id === 1 || 
-        user.is_hrm_admin === true || 
-        (user.roleName && adminRoleNames.includes(user.roleName.toLowerCase())) ||
-        (user.role_name && adminRoleNames.includes(user.role_name.toLowerCase()))
+        user.uid === 1 || 
+        adminRoleNames.some(r => roleStr.includes(r))
 
-      if (!isRealHrmAdmin && Array.isArray(user.permissions)) {
-        const hrmAdminIdx = user.permissions.indexOf('hrm_admin')
-        if (hrmAdminIdx !== -1) {
-          user.permissions.splice(hrmAdminIdx, 1)
-          try {
-            const raw = localStorage.getItem('userInfo')
-            if (raw) {
-              const parsed = JSON.parse(raw)
-              parsed.permissions = user.permissions
-              parsed.is_hrm_admin = false
-              localStorage.setItem('userInfo', JSON.stringify(parsed))
-            }
-          } catch (e) {}
+      if (!isRealHrmAdmin) {
+        user.is_hrm_admin = false
+        if (Array.isArray(user.permissions)) {
+          const hrmAdminIdx = user.permissions.indexOf('hrm_admin')
+          if (hrmAdminIdx !== -1) {
+            user.permissions.splice(hrmAdminIdx, 1)
+          }
         }
+        try {
+          const raw = localStorage.getItem('userInfo')
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            if (Array.isArray(parsed.permissions)) {
+              parsed.permissions = parsed.permissions.filter(p => p !== 'hrm_admin')
+            }
+            parsed.is_hrm_admin = false
+            localStorage.setItem('userInfo', JSON.stringify(parsed))
+          }
+        } catch (e) {}
       }
 
       const new_list = []

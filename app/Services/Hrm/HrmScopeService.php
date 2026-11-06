@@ -28,7 +28,7 @@ class HrmScopeService
             return $user->isHrmAdmin();
         }
 
-        if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['admin', 'ceo', 'account', 'ops', 'hrm_manager', 999999, 686868, 83, 16])) {
+        if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['admin', 'hrm_manager', 999999, 1000004])) {
             return true;
         }
 

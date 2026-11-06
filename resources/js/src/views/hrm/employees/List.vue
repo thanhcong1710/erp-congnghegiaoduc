@@ -612,10 +612,10 @@ export default {
         return this.isHrmAdminServer;
       }
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
-      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager'];
+      if (user.uid === 1 || user.id === 1) return true;
+      const adminRoleNames = ['admin', 'hrm_manager'];
       const roleName = (user.roleName || user.role_name || '').toLowerCase();
-      if (adminRoleNames.includes(roleName)) return true;
+      if (adminRoleNames.some(r => roleName.includes(r))) return true;
       return false;
     }
   },

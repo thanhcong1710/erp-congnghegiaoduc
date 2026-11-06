@@ -114,14 +114,14 @@ class User extends Authenticatable implements JWTSubject
     public function isHrmAdmin()
     {
         if ($this->id == 1) return true;
-        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 'hrm_manager', 999999, 686868, 83, 16])
+        return $this->hasAnyRole(['admin', 'hrm_manager', 999999, 1000004])
             || $this->checkPermission('hrm_admin');
     }
 
     public function canDeleteHrmEmployee()
     {
         if ($this->id == 1) return true;
-        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+        return $this->isHrmAdmin()
             || $this->checkPermission('hrm_delete_employee')
             || $this->checkPermission('hrm_admin');
     }
@@ -129,7 +129,7 @@ class User extends Authenticatable implements JWTSubject
     public function canApproveHrmOnlineRegistration()
     {
         if ($this->id == 1) return true;
-        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+        return $this->isHrmAdmin()
             || $this->checkPermission('hrm_approve_online')
             || $this->checkPermission('hrm_admin');
     }
@@ -137,7 +137,7 @@ class User extends Authenticatable implements JWTSubject
     public function canApproveHrmLeave()
     {
         if ($this->id == 1) return true;
-        return $this->hasAnyRole(['admin', 'ceo', 'account', 'ops', 999999, 686868, 83, 16])
+        return $this->isHrmAdmin()
             || $this->isLeader()
             || $this->checkPermission('hrm_approve_leave')
             || $this->checkPermission('hrm');

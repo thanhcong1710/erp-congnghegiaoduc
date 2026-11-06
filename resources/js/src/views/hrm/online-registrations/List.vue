@@ -510,10 +510,10 @@ export default {
     canApproveRegistration() {
       if (!this.canApprove) return false;
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
-      const adminRoleNames = ['admin', 'ceo', 'account', 'ops', 'hrm_manager'];
+      if (user.uid === 1 || user.id === 1) return true;
+      const adminRoleNames = ['admin', 'hrm_manager'];
       const roleName = (user.roleName || user.role_name || '').toLowerCase();
-      return adminRoleNames.includes(roleName);
+      return adminRoleNames.some(r => roleName.includes(r));
     }
   },
   created() {
