@@ -59,7 +59,7 @@ class ReservesController extends Controller
             $cond = " AND c.enrolment_last_date >= CURRENT_DATE";
         }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
-                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label,
+                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code, IF(s.gud_mobile1 IS NOT NULL AND s.gud_mobile1 != '', CONCAT(' - ', s.gud_mobile1), '')) AS label,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
                 (SELECT name FROM programs WHERE id=c.program_id) AS program_name,
                 (SELECT cls_name FROM classes WHERE id=c.class_id) AS class_name,
@@ -67,7 +67,7 @@ class ReservesController extends Controller
                 c.total_charged, c.summary_sessions, c.bonus_sessions, c.real_sessions, c.reservable_sessions, 
                 c.reserved_sessions , c.product_id, c.class_id, c.id AS contract_id, c.enrolment_start_date, c.enrolment_last_date  
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id 
-                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE c.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%')
                 AND c.status=6 AND c.type>0 $cond ");
         return response()->json($data);
     }  

@@ -57,12 +57,12 @@ class ExchangesController extends Controller
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
-                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label,
+                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code, IF(s.gud_mobile1 IS NOT NULL AND s.gud_mobile1 != '', CONCAT(' - ', s.gud_mobile1), '')) AS label,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.cm_id) AS cm_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id=t.ec_id) AS ec_name
             FROM students AS s 
                 LEFT JOIN term_student_user AS t ON t.student_id=s.id 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%')
+                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%')
                 AND s.status>0 ");
         return response()->json($data);
     }  

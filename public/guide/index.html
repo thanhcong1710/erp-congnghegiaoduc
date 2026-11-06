@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài liệu Hướng dẫn Sử dụng Hệ thống ERP - Luồng Khách hàng Toàn trình</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #7367f0;
+      --primary-light: #f4f3fd;
+      --primary-hover: #5e50ee;
+      --success: #28c76f;
+      --success-light: #e8faf0;
+      --warning: #ff9f43;
+      --warning-light: #fff5ea;
+      --danger: #ea5455;
+      --danger-light: #fceaea;
+      --info: #00cfe8;
+      --dark: #2c2c2c;
+      --text: #4b4b5a;
+      --text-muted: #82868b;
+      --border: #ebe9f1;
+      --bg-body: #f8f8fb;
+      --bg-card: #ffffff;
+      --sidebar-w: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    /* TOP HEADER */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .brand i {
+      font-size: 24px;
+    }
+    .search-box {
+      position: relative;
+      width: 380px;
+    }
+    .search-box input {
+      width: 100%;
+      height: 40px;
+      padding: 0 16px 0 40px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      outline: none;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    .search-box input:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15);
+    }
+    .search-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* CONTAINER LAYOUT */
+    .layout-container {
+      display: flex;
+      margin-top: 64px;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* SIDEBAR TOC */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 64px;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      padding: 20px 12px;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+    .nav-list {
+      list-style: none;
+    }
+    .nav-item {
+      margin-bottom: 4px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .nav-link .step-num {
+      width: 22px;
+      height: 22px;
+      background: #ecebf9;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .nav-link:hover .step-num, .nav-link.active .step-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 32px 48px;
+      max-width: 1050px;
+    }
+
+    /* FLOW OVERVIEW BANNER */
+    .flow-banner {
+      background: linear-gradient(135deg, #7367f0 0%, #9055fd 100%);
+      color: #fff;
+      padding: 28px;
+      border-radius: 14px;
+      margin-bottom: 36px;
+      box-shadow: 0 8px 24px rgba(115, 103, 240, 0.25);
+    }
+    .flow-banner h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .flow-banner p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+    .flow-steps-pill {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .flow-pill {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* SECTION CARD */
+    .guide-section {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 30px;
+      margin-bottom: 36px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      scroll-margin-top: 84px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+    }
+    .section-badge {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .section-role {
+      margin-left: auto;
+      font-size: 12px;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 6px;
+      color: var(--text-muted);
+    }
+
+    /* STEP LIST */
+    .step-item {
+      position: relative;
+      padding-left: 36px;
+      margin-bottom: 24px;
+    }
+    .step-item::before {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 26px;
+      bottom: -16px;
+      width: 2px;
+      background: var(--border);
+    }
+    .step-item:last-child::before {
+      display: none;
+    }
+    .step-bullet {
+      position: absolute;
+      left: 0;
+      top: 2px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    /* ALERT BOXES */
+    .alert-box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .alert-warning {
+      background: var(--warning-light);
+      border-left: 4px solid var(--warning);
+      color: #9b5a00;
+    }
+    .alert-tip {
+      background: var(--success-light);
+      border-left: 4px solid var(--success);
+      color: #176d3b;
+    }
+    .alert-danger {
+      background: var(--danger-light);
+      border-left: 4px solid var(--danger);
+      color: #9a191a;
+    }
+
+    /* SCREENSHOT PLACEHOLDER & IMAGE BOX */
+    .screenshot-container {
+      margin: 16px 0 24px 0;
+      background: #fafafc;
+      border: 1px dashed #c9c7dd;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .screenshot-container:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 16px rgba(115, 103, 240, 0.08);
+    }
+    .screenshot-header {
+      background: #f1f0f8;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .screenshot-header .file-path {
+      font-family: monospace;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .screenshot-body {
+      padding: 16px;
+      text-align: center;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    .screenshot-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+      cursor: zoom-in;
+    }
+    .screenshot-body img[src=""], .screenshot-body img:not([src]) {
+      display: none;
+    }
+    .screenshot-placeholder-info {
+      color: var(--text-muted);
+      padding: 20px;
+    }
+    .screenshot-placeholder-info i {
+      font-size: 36px;
+      color: #b4b7bd;
+      margin-bottom: 10px;
+    }
+    .screenshot-caption {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    /* LIGHTBOX MODAL */
+    .modal-lightbox {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-lightbox img {
+      max-width: 95%;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-lightbox.active {
+      display: flex;
+    }
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: #fff;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    /* CODE / KEYWORD PILL */
+    code {
+      background: #f1f0f8;
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER -->
+  <header class="top-header">
+    <div class="brand">
+      <i class="fa-solid fa-graduation-cap"></i>
+      <span>ERP ACADEMY - SỔ TAY HƯỚNG DẪN VẬN HÀNH</span>
+    </div>
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="guideSearch" placeholder="Tìm kiếm nghiệp vụ (ví dụ: checkin, chuyển lớp, hợp đồng...)" onkeyup="filterGuide()">
+    </div>
+  </header>
+
+  <div class="layout-container">
+    <!-- SIDEBAR MỤC LỤC -->
+    <aside class="sidebar">
+      <div class="sidebar-title">Luồng khách hàng</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-1" class="nav-link active">
+            <span class="step-num">1</span>
+            <span>Sale lên Data Phụ huynh</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-2" class="nav-link">
+            <span class="step-num">2</span>
+            <span>Tạo hồ sơ Học sinh</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-3" class="nav-link">
+            <span class="step-num">3</span>
+            <span>Check-in tại Trung tâm</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-4" class="nav-link">
+            <span class="step-num">4</span>
+            <span>Lên Học viên Chính thức</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-5" class="nav-link">
+            <span class="step-num">5</span>
+            <span>Hợp đồng & Đóng học phí</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-6" class="nav-link">
+            <span class="step-num">6</span>
+            <span>Xếp lớp (Enrolment)</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Vận hành sau xếp lớp</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-7-1" class="nav-link">
+            <span class="step-num">7.1</span>
+            <span>Điểm danh chuyên cần</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-7-2" class="nav-link">
+            <span class="step-num">7.2</span>
+            <span>Đánh giá & Test định kỳ</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-7-3" class="nav-link">
+            <span class="step-num">7.3</span>
+            <span>Học bù & Đổi ca học</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-7-4" class="nav-link">
+            <span class="step-num">7.4</span>
+            <span>Chuyển lớp & Chuyển cơ sở</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-7-5" class="nav-link">
+            <span class="step-num">7.5</span>
+            <span>Bảo lưu & Chuyển phí</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-7-6" class="nav-link">
+            <span class="step-num">7.6</span>
+            <span>Tái tục / Gia hạn hợp đồng</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="main-content">
+
+      <!-- BANNER TỔNG QUAN LUỒNG -->
+      <div class="flow-banner">
+        <h1>Quy trình Khách hàng Toàn trình (Customer Journey)</h1>
+        <p>Hướng dẫn chuẩn hóa các thao tác nghiệp vụ trên hệ thống ERP từ giai đoạn tiếp cận khách hàng tiềm năng đến vận hành đào tạo chuyên sâu.</p>
+        <div class="flow-steps-pill">
+          <div class="flow-pill"><i class="fa-solid fa-1"></i> Sale lên Data</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-2"></i> Nhập Học sinh</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-3"></i> Check-in Test</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-4"></i> Lên chính thức</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-5"></i> Đóng phí / HĐ</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-6"></i> Xếp lớp</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-7"></i> Vận hành & Chăm sóc</div>
+        </div>
+      </div>
+
+      <!-- CHẶNG 1 -->
+      <section id="chang-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 1</span>
+          <h2 class="section-title">Sale Tiếp nhận Data & Quản lý Phụ huynh (CRM)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Tuyển sinh / Marketing</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Truy cập màn hình Khách hàng</div>
+          <div class="step-desc">Trên menu điều hướng bên trái, chọn <code>CRM</code> &rarr; <code>Khách hàng</code> (URL: <code>/crm/parent</code>).</div>
+          
+          <!-- KHUNG ẢNH 1 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 1.1: Danh sách Khách hàng</span>
+              <span class="file-path">/images/guide/01-crm-parent-list.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/01-crm-parent-list.png" alt="Danh sách Khách hàng CRM" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 1.1]</strong></p>
+                <p class="screenshot-caption">Màn hình danh sách phụ huynh kèm bộ lọc trạng thái và nút "Thêm mới".</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Thêm mới Phụ huynh (Lead)</div>
+          <div class="step-desc">
+            Nhấp nút <strong>Thêm mới</strong> (hoặc vào <code>/crm/imports</code> nếu tải lên hàng loạt từ file Excel):
+            <ul>
+              <li><strong>Họ tên phụ huynh:</strong> Điền đầy đủ họ và tên.</li>
+              <li><strong>Số điện thoại 1 (*):</strong> Trường bắt buộc dùng để định danh và liên lạc.</li>
+              <li><strong>Nguồn khách hàng:</strong> Facebook, Hotline, Giới thiệu (B2B/C2C), Sự kiện...</li>
+              <li><strong>Người phụ trách:</strong> Gán cho nhân viên tư vấn chịu trách nhiệm chăm sóc.</li>
+            </ul>
+          </div>
+
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div><strong>Lưu ý quan trọng:</strong> Hệ thống sẽ kiểm tra trùng số điện thoại. Nếu phụ huynh đã tồn tại, hệ thống sẽ cảnh báo để tránh xung đột dữ liệu giữa các nhân viên Sale.</div>
+          </div>
+
+          <!-- KHUNG ẢNH 2 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 1.2: Form Thêm mới / Chi tiết Phụ huynh</span>
+              <span class="file-path">/images/guide/02-crm-parent-detail.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/02-crm-parent-detail.png" alt="Chi tiết hồ sơ phụ huynh" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 1.2]</strong></p>
+                <p class="screenshot-caption">Form nhập thông tin phụ huynh, cấp độ tương tác (Level khách hàng) và lịch chăm sóc tiếp theo.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">Ghi nhận Chăm sóc & Cập nhật Level khách hàng</div>
+          <div class="step-desc">
+            Trong màn hình chi tiết phụ huynh:
+            <ul>
+              <li>Vào tab <strong>Chăm sóc</strong>: Ghi lại nội dung cuộc gọi, nhu cầu của gia đình.</li>
+              <li>Chọn <strong>Lịch chăm sóc tiếp theo</strong> để hệ thống nhắc việc.</li>
+              <li>Cập nhật <strong>Level khách hàng</strong> theo mức độ tiềm năng (ví dụ: Khách quan tâm, Hẹn test, Chờ chốt phí...).</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 2 -->
+      <section id="chang-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 2</span>
+          <h2 class="section-title">Khởi tạo Hồ sơ Học sinh</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Lễ tân</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Thêm học sinh trực thuộc Phụ huynh</div>
+          <div class="step-desc">Tại màn hình Chi tiết Phụ huynh, chuyển sang tab <strong>Học sinh</strong> &rarr; Nhấp <strong>Thêm mới học sinh</strong>.</div>
+
+          <!-- KHUNG ẢNH 3 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 2.1: Thêm mới Học sinh từ hồ sơ Phụ huynh</span>
+              <span class="file-path">/images/guide/03-add-student-modal.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/03-add-student-modal.png" alt="Modal thêm học sinh" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 2.1]</strong></p>
+                <p class="screenshot-caption">Cửa sổ popup nhập họ tên học sinh, ngày sinh, giới tính và trung tâm đăng ký.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Điền thông tin học sinh</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Họ và tên học sinh (*):</strong> Nhập đầy đủ họ tên bé.</li>
+              <li><strong>Ngày sinh:</strong> Để hệ thống gợi ý độ tuổi và chương trình học phù hợp.</li>
+              <li><strong>Trường đang theo học / Lớp:</strong> Thu thập thông tin hỗ trợ tư vấn lộ trình.</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div><strong>Mẹo:</strong> Một phụ huynh có thể thêm nhiều học sinh (anh/chị em ruột). Các bé này sau này có thể cùng chia sẻ hoặc chuyển đổi gói phí dễ dàng.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 3 -->
+      <section id="chang-3" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 3</span>
+          <h2 class="section-title">Check-in Khách hàng tại Trung tâm (Test / Học thử)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Lễ tân / Sale tại cơ sở</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Tạo lượt Check-in khi khách đến cơ sở</div>
+          <div class="step-desc">Khi phụ huynh đưa học sinh đến trung tâm tham quan, kiểm tra năng lực hoặc học trải nghiệm, truy cập <code>LMS</code> &rarr; <code>Checkin</code> &rarr; Chọn <strong>Tạo mới checkin</strong>.</div>
+
+          <!-- KHUNG ẢNH 4 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 3.1: Màn hình Check-in Trung tâm</span>
+              <span class="file-path">/images/guide/04-checkin-add.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/04-checkin-add.png" alt="Checkin Add" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 3.1]</strong></p>
+                <p class="screenshot-caption">Giao diện ghi nhận check-in cơ sở, tìm kiếm học sinh và ghi nhận người tiếp đón.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Xác nhận thông tin & Mục đích buổi gặp</div>
+          <div class="step-desc">
+            <ul>
+              <li>Chọn <strong>Trung tâm (Branch)</strong> đang tiếp đón.</li>
+              <li>Tìm kiếm Phụ huynh/Học sinh theo Số điện thoại hoặc Tên.</li>
+              <li>Ghi nhận kết quả: Học sinh đã làm bài Diagnostic Test đầu vào hoặc trải nghiệm lớp.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 4 -->
+      <section id="chang-4" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 4</span>
+          <h2 class="section-title">Chuyển Trạng thái Học viên Chính thức & Cấp mã LMS</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Quản lý Tuyển sinh / Giáo vụ</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chuyển đổi trạng thái học viên</div>
+          <div class="step-desc">
+            Sau khi phụ huynh đồng ý nhập học:
+            <ul>
+              <li>Học sinh được cập nhật trạng thái sang <strong>Chính thức (Official Student)</strong>.</li>
+              <li>Hệ thống tự động cấp <strong>Mã LMS (Student LMS Code)</strong> duy nhất dùng cho toàn bộ quá trình học tập, thi cử và theo dõi học phí sau này.</li>
+            </ul>
+          </div>
+
+          <!-- KHUNG ẢNH 5 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 4.1: Hồ sơ Học sinh Chính thức với Mã LMS</span>
+              <span class="file-path">/images/guide/05-student-official.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/05-student-official.png" alt="Hồ sơ Học sinh LMS" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 4.1]</strong></p>
+                <p class="screenshot-caption">Màn hình LMS -> Students hiển thị mã LMS, trung tâm và trạng thái hoạt động.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 5 -->
+      <section id="chang-5" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 5</span>
+          <h2 class="section-title">Tạo Hợp đồng & Đóng Học phí</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Thu ngân / Sale</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Tạo mới Hợp đồng nhập học</div>
+          <div class="step-desc">Truy cập <code>LMS</code> &rarr; <code>Hợp đồng (Contracts)</code> &rarr; Bấm <strong>Tạo mới hợp đồng</strong> (URL: <code>/lms/contracts/add</code>).</div>
+
+          <!-- KHUNG ẢNH 6 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 5.1: Màn hình Tạo Hợp đồng & Chọn Biểu phí</span>
+              <span class="file-path">/images/guide/06-contract-add.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/06-contract-add.png" alt="Tạo hợp đồng" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 5.1]</strong></p>
+                <p class="screenshot-caption">Form tạo hợp đồng: Chọn trung tâm, tìm học sinh, gói học phí, áp dụng chiết khấu/voucher.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Thiết lập các thông số tài chính</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Chọn Học sinh:</strong> Gõ tên hoặc Mã LMS để lấy thông tin tự động.</li>
+              <li><strong>Chọn Gói học phí (Tuition Fee):</strong> Chọn khóa học (3 tháng, 6 tháng, 1 năm, số buổi tương ứng).</li>
+              <li><strong>Áp dụng Voucher / Mã giảm giá:</strong> Nhập mã ưu đãi hoặc chiết khấu chính sách (nếu có).</li>
+              <li><strong>Hình thức thanh toán:</strong> Tiền mặt, Chuyển khoản, Quẹt thẻ POS, Trả góp.</li>
+            </ul>
+          </div>
+
+          <div class="alert-box alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div><strong>Điều kiện tiên quyết:</strong> Học sinh bắt buộc phải có hợp đồng hợp lệ (hoặc xác nhận thanh toán/đặt cọc) thì hệ thống mới cho phép xếp vào danh sách lớp học chính thức.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 6 -->
+      <section id="chang-6" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 6</span>
+          <h2 class="section-title">Xếp lớp cho Học sinh (Enrolment)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ (Academic Admin)</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Truy cập danh sách chờ xếp lớp</div>
+          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Xếp lớp (Enrolments)</code> để lọc danh sách các học viên đã hoàn tất thủ tục phí nhưng chưa có lớp.</div>
+
+          <!-- KHUNG ẢNH 7 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 6.1: Màn hình Xếp lớp</span>
+              <span class="file-path">/images/guide/07-enrolment-class.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/07-enrolment-class.png" alt="Xếp lớp" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 6.1]</strong></p>
+                <p class="screenshot-caption">Thao tác chọn lớp, giáo viên phụ trách, ca học và ngày bắt đầu buổi học đầu tiên.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Gán học sinh vào Lớp học thực tế</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Chọn Lớp học (`Classes`):</strong> Kiểm tra sĩ số hiện tại so với sĩ số tối đa của phòng học (`Rooms`).</li>
+              <li><strong>Ngày bắt đầu học (Start date):</strong> Chọn ngày học sinh chính thức vào lớp.</li>
+              <li>Hệ thống sẽ tự động tính toán lịch học dự kiến và ngày dự kiến kết thúc khóa học dựa theo số buổi đã đóng trong hợp đồng.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- CHẶNG 7: VẬN HÀNH SAU XẾP LỚP -->
+      <section id="chang-7-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.1</span>
+          <h2 class="section-title">Vận hành: Điểm danh & Quản lý Chuyên cần</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo viên / Trợ giảng / Giáo vụ</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Điểm danh theo buổi học</div>
+          <div class="step-desc">Truy cập <code>LMS</code> &rarr; <code>Điểm danh (Attendances)</code> &rarr; Chọn Cơ sở, Lớp học và Ngày học:</div>
+
+          <!-- KHUNG ẢNH 8 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.1: Giao diện Điểm danh</span>
+              <span class="file-path">/images/guide/08-attendances.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/08-attendances.png" alt="Điểm danh" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 7.1]</strong></p>
+                <p class="screenshot-caption">Bảng danh sách học sinh trong ca học với các nút đánh dấu: Có mặt, Muộn, Nghỉ có phép, Không phép.</p>
+              </div>
+            </div>
+          </div>
+          <div class="step-desc">
+            Đánh dấu trạng thái học sinh:
+            <ul>
+              <li><strong style="color:var(--success)">Có mặt:</strong> Trừ 1 buổi học trong gói hợp đồng.</li>
+              <li><strong style="color:var(--warning)">Nghỉ có phép:</strong> Bảo lưu buổi học hoặc xếp lịch học bù (`Exchange`).</li>
+              <li><strong style="color:var(--danger)">Nghỉ không phép:</strong> Vẫn trừ buổi theo quy chế đào tạo.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="chang-7-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.2</span>
+          <h2 class="section-title">Vận hành: Kiểm tra & Đánh giá Năng lực (Evaluations)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo viên / Chuyên môn Đào tạo</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Các hình thức đánh giá trong hệ thống</div>
+          <div class="step-desc">Hệ thống hỗ trợ đánh giá theo chuẩn giáo trình IGBH và UCREA tại mục <code>LMS</code> &rarr; <code>Evaluations</code>:</div>
+
+          <!-- KHUNG ẢNH 9 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.2: Đánh giá Học viên</span>
+              <span class="file-path">/images/guide/09-evaluations.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/09-evaluations.png" alt="Đánh giá học sinh" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 7.2]</strong></p>
+                <p class="screenshot-caption">Màn hình chấm điểm năng lực định kỳ (Weekly) và tổng kết khóa học (Summative).</p>
+              </div>
+            </div>
+          </div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Diagnostic Test:</strong> Đánh giá đầu vào lúc mới check-in để xếp trình độ.</li>
+              <li><strong>Weekly Evaluation:</strong> Nhận xét và chấm điểm định kỳ hàng tuần/buổi học.</li>
+              <li><strong>Summative Evaluation:</strong> Đánh giá tổng kết cuối kỳ/cuối khóa để cấp chứng chỉ hoặc đề xuất lên cấp độ mới.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="chang-7-3" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.3</span>
+          <h2 class="section-title">Vận hành: Học bù & Đổi ca (Exchange)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ / Chăm sóc Khách hàng</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Xử lý học bù khi học sinh nghỉ có phép</div>
+          <div class="step-desc">
+            Vào mục <code>LMS</code> &rarr; <code>Học bù / Đổi ca (Exchange)</code>:
+            <ul>
+              <li>Chọn học sinh đã xin nghỉ buổi trước.</li>
+              <li>Chọn lớp học tương đương đang diễn ra bài học đó để xếp học sinh vào học bù mà không làm lệch sĩ số cố định của lớp.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="chang-7-4" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.4</span>
+          <h2 class="section-title">Vận hành: Chuyển lớp & Chuyển cơ sở</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ / Giám đốc cơ sở</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chuyển lớp nội bộ (`Class Transfers`)</div>
+          <div class="step-desc">Khi học sinh muốn đổi ca học hoặc lên lớp trình độ cao hơn: Vào <code>LMS</code> &rarr; <code>Chuyển lớp</code> &rarr; Chọn Lớp hiện tại &rarr; Chọn Lớp đích &rarr; Chọn Ngày chuyển hiệu lực. Hệ thống tự động chuyển số buổi còn lại sang lớp mới.</div>
+
+          <!-- KHUNG ẢNH 10 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.4: Chuyển lớp / Chuyển cơ sở</span>
+              <span class="file-path">/images/guide/10-transfers.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/10-transfers.png" alt="Chuyển lớp" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 7.4]</strong></p>
+                <p class="screenshot-caption">Màn hình thao tác chuyển học sinh giữa các lớp hoặc giữa 2 cơ sở (Branch Transfers).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Chuyển cơ sở (`Branch Transfers`)</div>
+          <div class="step-desc">Khi phụ huynh chuyển nhà: Giáo vụ thực hiện lệnh Chuyển cơ sở. Cơ sở đến (Destination Branch) sẽ nhận được thông báo tiếp nhận hồ sơ, hợp đồng và lịch sử học tập của học viên.</div>
+        </div>
+      </section>
+
+      <section id="chang-7-5" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.5</span>
+          <h2 class="section-title">Vận hành: Bảo lưu & Chuyển học phí</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Giáo vụ</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Bảo lưu học tập (`Reserves`)</div>
+          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Bảo lưu (Reserves)</code>: Nhập ngày bắt đầu bảo lưu, hạn chót bảo lưu và lý do. Học sinh sẽ được rút khỏi sĩ số lớp hiện tại và đóng băng số buổi học còn lại.</div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Chuyển nhượng số dư học phí (`Tuition Transfers`)</div>
+          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Chuyển phí</code>: Cho phép chuyển số dư tiền học phí từ học sinh này sang học sinh khác (ví dụ: chuyển từ anh sang em ruột).</div>
+        </div>
+      </section>
+
+      <section id="chang-7-6" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.6</span>
+          <h2 class="section-title">Vận hành: Tái tục / Gia hạn Hợp đồng (Contracts Renew)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Chăm sóc Khách hàng</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Cảnh báo học viên sắp kết thúc khóa học</div>
+          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Tái tục hợp đồng (Contracts-renew)</code>. Hệ thống tự động lọc các học viên còn dưới 4 - 8 buổi học để nhân viên chủ động chăm sóc, tư vấn tái tục trước khi khóa học kết thúc.</div>
+
+          <!-- KHUNG ẢNH 11 -->
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.6: Danh sách Tái tục Hợp đồng</span>
+              <span class="file-path">/images/guide/11-contract-renew.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="/images/guide/11-contract-renew.png" alt="Tái tục hợp đồng" onclick="zoomImage(this)" onerror="handleImgError(this)">
+              <div class="screenshot-placeholder-info">
+                <i class="fa-solid fa-camera"></i>
+                <p><strong>[Vị trí ảnh chụp màn hình 7.6]</strong></p>
+                <p class="screenshot-caption">Danh sách học viên sắp hết buổi học kèm nút tạo hợp đồng tái tục nhanh.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- LIGHTBOX PHÓNG TO ẢNH -->
+  <div id="imageModal" class="modal-lightbox" onclick="closeZoom()">
+    <span class="close-modal">&times;</span>
+    <img id="modalImg" src="">
+  </div>
+
+  <script>
+    // Smooth scroll & Active Nav tracking
+    const sections = document.querySelectorAll('.guide-section');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (pageYOffset >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Image Zoom Modal
+    function zoomImage(img) {
+      if (!img.src || img.style.display === 'none') return;
+      const modal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImg');
+      modal.classList.add('active');
+      modalImg.src = img.src;
+    }
+
+    function closeZoom() {
+      document.getElementById('imageModal').classList.remove('active');
+    }
+
+    // Khi chưa có ảnh trong thư mục, ẩn thẻ img để hiện placeholder
+    function handleImgError(img) {
+      img.style.display = 'none';
+      const placeholder = img.nextElementSibling;
+      if (placeholder) {
+        placeholder.style.display = 'block';
+      }
+    }
+
+    // Live search trong nội dung tài liệu
+    function filterGuide() {
+      const input = document.getElementById('guideSearch').value.toLowerCase();
+      const sections = document.querySelectorAll('.guide-section');
+      
+      sections.forEach(sec => {
+        const text = sec.innerText.toLowerCase();
+        if (text.includes(input)) {
+          sec.style.display = '';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

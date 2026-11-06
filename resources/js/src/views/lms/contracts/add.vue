@@ -509,6 +509,7 @@
         }
       },
       selectStudent(student) {
+        if (!student || !student.student_id) return;
         this.disabled_trial = student.disabled_trial;
         this.student_info = student
         this.contract.student_id = student.student_id

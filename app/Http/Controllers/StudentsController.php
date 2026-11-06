@@ -280,14 +280,14 @@ class StudentsController extends Controller
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_leader_id) AS ec_leader_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ceo_branch_id) AS ceo_branch_name, 
-                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code) AS label,
+                s.id AS student_id, CONCAT(s.name, ' - ', s.lms_code, IF(s.gud_mobile1 IS NOT NULL AND s.gud_mobile1 != '', CONCAT(' - ', s.gud_mobile1), '')) AS label,
                 (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling,
                 (SELECT start_date FROM contracts WHERE student_id=s.id AND status!=0 ORDER BY id DESC LIMIT 1) AS last_start_date,
                 (SELECT count(id) FROM contracts WHERE student_id=s.id AND  (type=0 AND status!=7)) AS disabled_trial,
                 (SELECT enrolment_last_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_last_date,
                 (SELECT enrolment_start_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_start_date
             FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%') $cond");
+                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') $cond");
         foreach($data AS $k=> $row){
             if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime ( '-3 month' , strtotime(date('Y-m-d')))) ) {
                 $data[$k]->disabled_trial = 1;

@@ -13,7 +13,7 @@
       :min="3"
       :options="response"
       :debounce="10"
-      :filterByAnchor="true"
+      :filterByAnchor="filterByAnchor"
       :placeholder="placeholderStudent"
       :onShouldGetData="suggestStudents"
       :onSelect="selectItem">
@@ -130,7 +130,11 @@ export default {
     },
     placeholderStudent: {
       type: String,
-      default: 'Tìm kiếm học sinh theo tên hoặc mã LMS'
+      default: 'Tìm kiếm học sinh theo tên, mã LMS hoặc SĐT'
+    },
+    filterByAnchor: {
+      type: Boolean,
+      default: false
     },
     response: {
       type: Array,
