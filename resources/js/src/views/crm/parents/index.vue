@@ -7,23 +7,12 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label>Chọn trung tâm</label>
-            <vue-select
-              label="name"
-              :options="branch_list"
-              v-model="searchData.branch_item"
-              :searchable="true"
-              language="tv-VN"
-              @input="saveBranch"
-              ></vue-select>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
             <vs-input class="w-full" placeholder="Tên khách hàng, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Lịch chăm sóc tiếp theo</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
+            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%;"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
@@ -82,24 +71,6 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <!-- <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Nguồn chi tiết</label>
-            <multiselect
-                name="search_source_detail"
-                placeholder="Chọn nguồn chi tiết"
-                v-model="searchData.arr_source_detail"
-                :options="source_detail_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div> -->
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -111,9 +82,9 @@
           </div>
         </div>
       </div>
-      <div class="form-group col-sm-12" v-if="checked_list.length>0">
+      <div class="form-group col-sm-12" >
         <p style="text-align: end">Bạn đã lựa chọn <b>{{checked_list.length}}</b> khách hàng   
-        <vs-button  style="margin-left:30px;" @click="showModalAssgin" color="danger"><i class="fa-solid fa-paper-plane mr-2"></i>Bàn giao</vs-button></p>
+        <vs-button :disabled="checked_list.length==0" style="margin-left:30px;" @click="showModalAssgin" color="danger"><i class="fa-solid fa-paper-plane mr-2"></i>Bàn giao</vs-button></p>
       </div>
 
       <vs-tabs v-model="activeItem">
@@ -280,10 +251,7 @@
           pagination: this.pagination,
           dateRange: "",
           type_search: 0,
-          branch_id:"",
-          branch_item:"",
         },
-        branch_list:[],
         statusOptions:u.levelOptionsParent,
         users_manager_list:[],
         source_list:[],
@@ -434,8 +402,7 @@
             start_date:startDate,
             end_date:endDate,
             pagination:this.pagination,
-            type_search:this.searchData.type_search,
-            branch_id: this.searchData.branch_id
+            type_search:this.searchData.type_search
           }
         localStorage.setItem("parents_searchData", JSON.stringify(this.searchData));
 
@@ -503,21 +470,8 @@
             });
         }
       },
-      saveBranch(data = null){
-        if (data && typeof data === 'object') {
-          const branch_id = data.id
-          this.searchData.branch_id = branch_id
-          axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
-            .then(response => {
-            this.users_manager_list = response.data
-          })
-        }else{
-          this.searchData.branch_id = ""
-          this.users_manager_list = []
-        }
-      },
     },
-    async created() {
+    created() {
       axios.g(`/api/system/sources`)
         .then(response => {
         this.source_list = response.data
@@ -526,20 +480,14 @@
         .then(response => {
         this.source_detail_list = response.data
       })
-      await axios.g(`/api/system/branches-has-user`)
+      axios.g(`/api/users/get-data/users-manager`)
         .then(response => {
-        this.branch_list = response.data
-        this.searchData.branch_item = this.branch_list[0]
-        this.searchData.branch_id = this.branch_list[0].id
+        this.users_manager_list = response.data
       })
       if(localStorage.getItem("parents_searchData")){
         this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
         this.activeItem = this.searchData.type_search
       }
-      axios.g(`/api/users/get-data/users-manager?branch_id=${this.searchData.branch_id}`)
-        .then(response => {
-        this.users_manager_list = response.data
-      })
       this.getData();
       if (this.$route.query.reset ==1){
         this.reset();
