@@ -32,6 +32,19 @@ export default {
         }
       },
       {
+        path: '/crm/care',
+        name: 'crm-care',
+        component: () => import('@/views/crm/care/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'QL chăm sóc', active: true }
+          ],
+          pageTitle: 'QL chăm sóc',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/crm/parent',
         name: 'crm-parent',
         component: () => import('@/views/crm/parents/index.vue'),

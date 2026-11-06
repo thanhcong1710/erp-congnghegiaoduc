@@ -107,6 +107,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('parents/assign', 'ParentsController@assign');
             Route::post('parents/update_next_care_date', 'ParentsController@updateNextCareDate');
             Route::get('parents/get_logs/{parent_id}', 'ParentsController@getLogs');
+            Route::post('care/list', 'ParentCareController@list');
+            Route::get('care/users', 'ParentCareController@getCareUsers');
             Route::get('care/get_all_data/{parent_id}', 'ParentCareController@getAllDataByParent');
             Route::post('care/add', 'ParentCareController@add');
             Route::post('parents/send_sms', 'ParentsController@sendSms');

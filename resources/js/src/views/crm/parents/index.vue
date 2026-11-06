@@ -71,6 +71,24 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Sản phẩm</label>
+            <multiselect
+                name="search_product"
+                placeholder="Chọn sản phẩm"
+                v-model="searchData.arr_product"
+                :options="product_list"
+                label="name"
+                :close-on-select="false"
+                :hide-selected="true"
+                :multiple="true"
+                :searchable="true"
+                track-by="id"
+                selectedLabel="" selectLabel="" deselectLabel=""
+              >
+                <span slot="noResult">Không tìm thấy dữ liệu</span>
+              </multiselect>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -117,6 +135,7 @@
                   <th colspan="1" rowspan="1" >Tên khách hàng</th>
                   <th colspan="1" rowspan="1" class="text-center">Số điện thoại</th>
                   <th colspan="1" rowspan="1" >Học sinh</th>
+                  <th colspan="1" rowspan="1" >Sản phẩm</th>
                   <th colspan="1" rowspan="1" >Nguồn</th>
                   <th colspan="1" rowspan="1">Nguồn chi tiết</th>
                   <th colspan="1" rowspan="1">Người phụ trách</th>
@@ -143,6 +162,7 @@
                 <td class="td vs-table--td"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.name }}</a></router-link></td>
                 <td class="td vs-table--td text-center"><router-link :to="`/crm/parent/${item.id}/detail`"><a>{{ item.mobile_1 }}</a></router-link></td>
                 <td class="td vs-table--td">{{ item.hs1_name }}</td>
+                <td class="td vs-table--td">{{ item.product_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
                 <td class="td vs-table--td">{{ item.source_detail_name }}</td>
                 <td class="td vs-table--td">{{ item.owner_name }}</td>
@@ -239,12 +259,14 @@
         searchData: {
           keyword: "",
           arr_status: "",
+          arr_product: "",
           arr_level: "",
           arr_owner: "",
           arr_source: "",
           arr_source_detail: "",
           level:"",
           status: "",
+          product_id: "",
           owner_id: "",
           source_id: "",
           source_detail_id: "",
@@ -256,9 +278,7 @@
         users_manager_list:[],
         source_list:[],
         source_detail_list:[],
-        searchData: {
-          status: '',
-        },
+        product_list:[],
         datepickerOptions: {
           closed: true,
           value: "",
@@ -336,11 +356,13 @@
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
+        this.searchData.arr_product= ""
         this.searchData.arr_level= ""
         this.searchData.arr_owner= ""
         this.searchData.arr_source= ""
         this.searchData.arr_source_detail= ""
         this.searchData.status= ""
+        this.searchData.product_id= ""
         this.searchData.level= ""
         this.searchData.owner_id= ""
         this.searchData.source_id= ""
@@ -361,6 +383,14 @@
           })
         }
         this.searchData.status = ids
+
+        const ids_product = []
+        if (this.searchData.arr_product && this.searchData.arr_product.length) {
+          this.searchData.arr_product.map(item => {
+            ids_product.push(item.id)
+          })
+        }
+        this.searchData.product_id = ids_product
         const ids_owner = []
         if (this.searchData.arr_owner && this.searchData.arr_owner.length) {
           this.searchData.arr_owner.map(item => {
@@ -395,6 +425,7 @@
         const data = {
             keyword: this.searchData.keyword,
             status: this.searchData.status,
+            product_id: this.searchData.product_id,
             owner_id: this.searchData.owner_id,
             source_id: this.searchData.source_id,
             source_detail_id: this.searchData.source_detail_id,
@@ -472,6 +503,10 @@
       },
     },
     created() {
+      axios.g(`/api/system/products`)
+        .then(response => {
+        this.product_list = response.data
+      })
       axios.g(`/api/system/sources`)
         .then(response => {
         this.source_list = response.data
@@ -485,7 +520,7 @@
         this.users_manager_list = response.data
       })
       if(localStorage.getItem("parents_searchData")){
-        this.searchData =  JSON.parse(localStorage.getItem("parents_searchData"));
+        this.searchData = Object.assign({}, this.searchData, JSON.parse(localStorage.getItem("parents_searchData")));
         this.activeItem = this.searchData.type_search
       }
       this.getData();

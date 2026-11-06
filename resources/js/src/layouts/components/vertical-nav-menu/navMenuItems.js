@@ -40,6 +40,13 @@ export default [
         permission:'crm_parent',
       },
       {
+        url: '/crm/care',
+        name: 'QL chăm sóc',
+        icon: 'PhoneCallIcon',
+        slug: 'crm-care',
+        permission:'crm_parent',
+      },
+      {
         url: '/crm/imports',
         name: 'Import',
         icon: 'ArrowUpCircleIcon',

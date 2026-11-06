@@ -19,6 +19,7 @@ class ParentsController extends Controller
         $owner_id = isset($request->owner_id) ? $request->owner_id :  [];
         $source_id = isset($request->source_id) ? $request->source_id : [];
         $source_detail_id = isset($request->source_detail_id) ? $request->source_detail_id : [];
+        $product_id = isset($request->product_id) ? $request->product_id : [];
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_search = isset($request->type_search) ? $request->type_search : 0;
@@ -46,6 +47,17 @@ class ParentsController extends Controller
         }
         if (!empty($source_detail_id)) {
             $cond .= " AND p.source_detail_id IN (".implode(",",$source_detail_id).")";
+        }
+        if (!empty($product_id)) {
+            $ids_product = is_array($product_id)
+                ? implode(",", array_map('intval', $product_id))
+                : (int)$product_id;
+            $cond .= " AND EXISTS (
+                SELECT 1 FROM crm_students AS cs
+                LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
+                WHERE cs.parent_id = p.id
+                  AND (cs.type_product IN ($ids_product) OR csc.type_product IN ($ids_product))
+            )";
         }
         
         if ($keyword !== '') {
@@ -87,7 +99,12 @@ class ParentsController extends Controller
                 p.care_date AS last_time_care,
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name
+                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
+                (SELECT GROUP_CONCAT(DISTINCT pr.name SEPARATOR ', ')
+                 FROM crm_students AS cs
+                 LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
+                 INNER JOIN products AS pr ON (pr.id = csc.type_product OR pr.id = cs.type_product)
+                 WHERE cs.parent_id = p.id) AS product_name
             FROM crm_parents AS p WHERE $cond $tmp_cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
 

@@ -29,7 +29,7 @@
             <p class="mb-1">Tương tác: <strong>{{parent.num_care}}</strong></p>
             <vs-divider/>
             <p><i class="fa fa-calendar"></i> Lịch chăm sóc tiếp theo</p>
-            <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
+            <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date ? parent.next_care_date.replace(' ', 'T').slice(0, 16) : ''" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
           </div>
           <div class="vx-col md:w-1/3 w-full">
             <p>Trạng thái khách hàng</p>
@@ -319,6 +319,7 @@
                           <!-- <th colspan="1" rowspan="1" class="text-center">Trung tâm</th> -->
                           <th colspan="1" rowspan="1" class="text-center">Phương thức</th>
                           <th colspan="1" rowspan="1" class="text-center">Trạng thái cuộc gọi</th>
+                          <th colspan="1" rowspan="1" class="text-center">Lịch chăm sóc tiếp theo</th>
                           <th colspan="1" rowspan="1" >Chi tiết</th>
                         </tr>
                       </thead>
@@ -328,6 +329,7 @@
                         <!-- <td class="td vs-table--td text-center">{{ item.branch_name }}</td> -->
                         <td class="td vs-table--td text-center">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
                         <td class="td vs-table--td text-center">{{ item.call_status_label }}</td>
+                        <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
                         <td class="td vs-table--td">
                           <p v-if="item.link_record">
                             <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
@@ -450,11 +452,11 @@
           </vs-tab>
         </vs-tabs>
       </vx-card>
-      <vs-popup :class="'modal_'+ modal_care.color" :title="modal_care.title" :active.sync="modal_care.show">
+      <vs-popup :class="'popup-care-lg modal_'+ modal_care.color" :title="modal_care.title" :active.sync="modal_care.show">
         <div class="vx-row"> 
           <div class="vx-col md:w-1/2 w-full mb-4">
-            <label>Phương thức</label>
-            <select class="vs-inputx vs-input--input normal" v-model="care.method_id">
+            <label>Phương thức <span class="text-danger">(*)</span></label>
+            <select class="vs-inputx vs-input--input normal" v-model="care.method_id" @change="onChangeCareMethod">
               <option value="">Chọn phương thức</option>
               <option
                 :value="method.id"
@@ -462,6 +464,25 @@
                 :key="index"
               >{{method.name}}</option>
             </select>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4" v-if="Number(care.method_id) === 1">
+            <label>Trạng thái cuộc gọi</label>
+            <select class="vs-inputx vs-input--input normal" v-model="care.call_status">
+              <option value="">Chọn trạng thái</option>
+              <option
+                v-for="option in statusOptionsCare"
+                :key="option.id"
+                :value="option.id"
+              >{{ option.label }}</option>
+            </select>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Lịch chăm sóc tiếp theo</label>
+            <input
+              type="datetime-local"
+              class="vs-inputx vs-input--input normal"
+              v-model="care.next_care_date"
+            >
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>File đính kèm</label>
@@ -473,8 +494,8 @@
               >
           </div>
           <div class="vx-col w-full mb-4">
-            <label>Ghi chú</label>
-            <textarea class="vs-inputx vs-input--input normal" v-model="care.note"></textarea>
+            <label>Ghi chú <span class="text-danger">(*)</span></label>
+            <textarea rows="4" class="vs-inputx vs-input--input normal" v-model="care.note" placeholder="Nhập nội dung chăm sóc"></textarea>
           </div>
           <vs-alert :active.sync="modal_care.alert.active" class="mb-5  mr-4 ml-4" :color="modal_care.alert.color" closable icon-pack="feather" close-icon="icon-x">
             <div v-html="modal_care.alert.body"></div>
@@ -642,7 +663,7 @@
           }
         },
         check_list: [],
-        active_tab: 3,
+        active_tab: 2,
         alert:{
           active: false,
           body: '',
@@ -769,7 +790,9 @@
         },
         cares:[],
         care:{
-          method_id:"",
+          method_id:1,
+          call_status:"",
+          next_care_date:"",
           care_date:"",
           note:"",
           parent_id:"",
@@ -1345,13 +1368,25 @@
         });
       },
       showModalCare(){
-        // document.getElementById('published_date').value=""
         this.modal_care.show = true
         this.modal_care.error_message=""
-        this.care.method_id=""
-        this.care.note=""
-        this.care.attached_file=""
-        this.care.file_name=""
+        this.modal_care.alert.active = false
+        this.modal_care.alert.body = ""
+        this.care.method_id = 1
+        this.care.call_status = ""
+        this.care.next_care_date = ""
+        this.care.note = ""
+        this.care.attached_file = ""
+        this.care.file_name = ""
+        const fileEl = document.getElementById('fileUploadExcel')
+        if (fileEl) {
+          fileEl.value = ""
+        }
+      },
+      onChangeCareMethod(){
+        if (Number(this.care.method_id) !== 1) {
+          this.care.call_status = ""
+        }
       },
       loadCares(){
         this.$vs.loading();
@@ -1365,6 +1400,9 @@
       },
       addCare(){
         this.care.parent_id = this.parent.id
+        if (Number(this.care.method_id) !== 1) {
+          this.care.call_status = ""
+        }
         let mess = "";
         let resp = true;
         if (this.care.method_id == "") {
@@ -1375,10 +1413,6 @@
           mess += " - Nội dung chăm sóc không được để trống<br/>";
           resp = false;
         }
-        // if (this.care.file_name == "") {
-        //   mess += " - File đính kèm không được để trống<br/>";
-        //   resp = false;
-        // }
         if (!resp) {
           this.modal_care.alert.color = 'danger'
           this.modal_care.alert.body = mess;
@@ -1398,8 +1432,10 @@
           })
           this.$vs.loading.close();
           this.loadCares();
+          this.loadDetail();
         })
         .catch((e) => {
+          this.$vs.loading.close();
         });
       },
       fileChanged(e) {
@@ -1720,3 +1756,9 @@
     },
   }
 </script>
+<style>
+.popup-care-lg.con-vs-popup .vs-popup {
+  width: 850px !important;
+  max-width: 95vw !important;
+}
+</style>
