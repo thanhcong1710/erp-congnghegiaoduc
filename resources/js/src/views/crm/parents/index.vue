@@ -137,9 +137,9 @@
                   <th colspan="1" rowspan="1" >Học sinh</th>
                   <th colspan="1" rowspan="1" >Sản phẩm</th>
                   <th colspan="1" rowspan="1" >Nguồn</th>
-                  <th colspan="1" rowspan="1">Nguồn chi tiết</th>
+                  <!-- <th colspan="1" rowspan="1">Nguồn chi tiết</th> -->
                   <th colspan="1" rowspan="1">Người phụ trách</th>
-                  <th colspan="1" rowspan="1" class="text-center">Lịch chăm sóc tiếp theo</th>
+                  <th colspan="1" rowspan="1" class="text-center">Lịch hẹn</th>
                   <th colspan="1" rowspan="1" >Lịch sử chăm sóc</th>
                   <th colspan="1" rowspan="1" class="text-center">Thời gian chăm sóc gần nhất</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -164,7 +164,7 @@
                 <td class="td vs-table--td">{{ item.hs1_name }}</td>
                 <td class="td vs-table--td">{{ item.product_name }}</td>
                 <td class="td vs-table--td">{{ item.source_name }}</td>
-                <td class="td vs-table--td">{{ item.source_detail_name }}</td>
+                <!-- <td class="td vs-table--td">{{ item.source_detail_name }}</td> -->
                 <td class="td vs-table--td">{{ item.owner_name }}</td>
                 <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
                 <td class="td vs-table--td">{{ item.last_care }}</td>
