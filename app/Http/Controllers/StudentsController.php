@@ -273,10 +273,13 @@ class StudentsController extends Controller
         $keyword = $request->keyword;
         $branch_id = $request->branch_id;
         $is_renew = $request->is_renew;
-        if ($is_renew) {
+        $cond = "";
+        // Nếu truyền is_renew rõ ràng: 1 = chỉ học sinh tái phí, 0 = chỉ học sinh mới. Nếu null hoặc -1 thì cho phép tìm tất cả
+        if ($is_renew === 1 || $is_renew === '1') {
             $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0 ) > 0";
-        } else {
-            $cond = " AND (SELECT count(id) FROM contracts WHERE student_id = s.id AND type>0 AND count_recharge>=0) = 0";
+        } elseif ($is_renew === 0 || $is_renew === '0') {
+            // Không giới hạn để màn hình nhập học tìm được cả học sinh mới và học sinh tái phí
+            $cond = "";
         }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
                 (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,

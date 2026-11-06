@@ -1049,29 +1049,26 @@
       <section id="chang-7-6" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.6</span>
-          <h2 class="section-title">Vận hành: Tái tục / Gia hạn Hợp đồng (Contracts Renew)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Chăm sóc Khách hàng</span>
+          <h2 class="section-title">Vận hành: Tái tục / Gia hạn Hợp đồng (Tái phí)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Sale / Tuyển sinh</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Cảnh báo học viên sắp kết thúc khóa học</div>
-          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Tái tục hợp đồng (Contracts-renew)</code>. Hệ thống tự động lọc các học viên còn dưới 4 - 8 buổi học để nhân viên chủ động chăm sóc, tư vấn tái tục trước khi khóa học kết thúc.</div>
+          <div class="step-title">Tạo gói Tái phí trực tiếp tại mục "Nhập học"</div>
+          <div class="step-desc">
+            Hệ thống đã tinh gọn quy trình: <strong>Toàn bộ hợp đồng mới và hợp đồng tái phí đều được thực hiện tập trung tại mục <code>LMS</code> &rarr; <code>Nhập học</code> (URL: <code>/lms/contracts/add</code>)</strong>:
+            <ul>
+              <li>Vào <code>Nhập học</code> &rarr; Bấm <strong>Thêm mới</strong>.</li>
+              <li>Chọn trung tâm và tìm kiếm học sinh đang theo học (học sinh cũ).</li>
+              <li>Chọn khóa học, gói học phí, áp dụng chính sách ưu đãi tái tục và bấm <strong>Lưu</strong>.</li>
+              <li><strong>Cơ chế tự động:</strong> Hệ thống tự động nhận diện học sinh đã từng có hợp đồng và tự động tăng số lần tái phí <code>count_recharge</code> (+1), đồng thời hiển thị ngay trên danh sách Nhập học chung.</li>
+            </ul>
+          </div>
 
-          <!-- KHUNG ẢNH 11 -->
-          <div class="screenshot-container">
-            <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.6: Danh sách Tái tục Hợp đồng</span>
-              <span class="file-path">/images/guide/11-contract-renew.png</span>
-            </div>
-            <div class="screenshot-body">
-              <img src="../images/guide/11-contract-renew.png" alt="Tái tục hợp đồng" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 7.6]</strong></p>
-                <p class="screenshot-caption">Danh sách học viên sắp hết buổi học kèm nút tạo hợp đồng tái tục nhanh.</p>
-              </div>
-            </div>
+          <div class="alert-box alert-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div><strong>Ghi chú:</strong> Nhân viên không cần chuyển qua menu riêng, chỉ cần thao tác tại màn hình Nhập học là hệ thống tự động quản trị lịch sử tái phí của từng học viên.</div>
           </div>
         </div>
       </section>

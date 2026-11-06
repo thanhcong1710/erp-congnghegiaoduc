@@ -84,12 +84,6 @@ export default [
             permission:'lms_contracts',
           },
           {
-            url: '/lms/contracts-renew',
-            name: 'Tái phí',
-            slug: 'lms-contracts-renew',
-            permission:'lms_contracts_renew',
-          },
-          {
             url: '/lms/enrolments',
             name: 'Xếp lớp',
             slug: 'lms-enrolments',

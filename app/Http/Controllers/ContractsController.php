@@ -230,7 +230,7 @@ class ContractsController extends Controller
             $cond .= " AND c.created_at > '$start_date 00:00:00'";
         }
         if ($type_contract == 1) {
-            $cond .= " AND c.count_recharge <= 0 ";
+            // Không giới hạn count_recharge để hiển thị cả hợp đồng nhập học mới và tái phí
         } elseif ($type_contract == 2) {
             $cond .= " AND c.count_recharge > 0 ";
         }
