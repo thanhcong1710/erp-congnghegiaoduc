@@ -814,7 +814,7 @@ class ContractsController extends Controller
             WHERE $cond $order_by $limitation");
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
-            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount;
+            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount + (float)$row->discount_amount;
             $list[$k]->excess_amount = $effective > (float)$row->must_charge ? ($effective - (float)$row->must_charge) : 0;
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
@@ -858,7 +858,7 @@ class ContractsController extends Controller
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genLearningStatusByContracts($row->student_id, true, $row->agreement_id);
             $list[$k]->status_register = ((int)$row->count_recharge > 0) ? 'UP' : 'NEW';
-            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount;
+            $effective = (float)$row->total_charged + (float)$row->received_amount - (float)$row->transferred_amount + (float)$row->discount_amount;
             $list[$k]->excess_amount = $effective > (float)$row->must_charge ? ($effective - (float)$row->must_charge) : 0;
         }
         $data = u::makingPagination($list, $total->total, $page, $limit);
@@ -1050,8 +1050,9 @@ class ContractsController extends Controller
         $received = (float) data_get($agreement, 'received_amount', 0);
         $transferred = (float) data_get($agreement, 'transferred_amount', 0);
         $must_charge = (float) data_get($agreement, 'must_charge', 0);
+        $discount_amount = (float) data_get($agreement, 'discount_amount', 0);
 
-        $effective = $total_charged + $received - $transferred;
+        $effective = $total_charged + $received - $transferred + $discount_amount;
         $excess = $effective - $must_charge;
 
         if ($refund_type == 1) {

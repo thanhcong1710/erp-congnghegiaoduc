@@ -772,6 +772,35 @@
         })
       },
       approve(status){
+        if (status == 1) {
+          let mess = '';
+          const discount = parseInt(this.agreement_info.discount_amount) || 0;
+          const inputDiscount = parseInt(this.discountAmount) || 0;
+          if (inputDiscount !== discount) {
+            mess += ' - Bạn đã thay đổi số tiền giảm trừ nhưng chưa ấn "Áp dụng giảm trừ". Vui lòng ấn "Áp dụng giảm trừ" và kiểm tra lại số tiền thu trước khi duyệt phiếu thu.<br/>';
+          }
+
+          const currentAmount = parseInt(this.payment.charge_amount) || 0;
+          const inputAmount = parseInt(this.payment.amount) || 0;
+          if (inputAmount && inputAmount !== currentAmount) {
+            mess += ' - Bạn đã thay đổi số tiền thu nhưng chưa ấn "Lưu". Vui lòng ấn "Lưu" trước khi duyệt phiếu thu.<br/>';
+          }
+
+          if (mess) {
+            this.alert.color = 'danger';
+            this.alert.body = mess;
+            this.alert.active = true;
+            this.$vs.notify({
+              title: 'Cảnh báo',
+              text: 'Vui lòng hoàn tất việc áp dụng giảm trừ hoặc lưu phiếu thu trước khi phê duyệt!',
+              color: 'danger',
+              iconPack: 'feather',
+              icon: 'icon-alert-triangle'
+            });
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            return;
+          }
+        }
         this.status = status;
         this.$vs.dialog({
           type: 'confirm',
