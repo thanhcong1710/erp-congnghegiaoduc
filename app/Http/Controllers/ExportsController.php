@@ -633,7 +633,7 @@ class ExportsController extends Controller
         $order_by = " ORDER BY c.enrolment_start_date DESC ";
         $list = u::query("SELECT s.name, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, c.enrolment_start_date, c.enrolment_last_date,
-                (SELECT `name` FROM programs WHERE id=p.parent_id) AS `level`,
+                COALESCE((SELECT `name` FROM programs WHERE id=p.parent_id), p.name) AS `level`,
                 (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND `type`>0 AND `status`>0) AS num_contract
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id = c.student_id
@@ -732,7 +732,7 @@ class ExportsController extends Controller
                 (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
                 (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
                 c.note, p.method, b.name AS branch_name, pd.name AS product_name,
-                (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`,
+                COALESCE((SELECT `name` FROM programs WHERE id =pg.parent_id), pg.name) AS `level`,
                 DATE_FORMAT(p.charge_date, '%Y-%m') AS report_month
             FROM payments AS p 
                 LEFT JOIN contracts AS c ON c.id=p.contract_id 
@@ -845,7 +845,7 @@ class ExportsController extends Controller
                 (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
                 (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
                 c.note, p.method, b.name AS branch_name, pd.name AS product_name,
-                (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`,
+                COALESCE((SELECT `name` FROM programs WHERE id =pg.parent_id), pg.name) AS `level`,
                 DATE_FORMAT(p.charge_date, '%Y-%m') AS report_month, s.nick, s.gud_mobile1, s.gud_name1,
                 c.count_recharge, (SELECT CONCAT(hrm_id, '-', name) FROM users WHERE id=p.ec_id) AS ec_name 
             FROM payments AS p 

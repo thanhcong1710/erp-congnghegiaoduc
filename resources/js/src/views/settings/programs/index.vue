@@ -7,12 +7,12 @@
       <div class="mb-5">
         <div class="vx-row">
           <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
+            <label for="" class="vs-input--label">Khóa học</label>
             <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
+                name="search_product"
+                placeholder="Chọn khóa học"
+                v-model="searchData.arr_product"
+                :options="product_list"
                 label="name"
                 :close-on-select="false"
                 :hide-selected="true"
@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Tên chương trình học" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Tên hoặc mã chương trình học" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -66,7 +66,6 @@
                 <tr>
                   <!---->
                   <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Khóa học</th>
                   <th colspan="1" rowspan="1">Chương trình học</th>
                   <th colspan="1" rowspan="1" class="text-center">Mã</th>
@@ -78,7 +77,6 @@
                 <!---->
                 
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">{{item.branch_name}}</td>
                 <td class="td vs-table--td">{{item.product_name}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
                 <td class="td vs-table--td text-center">{{item.code}}</td>
@@ -135,10 +133,10 @@
     },
     data() {
       return {
-        branch_list:[],
+        product_list:[],
         searchData: {
-          arr_branch: "",
-          branch_id:"",
+          arr_product: "",
+          product_id:"",
           keyword: "",
           status: "",
           arr_status:"",
@@ -190,16 +188,16 @@
       }
     },
     created() {
-      axios.g(`/api/system/branches-has-user`)
+      axios.g(`/api/system/products`)
         .then(response => {
-        this.branch_list = response.data
+        this.product_list = response.data
       })
       this.getData();
     },
     methods: {
       reset() {
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
+        this.searchData.arr_product= ""
+        this.searchData.product_id= ""
         this.searchData.keyword = ""
         this.searchData.arr_status= ""
         this.searchData.status= ""
@@ -207,10 +205,10 @@
         this.getData();
       },
       getData() {
-        const ids_branch = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.map(item => {
-            ids_branch.push(item.id)
+        const ids_product = []
+        if (this.searchData.arr_product && this.searchData.arr_product.length) {
+          this.searchData.arr_product.map(item => {
+            ids_product.push(item.id)
           })
         }
         const ids_status = []
@@ -220,9 +218,9 @@
           })
         }
         this.searchData.status = ids_status
-        this.searchData.branch_id = ids_branch
+        this.searchData.product_id = ids_product
         const data = {
-            branch_id: this.searchData.branch_id,
+            product_id: this.searchData.product_id,
             keyword: this.searchData.keyword,
             status:this.searchData.status,
             pagination:this.pagination,

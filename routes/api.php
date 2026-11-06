@@ -372,7 +372,6 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('delete', 'ProgramsController@delete');
                 Route::get('show/{id}', 'ProgramsController@show');
                 Route::post('update', 'ProgramsController@update');
-                Route::post('sync', 'ProgramsController@sync');
             });
             Route::prefix('rooms')->group(function () {
                 Route::post('add', 'RoomsController@add');

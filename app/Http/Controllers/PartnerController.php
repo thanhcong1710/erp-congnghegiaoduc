@@ -41,7 +41,7 @@ class PartnerController extends Controller
                         (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
                         (SELECT max(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_to, 
                         c.note, p.method, p.id AS payment_id,
-                        (SELECT `name` FROM programs WHERE id =pg.parent_id) AS `level`
+                        COALESCE((SELECT `name` FROM programs WHERE id =pg.parent_id), pg.name) AS `level`
                     FROM payments AS p 
                         LEFT JOIN contracts AS c ON c.id=p.contract_id 
                         LEFT JOIN students AS s ON s.id=p.student_id

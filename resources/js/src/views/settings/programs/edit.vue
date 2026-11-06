@@ -6,20 +6,6 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Trung tâm <span class="text-danger"> (*)</span></label>
-          <div class=w-full>
-            <vue-select
-                  label="name"
-                  placeholder="Chọn trung tâm"
-                  :options="html.branches.list"
-                  v-model="html.branches.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveBranch"
-              ></vue-select>
-          </div>
-        </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <vue-select
@@ -34,20 +20,6 @@
           </div>
         </div>
         <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Chương trình cha</label>
-          <div class=w-full>
-            <vue-select
-                  label="name"
-                  placeholder="Chọn chương trình cha"
-                  :options="html.programs.list"
-                  v-model="html.programs.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveProgram"
-              ></vue-select>
-          </div>
-        </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Mã chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.code" class="vs-inputx vs-input--input normal">
@@ -57,20 +29,6 @@
           <label>Tên chương trình học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <input type="text" v-model="program.name" class="vs-inputx vs-input--input normal">
-          </div>
-        </div>
-        <div class="mb-6 vx-col md:w-1/3 w-full">
-          <label>Chương trình con</label>
-          <div class=w-full>
-            <vue-select
-                  label="name"
-                  placeholder="Chọn chương trình con"
-                  :options="html.program_subs.list"
-                  v-model="html.program_subs.item"
-                  :searchable="true"
-                  language="tv-VN"
-                  @input="saveProgramSub"
-              ></vue-select>
           </div>
         </div>
         <div class="mb-6 md:w-2/3 vx-col w-full">
@@ -108,53 +66,15 @@
 
   import vSelect from 'vue-select'
   import axios from '../../../http/axios.js'
-  import u from '../../../until/helper.js'
-  import datepicker from "vue2-datepicker";
-  import moment from 'moment';
 
   export default {
     components: {
-      datepicker,
       "vue-select": vSelect
     },
     data() {
       return {
-        datepickerOptions: {
-          closed: true,
-          value: "",
-          minDate: "",
-          lang: {
-            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
-            months: [
-              "Tháng 1",
-              "Tháng 2",
-              "Tháng 3",
-              "Tháng 4",
-              "Tháng 5",
-              "Tháng 6",
-              "Tháng 7",
-              "Tháng 8",
-              "Tháng 9",
-              "Tháng 10",
-              "Tháng 11",
-              "Tháng 12"
-            ]
-          }
-        },
         html:{
-          branches: {
-            item: '',
-            list: []
-          },
           products: {
-            item: '',
-            list: []
-          },
-          programs: {
-            item: '',
-            list: []
-          },
-          program_subs: {
             item: '',
             list: []
           },
@@ -165,21 +85,15 @@
           color:'',
         },
         program:{
-          branch_id:'',
           product_id:'',
           code:'',
           name: '',
           description: '',
           status:1,
-          program_sub_id:'',
         },
       }
     },
     async created() {
-      await axios.g(`/api/system/branches-has-user`)
-        .then(response => {
-        this.html.branches.list = response.data
-      })
       await axios.g(`/api/system/products`)
         .then(response => {
         this.html.products.list = response.data
@@ -187,94 +101,29 @@
       this.loadDetail();
     },
     methods: {
-      loadProgram(program_id=0){
-        if (!this.program.product_id) {
-          this.html.programs.list = []
-          this.html.programs.item = ''
-          return
-        }
-        const branchQuery = this.program.branch_id ? `&branch_id=${this.program.branch_id}` : ''
-        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1${branchQuery}`)
-          .then(response => {
-          this.html.programs.list = response.data
-          if(program_id > 0){
-            this.html.programs.item = this.html.programs.list.filter(item => item.id == program_id)[0]
-          }
-        })
-      },
-      loadProgramSub(program_sub_id=0){
-        axios.g(`/api/system/program-subs/${this.program.product_id}`)
-          .then(response => {
-          this.html.program_subs.list = response.data
-          if(program_sub_id > 0){
-            this.html.program_subs.item = this.html.program_subs.list.filter(item => item.id == program_sub_id)[0]
-          }
-        })
-      },
-      saveBranch(data = null){
-        if (data && typeof data === 'object') {
-          this.program.branch_id = data.id
-        }else{
-          this.program.branch_id = ""
-        }
-        this.html.programs.item = ''
-        this.program.parent_id = ''
-        this.loadProgram();
-      },
-      saveProgram(data = null){
-        if (data && typeof data === 'object') {
-          const parent_id = data.id
-          this.program.parent_id = parent_id
-        }else{
-          this.program.parent_id = ""
-        }
-      },
-      saveProgramSub(data = null){
-        if (data && typeof data === 'object') {
-          const program_sub_id = data.id
-          this.program.program_sub_id = program_sub_id
-        }else{
-          this.program.program_sub_id = ""
-        }
-      },
       loadDetail(){
         this.$vs.loading();
         axios.g(`/api/settings/programs/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          if(response.data.length !== 0){
+          if(response.data && response.data.id){
             this.program = response.data
-            this.html.branches.item = this.html.branches.list.filter(item => item.id == response.data.branch_id)[0]
             this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
-            this.loadProgram(this.program.parent_id)
-            this.loadProgramSub(this.program.program_sub_id)
           }else{
             this.$router.push({ path: `/settings/programs` });
           }
         })
       },
-      selectDate(date){
-        if (date) {
-          this.program.opened_date = moment(date).format("YYYY-MM-DD");
-        }
-      },
       saveProduct(data = null){
         if (data && typeof data === 'object') {
-          const product_id = data.id
-          this.program.product_id = product_id
+          this.program.product_id = data.id
         }else{
           this.program.product_id = ""
         }
-        this.loadProgram();
-        this.loadProgramSub();
       },
       save() {
         let mess = "";
         let resp = true;
-        if (this.program.branch_id == "") {
-          mess += " - Trung tâm không được để trống<br/>";
-          resp = false;
-        }
         if (this.program.product_id == "") {
           mess += " - Khóa học không được để trống<br/>";
           resp = false;
@@ -317,7 +166,7 @@
             }
           })
           .catch((e) => {
-            console.log(error);
+            console.log(e);
             this.$vs.loading.close();
           });
       },

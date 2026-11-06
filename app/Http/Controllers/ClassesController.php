@@ -20,11 +20,11 @@ class ClassesController extends Controller
             id AS item_id, 
             'program' AS item_type, 
             `name` AS `text`, 
-            parent_id, 
+            0 AS parent_id, 
             'fa fa-folder' AS icon, 
             0 AS status 
         FROM programs 
-        WHERE id > 0 AND status = 1 AND product_id = $product_id AND branch_id = $branch_id 
+        WHERE id > 0 AND status = 1 AND product_id = $product_id 
         UNION ALL
         SELECT CONCAT(999, c.id) AS id, 
             c.id AS item_id, 

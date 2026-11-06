@@ -140,14 +140,8 @@ class SystemController extends Controller
     }
 
     public function getProgramsByProduct(Request $request, $product_id){
-        $is_parent = data_get($request,'is_parent', 0);
-        $branch_id = (int)data_get($request, 'branch_id', 0);
-        $branch_cond = $branch_id ? " AND branch_id = $branch_id " : "";
-        if ($is_parent) {
-            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND parent_id =0 AND product_id=$product_id $branch_cond");
-        } else {
-            $data= u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id $branch_cond");
-        }
+        $product_id = (int)$product_id;
+        $data = u::query("SELECT name, id FROM programs WHERE status=1 AND product_id=$product_id ORDER BY id ASC");
         return response()->json($data);
     }
 

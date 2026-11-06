@@ -595,8 +595,8 @@
         }
       },
       loadPrograms(){
-        if(this.config.branch_id && this.config.product_id){
-          axios.g(`/api/system/programs/${this.config.product_id}?branch_id=${this.config.branch_id}`)
+        if(this.config.product_id){
+          axios.g(`/api/system/programs/${this.config.product_id}`)
             .then(response => {
             this.html.programs.list = response.data
             if(this.config.program_id){
