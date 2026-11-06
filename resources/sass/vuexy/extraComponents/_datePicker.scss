@@ -84,3 +84,42 @@
       }
     }
 }
+
+// vue2-datepicker (mx-datepicker) styling
+.mx-datepicker {
+  width: 100%;
+
+  .mx-input {
+    height: 40px;
+    line-height: 40px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, .2);
+    color: $content-color;
+    box-shadow: none;
+    width: 100%;
+
+    &:focus {
+      border-color: rgba(var(--vs-primary), 1);
+    }
+  }
+
+  .mx-input-append,
+  .mx-clear-wrapper {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    width: 32px;
+  }
+
+  .mx-input-icon,
+  .mx-calendar-icon,
+  .mx-clear-icon {
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    font-size: 16px;
+  }
+}

@@ -348,5 +348,97 @@ th .vs-table-text {
 .multiselect {
   z-index: 999;
 }
+
+/* Đồng bộ chiều cao 40px và giao diện cho các ô filter */
+#page-roles-list label.vs-input--label {
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+#page-roles-list .vs-input .vs-input--input,
+#page-roles-list input.vs-input--input.normal,
+#page-roles-list select.vs-input--input.normal {
+  height: 40px !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-sizing: border-box !important;
+  padding: 0.55rem 0.7rem !important;
+}
+
+#page-roles-list .multiselect {
+  min-height: 40px;
+}
+#page-roles-list .multiselect .multiselect__tags {
+  min-height: 40px !important;
+  padding: 8px 40px 0 10px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-sizing: border-box !important;
+  background: #fff !important;
+}
+#page-roles-list .multiselect--active .multiselect__tags {
+  border-color: rgba(var(--vs-primary), 1) !important;
+}
+#page-roles-list .multiselect .multiselect__placeholder {
+  margin-bottom: 0 !important;
+  padding-top: 2px !important;
+  line-height: 20px !important;
+  font-size: 14px !important;
+  color: #adadad !important;
+}
+#page-roles-list .multiselect .multiselect__single {
+  margin-bottom: 0 !important;
+  line-height: 20px !important;
+  font-size: 14px !important;
+  padding-left: 0 !important;
+}
+#page-roles-list .multiselect .multiselect__input {
+  font-size: 14px !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  line-height: 20px !important;
+}
+#page-roles-list .multiselect .multiselect__select {
+  height: 38px !important;
+  width: 38px !important;
+  padding: 4px 8px !important;
+}
+
+#page-roles-list .mx-datepicker {
+  width: 100% !important;
+}
+#page-roles-list .mx-datepicker .mx-input {
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 14px !important;
+  border-radius: 5px !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  box-shadow: none !important;
+  padding-left: 10px !important;
+  padding-right: 30px !important;
+  color: inherit !important;
+  background-color: #fff !important;
+}
+#page-roles-list .mx-datepicker .mx-input:focus {
+  border-color: rgba(var(--vs-primary), 1) !important;
+}
+#page-roles-list .mx-datepicker .mx-input-append,
+#page-roles-list .mx-datepicker .mx-clear-wrapper {
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 8px !important;
+  width: 32px !important;
+}
+#page-roles-list .mx-datepicker .mx-input-icon,
+#page-roles-list .mx-datepicker .mx-calendar-icon,
+#page-roles-list .mx-datepicker .mx-clear-icon {
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  font-size: 16px !important;
+}
 </style>
 
