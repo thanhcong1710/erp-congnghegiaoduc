@@ -154,7 +154,7 @@
                     v-for="option in levelOptionsParent" 
                     :key="option.id" 
                     :value="option.id">
-                    {{ option.id }}. {{ option.label }}
+                    {{ option.label }}
                   </option>
                 </select>
               </div>
@@ -343,7 +343,7 @@
           mobile_2:"",
           note: "",
           email: "",
-          status: 0,
+          status: 1,
           province_id:"",
           district_id:"",
           job_id:"",

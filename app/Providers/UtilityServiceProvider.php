@@ -210,39 +210,37 @@ class UtilityServiceProvider extends ServiceProvider
     public static function getStatusParent($status)
     {
         $arr_status = array(
-            '1'=>'C3 rác',
-            '2'=>'C3',
-            '3'=>'L1',
-            '4'=>'L2',
-            '5'=>'L3',
-            '6'=>'L4',
-            '7'=>'L5',
-            '8'=>'L6',
-            '9'=>'L6 renew',
-            '10'=>'BL',
+            '1'=>'1. KH mới',
+            '2'=>'2. KH Không nghe máy',
+            '3'=>'3. KH Thuê bao / Không đúng số',
+            '4'=>'4. Không đúng đối tượng / không gần cơ sở',
+            '5'=>'5. KH Bận, gọi lại sau',
+            '6'=>'6. KH Không có nhu cầu',
+            '7'=>'7. KH Tiếp tục chăm sóc (Quan tâm, cần follow)',
+            '8'=>'8. KH Hẹn lịch Checkin',
+            '9'=>'9. KH Đã đến Checkin',
+            '10'=>'10. KH Đã mua gói phí',
+            '11'=>'11. KH Đến hạn tái tục',
+            '12'=>'12. KH Danh sách đen',
         );
-        return $arr_status['status'] ?? '';
+        return $arr_status[$status] ?? '';
     }
     public static function getTitleCallStatus($call_status, $call_status_sub)
     {
         $arr_status_care = array(
-            '0'=>'Khách hàng mới',
-            '1'=>'Khách hàng không liên lạc được',
-            '2'=>'Im lặng sau khi gửi thông tin',
-            '3'=>'Hẹn gọi lại sau',
-            '4'=>'Trùng lịch học/ Hiện tại đang không có nhu cầu/ Không sắp xếp được thời gian',
-            '5'=>'Đang học ở bên khác',
-            '6'=>'Đang cân nhắc nhưng không chia sẻ lý do',
-            '7'=>'Không thuộc tệp khách hàng mục tiêu',
-            '8'=>'Không có trình độ phù hợp',
-            '9'=>'Từ chối không có lý do cụ thể',
-            '10'=>'Tắt máy ngang',
-            '11'=>'Đồng ý đến test',
-            '12'=>'Hẹn lịch nhưng không đến',
-            '13'=>'Danh sách đen',
-            '14'=>'Khác',
+            '1'=>'Blank',
+            '2'=>'Thuê bao - Tắt máy - Sai số',
+            '3'=>'Location',
+            '4'=>'Máy bận - Không nghe máy',
+            '5'=>'KH hẹn gọi lại sau',
+            '6'=>'KH không phù hợp',
+            '7'=>'Không có con/Không có con trong độ tuổi học',
+            '8'=>'Lý do khác',
+            '9'=>'KH quan tâm cần follow update',
+            '10'=>'KH đồng ý đặt lịch checkin',
+            '11'=>'Danh sách đen',
         );
-        return $arr_status_care['call_status'] ?? '';
+        return $arr_status_care[$call_status] ?? '';
     }
 
     public static function genStatusByCallStatus($call_status, $call_status_sub)

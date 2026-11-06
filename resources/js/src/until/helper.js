@@ -149,32 +149,31 @@ function getDateMonth(date) {
   return "";
 }
 const statusOptionsCare = [
-  {id:0,label:'Khách hàng mới'},
-  {id:1,label:'Khách hàng không liên lạc được'},
-  {id:2,label:'Im lặng sau khi gửi thông tin'},
-  {id:3,label:'Hẹn gọi lại sau'},
-  {id:4,label:'Trùng lịch học/ Hiện tại đang không có nhu cầu/ Không sắp xếp được thời gian'},
-  {id:5,label:'Đang học ở bên khác'},
-  {id:6,label:'Đang cân nhắc nhưng không chia sẻ lý do'},
-  {id:7,label:'Không thuộc tệp khách hàng mục tiêu'},
-  {id:8,label:'Không có trình độ phù hợp'},
-  {id:9,label:'Từ chối không có lý do cụ thể'},
-  {id:10,label:'Tắt máy ngang'},
-  {id:11,label:'Đồng ý đến test'},
-  {id:12,label:'Hẹn lịch nhưng không đến'},
-  {id:13,label:'Danh sách đen'}
+  {id:1,label:'Blank'},
+  {id:2,label:'Thuê bao - Tắt máy - Sai số'},
+  {id:3,label:'Location'},
+  {id:4,label:'Máy bận - Không nghe máy'},
+  {id:5,label:'KH hẹn gọi lại sau'},
+  {id:6,label:'KH không phù hợp'},
+  {id:7,label:'Không có con/Không có con trong độ tuổi học'},
+  {id:8,label:'Lý do khác'},
+  {id:9,label:'KH quan tâm cần follow update'},
+  {id:10,label:'KH đồng ý đặt lịch checkin'},
+  {id:11,label:'Danh sách đen'}
 ]
 const levelOptionsParent = [
-  {id:1,label:'C3 rác'},
-  {id:2,label:'C3'},
-  {id:3,label:'L1'},
-  {id:4,label:'L2'},
-  {id:5,label:'L3'},
-  {id:6,label:'L4'},
-  {id:7,label:'L5'},
-  {id:8,label:'L6'},
-  {id:9,label:'L6 renew'},
-  {id:10,label:'BL'},
+  {id:1,label:'1. KH mới'},
+  {id:2,label:'2. KH Không nghe máy'},
+  {id:3,label:'3. KH Thuê bao / Không đúng số'},
+  {id:4,label:'4. Không đúng đối tượng / không gần cơ sở'},
+  {id:5,label:'5. KH Bận, gọi lại sau'},
+  {id:6,label:'6. KH Không có nhu cầu'},
+  {id:7,label:'7. KH Tiếp tục chăm sóc (Quan tâm, cần follow)'},
+  {id:8,label:'8. KH Hẹn lịch Checkin'},
+  {id:9,label:'9. KH Đã đến Checkin'},
+  {id:10,label:'10. KH Đã mua gói phí'},
+  {id:11,label:'11. KH Đến hạn tái tục'},
+  {id:12,label:'12. KH Danh sách đen'},
 ]
 
 export default {
