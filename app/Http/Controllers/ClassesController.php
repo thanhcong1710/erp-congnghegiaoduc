@@ -8,7 +8,6 @@ use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Artisan;
 
 class ClassesController extends Controller
 {
@@ -75,8 +74,20 @@ class ClassesController extends Controller
         $start_date = data_get($request,'start_date');
         $end_date = data_get($request,'end_date');
         $data_sessions = u::calculatorSessions($start_date, $end_date, $holidays, $arr_day);
-        // $subjects = data_get($request,'subjects');
-        $subjects = ["0"=> (object)['id'=>1,'session'=>data_get($request,'session'), 'stt'=>1]];
+        $dates = data_get($data_sessions, 'dates', []);
+        $session_count = (int)data_get($request,'session') ?: count($dates);
+        $subjects = ["0"=> (object)['id'=>1,'session'=>$session_count, 'stt'=>1]];
+
+        $teacher_id = (int)data_get($request, 'teacher_id');
+        $shift_id = (int)data_get($request, 'shift_id');
+        $room_id = (int)data_get($request, 'room_id');
+        $teacher_obj = $teacher_id ? u::first("SELECT CONCAT(`name`, ' - ', hrm_id) AS label FROM users WHERE id = $teacher_id") : null;
+        $shift_obj = $shift_id ? u::first("SELECT `name` FROM shifts WHERE id = $shift_id") : null;
+        $room_obj = $room_id ? u::first("SELECT `name` FROM rooms WHERE id = $room_id") : null;
+        $teacher_name = data_get($teacher_obj, 'label');
+        $shift_parts = array_filter([data_get($shift_obj, 'name'), data_get($room_obj, 'name')]);
+        $shift_name = !empty($shift_parts) ? implode(' - ', $shift_parts) : null;
+        $cls_enddate = data_get($data_sessions, 'end_date') ?: $end_date;
             
         if($request->is_edit){
             $class_id = data_get($request,'class_id');
@@ -109,7 +120,7 @@ class ClassesController extends Controller
             if($exitSChedule){
                 $currentDate = date('Y-m-d');
                 u::query("DELETE FROM schedules WHERE class_id= $class_id AND class_date >= '$currentDate'");
-                foreach(data_get($data_sessions, 'dates') AS $row){
+                foreach($dates AS $row){
                     if($row >= $currentDate){
                         u::insertSimpleRow(array(
                             'class_date'=> $row,
@@ -123,7 +134,7 @@ class ClassesController extends Controller
                     }
                 }
             } else{
-                foreach(data_get($data_sessions, 'dates') AS $row){
+                foreach($dates AS $row){
                     u::insertSimpleRow(array(
                         'class_date'=> $row,
                         'class_id'=> $class_id,
@@ -136,45 +147,48 @@ class ClassesController extends Controller
                 }
             }
 
-            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-           
-            for($i=1;$i<= data_get($request,'total_cycles');$i++){
+            $total_cycles = max(1, (int)data_get($request,'total_cycles', 1));
+            for($i=1;$i<= $total_cycles;$i++){
                 $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
                 foreach($arr_subject AS $subject){
-                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-
-                }
-                $tmp_subject = 0;
-                $subject_stt = 0;
-                $class_stt = 0;
-                foreach($arr_schedule AS $row){
-                    if($tmp_subject != $row->subject_id){
-                        $tmp_subject = $row->subject_id;
-                        $subject_stt = 0;
+                    if ((int)$subject->session > 0) {
+                        u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
                     }
-                    $subject_stt++;
-                    $class_stt++;
-                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
                 }
+            }
+            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
+            $tmp_subject = 0;
+            $subject_stt = 0;
+            $class_stt = 0;
+            foreach($arr_schedule AS $row){
+                if($tmp_subject != $row->subject_id){
+                    $tmp_subject = $row->subject_id;
+                    $subject_stt = 0;
+                }
+                $subject_stt++;
+                $class_stt++;
+                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
             }
             
             u::updateSimpleRow(array(
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
+                'teacher_name'=> $teacher_name,
+                'shift_name'=> $shift_name,
                 'cls_name'=> data_get($request,'title'),
                 'product_id'=> data_get($request,'product_id'),
                 'program_id'=> data_get($request,'program_id'),
                 'cm_id'=> data_get($request,'cm_id'),
                 'ta_id'=> data_get($request,'ta_id'),
                 'cls_startdate'=> data_get($request,'start_date'),
-                'cls_enddate'=> data_get($data_sessions,'end_date'),
+                'cls_enddate'=> $cls_enddate,
                 'class_day'=> implode(",", $arr_day),
                 'max_students'=> data_get($request,'max_students'),
                 'updated_at'=> date('Y-m-d H:i:s'),
                 'updator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
-                'total_cycles'=> data_get($request,'total_cycles'),
+                'total_cycles'=> $total_cycles,
             ), array('id'=>data_get($request,'class_id')), 'classes');
 
             // Cập nhật cm_id cho term_student_user
@@ -182,23 +196,26 @@ class ClassesController extends Controller
                 LEFT JOIN contracts AS c ON tsu.student_id = c.student_id 
                 SET tsu.cm_id = ".(int)data_get($request,'cm_id').", c.cm_id = ".(int)data_get($request,'cm_id')." WHERE c.class_id = $class_id AND c.status !=7 ");
         }else{
+            $total_cycles = max(1, (int)data_get($request,'total_cycles', 1));
             $class_id = u::insertSimpleRow(array(
                 'branch_id'=> data_get($request,'branch_id'),
                 'teacher_id'=> data_get($request,'teacher_id'),
+                'teacher_name'=> $teacher_name,
+                'shift_name'=> $shift_name,
                 'cls_name'=> data_get($request,'title'),
                 'product_id'=> data_get($request,'product_id'),
                 'program_id'=> data_get($request,'program_id'),
                 'cm_id'=> data_get($request,'cm_id'),
                 'ta_id'=> data_get($request,'ta_id'),
                 'cls_startdate'=> data_get($request,'start_date'),
-                'cls_enddate'=> data_get($data_sessions,'end_date'),
+                'cls_enddate'=> $cls_enddate,
                 'class_day'=> implode(",", $arr_day),
                 'max_students'=> data_get($request,'max_students'),
                 'created_at'=> date('Y-m-d H:i:s'),
                 'creator_id'=> Auth::user()->id,
                 'status'=> data_get($request,'status'),
                 'type'=> data_get($request,'type'),
-                'total_cycles'=> data_get($request,'total_cycles'),
+                'total_cycles'=> $total_cycles,
             ),'classes');
             foreach($arr_day AS $session){
                 u::insertSimpleRow(array(
@@ -222,7 +239,7 @@ class ClassesController extends Controller
                     'created_at'=> date('Y-m-d H:i:s')
                 ),'subject_has_class');
             }
-            foreach(data_get($data_sessions, 'dates') AS $row){
+            foreach($dates AS $row){
                 u::insertSimpleRow(array(
                     'class_date'=> $row,
                     'class_id'=> $class_id,
@@ -234,24 +251,26 @@ class ClassesController extends Controller
                 ),'schedules');
             }
 
-            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
-            for($i=1;$i<= data_get($request,'total_cycles');$i++){
+            for($i=1;$i<= $total_cycles;$i++){
                 $arr_subject = u::query("SELECT * FROM subject_has_class WHERE class_id=$class_id ORDER BY stt");
                 foreach($arr_subject AS $subject){
-                    u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
-                }
-                $tmp_subject = 0;
-                $subject_stt = 0;
-                $class_stt = 0;
-                foreach($arr_schedule AS $row){
-                    if($tmp_subject != $row->subject_id){
-                        $tmp_subject = $row->subject_id;
-                        $subject_stt = 0;
+                    if ((int)$subject->session > 0) {
+                        u::query("UPDATE schedules set subject_id = $subject->subject_id WHERE subject_id IS NULL AND status= 1 AND class_id= $class_id ORDER BY class_date LIMIT $subject->session");
                     }
-                    $subject_stt++;
-                    $class_stt++;
-                    u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
                 }
+            }
+            $arr_schedule = u::query("SELECT * FROM schedules WHERE status= 1 AND class_id= $class_id ORDER BY class_date");
+            $tmp_subject = 0;
+            $subject_stt = 0;
+            $class_stt = 0;
+            foreach($arr_schedule AS $row){
+                if($tmp_subject != $row->subject_id){
+                    $tmp_subject = $row->subject_id;
+                    $subject_stt = 0;
+                }
+                $subject_stt++;
+                $class_stt++;
+                u::updateSimpleRow(array('subject_stt'=>$subject_stt, 'class_stt'=>$class_stt), array('id'=>$row->id),'schedules');
             }
         }
         $result = array(
@@ -325,59 +344,6 @@ class ClassesController extends Controller
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
-    }
-
-    public function syncLMS(){
-        ini_set('max_execution_time', 30000);
-        Artisan::call('syncLMS:command');
-        
-        // Lấy kết quả output (nếu có)
-        $output = Artisan::output();
-
-        // $lms = new LMSController();
-        // //lấy dữ liệu trung tâm từ LMS
-        // $lms->syncDataBranch();
-        // //tạo trung tâm trên ERP 
-        // $lms->erpCreateBranch();
-
-        // //lấy dữ liệu semester từ LMS
-        // $lms->syncDataSemester();
-        // //tạo semester trên ERP 
-        // $lms->erpCreateSemester();
-
-        // //lấy dữ liệu programs từ LMS
-        // $listSemester = u::query("SELECT * FROM lms_semesters");
-        // foreach ($listSemester as $item) {
-        //     $lms->syncDataPrograms($item->bsem_id);
-        //     echo $item->bsem_id."/";
-        // }
-        // //tạo programs trên ERP 
-        // $lms->erpCreateProgram();
-
-        // //lấy dữ liệu teachers từ LMS
-        // $listBranch = u::query("SELECT * FROM lms_branches");
-        // foreach ($listBranch as $item) {
-        //     $lms->syncDataTeacher($item->brch_id, $item->ug_type, $item->branch_id);
-        //     echo $item->brch_id."/";
-        // }
-
-        // //lấy dữ liệu Class từ LMS
-        // $listClass = u::query("SELECT id, parent FROM lms_programs WHERE id LIKE '%:B'");
-        // foreach ($listClass as $item) {
-        //     $cls_id = str_replace(':B', '', $item->id);
-        //     $lms->syncDataClassInfo($cls_id, $item->parent);
-        //     echo $cls_id."/";
-        // }
-
-        // //tạo Class trên ERP 
-        // $lms->erpCreateClass();
-        // //tạo session trên ERP
-        // $listClass = u::query("SELECT * FROM classes");
-        // foreach ($listClass as $item) {
-        //     $lms->getDataRoomSessionInClass($item->id);
-        //     echo $item->id."/";
-        // }
-        return response()->json("ok");
     }
 
     public function updateSchedule(Request $request)

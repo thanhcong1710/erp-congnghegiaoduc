@@ -6,6 +6,20 @@
     <vx-card no-shadow class="mt-5">
       <div class="vx-row">
         <div class="mb-6 vx-col md:w-1/3 w-full">
+          <label>Trung tâm <span class="text-danger"> (*)</span></label>
+          <div class=w-full>
+            <vue-select
+                  label="name"
+                  placeholder="Chọn trung tâm"
+                  :options="html.branches.list"
+                  v-model="html.branches.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveBranch"
+              ></vue-select>
+          </div>
+        </div>
+        <div class="mb-6 vx-col md:w-1/3 w-full">
           <label>Khóa học <span class="text-danger"> (*)</span></label>
           <div class=w-full>
             <vue-select
@@ -128,6 +142,10 @@
           }
         },
         html:{
+          branches: {
+            item: '',
+            list: []
+          },
           products: {
             item: '',
             list: []
@@ -147,6 +165,7 @@
           color:'',
         },
         program:{
+          branch_id:'',
           product_id:'',
           parent_id:'',
           code:'',
@@ -158,6 +177,10 @@
       }
     },
     created() {
+      axios.g(`/api/system/branches-has-user`)
+        .then(response => {
+        this.html.branches.list = response.data
+      })
       axios.g(`/api/system/products`)
         .then(response => {
         this.html.products.list = response.data
@@ -165,7 +188,14 @@
     },
     methods: {
       loadProgram(){
-        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1`)
+        if (!this.program.product_id) {
+          this.html.programs.list = []
+          this.html.programs.item = ''
+          this.program.parent_id = ''
+          return
+        }
+        const branchQuery = this.program.branch_id ? `&branch_id=${this.program.branch_id}` : ''
+        axios.g(`/api/system/programs/${this.program.product_id}?is_parent=1${branchQuery}`)
           .then(response => {
           this.html.programs.list = response.data
         })
@@ -174,6 +204,16 @@
         if (date) {
           this.program.opened_date = moment(date).format("YYYY-MM-DD");
         }
+      },
+      saveBranch(data = null){
+        if (data && typeof data === 'object') {
+          this.program.branch_id = data.id
+        }else{
+          this.program.branch_id = ""
+        }
+        this.html.programs.item = ''
+        this.program.parent_id = ''
+        this.loadProgram();
       },
       saveProduct(data = null){
         if (data && typeof data === 'object') {
@@ -210,6 +250,10 @@
       save() {
         let mess = "";
         let resp = true;
+        if (this.program.branch_id == "") {
+          mess += " - Trung tâm không được để trống<br/>";
+          resp = false;
+        }
         if (this.program.product_id == "") {
           mess += " - Khóa học không được để trống<br/>";
           resp = false;

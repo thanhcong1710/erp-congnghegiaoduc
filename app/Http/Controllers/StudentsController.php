@@ -259,8 +259,6 @@ class StudentsController extends Controller
             'updator_id' => Auth::user()->id,
         ], array('student_id' => $request->id), 'term_student_user');
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
-        $lmsController = new LMSController();
-        $lmsController->addOrUpdateStudent($request->id);
         $result = (object) array(
             'status' => 1,
             'message' => 'Cập nhật học sinh thành công'

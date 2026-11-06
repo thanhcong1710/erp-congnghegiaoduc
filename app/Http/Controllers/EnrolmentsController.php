@@ -68,27 +68,27 @@ class EnrolmentsController extends Controller
     }
 
     public function getClassInfo(Request $request, $class_id){
-        $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate, cl.teacher_name, cl.shift_name AS room_text,
-                -- (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id) AS teacher_name,
+        $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate,
+                COALESCE((SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id), cl.teacher_name) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.ta_id) AS ta_name,
-                cl.product_id,
-                cl.max_students, cl.class_day, '' AS shift_text, '' AS class_day_text
+                cl.product_id, cl.shift_name,
+                cl.max_students, cl.class_day, '' AS room_text, '' AS shift_text, '' AS class_day_text
             FROM classes AS cl WHERE id = $class_id");
-        // $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
-        // $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND s.class_id =".$class_id);
+        $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND r.name IS NOT NULL AND s.class_id =".$class_id);
+        $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND sh.name IS NOT NULL AND s.class_id =".$class_id);
 
-        // $room_text = "";
-        // foreach($rooms AS $room){
-        //     $room_text.= $room_text ? ", ".$room->name : $room->name;
-        // }
-        // $class_info->room_text = $room_text;
-        // $shift_text = "";
-        // foreach($shifts AS $shift){
-        //     $shift_text.= $shift_text ? ", ".$shift->name : $shift->name;
-        // }
-        // $class_info->shift_text = $shift_text;
-        // $class_info->class_day_text = u::getClassDayText($class_info->class_day);
+        $room_text = "";
+        foreach($rooms AS $room){
+            $room_text.= $room_text ? ", ".$room->name : $room->name;
+        }
+        $shift_text = "";
+        foreach($shifts AS $shift){
+            $shift_text.= $shift_text ? ", ".$shift->name : $shift->name;
+        }
+        $class_info->room_text = $room_text ?: ($shift_text ? '' : (string)data_get($class_info, 'shift_name'));
+        $class_info->shift_text = $shift_text;
+        $class_info->class_day_text = u::getClassDayText($class_info->class_day);
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,s.lms_id, c.type AS contract_type,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
                 c.must_charge, c.total_charged, c.done_sessions,c.left_sessions, c.student_id, c.product_id,
@@ -190,8 +190,6 @@ class EnrolmentsController extends Controller
                 'updator_id' => Auth::user()->id
             ), array('student_id'=>$student_id), 'term_student_user');
             LogStudents::logAdd($student_id, 'Xếp vào lớp '.data_get($class_info,'cls_name').' - ngày bắt đầu: '. $start_date, Auth::user()->id);
-            $lmsController = new LMSController();
-            $lmsController->addStudentToClass($student_id);
             if($start_date < date('Y-m-d')){
                 u::updateScheduleHasStudent($contract_id, $start_date);
             }
@@ -208,8 +206,6 @@ class EnrolmentsController extends Controller
         $contract_id = data_get($request,'contract_id');
         $contract_info =  u::getObject(['id'=>$contract_id], 'contracts');
         if($contract_info->left_sessions == 0){
-            $lmsController = new LMSController();
-            $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
             u::updateSimpleRow(array(
                 'status' => 7,
                 'type_withdraw' =>1,
@@ -219,8 +215,6 @@ class EnrolmentsController extends Controller
             ), array('id'=>$contract_id),'contracts');
             u::addLogContracts($contract_id);
         } elseif($contract_info->type == 0){
-            $lmsController = new LMSController();
-            $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
             u::updateSimpleRow(array(
                 'status' => 7,
                 'type_withdraw' =>1,

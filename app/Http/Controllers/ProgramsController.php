@@ -28,7 +28,7 @@ class ProgramsController extends Controller
         }
         
         if ($keyword !== '') {
-            $cond .= " AND (p.name LIKE '%$keyword%' OR b.code LIKE '%$keyword%')";
+            $cond .= " AND (p.name LIKE '%$keyword%' OR p.code LIKE '%$keyword%')";
         }
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
@@ -52,6 +52,7 @@ class ProgramsController extends Controller
     public function add(Request $request)
     {
         $program_id = u::insertSimpleRow(array(
+            'branch_id' => data_get($request, 'branch_id'),
             'product_id' => data_get($request, 'product_id'),
             'parent_id' => (int)data_get($request, 'parent_id'),
             'name' => data_get($request, 'name'),
@@ -91,6 +92,7 @@ class ProgramsController extends Controller
     public function update(Request $request)
     {
         u::updateSimpleRow(array(
+            'branch_id' => data_get($request, 'branch_id'),
             'product_id' => data_get($request, 'product_id'),
             'parent_id' => (int)data_get($request, 'parent_id', 0),
             'name' => data_get($request, 'name'),

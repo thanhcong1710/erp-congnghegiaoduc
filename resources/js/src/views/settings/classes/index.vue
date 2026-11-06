@@ -3,7 +3,7 @@
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
       <div style="text-align: right;">
-        <vs-button class="mb-2" color="primary" @click="syncLMS()">Đồng bộ dữ liệu LMS</vs-button>
+        <vs-button class="mb-2" color="success" @click="prepareAddClass()"><i class="fa fa-plus"></i> Thêm mới lớp học</vs-button>
       </div>
       <div class="vx-row">
         <div class="vx-col md:w-1/4 w-full item-first" style="border-right: 1px solid #ccc;">
@@ -48,7 +48,20 @@
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin cấu hình lớp học</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Tên lớp</label>
+              <label>Chương trình học <span class="text-danger"> (*)</span></label>
+              <vue-select
+                  label="name"
+                  placeholder="Chọn chương trình học"
+                  :options="html.programs.list"
+                  v-model="html.programs.item"
+                  :searchable="true"
+                  language="tv-VN"
+                  @input="saveProgram"
+                  :disabled="disabled_input"
+              ></vue-select>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Tên lớp <span class="text-danger"> (*)</span></label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -58,27 +71,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Giáo viên</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="config.teacher_name"
-                disabled="true"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ca học, phòng học</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="config.shift_name"
-                disabled="true"
-              />
-            </div>
-            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Giáo viên</label>
+              <label>Giáo viên <span class="text-danger"> (*)</span></label>
               <vue-select
                   label="label"
                   placeholder="Chọn giáo viên"
@@ -89,9 +82,9 @@
                   @input="saveTeacher"
                   :disabled="disabled_input"
                 ></vue-select>
-            </div> -->
-            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Ca học</label>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Ca học <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="name"
                     placeholder="Chọn ca học"
@@ -102,9 +95,9 @@
                     @input="saveShift"
                     :disabled="disabled_input"
                 ></vue-select>
-            </div> -->
-            <!-- <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Phòng học</label>
+            </div>
+            <div class="vx-col md:w-1/2 w-full mb-4">
+              <label>Phòng học <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="label"
                     placeholder="Chọn phòng học"
@@ -115,9 +108,9 @@
                     @input="saveRoom"
                     :disabled="disabled_input"
                 ></vue-select>
-            </div> -->
+            </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>CM - Quản lý lớp học</label>
+              <label>CM - Quản lý lớp học <span class="text-danger"> (*)</span></label>
               <vue-select
                     label="label"
                     placeholder="Chọn quản lý lớp học"
@@ -431,6 +424,10 @@
             item: '',
             list: []
           },
+          programs: {
+            item: '',
+            list: []
+          },
           teachers:{
             item: '',
             list: []
@@ -469,6 +466,7 @@
           start_date:'',
           end_date:'',
           cm_id:'',
+          ta_id:'',
           teacher_id:'',
           shift_id:'',
           room_id:'',
@@ -547,6 +545,14 @@
           this.config.end_date = moment(date).format("YYYY-MM-DD");
         }
       },
+      prepareAddClass(){
+        this.disabled_input = false
+        this.config.is_edit = 0
+        this.config.class_id = ''
+        this.config.program_id = ''
+        this.html.programs.item = ''
+        this.resetInput()
+      },
       saveBranch(data = null){
         if (data && typeof data === 'object') {
           const branch_id = data.id
@@ -554,6 +560,12 @@
         }else{
           this.config.branch_id = ""
         }
+        if (this.config.branch_id && this.config.product_id) {
+          this.disabled_input = false
+        }
+        this.config.program_id = ''
+        this.html.programs.item = ''
+        this.loadPrograms();
         this.loadClasses();
         this.loadRooms();
         this.loadCMs();
@@ -567,7 +579,34 @@
         }else{
           this.config.product_id = ""
         }
+        if (this.config.branch_id && this.config.product_id) {
+          this.disabled_input = false
+        }
+        this.config.program_id = ''
+        this.html.programs.item = ''
+        this.loadPrograms();
         this.loadClasses();
+      },
+      saveProgram(data = null){
+        if (data && typeof data === 'object') {
+          this.config.program_id = data.id
+        }else{
+          this.config.program_id = ""
+        }
+      },
+      loadPrograms(){
+        if(this.config.branch_id && this.config.product_id){
+          axios.g(`/api/system/programs/${this.config.product_id}?branch_id=${this.config.branch_id}`)
+            .then(response => {
+            this.html.programs.list = response.data
+            if(this.config.program_id){
+              this.html.programs.item = this.html.programs.list.filter(item => item.id == this.config.program_id)[0]
+            }
+          })
+        }else{
+          this.html.programs.list = []
+          this.html.programs.item = ''
+        }
       },
       saveCM(data = null){
         if (data && typeof data === 'object') {
@@ -681,8 +720,10 @@
             .then(response => {
             this.$vs.loading.close();
             this.config = response.data
+            this.html.programs.item = this.html.programs.list.filter(item => item.id == response.data.program_id)[0]
             this.html.teachers.item = this.html.teachers.list.filter(item => item.id == response.data.teacher_id)[0]
             this.html.cms.item = this.html.cms.list.filter(item => item.id == response.data.cm_id)[0]
+            this.html.ta.item = this.html.ta.list.filter(item => item.id == response.data.ta_id)[0]
             this.html.rooms.item = this.html.rooms.list.filter(item => item.id == response.data.room_id)[0]
             this.html.shifts.item = this.html.shifts.list.filter(item => item.id == response.data.shift_id)[0]
             this.getDataSessions();
@@ -691,6 +732,7 @@
           this.config.program_id = selected_class.model.item_id
           this.config.is_edit=0
           this.resetInput();
+          this.html.programs.item = this.html.programs.list.filter(item => item.id == selected_class.model.item_id)[0]
           this.list_sessions=[]
         }
       },
@@ -706,16 +748,17 @@
         this.config.max_students= 16
         this.config.type= 1
         this.config.start_date=''
+        this.config.end_date=''
         this.config.cm_id=''
+        this.config.ta_id=''
         this.config.teacher_id=''
         this.config.shift_id=''
         this.config.room_id=''
         this.config.title=''
-        this.config.teacher_name=''
-        this.config.shift_name=''
         this.html.rooms.item = ''
         this.html.teachers.item = ''
         this.html.cms.item = ''
+        this.html.ta.item = ''
         this.html.shifts.item = ''
         this.config.subjects=[]
         this.list_sessions=[]
@@ -740,27 +783,32 @@
           mess += " - Tên lớp không được để trống<br/>";
           resp = false;
         }
-        // if (this.config.teacher_id == "") {
-        //   mess += " - Giáo viên không được để trống<br/>";
-        //   resp = false;
-        // }
-        // if (this.config.shift_id == "") {
-        //   mess += " - Ca học không được để trống<br/>";
-        //   resp = false;
-        // }
-        // if (this.config.room_id == "") {
-        //   mess += " - Phòng học không được để trống<br/>";
-        //   resp = false;
-        // }
+        if (this.config.teacher_id == "") {
+          mess += " - Giáo viên không được để trống<br/>";
+          resp = false;
+        }
+        if (this.config.shift_id == "") {
+          mess += " - Ca học không được để trống<br/>";
+          resp = false;
+        }
+        if (this.config.room_id == "") {
+          mess += " - Phòng học không được để trống<br/>";
+          resp = false;
+        }
         if (this.config.cm_id == "") {
-          mess += " - CM - Trợ giảng không được để trống<br/>";
+          mess += " - CM - Quản lý lớp học không được để trống<br/>";
+          resp = false;
+        }
+        const hasDay = Object.values(this.config.class_day).some(v => Boolean(v));
+        if (!hasDay) {
+          mess += " - Ngày học trong tuần không được để trống<br/>";
           resp = false;
         }
         if (this.config.start_date == "") {
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.start_date == "") {
+        if (this.config.end_date == "") {
           mess += " - Ngày kết thúc học không được để trống<br/>";
           resp = false;
         }
@@ -868,15 +916,6 @@
         this.pagination.cpage = 1
         this.pagination.limit = limit
         this.getDataSessions();
-      },
-      syncLMS(){
-        console.log('123');
-        this.$vs.loading();
-        axios.p(`/api/settings/classes/sync-lms`)
-          .then(response => {
-          this.$vs.loading.close();
-          location.reload();
-        })
       },
       showModalEditClassDate(item){
         this.modal_session.show= true

@@ -56,8 +56,6 @@ class JobsController extends Controller
         $listContracts = u::query("SELECT c.* FROM contracts AS c WHERE c.status=6 AND c.class_id IS NOT NULL AND c.left_sessions <= 0 AND c.enrolment_last_date <= '$dateWithdraw'
             AND (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND status!=7 AND count_recharge > c.count_recharge AND (debt_amount=0 OR total_charged>0))=0 AND c.student_id=$student_id");
         foreach ($listContracts AS $row){
-            $lmsController = new LMSController();
-            $lmsController->studentWithdraw(data_get($row, 'student_id'));
             u::updateSimpleRow(array(
                 'status' => 7,
                 'type_withdraw' =>1,

@@ -7,7 +7,6 @@ use App\Console\Commands\AutoWithdraw;
 use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
-use App\Console\Commands\SyncLMS;
 use App\Console\Commands\UpdateEnrolmentLastDate;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -23,7 +22,6 @@ class Kernel extends ConsoleKernel
         ProcessDataScheduleHasStudent::class,
         AddScheduleHasStudent::class,
         JobsSendEmail::class,
-        SyncLMS::class,
         UpdateEnrolmentLastDate::class,
         JobsProcessLockParent::class,
         AutoWithdraw::class,

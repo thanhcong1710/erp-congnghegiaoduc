@@ -53,15 +53,15 @@ class PartnerController extends Controller
                     $number_of_months = data_get($row, 'number_of_months');
                     $ug_type = $this->getCodeByProductId(data_get($row,'product_id'));
                     $branch_id = data_get($row, 'branch_id');
-                    $branch_lms_info = u::first("SELECT * FROM lms_branches WHERE branch_id = $branch_id AND ug_type = '$ug_type' ");
+                    $branch_info = u::first("SELECT * FROM branches WHERE id = $branch_id");
                     $list[] = [
                         'payment_date'=> data_get($row,'payment_date'),
                         'stu_name'=> data_get($row,'stu_name'),
                         'stu_id'=> data_get($row,'std_id'),
-                        'brch_id'=> data_get($branch_lms_info,'brch_id'),
-                        'branch_name'=> data_get($branch_lms_info,'brch_name'),
-                        'branch_location'=> data_get($branch_lms_info,'branch_location'),
-                        'band'=> data_get($branch_lms_info,'ug_type'),
+                        'brch_id'=> data_get($branch_info,'id'),
+                        'branch_name'=> data_get($branch_info,'name'),
+                        'branch_location'=> data_get($branch_info,'address'),
+                        'band'=> $ug_type,
                         'level'=> data_get($row,'level'),
                         'total_fee'=> data_get($row,'total_fee'),
                         'payment_id'=> data_get($row,'payment_id'),

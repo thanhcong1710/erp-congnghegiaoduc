@@ -189,8 +189,6 @@ class ClassTransfersController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
             ), array('id' => $contract_id), 'contracts');
             u::addLogContracts($contract_id);
-            $lmsController = new LMSController();
-            $lmsController->addStudentToClass($student_id, data_get($class_transfer_info, 'is_trans_semester'));
             LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
             u::updateSimpleRow(array(
                 'status' => 2,
@@ -231,8 +229,6 @@ class ClassTransfersController extends Controller
                     'enrolment_start_date' => data_get($class_transfer_info, 'transfer_date'),
                 ), array('id' => $contract_id), 'contracts');
                 u::addLogContracts($contract_id);
-                $lmsController = new LMSController();
-                $lmsController->addStudentToClass($student_id, data_get($class_transfer_info, 'is_trans_semester'));
                 LogStudents::logAdd($student_id, "Chuyển từ lớp $class_transfer_info->from_class_name sang lớp $class_transfer_info->to_class_name", $class_transfer_info->creator_id);
                 u::updateSimpleRow(array(
                     'status' => 2,

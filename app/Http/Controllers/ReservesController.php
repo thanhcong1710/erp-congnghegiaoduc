@@ -276,8 +276,6 @@ class ReservesController extends Controller
         $reserve_session = data_get($reserve_info, 'session');
         $start_date = data_get($reserve_info, 'start_date');
         $end_date = data_get($reserve_info, 'end_date');
-        $lmsController = new LMSController();
-        $lmsController->studentWithdraw(data_get($contract_info, 'student_id'));
         u::updateSimpleRow(array(
             'status' => 4,
             'updated_at' => date('Y-m-d H:i:s'),

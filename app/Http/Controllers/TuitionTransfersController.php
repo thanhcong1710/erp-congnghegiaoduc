@@ -326,8 +326,6 @@ class TuitionTransfersController extends Controller
                 u::addLogContracts($contract_id);
             }
 
-            $lmsController = new LMSController();
-            $lmsController->studentWithdraw($from_student_id);
             u::updateSimpleRow(array(
                 'transfer_to_contract_id' => $contract_id,
                 'status' => 7,

@@ -189,8 +189,6 @@ class ContractsController extends Controller
         u::addLogContracts($contract_id);
         $text_mess = $count_recharge > 0 ? 'tái phí' : 'nhập học';
         LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng '.$text_mess.' - '.$contract_code, Auth::user()->id);
-        $lmsController = new LMSController();
-        $lmsController->addOrUpdateStudent(data_get($student_info, 'student_id'));
 
         $result = array(
             'status' => 1,
