@@ -1,8 +1,8 @@
 <template>
   <div class="student-detail-assessments mt-2">
     <div class="table-responsive rounded border border-slate-200">
-      <table class="w-full text-xs bg-white">
-        <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+      <table class="w-full bg-white modern-assess-table">
+        <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-assess-thead">
           <tr>
             <th class="py-2.5 px-3 text-center" style="width: 50px">STT</th>
             <th class="py-2.5 px-3" style="width: 140px">Thời gian</th>
@@ -40,11 +40,11 @@
     <!-- Compact Pagination -->
     <div class="compact-pagination-bar" v-if="assessments && assessments.length > 0">
       <div class="flex items-center">
-        <span class="text-xs text-gray-500 mr-2">Hiển thị:</span>
+        <span class="text-gray-700 mr-2">Hiển thị:</span>
         <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
           <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
         </select>
-        <span class="text-xs text-gray-400 ml-2">
+        <span class="text-gray-500 ml-2">
           ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
         </span>
       </div>
@@ -134,6 +134,14 @@
 </script>
 
 <style scoped>
+.modern-assess-table {
+  font-size: 14px;
+}
+
+.modern-assess-thead {
+  font-size: 13.5px;
+}
+
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -146,14 +154,15 @@
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid #e2e8f0;
+  font-size: 14px;
 }
 
 .compact-page-select {
-  height: 26px;
-  padding: 1px 6px;
+  height: 32px;
+  padding: 2px 8px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  font-size: 11.5px;
+  font-size: 14px;
   background: #ffffff;
   color: #334155;
   outline: none;

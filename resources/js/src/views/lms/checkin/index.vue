@@ -162,7 +162,7 @@
               <th style="width: 230px">Học sinh</th>
               <th style="width: 230px">Phụ huynh</th>
               <th style="width: 240px">Thông tin Checkin</th>
-              <th style="width: 180px" class="text-center">Trạng thái</th>
+              <th style="width: 150px" class="text-center">Trạng thái</th>
               <th style="width: 140px" class="text-center">Thao tác</th>
               <th style="min-width: 180px">Ghi chú</th>
             </tr>
@@ -182,10 +182,10 @@
 
               <!-- Học sinh -->
               <td>
-                <div class="font-bold text-gray-900 text-sm">
+                <div class="font-bold text-gray-900 text-base">
                   {{ item.name }}
                 </div>
-                <div class="mt-1 flex items-center text-xs text-gray-500 gap-2">
+                <div class="mt-1 flex items-center text-gray-500 gap-2">
                   <span v-if="item.gender">
                     <i :class="item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'"></i>
                     {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}
@@ -202,7 +202,7 @@
                   <i class="fa-solid fa-user text-gray-400 mr-1.5" style="font-size: 13px;"></i>
                   {{ item.parent_name }}
                 </div>
-                <div class="mt-1 text-xs">
+                <div class="mt-1">
                   <a v-if="item.mobile_1" :href="'tel:' + item.mobile_1" class="text-primary hover:underline font-medium inline-flex items-center">
                     <i class="fa-solid fa-phone text-success mr-1"></i> {{ item.mobile_1 }}
                   </a>
@@ -220,11 +220,11 @@
 
               <!-- Thông tin Checkin -->
               <td>
-                <div class="text-xs font-semibold text-gray-800 flex items-center mb-1">
+                <div class="font-semibold text-gray-800 flex items-center mb-1">
                   <i class="fa-solid fa-location-dot text-primary mr-1.5"></i>
                   {{ item.checkin_branch_name }}
                 </div>
-                <div class="text-xs text-gray-600 mb-1" v-if="item.checkin_at">
+                <div class="text-gray-600 mb-1" v-if="item.checkin_at">
                   <i class="fa-regular fa-clock text-gray-400 mr-1"></i>{{ item.checkin_at }}
                 </div>
                 <div class="mt-1" v-if="item.checkin_product_name">
@@ -264,7 +264,7 @@
                   <i class="fa-solid fa-comment-dots text-gray-400 mr-1"></i>
                   {{ item.checkined_note }}
                 </div>
-                <span v-else class="text-gray-400 text-xs italic">—</span>
+                <span v-else class="text-gray-400 italic">—</span>
               </td>
             </tr>
           </tbody>
@@ -274,11 +274,11 @@
       <!-- Compact Pagination -->
       <div class="compact-pagination-bar">
         <div class="flex items-center">
-          <span class="text-xs text-gray-500 mr-2">Hiển thị mỗi trang:</span>
+          <span class="text-gray-700 mr-2">Hiển thị mỗi trang:</span>
           <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
             <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
           </select>
-          <span class="text-xs text-gray-400 ml-2">
+          <span class="text-gray-500 ml-2">
             ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
           </span>
         </div>
@@ -654,7 +654,7 @@ export default {
 }
 
 .filter-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #334155;
   margin-bottom: 6px;
@@ -673,7 +673,7 @@ export default {
   padding: 6px 32px 6px 12px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   background: #ffffff !important;
   display: flex !important;
   align-items: center !important;
@@ -689,19 +689,19 @@ export default {
   margin-bottom: 0 !important;
   padding-top: 0 !important;
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   color: #94a3b8 !important;
 }
 
 .compact-multiselect >>> .multiselect__single {
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   margin-bottom: 0 !important;
 }
 
 .compact-multiselect >>> .multiselect__input {
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   margin-bottom: 0 !important;
   height: 24px !important;
 }
@@ -710,7 +710,7 @@ export default {
   height: 24px !important;
   line-height: 24px !important;
   padding: 0 20px 0 8px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   margin-bottom: 2px !important;
   margin-top: 2px !important;
 }
@@ -731,7 +731,7 @@ export default {
   position: absolute;
   left: 12px;
   color: #94a3b8;
-  font-size: 13.5px;
+  font-size: 14px;
   pointer-events: none;
 }
 
@@ -742,7 +742,7 @@ export default {
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
   padding: 6px 12px 6px 34px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   color: #1e293b !important;
   outline: none !important;
   background: #ffffff !important;
@@ -760,7 +760,7 @@ export default {
   height: 38px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   padding: 6px 12px !important;
 }
 
@@ -790,7 +790,7 @@ export default {
 .btn-filter-action {
   height: 38px;
   padding: 0 18px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -832,14 +832,15 @@ export default {
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid #e2e8f0;
+  font-size: 14px;
 }
 
 .compact-page-select {
-  height: 28px;
+  height: 32px;
   padding: 2px 6px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 14px;
   background: #ffffff;
   color: #334155;
   outline: none;
@@ -849,9 +850,9 @@ export default {
   background: #f0fdf4;
   color: #15803d;
   border: 1px solid #bbf7d0;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 13.5px;
   display: inline-flex;
   align-items: center;
 }
@@ -873,7 +874,7 @@ export default {
 
 .modern-checkin-table th {
   padding: 12px 14px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #475569;
   text-transform: uppercase;
@@ -884,7 +885,7 @@ export default {
   padding: 14px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .subtle-source-tag {
@@ -892,7 +893,7 @@ export default {
   color: #64748b;
   padding: 2px 7px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .subtle-ec-tag {
@@ -900,7 +901,7 @@ export default {
   color: #1d4ed8;
   padding: 2px 7px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .course-pill {
@@ -909,7 +910,7 @@ export default {
   border: 1px solid #fde68a;
   padding: 2px 8px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   display: inline-block;
 }
@@ -919,7 +920,7 @@ export default {
   align-items: center;
   padding: 4px 10px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
 }
@@ -940,14 +941,14 @@ export default {
 }
 
 .action-promote-btn {
-  font-size: 12px;
+  font-size: 13px;
   padding: 6px 12px !important;
   border-radius: 6px;
 }
 
 .done-tag {
   color: #16a34a;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -956,8 +957,8 @@ export default {
 .note-box {
   background: #f8fafc;
   border-left: 3px solid #cbd5e1;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 6px 10px;
+  font-size: 13.5px;
   color: #475569;
   border-radius: 0 4px 4px 0;
   line-height: 1.4;

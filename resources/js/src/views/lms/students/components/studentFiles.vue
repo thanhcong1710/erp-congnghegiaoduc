@@ -28,8 +28,8 @@
 
     <!-- Files Table -->
     <div class="table-responsive rounded border border-slate-200">
-      <table class="w-full text-xs bg-white">
-        <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+      <table class="w-full bg-white modern-files-table">
+        <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-files-thead">
           <tr>
             <th class="py-2.5 px-3" style="width: 50px">STT</th>
             <th class="py-2.5 px-3" style="width: 280px">Tên tệp</th>
@@ -221,33 +221,33 @@
 }
 
 .form-label {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   color: #475569;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 }
 
 .form-control-compact {
-  height: 32px;
+  height: 38px;
   border: 1px solid #cbd5e1;
   border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12.5px;
+  padding: 6px 10px;
+  font-size: 14px;
   background: #ffffff;
   outline: none;
   width: 100%;
 }
 
 .upload-btn-item {
-  height: 32px;
+  height: 38px;
   display: flex;
   align-items: flex-end;
 }
 
 .btn-compact-save {
-  height: 32px;
-  padding: 0 14px;
-  font-size: 12px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 14px;
   font-weight: 600;
   background: #28c76f;
   color: #ffffff;
@@ -262,6 +262,14 @@
 
 .btn-compact-save:hover {
   background: #20a159;
+}
+
+.modern-files-table {
+  font-size: 14px;
+}
+
+.modern-files-thead {
+  font-size: 13.5px;
 }
 
 .table-responsive {

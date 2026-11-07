@@ -2,10 +2,10 @@
   <div id="page-student-detail">
     <!-- Back Navigation -->
     <div class="mb-2 flex items-center justify-between">
-      <router-link to="/lms/students" class="inline-flex items-center text-xs font-semibold text-primary hover:underline">
+      <router-link to="/lms/students" class="inline-flex items-center font-semibold text-primary hover:underline">
         <i class="fa-solid fa-arrow-left mr-1.5"></i> Quay lại danh sách học sinh
       </router-link>
-      <div class="text-xs text-gray-500">
+      <div class="text-gray-500 font-medium">
         ID học sinh: <strong>#{{ $route.params.id }}</strong>
       </div>
     </div>
@@ -82,7 +82,7 @@
         <div class="hero-kpi-card">
           <div class="hero-kpi-header">
             <span><i class="fa-solid fa-wallet text-primary mr-1"></i> Số dư học phí</span>
-            <span class="text-2xs text-gray-400">VNĐ</span>
+            <span class="text-gray-400 font-normal">VNĐ</span>
           </div>
           <div class="hero-kpi-number text-emerald-600">
             {{ (student_info.left_amount || 0) | formatNumber }}
@@ -95,7 +95,7 @@
         <div class="hero-kpi-card">
           <div class="hero-kpi-header">
             <span><i class="fa-solid fa-clock text-amber-500 mr-1"></i> Buổi còn lại</span>
-            <span class="text-2xs font-semibold" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
+            <span class="font-semibold" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
               {{ (student_info.left_sessions || 0) > 5 ? 'Ổn định' : 'Sắp hết' }}
             </span>
           </div>
@@ -346,7 +346,7 @@ export default {
 .hero-stk-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #7367f0;
   background: #f5f3ff;
@@ -359,9 +359,9 @@ export default {
 .status-pill {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 13.5px;
   font-weight: 600;
 }
 
@@ -377,7 +377,7 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 12px;
+  font-size: 14px;
   color: #475569;
 }
 
@@ -392,10 +392,10 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 11.5px;
+  font-size: 14px;
   color: #64748b;
   background: #f8fafc;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 6px;
   border: 1px solid #f1f5f9;
 }
@@ -431,26 +431,26 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
   margin-bottom: 2px;
 }
 
 .hero-kpi-number {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .hero-kpi-max {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: normal;
   color: #94a3b8;
 }
 
 .hero-kpi-sub {
-  font-size: 10.5px;
+  font-size: 13px;
   color: #64748b;
   margin-top: 2px;
 }

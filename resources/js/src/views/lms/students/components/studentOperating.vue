@@ -12,8 +12,8 @@
         </span>
       </div>
       <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full text-xs bg-white">
-          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+        <table class="w-full bg-white modern-op-table">
+          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
             <tr>
               <th class="py-2.5 px-3">Học sinh</th>
               <th class="py-2.5 px-3">Trung tâm</th>
@@ -52,8 +52,8 @@
         </span>
       </div>
       <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full text-xs bg-white">
-          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+        <table class="w-full bg-white modern-op-table">
+          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
             <tr>
               <th class="py-2.5 px-3">Học sinh</th>
               <th class="py-2.5 px-3">Trung tâm chuyển</th>
@@ -94,8 +94,8 @@
         </span>
       </div>
       <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full text-xs bg-white">
-          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+        <table class="w-full bg-white modern-op-table">
+          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
             <tr>
               <th class="py-2.5 px-3">Học sinh chuyển</th>
               <th class="py-2.5 px-3">Học sinh nhận</th>
@@ -210,22 +210,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .operating-title {
-  font-size: 12.5px;
+  font-size: 14.5px;
   font-weight: 700;
   color: #334155;
 }
 
 .operating-count {
-  font-size: 11px;
+  font-size: 13px;
   background: #f1f5f9;
   color: #64748b;
-  padding: 1px 8px;
+  padding: 2px 10px;
   border-radius: 9999px;
   font-weight: 600;
+}
+
+.modern-op-table {
+  font-size: 14px;
+}
+
+.modern-op-thead {
+  font-size: 13.5px;
 }
 
 .table-responsive {

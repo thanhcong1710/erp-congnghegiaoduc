@@ -7,7 +7,7 @@
           <i class="fa-solid fa-user-graduate text-primary mr-2" style="font-size: 20px;"></i>
           Danh Sách Học Sinh
         </h4>
-        <span class="text-xs text-gray-500">Quản lý hồ sơ học sinh, tiến độ buổi học và thông tin lớp học</span>
+        <span class="text-gray-500">Quản lý hồ sơ học sinh, tiến độ buổi học và thông tin lớp học</span>
       </div>
       <div>
         <span class="badge-total-students">
@@ -114,7 +114,7 @@
 
             <tr v-for="(item, index) in students" :key="index" class="student-row hover:bg-slate-50 transition-colors">
               <!-- STT -->
-              <td class="text-center text-gray-500 font-semibold text-xs">
+              <td class="text-center text-gray-500 font-semibold">
                 {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </td>
 
@@ -154,7 +154,7 @@
                     {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}
                   </span>
                 </div>
-                <div class="text-xs text-gray-500" v-if="item.date_of_birth">
+                <div class="text-gray-500" v-if="item.date_of_birth">
                   <i class="fa-regular fa-calendar mr-1 text-gray-400"></i>
                   {{ item.date_of_birth | formatDateView }}
                 </div>
@@ -162,15 +162,15 @@
 
               <!-- Phụ huynh -->
               <td>
-                <div class="text-xs font-semibold text-gray-800 flex items-center mb-1">
+                <div class="font-semibold text-gray-800 flex items-center mb-1">
                   <i class="fa-solid fa-user-tie text-gray-400 mr-1.5"></i>
                   {{ item.gud_name1 || 'Chưa cập nhật' }}
                 </div>
-                <div class="text-xs text-gray-600 mb-1" v-if="item.gud_mobile1">
+                <div class="text-gray-600 mb-1" v-if="item.gud_mobile1">
                   <i class="fa-solid fa-phone text-emerald-500 mr-1.5"></i>
                   <a :href="'tel:' + item.gud_mobile1" class="text-primary hover:underline font-semibold">{{ item.gud_mobile1 }}</a>
                 </div>
-                <div class="text-xs text-gray-500 truncate" v-if="item.address" :title="item.address">
+                <div class="text-gray-500 truncate" v-if="item.address" :title="item.address">
                   <i class="fa-solid fa-location-dot text-rose-400 mr-1.5"></i>
                   {{ item.address }}
                 </div>
@@ -178,11 +178,11 @@
 
               <!-- Lớp học & Trung tâm -->
               <td>
-                <div class="text-xs font-semibold text-gray-700 flex items-center mb-1">
+                <div class="font-semibold text-gray-700 flex items-center mb-1">
                   <i class="fa-solid fa-building text-primary mr-1.5"></i>
                   {{ item.branch_name || '—' }}
                 </div>
-                <div class="text-xs text-gray-600 mb-1" v-if="item.class_name">
+                <div class="text-gray-600 mb-1" v-if="item.class_name">
                   <span class="class-pill"><i class="fa-solid fa-chalkboard-user mr-1"></i>{{ item.class_name }}</span>
                 </div>
                 <div class="mt-1">
@@ -190,7 +190,7 @@
                     {{ item.label_status || 'Chưa có' }}
                   </span>
                 </div>
-                <div class="text-xs text-gray-400 mt-1 flex items-center gap-2" v-if="item.ec_name || item.cm_name">
+                <div class="text-gray-500 mt-1 flex items-center gap-2" v-if="item.ec_name || item.cm_name">
                   <span v-if="item.ec_name" title="EC phụ trách"><i class="fa-solid fa-user-tag mr-0.5"></i>EC: {{ item.ec_name }}</span>
                   <span v-if="item.cm_name" title="CM phụ trách"><i class="fa-solid fa-headset mr-0.5"></i>CM: {{ item.cm_name }}</span>
                 </div>
@@ -199,8 +199,8 @@
               <!-- Tiến độ buổi học -->
               <td class="text-center">
                 <div v-if="item.summary_sessions && item.summary_sessions > 0">
-                  <div class="flex items-center justify-between text-xs font-semibold mb-1">
-                    <span class="text-success font-bold text-sm">{{ item.done_sessions || 0 }}</span>
+                  <div class="flex items-center justify-between font-semibold mb-1">
+                    <span class="text-success font-bold text-base">{{ item.done_sessions || 0 }}</span>
                     <span class="text-gray-400">/ {{ item.summary_sessions }} buổi</span>
                   </div>
                   <div class="progress-bar-container">
@@ -209,11 +209,11 @@
                       :style="{ width: Math.min(100, Math.round(((item.done_sessions || 0) * 100) / item.summary_sessions)) + '%' }"
                     ></div>
                   </div>
-                  <div class="text-xs text-gray-400 mt-1 text-right">
+                  <div class="text-gray-500 mt-1 text-right">
                     {{ Math.round(((item.done_sessions || 0) * 100) / item.summary_sessions) }}%
                   </div>
                 </div>
-                <div v-else class="text-xs text-gray-400 italic">
+                <div v-else class="text-gray-400 italic">
                   Chưa có lịch học
                 </div>
               </td>
@@ -234,11 +234,11 @@
       <!-- Compact Pagination -->
       <div class="compact-pagination-bar">
         <div class="flex items-center">
-          <span class="text-xs text-gray-500 mr-2">Hiển thị mỗi trang:</span>
+          <span class="text-gray-700 mr-2">Hiển thị mỗi trang:</span>
           <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
             <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
           </select>
-          <span class="text-xs text-gray-400 ml-2">
+          <span class="text-gray-500 ml-2">
             ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
           </span>
         </div>
@@ -393,21 +393,21 @@ export default {
   align-items: center;
   background-color: #eff6ff;
   color: #1d4ed8;
-  font-size: 13px;
-  padding: 5px 14px;
+  font-size: 13.5px;
+  padding: 6px 14px;
   border-radius: 9999px;
   border: 1px solid #bfdbfe;
 }
 
 .filter-label {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #334155;
   margin-bottom: 6px;
   display: block;
 }
 
-/* Custom Multiselect - Exactly 38px height, 13.5px font */
+/* Custom Multiselect - Exactly 38px height, 14px font */
 .custom-multiselect >>> .multiselect {
   min-height: 38px !important;
 }
@@ -419,7 +419,7 @@ export default {
   padding: 6px 32px 6px 12px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   background: #ffffff !important;
   display: flex !important;
   align-items: center !important;
@@ -435,19 +435,19 @@ export default {
   margin-bottom: 0 !important;
   padding-top: 0 !important;
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   color: #94a3b8 !important;
 }
 
 .custom-multiselect >>> .multiselect__single {
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   margin-bottom: 0 !important;
 }
 
 .custom-multiselect >>> .multiselect__input {
   line-height: 24px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   margin-bottom: 0 !important;
   height: 24px !important;
 }
@@ -456,7 +456,7 @@ export default {
   height: 24px !important;
   line-height: 24px !important;
   padding: 0 20px 0 8px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   margin-bottom: 2px !important;
   margin-top: 2px !important;
 }
@@ -465,7 +465,7 @@ export default {
   line-height: 24px !important;
 }
 
-/* Custom Search Text Input - Exactly 38px height, 13.5px font */
+/* Custom Search Text Input - Exactly 38px height, 14px font */
 .filter-search-wrapper {
   position: relative;
   display: flex;
@@ -477,7 +477,7 @@ export default {
   position: absolute;
   left: 12px;
   color: #94a3b8;
-  font-size: 13.5px;
+  font-size: 14px;
   pointer-events: none;
 }
 
@@ -488,7 +488,7 @@ export default {
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
   padding: 6px 12px 6px 34px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   color: #1e293b !important;
   outline: none !important;
   background: #ffffff !important;
@@ -513,7 +513,7 @@ export default {
 .btn-filter-action {
   height: 38px;
   padding: 0 18px;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -552,14 +552,14 @@ export default {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 13.5px;
+  font-size: 14px;
 }
 
 .modern-student-table thead th {
   background: #f8fafc;
   color: #475569;
   font-weight: 700;
-  font-size: 12.5px;
+  font-size: 13.5px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   padding: 12px 14px;
@@ -571,6 +571,7 @@ export default {
   padding: 12px 14px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  font-size: 14px;
 }
 
 .student-row:hover {
@@ -592,14 +593,14 @@ export default {
 }
 
 .student-name-text {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 700;
 }
 
 .stk-code-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #7367f0;
   background-color: #f5f3ff;
@@ -613,7 +614,7 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
   background: #f1f5f9;
   padding: 2px 7px;
@@ -625,7 +626,7 @@ export default {
   align-items: center;
   background: #eef2ff;
   color: #4f46e5;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 4px;
@@ -634,7 +635,7 @@ export default {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 9999px;
@@ -663,7 +664,7 @@ export default {
 }
 
 .action-view-btn {
-  font-size: 12px !important;
+  font-size: 13.5px !important;
   font-weight: 600 !important;
   padding: 5px 12px !important;
 }
@@ -676,14 +677,15 @@ export default {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #e2e8f0;
+  font-size: 14px;
 }
 
 .compact-page-select {
-  height: 30px;
+  height: 32px;
   padding: 2px 8px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 14px;
   background: #ffffff;
   color: #334155;
   outline: none;

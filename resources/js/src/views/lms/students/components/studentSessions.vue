@@ -4,32 +4,32 @@
     <div class="vx-row mb-3">
       <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-primary">
-          <div class="text-xs text-gray-500 font-medium">Tổng số buổi trong gói</div>
-          <div class="text-base font-bold text-gray-800 mt-0.5">
-            {{ contract_info.summary_sessions || 0 }} <span class="text-xs font-normal text-gray-400">buổi</span>
+          <div class="session-stat-title">Tổng số buổi trong gói</div>
+          <div class="text-lg font-bold text-gray-800 mt-0.5">
+            {{ contract_info.summary_sessions || 0 }} <span class="session-stat-unit">buổi</span>
           </div>
         </div>
       </div>
       <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-emerald-500">
-          <div class="text-xs text-gray-500 font-medium">Số buổi đã học / ghi nhận</div>
-          <div class="text-base font-bold text-emerald-600 mt-0.5">
-            {{ contract_info.done_sessions || 0 }} <span class="text-xs font-normal text-gray-400">buổi</span>
+          <div class="session-stat-title">Số buổi đã học / ghi nhận</div>
+          <div class="text-lg font-bold text-emerald-600 mt-0.5">
+            {{ contract_info.done_sessions || 0 }} <span class="session-stat-unit">buổi</span>
           </div>
         </div>
       </div>
       <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-amber-500">
-          <div class="text-xs text-gray-500 font-medium">Số buổi còn lại</div>
-          <div class="text-base font-bold text-amber-600 mt-0.5">
-            {{ (contract_info.summary_sessions || 0) - (contract_info.done_sessions || 0) }} <span class="text-xs font-normal text-gray-400">buổi</span>
+          <div class="session-stat-title">Số buổi còn lại</div>
+          <div class="text-lg font-bold text-amber-600 mt-0.5">
+            {{ (contract_info.summary_sessions || 0) - (contract_info.done_sessions || 0) }} <span class="session-stat-unit">buổi</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Legend -->
-    <div class="flex flex-wrap items-center gap-3 p-2 bg-slate-50 rounded border border-slate-200 mb-3 text-xs text-gray-600">
+    <div class="flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded border border-slate-200 mb-3 text-sm text-gray-600">
       <span class="font-bold text-gray-700 mr-1"><i class="fa-solid fa-circle-info mr-1 text-primary"></i> Chú thích:</span>
       <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1 inline-block"></span> Đã học</span>
       <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1 inline-block"></span> Đã học bù</span>
@@ -51,7 +51,7 @@
           <div class="session-order">Buổi {{ index + 1 }}</div>
           <div class="session-class-name font-semibold text-gray-800 truncate" :title="item.cls_name">{{ item.cls_name }}</div>
           <div class="session-date text-gray-500">
-            <i class="fa-regular fa-calendar-days text-2xs mr-1"></i>
+            <i class="fa-regular fa-calendar-days mr-1"></i>
             {{ item.class_date | formatDateViewDay }}
           </div>
           <div class="mt-2">
@@ -70,12 +70,12 @@
           <div class="session-order text-gray-400">Buổi {{ index + 1 + (done_sessions ? done_sessions.length : 0) }}</div>
           <div class="session-class-name font-semibold text-gray-800 truncate" :title="item.cls_name">{{ item.cls_name }}</div>
           <div class="session-date text-gray-500">
-            <i class="fa-regular fa-calendar-days text-2xs mr-1"></i>
+            <i class="fa-regular fa-calendar-days mr-1"></i>
             {{ item.class_date | formatDateViewDay }}
           </div>
           <div class="mt-2">
             <span class="session-status-pill bg-slate-100 text-slate-600 border border-slate-200">
-              <i class="fa-regular fa-clock text-2xs mr-1"></i> Sắp học
+              <i class="fa-regular fa-clock mr-1"></i> Sắp học
             </span>
           </div>
         </div>
@@ -86,7 +86,7 @@
   <div v-else class="p-8 text-center bg-slate-50 rounded-lg border border-slate-200 mt-2">
     <i class="fa-regular fa-calendar-xmark text-4xl text-gray-300 mb-2"></i>
     <h5 class="text-gray-600 font-semibold mb-1">Chưa có thông tin buổi học</h5>
-    <p class="text-xs text-gray-400">Học sinh chưa được xếp lớp hoặc chưa phát sinh lịch học.</p>
+    <p class="text-gray-500">Học sinh chưa được xếp lớp hoặc chưa phát sinh lịch học.</p>
   </div>
 </template>
 
@@ -220,34 +220,46 @@
   background: #fff1f2;
 }
 
+.session-stat-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.session-stat-unit {
+  font-size: 13.5px;
+  font-weight: normal;
+  color: #94a3b8;
+}
+
 .session-upcoming {
   border-style: dashed;
   background: #f8fafc;
 }
 
 .session-order {
-  font-size: 10.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #64748b;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 
 .session-class-name {
-  font-size: 11.5px;
-  margin-bottom: 1px;
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .session-date {
-  font-size: 10.5px;
+  font-size: 13px;
 }
 
 .session-status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 1px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 2px 8px;
   border-radius: 9999px;
 }
 </style>

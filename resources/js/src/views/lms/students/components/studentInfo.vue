@@ -641,14 +641,14 @@ export default {
 }
 
 .info-mode-indicator {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 500;
 }
 
 .btn-compact-action {
-  height: 30px;
-  padding: 0 12px;
-  font-size: 12px;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 5px;
   cursor: pointer;
@@ -692,7 +692,7 @@ export default {
 .compact-section-divider {
   display: flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   color: #334155;
   padding: 6px 0;
@@ -746,20 +746,20 @@ export default {
 }
 
 .form-label {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: #334155;
   margin-bottom: 5px;
 }
 
-/* Comfortable Inputs - Exactly 36px */
+/* Comfortable Inputs - Exactly 38px */
 .form-control-compact {
   box-sizing: border-box !important;
-  height: 36px;
+  height: 38px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 13.5px;
+  padding: 6px 12px;
+  font-size: 14px;
   color: #1e293b;
   background: #ffffff;
   outline: none;
@@ -781,14 +781,14 @@ export default {
 
 .form-control-readonly {
   box-sizing: border-box !important;
-  height: 36px;
+  height: 38px;
   display: flex;
   align-items: center;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 13.5px;
+  padding: 6px 12px;
+  font-size: 14px;
   color: #334155;
 }
 
@@ -800,20 +800,20 @@ export default {
 }
 
 .parent-compact-header {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 700;
   border-bottom: 1px dashed #cbd5e1;
   padding-bottom: 5px;
 }
 
-/* Datepicker & VueSelect Overrides for exactly 36px */
+/* Datepicker & VueSelect Overrides for exactly 38px */
 .form-datepicker-compact >>> input {
   box-sizing: border-box !important;
-  height: 36px !important;
+  height: 38px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 13.5px !important;
-  padding: 6px 10px !important;
+  font-size: 14px !important;
+  padding: 6px 12px !important;
 }
 
 .form-datepicker-compact >>> input:disabled {
@@ -824,11 +824,11 @@ export default {
 
 .form-vselect-compact >>> .vs__dropdown-toggle {
   box-sizing: border-box !important;
-  min-height: 36px !important;
-  height: 36px !important;
+  min-height: 38px !important;
+  height: 38px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
   padding: 0 8px !important;
 }
 
@@ -838,14 +838,14 @@ export default {
 }
 
 .form-vselect-compact >>> .vs__selected {
-  margin: 3px 2px 0 !important;
+  margin: 4px 2px 0 !important;
   padding: 0 4px !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
 }
 
 .form-vselect-compact >>> .vs__search {
-  margin: 3px 0 0 !important;
+  margin: 4px 0 0 !important;
   padding: 0 !important;
-  font-size: 13.5px !important;
+  font-size: 14px !important;
 }
 </style>

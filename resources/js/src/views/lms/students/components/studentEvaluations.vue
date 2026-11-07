@@ -19,7 +19,7 @@
       </h5>
       <table class="w-full text-sm border-collapse border border-gray-200">
         <thead>
-          <tr class="bg-gray-100 text-xs font-bold text-gray-700">
+          <tr class="bg-gray-100 text-sm font-bold text-gray-700">
             <th class="border p-2 text-center w-12">STT</th>
             <th class="border p-2">Bài kiểm tra</th>
             <th class="border p-2 text-center">Level</th>
@@ -73,7 +73,7 @@
       </h5>
       <table class="w-full text-sm border-collapse border border-gray-200">
         <thead>
-          <tr class="bg-gray-100 text-xs font-bold text-gray-700">
+          <tr class="bg-gray-100 text-sm font-bold text-gray-700">
             <th class="border p-2 text-center w-12">STT</th>
             <th class="border p-2">Bài kiểm tra</th>
             <th class="border p-2 text-center">Điểm môn học</th>
@@ -125,7 +125,7 @@
       </h5>
       <table class="w-full text-sm border-collapse border border-gray-200">
         <thead>
-          <tr class="bg-gray-100 text-xs font-bold text-gray-700">
+          <tr class="bg-gray-100 text-sm font-bold text-gray-700">
             <th class="border p-2 text-center w-12">STT</th>
             <th class="border p-2">Bài kiểm tra</th>
             <th class="border p-2">Lớp</th>
