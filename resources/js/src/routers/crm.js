@@ -48,6 +48,13 @@ export default {
         path: '/crm/parent',
         name: 'crm-parent',
         component: () => import('@/views/crm/parents/index.vue'),
+        beforeEnter: (to, from, next) => {
+          if (to.query.view !== 'overview') {
+            next({ path: '/crm/parent/detail-list' });
+          } else {
+            next();
+          }
+        },
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },

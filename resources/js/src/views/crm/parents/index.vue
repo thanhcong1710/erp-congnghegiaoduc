@@ -184,7 +184,7 @@
                   type="button"
                   class="pill-btn" 
                   @click="goToDetailList"
-                  title="Chuyển sang chế độ xem chi tiết 20 cột"
+                  title="Chuyển sang chế độ xem chi tiết"
                 >
                   <i class="feather icon-grid mr-1"></i> Chi tiết
                 </button>

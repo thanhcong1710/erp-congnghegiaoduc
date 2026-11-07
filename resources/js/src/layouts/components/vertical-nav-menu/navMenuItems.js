@@ -33,7 +33,7 @@ export default [
     permission:'CRM',
     items: [
       {
-        url: '/crm/parent',
+        url: '/crm/parent/detail-list',
         name: 'Khách hàng',
         icon: 'UsersIcon',
         slug: 'crm-parent',

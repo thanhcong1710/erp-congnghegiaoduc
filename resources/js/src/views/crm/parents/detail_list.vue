@@ -221,10 +221,10 @@
         <vs-tab :label="'Ticket chưa xử lý ('+ total.total_4 +')'" @click.prevent="setActive(4)"></vs-tab>
       </vs-tabs>
 
-      <!-- BẢNG CHI TIẾT 20 CỘT -->
+      <!-- BẢNG CHI TIẾT 16 CỘT -->
       <div class="detail-table-wrapper mt-3">
         <div class="detail-table-scroll-container">
-          <table class="detail-custom-table" style="min-width: 2600px;">
+          <table class="detail-custom-table" style="min-width: 2050px;">
             <thead>
               <tr>
                 <!-- Checkbox -->
@@ -248,37 +248,29 @@
                 <th class="th-center" style="width: 130px;">Điện thoại</th>
                 <!-- Cột 4: Họ và tên -->
                 <th style="width: 170px;">Họ và tên</th>
-                <!-- Cột 5: Tên đăng nhập -->
-                <th style="width: 130px;">Tên đăng nhập</th>
-                <!-- Cột 6: Điểm test -->
-                <th style="width: 150px;">Điểm test</th>
-                <!-- Cột 7: Lịch sử chăm sóc -->
+                <!-- Cột 5: Lịch sử chăm sóc -->
                 <th style="width: 380px;">Lịch sử chăm sóc</th>
-                <!-- Cột 8: Ghi chú -->
+                <!-- Cột 6: Ghi chú -->
                 <th style="width: 320px;">Ghi chú</th>
-                <!-- Cột 9: Mục tiêu band điểm IELTS -->
-                <th class="th-center" style="width: 140px;">Mục tiêu band điểm IELTS</th>
-                <!-- Cột 10: Người quản lý -->
+                <!-- Cột 7: Người quản lý -->
                 <th style="width: 160px;">Người quản lý</th>
-                <!-- Cột 11: Quản lý đầu tiên -->
+                <!-- Cột 8: Quản lý đầu tiên -->
                 <th style="width: 160px;">Quản lý đầu tiên</th>
-                <!-- Cột 12: Người tạo -->
+                <!-- Cột 9: Người tạo -->
                 <th style="width: 160px;">Người tạo</th>
-                <!-- Cột 13: Hợp đồng -->
+                <!-- Cột 10: Hợp đồng -->
                 <th class="th-center" style="width: 90px;">Hợp đồng</th>
-                <!-- Cột 14: Tỉnh thành -->
+                <!-- Cột 11: Tỉnh thành -->
                 <th style="width: 130px;">Tỉnh thành</th>
-                <!-- Cột 15: Khu vực -->
-                <th style="width: 140px;">Khu vực</th>
-                <!-- Cột 16: Địa chỉ -->
+                <!-- Cột 12: Địa chỉ -->
                 <th style="width: 250px;">Địa chỉ</th>
-                <!-- Cột 17: Phân loại -->
+                <!-- Cột 13: Phân loại -->
                 <th style="width: 180px;">Phân loại</th>
-                <!-- Cột 18: Nguồn data -->
+                <!-- Cột 14: Nguồn data -->
                 <th style="width: 140px;">Nguồn data</th>
-                <!-- Cột 19: Kênh nguồn -->
+                <!-- Cột 15: Kênh nguồn -->
                 <th style="width: 150px;">Kênh nguồn</th>
-                <!-- Cột 20: Link đăng ký -->
+                <!-- Cột 16: Link đăng ký -->
                 <th style="width: 140px;">Link đăng ký</th>
               </tr>
             </thead>
@@ -385,27 +377,7 @@
                   </div>
                 </td>
 
-                <!-- Cột 5: Tên đăng nhập -->
-                <td class="text-gray-600 text-sm">
-                  {{ item.username || item.email || '-' }}
-                </td>
-
-                <!-- Cột 6: Điểm test -->
-                <td>
-                  <div v-if="item.test_score">
-                    <div class="text-xs font-medium">L: {{ item.test_score.subject_total || 0 }}</div>
-                    <div class="text-xs font-medium">R: {{ item.test_score.thinking_total || 0 }}</div>
-                    <div class="text-xs text-gray-600">Tổng: {{ item.test_score.total_score || 0 }}</div>
-                    <button class="btn-test-detail mt-1" @click="openTestDetail(item)">Chi tiết</button>
-                  </div>
-                  <div v-else>
-                    <div class="text-xs text-gray-500">L: 0 | R: 0</div>
-                    <div class="text-xs text-gray-400">W1: 0 words | W2: 0 words</div>
-                    <button class="btn-test-detail mt-1" @click="openTestDetail(item)">Chi tiết</button>
-                  </div>
-                </td>
-
-                <!-- Cột 7: Lịch sử chăm sóc -->
+                <!-- Cột 5: Lịch sử chăm sóc -->
                 <td>
                   <div class="care-history-box" v-if="item.care_history && item.care_history.length">
                     <div 
@@ -451,27 +423,22 @@
                   </div>
                 </td>
 
-                <!-- Cột 9: Mục tiêu band điểm IELTS -->
-                <td class="td-center font-bold text-base text-gray-800">
-                  {{ item.level || item.ielts_target || '5.0' }}
-                </td>
-
-                <!-- Cột 10: Người quản lý -->
+                <!-- Cột 7: Người quản lý -->
                 <td class="font-medium text-dark text-sm">
                   {{ item.owner_name || '-' }}
                 </td>
 
-                <!-- Cột 11: Quản lý đầu tiên -->
+                <!-- Cột 8: Quản lý đầu tiên -->
                 <td class="text-gray-700 text-sm">
                   {{ item.first_owner_name || item.creator_name || '-' }}
                 </td>
 
-                <!-- Cột 12: Người tạo -->
+                <!-- Cột 9: Người tạo -->
                 <td class="text-gray-700 text-sm">
                   {{ item.creator_name || '-' }}
                 </td>
 
-                <!-- Cột 13: Hợp đồng -->
+                <!-- Cột 10: Hợp đồng -->
                 <td class="td-center">
                   <span 
                     class="contract-badge" 
@@ -481,22 +448,17 @@
                   </span>
                 </td>
 
-                <!-- Cột 14: Tỉnh thành -->
+                <!-- Cột 11: Tỉnh thành -->
                 <td class="text-sm text-gray-700">
                   {{ item.province_name || '-' }}
                 </td>
 
-                <!-- Cột 15: Khu vực -->
-                <td class="text-sm text-gray-700">
-                  {{ item.district_name || item.branch_name || '-' }}
-                </td>
-
-                <!-- Cột 16: Địa chỉ -->
+                <!-- Cột 12: Địa chỉ -->
                 <td class="text-sm text-gray-700" style="max-width: 250px;">
                   {{ item.address || '-' }}
                 </td>
 
-                <!-- Cột 17: Phân loại -->
+                <!-- Cột 13: Phân loại -->
                 <td>
                   <div class="classification-box">
                     <span class="status-name font-medium text-dark">
@@ -1127,7 +1089,7 @@ export default {
   methods: {
     // Chuyển sang chế độ xem tổng quan
     goToOverview() {
-      this.$router.push('/crm/parent')
+      this.$router.push('/crm/parent?view=overview')
     },
 
     // Lấy dữ liệu danh sách khách hàng chi tiết (API độc lập)
