@@ -654,104 +654,114 @@ export default {
 }
 
 .filter-label {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #475569;
-  margin-bottom: 4px;
+  color: #334155;
+  margin-bottom: 6px;
   display: block;
 }
 
-/* Compact multiselect - Exactly 34px */
+/* Custom Multiselect - Exactly 38px */
+.compact-multiselect >>> .multiselect {
+  min-height: 38px !important;
+}
+
 .compact-multiselect >>> .multiselect__tags {
-  min-height: 34px !important;
-  height: 34px !important;
-  padding: 3px 28px 3px 10px !important;
+  box-sizing: border-box !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 6px 32px 6px 12px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 12.5px !important;
+  font-size: 13.5px !important;
   background: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .compact-multiselect >>> .multiselect__select {
-  height: 32px !important;
-  width: 28px !important;
-  padding: 4px 6px !important;
+  height: 36px !important;
+  width: 30px !important;
+  padding: 4px 8px !important;
 }
 
 .compact-multiselect >>> .multiselect__placeholder {
   margin-bottom: 0 !important;
   padding-top: 0 !important;
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   color: #94a3b8 !important;
 }
 
 .compact-multiselect >>> .multiselect__single {
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   margin-bottom: 0 !important;
 }
 
 .compact-multiselect >>> .multiselect__input {
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   margin-bottom: 0 !important;
-  height: 26px !important;
+  height: 24px !important;
 }
 
 .compact-multiselect >>> .multiselect__tag {
-  height: 22px !important;
-  line-height: 22px !important;
-  padding: 0 18px 0 6px !important;
-  font-size: 11px !important;
+  height: 24px !important;
+  line-height: 24px !important;
+  padding: 0 20px 0 8px !important;
+  font-size: 12px !important;
   margin-bottom: 2px !important;
   margin-top: 2px !important;
 }
 
 .compact-multiselect >>> .multiselect__tag-icon {
-  line-height: 22px !important;
+  line-height: 24px !important;
 }
 
-/* Compact Search Text Input - Exactly 34px */
+/* Compact Search Text Input - Exactly 38px */
 .compact-search-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .input-search-icon {
   position: absolute;
-  left: 10px;
+  left: 12px;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 13.5px;
   pointer-events: none;
 }
 
 .compact-text-input {
-  width: 100%;
-  height: 34px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 4px 10px 4px 30px;
-  font-size: 12.5px;
-  color: #1e293b;
-  outline: none;
-  background: #ffffff;
-  transition: all 0.2s ease;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px 6px 34px !important;
+  font-size: 13.5px !important;
+  color: #1e293b !important;
+  outline: none !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
 }
 
 .compact-text-input:focus {
-  border-color: #7367f0;
-  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15);
+  border-color: #7367f0 !important;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15) !important;
 }
 
-/* Compact Datepicker - Exactly 34px */
+/* Compact Datepicker - Exactly 38px */
 .compact-datepicker >>> input {
-  height: 34px !important;
+  box-sizing: border-box !important;
+  height: 38px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 12.5px !important;
-  padding: 4px 10px !important;
+  font-size: 13.5px !important;
+  padding: 6px 12px !important;
 }
 
 /* Action Buttons */
@@ -759,8 +769,10 @@ export default {
   grid-column: span 3;
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
 }
 
 @media (max-width: 991px) {
@@ -776,9 +788,9 @@ export default {
 }
 
 .btn-filter-action {
-  height: 34px;
-  padding: 0 16px;
-  font-size: 12.5px;
+  height: 38px;
+  padding: 0 18px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;

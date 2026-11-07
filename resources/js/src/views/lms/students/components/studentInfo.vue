@@ -679,11 +679,11 @@ export default {
 .compact-section-divider {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #334155;
-  padding: 4px 0;
-  margin-bottom: 8px;
+  padding: 6px 0;
+  margin-bottom: 10px;
   border-bottom: 1px solid #e2e8f0;
   letter-spacing: 0.3px;
 }
@@ -692,19 +692,19 @@ export default {
 .compact-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px 12px;
+  gap: 10px 14px;
 }
 
 .compact-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px 12px;
+  gap: 10px 14px;
 }
 
 .compact-grid-2 {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px 12px;
+  gap: 10px 14px;
 }
 
 @media (max-width: 991px) {
@@ -733,19 +733,20 @@ export default {
 }
 
 .form-label {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: #475569;
-  margin-bottom: 3px;
+  color: #334155;
+  margin-bottom: 5px;
 }
 
-/* Compact Inputs - Exactly 32px */
+/* Comfortable Inputs - Exactly 36px */
 .form-control-compact {
-  height: 32px;
+  box-sizing: border-box !important;
+  height: 36px;
   border: 1px solid #cbd5e1;
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12.5px;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13.5px;
   color: #1e293b;
   background: #ffffff;
   outline: none;
@@ -766,14 +767,15 @@ export default {
 }
 
 .form-control-readonly {
-  height: 32px;
+  box-sizing: border-box !important;
+  height: 36px;
   display: flex;
   align-items: center;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 5px;
-  padding: 4px 8px;
-  font-size: 12.5px;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13.5px;
   color: #334155;
 }
 
@@ -781,23 +783,24 @@ export default {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
 .parent-compact-header {
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
   border-bottom: 1px dashed #cbd5e1;
-  padding-bottom: 4px;
+  padding-bottom: 5px;
 }
 
-/* Datepicker & VueSelect Overrides for exactly 32px */
+/* Datepicker & VueSelect Overrides for exactly 36px */
 .form-datepicker-compact >>> input {
-  height: 32px !important;
+  box-sizing: border-box !important;
+  height: 36px !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 5px !important;
-  font-size: 12.5px !important;
-  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  padding: 6px 10px !important;
 }
 
 .form-datepicker-compact >>> input:disabled {
@@ -807,12 +810,13 @@ export default {
 }
 
 .form-vselect-compact >>> .vs__dropdown-toggle {
-  min-height: 32px !important;
-  height: 32px !important;
+  box-sizing: border-box !important;
+  min-height: 36px !important;
+  height: 36px !important;
   border: 1px solid #cbd5e1 !important;
-  border-radius: 5px !important;
-  font-size: 12.5px !important;
-  padding: 0 6px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
+  padding: 0 8px !important;
 }
 
 .form-vselect-compact.vs--disabled >>> .vs__dropdown-toggle {
@@ -821,14 +825,14 @@ export default {
 }
 
 .form-vselect-compact >>> .vs__selected {
-  margin: 2px 2px 0 !important;
-  padding: 0 2px !important;
-  font-size: 12.5px !important;
+  margin: 3px 2px 0 !important;
+  padding: 0 4px !important;
+  font-size: 13.5px !important;
 }
 
 .form-vselect-compact >>> .vs__search {
-  margin: 2px 0 0 !important;
+  margin: 3px 0 0 !important;
   padding: 0 !important;
-  font-size: 12.5px !important;
+  font-size: 13.5px !important;
 }
 </style>

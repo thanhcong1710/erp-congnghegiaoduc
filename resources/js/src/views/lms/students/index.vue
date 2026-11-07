@@ -17,14 +17,14 @@
       </div>
     </div>
 
-    <!-- Filter Card - Compact & Balanced -->
-    <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg compact-filter-card">
-      <div class="filter-grid">
+    <!-- Filter Card -->
+    <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg">
+      <div class="vx-row">
         <!-- Trung tâm -->
-        <div class="filter-item">
+        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-location-dot text-primary mr-1"></i> Trung tâm</label>
           <multiselect
-            class="compact-multiselect"
+            class="custom-multiselect"
             name="search_branch"
             placeholder="Tất cả trung tâm"
             v-model="searchData.arr_branch"
@@ -42,13 +42,13 @@
         </div>
 
         <!-- Tìm kiếm -->
-        <div class="filter-item">
+        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-magnifying-glass text-primary mr-1"></i> Tìm kiếm</label>
-          <div class="compact-search-input-wrapper">
-            <i class="fa-solid fa-search input-search-icon"></i>
+          <div class="filter-search-wrapper">
+            <i class="fa-solid fa-search filter-search-icon"></i>
             <input
               type="text"
-              class="compact-text-input"
+              class="filter-input-text"
               placeholder="Mã HS, Tên học sinh, số điện thoại..."
               v-model="searchData.keyword"
               @keyup.enter="getData"
@@ -57,10 +57,10 @@
         </div>
 
         <!-- Trạng thái -->
-        <div class="filter-item">
+        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-tags text-primary mr-1"></i> Trạng thái học sinh</label>
           <multiselect
-            class="compact-multiselect"
+            class="custom-multiselect"
             name="search_status"
             placeholder="Tất cả trạng thái"
             v-model="searchData.arr_status"
@@ -76,16 +76,16 @@
             <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
+      </div>
 
-        <!-- Action Buttons -->
-        <div class="filter-actions-item">
-          <button class="btn-filter-action btn-filter-submit" @click="getData" title="Tìm kiếm">
-            <i class="fa fa-search mr-1"></i> Tìm kiếm
-          </button>
-          <button class="btn-filter-action btn-filter-reset" @click="reset" title="Đặt lại bộ lọc">
-            <i class="fas fa-undo-alt mr-1"></i> Đặt lại
-          </button>
-        </div>
+      <!-- Action Buttons Row (Below inputs like Checkin) -->
+      <div class="filter-actions-bar">
+        <button class="btn-filter-action btn-filter-submit" @click="getData" title="Tìm kiếm">
+          <i class="fa fa-search mr-1.5"></i> Tìm kiếm
+        </button>
+        <button class="btn-filter-action btn-filter-reset" @click="reset" title="Đặt lại bộ lọc">
+          <i class="fas fa-undo-alt mr-1.5"></i> Đặt lại
+        </button>
       </div>
     </vx-card>
 
@@ -393,147 +393,127 @@ export default {
   align-items: center;
   background-color: #eff6ff;
   color: #1d4ed8;
-  font-size: 12px;
-  padding: 4px 12px;
+  font-size: 13px;
+  padding: 5px 14px;
   border-radius: 9999px;
   border: 1px solid #bfdbfe;
 }
 
-.compact-filter-card >>> .vx-card__collapsible-content .vx-card__body {
-  padding: 12px 16px !important;
-}
-
-.compact-table-card >>> .vx-card__collapsible-content .vx-card__body {
-  padding: 12px 16px !important;
-}
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 12px;
-  align-items: flex-end;
-}
-
-@media (max-width: 991px) {
-  .filter-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .filter-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-}
-
 .filter-label {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
-  color: #475569;
-  margin-bottom: 4px;
+  color: #334155;
+  margin-bottom: 6px;
+  display: block;
 }
 
-/* Compact multiselect - Exactly 34px */
-.compact-multiselect >>> .multiselect__tags {
-  min-height: 34px !important;
-  height: 34px !important;
-  padding: 3px 28px 3px 10px !important;
+/* Custom Multiselect - Exactly 38px height, 13.5px font */
+.custom-multiselect >>> .multiselect {
+  min-height: 38px !important;
+}
+
+.custom-multiselect >>> .multiselect__tags {
+  box-sizing: border-box !important;
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 6px 32px 6px 12px !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 12.5px !important;
+  font-size: 13.5px !important;
   background: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.compact-multiselect >>> .multiselect__select {
-  height: 32px !important;
-  width: 28px !important;
-  padding: 4px 6px !important;
+.custom-multiselect >>> .multiselect__select {
+  height: 36px !important;
+  width: 30px !important;
+  padding: 4px 8px !important;
 }
 
-.compact-multiselect >>> .multiselect__placeholder {
+.custom-multiselect >>> .multiselect__placeholder {
   margin-bottom: 0 !important;
   padding-top: 0 !important;
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   color: #94a3b8 !important;
 }
 
-.compact-multiselect >>> .multiselect__single {
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+.custom-multiselect >>> .multiselect__single {
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   margin-bottom: 0 !important;
 }
 
-.compact-multiselect >>> .multiselect__input {
-  line-height: 26px !important;
-  font-size: 12.5px !important;
+.custom-multiselect >>> .multiselect__input {
+  line-height: 24px !important;
+  font-size: 13.5px !important;
   margin-bottom: 0 !important;
-  height: 26px !important;
+  height: 24px !important;
 }
 
-.compact-multiselect >>> .multiselect__tag {
-  height: 22px !important;
-  line-height: 22px !important;
-  padding: 0 18px 0 6px !important;
-  font-size: 11px !important;
+.custom-multiselect >>> .multiselect__tag {
+  height: 24px !important;
+  line-height: 24px !important;
+  padding: 0 20px 0 8px !important;
+  font-size: 12px !important;
   margin-bottom: 2px !important;
   margin-top: 2px !important;
 }
 
-.compact-multiselect >>> .multiselect__tag-icon {
-  line-height: 22px !important;
+.custom-multiselect >>> .multiselect__tag-icon {
+  line-height: 24px !important;
 }
 
-/* Compact Search Text Input - Exactly 34px */
-.compact-search-input-wrapper {
+/* Custom Search Text Input - Exactly 38px height, 13.5px font */
+.filter-search-wrapper {
   position: relative;
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
-.input-search-icon {
+.filter-search-icon {
   position: absolute;
-  left: 10px;
+  left: 12px;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: 13.5px;
   pointer-events: none;
 }
 
-.compact-text-input {
-  width: 100%;
-  height: 34px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 4px 10px 4px 30px;
-  font-size: 12.5px;
-  color: #1e293b;
-  outline: none;
-  background: #ffffff;
-  transition: all 0.2s ease;
+.filter-input-text {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px 6px 34px !important;
+  font-size: 13.5px !important;
+  color: #1e293b !important;
+  outline: none !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
 }
 
-.compact-text-input:focus {
-  border-color: #7367f0;
-  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15);
+.filter-input-text:focus {
+  border-color: #7367f0 !important;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15) !important;
 }
 
-/* Action Buttons - Exactly 34px */
-.filter-actions-item {
+/* Action Buttons Bar - Positioned below inputs, aligned right */
+.filter-actions-bar {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 34px;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .btn-filter-action {
-  height: 34px;
-  padding: 0 14px;
-  font-size: 12.5px;
+  height: 38px;
+  padding: 0 18px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
@@ -567,28 +547,28 @@ export default {
   border-color: #94a3b8;
 }
 
-/* Modern Student Table */
+/* Modern Student Table - Readable fonts */
 .modern-student-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .modern-student-table thead th {
   background: #f8fafc;
   color: #475569;
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 12.5px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 2px solid #e2e8f0;
   white-space: nowrap;
 }
 
 .modern-student-table tbody td {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
 }
@@ -603,23 +583,28 @@ export default {
 }
 
 .student-avatar-img {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.student-name-text {
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
 .stk-code-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #7367f0;
   background-color: #f5f3ff;
   border: 1px solid #ddd6fe;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 5px;
   cursor: pointer;
 }
@@ -628,10 +613,10 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 11px;
+  font-size: 12px;
   color: #64748b;
   background: #f1f5f9;
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
 }
 
@@ -640,7 +625,7 @@ export default {
   align-items: center;
   background: #eef2ff;
   color: #4f46e5;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 4px;
@@ -649,9 +634,9 @@ export default {
 .status-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
   white-space: nowrap;
 }
@@ -678,9 +663,9 @@ export default {
 }
 
 .action-view-btn {
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
-  padding: 4px 10px !important;
+  padding: 5px 12px !important;
 }
 
 /* Compact Pagination Bar */
@@ -688,17 +673,17 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 12px;
-  padding-top: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #e2e8f0;
 }
 
 .compact-page-select {
-  height: 28px;
-  padding: 2px 6px;
+  height: 30px;
+  padding: 2px 8px;
   border: 1px solid #cbd5e1;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   background: #ffffff;
   color: #334155;
   outline: none;
