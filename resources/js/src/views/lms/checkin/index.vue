@@ -22,12 +22,14 @@
       </div>
     </div>
 
-    <!-- Filter Card -->
-    <vx-card no-shadow class="mb-5 shadow-sm border border-solid border-grey-light rounded-lg">
-      <div class="vx-row">
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+    <!-- Filter Card - Compact & Balanced -->
+    <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg compact-filter-card">
+      <div class="filter-grid-checkin">
+        <!-- Trung tâm -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-building text-primary mr-1"></i> Trung tâm checkin</label>
           <multiselect
+            class="compact-multiselect"
             name="search_branch"
             placeholder="Tất cả trung tâm"
             v-model="searchData.arr_branch"
@@ -40,25 +42,30 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
 
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Tìm kiếm -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-magnifying-glass text-primary mr-1"></i> Tìm kiếm</label>
-          <vs-input
-            icon-pack="feather"
-            icon="icon-search"
-            class="w-full"
-            placeholder="Tên học sinh, phụ huynh, SĐT..."
-            v-model="searchData.keyword"
-            @keyup.enter="getData"
-          ></vs-input>
+          <div class="compact-search-input-wrapper">
+            <i class="fa-solid fa-search input-search-icon"></i>
+            <input
+              type="text"
+              class="compact-text-input"
+              placeholder="Tên học sinh, phụ huynh, SĐT..."
+              v-model="searchData.keyword"
+              @keyup.enter="getData"
+            />
+          </div>
         </div>
 
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Trạng thái -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-tags text-primary mr-1"></i> Trạng thái</label>
           <multiselect
+            class="compact-multiselect"
             name="search_status"
             placeholder="Tất cả trạng thái"
             v-model="searchData.arr_status"
@@ -71,13 +78,15 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
 
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Người phụ trách (EC) -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-user-tie text-primary mr-1"></i> Người phụ trách (EC)</label>
           <multiselect
+            class="compact-multiselect"
             name="search_owner"
             placeholder="Tất cả nhân viên"
             v-model="searchData.arr_creator"
@@ -90,13 +99,15 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
 
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Nguồn khách hàng -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-bullhorn text-primary mr-1"></i> Nguồn khách hàng</label>
           <multiselect
+            class="compact-multiselect"
             name="search_source"
             placeholder="Tất cả nguồn"
             v-model="searchData.arr_source"
@@ -109,13 +120,15 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
 
-        <div class="vx-col lg:w-1/4 md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Thời gian checkin -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-regular fa-calendar-days text-primary mr-1"></i> Thời gian checkin</label>
           <date-picker
+            class="compact-datepicker w-full"
             name="item-date"
             v-model="searchData.dateRange"
             range
@@ -126,19 +139,15 @@
             placeholder="Chọn khoảng thời gian"
           ></date-picker>
         </div>
-      </div>
 
-      <div class="flex flex-wrap items-center justify-between pt-2 border-t border-solid border-grey-light mt-1">
-        <div class="text-xs text-gray-500 italic">
-          * Nhấn Enter hoặc bấm "Tìm kiếm" để lọc dữ liệu
-        </div>
-        <div class="flex items-center mt-2 sm:mt-0">
-          <vs-button color="primary" class="mr-3 flex items-center shadow-md" @click="getData">
+        <!-- Action Buttons - span across or bottom right -->
+        <div class="filter-actions-checkin">
+          <button class="btn-filter-action btn-filter-submit" @click="getData" title="Tìm kiếm">
             <i class="fa fa-search mr-1"></i> Tìm kiếm
-          </vs-button>
-          <vs-button color="gray" type="border" class="flex items-center" @click="reset">
+          </button>
+          <button class="btn-filter-action btn-filter-reset" @click="reset" title="Đặt lại">
             <i class="fas fa-undo-alt mr-1"></i> Đặt lại
-          </vs-button>
+          </button>
         </div>
       </div>
     </vx-card>
@@ -262,22 +271,14 @@
         </table>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between mt-5 pt-3 border-t border-solid border-grey-light">
-        <div class="flex items-center mb-2 sm:mb-0">
-          <span class="text-sm text-gray-500 mr-2">Hiển thị mỗi trang:</span>
-          <vs-dropdown vs-trigger-click class="cursor-pointer">
-            <div class="px-3 py-1.5 border border-solid border-grey-light rounded-md bg-white flex items-center justify-between font-medium text-sm">
-              <span class="mr-2">{{ pagination.limit }}</span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-            <vs-dropdown-menu>
-              <vs-dropdown-item v-for="(limit, idx) in limitSource" :key="idx" @click="changePageLimit(limit)">
-                <span>{{ limit }}</span>
-              </vs-dropdown-item>
-            </vs-dropdown-menu>
-          </vs-dropdown>
-          <span class="text-xs text-gray-400 ml-3">
+      <!-- Compact Pagination -->
+      <div class="compact-pagination-bar">
+        <div class="flex items-center">
+          <span class="text-xs text-gray-500 mr-2">Hiển thị mỗi trang:</span>
+          <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
+            <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
+          </select>
+          <span class="text-xs text-gray-400 ml-2">
             ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
           </span>
         </div>
@@ -624,21 +625,221 @@ export default {
 </script>
 
 <style scoped>
+.compact-filter-card >>> .vx-card__collapsible-content .vx-card__body {
+  padding: 12px 16px !important;
+}
+
+.filter-grid-checkin {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-items: flex-end;
+}
+
+@media (max-width: 991px) {
+  .filter-grid-checkin {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-grid-checkin {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+}
+
 .filter-label {
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 600;
   color: #475569;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   display: block;
+}
+
+/* Compact multiselect - Exactly 34px */
+.compact-multiselect >>> .multiselect__tags {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 3px 28px 3px 10px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 12.5px !important;
+  background: #ffffff !important;
+}
+
+.compact-multiselect >>> .multiselect__select {
+  height: 32px !important;
+  width: 28px !important;
+  padding: 4px 6px !important;
+}
+
+.compact-multiselect >>> .multiselect__placeholder {
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  color: #94a3b8 !important;
+}
+
+.compact-multiselect >>> .multiselect__single {
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  margin-bottom: 0 !important;
+}
+
+.compact-multiselect >>> .multiselect__input {
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  margin-bottom: 0 !important;
+  height: 26px !important;
+}
+
+.compact-multiselect >>> .multiselect__tag {
+  height: 22px !important;
+  line-height: 22px !important;
+  padding: 0 18px 0 6px !important;
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+  margin-top: 2px !important;
+}
+
+.compact-multiselect >>> .multiselect__tag-icon {
+  line-height: 22px !important;
+}
+
+/* Compact Search Text Input - Exactly 34px */
+.compact-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.compact-text-input {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 10px 4px 30px;
+  font-size: 12.5px;
+  color: #1e293b;
+  outline: none;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.compact-text-input:focus {
+  border-color: #7367f0;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15);
+}
+
+/* Compact Datepicker - Exactly 34px */
+.compact-datepicker >>> input {
+  height: 34px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 12.5px !important;
+  padding: 4px 10px !important;
+}
+
+/* Action Buttons */
+.filter-actions-checkin {
+  grid-column: span 3;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+@media (max-width: 991px) {
+  .filter-actions-checkin {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-actions-checkin {
+    grid-column: span 1;
+  }
+}
+
+.btn-filter-action {
+  height: 34px;
+  padding: 0 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-filter-submit {
+  background: #7367f0;
+  color: #ffffff;
+  border: 1px solid #7367f0;
+}
+
+.btn-filter-submit:hover {
+  background: #5e50ee;
+  box-shadow: 0 2px 6px rgba(115, 103, 240, 0.3);
+}
+
+.btn-filter-reset {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-filter-reset:hover {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+/* Compact Pagination Bar */
+.compact-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.compact-page-select {
+  height: 28px;
+  padding: 2px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
 }
 
 .badge-total-checkin {
   background: #f0fdf4;
   color: #15803d;
   border: 1px solid #bbf7d0;
-  padding: 6px 14px;
+  padding: 4px 12px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
 }

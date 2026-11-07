@@ -1,27 +1,27 @@
 <template>
   <div class="student-detail-sessions mt-2" v-if="contract_info && contract_info.id">
     <!-- Session Stats Cards -->
-    <div class="vx-row mb-4">
-      <div class="vx-col sm:w-1/3 w-full mb-3">
+    <div class="vx-row mb-3">
+      <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-primary">
           <div class="text-xs text-gray-500 font-medium">Tổng số buổi trong gói</div>
-          <div class="text-xl font-bold text-gray-800 mt-1">
+          <div class="text-base font-bold text-gray-800 mt-0.5">
             {{ contract_info.summary_sessions || 0 }} <span class="text-xs font-normal text-gray-400">buổi</span>
           </div>
         </div>
       </div>
-      <div class="vx-col sm:w-1/3 w-full mb-3">
+      <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-emerald-500">
           <div class="text-xs text-gray-500 font-medium">Số buổi đã học / ghi nhận</div>
-          <div class="text-xl font-bold text-emerald-600 mt-1">
+          <div class="text-base font-bold text-emerald-600 mt-0.5">
             {{ contract_info.done_sessions || 0 }} <span class="text-xs font-normal text-gray-400">buổi</span>
           </div>
         </div>
       </div>
-      <div class="vx-col sm:w-1/3 w-full mb-3">
+      <div class="vx-col sm:w-1/3 w-full mb-2">
         <div class="session-stat-card border-l-4 border-amber-500">
           <div class="text-xs text-gray-500 font-medium">Số buổi còn lại</div>
-          <div class="text-xl font-bold text-amber-600 mt-1">
+          <div class="text-base font-bold text-amber-600 mt-0.5">
             {{ (contract_info.summary_sessions || 0) - (contract_info.done_sessions || 0) }} <span class="text-xs font-normal text-gray-400">buổi</span>
           </div>
         </div>
@@ -29,18 +29,18 @@
     </div>
 
     <!-- Legend -->
-    <div class="flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200 mb-4 text-xs text-gray-600">
-      <span class="font-bold text-gray-700 mr-2"><i class="fa-solid fa-circle-info mr-1 text-primary"></i> Chú thích:</span>
-      <span class="inline-flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-1.5 inline-block"></span> Đã học</span>
-      <span class="inline-flex items-center"><span class="w-3 h-3 rounded-full bg-purple-500 mr-1.5 inline-block"></span> Đã học bù</span>
-      <span class="inline-flex items-center"><span class="w-3 h-3 rounded-full bg-rose-500 mr-1.5 inline-block"></span> Đã chạy phí</span>
-      <span class="inline-flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-1.5 inline-block"></span> Bảo lưu / Nghỉ lễ</span>
-      <span class="inline-flex items-center"><span class="w-3 h-3 rounded-full bg-slate-300 mr-1.5 inline-block"></span> Sắp học</span>
+    <div class="flex flex-wrap items-center gap-3 p-2 bg-slate-50 rounded border border-slate-200 mb-3 text-xs text-gray-600">
+      <span class="font-bold text-gray-700 mr-1"><i class="fa-solid fa-circle-info mr-1 text-primary"></i> Chú thích:</span>
+      <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1 inline-block"></span> Đã học</span>
+      <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-purple-500 mr-1 inline-block"></span> Đã học bù</span>
+      <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 mr-1 inline-block"></span> Đã chạy phí</span>
+      <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-1 inline-block"></span> Bảo lưu / Nghỉ lễ</span>
+      <span class="inline-flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-slate-300 mr-1 inline-block"></span> Sắp học</span>
     </div>
 
     <!-- Sessions Grid -->
     <div>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div class="sessions-chips-grid">
         <!-- Done Sessions -->
         <div
           v-for="(item, index) in done_sessions"
@@ -162,24 +162,42 @@
 .session-stat-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.sessions-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 1200px) {
+  .sessions-chips-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .sessions-chips-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .sessions-chips-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .session-chip-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 6px;
+  padding: 8px;
   text-align: center;
   transition: all 0.2s ease;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .session-chip-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
 }
 
 .session-card-attended {
@@ -208,28 +226,28 @@
 }
 
 .session-order {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   color: #64748b;
-  margin-bottom: 4px;
-}
-
-.session-class-name {
-  font-size: 12px;
   margin-bottom: 2px;
 }
 
+.session-class-name {
+  font-size: 11.5px;
+  margin-bottom: 1px;
+}
+
 .session-date {
-  font-size: 11px;
+  font-size: 10.5px;
 }
 
 .session-status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 9999px;
 }
 </style>

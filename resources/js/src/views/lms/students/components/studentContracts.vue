@@ -8,34 +8,34 @@
     </div>
 
     <!-- Contracts Table -->
-    <div v-else class="table-responsive rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+    <div v-else class="table-responsive rounded border border-slate-200 overflow-hidden shadow-sm">
       <table class="w-full text-left text-xs bg-white">
         <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 uppercase text-2xs tracking-wider">
           <tr>
-            <th class="py-3 px-4">Thời gian & Người tạo</th>
-            <th class="py-3 px-4">Trung tâm & Phụ trách</th>
-            <th class="py-3 px-4">Gói phí & Khóa học</th>
-            <th class="py-3 px-4">Tài chính & Thu phí</th>
-            <th class="py-3 px-4">Trạng thái & Lộ trình</th>
+            <th class="py-2.5 px-3">Thời gian & Người tạo</th>
+            <th class="py-2.5 px-3">Trung tâm & Phụ trách</th>
+            <th class="py-2.5 px-3">Gói phí & Khóa học</th>
+            <th class="py-2.5 px-3">Tài chính & Thu phí</th>
+            <th class="py-2.5 px-3">Trạng thái & Lộ trình</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           <tr v-for="(item, index) in contracts" :key="index" class="hover:bg-slate-50 transition-colors">
             <!-- Col 1: Thời gian -->
-            <td class="py-3 px-4 align-top">
+            <td class="py-2 px-3 align-top">
               <div class="font-semibold text-gray-800 flex items-center">
                 <i class="fa-regular fa-clock text-gray-400 mr-1.5"></i>
                 {{ item.created_at }}
               </div>
-              <div class="text-gray-500 mt-1 flex items-center">
+              <div class="text-gray-500 mt-0.5 flex items-center">
                 <i class="fa-regular fa-user text-gray-400 mr-1.5"></i>
                 {{ item.creator_name || 'Hệ thống' }}
               </div>
             </td>
 
             <!-- Col 2: Trung tâm -->
-            <td class="py-3 px-4 align-top">
-              <div class="font-bold text-gray-900 mb-1 flex items-center">
+            <td class="py-2 px-3 align-top">
+              <div class="font-bold text-gray-900 mb-0.5 flex items-center">
                 <i class="fa-solid fa-building text-primary mr-1.5"></i>
                 {{ item.branch_name }}
               </div>
@@ -49,15 +49,15 @@
             </td>
 
             <!-- Col 3: Gói phí -->
-            <td class="py-3 px-4 align-top">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+            <td class="py-2 px-3 align-top">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
                   <i class="fa-solid fa-file-contract mr-1"></i> {{ item.code }}
                 </span>
               </div>
               <div class="font-bold text-gray-900">{{ item.product_name }}</div>
               <div class="text-gray-600 text-xs">{{ item.tuition_fee_name }}</div>
-              <div class="mt-1 text-xs text-gray-500">
+              <div class="mt-0.5 text-xs text-gray-500">
                 <span>Số buổi: <strong>{{ item.debt_amount == 0 ? item.summary_sessions : item.total_sessions }}</strong> buổi</span>
                 <span v-if="item.bonus_sessions" class="text-emerald-600 ml-1 font-semibold">(+{{ item.bonus_sessions }} HB)</span>
               </div>
@@ -67,8 +67,8 @@
             </td>
 
             <!-- Col 4: Tài chính -->
-            <td class="py-3 px-4 align-top">
-              <div class="space-y-1">
+            <td class="py-2 px-3 align-top">
+              <div class="space-y-0.5">
                 <div class="flex justify-between text-xs text-gray-500">
                   <span>Giá gốc:</span>
                   <span>{{ item.init_tuition_fee_amount | formatMoney }}</span>
@@ -91,7 +91,7 @@
                 size="small"
                 color="warning"
                 type="relief"
-                class="mt-2 w-full text-xs font-semibold"
+                class="mt-1.5 w-full text-xs font-semibold"
                 @click="confirmExitDepost(item.contract_id)"
               >
                 <i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Quy đổi cọc
@@ -99,8 +99,8 @@
             </td>
 
             <!-- Col 5: Trạng thái & Lộ trình -->
-            <td class="py-3 px-4 align-top">
-              <div class="mb-2">
+            <td class="py-2 px-3 align-top">
+              <div class="mb-1">
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold" :class="getStatusBadgeClass(item.status)">
                   <i class="fa-solid fa-circle text-2xs mr-1.5"></i>
                   {{ item.label_status || 'Đang hiệu lực' }}

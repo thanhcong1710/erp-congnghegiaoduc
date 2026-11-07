@@ -1,54 +1,68 @@
 <template>
-  <div class="student-detail-sessions mt-5">
-    <div class="vx-row">
-      <div class="vx-col md:w-1/3 w-full mb-4">
-        <label>File hồ sơ <span class="text-danger"> (*)</span></label>
-        <input class="vs-inputx vs-input--input normal" type="file" @change="handleFileUpload" />
+  <div class="student-detail-files mt-2">
+    <!-- Compact Upload Form -->
+    <div class="compact-upload-bar mb-3">
+      <div class="upload-item" style="max-width: 250px;">
+        <label class="form-label">Chọn tệp đính kèm <span class="text-danger">*</span></label>
+        <input class="form-control-compact" type="file" @change="handleFileUpload" />
       </div>
-      <div class="vx-col md:w-1/3 w-full mb-4">
-        <label>Ghi chú <span class="text-danger"> (*)</span></label>
+      <div class="upload-item flex-1">
+        <label class="form-label">Ghi chú tệp <span class="text-danger">*</span></label>
         <input
-          class="vs-inputx vs-input--input normal"
+          class="form-control-compact"
           type="text"
-          name="title"
+          placeholder="Nhập ghi chú tệp hồ sơ..."
           v-model="upload.note"
         />
       </div>
-      <div class="mt-5">
-        <vs-button class="mb-2" color="success" @click="uploadFile" >Lưu</vs-button>
+      <div class="upload-btn-item">
+        <button class="btn-compact-save" @click="uploadFile">
+          <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Tải lên
+        </button>
       </div>
-      <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
-        <div v-html="alert.body"></div>
-      </vs-alert>
     </div>
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1">File</th>
-                <th colspan="1" rowspan="1">Ghi chú</th>
-                <th colspan="1" rowspan="1">Thao tác</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in files" :key="index">
-              <!---->
-              
-              <td class="td vs-table--td">
-                <a :href="item.file_path" target="_blank">{{ item.file_name }}</a>
-              </td>
-              <td class="td vs-table--td">{{item.note}}</td>
-              <td class="td vs-table--td list-action">
-                <a :href="item.file_path" target="_blank"><vs-button size="small"><i class="fa fa-eye"></i></vs-button></a>
-                <vs-button size="small" color="danger" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
-              </td>
-            </tr>
-          </table>
-          
-        </div>
-      </div>
+
+    <vs-alert :active.sync="alert.active" class="mb-3" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+      <div v-html="alert.body"></div>
+    </vs-alert>
+
+    <!-- Files Table -->
+    <div class="table-responsive rounded border border-slate-200">
+      <table class="w-full text-xs bg-white">
+        <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+          <tr>
+            <th class="py-2.5 px-3" style="width: 50px">STT</th>
+            <th class="py-2.5 px-3" style="width: 280px">Tên tệp</th>
+            <th class="py-2.5 px-3">Ghi chú</th>
+            <th class="py-2.5 px-3 text-center" style="width: 100px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr v-if="!files || files.length === 0">
+            <td colspan="4" class="text-center py-4 text-gray-400 italic">
+              Chưa có tài liệu hồ sơ nào được lưu trữ
+            </td>
+          </tr>
+          <tr v-for="(item, index) in files" :key="index" class="hover:bg-slate-50">
+            <td class="py-2 px-3 text-center text-gray-500 font-semibold">{{ index + 1 }}</td>
+            <td class="py-2 px-3">
+              <a :href="item.file_path" target="_blank" class="text-primary font-semibold hover:underline flex items-center">
+                <i class="fa-solid fa-file-pdf text-rose-500 mr-1.5" style="font-size: 14px;"></i>
+                {{ item.file_name }}
+              </a>
+            </td>
+            <td class="py-2 px-3 text-gray-700">{{ item.note }}</td>
+            <td class="py-2 px-3 text-center">
+              <a :href="item.file_path" target="_blank" class="mr-2 text-primary" title="Xem tệp">
+                <i class="fa fa-eye"></i>
+              </a>
+              <button class="text-rose-500 hover:text-rose-700" @click="confirmDelete(item)" title="Xóa tệp">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -89,22 +103,63 @@
       this.getStudentFiles();
     },
     methods: {
-      handleFileUpload(event){
-        const selectedFile = event.target.files[0];
-        if (selectedFile) {
-          this.upload.file = selectedFile;
-          this.upload.fileName = selectedFile.name;
-        }else{
-          this.upload.file = "";
-          this.upload.fileName = "";
+      handleFileUpload(e){
+        this.upload.file = e.target.files[0];
+        this.upload.fileName = e.target.files[0].name;
+      },
+      confirmDelete (item) {
+        this.$vs.dialog({
+          type: 'confirm',
+          color: 'danger',
+          title: 'Thông báo',
+          text: `Bạn chắc chắn xóa file ${item.file_name}?`,
+          accept: () => this.deleteFile(item),
+          acceptText: 'Xóa',
+          cancelText: 'Hủy'
+        })
+      },
+      deleteFile(item){
+        const data = {
+          file_id: item.id
         }
-        console.log(this.upload.file)
+        this.$vs.loading()
+        axios.p('/api/lms/students/delete_files', data)
+          .then((response) => {
+            this.$vs.loading.close()
+            this.getStudentFiles();
+            this.$vs.notify({
+              title: 'Thành Công',
+              text: response.data.message,
+              color: 'success',
+              iconPack: 'feather',
+              icon: 'icon-check'
+            })
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
+      },
+      getStudentFiles(){
+        const data = {
+          student_id: this.student_info.id
+        }
+        this.$vs.loading()
+        axios.p('/api/lms/students/files', data)
+          .then((response) => {
+            this.$vs.loading.close()
+            this.files = response.data
+          })
+          .catch((error) => {
+            console.log(error);
+            this.$vs.loading.close();
+          })
       },
       uploadFile(){
         let mess = "";
         let resp = true;
         if (this.upload.file == "") {
-          mess += " - File hồ sơ không được để trống<br/>";
+          mess += " - File không được để trống<br/>";
           resp = false;
         }
         if (this.upload.note == "") {
@@ -117,61 +172,18 @@
           this.alert.active = true;
           return false;
         }
-        const formData = new FormData();
-        formData.append('file', this.upload.file);
-        formData.append('student_id', this.student_info.id);
-        formData.append('note', this.upload.note);
+        let formData = new FormData();
+        formData.append("file", this.upload.file);
+        formData.append("note", this.upload.note);
+        formData.append("student_id", this.student_info.id);
         this.$vs.loading()
-        axios.p('/api/lms/students/upload-file', formData, 
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            },
-          }).then((response) => {  
-            this.getStudentFiles();
-            this.upload.file = "";
-            this.upload.fileName = "";
-            this.upload.note = "";
-            this.$vs.loading.close();
-          })
-        .catch((error)   => { console.log(error); this.$vs.loading.close(); })
-      },
-      getStudentFiles(){
-        const data = {
-          student_id: this.student_info.id,
-        }
-        this.$vs.loading()
-        axios.p('/api/lms/students/get-files', data)
-          .then((response) => {
-            this.$vs.loading.close()
-            this.files = response.data
-          })
-          .catch((error) => {
-            console.log(error);
-            this.$vs.loading.close();
-          })
-      },
-      confirmDelete (item) {
-        this.delete_id = item.id
-        this.$vs.dialog({
-          type: 'confirm',
-          color: 'danger',
-          title: 'Thông báo',
-          text: `Bạn chắc chắn muốn xoá file này`,
-          accept: this.deleteFile,
-          acceptText: 'Xóa',
-          cancelText: 'Hủy'
+        axios.p("/api/lms/students/upload_files",formData,{
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
         })
-      },
-      deleteFile(){
-        const data = {
-          id: this.delete_id,
-        };
-        this.$vs.loading();
-        axios.p(`/api/lms/students/delete-file`,data)
         .then((response) => {
           this.$vs.loading.close();
-          this.getStudentFiles();
           this.$vs.notify({
             title: 'Thành Công',
             text: response.data.message,
@@ -179,8 +191,81 @@
             iconPack: 'feather',
             icon: 'icon-check'
           })
+          this.upload.file = ""
+          this.upload.note = ""
+          this.getStudentFiles();
         })
-      },
+        .catch((e) => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+      }
     }
   }
 </script>
+
+<style scoped>
+.compact-upload-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.upload-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 3px;
+}
+
+.form-control-compact {
+  height: 32px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12.5px;
+  background: #ffffff;
+  outline: none;
+  width: 100%;
+}
+
+.upload-btn-item {
+  height: 32px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.btn-compact-save {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #28c76f;
+  color: #ffffff;
+  border: 1px solid #28c76f;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-compact-save:hover {
+  background: #20a159;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+</style>

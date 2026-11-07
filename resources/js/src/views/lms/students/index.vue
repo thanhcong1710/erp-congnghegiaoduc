@@ -1,15 +1,15 @@
 <template>
   <div id="page-students-list">
     <!-- Header Banner -->
-    <div class="flex flex-wrap items-center justify-between mb-4 mt-2">
+    <div class="flex items-center justify-between mb-3 mt-1">
       <div>
-        <h4 class="font-bold text-gray-800 flex items-center">
-          <i class="fa-solid fa-user-graduate text-primary mr-2" style="font-size: 24px;"></i>
+        <h4 class="font-bold text-gray-800 flex items-center text-lg m-0">
+          <i class="fa-solid fa-user-graduate text-primary mr-2" style="font-size: 20px;"></i>
           Danh Sách Học Sinh
         </h4>
-        <p class="text-sm text-gray-500 mt-1">Quản lý hồ sơ học sinh, tiến độ buổi học và thông tin lớp học</p>
+        <span class="text-xs text-gray-500">Quản lý hồ sơ học sinh, tiến độ buổi học và thông tin lớp học</span>
       </div>
-      <div class="flex items-center mt-2 sm:mt-0">
+      <div>
         <span class="badge-total-students">
           <i class="fa-solid fa-users mr-1"></i>
           Tổng cộng: <strong>{{ pagination.total }}</strong> học sinh
@@ -17,12 +17,14 @@
       </div>
     </div>
 
-    <!-- Filter Card -->
-    <vx-card no-shadow class="mb-5 shadow-sm border border-solid border-grey-light rounded-lg">
-      <div class="vx-row">
-        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
+    <!-- Filter Card - Compact & Balanced -->
+    <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg compact-filter-card">
+      <div class="filter-grid">
+        <!-- Trung tâm -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-location-dot text-primary mr-1"></i> Trung tâm</label>
           <multiselect
+            class="compact-multiselect"
             name="search_branch"
             placeholder="Tất cả trung tâm"
             v-model="searchData.arr_branch"
@@ -35,25 +37,30 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
 
-        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Tìm kiếm -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-magnifying-glass text-primary mr-1"></i> Tìm kiếm</label>
-          <vs-input
-            icon-pack="feather"
-            icon="icon-search"
-            class="w-full"
-            placeholder="Mã HS, Tên học sinh, số điện thoại..."
-            v-model="searchData.keyword"
-            @keyup.enter="getData"
-          ></vs-input>
+          <div class="compact-search-input-wrapper">
+            <i class="fa-solid fa-search input-search-icon"></i>
+            <input
+              type="text"
+              class="compact-text-input"
+              placeholder="Mã HS, Tên học sinh, số điện thoại..."
+              v-model="searchData.keyword"
+              @keyup.enter="getData"
+            />
+          </div>
         </div>
 
-        <div class="vx-col md:w-1/3 sm:w-1/2 w-full mb-3">
+        <!-- Trạng thái -->
+        <div class="filter-item">
           <label class="filter-label"><i class="fa-solid fa-tags text-primary mr-1"></i> Trạng thái học sinh</label>
           <multiselect
+            class="compact-multiselect"
             name="search_status"
             placeholder="Tất cả trạng thái"
             v-model="searchData.arr_status"
@@ -66,36 +73,32 @@
             track-by="id"
             selectedLabel="" selectLabel="" deselectLabel=""
           >
-            <span slot="noResult">Không tìm thấy dữ liệu</span>
+            <span slot="noResult">Không tìm thấy</span>
           </multiselect>
         </div>
-      </div>
 
-      <div class="flex flex-wrap items-center justify-between pt-2 border-t border-solid border-grey-light mt-1">
-        <div class="text-xs text-gray-500 italic">
-          * Nhấn Enter hoặc bấm "Tìm kiếm" để lọc dữ liệu
-        </div>
-        <div class="flex items-center mt-2 sm:mt-0">
-          <vs-button color="primary" class="mr-3 flex items-center shadow-md" @click="getData">
+        <!-- Action Buttons -->
+        <div class="filter-actions-item">
+          <button class="btn-filter-action btn-filter-submit" @click="getData" title="Tìm kiếm">
             <i class="fa fa-search mr-1"></i> Tìm kiếm
-          </vs-button>
-          <vs-button color="gray" type="border" class="flex items-center" @click="reset">
+          </button>
+          <button class="btn-filter-action btn-filter-reset" @click="reset" title="Đặt lại bộ lọc">
             <i class="fas fa-undo-alt mr-1"></i> Đặt lại
-          </vs-button>
+          </button>
         </div>
       </div>
     </vx-card>
 
     <!-- Table Card -->
-    <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg">
+    <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <div class="table-responsive">
         <table class="modern-student-table">
           <thead>
             <tr>
               <th class="text-center" style="width: 50px">STT</th>
-              <th style="width: 65px" class="text-center">Avatar</th>
+              <th style="width: 60px" class="text-center">Avatar</th>
               <th style="width: 250px">Học sinh</th>
-              <th style="width: 230px">Phụ huynh</th>
+              <th style="width: 220px">Phụ huynh</th>
               <th style="width: 240px">Lớp học & Trung tâm</th>
               <th style="width: 170px" class="text-center">Tiến độ buổi</th>
               <th style="width: 100px" class="text-center">Thao tác</th>
@@ -108,64 +111,72 @@
                 Không tìm thấy dữ liệu học sinh nào phù hợp
               </td>
             </tr>
-            <tr v-for="(item, index) in students" :key="item.id" class="hover:bg-slate-50 transition-colors">
+
+            <tr v-for="(item, index) in students" :key="index" class="student-row hover:bg-slate-50 transition-colors">
               <!-- STT -->
-              <td class="text-center font-medium text-gray-500">
+              <td class="text-center text-gray-500 font-semibold text-xs">
                 {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </td>
 
               <!-- Avatar -->
               <td class="text-center">
-                <router-link :to="`/lms/students/${item.id}/detail`">
-                  <div class="avatar-wrapper">
-                    <img class="student-avatar-img" :src="item.avatar_url || (item.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')" alt="avatar" />
-                  </div>
-                </router-link>
+                <div class="avatar-cell">
+                  <img
+                    class="student-avatar-img"
+                    :src="item.avatar_url || (item.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')"
+                    :alt="item.name"
+                  />
+                </div>
               </td>
 
               <!-- Học sinh -->
               <td>
-                <div class="student-name-box">
-                  <router-link :to="`/lms/students/${item.id}/detail`" class="student-title-link">
+                <div class="student-name-text font-bold text-gray-900 mb-1 flex items-center">
+                  <router-link :to="`/lms/students/${item.id}/detail`" class="hover:text-primary transition-colors">
                     {{ item.name }}
                   </router-link>
                 </div>
-                <div class="mt-1 flex flex-wrap items-center gap-1">
-                  <span class="stk-code-badge" @click="copyCode(item.lms_code)" title="Bấm để copy mã học sinh">
-                    <i class="fa-solid fa-id-badge text-primary mr-1"></i>
-                    <strong>{{ item.lms_code }}</strong>
-                    <i class="fa-regular fa-copy ml-1 text-gray-400 copy-icon"></i>
+                <div class="flex items-center gap-2 mb-1">
+                  <!-- Clickable STK Code Badge -->
+                  <span
+                    class="stk-code-badge"
+                    @click="copyCode(item.lms_code)"
+                    title="Bấm để sao chép mã học sinh"
+                  >
+                    <i class="fa-solid fa-id-badge mr-1"></i>
+                    <strong>{{ item.lms_code || '---' }}</strong>
+                    <i class="fa-regular fa-copy ml-1 opacity-70"></i>
                   </span>
-                </div>
-                <div class="mt-1 flex items-center text-xs text-gray-500 gap-3">
-                  <span v-if="item.gender">
+
+                  <!-- Gender & Dob -->
+                  <span v-if="item.gender" class="gender-pill">
                     <i :class="item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'"></i>
                     {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}
                   </span>
-                  <span v-if="item.date_of_birth">
-                    <i class="fa-regular fa-calendar text-gray-400 mr-1"></i>{{ item.date_of_birth | formatDateView }}
-                  </span>
+                </div>
+                <div class="text-xs text-gray-500" v-if="item.date_of_birth">
+                  <i class="fa-regular fa-calendar mr-1 text-gray-400"></i>
+                  {{ item.date_of_birth | formatDateView }}
                 </div>
               </td>
 
               <!-- Phụ huynh -->
               <td>
-                <div class="font-semibold text-gray-800 flex items-center">
-                  <i class="fa-solid fa-user-tie text-gray-400 mr-1.5" style="font-size: 13px;"></i>
+                <div class="text-xs font-semibold text-gray-800 flex items-center mb-1">
+                  <i class="fa-solid fa-user-tie text-gray-400 mr-1.5"></i>
                   {{ item.gud_name1 || 'Chưa cập nhật' }}
                 </div>
-                <div class="mt-1 text-xs">
-                  <a v-if="item.gud_mobile1" :href="'tel:' + item.gud_mobile1" class="text-primary hover:underline font-medium inline-flex items-center">
-                    <i class="fa-solid fa-phone text-success mr-1"></i> {{ item.gud_mobile1 }}
-                  </a>
-                  <span v-else class="text-gray-400">Chưa có SĐT</span>
+                <div class="text-xs text-gray-600 mb-1" v-if="item.gud_mobile1">
+                  <i class="fa-solid fa-phone text-emerald-500 mr-1.5"></i>
+                  <a :href="'tel:' + item.gud_mobile1" class="text-primary hover:underline font-semibold">{{ item.gud_mobile1 }}</a>
                 </div>
-                <div class="mt-1" v-if="item.source_name">
-                  <span class="subtle-tag"><i class="fa-solid fa-bullhorn text-gray-400 mr-1"></i>{{ item.source_name }}</span>
+                <div class="text-xs text-gray-500 truncate" v-if="item.address" :title="item.address">
+                  <i class="fa-solid fa-location-dot text-rose-400 mr-1.5"></i>
+                  {{ item.address }}
                 </div>
               </td>
 
-              <!-- Trung tâm & Lớp học & Trạng thái -->
+              <!-- Lớp học & Trung tâm -->
               <td>
                 <div class="text-xs font-semibold text-gray-700 flex items-center mb-1">
                   <i class="fa-solid fa-building text-primary mr-1.5"></i>
@@ -174,7 +185,7 @@
                 <div class="text-xs text-gray-600 mb-1" v-if="item.class_name">
                   <span class="class-pill"><i class="fa-solid fa-chalkboard-user mr-1"></i>{{ item.class_name }}</span>
                 </div>
-                <div class="mt-1.5">
+                <div class="mt-1">
                   <span :class="getStatusBadgeClass(item.label_status)">
                     {{ item.label_status || 'Chưa có' }}
                   </span>
@@ -220,22 +231,14 @@
         </table>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between mt-5 pt-3 border-t border-solid border-grey-light">
-        <div class="flex items-center mb-2 sm:mb-0">
-          <span class="text-sm text-gray-500 mr-2">Hiển thị mỗi trang:</span>
-          <vs-dropdown vs-trigger-click class="cursor-pointer">
-            <div class="px-3 py-1.5 border border-solid border-grey-light rounded-md bg-white flex items-center justify-between font-medium text-sm">
-              <span class="mr-2">{{ pagination.limit }}</span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-            <vs-dropdown-menu>
-              <vs-dropdown-item v-for="(limit, idx) in limitSource" :key="idx" @click="changePageLimit(limit)">
-                <span>{{ limit }}</span>
-              </vs-dropdown-item>
-            </vs-dropdown-menu>
-          </vs-dropdown>
-          <span class="text-xs text-gray-400 ml-3">
+      <!-- Compact Pagination -->
+      <div class="compact-pagination-bar">
+        <div class="flex items-center">
+          <span class="text-xs text-gray-500 mr-2">Hiển thị mỗi trang:</span>
+          <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
+            <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
+          </select>
+          <span class="text-xs text-gray-400 ml-2">
             ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
           </span>
         </div>
@@ -261,31 +264,42 @@ import u from '../../../until/helper.js'
 
 export default {
   components: {
-    vSelect,
     Multiselect,
-    DatePicker
+    DatePicker,
+    vSelect
   },
   data() {
     return {
-      branch_list: [],
-      searchData: {
-        arr_branch: "",
-        branch_id: "",
-        keyword: "",
-        arr_status: "",
-        status: "",
-        pagination: this.pagination
+      datepickerOptions: {
+        closed: true,
+        value: "",
+        minDate: "",
+        lang: {
+          days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+          months: [
+            "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+            "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+          ]
+        }
       },
       statusOptions: [
-        { id: 1, label: 'Chờ xếp lớp học thử' },
-        { id: 2, label: 'Đang học thử' },
-        { id: 3, label: 'Kết thúc học thử' },
-        { id: 4, label: 'Chưa đóng phí' },
-        { id: 5, label: 'Đặt cọc' },
-        { id: 6, label: 'Chờ xếp lớp' },
-        { id: 7, label: 'Đang học chính thức' },
-        { id: 8, label: 'Hết phí' },
+        { id: 1, label: "Chờ xếp lớp học thử" },
+        { id: 2, label: "Đang học thử" },
+        { id: 3, label: "Chờ xếp lớp chính thức" },
+        { id: 4, label: "Đang học chính thức" },
+        { id: 5, label: "Bảo lưu" },
+        { id: 6, label: "Đình chỉ" },
+        { id: 7, label: "Bỏ học" },
+        { id: 8, label: "Hết phí" },
+        { id: 9, label: "Rút phí" },
+        { id: 10, label: "Tốt nghiệp" },
       ],
+      searchData: {
+        keyword: "",
+        arr_branch: [],
+        arr_status: [],
+      },
+      branch_list: [],
       students: [],
       limitSource: [20, 50, 100, 500],
       pagination: {
@@ -305,284 +319,388 @@ export default {
       },
     }
   },
-  created() {
+  async created() {
     axios.g(`/api/system/branches-has-user`).then(response => {
       this.branch_list = response.data
     })
     this.getData();
   },
   methods: {
-    reset() {
-      this.searchData.keyword = ""
-      this.searchData.arr_status = ""
-      this.searchData.arr_branch = ""
-      this.searchData.branch_id = ""
-      this.searchData.status = ""
-      this.searchData.pagination = this.pagination
-      this.getData();
-    },
-    getData() {
-      const ids = []
-      if (this.searchData.arr_status && this.searchData.arr_status.length) {
-        this.searchData.arr_status.map(item => {
-          ids.push(item.id)
-        })
-      }
-      this.searchData.status = ids
-
-      const ids_branch = []
-      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-        this.searchData.arr_branch.map(item => {
-          ids_branch.push(item.id)
-        })
-      }
-      this.searchData.branch_id = ids_branch
-
-      const data = {
-        branch_id: this.searchData.branch_id,
-        status: this.searchData.status,
-        keyword: this.searchData.keyword,
-        pagination: this.pagination
-      }
-
-      this.$vs.loading()
-      axios.p('/api/lms/students/list', data)
-        .then((response) => {
-          this.$vs.loading.close()
-          this.students = response.data.list
-          this.total = response.data.detail_total
-          this.pagination = response.data.paging;
-          setTimeout(() => {
-            this.pagination.init = 1;
-          }, 500)
-        })
-        .catch((error) => {
-          console.log(error);
-          this.$vs.loading.close();
-        })
-    },
-    changePage() {
-      if (this.pagination.init) {
-        this.getData();
-      }
-    },
-    changePageLimit(limit) {
-      this.pagination.cpage = 1
-      this.pagination.limit = limit
-      this.getData();
-    },
     copyCode(code) {
       if (!code) return;
       navigator.clipboard.writeText(code).then(() => {
         this.$vs.notify({
-          title: 'Thành công',
-          text: `Đã sao chép mã học sinh: ${code}`,
+          title: 'Đã sao chép',
+          text: `Mã học sinh "${code}" đã được lưu vào clipboard`,
           color: 'success',
-          icon: 'check',
-          position: 'top-right'
+          iconPack: 'feather',
+          icon: 'icon-check',
+          time: 2500
         });
       });
     },
     getStatusBadgeClass(status) {
-      if (!status) return 'status-badge badge-default';
+      if (!status) return 'status-badge status-default';
       const s = status.toLowerCase();
-      if (s.includes('chính thức')) return 'status-badge badge-success';
-      if (s.includes('đang học thử')) return 'status-badge badge-info';
-      if (s.includes('chờ')) return 'status-badge badge-warning';
-      if (s.includes('hết phí') || s.includes('chưa đóng')) return 'status-badge badge-danger';
-      if (s.includes('đặt cọc')) return 'status-badge badge-primary';
-      return 'status-badge badge-default';
-    }
+      if (s.includes('chính thức')) return 'status-badge status-official';
+      if (s.includes('học thử')) return 'status-badge status-trial';
+      if (s.includes('chờ xếp')) return 'status-badge status-waiting';
+      if (s.includes('bảo lưu')) return 'status-badge status-paused';
+      if (s.includes('bỏ học') || s.includes('đình chỉ') || s.includes('hết phí')) return 'status-badge status-inactive';
+      return 'status-badge status-default';
+    },
+    reset() {
+      this.searchData.keyword = "";
+      this.searchData.arr_branch = [];
+      this.searchData.arr_status = [];
+      this.pagination.cpage = 1;
+      this.getData();
+    },
+    changePageLimit(limit) {
+      this.pagination.limit = limit;
+      this.pagination.cpage = 1;
+      this.getData();
+    },
+    changePage() {
+      this.getData();
+    },
+    getData() {
+      const data = {
+        keyword: this.searchData.keyword,
+        arr_branch: this.searchData.arr_branch.map(item => item.id),
+        arr_status: this.searchData.arr_status.map(item => item.id),
+        pagination: this.pagination,
+      };
+      this.$vs.loading();
+      axios.p(this.pagination.url, data)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.students = response.data.list;
+          this.pagination.total = response.data.total;
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$vs.loading.close();
+        });
+    },
   }
 }
 </script>
 
 <style scoped>
-.filter-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 6px;
-  display: block;
+.badge-total-students {
+  display: inline-flex;
+  align-items: center;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
 }
 
-.badge-total-students {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  display: inline-flex;
+.compact-filter-card >>> .vx-card__collapsible-content .vx-card__body {
+  padding: 12px 16px !important;
+}
+
+.compact-table-card >>> .vx-card__collapsible-content .vx-card__body {
+  padding: 12px 16px !important;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+@media (max-width: 991px) {
+  .filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+/* Compact multiselect - Exactly 34px */
+.compact-multiselect >>> .multiselect__tags {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 3px 28px 3px 10px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 12.5px !important;
+  background: #ffffff !important;
+}
+
+.compact-multiselect >>> .multiselect__select {
+  height: 32px !important;
+  width: 28px !important;
+  padding: 4px 6px !important;
+}
+
+.compact-multiselect >>> .multiselect__placeholder {
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  color: #94a3b8 !important;
+}
+
+.compact-multiselect >>> .multiselect__single {
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  margin-bottom: 0 !important;
+}
+
+.compact-multiselect >>> .multiselect__input {
+  line-height: 26px !important;
+  font-size: 12.5px !important;
+  margin-bottom: 0 !important;
+  height: 26px !important;
+}
+
+.compact-multiselect >>> .multiselect__tag {
+  height: 22px !important;
+  line-height: 22px !important;
+  padding: 0 18px 0 6px !important;
+  font-size: 11px !important;
+  margin-bottom: 2px !important;
+  margin-top: 2px !important;
+}
+
+.compact-multiselect >>> .multiselect__tag-icon {
+  line-height: 22px !important;
+}
+
+/* Compact Search Text Input - Exactly 34px */
+.compact-search-input-wrapper {
+  position: relative;
+  display: flex;
   align-items: center;
 }
 
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
+.input-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #94a3b8;
+  font-size: 12px;
+  pointer-events: none;
 }
 
+.compact-text-input {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 10px 4px 30px;
+  font-size: 12.5px;
+  color: #1e293b;
+  outline: none;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.compact-text-input:focus {
+  border-color: #7367f0;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15);
+}
+
+/* Action Buttons - Exactly 34px */
+.filter-actions-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+
+.btn-filter-action {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-filter-submit {
+  background: #7367f0;
+  color: #ffffff;
+  border: 1px solid #7367f0;
+}
+
+.btn-filter-submit:hover {
+  background: #5e50ee;
+  box-shadow: 0 2px 6px rgba(115, 103, 240, 0.3);
+}
+
+.btn-filter-reset {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-filter-reset:hover {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+/* Modern Student Table */
 .modern-student-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12.5px;
 }
 
-.modern-student-table thead tr {
+.modern-student-table thead th {
   background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.modern-student-table th {
-  padding: 12px 14px;
-  font-size: 12px;
-  font-weight: 700;
   color: #475569;
+  font-weight: 700;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
 }
 
-.modern-student-table td {
-  padding: 14px;
+.modern-student-table tbody td {
+  padding: 10px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
-  font-size: 13px;
 }
 
-.avatar-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #f1f5f9;
-  border: 2px solid #e2e8f0;
-  margin: 0 auto;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  transition: transform 0.2s;
+.student-row:hover {
+  background-color: #f8fafc;
 }
 
-.avatar-wrapper:hover {
-  transform: scale(1.08);
-  border-color: #3b82f6;
+.avatar-cell {
+  display: flex;
+  justify-content: center;
 }
 
 .student-avatar-img {
-  width: 100%;
-  height: 100%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   object-fit: cover;
-}
-
-.student-name-box {
-  line-height: 1.3;
-}
-
-.student-title-link {
-  font-weight: 700;
-  font-size: 14px;
-  color: #0f172a;
-  text-decoration: none;
-  transition: color 0.15s;
-}
-
-.student-title-link:hover {
-  color: #2563eb;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .stk-code-badge {
   display: inline-flex;
   align-items: center;
-  background: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  color: #334155;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-size: 11.5px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.stk-code-badge:hover {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  color: #1d4ed8;
-}
-
-.subtle-tag {
-  background: #f1f5f9;
-  color: #64748b;
-  padding: 2px 8px;
-  border-radius: 12px;
   font-size: 11px;
-  display: inline-block;
+  font-weight: 700;
+  color: #7367f0;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 6px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.gender-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .class-pill {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 11px;
   font-weight: 600;
-  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
 }
 
-.badge-success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge-info {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.badge-warning {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.badge-danger {
-  background: #ffe4e6;
-  color: #be123c;
-}
-
-.badge-primary {
-  background: #f3e8ff;
-  color: #7e22ce;
-}
-
-.badge-default {
-  background: #f1f5f9;
-  color: #475569;
-}
+.status-official { background: #dcfce7; color: #15803d; }
+.status-trial { background: #e0f2fe; color: #0369a1; }
+.status-waiting { background: #fef9c3; color: #a16207; }
+.status-paused { background: #ffedd5; color: #c2410c; }
+.status-inactive { background: #fee2e2; color: #b91c1c; }
+.status-default { background: #f1f5f9; color: #475569; }
 
 .progress-bar-container {
   width: 100%;
-  height: 7px;
-  background: #e2e8f0;
-  border-radius: 4px;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #10b981, #059669);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #7367f0, #28c76f);
+  border-radius: 9999px;
 }
 
 .action-view-btn {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 4px 10px !important;
+}
+
+/* Compact Pagination Bar */
+.compact-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.compact-page-select {
+  height: 28px;
+  padding: 2px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
   font-size: 12px;
-  padding: 6px 12px !important;
-  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
 }
 </style>

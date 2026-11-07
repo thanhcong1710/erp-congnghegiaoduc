@@ -1,87 +1,126 @@
 <template>
-  <div class="student-detail-operating mt-5">
-    <h4 class="mb-3">Thông tin chuyển lớp</h4>
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1">Học sinh</th>
-                <th colspan="1" rowspan="1">Trung tâm</th>
-                <th colspan="1" rowspan="1">Lớp đi</th>
-                <th colspan="1" rowspan="1">Lớp đến </th>
-                <th colspan="1" rowspan="1" class="text-center">Ngày chuyển</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in class_transfer" :key="index">
-              <td class="td vs-table--td">{{item.name}} - {{item.lms_code}}</td>
-              <td class="td vs-table--td">{{item.from_branch_name}}</td>
-              <td class="td vs-table--td">{{item.from_class_name}}</td>
-              <td class="td vs-table--td">{{item.to_class_name}}</td>
-              <td class="td vs-table--td text-center">{{item.transfer_date | formatDateView}}</td>
-            </tr>
-          </table>
-        </div>
+  <div class="student-detail-operating mt-2">
+    <!-- 1. Thông tin chuyển lớp -->
+    <div class="operating-section mb-4">
+      <div class="operating-header">
+        <span class="operating-title">
+          <i class="fa-solid fa-arrow-right-arrow-left text-primary mr-1.5"></i>
+          1. Thông tin chuyển lớp
+        </span>
+        <span class="operating-count">
+          {{ class_transfer ? class_transfer.length : 0 }} lượt
+        </span>
       </div>
-    </div>
-    <vs-divider/>
-    <h4 class="mt-3 mb-3">Thông tin chuyển trung tâm</h4>
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1">Học sinh</th>
-                <th colspan="1" rowspan="1">Trung tâm chuyển</th>
-                <th colspan="1" rowspan="1">Trung tâm nhận</th>
-                <th colspan="1" rowspan="1" class="text-center">Ngày chuyển</th>
-                <th colspan="1" rowspan="1">Trạng thái</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in branch_transfer" :key="index">
-              <td class="td vs-table--td">{{item.name}} - {{item.lms_code}}</td>
-              <td class="td vs-table--td">{{item.from_branch_name}}</td>
-              <td class="td vs-table--td">{{item.to_branch_name}}</td>
-              <td class="td vs-table--td text-center">{{item.transfer_date | formatDateView}}</td>
-              <td class="td vs-table--td">
-                <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusName}}</vs-chip>
+      <div class="table-responsive rounded border border-slate-200">
+        <table class="w-full text-xs bg-white">
+          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Học sinh</th>
+              <th class="py-2.5 px-3">Trung tâm</th>
+              <th class="py-2.5 px-3">Lớp đi</th>
+              <th class="py-2.5 px-3">Lớp đến</th>
+              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr v-if="!class_transfer || class_transfer.length === 0">
+              <td colspan="5" class="text-center py-4 text-gray-400 italic">
+                Chưa có dữ liệu chuyển lớp
               </td>
             </tr>
-          </table>
-        </div>
+            <tr v-for="(item, index) in class_transfer" :key="'ct_' + index" class="hover:bg-slate-50">
+              <td class="py-2 px-3 font-semibold text-gray-800">{{ item.name }} - <span class="text-primary">{{ item.lms_code }}</span></td>
+              <td class="py-2 px-3">{{ item.from_branch_name }}</td>
+              <td class="py-2 px-3 text-rose-600">{{ item.from_class_name }}</td>
+              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_class_name }}</td>
+              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <vs-divider/>
-    <h4 class="mt-3 mb-3">Thông tin chuyển phí</h4>
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1">Học sinh chuyển</th>
-                <th colspan="1" rowspan="1">Học sinh nhận</th>
-                <th colspan="1" rowspan="1">Số tiền chuyển</th>
-                <th colspan="1" rowspan="1" class="text-center">Ngày chuyển</th>
-                <th colspan="1" rowspan="1" >Trạng thái</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tuition_transfer" :key="index">
-              <td class="td vs-table--td">{{item.from_student_name}} - {{item.from_student_lms_code}}</td>
-              <td class="td vs-table--td">{{item.to_student_name}} - {{item.to_student_lms_code}}</td>
-              <td class="td vs-table--td">{{item.transferred_amount | formatMoney}}</td>
-              <td class="td vs-table--td text-center">{{item.transfer_date | formatDateView}}</td>
-              <td class="td vs-table--td">
-                <vs-chip :color="getStatusColor(item.status)">{{item.status | getStatusNameTuitionTrasfer}}</vs-chip>
+
+    <!-- 2. Thông tin chuyển trung tâm -->
+    <div class="operating-section mb-4">
+      <div class="operating-header">
+        <span class="operating-title">
+          <i class="fa-solid fa-building-circle-arrow-right text-emerald-600 mr-1.5"></i>
+          2. Thông tin chuyển trung tâm
+        </span>
+        <span class="operating-count">
+          {{ branch_transfer ? branch_transfer.length : 0 }} lượt
+        </span>
+      </div>
+      <div class="table-responsive rounded border border-slate-200">
+        <table class="w-full text-xs bg-white">
+          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Học sinh</th>
+              <th class="py-2.5 px-3">Trung tâm chuyển</th>
+              <th class="py-2.5 px-3">Trung tâm nhận</th>
+              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
+              <th class="py-2.5 px-3 text-center">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr v-if="!branch_transfer || branch_transfer.length === 0">
+              <td colspan="5" class="text-center py-4 text-gray-400 italic">
+                Chưa có dữ liệu chuyển trung tâm
               </td>
             </tr>
-          </table>
-        </div>
+            <tr v-for="(item, index) in branch_transfer" :key="'bt_' + index" class="hover:bg-slate-50">
+              <td class="py-2 px-3 font-semibold text-gray-800">{{ item.name }} - <span class="text-primary">{{ item.lms_code }}</span></td>
+              <td class="py-2 px-3 text-rose-600">{{ item.from_branch_name }}</td>
+              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_branch_name }}</td>
+              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
+              <td class="py-2 px-3 text-center">
+                <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusName }}</vs-chip>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. Thông tin chuyển phí -->
+    <div class="operating-section mb-3">
+      <div class="operating-header">
+        <span class="operating-title">
+          <i class="fa-solid fa-money-bill-transfer text-amber-600 mr-1.5"></i>
+          3. Thông tin chuyển phí
+        </span>
+        <span class="operating-count">
+          {{ tuition_transfer ? tuition_transfer.length : 0 }} lượt
+        </span>
+      </div>
+      <div class="table-responsive rounded border border-slate-200">
+        <table class="w-full text-xs bg-white">
+          <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Học sinh chuyển</th>
+              <th class="py-2.5 px-3">Học sinh nhận</th>
+              <th class="py-2.5 px-3">Số tiền chuyển</th>
+              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
+              <th class="py-2.5 px-3 text-center">Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr v-if="!tuition_transfer || tuition_transfer.length === 0">
+              <td colspan="5" class="text-center py-4 text-gray-400 italic">
+                Chưa có dữ liệu chuyển phí
+              </td>
+            </tr>
+            <tr v-for="(item, index) in tuition_transfer" :key="'tt_' + index" class="hover:bg-slate-50">
+              <td class="py-2 px-3 text-rose-600 font-semibold">{{ item.from_student_name }} - {{ item.from_student_lms_code }}</td>
+              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_student_name }} - {{ item.to_student_lms_code }}</td>
+              <td class="py-2 px-3 font-bold text-gray-900">{{ item.transferred_amount | formatMoney }}</td>
+              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
+              <td class="py-2 px-3 text-center">
+                <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusNameTuitionTrasfer }}</vs-chip>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -109,133 +148,88 @@
         class_transfer:[],
         branch_transfer:[],
         tuition_transfer:[],
-        limitSource: [20, 50, 100, 500],
-        pagination: {
-          url: "/api/roles/list",
-          id: "",
-          style: "line",
-          class: "",
-          spage: 1,
-          ppage: 1,
-          npage: 0,
-          lpage: 1,
-          cpage: 1,
-          total: 0,
-          limit: 20,
-          pages: [],
-          init: 0
-        },
+      }
+    },
+    filters: {
+      getStatusName(status) {
+        switch (Number(status)) {
+          case 0: return 'Chờ duyệt';
+          case 1: return 'Đã duyệt';
+          case 2: return 'Từ chối';
+          default: return 'Khác';
+        }
+      },
+      getStatusNameTuitionTrasfer(status) {
+        switch (Number(status)) {
+          case 0: return 'Chờ duyệt';
+          case 1: return 'Đã duyệt';
+          case 2: return 'Từ chối';
+          default: return 'Khác';
+        }
       }
     },
     async created() {
-      this.getOperating();
+      this.getTransfer();
     },
     methods: {
-      getOperating(){
+      getStatusColor(status) {
+        switch (Number(status)) {
+          case 0: return 'warning';
+          case 1: return 'success';
+          case 2: return 'danger';
+          default: return 'primary';
+        }
+      },
+      getTransfer(){
         const data = {
           student_id: this.student_info.id,
         }
         this.$vs.loading()
-        axios.p('/api/lms/students/operating', data)
+        axios.p('/api/lms/students/transfers', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.class_transfer = response.data.class_transfer
-            this.branch_transfer = response.data.branch_transfer
-            this.tuition_transfer = response.data.tuition_transfer
+            this.class_transfer = response.data.class_transfer || []
+            this.branch_transfer = response.data.branch_transfer || []
+            this.tuition_transfer = response.data.tuition_transfer || []
           })
           .catch((error) => {
             console.log(error);
             this.$vs.loading.close();
           })
       },
-      getStatusColor(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 1:
-                resp = 'primary';
-                break;
-            case 2:
-                resp = 'danger';
-                break;
-            case 3:
-                resp = 'success';
-                break;
-            case 4:
-                resp = 'danger';
-                break;
-            case 5:
-                resp = 'success';
-                break;
-            case 6:
-                resp = '#24c1a0';
-                break;
-            default:
-                resp = 'primary'
-                break
-        }
-        return resp
-      },
-    },
-    filters: {
-      getStatusName(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 1:
-                resp = 'Chờ duyệt đi';
-                break;
-            case 2:
-                resp = 'Từ chối duyệt đi';
-                break;
-            case 3:
-                resp = 'Chờ duyệt đến';
-                break;
-            case 4:
-                resp = 'Từ chối duyệt đến';
-                break;
-            case 5:
-                resp = 'Đã được duyệt đến';
-                break;
-            case 6:
-                resp = 'Đã xử lý';
-                break;
-            default:
-                resp = 'Chờ phê duyệt'
-                break
-        }
-        return resp
-      },
-      getStatusNameTuitionTrasfer(value) {
-        let resp = ''
-        switch (Number(value)) {
-            case 1:
-                resp = 'Chờ GĐTT duyệt';
-                break;
-            case 2:
-                resp = 'GĐTT từ chối duyệt';
-                break;
-            case 3:
-                resp = 'Chờ kế toán duyệt';
-                break;
-            case 4:
-                resp = 'Kế toán từ chối duyệt';
-                break;
-            case 5:
-                resp = 'Đã được duyệt';
-                break;
-            case 6:
-                resp = 'Đã xử lý';
-                break;
-            default:
-                resp = 'Chờ GĐTT duyệt'
-                break
-        }
-        return resp
-      },
-    },
+    }
   }
 </script>
-<style>
-.td.vs-table--td{
-  vertical-align: top;
+
+<style scoped>
+.operating-section {
+  background: #ffffff;
+}
+
+.operating-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.operating-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.operating-count {
+  font-size: 11px;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
 }
 </style>

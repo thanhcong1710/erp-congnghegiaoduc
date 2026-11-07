@@ -1,49 +1,60 @@
 <template>
-  <div class="student-detail-logs mt-5">
-    <div class="vs-component vs-con-table stripe vs-table-primary">
-      <div class="con-tablex vs-table--content">
-        <div class="vs-con-tbody vs-table--tbody ">
-          <table class="vs-table vs-table--tbody-table">
-            <thead class="vs-table--thead">
-              <tr>
-                <!---->
-                <th colspan="1" rowspan="1" class="text-center">STT</th>
-                <th colspan="1" rowspan="1" class="text-center">Thời gian thực hiện</th>
-                <th colspan="1" rowspan="1">Người thực hiện</th>
-                <th colspan="1" rowspan="1">Nội dung thay đổi</th>
-              </tr>
-            </thead>
-            <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
-              <!---->
-              
-              <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-              <td class="td vs-table--td text-center" style="min-width: 150px">{{item.created_at}}</td>
-              <td class="td vs-table--td" style="min-width: 200px">{{item.creator_name}}</td>
-              <td class="td vs-table--td">{{item.content}}</td>
-            </tr>
-          </table>
-          
-        </div>
-      </div>
+  <div class="student-detail-logs mt-2">
+    <div class="table-responsive rounded border border-slate-200">
+      <table class="w-full text-xs bg-white">
+        <thead class="bg-slate-50 text-gray-600 font-bold border-b border-slate-200 text-2xs uppercase">
+          <tr>
+            <th class="py-2.5 px-3 text-center" style="width: 50px">STT</th>
+            <th class="py-2.5 px-3" style="width: 140px">Thời gian thực hiện</th>
+            <th class="py-2.5 px-3" style="width: 160px">Người thực hiện</th>
+            <th class="py-2.5 px-3">Nội dung thay đổi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr v-if="!logs || logs.length === 0">
+            <td colspan="4" class="text-center py-4 text-gray-400 italic">
+              Chưa có lịch sử thay đổi nào
+            </td>
+          </tr>
+          <tr v-for="(item, index) in logs" :key="index" class="hover:bg-slate-50">
+            <td class="py-2 px-3 text-center text-gray-500 font-semibold">
+              {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
+            </td>
+            <td class="py-2 px-3 text-gray-600">
+              <i class="fa-regular fa-clock text-gray-400 mr-1"></i>
+              {{ item.created_at }}
+            </td>
+            <td class="py-2 px-3 font-semibold text-gray-800">
+              <i class="fa-regular fa-user text-primary mr-1"></i>
+              {{ item.creator_name }}
+            </td>
+            <td class="py-2 px-3 text-gray-700">
+              {{ item.content }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="flex flex-wrap items-center mt-5">
-      <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
-        <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-          <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
-          <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-        </div>
-        <vs-dropdown-menu>
-          <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)" >
-            <span>{{item}}</span>
-          </vs-dropdown-item>
-        </vs-dropdown-menu>
-      </vs-dropdown>
+
+    <!-- Compact Pagination -->
+    <div class="compact-pagination-bar" v-if="logs && logs.length > 0">
+      <div class="flex items-center">
+        <span class="text-xs text-gray-500 mr-2">Hiển thị:</span>
+        <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
+          <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
+        </select>
+        <span class="text-xs text-gray-400 ml-2">
+          ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
+        </span>
+      </div>
+
       <vs-pagination
-            style="width: calc(100% - 160px);"
-            v-if="Math.ceil(pagination.total / pagination.limit) >1"
-            :total="Math.ceil(pagination.total / pagination.limit)"
-            :max="7"
-            v-model="pagination.cpage" @change="changePage()"/>
+        v-if="Math.ceil(pagination.total / pagination.limit) > 1"
+        :total="Math.ceil(pagination.total / pagination.limit)"
+        :max="7"
+        v-model="pagination.cpage"
+        @change="changePage"
+      />
     </div>
   </div>
 </template>
@@ -126,3 +137,30 @@
     }
   }
 </script>
+
+<style scoped>
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.compact-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.compact-page-select {
+  height: 26px;
+  padding: 1px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 11.5px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+}
+</style>

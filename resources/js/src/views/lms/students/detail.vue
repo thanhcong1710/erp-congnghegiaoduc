@@ -1,173 +1,155 @@
 <template>
   <div id="page-student-detail">
     <!-- Back Navigation -->
-    <div class="mb-3 flex items-center justify-between">
-      <router-link to="/lms/students" class="inline-flex items-center text-sm font-semibold text-primary hover:underline">
-        <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách học sinh
+    <div class="mb-2 flex items-center justify-between">
+      <router-link to="/lms/students" class="inline-flex items-center text-xs font-semibold text-primary hover:underline">
+        <i class="fa-solid fa-arrow-left mr-1.5"></i> Quay lại danh sách học sinh
       </router-link>
       <div class="text-xs text-gray-500">
         ID học sinh: <strong>#{{ $route.params.id }}</strong>
       </div>
     </div>
 
-    <!-- Student Profile Hero Card -->
-    <vx-card no-shadow class="mb-5 shadow-sm border border-solid border-grey-light rounded-lg profile-hero-card">
-      <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
-        <!-- Avatar Column -->
-        <div class="avatar-upload-col text-center flex-shrink-0">
-          <div class="profile-avatar-container">
-            <img
-              class="profile-avatar-img"
-              alt="avatar"
-              :src="student_info.avatar_url || (student_info.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')"
-            />
-            <label for="account-upload" class="avatar-camera-btn" title="Thay đổi ảnh đại diện">
-              <i class="fa-solid fa-camera"></i>
-            </label>
-            <input type="file" ref="file" id="account-upload" hidden accept="image/*" @change="submitFiles" />
-          </div>
-          <div class="text-xs text-gray-400 mt-2">Bấm icon camera để đổi ảnh</div>
+    <!-- Student Profile Hero Banner - Compact & Bulletproof -->
+    <div class="profile-hero-bar mb-3">
+      <!-- 1. Left Avatar Box -->
+      <div class="hero-avatar-wrapper">
+        <img
+          class="hero-avatar-image"
+          alt="avatar"
+          :src="student_info.avatar_url || (student_info.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')"
+        />
+        <label for="account-upload" class="hero-camera-btn" title="Đổi ảnh đại diện">
+          <i class="fa-solid fa-camera"></i>
+        </label>
+        <input type="file" ref="file" id="account-upload" hidden accept="image/*" @change="submitFiles" />
+      </div>
+
+      <!-- 2. Middle Main Info Block -->
+      <div class="hero-info-wrapper">
+        <!-- Line 1: Student Name + Code + Status -->
+        <div class="hero-title-line">
+          <h3 class="hero-name">{{ student_info.name || 'Học sinh' }}</h3>
+          <span class="hero-stk-badge" @click="copyCode(student_info.lms_code)" title="Bấm để sao chép mã">
+            <i class="fa-solid fa-id-badge text-primary mr-1"></i>
+            <strong>{{ student_info.lms_code || 'Chưa có mã' }}</strong>
+            <i class="fa-regular fa-copy ml-1 opacity-70"></i>
+          </span>
+          <span :class="getStatusBadgeClass(student_info.status_label)">
+            {{ student_info.status_label || 'Chưa xác định' }}
+          </span>
         </div>
 
-        <!-- Middle Info Column -->
-        <div class="flex-grow-1 text-center lg:text-left">
-          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-2">
-            <h3 class="font-bold text-gray-900 m-0">{{ student_info.name || 'Học sinh' }}</h3>
-            <!-- STK Code Badge -->
-            <span class="stk-code-hero-badge" @click="copyCode(student_info.lms_code)" title="Bấm để copy mã học sinh">
-              <i class="fa-solid fa-id-badge text-primary mr-1"></i>
-              <strong>{{ student_info.lms_code || 'Chưa có mã' }}</strong>
-              <i class="fa-regular fa-copy ml-1 text-gray-400"></i>
-            </span>
-            <!-- Status Badge -->
-            <span :class="getStatusBadgeClass(student_info.status_label)">
-              {{ student_info.status_label || 'Chưa xác định' }}
-            </span>
-          </div>
+        <!-- Line 2: Demographic & Branch Tags -->
+        <div class="hero-meta-line">
+          <span v-if="student_info.gender" class="hero-tag">
+            <i :class="student_info.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'" class="mr-1"></i>
+            {{ student_info.gender == 'F' ? 'Nữ' : 'Nam' }}
+          </span>
+          <span v-if="student_info.date_of_birth" class="hero-tag">
+            <i class="fa-regular fa-calendar text-primary mr-1"></i>
+            {{ student_info.date_of_birth | formatDateView }}
+          </span>
+          <span v-if="student_info.branch_name" class="hero-tag">
+            <i class="fa-solid fa-building text-primary mr-1"></i>
+            {{ student_info.branch_name }}
+          </span>
+        </div>
 
-          <!-- Quick Meta Info -->
-          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-gray-600 mb-4 mt-2">
-            <span v-if="student_info.gender" class="inline-flex items-center">
-              <i :class="student_info.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'" class="mr-1"></i>
-              {{ student_info.gender == 'F' ? 'Nữ' : 'Nam' }}
-            </span>
-            <span v-if="student_info.date_of_birth" class="inline-flex items-center">
-              <i class="fa-regular fa-calendar text-primary mr-1"></i>
-              {{ student_info.date_of_birth | formatDateView }}
-            </span>
-            <span v-if="student_info.branch_name" class="inline-flex items-center">
-              <i class="fa-solid fa-building text-primary mr-1"></i>
-              {{ student_info.branch_name }}
-            </span>
-          </div>
+        <!-- Line 3: Compact Contact Line -->
+        <div class="hero-contact-line">
+          <span class="hero-contact-chip">
+            <i class="fa-solid fa-user-tie text-gray-400 mr-1"></i>
+            Phụ huynh: <strong>{{ student_info.gud_name1 || 'Chưa cập nhật' }}</strong>
+          </span>
+          <span class="hero-contact-chip" v-if="student_info.gud_mobile1">
+            <i class="fa-solid fa-phone text-emerald-500 mr-1"></i>
+            <a :href="'tel:' + student_info.gud_mobile1" class="text-primary font-bold hover:underline">{{ student_info.gud_mobile1 }}</a>
+          </span>
+          <span class="hero-contact-chip" v-if="student_info.gud_email1">
+            <i class="fa-solid fa-envelope text-gray-400 mr-1"></i>
+            {{ student_info.gud_email1 }}
+          </span>
+          <span class="hero-contact-chip" v-if="student_info.address" :title="student_info.address">
+            <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>
+            {{ student_info.address }}
+          </span>
+        </div>
+      </div>
 
-          <!-- Contact Details -->
-          <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-gray-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-            <div class="inline-flex items-center">
-              <i class="fa-solid fa-user-tie text-gray-400 mr-1.5"></i>
-              <span>Phụ huynh: <strong>{{ student_info.gud_name1 || 'Chưa cập nhật' }}</strong></span>
-            </div>
-            <div class="inline-flex items-center" v-if="student_info.gud_mobile1">
-              <i class="fa-solid fa-phone text-success mr-1.5"></i>
-              <a :href="'tel:' + student_info.gud_mobile1" class="text-primary hover:underline font-semibold">{{ student_info.gud_mobile1 }}</a>
-            </div>
-            <div class="inline-flex items-center" v-if="student_info.gud_email1">
-              <i class="fa-solid fa-envelope text-primary mr-1.5"></i>
-              <span>{{ student_info.gud_email1 }}</span>
-            </div>
-            <div class="inline-flex items-center" v-if="student_info.address">
-              <i class="fa-solid fa-location-dot text-rose-500 mr-1.5"></i>
-              <span>{{ student_info.address }}</span>
-            </div>
+      <!-- 3. Right Stats KPI Boxes (Compact) -->
+      <div class="hero-kpi-wrapper">
+        <div class="hero-kpi-card">
+          <div class="hero-kpi-header">
+            <span><i class="fa-solid fa-wallet text-primary mr-1"></i> Số dư học phí</span>
+            <span class="text-2xs text-gray-400">VNĐ</span>
+          </div>
+          <div class="hero-kpi-number text-emerald-600">
+            {{ (student_info.left_amount || 0) | formatNumber }}
+          </div>
+          <div class="hero-kpi-sub">
+            Tổng đã đóng: <strong>{{ (student_info.init_total_charged || 0) | formatNumber }}</strong> đ
           </div>
         </div>
 
-        <!-- Right Stats Column (KPI Cards) -->
-        <div class="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-72 flex-shrink-0">
-          <!-- Học phí Card -->
-          <div class="kpi-metric-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="kpi-label"><i class="fa-solid fa-wallet text-primary mr-1"></i> Số dư học phí</span>
-              <span class="text-xs text-gray-400">VNĐ</span>
-            </div>
-            <div class="kpi-value text-success">
-              {{ (student_info.left_amount || 0) | formatNumber }}
-            </div>
-            <div class="text-xs text-gray-500 mt-1">
-              Tổng đã đóng: <strong>{{ (student_info.init_total_charged || 0) | formatNumber }}</strong> đ
-            </div>
+        <div class="hero-kpi-card">
+          <div class="hero-kpi-header">
+            <span><i class="fa-solid fa-clock text-amber-500 mr-1"></i> Buổi còn lại</span>
+            <span class="text-2xs font-semibold" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
+              {{ (student_info.left_sessions || 0) > 5 ? 'Ổn định' : 'Sắp hết' }}
+            </span>
           </div>
-
-          <!-- Buổi học Card -->
-          <div class="kpi-metric-card">
-            <div class="flex items-center justify-between mb-1">
-              <span class="kpi-label"><i class="fa-solid fa-clock text-amber-500 mr-1"></i> Số buổi còn lại</span>
-              <span class="text-xs font-semibold" :class="(student_info.left_sessions || 0) > 5 ? 'text-success' : 'text-danger'">
-                {{ (student_info.left_sessions || 0) > 5 ? 'Ổn định' : 'Sắp hết' }}
-              </span>
-            </div>
-            <div class="kpi-value" :class="(student_info.left_sessions || 0) > 5 ? 'text-success' : 'text-danger'">
-              {{ student_info.left_sessions || 0 }}
-              <span class="text-xs text-gray-400 font-normal">/ {{ student_info.summary_sessions || 0 }} buổi</span>
-            </div>
-            <!-- Progress Bar -->
-            <div class="mt-2" v-if="student_info.summary_sessions">
-              <div class="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>Đã học: {{ student_info.done_sessions || 0 }} buổi</span>
-                <span class="font-bold">{{ Math.round(((student_info.done_sessions || 0) * 100) / (student_info.summary_sessions || 1)) }}%</span>
-              </div>
-              <div class="hero-progress-bg">
-                <div
-                  class="hero-progress-bar"
-                  :style="{ width: Math.min(100, Math.round(((student_info.done_sessions || 0) * 100) / (student_info.summary_sessions || 1))) + '%' }"
-                ></div>
-              </div>
-            </div>
+          <div class="hero-kpi-number" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
+            {{ student_info.left_sessions || 0 }}
+            <span class="hero-kpi-max">/ {{ student_info.summary_sessions || 0 }}</span>
+          </div>
+          <div class="hero-kpi-sub">
+            Đã học: <strong>{{ student_info.done_sessions || 0 }}</strong> buổi
           </div>
         </div>
       </div>
-    </vx-card>
+    </div>
 
     <!-- Detailed Tabs Card -->
-    <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg">
+    <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-tabs-card">
       <vs-tabs v-model="active_tab" class="modern-student-tabs">
         <vs-tab label="Hồ sơ">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-info :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Gói phí">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-contracts :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Buổi học">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-sessions :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Vận hành">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-operating :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Đánh giá & nhận xét">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-assessments :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Bài test (IG.BH & UCREA)">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-evaluations :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Lịch sử">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-logs :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Hồ sơ lưu trữ">
-          <div class="tab-text pt-4">
+          <div class="tab-content-area">
             <student-files :student_info="student_info" />
           </div>
         </vs-tab>
@@ -178,243 +160,307 @@
 
 <script>
 import Multiselect from "vue-multiselect";
-import axios from '../../../http/axios.js';
-import u from '../../../until/helper.js'
-import moment from 'moment';
-import datepicker from "vue2-datepicker";
-import select from 'vue-select'
-import studentInfo from './components/studentInfo.vue'
-import studentLogs from './components/studentLogs.vue'
-import studentContracts from './components/studentContracts.vue'
-import studentSessions from './components/studentSessions.vue'
-import studentAssessments from './components/studentAssessments.vue'
-import studentOperating from './components/studentOperating.vue'
-import studentFiles from './components/studentFiles.vue'
-import studentEvaluations from './components/studentEvaluations.vue'
+import axios from "../../../http/axios.js";
+import StudentInfo from "./components/studentInfo.vue";
+import StudentContracts from "./components/studentContracts.vue";
+import StudentSessions from "./components/studentSessions.vue";
+import StudentOperating from "./components/studentOperating.vue";
+import StudentAssessments from "./components/studentAssessments.vue";
+import StudentEvaluations from "./components/studentEvaluations.vue";
+import StudentLogs from "./components/studentLogs.vue";
+import StudentFiles from "./components/studentFiles.vue";
 
 export default {
   components: {
-    "vue-select": select,
     Multiselect,
-    moment,
-    datepicker,
-    studentInfo,
-    studentLogs,
-    studentContracts,
-    studentSessions,
-    studentAssessments,
-    studentOperating,
-    studentFiles,
-    studentEvaluations
+    StudentInfo,
+    StudentContracts,
+    StudentSessions,
+    StudentOperating,
+    StudentAssessments,
+    StudentEvaluations,
+    StudentLogs,
+    StudentFiles
   },
   data() {
     return {
       active_tab: 0,
-      student_info: {}
+      student_info: {},
+      file: "",
     };
   },
   async created() {
-    this.loadDetail();
+    this.getData();
   },
   methods: {
-    submitFiles() {
-      if (this.$refs.file.files.length) {
-        this.$vs.loading()
-        const formData = new FormData();
-        for (var i = 0; i < this.$refs.file.files.length; i++) {
-          let file = this.$refs.file.files[i];
-          formData.append('files[' + i + ']', file);
-        }
-        formData.append('student_id', this.$route.params.id);
-        axios.p('/api/lms/students/upload-avatar', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          },
-        }).then((response) => {
-          this.$vs.notify({
-            title: 'Thành công',
-            text: 'Đã cập nhật ảnh đại diện học sinh',
-            color: 'success',
-            icon: 'check',
-            position: 'top-right'
-          });
-          this.loadDetail();
-        }).catch((error) => {
-          console.log(error);
-          this.$vs.loading.close();
-        })
-      }
-    },
-    loadDetail() {
-      this.$vs.loading();
-      axios.g(`/api/lms/students/show/${this.$route.params.id}`)
-        .then(response => {
-          this.$vs.loading.close();
-          if (response.data && response.data.length !== 0) {
-            this.student_info = response.data
-          } else {
-            this.$router.push({ path: `/lms/students` });
-          }
-        })
-        .catch(() => {
-          this.$vs.loading.close();
-        });
-    },
     copyCode(code) {
       if (!code) return;
       navigator.clipboard.writeText(code).then(() => {
         this.$vs.notify({
-          title: 'Thành công',
-          text: `Đã sao chép mã học sinh: ${code}`,
-          color: 'success',
-          icon: 'check',
-          position: 'top-right'
+          title: "Đã sao chép",
+          text: `Mã học sinh "${code}" đã được lưu vào clipboard`,
+          color: "success",
+          iconPack: "feather",
+          icon: "icon-check",
+          time: 2500
         });
       });
     },
     getStatusBadgeClass(status) {
-      if (!status) return 'status-hero-badge badge-default';
+      if (!status) return "status-pill badge-default";
       const s = status.toLowerCase();
-      if (s.includes('chính thức')) return 'status-hero-badge badge-success';
-      if (s.includes('học thử')) return 'status-hero-badge badge-info';
-      if (s.includes('chờ')) return 'status-hero-badge badge-warning';
-      if (s.includes('hết') || s.includes('chưa')) return 'status-hero-badge badge-danger';
-      return 'status-hero-badge badge-default';
-    }
-  }
-}
+      if (s.includes("chính thức")) return "status-pill badge-success";
+      if (s.includes("học thử")) return "status-pill badge-info";
+      if (s.includes("chờ xếp")) return "status-pill badge-warning";
+      if (s.includes("bảo lưu") || s.includes("đình chỉ") || s.includes("bỏ học")) return "status-pill badge-danger";
+      return "status-pill badge-default";
+    },
+    getData() {
+      this.$vs.loading();
+      axios.g(`/api/lms/students/${this.$route.params.id}/detail`)
+        .then((response) => {
+          this.$vs.loading.close();
+          this.student_info = response.data;
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$vs.loading.close();
+        });
+    },
+    submitFiles() {
+      let formData = new FormData();
+      formData.append("avatar", this.$refs.file.files[0]);
+      formData.append("student_id", this.student_info.id);
+      this.$vs.loading();
+      axios
+        .p("/api/lms/students/update_avatar", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then((response) => {
+          this.$vs.loading.close();
+          this.student_info.avatar_url = response.data.avatar_url;
+          this.$vs.notify({
+            title: "Thành Công",
+            text: response.data.message,
+            color: "success",
+            iconPack: "feather",
+            icon: "icon-check",
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+          this.$vs.loading.close();
+        });
+    },
+  },
+};
 </script>
 
 <style scoped>
-.profile-hero-card {
+/* Bulletproof Compact Profile Hero Bar */
+.profile-hero-bar {
+  display: flex;
+  align-items: center;
   background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  gap: 16px;
 }
 
-.profile-avatar-container {
+@media (max-width: 991px) {
+  .profile-hero-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Avatar Box */
+.hero-avatar-wrapper {
   position: relative;
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  margin: 0 auto;
-  border: 3px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  overflow: visible;
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
 }
 
-.profile-avatar-img {
-  width: 100%;
-  height: 100%;
+.hero-avatar-image {
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   object-fit: cover;
-  background: #f1f5f9;
+  border: 2px solid #7367f0;
+  background: #f8fafc;
 }
 
-.avatar-camera-btn {
+.hero-camera-btn {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 32px;
-  height: 32px;
-  background: #2563eb;
-  color: #ffffff;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
+  background: #7367f0;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 11px;
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
 }
 
-.avatar-camera-btn:hover {
-  background: #1d4ed8;
+.hero-camera-btn:hover {
+  background: #5e50ee;
   transform: scale(1.1);
 }
 
-.stk-code-hero-badge {
+/* Main Info Wrapper */
+.hero-info-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-title-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hero-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.hero-stk-badge {
   display: inline-flex;
   align-items: center;
-  background: #eff6ff;
-  border: 1px dashed #3b82f6;
-  color: #1d4ed8;
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: 13px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #7367f0;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 7px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.stk-code-hero-badge:hover {
-  background: #dbeafe;
-}
-
-.status-hero-badge {
-  display: inline-block;
-  padding: 3px 12px;
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 
-.badge-success {
-  background: #dcfce7;
-  color: #166534;
-}
+.badge-success { background: #dcfce7; color: #15803d; }
+.badge-info { background: #e0f2fe; color: #0369a1; }
+.badge-warning { background: #fef9c3; color: #a16207; }
+.badge-danger { background: #fee2e2; color: #b91c1c; }
+.badge-default { background: #f1f5f9; color: #475569; }
 
-.badge-info {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.badge-warning {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.badge-danger {
-  background: #ffe4e6;
-  color: #be123c;
-}
-
-.badge-default {
-  background: #f1f5f9;
+/* Demographic Line */
+.hero-meta-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
   color: #475569;
 }
 
-.kpi-metric-card {
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Contact Line */
+.hero-contact-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11.5px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #f1f5f9;
+}
+
+.hero-contact-chip {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Right KPI Wrapper */
+.hero-kpi-wrapper {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .hero-kpi-wrapper {
+    flex-direction: column;
+  }
+}
+
+.hero-kpi-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 12px 14px;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: 140px;
 }
 
-.kpi-label {
-  font-size: 11.5px;
+.hero-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
   font-weight: 600;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  color: #64748b;
+  margin-bottom: 2px;
 }
 
-.kpi-value {
-  font-size: 20px;
+.hero-kpi-number {
+  font-size: 16px;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.hero-progress-bg {
-  width: 100%;
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 3px;
-  overflow: hidden;
+.hero-kpi-max {
+  font-size: 11px;
+  font-weight: normal;
+  color: #94a3b8;
 }
 
-.hero-progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #10b981, #059669);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+.hero-kpi-sub {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Compact Tabs Card */
+.compact-tabs-card >>> .vx-card__collapsible-content .vx-card__body {
+  padding: 10px 16px !important;
+}
+
+.tab-content-area {
+  padding-top: 10px;
 }
 </style>
