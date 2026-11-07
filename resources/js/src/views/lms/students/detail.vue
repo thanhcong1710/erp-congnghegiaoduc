@@ -217,10 +217,19 @@ export default {
     },
     getData() {
       this.$vs.loading();
-      axios.g(`/api/lms/students/${this.$route.params.id}/detail`)
+      axios.g(`/api/lms/students/show/${this.$route.params.id}`)
         .then((response) => {
           this.$vs.loading.close();
-          this.student_info = response.data;
+          if (response.data && response.data.id) {
+            this.student_info = response.data;
+          } else {
+            this.$vs.notify({
+              title: "Thông báo",
+              text: "Không tìm thấy thông tin học sinh",
+              color: "warning",
+            });
+            this.$router.push({ path: `/lms/students` });
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -228,31 +237,35 @@ export default {
         });
     },
     submitFiles() {
-      let formData = new FormData();
-      formData.append("avatar", this.$refs.file.files[0]);
-      formData.append("student_id", this.student_info.id);
-      this.$vs.loading();
-      axios
-        .p("/api/lms/students/update_avatar", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        })
-        .then((response) => {
-          this.$vs.loading.close();
-          this.student_info.avatar_url = response.data.avatar_url;
-          this.$vs.notify({
-            title: "Thành Công",
-            text: response.data.message,
-            color: "success",
-            iconPack: "feather",
-            icon: "icon-check",
+      if (this.$refs.file && this.$refs.file.files.length) {
+        this.$vs.loading();
+        let formData = new FormData();
+        for (let i = 0; i < this.$refs.file.files.length; i++) {
+          formData.append("files[" + i + "]", this.$refs.file.files[i]);
+        }
+        formData.append("student_id", this.student_info.id || this.$route.params.id);
+        axios
+          .p("/api/lms/students/upload-avatar", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((response) => {
+            this.$vs.loading.close();
+            this.$vs.notify({
+              title: "Thành công",
+              text: response.data.message || "Upload avatar thành công",
+              color: "success",
+              iconPack: "feather",
+              icon: "icon-check",
+            });
+            this.getData();
+          })
+          .catch((e) => {
+            console.log(e);
+            this.$vs.loading.close();
           });
-        })
-        .catch((e) => {
-          console.log(e);
-          this.$vs.loading.close();
-        });
+      }
     },
   },
 };

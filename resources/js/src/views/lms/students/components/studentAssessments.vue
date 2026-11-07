@@ -39,13 +39,13 @@
 
     <!-- Compact Pagination -->
     <div class="compact-pagination-bar" v-if="assessments && assessments.length > 0">
-      <div class="flex items-center">
-        <span class="text-gray-700 mr-2">Hiển thị:</span>
+      <div class="compact-pagination-info">
+        <span class="text-gray-700 whitespace-nowrap">Hiển thị:</span>
         <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
           <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
         </select>
-        <span class="text-gray-500 ml-2">
-          ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
+        <span class="text-gray-500 whitespace-nowrap">
+          ({{ pagination.total > 0 ? (pagination.cpage * pagination.limit - (pagination.limit - 1)) : 0 }} - {{ Math.min(pagination.total || 0, pagination.cpage * pagination.limit) }} / {{ pagination.total || 0 }})
         </span>
       </div>
 
@@ -151,10 +151,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 10px;
   padding-top: 8px;
   border-top: 1px solid #e2e8f0;
   font-size: 14px;
+}
+
+.compact-pagination-info {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 .compact-page-select {

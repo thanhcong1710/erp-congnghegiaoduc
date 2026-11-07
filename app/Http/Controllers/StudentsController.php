@@ -116,8 +116,8 @@ class StudentsController extends Controller
     //LMS
     public function list(Request $request)
     {
-        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
-        $status = isset($request->status) ? $request->status : [];
+        $branch_id = isset($request->branch_id) ? $request->branch_id : (isset($request->arr_branch) ? $request->arr_branch : []);
+        $status = isset($request->status) ? $request->status : (isset($request->arr_status) ? $request->arr_status : []);
         $keyword = isset($request->keyword) ? $request->keyword : '';
 
         $pagination = (object) $request->pagination;
@@ -182,7 +182,9 @@ class StudentsController extends Controller
         foreach ($list as $k => $row) {
             $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
         }
-        $data = u::makingPagination($list, $total->total, $page, $limit);
+        $total_count = $total ? (int)$total->total : 0;
+        $data = u::makingPagination($list, $total_count, $page, $limit);
+        $data->total = $total_count;
         return response()->json($data);
     }
 
@@ -202,11 +204,13 @@ class StudentsController extends Controller
                         (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
                 OR c.id IS NULL) AND s.id=$student_id");
-        $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
-        if ($data->real_sessions > $data->done_sessions) {
-            $data->left_amount = $data->left_sessions ? round($data->total_charged * ($data->left_sessions - $data->done_sessions) / $data->left_sessions) : 0;
-        } else {
-            $data->left_amount = 0;
+        if ($data) {
+            $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
+            if ($data->real_sessions > $data->done_sessions) {
+                $data->left_amount = $data->left_sessions ? round($data->total_charged * ($data->left_sessions - $data->done_sessions) / $data->left_sessions) : 0;
+            } else {
+                $data->left_amount = 0;
+            }
         }
 
         return response()->json($data);

@@ -233,18 +233,18 @@
 
       <!-- Compact Pagination -->
       <div class="compact-pagination-bar">
-        <div class="flex items-center">
-          <span class="text-gray-700 mr-2">Hiển thị mỗi trang:</span>
+        <div class="compact-pagination-info">
+          <span class="text-gray-700 whitespace-nowrap">Hiển thị mỗi trang:</span>
           <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
             <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
           </select>
-          <span class="text-gray-500 ml-2">
-            ({{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ Math.min(pagination.total, pagination.cpage * pagination.limit) }} / {{ pagination.total }})
+          <span class="text-gray-500 whitespace-nowrap">
+            ({{ pagination.total > 0 ? (pagination.cpage * pagination.limit - (pagination.limit - 1)) : 0 }} - {{ Math.min(pagination.total || 0, pagination.cpage * pagination.limit) }} / {{ pagination.total || 0 }})
           </span>
         </div>
 
         <vs-pagination
-          v-if="Math.ceil(pagination.total / pagination.limit) > 1"
+          v-if="pagination.total && Math.ceil(pagination.total / pagination.limit) > 1"
           :total="Math.ceil(pagination.total / pagination.limit)"
           :max="7"
           v-model="pagination.cpage"
@@ -362,21 +362,33 @@ export default {
       this.getData();
     },
     changePage() {
-      this.getData();
+      if (this.pagination.init) {
+        this.getData();
+      }
     },
     getData() {
       const data = {
         keyword: this.searchData.keyword,
-        arr_branch: this.searchData.arr_branch.map(item => item.id),
-        arr_status: this.searchData.arr_status.map(item => item.id),
+        branch_id: this.searchData.arr_branch.map(item => item.id),
+        status: this.searchData.arr_status.map(item => item.id),
         pagination: this.pagination,
       };
       this.$vs.loading();
       axios.p(this.pagination.url, data)
         .then((response) => {
           this.$vs.loading.close();
-          this.students = response.data.list;
-          this.pagination.total = response.data.total;
+          this.students = response.data.list || [];
+          if (response.data.paging) {
+            this.pagination.total = response.data.paging.total || 0;
+            this.pagination.cpage = response.data.paging.cpage || 1;
+            this.pagination.limit = response.data.paging.limit || 20;
+            this.pagination.lpage = response.data.paging.lpage || 1;
+          } else if (response.data.total !== undefined) {
+            this.pagination.total = response.data.total;
+          }
+          setTimeout(() => {
+            this.pagination.init = 1;
+          }, 300);
         })
         .catch((error) => {
           console.log(error);
@@ -674,10 +686,20 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid #e2e8f0;
   font-size: 14px;
+}
+
+.compact-pagination-info {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 .compact-page-select {
