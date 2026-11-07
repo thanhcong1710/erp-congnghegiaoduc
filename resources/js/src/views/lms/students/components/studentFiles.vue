@@ -123,7 +123,7 @@
           file_id: item.id
         }
         this.$vs.loading()
-        axios.p('/api/lms/students/delete_files', data)
+        axios.p('/api/lms/students/delete-file', data)
           .then((response) => {
             this.$vs.loading.close()
             this.getStudentFiles();
@@ -145,7 +145,7 @@
           student_id: this.student_info.id
         }
         this.$vs.loading()
-        axios.p('/api/lms/students/files', data)
+        axios.p('/api/lms/students/get-files', data)
           .then((response) => {
             this.$vs.loading.close()
             this.files = response.data
@@ -177,7 +177,7 @@
         formData.append("note", this.upload.note);
         formData.append("student_id", this.student_info.id);
         this.$vs.loading()
-        axios.p("/api/lms/students/upload_files",formData,{
+        axios.p("/api/lms/students/upload-file",formData,{
           headers: {
             "Content-Type": "multipart/form-data"
           }

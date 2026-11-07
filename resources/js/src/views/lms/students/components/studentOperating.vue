@@ -185,7 +185,7 @@
           student_id: this.student_info.id,
         }
         this.$vs.loading()
-        axios.p('/api/lms/students/transfers', data)
+        axios.p('/api/lms/students/operating', data)
           .then((response) => {
             this.$vs.loading.close()
             this.class_transfer = response.data.class_transfer || []
