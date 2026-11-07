@@ -114,42 +114,42 @@
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-tabs-card">
       <vs-tabs v-model="active_tab" class="modern-student-tabs">
         <vs-tab label="Hồ sơ">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-info :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Gói phí">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-contracts :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Buổi học">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-sessions :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Vận hành">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-operating :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Đánh giá & nhận xét">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-assessments :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Bài test (IG.BH & UCREA)">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-evaluations :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Lịch sử">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-logs :student_info="student_info" />
           </div>
         </vs-tab>
         <vs-tab label="Hồ sơ lưu trữ">
-          <div class="tab-content-area">
+          <div class="tab-content-area" v-if="student_info && student_info.id">
             <student-files :student_info="student_info" />
           </div>
         </vs-tab>

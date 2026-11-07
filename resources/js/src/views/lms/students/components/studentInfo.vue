@@ -455,20 +455,33 @@ export default {
     await axios.g(`/api/system/jobs`).then((res) => {
       this.html.jobs.list = res.data;
     });
-    await axios.g(`/api/system/cms/${this.student_info.branch_id}`).then((res) => {
+    const branch_id = (this.student_info && this.student_info.branch_id) ? this.student_info.branch_id : 0;
+    await axios.g(`/api/system/cms/${branch_id}`).then((res) => {
       this.html.cms.list = res.data;
     });
-    await axios.g(`/api/system/ecs/${this.student_info.branch_id}`).then((res) => {
+    await axios.g(`/api/system/ecs/${branch_id}`).then((res) => {
       this.html.ecs.list = res.data;
     });
-    this.html.jobs.item = this.html.jobs.list.filter((i) => i.id == this.student_info.gud_job1)[0];
-    this.html.jobs.item2 = this.html.jobs.list.filter((i) => i.id == this.student_info.gud_job2)[0];
-    this.html.province.item = this.html.province.list.filter((i) => i.id == this.student_info.province_id)[0];
-    this.tmp_district_id = this.student_info.district_id;
-    this.getDistrict(this.html.province.item);
-    this.html.ecs.item = this.html.ecs.list.filter((i) => i.id == this.student_info.ec_id)[0];
-    this.html.cms.item = this.html.cms.list.filter((i) => i.id == this.student_info.cm_id)[0];
-    this.init_lms_id = this.student_info.lms_id;
+    if (this.student_info) {
+      if (this.student_info.gud_job1) {
+        this.html.jobs.item = this.html.jobs.list.filter((i) => i.id == this.student_info.gud_job1)[0];
+      }
+      if (this.student_info.gud_job2) {
+        this.html.jobs.item2 = this.html.jobs.list.filter((i) => i.id == this.student_info.gud_job2)[0];
+      }
+      if (this.student_info.province_id) {
+        this.html.province.item = this.html.province.list.filter((i) => i.id == this.student_info.province_id)[0];
+        this.tmp_district_id = this.student_info.district_id;
+        this.getDistrict(this.html.province.item);
+      }
+      if (this.student_info.ec_id) {
+        this.html.ecs.item = this.html.ecs.list.filter((i) => i.id == this.student_info.ec_id)[0];
+      }
+      if (this.student_info.cm_id) {
+        this.html.cms.item = this.html.cms.list.filter((i) => i.id == this.student_info.cm_id)[0];
+      }
+      this.init_lms_id = this.student_info.lms_id || 0;
+    }
   },
   methods: {
     saveEC(data = null) {
