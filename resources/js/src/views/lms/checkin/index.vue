@@ -271,24 +271,26 @@
         </table>
       </div>
 
-      <!-- Compact Pagination -->
-      <div class="compact-pagination-bar">
-        <div class="compact-pagination-info">
-          <span class="text-gray-700 whitespace-nowrap">Hiển thị mỗi trang:</span>
-          <select class="compact-page-select" v-model="pagination.limit" @change="changePageLimit(pagination.limit)">
-            <option v-for="(limit, idx) in limitSource" :key="idx" :value="limit">{{ limit }}</option>
-          </select>
-          <span class="text-gray-500 whitespace-nowrap">
-            ({{ pagination.total > 0 ? (pagination.cpage * pagination.limit - (pagination.limit - 1)) : 0 }} - {{ Math.min(pagination.total || 0, pagination.cpage * pagination.limit) }} / {{ pagination.total || 0 }})
-          </span>
-        </div>
-
+      <!-- Pagination (Theo chuẩn /lms/contracts) -->
+      <div class="flex flex-wrap items-center mt-5">
+        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
+          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
+            <span class="mr-2">{{ pagination.total > 0 ? (pagination.cpage * pagination.limit - (pagination.limit - 1)) : 0 }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </div>
+          <vs-dropdown-menu>
+            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)">
+              <span>{{ item }}</span>
+            </vs-dropdown-item>
+          </vs-dropdown-menu>
+        </vs-dropdown>
         <vs-pagination
+          style="width: calc(100% - 160px);"
           v-if="pagination.total && Math.ceil(pagination.total / pagination.limit) > 1"
           :total="Math.ceil(pagination.total / pagination.limit)"
           :max="7"
           v-model="pagination.cpage"
-          @change="changePage"
+          @change="changePage()"
         />
       </div>
     </vx-card>

@@ -95,9 +95,6 @@
         <div class="hero-kpi-card">
           <div class="hero-kpi-header">
             <span><i class="fa-solid fa-clock text-amber-500 mr-1"></i> Buổi còn lại</span>
-            <span class="font-semibold" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
-              {{ (student_info.left_sessions || 0) > 5 ? 'Ổn định' : 'Sắp hết' }}
-            </span>
           </div>
           <div class="hero-kpi-number" :class="(student_info.left_sessions || 0) > 5 ? 'text-emerald-600' : 'text-rose-500'">
             {{ student_info.left_sessions || 0 }}
@@ -279,7 +276,7 @@ export default {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 12px 18px;
+  padding: 25px 25px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   gap: 16px;
 }
