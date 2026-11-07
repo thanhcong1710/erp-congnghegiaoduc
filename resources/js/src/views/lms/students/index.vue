@@ -100,7 +100,7 @@
               <th style="width: 250px">Học sinh</th>
               <th style="width: 220px">Phụ huynh</th>
               <th style="width: 240px">Lớp học & Trung tâm</th>
-              <th style="width: 170px" class="text-center">Tiến độ buổi</th>
+              <th style="width: 140px" class="text-center">Tiến độ buổi</th>
               <th style="width: 100px" class="text-center">Thao tác</th>
             </tr>
           </thead>
@@ -121,11 +121,13 @@
               <!-- Avatar -->
               <td class="text-center">
                 <div class="avatar-cell">
-                  <img
-                    class="student-avatar-img"
-                    :src="item.avatar_url || (item.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')"
-                    :alt="item.name"
-                  />
+                  <router-link :to="`/lms/students/${item.id}/detail`">
+                    <img
+                      class="student-avatar-img"
+                      :src="item.avatar_url || (item.gender == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg')"
+                      :alt="item.name"
+                    />
+                  </router-link>
                 </div>
               </td>
 
@@ -222,7 +224,7 @@
               <td class="text-center">
                 <router-link :to="`/lms/students/${item.id}/detail`">
                   <vs-button size="small" color="primary" type="relief" class="action-view-btn shadow-sm" title="Xem chi tiết hồ sơ">
-                    <i class="fa-solid fa-eye mr-1"></i> Chi tiết
+                    <i class="fa-solid fa-eye mr-1"></i>
                   </vs-button>
                 </router-link>
               </td>
@@ -594,8 +596,8 @@ export default {
 }
 
 .student-avatar-img {
-  width: 44px;
-  height: 44px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #e2e8f0;

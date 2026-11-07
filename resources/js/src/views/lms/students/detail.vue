@@ -434,7 +434,7 @@ export default {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   padding: 8px 12px;
-  min-width: 140px;
+  min-width: 200px;
 }
 
 .hero-kpi-header {
@@ -448,7 +448,7 @@ export default {
 }
 
 .hero-kpi-number {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
 }

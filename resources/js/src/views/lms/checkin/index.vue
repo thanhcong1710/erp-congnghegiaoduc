@@ -159,9 +159,9 @@
           <thead>
             <tr>
               <th class="text-center" style="width: 50px">STT</th>
-              <th style="width: 230px">Học sinh</th>
-              <th style="width: 230px">Phụ huynh</th>
-              <th style="width: 240px">Thông tin Checkin</th>
+              <th style="min-width: 230px">Học sinh</th>
+              <th style="min-width: 230px">Phụ huynh</th>
+              <th style="min-width: 240px">Thông tin Checkin</th>
               <th style="width: 180px" class="text-center">Trạng thái</th>
               <th style="width: 140px" class="text-center">Thao tác</th>
               <th style="min-width: 180px">Ghi chú</th>
