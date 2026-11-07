@@ -627,8 +627,7 @@
           return new Promise((resolve, reject) => {
             axios.p(`/api/lms/students/search-contract`,{
               branch_id: this.contract.branch_id,
-              keyword: keyword,
-              is_renew:0
+              keyword: keyword
             }).then((response) => {
                 const resp = response.data.length ? response.data : [{
                     label: 'Không tìm thấy',
@@ -829,8 +828,7 @@
           axios.p(`/api/lms/contracts/load-tuition-fee`,{
             branch_id: this.contract.branch_id,
             product_id: this.contract.product_id,
-            type_contract: this.contract.type,
-            is_renew: 0
+            type_contract: this.contract.type
           }).then((response) => {
             this.$vs.loading.close();
             this.html.tuition_fee.list = response.data

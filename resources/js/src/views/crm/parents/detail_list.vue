@@ -249,7 +249,7 @@
                 <!-- Cột 4: Họ và tên -->
                 <th style="width: 170px;">Họ và tên</th>
                 <!-- Cột 5: Lịch sử chăm sóc -->
-                <th style="width: 380px;">Lịch sử chăm sóc</th>
+                <th style="width: 480px;">Lịch sử chăm sóc</th>
                 <!-- Cột 6: Ghi chú -->
                 <th style="width: 320px;">Ghi chú</th>
                 <!-- Cột 7: Người quản lý -->

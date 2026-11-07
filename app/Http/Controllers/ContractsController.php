@@ -16,17 +16,10 @@ class ContractsController extends Controller
         $product_id = $request->product_id;
         $branch_id = $request->branch_id;
         $type_contract = $request->type_contract;
-        $is_renew = $request->is_renew;
-        if ($is_renew) {
-            $cond = " AND t.type IN(0,2)";
-        } else {
-            $cond = " AND t.type IN(0,1)";
-        }
         $data = u::query("SELECT t.name, t.id, t.price, t.receivable,t.session,t.number_of_months
             FROM tuition_fee AS t 
             WHERE t.status=1 AND t.available_date <= CURRENT_DATE AND expired_date >= CURRENT_DATE AND type_contract = $type_contract
             AND t.product_id = $product_id AND ( t.branch_id LIKE '$branch_id,%' OR t.branch_id LIKE '%,$branch_id,%' OR t.branch_id LIKE '%,$branch_id' OR t.branch_id = '$branch_id' )
-            $cond 
             ORDER BY t.number_of_months DESC");
         return response()->json($data);
     }
