@@ -1,19 +1,54 @@
 <template>
-  <div id="page-roles-list">
-    <vx-card no-shadow class="mt-5">
-      <div class="mb-5">
+  <div id="page-crm-care-list">
+    <!-- KHUNG BỘ LỌC QUẢN LÝ CHĂM SÓC HIỆN ĐẠI -->
+    <vx-card no-shadow class="mt-5 filter-box-card">
+      <div class="filter-header-bar flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
+        <div class="flex items-center">
+          <div class="filter-icon-badge mr-2">
+            <i class="feather icon-filter"></i>
+          </div>
+          <div>
+            <h5 class="font-bold text-gray-800 text-base mb-0">Bộ lọc lịch sử chăm sóc</h5>
+            <p class="text-xs text-gray-400 mb-0">Tra cứu nhanh cuộc gọi, ghi chú chăm sóc theo nhân viên và trạng thái</p>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <span class="active-filter-badge mr-3" v-if="activeFilterCount > 0">
+            <i class="feather icon-check-circle mr-1"></i> Đang lọc {{ activeFilterCount }} tiêu chí
+          </span>
+          <button 
+            type="button" 
+            class="btn-toggle-filter" 
+            @click="isFilterCollapsed = !isFilterCollapsed"
+            :title="isFilterCollapsed ? 'Mở rộng bộ lọc' : 'Thu gọn bộ lọc'"
+          >
+            <i :class="isFilterCollapsed ? 'feather icon-chevron-down' : 'feather icon-chevron-up'"></i>
+            {{ isFilterCollapsed ? 'Mở rộng' : 'Thu gọn' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- NỘI DUNG CÁC TRƯỜNG LỌC -->
+      <div v-show="!isFilterCollapsed" class="filter-body-content">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label class="vs-input--label">Từ khóa</label>
+          <!-- 1. Từ khóa -->
+          <div class="vx-col sm:w-1/2 md:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-search text-primary mr-1"></i> Từ khóa
+            </label>
             <vs-input
-              class="w-full"
-              placeholder="Tên khách hàng, số điện thoại"
+              class="w-full custom-input"
+              placeholder="Tên khách hàng, số điện thoại..."
               v-model="searchData.keyword"
               @keyup.enter="search"
             ></vs-input>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label class="vs-input--label">Người phụ trách</label>
+
+          <!-- 2. Người phụ trách -->
+          <div class="vx-col sm:w-1/2 md:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-user text-primary mr-1"></i> Người phụ trách
+            </label>
             <multiselect
               name="search_creator"
               placeholder="Chọn người phụ trách"
@@ -32,8 +67,12 @@
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label class="vs-input--label">Khoảng thời gian chăm sóc</label>
+
+          <!-- 3. Khoảng thời gian chăm sóc -->
+          <div class="vx-col sm:w-1/2 md:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-calendar text-primary mr-1"></i> Khoảng thời gian chăm sóc
+            </label>
             <date-picker
               name="item-date"
               v-model="searchData.dateRange"
@@ -42,14 +81,18 @@
               style="width: 100%;"
               :clearable="true"
               :lang="datepickerOptions.lang"
-              placeholder="Chọn khoảng thời gian chăm sóc"
+              placeholder="Chọn khoảng ngày chăm sóc"
             ></date-picker>
           </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label class="vs-input--label">Trạng thái cuộc gọi</label>
+
+          <!-- 4. Trạng thái cuộc gọi -->
+          <div class="vx-col sm:w-1/2 md:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-phone-call text-primary mr-1"></i> Trạng thái cuộc gọi
+            </label>
             <multiselect
               name="search_call_status"
-              placeholder="Chọn trạng thái cuộc gọi"
+              placeholder="Tất cả trạng thái cuộc gọi"
               v-model="searchData.arr_call_status"
               :options="callStatusOptions"
               label="label"
@@ -66,105 +109,164 @@
             </multiselect>
           </div>
         </div>
-        <div class="vx-row mt-3">
-          <div class="vx-col w-full">
-            <vs-button class="mr-3 mb-2" @click="search">
-              <i class="fa fa-search"></i> Tìm kiếm
+
+        <!-- ACTION BUTTONS -->
+        <div class="vx-row mt-1 pt-3 border-t border-gray-100 items-center justify-between">
+          <div class="vx-col sm:w-auto w-full mb-2 flex items-center">
+            <vs-button class="mr-3 mb-2 shadow-btn" color="primary" @click="search">
+              <i class="fa fa-search mr-1"></i> Tìm kiếm
             </vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="reset">
-              <i class="fas fa-undo-alt"></i> Hủy
+            <vs-button color="dark" type="border" class="mb-2 mr-3" @click="reset">
+              <i class="fas fa-undo-alt mr-1"></i> Đặt lại
             </vs-button>
+          </div>
+
+          <div class="vx-col sm:w-auto w-full mb-2 text-sm text-gray-500 font-medium">
+            <i class="feather icon-list mr-1 text-primary"></i> Tổng số: <strong class="text-primary">{{ pagination.total }}</strong> lượt chăm sóc
           </div>
         </div>
       </div>
 
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody">
-            <table class="vs-table vs-table--tbody-table" style="min-width: 1400px">
-              <thead class="vs-table--thead">
-                <tr>
-                  <th class="text-center">STT</th>
-                  <th class="text-center">Thời gian</th>
-                  <th>Tên khách hàng</th>
-                  <th class="text-center">Số điện thoại</th>
-                  <th>Người phụ trách</th>
-                  <th class="text-center">Phương thức</th>
-                  <th class="text-center">Trạng thái cuộc gọi</th>
-                  <th>Nội dung</th>
-                  <th class="text-center">Lịch hẹn</th>
-                  <th class="text-center">Thao tác</th>
-                </tr>
-              </thead>
+      <!-- BẢNG DANH SÁCH CHĂM SÓC NÂNG CẤP CHUẨN ERP -->
+      <div class="care-table-wrapper mt-3">
+        <div class="care-table-scroll">
+          <table class="care-custom-table" style="min-width: 1450px">
+            <thead>
+              <tr>
+                <th class="th-center" style="width: 60px;">STT</th>
+                <th class="th-center" style="width: 140px;">Thời gian</th>
+                <th style="width: 190px;">Tên khách hàng</th>
+                <th class="th-center" style="width: 130px;">Số điện thoại</th>
+                <th style="width: 160px;">Người phụ trách</th>
+                <th class="th-center" style="width: 130px;">Phương thức</th>
+                <th class="th-center" style="width: 180px;">Trạng thái cuộc gọi</th>
+                <th style="width: 380px;">Nội dung chăm sóc</th>
+                <th class="th-center" style="width: 140px;">Lịch hẹn tiếp theo</th>
+                <th class="th-center" style="width: 90px;">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
               <tr
-                class="tr-values vs-table--tr tr-table-state-null"
                 v-for="(item, index) in cares"
                 :key="item.id || index"
               >
-                <td class="td vs-table--td text-center">
+                <!-- STT -->
+                <td class="td-center font-medium text-gray-500">
                   {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
                 </td>
-                <td class="td vs-table--td text-center">{{ item.care_date }}</td>
-                <td class="td vs-table--td">
-                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`">
-                    <a>{{ item.parent_name }}</a>
-                  </router-link>
-                  <span v-else>{{ item.parent_name }}</span>
+
+                <!-- Thời gian -->
+                <td class="td-center">
+                  <div class="font-medium text-dark text-sm">{{ formatDateOnly(item.care_date) }}</div>
+                  <div class="text-xs text-muted">{{ formatTimeOnly(item.care_date) }}</div>
                 </td>
-                <td class="td vs-table--td text-center">
-                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`">
-                    <a>{{ item.parent_phone }}</a>
+
+                <!-- Tên khách hàng -->
+                <td>
+                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`" class="font-semibold text-blue-600 hover:underline">
+                    {{ item.parent_name }}
                   </router-link>
-                  <span v-else>{{ item.parent_phone }}</span>
+                  <span v-else class="font-medium text-dark">{{ item.parent_name }}</span>
                 </td>
-                <td class="td vs-table--td">{{ item.creator_name }}</td>
-                <td class="td vs-table--td text-center">{{ item.method_name }}</td>
-                <td class="td vs-table--td text-center">{{ item.call_status_label }}</td>
-                <td class="td vs-table--td" style="max-width: 280px;">
-                  <div v-html="item.note"></div>
-                  <p v-if="item.attached_file" class="mt-1">
-                    <a :href="item.attached_file" target="_blank">File đính kèm</a>
-                  </p>
-                </td>
-                <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
-                <td class="td vs-table--td text-center list-action">
-                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`">
-                    <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+
+                <!-- Số điện thoại -->
+                <td class="td-center">
+                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`" class="font-medium text-blue-600 hover:underline">
+                    <i class="feather icon-phone text-xs mr-1 text-primary"></i>{{ item.parent_phone }}
                   </router-link>
+                  <span v-else class="text-dark">{{ item.parent_phone }}</span>
+                </td>
+
+                <!-- Người phụ trách -->
+                <td class="font-medium text-gray-800 text-sm">
+                  {{ item.creator_name || '-' }}
+                </td>
+
+                <!-- Phương thức liên hệ -->
+                <td class="td-center">
+                  <span class="method-badge" :class="getMethodClass(item.method_id)">
+                    <i :class="getMethodIcon(item.method_id)" class="mr-1"></i>
+                    {{ item.method_name || 'Khác' }}
+                  </span>
+                </td>
+
+                <!-- Trạng thái cuộc gọi -->
+                <td class="td-center">
+                  <span v-if="item.call_status_label" class="call-status-badge" :class="getCallStatusClass(item.call_status)">
+                    {{ item.call_status_label }}
+                  </span>
+                  <span v-else class="text-gray-400 text-xs">-</span>
+                </td>
+
+                <!-- Nội dung chăm sóc -->
+                <td>
+                  <div class="care-content-box">
+                    <div class="care-note-html text-gray-700" v-html="item.note"></div>
+                    <div v-if="item.attached_file" class="mt-1">
+                      <a :href="item.attached_file" target="_blank" class="attached-file-link inline-flex items-center">
+                        <i class="feather icon-paperclip mr-1"></i> File đính kèm
+                      </a>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Lịch hẹn tiếp theo -->
+                <td class="td-center text-xs">
+                  <span v-if="item.next_care_date" class="font-semibold text-primary">
+                    <i class="feather icon-calendar mr-1"></i>{{ item.next_care_date }}
+                  </span>
+                  <span v-else class="text-gray-400">-</span>
+                </td>
+
+                <!-- Thao tác -->
+                <td class="td-center">
+                  <router-link v-if="item.parent_id" :to="`/crm/parent/${item.parent_id}/detail`" title="Xem chi tiết hồ sơ">
+                    <button class="btn-action-view">
+                      <i class="feather icon-eye"></i>
+                    </button>
+                  </router-link>
+                  <span v-else class="text-gray-400">-</span>
                 </td>
               </tr>
+
+              <!-- Trống dữ liệu -->
               <tr v-if="!cares || cares.length === 0">
-                <td colspan="10" class="td vs-table--td text-center py-4">
-                  Không có dữ liệu chăm sóc
+                <td colspan="10" class="text-center py-8 text-gray-400">
+                  <i class="feather icon-inbox text-3xl mb-2 block"></i>
+                  Không có dữ liệu chăm sóc nào phù hợp với bộ lọc
                 </td>
               </tr>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center mt-5" v-if="pagination.total > 0">
-        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
-          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-            <span class="mr-2">
-              {{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} -
-              {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }}
-              of {{ pagination.total }}
-            </span>
-            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-          </div>
-          <vs-dropdown-menu>
-            <vs-dropdown-item
-              v-for="(item, index) in limitSource"
-              :key="index"
-              @click="changePageLimit(item)"
-            >
-              <span>{{ item }}</span>
-            </vs-dropdown-item>
-          </vs-dropdown-menu>
-        </vs-dropdown>
+      <!-- PHÂN TRANG HIỆN ĐẠI -->
+      <div class="flex flex-wrap items-center justify-between mt-5" v-if="pagination.total > 0">
+        <div class="flex items-center">
+          <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
+            <div class="p-3 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium text-sm">
+              <span class="mr-2">
+                {{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} -
+                {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }}
+                của {{ pagination.total }}
+              </span>
+              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+            </div>
+            <vs-dropdown-menu>
+              <vs-dropdown-item
+                v-for="(item, index) in limitSource"
+                :key="index"
+                @click="changePageLimit(item)"
+              >
+                <span>{{ item }} dòng / trang</span>
+              </vs-dropdown-item>
+            </vs-dropdown-menu>
+          </vs-dropdown>
+          <span class="text-sm text-gray-500">Hiển thị dữ liệu trang {{ pagination.cpage }}</span>
+        </div>
+
         <vs-pagination
-          style="width: calc(100% - 160px);"
           v-if="Math.ceil(pagination.total / pagination.limit) > 1"
           :total="Math.ceil(pagination.total / pagination.limit)"
           :max="7"
@@ -181,14 +283,17 @@ import axios from '../../../http/axios.js'
 import Multiselect from 'vue-multiselect'
 import DatePicker from 'vue2-datepicker'
 import u from '../../../until/helper.js'
+import moment from 'moment'
 
 export default {
+  name: 'CrmCareList',
   components: {
     DatePicker,
     Multiselect
   },
   data() {
     return {
+      isFilterCollapsed: false,
       searchData: {
         keyword: '',
         arr_creator: [],
@@ -206,18 +311,8 @@ export default {
         lang: {
           days: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
           months: [
-            'Tháng 1',
-            'Tháng 2',
-            'Tháng 3',
-            'Tháng 4',
-            'Tháng 5',
-            'Tháng 6',
-            'Tháng 7',
-            'Tháng 8',
-            'Tháng 9',
-            'Tháng 10',
-            'Tháng 11',
-            'Tháng 12'
+            'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
           ]
         }
       },
@@ -238,6 +333,16 @@ export default {
         pages: [],
         init: 0
       }
+    }
+  },
+  computed: {
+    activeFilterCount() {
+      let count = 0
+      if (this.searchData.keyword && this.searchData.keyword.trim()) count++
+      if (this.searchData.dateRange && this.searchData.dateRange.length && this.searchData.dateRange[0]) count++
+      if (this.searchData.arr_creator && this.searchData.arr_creator.length) count++
+      if (this.searchData.arr_call_status && this.searchData.arr_call_status.length) count++
+      return count
     }
   },
   created() {
@@ -311,10 +416,10 @@ export default {
           this.pagination = response.data.paging
           setTimeout(() => {
             this.pagination.init = 1
-          }, 500)
+          }, 300)
         })
         .catch((error) => {
-          console.log(error)
+          console.error(error)
           this.$vs.loading.close()
         })
     },
@@ -327,118 +432,308 @@ export default {
       this.pagination.cpage = 1
       this.pagination.limit = limit
       this.getData()
+    },
+
+    formatDateOnly(dateStr) {
+      if (!dateStr) return '-'
+      return moment(dateStr).format('DD/MM/YYYY')
+    },
+    formatTimeOnly(dateStr) {
+      if (!dateStr) return ''
+      return moment(dateStr).format('HH:mm')
+    },
+
+    getMethodIcon(methodId) {
+      const m = Number(methodId)
+      if (m === 1) return 'fa fa-phone'
+      if (m === 2) return 'fa fa-envelope'
+      if (m === 3) return 'fa fa-users'
+      if (m === 4) return 'fa fa-comment'
+      if (m === 5) return 'fa fa-comment-dots'
+      return 'fa fa-headset'
+    },
+    getMethodClass(methodId) {
+      const m = Number(methodId)
+      if (m === 1) return 'method-phone'
+      if (m === 2) return 'method-email'
+      if (m === 3) return 'method-direct'
+      if (m === 4) return 'method-sms'
+      if (m === 5) return 'method-zalo'
+      return 'method-default'
+    },
+    getCallStatusClass(status) {
+      const s = Number(status)
+      if (s === 1 || s === 9 || s === 10) return 'status-badge-success'
+      if (s === 2 || s === 4 || s === 11) return 'status-badge-danger'
+      if (s === 5 || s === 3) return 'status-badge-warning'
+      return 'status-badge-default'
     }
   }
 }
 </script>
 
-<style>
-@media only screen and (min-width: 600px) {
-  #page-roles-list .vs-table--search {
-    max-width: 360px;
-  }
-  #page-roles-list .vs-table--search-input {
-    width: 360px;
-  }
+<style scoped>
+/* KHUNG BỘ LỌC HIỆN ĐẠI */
+.filter-box-card {
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
 }
-th .sort-th,
-th .vs-table-text {
-  display: contents;
+.filter-icon-badge {
+  width: 34px;
+  height: 34px;
+  background: #ede9fe;
+  color: #7367f0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
 }
-.multiselect {
-  z-index: 999;
+.active-filter-badge {
+  font-size: 12px;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.btn-toggle-filter {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  color: #475569;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+.btn-toggle-filter:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
-/* Đồng bộ chiều cao 40px và giao diện cho các ô filter */
-#page-roles-list label.vs-input--label {
-  display: inline-block;
-  margin-bottom: 0.35rem;
+/* NHÃN FILTER VÀ INPUTS */
+.custom-filter-label {
+  display: flex;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
 }
-
-#page-roles-list .vs-input .vs-input--input,
-#page-roles-list input.vs-input--input.normal,
-#page-roles-list select.vs-input--input.normal {
+.custom-input input {
   height: 40px !important;
-  font-size: 14px !important;
-  border-radius: 5px !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
-  box-sizing: border-box !important;
-  padding: 0.55rem 0.7rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #f8fafc !important;
+  transition: all 0.2s;
+}
+.custom-input input:focus {
+  border-color: #7367f0 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12) !important;
+}
+.shadow-btn {
+  box-shadow: 0 3px 10px rgba(115, 103, 240, 0.3) !important;
 }
 
-#page-roles-list .multiselect {
+/* BẢNG CHĂM SÓC NÂNG CẤP */
+.care-table-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+.care-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.care-custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.care-custom-table thead tr {
+  background-color: #2b3346;
+  color: #ffffff;
+}
+.care-custom-table th {
+  padding: 12px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.care-custom-table th:last-child {
+  border-right: none;
+}
+.th-center, .td-center {
+  text-align: center !important;
+}
+.care-custom-table tbody tr {
+  background-color: #ffffff;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid #edf2f7;
+}
+.care-custom-table tbody tr:nth-child(even) {
+  background-color: #fbfcfe;
+}
+.care-custom-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+.care-custom-table td {
+  padding: 10px 14px;
+  border-right: 1px solid #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  line-height: 1.45;
+}
+.care-custom-table td:last-child {
+  border-right: none;
+}
+
+/* PHƯƠNG THỨC LIÊN HỆ BADGES */
+.method-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.method-phone {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.method-email {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.method-direct {
+  background: #dcfce7;
+  color: #15803d;
+}
+.method-sms {
+  background: #fef3c7;
+  color: #b45309;
+}
+.method-zalo {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.method-default {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* TRẠNG THÁI CUỘC GỌI BADGES */
+.call-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.status-badge-success {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.status-badge-danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.status-badge-warning {
+  background: #fef3c7;
+  color: #d97706;
+}
+.status-badge-default {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* NỘI DUNG CHĂM SÓC */
+.care-content-box {
+  max-width: 380px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.care-note-html {
+  word-break: break-word;
+}
+.attached-file-link {
+  font-size: 11.5px;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.attached-file-link:hover {
+  background: #dbeafe;
+  text-decoration: underline;
+}
+
+/* THAO TÁC */
+.btn-action-view {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #7367f0;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.btn-action-view:hover {
+  background: #5e50ee;
+  transform: translateY(-1px);
+}
+
+/* ĐỒNG BỘ MULTISELECT & DATEPICKER */
+>>> .multiselect {
   min-height: 40px;
 }
-#page-roles-list .multiselect .multiselect__tags {
+>>> .multiselect .multiselect__tags {
   min-height: 40px !important;
   padding: 8px 40px 0 10px !important;
-  border-radius: 5px !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #f8fafc !important;
   box-sizing: border-box !important;
+}
+>>> .multiselect--active .multiselect__tags {
+  border-color: #7367f0 !important;
   background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12) !important;
 }
-#page-roles-list .multiselect--active .multiselect__tags {
-  border-color: rgba(var(--vs-primary), 1) !important;
-}
-#page-roles-list .multiselect .multiselect__placeholder {
-  margin-bottom: 0 !important;
-  padding-top: 2px !important;
-  line-height: 20px !important;
-  font-size: 14px !important;
-  color: #adadad !important;
-}
-#page-roles-list .multiselect .multiselect__single {
-  margin-bottom: 0 !important;
-  line-height: 20px !important;
-  font-size: 14px !important;
-  padding-left: 0 !important;
-}
-#page-roles-list .multiselect .multiselect__input {
-  font-size: 14px !important;
-  margin-bottom: 0 !important;
-  padding: 0 !important;
-  line-height: 20px !important;
-}
-#page-roles-list .multiselect .multiselect__select {
-  height: 38px !important;
-  width: 38px !important;
-  padding: 4px 8px !important;
-}
-
-#page-roles-list .mx-datepicker {
+>>> .mx-datepicker {
   width: 100% !important;
 }
-#page-roles-list .mx-datepicker .mx-input {
+>>> .mx-datepicker .mx-input {
   height: 40px !important;
   line-height: 40px !important;
-  font-size: 14px !important;
-  border-radius: 5px !important;
-  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  font-size: 13.5px !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background-color: #f8fafc !important;
   box-shadow: none !important;
-  padding-left: 10px !important;
-  padding-right: 30px !important;
-  color: inherit !important;
+}
+>>> .mx-datepicker .mx-input:focus {
+  border-color: #7367f0 !important;
   background-color: #fff !important;
-}
-#page-roles-list .mx-datepicker .mx-input:focus {
-  border-color: rgba(var(--vs-primary), 1) !important;
-}
-#page-roles-list .mx-datepicker .mx-input-append,
-#page-roles-list .mx-datepicker .mx-clear-wrapper {
-  height: 40px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 8px !important;
-  width: 32px !important;
-}
-#page-roles-list .mx-datepicker .mx-input-icon,
-#page-roles-list .mx-datepicker .mx-calendar-icon,
-#page-roles-list .mx-datepicker .mx-clear-icon {
-  width: 16px !important;
-  height: 16px !important;
-  line-height: 16px !important;
-  font-size: 16px !important;
+  box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12) !important;
 }
 </style>
-

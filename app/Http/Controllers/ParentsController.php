@@ -123,6 +123,220 @@ class ParentsController extends Controller
         return response()->json($data);
     }
 
+    public function detailList(Request $request)
+    {
+        $status = isset($request->status) ? $request->status : [];
+        $level = isset($request->level) ? $request->level : [];
+        $keyword = isset($request->keyword) ? trim($request->keyword) : '';
+        $owner_id = isset($request->owner_id) ? $request->owner_id : [];
+        $source_id = isset($request->source_id) ? $request->source_id : [];
+        $source_detail_id = isset($request->source_detail_id) ? $request->source_detail_id : [];
+        $product_id = isset($request->product_id) ? $request->product_id : [];
+        $end_date = isset($request->end_date) ? $request->end_date : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $type_search = isset($request->type_search) ? (int)$request->type_search : 0;
+        $branch_id = isset($request->branch_id) ? (int)$request->branch_id : 0;
+
+        $pagination = (object)$request->pagination;
+        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
+        $offset = $page == 1 ? 0 : $limit * ($page - 1);
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $cond = " 1 ";
+        
+        if (!Auth::user()->checkPermission('canViewAllParents')) {
+            $cond .= " AND p.owner_id IN (" . Auth::user()->getStaffHasUser() . ")";
+        }
+        
+        if (!empty($status)) {
+            $status_ids = is_array($status) ? implode(",", array_map('intval', $status)) : (int)$status;
+            $cond .= " AND p.status IN ($status_ids)";
+        }
+        if (!empty($owner_id)) {
+            $owner_ids = is_array($owner_id) ? implode(",", array_map('intval', $owner_id)) : (int)$owner_id;
+            $cond .= " AND p.owner_id IN ($owner_ids)";
+        }
+        if (!empty($source_id)) {
+            $source_ids = is_array($source_id) ? implode(",", array_map('intval', $source_id)) : (int)$source_id;
+            $cond .= " AND p.source_id IN ($source_ids)";
+        }
+        if (!empty($source_detail_id)) {
+            $source_det_ids = is_array($source_detail_id) ? implode(",", array_map('intval', $source_detail_id)) : (int)$source_detail_id;
+            $cond .= " AND p.source_detail_id IN ($source_det_ids)";
+        }
+        if (!empty($product_id)) {
+            $ids_product = is_array($product_id)
+                ? implode(",", array_map('intval', $product_id))
+                : (int)$product_id;
+            $cond .= " AND EXISTS (
+                SELECT 1 FROM crm_students AS cs
+                LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
+                WHERE cs.parent_id = p.id
+                  AND (cs.type_product IN ($ids_product) OR csc.type_product IN ($ids_product))
+            )";
+        }
+        
+        if ($keyword !== '') {
+            $kw = addslashes($keyword);
+            $cond .= " AND (p.name LIKE '%$kw%' OR p.mobile_1 LIKE '%$kw%' OR p.mobile_2 LIKE '%$kw%') ";
+        }
+        if ($end_date !== '') {
+            $ed = addslashes($end_date);
+            $cond .= " AND p.next_care_date < '$ed 23:59:59' AND p.next_care_date IS NOT NULL";
+        }
+        if ($start_date !== '') {
+            $sd = addslashes($start_date);
+            $cond .= " AND p.next_care_date > '$sd 00:00:00'";
+        }
+        // type_search tabs
+        $cond_1 = " AND p.care_date IS NULL ";
+        $cond_2 = " AND DATE_FORMAT(next_care_date,'%Y-%m-%d') = '" . date('Y-m-d') . "'";
+        $cond_3 = " AND next_care_date < '" . date('Y-m-d') . "' 
+            AND (p.care_date < p.next_care_date OR p.care_date IS NULL) ";
+        $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5) > 0 ";
+
+        $order_by = " ORDER BY p.id DESC ";
+        $tmp_cond = "";
+        if ($type_search == 1) {
+            $tmp_cond = $cond_1;
+        } elseif ($type_search == 2) {
+            $tmp_cond = $cond_2;
+            $order_by = " ORDER BY next_care_date ASC ";
+        } elseif ($type_search == 3) {
+            $tmp_cond = $cond_3;
+            $order_by = " ORDER BY next_care_date ASC ";
+        } elseif ($type_search == 4) {
+            $tmp_cond = $cond_4;
+            $order_by = " ORDER BY p.last_ticket_date DESC ";
+        }
+
+        $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
+        
+        $list = u::query("SELECT 
+                p.id,
+                p.name,
+                p.email,
+                p.mobile_1,
+                p.mobile_2,
+                p.gender,
+                p.birthday,
+                p.job_id,
+                p.address,
+                p.province_id,
+                p.district_id,
+                p.status,
+                p.level,
+                p.note,
+                p.c2c_mobile,
+                p.owner_id,
+                p.source_id,
+                p.source_detail_id,
+                p.branch_id,
+                p.creator_id,
+                p.created_at,
+                p.last_assign_date,
+                p.next_care_date,
+                p.care_date AS last_time_care,
+                (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
+                (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
+                (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
+                (SELECT name FROM users WHERE id=p.owner_id) AS owner_name,
+                (SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
+                (SELECT name FROM provinces WHERE id=p.province_id) AS province_name,
+                (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
+                (SELECT name FROM branches WHERE id=p.branch_id) AS branch_name,
+                (SELECT COUNT(ct.id) FROM crm_students cs INNER JOIN contracts ct ON (ct.student_id = cs.lms_id AND cs.parent_id = p.id) WHERE ct.status > 0) AS contract_count,
+                (SELECT u.name FROM crm_parent_logs cpl LEFT JOIN users u ON u.id=cpl.creator_id WHERE cpl.parent_id=p.id ORDER BY cpl.id ASC LIMIT 1) AS first_owner_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
+                (SELECT GROUP_CONCAT(DISTINCT pr.name SEPARATOR ', ')
+                 FROM crm_students AS cs
+                 LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
+                 INNER JOIN products AS pr ON (pr.id = csc.type_product OR pr.id = cs.type_product)
+                 WHERE cs.parent_id = p.id) AS product_name
+            FROM crm_parents AS p WHERE $cond $tmp_cond $order_by $limitation");
+
+        if (!empty($list)) {
+            $pids = [];
+            foreach ($list as $item) {
+                $pids[] = (int)$item->id;
+                if (empty($item->first_owner_name)) {
+                    $item->first_owner_name = !empty($item->creator_name) ? $item->creator_name : $item->owner_name;
+                }
+                $item->username = !empty($item->email) ? $item->email : '';
+                $item->ielts_target = !empty($item->level) ? $item->level : '';
+                $item->reg_link = '';
+            }
+            $pids_str = implode(',', $pids);
+
+            // Fetch recent care logs for these parents
+            $care_logs = u::query("SELECT c.id, c.parent_id, c.care_date, c.next_care_date, c.note, c.call_status, c.call_status_sub, c.method_id,
+                    (SELECT name FROM users WHERE id = c.creator_id) AS creator_name,
+                    (SELECT name FROM crm_contact_methods WHERE id = c.method_id) AS method_name
+                FROM crm_customer_care c
+                WHERE c.parent_id IN ($pids_str) AND c.status = 1
+                ORDER BY c.care_date DESC");
+
+            $cares_by_parent = [];
+            foreach ($care_logs as $c) {
+                $c->call_status_label = u::getTitleCallStatus($c->call_status, $c->call_status_sub);
+                // Keep up to 8 recent care notes per parent
+                if (!isset($cares_by_parent[$c->parent_id]) || count($cares_by_parent[$c->parent_id]) < 8) {
+                    $cares_by_parent[$c->parent_id][] = $c;
+                }
+            }
+
+            // Fetch students for these parents
+            $students_list = u::query("SELECT cs.id, cs.parent_id, cs.name, cs.gender, cs.birthday, cs.school_level, cs.school, cs.note, cs.lms_id,
+                    (SELECT name FROM branches WHERE id=cs.checkin_branch_id) AS branch_name,
+                    (SELECT GROUP_CONCAT(name SEPARATOR ', ') FROM products WHERE id = cs.type_product) AS product_name
+                FROM crm_students cs
+                WHERE cs.parent_id IN ($pids_str)
+                ORDER BY cs.id ASC");
+
+            $students_by_parent = [];
+            foreach ($students_list as $st) {
+                $students_by_parent[$st->parent_id][] = $st;
+            }
+
+            // Fetch test scores for students if any
+            $tests_list = u::query("SELECT r.id, r.total_score, r.subject_total, r.thinking_total, r.assigned_level, r.eval_dt, cs.parent_id
+                FROM igbh_student_results r
+                INNER JOIN crm_students cs ON cs.lms_id = r.student_id
+                WHERE cs.parent_id IN ($pids_str)
+                ORDER BY r.eval_dt DESC");
+
+            $tests_by_parent = [];
+            foreach ($tests_list as $t) {
+                if (!isset($tests_by_parent[$t->parent_id])) {
+                    $tests_by_parent[$t->parent_id] = $t;
+                }
+            }
+
+            foreach ($list as $item) {
+                $item->care_history = isset($cares_by_parent[$item->id]) ? $cares_by_parent[$item->id] : [];
+                $item->students = isset($students_by_parent[$item->id]) ? $students_by_parent[$item->id] : [];
+                $item->test_score = isset($tests_by_parent[$item->id]) ? $tests_by_parent[$item->id] : null;
+            }
+        }
+
+        $data = u::makingPagination($list, $total->total, $page, $limit);
+
+        $total_0 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond ");
+        $total_1 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_1 ");
+        $total_2 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
+        $total_3 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
+        $total_4 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
+        $data->detail_total = (object)array(
+            'total_0' => $total_0->total,
+            'total_1' => $total_1->total,
+            'total_2' => $total_2->total,
+            'total_3' => $total_3->total,
+            'total_4' => $total_4->total,
+        );
+        return response()->json($data);
+    }
+
     public function validatePhone(Request $request){
         $parent_id = isset($request->parent_id) ? $request->parent_id : '';
         $phone = isset($request->phone) ? $request->phone : '';

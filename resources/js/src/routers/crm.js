@@ -58,6 +58,19 @@ export default {
         }
       },
       {
+        path: '/crm/parent/detail-list',
+        name: 'crm-parent-detail-list',
+        component: () => import('@/views/crm/parents/detail_list.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Danh sách khách hàng (Chi tiết)', active: true }
+          ],
+          pageTitle: 'Danh sách khách hàng (Chi tiết)',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/crm/parent/add',
         name: 'crm-parent-add',
         component: () => import('@/views/crm/parents/add.vue'),
