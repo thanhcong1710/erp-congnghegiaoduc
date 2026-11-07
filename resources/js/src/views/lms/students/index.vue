@@ -26,7 +26,7 @@
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã LMS, Tên HS, số điện thoại" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã học sinh, Tên HS, số điện thoại" v-model="searchData.keyword"></vs-input>
           </div>
           <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái</label>
@@ -111,8 +111,7 @@
                 </td>
                 <td class="td vs-table--td">
                   <p><strong><router-link :to="`/lms/students/${item.id}/detail`"><a>{{item.name}}</a></router-link></strong></p>
-                  <p>Mã: {{item.lms_code}}</p>
-                  <p>Mã LMS: {{item.lms_id}}</p>
+                  <p>Mã học sinh: {{item.lms_code}}</p>
                   <p>Giới tính: {{item.gender == 'F' ? 'Nữ' : 'Nam'}}</p>
                   <p>Ngày sinh: <span v-if="item.date_of_birth">{{item.date_of_birth | formatDateView}}</span></p>
                 </td>

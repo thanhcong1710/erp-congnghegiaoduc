@@ -3,7 +3,7 @@
     <div class="mt-3">
       <h5 class="w-full"><i class="fa-solid fa-user-graduate"></i> THÔNG TIN HỌC SINH</h5>
       <div class="vx-row w-full mt-3">
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/2 w-full mb-4">
           <label>Mã Học sinh</label>
           <input
             class="vs-inputx vs-input--input normal"
@@ -13,18 +13,7 @@
             :disabled="true"
           />
         </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
-          <label>Mã LMS</label>
-          <input
-            class="vs-inputx vs-input--input normal"
-            type="text"
-            name="title"
-            v-model="student_info.lms_id"
-            :disabled="disableLMS(disabled_edit, init_lms_id)"
-            @change="validateIdLMS"
-          />
-        </div>
-        <div class="vx-col md:w-1/3 w-full mb-4">
+        <div class="vx-col md:w-1/2 w-full mb-4">
           <label>Tên học sinh <span class="text-danger"> (*)</span></label>
           <input
             class="vs-inputx vs-input--input normal"

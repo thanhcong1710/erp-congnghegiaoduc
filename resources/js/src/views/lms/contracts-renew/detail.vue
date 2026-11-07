@@ -27,7 +27,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Mã LMS</label>
+              <label>Mã học sinh</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -169,6 +169,7 @@
                 disabled="true"
               />
             </div>
+            <!-- TẠM ẨN: MÃ CHIẾT KHẤU
             <div class="vx-col w-full mb-4">
               <label >Mã chiết khấu</label>
               <input
@@ -209,6 +210,7 @@
                 disabled="true"
               />
             </div>
+            -->
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label> <input type="checkbox" v-model="contract_info.sibling"  disabled="true">
                 Giảm trừ anh chị em học cùng 5%</label>
@@ -220,6 +222,7 @@
                 disabled="true"
               />
             </div>
+            <!-- TẠM ẨN: MÃ VOUCHER
             <div class="vx-col w-full mb-4">
               <label>Mã voucher</label>
               <input
@@ -250,6 +253,8 @@
                 disabled="true"
               />
             </div>
+            -->
+            <!-- TẠM ẨN: CHÍNH SÁCH B2B
             <div class="vx-col w-full mb-4" v-if="contract_info.b2b_campaign_id">
               <label >Chính sách B2B</label>
               <input
@@ -280,6 +285,7 @@
                 disabled="true"
               />
             </div>
+            -->
             <vs-divider/>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Số tiền phải đóng</label>

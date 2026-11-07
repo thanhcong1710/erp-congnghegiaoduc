@@ -298,7 +298,7 @@ class ReservesController extends Controller
 
     public function print(Request $request, $id)
     {
-        $reserveInfo = u::first("SELECT s.gud_name1,s.gud_mobile1, s.name AS student_name, s.lms_id, 
+        $reserveInfo = u::first("SELECT s.gud_name1,s.gud_mobile1, s.name AS student_name, COALESCE(s.lms_code, s.lms_id) AS lms_id, 
                 (SELECT name FROM products WHERE id=r.product_id) AS product_name,
                 (SELECT SUBSTRING(cls_name, LOCATE('/', cls_name) + 1) FROM classes WHERE id =r.class_id) AS lich_hoc,
                 r.start_date, r.end_date, r.note, r.meta_data,r.session

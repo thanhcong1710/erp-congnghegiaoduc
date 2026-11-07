@@ -27,7 +27,7 @@
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Mã LMS</label>
+              <label>Mã học sinh</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -184,6 +184,7 @@
                 disabled="true"
               />
             </div>
+            <!-- TẠM ẨN: MÃ CHIẾT KHẤU
             <div class="vx-col w-full mb-4">
               <label >Mã chiết khấu</label>
               <vue-select
@@ -226,6 +227,7 @@
                 disabled="true"
               />
             </div>
+            -->
             <div class="vx-col md:w-1/2 w-full mb-4" v-if="contract.count_sibling > 0">
               <label> <input type="checkbox" v-model="contract.sibling" @change="caculatorSession">
                 Giảm trừ anh chị em học cùng 5%</label>
@@ -237,6 +239,7 @@
                 disabled="true"
               />
             </div>
+            <!-- TẠM ẨN: MÃ VOUCHER
             <div class="vx-col w-full mb-4">
               <label>Mã voucher</label>
               <input
@@ -267,6 +270,8 @@
                 disabled="true"
               />
             </div>
+            -->
+            <!-- TẠM ẨN: CHÍNH SÁCH B2B
             <div class="vx-col w-full mb-4">
                 <label >Chính sách B2B</label>
                 <vue-select
@@ -299,6 +304,7 @@
                   disabled="true"
                 />
               </div>
+            -->
 
             <!-- CHÍNH SÁCH ƯU ĐÃI STEMKEY 2026 -->
             <div class="vx-col w-full mb-4" v-if="contract.tuition_fee_id">

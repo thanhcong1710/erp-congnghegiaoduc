@@ -41,7 +41,7 @@
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Mã LMS:</span>
+                                            <span class="label">Mã học sinh:</span>
                                             {{reserve.lms_id}}
                                         </div>
                                     </div>

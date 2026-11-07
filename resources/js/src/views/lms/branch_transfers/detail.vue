@@ -27,7 +27,7 @@
                         <td class="td vs-table--td"><span>{{branch_transfer_info.meta_data.student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><span>Mã học sinh:</span></td> 
                         <td class="td vs-table--td"><strong>{{branch_transfer_info.meta_data.student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">

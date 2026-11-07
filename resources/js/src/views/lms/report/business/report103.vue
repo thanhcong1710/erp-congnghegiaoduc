@@ -50,7 +50,7 @@
                   <th colspan="1" rowspan="1">STT</th>
                   <th colspan="1" rowspan="1">Ngày checkin</th>
                   <th colspan="1" rowspan="1">Họ và tên</th>
-                  <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Mã học sinh</th>
                   <th colspan="1" rowspan="1">Ngày sinh</th>
                   <th colspan="1" rowspan="1">Phụ huynh</th>
                   <th colspan="1" rowspan="1">SĐT</th>
@@ -62,7 +62,7 @@
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.checkined_at}}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.lms_id}}</td>
+                <td class="td vs-table--td">{{item.lms_code}}</td>
                 <td class="td vs-table--td">{{item.birthday}}</td>
                 <td class="td vs-table--td">{{item.parent_name}}</td>
                 <td class="td vs-table--td">{{item.parent_mobile}}</td>

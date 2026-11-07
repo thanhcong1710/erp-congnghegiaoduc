@@ -501,7 +501,7 @@ class ReportsController extends Controller
             FROM crm_student_checkin AS csc 
                 LEFT JOIN crm_students AS s ON s.id=csc.crm_student_id 
             WHERE csc.checkin_branch_id IN ($branch_query) AND csc.status >= 1 $cond");
-        $list = u::query("SELECT s.name, ss.lms_id, csc.checkin_at AS checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+        $list = u::query("SELECT s.name, ss.lms_code, ss.lms_id, csc.checkin_at AS checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, p.name AS parent_name, p.mobile_1 AS parent_mobile,
                 IF(ss.id IS NOT NULL, ss.date_of_birth, s.birthday) AS birthday
             FROM crm_student_checkin AS csc 
@@ -544,7 +544,7 @@ class ReportsController extends Controller
                 FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id = c.student_id
             WHERE c.branch_id IN ($branch_query) AND c.type=0  AND c.class_id IS NOT NULL $cond");
-        $list = u::query("SELECT s.name, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+        $list = u::query("SELECT s.name, s.lms_code, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, c.enrolment_start_date, c.enrolment_last_date,
                 COALESCE((SELECT `name` FROM programs WHERE id=p.parent_id), p.name) AS `level`,
                 (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND `type`>0 AND `status`>0) AS num_contract
@@ -588,7 +588,7 @@ class ReportsController extends Controller
                 LEFT JOIN contracts AS c ON c.id=p.contract_id 
                 LEFT JOIN students AS s ON s.id=p.student_id
             WHERE  p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond");
-        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, COALESCE(s.lms_code, s.lms_id) AS std_id, c.branch_id, c.product_id, c.program_id,
                 p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
                 p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
                 (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
@@ -638,7 +638,7 @@ class ReportsController extends Controller
                 LEFT JOIN contracts AS c ON c.id=p.contract_id 
                 LEFT JOIN students AS s ON s.id=p.student_id
             WHERE  p.branch_id IN ($branch_query) AND s.lms_id IS NOT NULL $cond");
-        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, COALESCE(s.lms_code, s.lms_id) AS std_id, c.branch_id, c.product_id, c.program_id,
                 p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
                 p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
                 (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,

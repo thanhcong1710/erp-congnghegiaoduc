@@ -30,15 +30,9 @@
                                     </div>
                                 </div>
                                 <div class="vx-row">
-                                    <div class="w-1/2">
+                                    <div class="w-full">
                                         <div class="input-line">
-                                            <span class="label">Mã LMS:</span>
-                                            {{contract.lms_id}}
-                                        </div>
-                                    </div>
-                                    <div class="w-1/2">
-                                        <div class="input-line">
-                                            <span class="label">Mã CRM:</span>
+                                            <span class="label">Mã học sinh:</span>
                                             {{contract.lms_code}}
                                         </div>
                                     </div>

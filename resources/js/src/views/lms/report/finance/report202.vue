@@ -50,7 +50,7 @@
                   <th colspan="1" rowspan="1">STT</th>
                   <th colspan="1" rowspan="1">Ngày thanh toán</th>
                   <th colspan="1" rowspan="1">Tên học sinh</th>
-                  <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Mã học sinh</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Khoá học</th>
                   <th colspan="1" rowspan="1">Trình độ</th>

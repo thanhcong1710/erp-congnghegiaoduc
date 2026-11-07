@@ -27,7 +27,7 @@
                         <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.from_student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><span>Mã học sinh:</span></td> 
                         <td class="td vs-table--td"><strong>{{tuition_transfer_info.meta_data.from_student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
@@ -144,7 +144,7 @@
                         <td class="td vs-table--td"><span>{{tuition_transfer_info.meta_data.to_student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><span>Mã học sinh:</span></td> 
                         <td class="td vs-table--td"><strong>{{tuition_transfer_info.meta_data.to_student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">

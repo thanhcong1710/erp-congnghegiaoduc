@@ -130,7 +130,7 @@ export default {
     },
     placeholderStudent: {
       type: String,
-      default: 'Tìm kiếm học sinh theo tên, mã LMS hoặc SĐT'
+      default: 'Tìm kiếm học sinh theo tên, mã học sinh hoặc SĐT'
     },
     filterByAnchor: {
       type: Boolean,

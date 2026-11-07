@@ -82,7 +82,7 @@
                   <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Lớp</th>
                   <th colspan="1" rowspan="1">Tên học sinh</th>
-                  <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Mã học sinh</th>
                   <th colspan="1" rowspan="1">Ngày sinh</th>
                   <th colspan="1" rowspan="1">Tên phụ huynh</th>
                   <th colspan="1" rowspan="1">SĐT</th>

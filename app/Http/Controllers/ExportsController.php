@@ -537,7 +537,7 @@ class ExportsController extends Controller
         }
 
         $order_by = " ORDER BY s.id DESC ";
-        $list = u::query("SELECT s.name, ss.lms_id, csc.checkin_at AS checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+        $list = u::query("SELECT s.name, ss.lms_code, ss.lms_id, csc.checkin_at AS checkined_at, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, p.name AS parent_name, p.mobile_1 AS parent_mobile,
                 IF(ss.id IS NOT NULL, ss.date_of_birth, s.birthday) AS birthday
             FROM crm_student_checkin AS csc 
@@ -552,7 +552,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('A1', 'STT');
         $sheet->setCellValue('B1', 'Ngày checkin');
         $sheet->setCellValue('C1', 'Họ và tên');
-        $sheet->setCellValue('D1', 'Mã LMS');
+        $sheet->setCellValue('D1', 'Mã học sinh');
         $sheet->setCellValue('E1', 'Ngày sinh');
         $sheet->setCellValue('F1', 'Phụ huynh');
         $sheet->setCellValue('G1', 'SĐT');
@@ -586,7 +586,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('A' . $x, $i+1);
             $sheet->setCellValue('B' . $x, $list[$i]->checkined_at);
             $sheet->setCellValue('C' . $x, $list[$i]->name);
-            $sheet->setCellValue('D' . $x, $list[$i]->lms_id) ;
+            $sheet->setCellValue('D' . $x, !empty($list[$i]->lms_code) ? $list[$i]->lms_code : $list[$i]->lms_id) ;
             $sheet->setCellValue('E' . $x, $list[$i]->birthday);
             $sheet->setCellValue('F' . $x, $list[$i]->parent_name);
             $sheet->setCellValue('G' . $x, $list[$i]->parent_mobile);
@@ -631,7 +631,7 @@ class ExportsController extends Controller
             $cond.= " AND c.enrolment_start_date <= '$end_date'";
         }
         $order_by = " ORDER BY c.enrolment_start_date DESC ";
-        $list = u::query("SELECT s.name, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
+        $list = u::query("SELECT s.name, s.lms_code, s.lms_id, CONCAT(u.hrm_id, '-', u.name) AS ec_name, 
                 b.name AS branch_name, c.enrolment_start_date, c.enrolment_last_date,
                 COALESCE((SELECT `name` FROM programs WHERE id=p.parent_id), p.name) AS `level`,
                 (SELECT count(id) FROM contracts WHERE student_id=c.student_id AND `type`>0 AND `status`>0) AS num_contract
@@ -645,7 +645,7 @@ class ExportsController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setCellValue('A1', 'STT');
         $sheet->setCellValue('B1', 'Họ và tên');
-        $sheet->setCellValue('C1', 'Mã LMS');
+        $sheet->setCellValue('C1', 'Mã học sinh');
         $sheet->setCellValue('D1', 'Sale');
         $sheet->setCellValue('E1', 'Trung tâm');
         $sheet->setCellValue('F1', 'Ngày bắt đầu trial');
@@ -679,7 +679,7 @@ class ExportsController extends Controller
             $x = $i + 2;
             $sheet->setCellValue('A' . $x, $i+1);
             $sheet->setCellValue('B' . $x, $list[$i]->name);
-            $sheet->setCellValue('C' . $x, $list[$i]->lms_id);
+            $sheet->setCellValue('C' . $x, !empty($list[$i]->lms_code) ? $list[$i]->lms_code : $list[$i]->lms_id);
             $sheet->setCellValue('D' . $x, $list[$i]->ec_name) ;
             $sheet->setCellValue('E' . $x, $list[$i]->branch_name );
             $sheet->setCellValue('F' . $x, $list[$i]->enrolment_start_date);
@@ -726,7 +726,7 @@ class ExportsController extends Controller
             $cond.= " AND p.charge_date <= '$end_date'";
         }
         $order_by = " ORDER BY p.charge_date DESC ";
-        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, s.lms_id AS std_id, c.branch_id, c.product_id, c.program_id,
+        $list = u::query("SELECT p.charge_date AS payment_date, s.name AS stu_name, COALESCE(s.lms_code, s.lms_id) AS std_id, c.branch_id, c.product_id, c.program_id,
                 p.must_charge AS total_fee, p.amount AS payment_amount, p.debt AS remaining_amount, 
                 p.total, t.number_of_months, t.session, c.start_date, p.contract_id,
                 (SELECT min(charge_date) FROM payments WHERE contract_id = p.contract_id) AS period_from,
@@ -747,7 +747,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('A1', 'STT');
         $sheet->setCellValue('B1', 'Ngày thanh toán');
         $sheet->setCellValue('C1', 'Tên học sinh');
-        $sheet->setCellValue('D1', 'Mã LMS');
+        $sheet->setCellValue('D1', 'Mã học sinh');
         $sheet->setCellValue('E1', 'Trung tâm');
         $sheet->setCellValue('F1', 'Khoá học');
         $sheet->setCellValue('G1', 'Trình độ');
@@ -1385,7 +1385,7 @@ class ExportsController extends Controller
         $sheet->setCellValue('B1', 'Trung tâm');
         $sheet->setCellValue('C1', 'Lớp');
         $sheet->setCellValue('D1', 'Tên học sinh');
-        $sheet->setCellValue('E1', 'Mã LMS');
+        $sheet->setCellValue('E1', 'Mã học sinh');
         $sheet->setCellValue('F1', 'Ngày sinh');
         $sheet->setCellValue('G1', 'Tên phụ huynh');
         $sheet->setCellValue('H1', 'SDT');

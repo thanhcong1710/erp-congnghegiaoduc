@@ -344,8 +344,8 @@ class TuitionTransfersController extends Controller
 
     public function print(Request $request, $tuition_transfer_id)
     {
-        $contract_info = u::first("SELECT fs.gud_name1 AS from_gud_name1, fs.gud_mobile1 AS from_gud_mobile1, fs.name AS from_student_name, fs.lms_id AS from_lms_id,
-            ts.gud_name1 AS to_gud_name1, ts.gud_mobile1 AS to_gud_mobile1, ts.name AS to_student_name, ts.lms_id AS to_lms_id,
+        $contract_info = u::first("SELECT fs.gud_name1 AS from_gud_name1, fs.gud_mobile1 AS from_gud_mobile1, fs.name AS from_student_name, COALESCE(fs.lms_code, fs.lms_id) AS from_lms_id,
+            ts.gud_name1 AS to_gud_name1, ts.gud_mobile1 AS to_gud_mobile1, ts.name AS to_student_name, COALESCE(ts.lms_code, ts.lms_id) AS to_lms_id,
             t.meta_data, t.note
         FROM tuition_transfer AS t 
             LEFT JOIN students AS fs ON fs.id=t.from_student_id 

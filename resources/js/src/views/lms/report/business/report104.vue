@@ -49,7 +49,7 @@
                 <tr>
                   <th colspan="1" rowspan="1">STT</th>
                   <th colspan="1" rowspan="1">Họ và tên</th>
-                  <th colspan="1" rowspan="1">Mã LMS</th>
+                  <th colspan="1" rowspan="1">Mã học sinh</th>
                   <th colspan="1" rowspan="1">Sale</th>
                   <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Ngày bắt đầu trial</th>
@@ -61,7 +61,7 @@
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in datas" :key="index">
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.name}}</td>
-                <td class="td vs-table--td">{{item.lms_id}}</td>
+                <td class="td vs-table--td">{{item.lms_code}}</td>
                 <td class="td vs-table--td">{{item.ec_name}}</td>
                 <td class="td vs-table--td">{{ item.branch_name}}</td>
                 <td class="td vs-table--td">{{ item.enrolment_start_date}}</td>

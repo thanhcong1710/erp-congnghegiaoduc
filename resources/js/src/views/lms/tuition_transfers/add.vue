@@ -37,7 +37,7 @@
                         <td class="td vs-table--td"><span>{{from_student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><span>Mã học sinh:</span></td> 
                         <td class="td vs-table--td"><strong>{{from_student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
@@ -216,7 +216,7 @@
                         <td class="td vs-table--td"><span>{{to_student_info.name}}</span></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">
-                        <td class="td vs-table--td"><span>Mã LMS:</span></td> 
+                        <td class="td vs-table--td"><span>Mã học sinh:</span></td> 
                         <td class="td vs-table--td"><strong>{{to_student_info.lms_code}}</strong></td> 
                       </tr>
                       <tr class="tr-values vs-table--tr tr-table-state-null">

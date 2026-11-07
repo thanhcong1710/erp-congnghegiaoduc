@@ -73,7 +73,7 @@
                           #
                         </th>
                         <th colspan="1" rowspan="1" >Học sinh</th>
-                        <th colspan="1" rowspan="1" class="text-center">Mã LMS</th>
+                        <th colspan="1" rowspan="1" class="text-center">Mã học sinh</th>
                         <th colspan="1" rowspan="1" class="text-center">Buổi học đã học</th>
                         <th colspan="1" rowspan="1" class="text-center">Tổng số buổi</th>
                         <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
@@ -91,7 +91,7 @@
                         </div>
                       </td> 
                       <td class="td vs-table--td">{{item.name}}</td>
-                      <td class="td vs-table--td text-center">{{item.lms_id}}</td>
+                      <td class="td vs-table--td text-center">{{item.lms_code}}</td>
                       <td class="td vs-table--td text-center">{{item.done_sessions}}</td>
                       <td class="td vs-table--td text-center">{{item.summary_sessions}}</td>
                       <td class="td vs-table--td text-center"> 

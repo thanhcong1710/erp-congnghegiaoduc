@@ -43,7 +43,7 @@
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Mã LMS:</span>
+                                            <span class="label">Mã học sinh:</span>
                                             {{tuition_transfer.from_lms_id}}
                                         </div>
                                     </div>
@@ -89,7 +89,7 @@
                                     </div>
                                     <div class="w-1/2">
                                         <div class="input-line">
-                                            <span class="label">Mã LMS:</span>
+                                            <span class="label">Mã học sinh:</span>
                                             {{tuition_transfer.to_lms_id}}
                                         </div>
                                     </div>
