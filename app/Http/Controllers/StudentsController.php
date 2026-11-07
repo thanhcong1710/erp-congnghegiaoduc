@@ -425,25 +425,27 @@ class StudentsController extends Controller
 
     public function uploadAvatar(Request $request)
     {
-        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : '';
-        $total = count($_FILES['files']['name']);
-        if ($total > 0) {
-            $tmpFilePath = $_FILES['files']['tmp_name'][0];
-            if ($tmpFilePath != "") {
-                $dir = __DIR__ . '/../../../public/static/upload/avatar_students/' . date('Y_m') . '/';
+        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : ($request->student_id ? $request->student_id : '');
+        $files = isset($_FILES['files']) ? $_FILES['files'] : (isset($_FILES['file']) ? $_FILES['file'] : null);
+        if ($files && isset($files['name'])) {
+            $names = is_array($files['name']) ? $files['name'] : [$files['name']];
+            $tmp_names = is_array($files['tmp_name']) ? $files['tmp_name'] : [$files['tmp_name']];
+            if (count($names) > 0 && !empty($tmp_names[0])) {
+                $dir = public_path('static/upload/avatar_students/' . date('Y_m') . '/');
                 if (!file_exists($dir)) {
-                    mkdir($dir);
+                    mkdir($dir, 0775, true);
                 }
-                $newFilePath = $dir . $_FILES['files']['name'][0];
+                $newFilePath = $dir . $names[0];
                 $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__ . '/../../../public', '', $newFilePath);
-                move_uploaded_file($tmpFilePath, $newFilePath);
+                $dir_file_insert = str_replace(public_path(), '', $newFilePath);
+                move_uploaded_file($tmp_names[0], $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
                 ), array('id' => $student_id), 'students');
                 return response()->json([
                     'status' => 1,
                     'message' => 'Upload avatar thành công.',
+                    'avatar_url' => $dir_file_insert
                 ]);
             }
         }
@@ -504,11 +506,12 @@ class StudentsController extends Controller
     }
     public function deleteFile(Request $request)
     {
+        $file_id = $request->id ? $request->id : $request->file_id;
         u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
             'status' => 0
-        ), ['id' => $request->id], 'file_has_student');
+        ), ['id' => $file_id], 'file_has_student');
         return response()->json([
             'status' => 1,
             'message' => 'Xoá file thành công.',

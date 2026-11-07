@@ -131,7 +131,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('checkin/upgrade', 'CheckinController@studentUpgrade');
             Route::prefix('students')->group(function () {
                 Route::post('list', 'StudentsController@list');
-                Route::get('show/{student_id}', 'StudentsController@show');
+                Route::match(['get', 'post'], 'show/{student_id}', 'StudentsController@show');
+                Route::match(['get', 'post'], '{student_id}/detail', 'StudentsController@show');
                 Route::post('update', 'StudentsController@update');
                 Route::post('search-contract', 'StudentsController@searchContract');
                 Route::post('logs', 'StudentsController@logs');
@@ -139,10 +140,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('sessions', 'StudentsController@sessions');
                 Route::post('assessments', 'StudentsController@assessments');
                 Route::post('operating', 'StudentsController@operating');
+                Route::post('transfers', 'StudentsController@operating');
                 Route::post('upload-avatar', 'StudentsController@uploadAvatar');
                 Route::post('upload-file', 'StudentsController@uploadFile');
+                Route::post('upload_files', 'StudentsController@uploadFile');
                 Route::post('get-files', 'StudentsController@getFile');
+                Route::post('files', 'StudentsController@getFile');
                 Route::post('delete-file', 'StudentsController@deleteFile');
+                Route::post('delete_files', 'StudentsController@deleteFile');
                 Route::post('validate_lms', 'StudentsController@validateLMS');
             });
 
