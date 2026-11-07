@@ -354,7 +354,18 @@ class ChargesController extends Controller
             LEFT JOIN students AS s ON c.student_id = s.id
           WHERE p.id = $id");
         $data->text_1 = "Ngày ".date('d', strtotime(data_get($data, 'charge_date'))).  " tháng ". date('m', strtotime(data_get($data, 'charge_date'))). " năm ". date('Y', strtotime(data_get($data, 'charge_date')));
-        $data->text_2 = "Thanh toán học phí khóa học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name;
+        $materials = u::query("SELECT m.name AS material_name, cm.quantity, cm.final_price 
+            FROM contract_materials AS cm 
+            JOIN materials AS m ON m.id = cm.material_id 
+            JOIN payments AS p ON p.contract_id = cm.contract_id
+            WHERE p.id = $id");
+        $matText = "";
+        if (!empty($materials)) {
+            $names = array_map(function($m) { return $m->material_name; }, $materials);
+            $matText = " kèm học liệu (" . implode(", ", $names) . ")";
+        }
+        $data->text_2 = "Thanh toán học phí khóa học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name . $matText;
+        $data->materials = $materials;
         $data->text_debt_amount = number_format($data->debt_amount, 0, '', '.');
         $data->text_amount = number_format($data->charge_amount, 0, '', '.');
         $data->text_amount_words = u::convert_number_to_words($data->charge_amount);

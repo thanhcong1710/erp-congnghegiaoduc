@@ -134,11 +134,37 @@
                                         <td></td>
                                         <td>{{ contract.number_of_months }}</td>
                                         <td>{{contract.tuition_fee_price | formatMoney}}</td>
-                                        <td>{{contract.tuition_fee_price - contract.must_charge | formatMoney}}</td>
-                                        <td> {{contract.must_charge | formatMoney}}</td>
+                                        <td>{{(contract.tuition_fee_price - (contract.tuition_receivable || contract.must_charge)) | formatMoney}}</td>
+                                        <td> {{(contract.tuition_receivable || contract.must_charge) | formatMoney}}</td>
                                     </tr>
                                 </tbody>
                             </table>
+                            <div v-if="contract.materials && contract.materials.length > 0" class="mt-2 mb-2">
+                                <h4 class="title" style="font-size: 13px; margin-bottom: 4px;">GIÁO TRÌNH / HỌC LIỆU MUA KÈM</h4>
+                                <table class="table table-responsive-sm table-striped erp-table mb-2">
+                                    <thead>
+                                        <tr>
+                                            <th width="45%">TÊN GIÁO TRÌNH / HỌC LIỆU</th>
+                                            <th width="10%">SL</th>
+                                            <th width="15%">GIÁ NIÊM YẾT</th>
+                                            <th width="15%">CHIẾT KHẤU</th>
+                                            <th width="15%">THỰC ĐÓNG (VNĐ)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="(m, idx) in contract.materials" :key="idx">
+                                            <td>{{ m.material_name }}</td>
+                                            <td style="text-align: center">{{ m.quantity }}</td>
+                                            <td>{{ m.original_price | formatMoney }}</td>
+                                            <td>{{ m.discount_percent }}%</td>
+                                            <td>{{ m.final_price | formatMoney }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div v-if="contract.gift_note" class="mb-2">
+                                <span class="label"><b>Quà tặng & Quyền lợi kèm theo:</b> {{ contract.gift_note }}</span>
+                            </div>
                             <div>
                                 <div>
                                     <div>

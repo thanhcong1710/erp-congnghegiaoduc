@@ -147,6 +147,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             });
 
             Route::post('contracts/load-tuition-fee', 'ContractsController@loadTuitionFee');
+            Route::post('contracts/load-materials', 'ContractsController@loadMaterials');
             Route::post('contracts/load-discount-code', 'ContractsController@loadDiscountCode');
             Route::post('contracts/check-coupon', 'ContractsController@checkCoupon');
             Route::post('contracts/add', 'ContractsController@add');
@@ -469,6 +470,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('18', 'DashboardController@dashboard18');
             Route::post('19', 'DashboardController@dashboard19');
             Route::post('20', 'DashboardController@dashboard20');
+            Route::post('branch-targets', 'DashboardController@getBranchTargets');
+            Route::get('branch-targets', 'DashboardController@getBranchTargets');
         });
 
         // AI Chatbot Routes

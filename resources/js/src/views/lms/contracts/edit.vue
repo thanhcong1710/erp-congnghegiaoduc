@@ -299,15 +299,127 @@
                   disabled="true"
                 />
               </div>
+
+            <!-- CHÍNH SÁCH ƯU ĐÃI STEMKEY 2026 -->
+            <div class="vx-col w-full mb-4" v-if="contract.tuition_fee_id">
+              <vx-card no-shadow style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <h5 class="mb-3 font-semibold text-primary">Chính sách ưu đãi STEMKey 2026</h5>
+                
+                <div class="vx-row">
+                  <div class="vx-col md:w-1/2 w-full mb-3">
+                    <span class="text-sm font-medium">Học bổng theo kỳ hạn:</span>
+                    <span class="font-bold text-success ml-2">{{ contract.scholarship_percent }}% (-{{ contract.scholarship_amount | formatNumber }} đ)</span>
+                  </div>
+
+                  <div class="vx-col md:w-1/2 w-full mb-3" v-if="contract.gift_note">
+                    <span class="text-sm font-medium">Quà tặng kèm:</span>
+                    <span class="font-bold text-warning ml-2">{{ contract.gift_note }}</span>
+                  </div>
+
+                  <div class="vx-col md:w-1/2 w-full mb-3">
+                    <label class="flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="contract.is_promo_extra" :disabled="Number(contract.number_of_months) < 6" @change="caculatorSession">
+                      <span class="ml-2 font-medium">Ưu đãi tháng 11: Tặng thêm 10% (gói ≥ 6 tháng)</span>
+                    </label>
+                    <span v-if="contract.is_promo_extra" class="text-xs text-success block">Đã giảm thêm 10%: -{{ contract.promo_extra_amount | formatNumber }} đ</span>
+                  </div>
+
+                  <div class="vx-col md:w-1/2 w-full mb-3">
+                    <label class="flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="contract.is_checkin_group" @change="caculatorSession">
+                      <span class="ml-2 font-medium">Đăng ký nhóm 3 / Check-in (-{{ contract.checkin_group_percent }}%)</span>
+                    </label>
+                    <span v-if="contract.is_checkin_group" class="text-xs text-success block">Đã giảm: -{{ contract.checkin_group_amount | formatNumber }} đ</span>
+                  </div>
+
+                  <div class="vx-col md:w-1/2 w-full mb-3">
+                    <label class="flex items-center cursor-pointer">
+                      <input type="checkbox" v-model="contract.is_resident" @change="caculatorSession">
+                      <span class="ml-2 font-medium">Khách hàng nội khu (-5% toàn khóa)</span>
+                    </label>
+                    <span v-if="contract.is_resident" class="text-xs text-success block">Đã giảm nội khu: -{{ contract.resident_amount | formatNumber }} đ</span>
+                  </div>
+                </div>
+              </vx-card>
+            </div>
+
+            <!-- SÁCH & HỌC LIỆU MUA KÈM -->
+            <div class="vx-col w-full mb-4" v-if="contract.product_id">
+              <vx-card no-shadow style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <h5 class="mb-3 font-semibold text-primary">Sách & Học liệu mua kèm (Phiếu thu gộp chung)</h5>
+                <div class="vx-row mb-2">
+                  <div class="vx-col md:w-8/12 w-full">
+                    <vue-select
+                      label="name"
+                      placeholder="Chọn bộ sách / học liệu cần mua kèm"
+                      :options="html.materials.list"
+                      v-model="html.materials.item"
+                      :searchable="true"
+                      language="tv-VN"
+                    ></vue-select>
+                  </div>
+                  <div class="vx-col md:w-4/12 w-full">
+                    <vs-button color="primary" type="border" @click="addMaterial">Thêm sách</vs-button>
+                  </div>
+                </div>
+
+                <table class="table table-bordered w-full text-sm mt-3" v-if="contract.materials && contract.materials.length > 0" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #e2e8f0;">
+                      <th style="padding: 6px; border: 1px solid #cbd5e1;">Tên sách/Học liệu</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">SL</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">Giá gốc</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">Chiết khấu</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">Thành tiền</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">Xóa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(m, idx) in contract.materials" :key="idx">
+                      <td style="padding: 6px; border: 1px solid #cbd5e1;">{{ m.material_name }}</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">{{ m.quantity }}</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">{{ m.original_price | formatNumber }} đ</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">{{ m.discount_percent }}%</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right; font-weight: bold;">{{ m.final_price | formatNumber }} đ</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">
+                        <vs-button color="danger" type="flat" size="small" icon-pack="feather" icon="icon-trash" @click="removeMaterial(idx)"></vs-button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </vx-card>
+            </div>
+
             <vs-divider/>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền phải đóng</label>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Học phí thực thu</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="contract.tuition_receivable | formatNumber"
+                disabled="true"
+                style="font-weight: bold; color: #2563eb;"
+              />
+            </div>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Tiền sách thực thu</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="contract.book_receivable | formatNumber"
+                disabled="true"
+                style="font-weight: bold; color: #059669;"
+              />
+            </div>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Tổng thanh toán (Học phí + Sách)</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
                 :value="contract.total_amount | formatNumber"
                 disabled="true"
+                style="font-weight: bold; color: #dc2626; font-size: 15px;"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -422,6 +534,10 @@
           b2b_campaign:{
             item: '',
             list: []
+          },
+          materials:{
+            item: '',
+            list: []
           }
         },
         contract:{
@@ -433,6 +549,22 @@
           tuition_fee_amount:'',
           tuition_fee_receivable:'',
           tuition_fee_session:'',
+          number_of_months: 0,
+          tuition_receivable: 0,
+          book_receivable: 0,
+          scholarship_percent: 0,
+          scholarship_amount: 0,
+          is_promo_extra: false,
+          promo_extra_percent: 0,
+          promo_extra_amount: 0,
+          is_checkin_group: false,
+          checkin_group_percent: 0,
+          checkin_group_amount: 0,
+          is_resident: false,
+          resident_percent: 0,
+          resident_amount: 0,
+          gift_note: '',
+          materials: [],
           discount_code_id:'',
           discount_code:'',
           discount_code_amount:'',
@@ -517,11 +649,24 @@
           if(this.contract.coupon_code){
             this.contract.coupon_code_check=1
           }
+          this.contract.materials = response.data.materials || [];
+          this.contract.tuition_receivable = response.data.tuition_receivable || response.data.must_charge;
+          this.contract.book_receivable = response.data.book_receivable || 0;
+          this.contract.scholarship_percent = response.data.scholarship_percent || 0;
+          this.contract.promo_extra_percent = response.data.promo_extra_percent || 0;
+          this.contract.is_promo_extra = (response.data.promo_extra_percent > 0);
+          this.contract.checkin_group_percent = response.data.checkin_group_percent || 0;
+          this.contract.is_checkin_group = (response.data.checkin_group_percent > 0);
+          this.contract.resident_percent = response.data.resident_percent || 0;
+          this.contract.is_resident = (response.data.resident_percent > 0);
+          this.contract.gift_note = response.data.gift_note || '';
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.tmp_discount_code_id = response.data.discount_code_id
           this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
           this.loadTuitionFee();
+          this.loadMaterialsForProduct();
           this.loadB2BCampaign();
+          this.caculatorSession();
         })
       },
       
@@ -530,9 +675,11 @@
           const product_id = data.id
           this.contract.product_id = product_id
           this.loadTuitionFee();
+          this.loadMaterialsForProduct();
         }else{
           this.contract.product_id = ""
           this.html.tuition_fee.list =[]
+          this.html.materials.list = []
         }
         this.resetTuitionFee()
         this.html.tuition_fee.item =''
@@ -542,6 +689,14 @@
         this.contract.tuition_fee_amount = ''
         this.contract.tuition_fee_receivable = ''
         this.contract.session = ''
+        this.contract.number_of_months = 0
+        this.contract.scholarship_percent = 0
+        this.contract.scholarship_amount = 0
+        this.contract.promo_extra_amount = 0
+        this.contract.checkin_group_amount = 0
+        this.contract.resident_amount = 0
+        this.contract.gift_note = ''
+        this.contract.materials = []
       },
       saveTuitionFee(data = null){
         if (data && typeof data === 'object') {
@@ -550,11 +705,109 @@
           this.contract.tuition_fee_amount = data.price
           this.contract.tuition_fee_receivable = data.receivable
           this.contract.tuition_fee_session = data.session
+          this.contract.number_of_months = data.number_of_months || 0
+          this.applyStemkeyPolicy(data.number_of_months, this.contract.product_id)
+          this.loadMaterialsForProduct()
           this.loadDiscountCode();
           this.caculatorSession()
         }else{
           this.contract.tuition_fee_id = ""
+          this.contract.number_of_months = 0
+          this.contract.scholarship_percent = 0
+          this.contract.gift_note = ''
         }
+      },
+      applyStemkeyPolicy(months, productId) {
+        let scholarship = 0;
+        let checkin = 0;
+        let gift = '';
+        months = Number(months);
+        productId = Number(productId);
+
+        if (productId === 1 || productId === 2) {
+          if (months === 3) {
+            scholarship = 0; checkin = 5; gift = '';
+          } else if (months === 6) {
+            scholarship = 10; checkin = 5; gift = '2 buổi/tuần/3 tháng STEMKey homework';
+          } else if (months === 12) {
+            scholarship = 20; checkin = 5; gift = '2 buổi/tuần/6 tháng STEMKey homework';
+          } else if (months === 24) {
+            scholarship = 30; checkin = 10; gift = '2 buổi/tuần/12 tháng STEMKey homework';
+          }
+        } else if (productId === 4) {
+          if (months === 1) {
+            scholarship = 0; checkin = 0; gift = '';
+          } else if (months === 6) {
+            scholarship = 10; checkin = 3; gift = '';
+          } else if (months === 9) {
+            scholarship = 10; checkin = 5; gift = '';
+          }
+        } else if (productId === 3) {
+          if (months === 4) {
+            scholarship = 5; checkin = 5; gift = '2 buổi/tuần/3 tháng kèm bài tập';
+          } else if (months === 8) {
+            scholarship = 10; checkin = 5; gift = '2 buổi/tuần/6 tháng kèm bài tập';
+          } else if (months === 12) {
+            scholarship = 20; checkin = 5; gift = '2 buổi/tuần/10 tháng kèm bài tập';
+          } else if (months === 24) {
+            scholarship = 30; checkin = 5; gift = '2 buổi/tuần/12 tháng kèm bài tập';
+          }
+        }
+
+        this.contract.scholarship_percent = scholarship;
+        this.contract.checkin_group_percent = checkin;
+        this.contract.gift_note = gift;
+      },
+      loadMaterialsForProduct() {
+        if (!this.contract.product_id) {
+          this.html.materials.list = [];
+          return;
+        }
+        axios.p('/api/lms/contracts/load-materials', {
+          product_id: this.contract.product_id,
+          package_months: this.contract.number_of_months || null
+        }).then(res => {
+          this.html.materials.list = res.data;
+        }).catch(err => console.log(err));
+      },
+      addMaterial() {
+        const item = this.html.materials.item;
+        if (!item || !item.id) {
+          this.$vs.notify({
+            title: 'Chưa chọn sách',
+            text: 'Vui lòng chọn bộ sách trước khi bấm thêm!',
+            color: 'warning'
+          });
+          return;
+        }
+        let discountRate = 0;
+        const months = Number(this.contract.number_of_months) || Number(item.package_months) || 3;
+        if (months >= 24) discountRate = 20;
+        else if (months >= 12) discountRate = 15;
+        else if (months >= 6) discountRate = 10;
+        else if (months >= 3) {
+          discountRate = (this.contract.product_id == 4) ? 10 : 5;
+        }
+
+        const origPrice = Number(item.unit_price) || 0;
+        const finalPrice = Math.round(origPrice * (1 - discountRate / 100));
+
+        this.contract.materials.push({
+          material_id: item.id,
+          material_name: item.name,
+          quantity: 1,
+          package_months: months,
+          original_price: origPrice,
+          discount_percent: discountRate,
+          final_price: finalPrice
+        });
+
+        this.html.materials.item = '';
+        this.caculatorSession();
+      },
+      removeMaterial(index) {
+        this.contract.materials.splice(index, 1);
+        this.caculatorSession();
       },
       loadTuitionFee(){
         if(this.contract.product_id){
@@ -637,16 +890,81 @@
         }
       },
       caculatorSession(){
-        if( this.contract.sibling) {
-          this.contract.sibling_discount = ((Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount)) * 5 / 100).toFixed(0);
+        const basePrice = Number(this.contract.tuition_fee_amount) || 0;
+        
+        // 1. Học bổng kỳ hạn
+        const scholarshipPercent = Number(this.contract.scholarship_percent) || 0;
+        const scholarshipAmount = Math.round(basePrice * scholarshipPercent / 100);
+        this.contract.scholarship_amount = scholarshipAmount;
+        let currentTuition = basePrice - scholarshipAmount;
+
+        // 2. Ưu đãi tháng 11 (Tặng thêm 10% nếu gói >= 6 tháng)
+        let promoExtraAmount = 0;
+        if (this.contract.is_promo_extra && Number(this.contract.number_of_months) >= 6) {
+          this.contract.promo_extra_percent = 10;
+          promoExtraAmount = Math.round(basePrice * 10 / 100);
+        } else {
+          this.contract.promo_extra_percent = 0;
+        }
+        this.contract.promo_extra_amount = promoExtraAmount;
+        currentTuition = Math.max(0, currentTuition - promoExtraAmount);
+
+        // 3. Đăng ký nhóm 3 / Check-in
+        let checkinAmount = 0;
+        if (this.contract.is_checkin_group && Number(this.contract.checkin_group_percent) > 0) {
+          checkinAmount = Math.round(currentTuition * Number(this.contract.checkin_group_percent) / 100);
+        }
+        this.contract.checkin_group_amount = checkinAmount;
+        currentTuition = Math.max(0, currentTuition - checkinAmount);
+
+        // 4. Cư dân nội khu (5%)
+        let residentAmount = 0;
+        if (this.contract.is_resident) {
+          this.contract.resident_percent = 5;
+          residentAmount = Math.round(currentTuition * 5 / 100);
+        } else {
+          this.contract.resident_percent = 0;
+        }
+        this.contract.resident_amount = residentAmount;
+        currentTuition = Math.max(0, currentTuition - residentAmount);
+
+        // 5. Giảm trừ anh chị em học cùng (5%)
+        if (this.contract.sibling) {
+          this.contract.sibling_discount = Math.round(currentTuition * 5 / 100);
         } else {
           this.contract.sibling_discount = 0;
         }
-        if(this.contract.coupon_percent && this.contract.coupon_percent > 0){
-          this.contract.coupon_amount = ((Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount)) * this.contract.coupon_percent / 100).toFixed(0);
-        } 
-        this.contract.total_amount = Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount) > 0 ? Number(this.contract.tuition_fee_amount) - Number(this.contract.discount_code_amount) - Number(this.contract.sibling_discount) - Number(this.contract.coupon_amount) - Number(this.contract.b2b_amount): 0;
-        this.contract.total_session = Number(this.contract.tuition_fee_session) + Number(this.contract.discount_code_session) + Number(this.contract.coupon_session)  + Number(this.contract.b2b_bonus_session);
+        currentTuition = Math.max(0, currentTuition - Number(this.contract.sibling_discount || 0));
+
+        // 6. Voucher / Coupon
+        if (this.contract.coupon_percent && Number(this.contract.coupon_percent) > 0) {
+          this.contract.coupon_amount = Math.round(currentTuition * Number(this.contract.coupon_percent) / 100);
+        }
+        currentTuition = Math.max(0, currentTuition - Number(this.contract.coupon_amount || 0));
+
+        // 7. B2B
+        currentTuition = Math.max(0, currentTuition - Number(this.contract.b2b_amount || 0));
+
+        // 8. Mã chiết khấu thủ công
+        currentTuition = Math.max(0, currentTuition - Number(this.contract.discount_code_amount || 0));
+
+        this.contract.tuition_receivable = currentTuition;
+
+        // 9. Tiền sách & Học liệu mua kèm
+        let bookReceivable = 0;
+        if (this.contract.materials && this.contract.materials.length > 0) {
+          bookReceivable = this.contract.materials.reduce((sum, item) => sum + Number(item.final_price || 0), 0);
+        }
+        this.contract.book_receivable = bookReceivable;
+
+        // Tổng tiền thanh toán (Học phí + Sách)
+        this.contract.total_amount = this.contract.tuition_receivable + this.contract.book_receivable;
+
+        // Tổng số buổi học
+        this.contract.total_session = Number(this.contract.tuition_fee_session || 0) + 
+          Number(this.contract.discount_code_session || 0) + 
+          Number(this.contract.coupon_session || 0) + 
+          Number(this.contract.b2b_bonus_session || 0);
       },
       save() {
         let mess = "";

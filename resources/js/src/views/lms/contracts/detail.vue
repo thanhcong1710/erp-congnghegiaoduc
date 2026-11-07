@@ -280,15 +280,67 @@
                 disabled="true"
               />
             </div>
+
+            <!-- SÁCH & HỌC LIỆU MUA KÈM -->
+            <div class="vx-col w-full mb-3" v-if="contract_info.materials && contract_info.materials.length > 0">
+              <vx-card no-shadow style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <h5 class="mb-3 font-semibold text-primary">Sách & Học liệu mua kèm</h5>
+                <table class="table table-bordered w-full text-sm" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #e2e8f0;">
+                      <th style="padding: 6px; border: 1px solid #cbd5e1;">Tên sách/Học liệu</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">SL</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">Giá gốc</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">Chiết khấu</th>
+                      <th style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(m, idx) in contract_info.materials" :key="idx">
+                      <td style="padding: 6px; border: 1px solid #cbd5e1;">{{ m.material_name }}</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">{{ m.quantity }}</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;">{{ m.original_price | formatNumber }} đ</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">{{ m.discount_percent }}%</td>
+                      <td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right; font-weight: bold;">{{ m.final_price | formatNumber }} đ</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </vx-card>
+            </div>
+            <div class="vx-col w-full mb-2" v-if="contract_info.gift_note">
+              <span class="text-sm"><b>Quà tặng & Quyền lợi kèm theo:</b> <span class="text-warning font-bold">{{ contract_info.gift_note }}</span></span>
+            </div>
+
             <vs-divider/>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label>Số tiền phải đóng</label>
+            <div class="vx-col md:w-1/3 w-full mb-4" v-if="contract_info.tuition_receivable">
+              <label>Học phí thực thu</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="contract_info.tuition_receivable | formatNumber"
+                disabled="true"
+                style="font-weight: bold; color: #2563eb;"
+              />
+            </div>
+            <div class="vx-col md:w-1/3 w-full mb-4" v-if="contract_info.book_receivable">
+              <label>Tiền sách thực thu</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="text"
+                :value="contract_info.book_receivable | formatNumber"
+                disabled="true"
+                style="font-weight: bold; color: #059669;"
+              />
+            </div>
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Tổng thanh toán (Học phí + Sách)</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
                 :value="contract_info.must_charge | formatNumber"
                 disabled="true"
+                style="font-weight: bold; color: #dc2626;"
               />
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">

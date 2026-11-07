@@ -785,5 +785,37 @@ class DashboardController extends Controller
 
         return response()->json($result);
     }
+
+    public function getBranchTargets(Request $request)
+    {
+        $year = (int)$request->get('year', 2026);
+        $targets = u::query("SELECT bt.*, b.name AS branch_name, b.code AS branch_code,
+            COALESCE((
+                SELECT SUM(p.amount) 
+                FROM payments p 
+                JOIN contracts c ON c.id = p.contract_id 
+                WHERE c.branch_id = bt.branch_id AND YEAR(p.charge_date) = $year
+            ), 0) AS total_collected
+            FROM branch_targets bt
+            JOIN branches b ON b.id = bt.branch_id
+            WHERE bt.year = $year
+            ORDER BY b.code ASC");
+
+        $totalTarget = 0;
+        $totalCollected = 0;
+        foreach ($targets as $t) {
+            $totalTarget += (float)$t->target_collection;
+            $totalCollected += (float)$t->total_collected;
+            $t->percent_reached = $t->target_collection > 0 ? round(($t->total_collected / $t->target_collection) * 100, 2) : 0;
+        }
+
+        return response()->json([
+            'year' => $year,
+            'total_target' => $totalTarget,
+            'total_collected' => $totalCollected,
+            'total_percent' => $totalTarget > 0 ? round(($totalCollected / $totalTarget) * 100, 2) : 0,
+            'details' => $targets,
+        ]);
+    }
 }
 

@@ -64,7 +64,12 @@
                                 <div>
                                     <div class="input-line">
                                         <span class="label"><b>Kèm theo:</b></span>
-                                        <i class="doted"></i>
+                                        <span v-if="contract.materials && contract.materials.length > 0">
+                                            <span v-for="(m, idx) in contract.materials" :key="idx">
+                                                {{ m.material_name }} (SL: {{ m.quantity }}){{ idx < contract.materials.length - 1 ? ', ' : '' }}
+                                            </span>
+                                        </span>
+                                        <i v-else class="doted"></i>
                                     </div>
                                 </div>
                             </div>

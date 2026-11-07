@@ -42,6 +42,21 @@ class ContractsController extends Controller
         return response()->json($data);
     }
 
+    public function loadMaterials(Request $request)
+    {
+        $product_id = $request->product_id;
+        $package_months = $request->package_months;
+        $cond = " status = 1 ";
+        if (!empty($product_id)) {
+            $cond .= " AND product_id = $product_id ";
+        }
+        if (!empty($package_months)) {
+            $cond .= " AND (package_months = $package_months OR package_months IS NULL) ";
+        }
+        $data = u::query("SELECT * FROM materials WHERE $cond ORDER BY package_months ASC, id ASC");
+        return response()->json($data);
+    }
+
     public function checkCoupon(Request $request){
         $coupon_code = $request->coupon_code;
         $data = u::first("SELECT c.id, c.status, c.end_date, c.start_date, c.coupon_amount,c.coupon_session, c.type, c.quota, c.branch_id, c.coupon_percent, c.limit
@@ -164,7 +179,30 @@ class ContractsController extends Controller
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
            'sibling_discount' => $sibling_discount,
+           'tuition_receivable' => data_get($request, 'tuition_receivable', data_get($request, 'total_amount')),
+           'book_receivable' => data_get($request, 'book_receivable', 0),
+           'scholarship_percent' => data_get($request, 'scholarship_percent', 0),
+           'promo_extra_percent' => data_get($request, 'promo_extra_percent', 0),
+           'checkin_group_percent' => data_get($request, 'checkin_group_percent', 0),
+           'resident_percent' => data_get($request, 'resident_percent', 0),
+           'gift_note' => data_get($request, 'gift_note', ''),
         ), 'contracts');
+
+        $materials = data_get($request, 'materials', []);
+        if (!empty($materials) && is_array($materials)) {
+            foreach ($materials as $mat) {
+                u::insertSimpleRow(array(
+                    'contract_id' => $contract_id,
+                    'material_id' => data_get($mat, 'material_id'),
+                    'package_months' => data_get($mat, 'package_months', 0),
+                    'quantity' => data_get($mat, 'quantity', 1),
+                    'original_price' => data_get($mat, 'original_price', 0),
+                    'discount_percent' => data_get($mat, 'discount_percent', 0),
+                    'final_price' => data_get($mat, 'final_price', 0),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ), 'contract_materials');
+            }
+        }
 
         if(data_get($request,'coupon_code_check') == 1){
             $coupon_info = u::getObject(['code'=>data_get($request, 'coupon_code')], 'coupons');
@@ -284,6 +322,12 @@ class ContractsController extends Controller
             (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
+        if ($data) {
+            $data->materials = u::query("SELECT cm.*, m.name AS material_name, m.code AS material_code 
+                FROM contract_materials AS cm 
+                JOIN materials AS m ON m.id = cm.material_id 
+                WHERE cm.contract_id = $contract_id");
+        }
         return response()->json($data);
     }
 
@@ -398,9 +442,14 @@ class ContractsController extends Controller
             (SELECT cl.cls_name FROM contracts AS ct LEFT JOIN classes AS cl ON cl.id=ct.class_id WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS cls_name,
             (SELECT u.name FROM contracts AS ct LEFT JOIN classes AS cl ON cl.id=ct.class_id LEFT JOIN users AS u ON u.id=cl.cm_id WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS cm_name,
             (SELECT price FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_price,
-            (SELECT enrolment_last_date FROM contracts AS ct WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS enrolment_last_date
+            (SELECT enrolment_last_date FROM contracts AS ct WHERE ct.student_id=c.student_id AND ct.class_id IS NOT NULL AND ct.id<c.id ORDER BY ct.id DESC LIMIT 1 ) AS enrolment_last_date,
+            c.tuition_receivable, c.book_receivable, c.gift_note
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
+        $materials = u::query("SELECT cm.*, m.name AS material_name, m.code AS material_code 
+            FROM contract_materials AS cm 
+            JOIN materials AS m ON m.id = cm.material_id 
+            WHERE cm.contract_id = $contract_id");
         $data = [
             'student_name' => data_get($contract_info, 'student_name') ?? '',
             'date_of_birth' => data_get($contract_info, 'date_of_birth') ? date('d/m/Y',strtotime(data_get($contract_info, 'date_of_birth'))): '',
@@ -416,6 +465,10 @@ class ContractsController extends Controller
             'total_charged_text' => u::convert_number_to_words(data_get($contract_info, 'total_charged')),
             'total_charged' => data_get($contract_info, 'total_charged') ?? 0,
             'must_charge' => data_get($contract_info, 'must_charge') ?? 0,
+            'tuition_receivable' => data_get($contract_info, 'tuition_receivable') ?? data_get($contract_info, 'must_charge'),
+            'book_receivable' => data_get($contract_info, 'book_receivable') ?? 0,
+            'gift_note' => data_get($contract_info, 'gift_note') ?? '',
+            'materials' => $materials,
             'product_name' => data_get($contract_info, 'product_name') ?? '',
             'number_of_months' => data_get($contract_info, 'number_of_months') ?? '',
             'nick' => data_get($contract_info, 'nick') ?? '',
