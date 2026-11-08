@@ -204,7 +204,8 @@
         axios.p('/api/lms/students/contracts', data)
           .then((response) => {
             this.$vs.loading.close()
-            this.contracts = response.data.contracts
+            const resData = response.data
+            this.contracts = Array.isArray(resData) ? resData : (resData && (resData.contracts || resData.list) ? (resData.contracts || resData.list) : [])
           })
           .catch((error) => {
             console.log(error);
