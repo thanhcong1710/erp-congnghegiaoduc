@@ -76,7 +76,7 @@ class ImportAnKhanhCommand extends Command
             "reserves", "reserve_multis", "class_transfer", "branch_transfer",
             "exchanges", "coupon_logs",
             // Lớp học & Lịch học
-            "classes", "subject_has_class", "schedule_has_student", "schedules",
+            "classes", "sessions", "subject_has_class", "schedule_has_student", "schedules",
             // Đánh giá / Kết quả
             "igbh_student_results", "igbh_student_result_details",
             "igbh_summative_results", "igbh_summative_result_details",
@@ -542,7 +542,7 @@ class ImportAnKhanhCommand extends Command
 
     /**
      * Resolve Contract Status
-     * 1: Pending, 2: Deposit, 3: Full fee waiting class, 4: Reserved/Finished, 6: In Class/Active, 7: Cancelled
+     * 1: Pending, 2: Deposit, 3: Full fee waiting class, 4: Reserved, 6: In Class/Active, 7: Finished / Cancelled
      */
     protected function resolveContractStatus($statusRaw, $isBaoLuu = false)
     {
@@ -553,10 +553,49 @@ class ImportAnKhanhCommand extends Command
         if (strpos($s, 'full phí đang chờ') !== false) return 3;
         if (strpos($s, 'đặt cọc') !== false || strpos($s, 'đóng tiền lần 1') !== false) return 2;
         if (strpos($s, 'bảo lưu') !== false) return 4;
-        if (strpos($s, 'đã kết thúc') !== false) return 4;
-        if (strpos($s, 'huỷ') !== false || strpos($s, 'hủy') !== false) return 7;
+        if (strpos($s, 'kết thúc') !== false || strpos($s, 'huỷ') !== false || strpos($s, 'hủy') !== false) return 7;
 
         return 6; // Default to active if learning
+    }
+
+    /**
+     * Parse Class Days from class name
+     * E.g. Bright IG 19. Thứ 3-cn -> [3, 8], STM.06.IG.18.Thứ 7-cn -> [7, 8], English kids 1 -> [4, 6]
+     */
+    protected function parseClassDays($name)
+    {
+        $nameClean = mb_strtolower(trim($name), 'UTF-8');
+        
+        if (strpos($nameClean, 'luyện đọc chủ nhật') !== false) {
+            return [8];
+        }
+        if (strpos($nameClean, 'english kids') !== false) {
+            return [4, 6];
+        }
+
+        // X-cn or X-chủ nhật (e.g. Thứ 7-cn, t7-chủ nhật, Thứ 3-cn)
+        if (preg_match('/(?:thứ\s*|t)?([2-7])\s*[-–]\s*(?:cn|chủ nhật)/iu', $nameClean, $m)) {
+            return [(int)$m[1], 8];
+        }
+
+        // X-Y (e.g. Thứ 3-5, 4-6, t4-6, Thứ3-6, 2-4, 6-7, 3-6)
+        if (preg_match('/(?:thứ\s*|t)?([2-7])\s*[-–]\s*([2-7])/iu', $nameClean, $m)) {
+            return [(int)$m[1], (int)$m[2]];
+        }
+
+        $days = [];
+        if (strpos($nameClean, 'chủ nhật') !== false || strpos($nameClean, 'cn') !== false) {
+            $days[] = 8;
+        }
+        for ($d = 2; $d <= 7; $d++) {
+            if (strpos($nameClean, "thứ $d") !== false || strpos($nameClean, "thứ$d") !== false || strpos($nameClean, "t$d") !== false) {
+                if (!in_array($d, $days)) {
+                    $days[] = $d;
+                }
+            }
+        }
+        sort($days);
+        return !empty($days) ? $days : [7, 8];
     }
 
     /**
@@ -670,8 +709,8 @@ class ImportAnKhanhCommand extends Command
             $feeMap = $this->ensureTuitionFees($batchData);
 
             // 2. Ensure Classes exist
-            $this->info("2. Khởi tạo các lớp học (classes)...");
-            $classMap = $this->ensureClasses($uniqueClasses, $batchData);
+            $this->info("2. Khởi tạo các lớp học (classes) và sinh 96 buổi học...");
+            $classMap = $this->ensureClasses($uniqueClasses, $batchData, $parsedRows);
 
             // 3. Process Students, Parents, Contracts
             $this->info("3. Đang import Phụ huynh, Học sinh, Hợp đồng...");
@@ -814,6 +853,10 @@ class ImportAnKhanhCommand extends Command
                     $contractStatus = 3; // Waiting class if no class is assigned
                 }
 
+                $studentStartDate = $row['start_date'] ?: ($classId && isset($classMap[$row['class_name']]['start_date']) ? $classMap[$row['class_name']]['start_date'] : date('Y-m-d'));
+
+                $summarySessions = $row['duration_sessions'] + $row['bonus_sessions'];
+
                 $contractId = DB::table('contracts')->insertGetId([
                     'type' => 1,
                     'code' => '',
@@ -830,14 +873,14 @@ class ImportAnKhanhCommand extends Command
                     'must_charge' => $mustCharge,
                     'total_charged' => $totalCharged,
                     'debt_amount' => $debtAmount,
-                    'total_sessions' => $row['duration_sessions'] + $row['bonus_sessions'],
+                    'total_sessions' => $summarySessions,
                     'real_sessions' => $row['duration_sessions'],
                     'bonus_sessions' => $row['bonus_sessions'],
-                    'summary_sessions' => $row['duration_sessions'] + $row['bonus_sessions'],
+                    'summary_sessions' => $summarySessions,
                     'reservable_sessions' => 0,
                     'class_id' => $classId,
-                    'start_date' => $row['start_date'],
-                    'enrolment_start_date' => $row['start_date'],
+                    'start_date' => $studentStartDate,
+                    'enrolment_start_date' => $studentStartDate,
                     'status' => $contractStatus,
                     'count_recharge' => 0,
                     'note' => "[Import: " . self::BATCH_CODE . "]",
@@ -851,12 +894,55 @@ class ImportAnKhanhCommand extends Command
 
                 $batchData['contract_ids'][] = $contractId;
 
-                // Sync done sessions
-                try {
-                    u::updateDoneSessions($contractId);
-                } catch (\Exception $e) {
-                    // Ignore session calc errors if dates are far
+                // Generate schedule_has_student for sessions already studied (class_date <= '2026-11-08')
+                if ($classId && isset($classMap[$row['class_name']]['dates'])) {
+                    $classDates = $classMap[$row['class_name']]['dates'];
+                    $studentDates = [];
+                    foreach ($classDates as $cd) {
+                        if ($cd >= $studentStartDate) {
+                            $studentDates[] = $cd;
+                        }
+                    }
+                    $studentContractDates = array_slice($studentDates, 0, $summarySessions);
+                    $todayStr = date('Y-m-d');
+
+                    $scheduleStudentInserts = [];
+                    foreach ($studentContractDates as $sIdx => $sDate) {
+                        if ($sDate <= $todayStr) {
+                            $scheduleStudentInserts[] = [
+                                'student_id' => $studentId,
+                                'branch_id' => self::BRANCH_ID,
+                                'class_id' => $classId,
+                                'contract_id' => $contractId,
+                                'product_id' => $row['product_id'],
+                                'program_id' => $programId,
+                                'subject_id' => 1,
+                                'subject_stt' => $sIdx + 1,
+                                'class_date' => $sDate,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'status' => ($contractStatus == 4 ? 2 : 1), // 1: Đã học (2: bảo lưu)
+                                'attendance_status' => 1,
+                            ];
+                        }
+                    }
+
+                    if (!empty($scheduleStudentInserts)) {
+                        DB::table('schedule_has_student')->insert($scheduleStudentInserts);
+                    }
                 }
+
+                // Update done_sessions & left_sessions
+                $doneCount = DB::table('schedule_has_student')
+                    ->where('contract_id', $contractId)
+                    ->where('status', 1)
+                    ->count();
+
+                $leftCount = ($contractStatus == 7) ? 0 : max(0, $summarySessions - $doneCount);
+
+                DB::table('contracts')->where('id', $contractId)->update([
+                    'done_sessions' => $doneCount,
+                    'left_sessions' => $leftCount,
+                ]);
 
                 $bar->advance();
             }
@@ -982,9 +1068,9 @@ class ImportAnKhanhCommand extends Command
     }
 
     /**
-     * Ensure Classes exist
+     * Ensure Classes exist and generate 96 sessions
      */
-    protected function ensureClasses($uniqueClasses, &$batchData)
+    protected function ensureClasses($uniqueClasses, &$batchData, $parsedRows = [])
     {
         $this->ensureBrightIgProgram();
 
@@ -992,40 +1078,112 @@ class ImportAnKhanhCommand extends Command
 
         foreach ($uniqueClasses as $clsName => $info) {
             $programId = $this->resolveProgramId($clsName, $info['product_id']);
+            $classDays = $this->parseClassDays($clsName);
+
+            // Find start dates of students belonging to this class
+            $studentStarts = [];
+            foreach ($parsedRows as $r) {
+                if (!empty($r['class_name']) && $r['class_name'] == $clsName && !empty($r['start_date'])) {
+                    $studentStarts[] = $r['start_date'];
+                }
+            }
+            $minStartDate = !empty($studentStarts) ? min($studentStarts) : '2026-05-14';
+
+            // Calculate 96 sessions
+            $holidays = u::getPublicHolidays(self::BRANCH_ID, $info['product_id']);
+            $sessionCalc = u::calculatorSessionsByNumberOfSessions($minStartDate, 96, $holidays, $classDays);
+            $clsStartDate = data_get($sessionCalc, 'start_date', $minStartDate);
+            $clsEndDate = data_get($sessionCalc, 'end_date', $clsStartDate);
+            $sessionDates = data_get($sessionCalc, 'dates', []);
 
             $existing = DB::table('classes')
                 ->where('branch_id', self::BRANCH_ID)
                 ->where('cls_name', $clsName)
                 ->first();
 
+            $classData = [
+                'cls_name' => $clsName,
+                'product_id' => $info['product_id'],
+                'program_id' => $programId,
+                'branch_id' => self::BRANCH_ID,
+                'teacher_id' => 1,
+                'teacher_name' => 'Admin - admin',
+                'cls_startdate' => $clsStartDate,
+                'cls_enddate' => $clsEndDate,
+                'class_day' => implode(',', $classDays),
+                'max_students' => 16,
+                'total_cycles' => 1,
+                'type' => 1,
+                'status' => 1,
+                'creator_id' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ];
+
             if ($existing) {
-                DB::table('classes')->where('id', $existing->id)->update([
-                    'program_id' => $programId,
-                    'product_id' => $info['product_id'],
-                ]);
-                $classMap[$clsName] = [
-                    'id' => $existing->id,
-                    'program_id' => $programId,
-                ];
+                unset($classData['creator_id'], $classData['created_at']);
+                $classData['updated_at'] = date('Y-m-d H:i:s');
+                DB::table('classes')->where('id', $existing->id)->update($classData);
+                $classId = $existing->id;
             } else {
-                $newClassId = DB::table('classes')->insertGetId([
-                    'cls_name' => $clsName,
-                    'product_id' => $info['product_id'],
-                    'program_id' => $programId,
-                    'branch_id' => self::BRANCH_ID,
-                    'max_students' => 16,
-                    'total_cycles' => 1,
-                    'type' => 0,
+                $classId = DB::table('classes')->insertGetId($classData);
+                $batchData['class_ids'][] = $classId;
+            }
+
+            // Sync sessions table (days in week)
+            DB::table('sessions')->where('class_id', $classId)->delete();
+            foreach ($classDays as $day) {
+                DB::table('sessions')->insert([
+                    'class_id' => $classId,
+                    'shift_id' => null,
+                    'room_id' => 18,
+                    'teacher_id' => 1,
+                    'class_day' => $day,
                     'status' => 1,
+                    'branch_id' => self::BRANCH_ID,
                     'creator_id' => 1,
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
-                $classMap[$clsName] = [
-                    'id' => $newClassId,
-                    'program_id' => $programId,
-                ];
-                $batchData['class_ids'][] = $newClassId;
             }
+
+            // Sync subject_has_class table
+            DB::table('subject_has_class')->where('class_id', $classId)->delete();
+            DB::table('subject_has_class')->insert([
+                'class_id' => $classId,
+                'subject_id' => 1,
+                'session' => 96,
+                'stt' => 1,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            // Sync schedules table (96 sessions)
+            DB::table('schedules')->where('class_id', $classId)->delete();
+            $schedulesToInsert = [];
+            foreach ($sessionDates as $idx => $sDate) {
+                $schedulesToInsert[] = [
+                    'class_date' => $sDate,
+                    'class_id' => $classId,
+                    'subject_id' => 1,
+                    'class_stt' => $idx + 1,
+                    'subject_stt' => $idx + 1,
+                    'status' => 1,
+                    'branch_id' => self::BRANCH_ID,
+                    'teacher_id' => 1,
+                    'cm_id' => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ];
+            }
+            if (!empty($schedulesToInsert)) {
+                DB::table('schedules')->insert($schedulesToInsert);
+            }
+
+            $classMap[$clsName] = [
+                'id' => $classId,
+                'program_id' => $programId,
+                'start_date' => $clsStartDate,
+                'end_date' => $clsEndDate,
+                'days' => $classDays,
+                'dates' => $sessionDates,
+            ];
         }
 
         return $classMap;

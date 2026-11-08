@@ -155,7 +155,7 @@
                 <vs-checkbox v-model="config.class_day.day_8" class="vx-col md:w-1/5 mb-4 pl-2 pr-2" :disabled="disabled_input">Chủ nhật</vs-checkbox>
               </div>
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <div class="vx-col md:w-1/3 w-full mb-4">
               <label>Ngày bắt đầu học</label>
               <datepicker class="w-full"
                 v-model="config.start_date"
@@ -164,7 +164,19 @@
                 @change="selectDate"
               />
             </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
+            <div class="vx-col md:w-1/3 w-full mb-4">
+              <label>Số buổi học</label>
+              <input
+                class="vs-inputx vs-input--input normal"
+                type="number"
+                placeholder="Nhập số buổi (VD: 96)"
+                min="1"
+                v-model="config.session"
+                :disabled="disabled_input"
+                @input="calculateEndDateFromSession"
+              />
+            </div>
+            <div class="vx-col md:w-1/3 w-full mb-4">
               <label>Ngày kết thúc học</label>
               <datepicker class="w-full"
                 v-model="config.end_date"
@@ -533,6 +545,25 @@
       selectDate(date){
         if (date) {
           this.config.start_date = moment(date).format("YYYY-MM-DD");
+          this.calculateEndDateFromSession();
+        }
+      },
+      calculateEndDateFromSession(){
+        if (this.config.session > 0 && this.config.start_date) {
+          const hasDay = Object.values(this.config.class_day).some(v => Boolean(v));
+          if (hasDay) {
+            axios.p("/api/settings/classes/calc-end-date", {
+              start_date: this.config.start_date,
+              session: this.config.session,
+              class_day: this.config.class_day,
+              branch_id: this.config.branch_id,
+              product_id: this.config.product_id
+            }).then(res => {
+              if (res.data && res.data.end_date) {
+                this.config.end_date = res.data.end_date;
+              }
+            }).catch(e => console.log(e));
+          }
         }
       },
       selectDateChange(date){
@@ -808,8 +839,8 @@
           mess += " - Ngày bắt đầu học không được để trống<br/>";
           resp = false;
         }
-        if (this.config.end_date == "") {
-          mess += " - Ngày kết thúc học không được để trống<br/>";
+        if (this.config.end_date == "" && (!this.config.session || this.config.session <= 0)) {
+          mess += " - Vui lòng nhập ngày kết thúc học hoặc số buổi học<br/>";
           resp = false;
         }
         // if (this.config.session == "") {

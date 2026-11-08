@@ -59,6 +59,29 @@ class ClassesController extends Controller
         return response()->json($data);
     }
 
+    public function calcEndDate(Request $request)
+    {
+        $class_day = $request->class_day;
+        $arr_day = [];
+        if (!empty($class_day)) {
+            foreach ($class_day as $k => $row) {
+                if ($row) {
+                    $arr_day[] = (int)(str_replace('day_', '', $k));
+                }
+            }
+        }
+        $holidays = u::getPublicHolidays(data_get($request, 'branch_id'), data_get($request, 'product_id'));
+        $start_date = data_get($request, 'start_date');
+        $session = (int)data_get($request, 'session', 96);
+        $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session, $holidays, $arr_day);
+
+        return response()->json([
+            'end_date' => data_get($data_sessions, 'end_date'),
+            'total' => data_get($data_sessions, 'total'),
+            'dates' => data_get($data_sessions, 'dates', [])
+        ]);
+    }
+
     public function save(Request $request)
     {
         $class_day = $request->class_day;
@@ -73,9 +96,15 @@ class ClassesController extends Controller
         $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
         $start_date = data_get($request,'start_date');
         $end_date = data_get($request,'end_date');
-        $data_sessions = u::calculatorSessions($start_date, $end_date, $holidays, $arr_day);
+        $session_count = (int)data_get($request,'session') ?: (int)data_get($request,'total_sessions');
+        
+        if ($session_count > 0 && (empty($end_date) || empty($dates))) {
+            $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, $session_count, $holidays, $arr_day);
+        } else {
+            $data_sessions = u::calculatorSessions($start_date, $end_date, $holidays, $arr_day);
+        }
         $dates = data_get($data_sessions, 'dates', []);
-        $session_count = (int)data_get($request,'session') ?: count($dates);
+        $session_count = $session_count ?: count($dates);
         $subjects = ["0"=> (object)['id'=>1,'session'=>$session_count, 'stt'=>1]];
 
         $teacher_id = (int)data_get($request, 'teacher_id');

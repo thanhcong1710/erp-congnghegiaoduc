@@ -350,6 +350,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::prefix('classes')->group(function () {
                 Route::post('load-classes', 'ClassesController@loadClasses');
                 Route::post('save', 'ClassesController@save');
+                Route::post('calc-end-date', 'ClassesController@calcEndDate');
                 Route::get('info-config/{class_id}', 'ClassesController@infoConfig');
                 Route::post('sessions', 'ClassesController@listSessions');
                 Route::post('update-schedule', 'ClassesController@updateSchedule');
