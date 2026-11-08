@@ -197,15 +197,15 @@
 
 .session-stat-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 14px 18px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.border-l-primary { border-left: 4px solid #7367f0; }
-.border-l-emerald { border-left: 4px solid #10b981; }
-.border-l-amber { border-left: 4px solid #f59e0b; }
+.border-l-primary { border-left: 5px solid #7367f0 !important; }
+.border-l-emerald { border-left: 5px solid #10b981 !important; }
+.border-l-amber { border-left: 5px solid #f59e0b !important; }
 
 .session-stat-title {
   font-size: 13.5px;
@@ -214,7 +214,7 @@
 }
 
 .session-stat-number {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   margin-top: 4px;
   line-height: 1.2;
@@ -233,7 +233,7 @@
   gap: 14px;
   padding: 10px 14px;
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   margin-bottom: 14px;
   font-size: 13.5px;

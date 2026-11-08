@@ -32,50 +32,48 @@
       <div v-html="alert.body"></div>
     </vs-alert>
 
-    <!-- Files Table -->
-    <div class="table-container-card">
-      <div class="table-responsive">
-        <table class="detail-data-table">
-          <thead>
-            <tr>
-              <th class="text-center" style="width: 60px">STT</th>
-              <th style="width: 320px">Tên tệp</th>
-              <th>Ghi chú</th>
-              <th class="text-center" style="width: 120px">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="!files || files.length === 0">
-              <td colspan="4" class="text-center py-6 text-gray-400 italic">
-                <i class="fa-regular fa-folder-open text-2xl text-gray-300 block mb-2"></i>
-                Chưa có tài liệu hồ sơ nào được lưu trữ
-              </td>
-            </tr>
-            <tr v-for="(item, index) in files" :key="index" class="table-row-hover">
-              <td class="text-center font-semibold text-gray-500">{{ index + 1 }}</td>
-              <td>
-                <a :href="item.file_path" target="_blank" class="file-name-link">
-                  <i class="fa-solid fa-file-lines text-indigo-500 mr-2 text-base"></i>
-                  <span class="font-semibold">{{ item.file_name }}</span>
+    <!-- Files Table with Grid Borders -->
+    <div class="bordered-table-container">
+      <table class="grid-border-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 60px">STT</th>
+            <th style="width: 340px">Tên tệp hồ sơ</th>
+            <th>Ghi chú</th>
+            <th class="text-center" style="width: 120px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!files || files.length === 0">
+            <td colspan="4" class="text-center py-6 text-gray-400 italic">
+              <i class="fa-regular fa-folder-open text-2xl text-gray-300 block mb-2"></i>
+              Chưa có tài liệu hồ sơ nào được lưu trữ
+            </td>
+          </tr>
+          <tr v-for="(item, index) in files" :key="index" class="grid-row-hover">
+            <td class="text-center font-bold text-gray-500">{{ index + 1 }}</td>
+            <td>
+              <a :href="item.file_path" target="_blank" class="file-name-link">
+                <i class="fa-solid fa-file-pdf text-rose-500 mr-2 text-base"></i>
+                <span class="font-bold">{{ item.file_name }}</span>
+              </a>
+            </td>
+            <td>
+              <span class="text-gray-800">{{ item.note || '---' }}</span>
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-2">
+                <a :href="item.file_path" target="_blank" class="action-btn-file btn-view" title="Xem tệp">
+                  <i class="fa-solid fa-eye"></i>
                 </a>
-              </td>
-              <td>
-                <span class="text-gray-700">{{ item.note || '---' }}</span>
-              </td>
-              <td class="text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <a :href="item.file_path" target="_blank" class="action-btn-file btn-view" title="Xem tệp">
-                    <i class="fa-solid fa-eye"></i>
-                  </a>
-                  <button class="action-btn-file btn-delete" @click="confirmDelete(item)" title="Xóa tệp">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <button class="action-btn-file btn-delete" @click="confirmDelete(item)" title="Xóa tệp">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -221,8 +219,8 @@
 <style scoped>
 .upload-bar-card {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
   padding: 14px 18px;
 }
 
@@ -280,52 +278,42 @@
   box-shadow: 0 2px 6px rgba(115, 103, 240, 0.4);
 }
 
-.table-container-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.table-responsive {
+.bordered-table-container {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.detail-data-table {
+.grid-border-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 14px;
 }
 
-.detail-data-table thead th {
-  background: #f8fafc;
-  color: #475569;
+.grid-border-table thead th {
+  background: #f1f5f9;
+  color: #1e293b;
   font-weight: 700;
   font-size: 13.5px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 12px 16px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
   white-space: nowrap;
 }
 
-.detail-data-table tbody td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
+.grid-border-table tbody td {
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
   vertical-align: middle;
   font-size: 14px;
   color: #334155;
 }
 
-.table-row-hover:hover {
+.grid-row-hover:hover td {
   background-color: #f8fafc;
-}
-
-.detail-data-table tbody tr:last-child td {
-  border-bottom: none;
 }
 
 .file-name-link {
@@ -356,6 +344,7 @@
 .btn-view {
   background: #eff6ff;
   color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 
 .btn-view:hover {
@@ -365,6 +354,7 @@
 .btn-delete {
   background: #fef2f2;
   color: #dc2626;
+  border: 1px solid #fecaca;
 }
 
 .btn-delete:hover {

@@ -1,49 +1,47 @@
 <template>
   <div class="student-detail-logs mt-3">
-    <!-- Table Container -->
-    <div class="table-container-card">
-      <div class="table-responsive">
-        <table class="detail-data-table">
-          <thead>
-            <tr>
-              <th class="text-center" style="width: 60px">STT</th>
-              <th style="width: 170px">Thời gian thực hiện</th>
-              <th style="width: 220px">Người thực hiện</th>
-              <th>Nội dung thay đổi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="!logs || logs.length === 0">
-              <td colspan="4" class="text-center py-6 text-gray-400 italic">
-                <i class="fa-regular fa-clock text-2xl text-gray-300 block mb-2"></i>
-                Chưa có lịch sử thay đổi nào
-              </td>
-            </tr>
-            <tr v-for="(item, index) in logs" :key="index" class="table-row-hover">
-              <td class="text-center font-semibold text-gray-500">
-                {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
-              </td>
-              <td>
-                <span class="cell-time-badge">
-                  <i class="fa-regular fa-clock text-gray-400 mr-1.5"></i>
-                  {{ item.created_at }}
-                </span>
-              </td>
-              <td>
-                <span class="cell-user-badge">
-                  <i class="fa-regular fa-user text-primary mr-1.5"></i>
-                  <span class="font-semibold text-gray-800">{{ item.creator_name || 'Hệ thống' }}</span>
-                </span>
-              </td>
-              <td>
-                <div class="cell-content-text">
-                  {{ item.content }}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Bordered Table Container -->
+    <div class="bordered-table-container">
+      <table class="grid-border-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 60px">STT</th>
+            <th style="width: 180px">Thời gian thực hiện</th>
+            <th style="width: 220px">Người thực hiện</th>
+            <th>Nội dung thay đổi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!logs || logs.length === 0">
+            <td colspan="4" class="text-center py-6 text-gray-400 italic">
+              <i class="fa-regular fa-clock text-2xl text-gray-300 block mb-2"></i>
+              Chưa có lịch sử thay đổi nào
+            </td>
+          </tr>
+          <tr v-for="(item, index) in logs" :key="index" class="grid-row-hover">
+            <td class="text-center font-bold text-gray-500">
+              {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
+            </td>
+            <td>
+              <div class="font-bold text-gray-900 flex items-center">
+                <i class="fa-regular fa-clock text-primary mr-1.5"></i>
+                {{ item.created_at }}
+              </div>
+            </td>
+            <td>
+              <div class="font-bold text-gray-800 flex items-center">
+                <i class="fa-regular fa-user text-primary mr-1.5"></i>
+                <span>{{ item.creator_name || 'Hệ thống' }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="cell-content-text">
+                {{ item.content }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Pagination (Chuẩn /lms/contracts) -->
@@ -151,69 +149,42 @@
 </script>
 
 <style scoped>
-.table-container-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.table-responsive {
+.bordered-table-container {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.detail-data-table {
+.grid-border-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 14px;
 }
 
-.detail-data-table thead th {
-  background: #f8fafc;
-  color: #475569;
+.grid-border-table thead th {
+  background: #f1f5f9;
+  color: #1e293b;
   font-weight: 700;
   font-size: 13.5px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 12px 16px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
   white-space: nowrap;
 }
 
-.detail-data-table tbody td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
+.grid-border-table tbody td {
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
   vertical-align: middle;
   font-size: 14px;
   color: #334155;
 }
 
-.table-row-hover:hover {
+.grid-row-hover:hover td {
   background-color: #f8fafc;
-}
-
-.detail-data-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.cell-time-badge {
-  display: inline-flex;
-  align-items: center;
-  color: #475569;
-  font-size: 13.5px;
-  background: #f1f5f9;
-  padding: 3px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.cell-user-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 13.5px;
 }
 
 .cell-content-text {

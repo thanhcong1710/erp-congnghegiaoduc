@@ -16,176 +16,170 @@
     </div>
 
     <!-- Section 1: UCREA Tests -->
-    <div class="eval-section-card mb-5">
+    <div class="eval-section-block mb-5">
       <div class="eval-section-header">
         <span class="eval-section-title text-blue-800">
           <i class="fa-solid fa-circle-check text-primary mr-1.5"></i> 1. Đánh giá năng lực UCREA
         </span>
         <span class="eval-count-badge">{{ ucreaList ? ucreaList.length : 0 }} bài</span>
       </div>
-      <div class="table-container-card">
-        <div class="table-responsive">
-          <table class="detail-data-table">
-            <thead>
-              <tr>
-                <th class="text-center" style="width: 60px">STT</th>
-                <th>Bài kiểm tra</th>
-                <th class="text-center" style="width: 100px">Level</th>
-                <th>Lớp</th>
-                <th>Giáo viên</th>
-                <th class="text-center" style="width: 130px">Ngày thi</th>
-                <th class="text-center" style="width: 130px">Trạng thái</th>
-                <th class="text-center" style="width: 140px">Báo cáo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="!ucreaList || ucreaList.length === 0">
-                <td colspan="8" class="text-center py-5 text-gray-400 italic">Chưa có bài đánh giá UCREA nào</td>
-              </tr>
-              <tr v-for="(item, idx) in ucreaList" :key="'uc_' + item.id" class="table-row-hover">
-                <td class="text-center font-semibold text-gray-500">{{ idx + 1 }}</td>
-                <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
-                <td class="text-center"><span class="badge-level">{{ item.level_cd }}</span></td>
-                <td class="text-gray-700">{{ item.erp_class_name || item.class_nm || '-' }}</td>
-                <td class="text-gray-700">{{ item.memb_nm || '-' }}</td>
-                <td class="text-center text-gray-500 font-medium">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                <td class="text-center">
-                  <span v-if="item.result_cd === 'IS002'" class="badge-status-eval badge-done">Đã chấm</span>
-                  <span v-else class="badge-status-eval badge-pending">Chưa chấm</span>
-                </td>
-                <td class="text-center">
-                  <router-link
-                    v-if="item.result_cd === 'IS002'"
-                    :to="`/lms/evaluations/ucrea/report/${item.id}`"
-                    class="action-link-btn text-primary font-bold hover:underline"
-                  >
-                    <i class="fa-solid fa-chart-pie mr-1"></i> Radar Chart
-                  </router-link>
-                  <router-link
-                    v-else
-                    :to="`/lms/evaluations/ucrea/form/${item.id}`"
-                    class="action-link-btn text-amber-600 font-bold hover:underline"
-                  >
-                    <i class="fa-solid fa-pen-nib mr-1"></i> Chấm điểm
-                  </router-link>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="bordered-table-container">
+        <table class="grid-border-table">
+          <thead>
+            <tr>
+              <th class="text-center" style="width: 50px">STT</th>
+              <th>Bài kiểm tra</th>
+              <th class="text-center" style="width: 100px">Level</th>
+              <th>Lớp</th>
+              <th>Giáo viên</th>
+              <th class="text-center" style="width: 130px">Ngày thi</th>
+              <th class="text-center" style="width: 130px">Trạng thái</th>
+              <th class="text-center" style="width: 140px">Báo cáo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!ucreaList || ucreaList.length === 0">
+              <td colspan="8" class="text-center py-5 text-gray-400 italic">Chưa có bài đánh giá UCREA nào</td>
+            </tr>
+            <tr v-for="(item, idx) in ucreaList" :key="'uc_' + item.id" class="grid-row-hover">
+              <td class="text-center font-bold text-gray-500">{{ idx + 1 }}</td>
+              <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
+              <td class="text-center"><span class="badge-level">{{ item.level_cd }}</span></td>
+              <td class="text-gray-700 font-medium">{{ item.erp_class_name || item.class_nm || '-' }}</td>
+              <td class="text-gray-700 font-medium">{{ item.memb_nm || '-' }}</td>
+              <td class="text-center text-gray-700 font-semibold">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
+              <td class="text-center">
+                <span v-if="item.result_cd === 'IS002'" class="badge-status-eval badge-done">Đã chấm</span>
+                <span v-else class="badge-status-eval badge-pending">Chưa chấm</span>
+              </td>
+              <td class="text-center">
+                <router-link
+                  v-if="item.result_cd === 'IS002'"
+                  :to="`/lms/evaluations/ucrea/report/${item.id}`"
+                  class="action-link-btn text-primary font-bold hover:underline"
+                >
+                  <i class="fa-solid fa-chart-pie mr-1"></i> Radar Chart
+                </router-link>
+                <router-link
+                  v-else
+                  :to="`/lms/evaluations/ucrea/form/${item.id}`"
+                  class="action-link-btn text-amber-600 font-bold hover:underline"
+                >
+                  <i class="fa-solid fa-pen-nib mr-1"></i> Chấm điểm
+                </router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- Section 2: IG.BH Diagnostic Tests -->
-    <div class="eval-section-card mb-5">
+    <div class="eval-section-block mb-5">
       <div class="eval-section-header">
         <span class="eval-section-title text-amber-800">
           <i class="fa-solid fa-award text-amber-600 mr-1.5"></i> 2. Khảo sát đầu vào (IG.BH Diagnostic)
         </span>
         <span class="eval-count-badge">{{ diagnosticList ? diagnosticList.length : 0 }} bài</span>
       </div>
-      <div class="table-container-card">
-        <div class="table-responsive">
-          <table class="detail-data-table">
-            <thead>
-              <tr>
-                <th class="text-center" style="width: 60px">STT</th>
-                <th>Bài kiểm tra</th>
-                <th class="text-center" style="width: 120px">Điểm môn học</th>
-                <th class="text-center" style="width: 120px">Điểm tư duy</th>
-                <th class="text-center" style="width: 110px">Tổng điểm</th>
-                <th class="text-center" style="width: 110px">Level gán</th>
-                <th class="text-center" style="width: 130px">Ngày thi</th>
-                <th class="text-center" style="width: 150px">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="!diagnosticList || diagnosticList.length === 0">
-                <td colspan="8" class="text-center py-5 text-gray-400 italic">Chưa có bài khảo sát đầu vào nào</td>
-              </tr>
-              <tr v-for="(item, idx) in diagnosticList" :key="'diag_' + item.id" class="table-row-hover">
-                <td class="text-center font-semibold text-gray-500">{{ idx + 1 }}</td>
-                <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
-                <td class="text-center font-medium">{{ item.subject_total || 0 }}</td>
-                <td class="text-center font-medium">{{ item.thinking_total || 0 }}</td>
-                <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
-                <td class="text-center">
-                  <span v-if="item.assigned_level" class="badge-level">{{ item.assigned_level }}</span>
-                  <span v-else class="text-gray-400">-</span>
-                </td>
-                <td class="text-center text-gray-500 font-medium">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                <td class="text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <router-link
-                      :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`"
-                      class="action-link-btn text-primary font-bold hover:underline"
-                    >
-                      Báo cáo
-                    </router-link>
-                    <span class="text-gray-300">|</span>
-                    <router-link
-                      :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`"
-                      class="action-link-btn text-emerald-600 font-bold hover:underline"
-                    >
-                      Chấm
-                    </router-link>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="bordered-table-container">
+        <table class="grid-border-table">
+          <thead>
+            <tr>
+              <th class="text-center" style="width: 50px">STT</th>
+              <th>Bài kiểm tra</th>
+              <th class="text-center" style="width: 120px">Điểm môn học</th>
+              <th class="text-center" style="width: 120px">Điểm tư duy</th>
+              <th class="text-center" style="width: 110px">Tổng điểm</th>
+              <th class="text-center" style="width: 110px">Level gán</th>
+              <th class="text-center" style="width: 130px">Ngày thi</th>
+              <th class="text-center" style="width: 150px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!diagnosticList || diagnosticList.length === 0">
+              <td colspan="8" class="text-center py-5 text-gray-400 italic">Chưa có bài khảo sát đầu vào nào</td>
+            </tr>
+            <tr v-for="(item, idx) in diagnosticList" :key="'diag_' + item.id" class="grid-row-hover">
+              <td class="text-center font-bold text-gray-500">{{ idx + 1 }}</td>
+              <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
+              <td class="text-center font-bold text-gray-800">{{ item.subject_total || 0 }}</td>
+              <td class="text-center font-bold text-gray-800">{{ item.thinking_total || 0 }}</td>
+              <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
+              <td class="text-center">
+                <span v-if="item.assigned_level" class="badge-level">{{ item.assigned_level }}</span>
+                <span v-else class="text-gray-400">-</span>
+              </td>
+              <td class="text-center text-gray-700 font-semibold">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
+              <td class="text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <router-link
+                    :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`"
+                    class="action-link-btn text-primary font-bold hover:underline"
+                  >
+                    Báo cáo
+                  </router-link>
+                  <span class="text-gray-400">|</span>
+                  <router-link
+                    :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`"
+                    class="action-link-btn text-emerald-600 font-bold hover:underline"
+                  >
+                    Chấm
+                  </router-link>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <!-- Section 3: IG.BH Summative Final Evaluations -->
-    <div class="eval-section-card mb-3">
+    <div class="eval-section-block mb-3">
       <div class="eval-section-header">
         <span class="eval-section-title text-purple-800">
           <i class="fa-solid fa-star text-purple-600 mr-1.5"></i> 3. Đánh giá tổng kết kỳ (IG.BH Summative)
         </span>
         <span class="eval-count-badge">{{ summativeList ? summativeList.length : 0 }} bài</span>
       </div>
-      <div class="table-container-card">
-        <div class="table-responsive">
-          <table class="detail-data-table">
-            <thead>
-              <tr>
-                <th class="text-center" style="width: 60px">STT</th>
-                <th>Bài kiểm tra</th>
-                <th>Lớp</th>
-                <th class="text-center" style="width: 110px">Tổng điểm</th>
-                <th class="text-center" style="width: 140px">Ngày đánh giá</th>
-                <th class="text-center" style="width: 140px">Trạng thái</th>
-                <th class="text-center" style="width: 150px">Báo cáo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="!summativeList || summativeList.length === 0">
-                <td colspan="7" class="text-center py-5 text-gray-400 italic">Chưa có kết quả tổng kết kỳ nào</td>
-              </tr>
-              <tr v-for="(item, idx) in summativeList" :key="'smtv_' + item.id" class="table-row-hover">
-                <td class="text-center font-semibold text-gray-500">{{ idx + 1 }}</td>
-                <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
-                <td class="text-gray-700">{{ item.erp_class_name || item.class_nm || '-' }}</td>
-                <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
-                <td class="text-center text-gray-500 font-medium">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                <td class="text-center">
-                  <span v-if="item.status === 'completed'" class="badge-status-eval badge-done">Đã hoàn thành</span>
-                  <span v-else class="badge-status-eval badge-pending">Bản nháp</span>
-                </td>
-                <td class="text-center">
-                  <router-link
-                    :to="`/lms/evaluations/igbh/summative/report/${item.id}`"
-                    class="action-link-btn text-primary font-bold hover:underline"
-                  >
-                    <i class="fa-solid fa-file-waveform mr-1"></i> Báo cáo 12 tuần
-                  </router-link>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="bordered-table-container">
+        <table class="grid-border-table">
+          <thead>
+            <tr>
+              <th class="text-center" style="width: 50px">STT</th>
+              <th>Bài kiểm tra</th>
+              <th>Lớp</th>
+              <th class="text-center" style="width: 110px">Tổng điểm</th>
+              <th class="text-center" style="width: 140px">Ngày đánh giá</th>
+              <th class="text-center" style="width: 140px">Trạng thái</th>
+              <th class="text-center" style="width: 150px">Báo cáo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!summativeList || summativeList.length === 0">
+              <td colspan="7" class="text-center py-5 text-gray-400 italic">Chưa có kết quả tổng kết kỳ nào</td>
+            </tr>
+            <tr v-for="(item, idx) in summativeList" :key="'smtv_' + item.id" class="grid-row-hover">
+              <td class="text-center font-bold text-gray-500">{{ idx + 1 }}</td>
+              <td class="font-bold text-gray-800">{{ item.test_nm }}</td>
+              <td class="text-gray-700 font-medium">{{ item.erp_class_name || item.class_nm || '-' }}</td>
+              <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
+              <td class="text-center text-gray-700 font-semibold">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
+              <td class="text-center">
+                <span v-if="item.status === 'completed'" class="badge-status-eval badge-done">Đã hoàn thành</span>
+                <span v-else class="badge-status-eval badge-pending">Bản nháp</span>
+              </td>
+              <td class="text-center">
+                <router-link
+                  :to="`/lms/evaluations/igbh/summative/report/${item.id}`"
+                  class="action-link-btn text-primary font-bold hover:underline"
+                >
+                  <i class="fa-solid fa-file-waveform mr-1"></i> Báo cáo 12 tuần
+                </router-link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -277,55 +271,45 @@ export default {
   background: #f1f5f9;
   padding: 3px 10px;
   border-radius: 9999px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
 }
 
-.table-container-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.table-responsive {
+.bordered-table-container {
   width: 100%;
   overflow-x: auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
 }
 
-.detail-data-table {
+.grid-border-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 14px;
 }
 
-.detail-data-table thead th {
-  background: #f8fafc;
-  color: #475569;
+.grid-border-table thead th {
+  background: #f1f5f9;
+  color: #1e293b;
   font-weight: 700;
   font-size: 13.5px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 12px 16px;
-  border-bottom: 2px solid #e2e8f0;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
   white-space: nowrap;
 }
 
-.detail-data-table tbody td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
+.grid-border-table tbody td {
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
   vertical-align: middle;
   font-size: 14px;
   color: #334155;
 }
 
-.table-row-hover:hover {
+.grid-row-hover:hover td {
   background-color: #f8fafc;
-}
-
-.detail-data-table tbody tr:last-child td {
-  border-bottom: none;
 }
 
 .badge-level {
@@ -353,11 +337,13 @@ export default {
 .badge-done {
   background: #dcfce7;
   color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .badge-pending {
   background: #fef9c3;
   color: #a16207;
+  border: 1px solid #fef08a;
 }
 
 .action-link-btn {
