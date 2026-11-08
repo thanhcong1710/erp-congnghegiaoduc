@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tài liệu Hướng dẫn Sử dụng Hệ thống ERP - Luồng Khách hàng Toàn trình</title>
+  <title>Tài liệu Hướng dẫn Sử dụng Hệ thống STEMKey ERP - Luồng Khách hàng Toàn trình</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -20,13 +20,14 @@
       --danger: #ea5455;
       --danger-light: #fceaea;
       --info: #00cfe8;
-      --dark: #2c2c2c;
-      --text: #4b4b5a;
-      --text-muted: #82868b;
-      --border: #ebe9f1;
-      --bg-body: #f8f8fb;
+      --info-light: #e5fafe;
+      --dark: #1e293b;
+      --text: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --bg-body: #f8fafc;
       --bg-card: #ffffff;
-      --sidebar-w: 280px;
+      --sidebar-w: 295px;
     }
 
     * {
@@ -39,7 +40,7 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-body);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.65;
       font-size: 14px;
     }
 
@@ -57,26 +58,26 @@
       justify-content: space-between;
       padding: 0 24px;
       z-index: 1000;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
     }
     .header-left {
       display: flex;
       align-items: center;
-      gap: 22px;
+      gap: 20px;
     }
     .btn-back-header {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       background: linear-gradient(135deg, #7367f0 0%, #5e50ee 100%);
       color: #ffffff !important;
-      padding: 11px 24px;
-      font-size: 15px;
+      padding: 10px 22px;
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       border-radius: 10px;
       text-decoration: none;
-      box-shadow: 0 4px 15px rgba(115, 103, 240, 0.4);
+      box-shadow: 0 4px 14px rgba(115, 103, 240, 0.35);
       transition: all 0.25s ease;
       cursor: pointer;
       border: 2px solid rgba(255, 255, 255, 0.2);
@@ -84,18 +85,14 @@
     .btn-back-header:hover {
       background: linear-gradient(135deg, #5e50ee 0%, #4a3adb 100%);
       transform: translateX(-3px);
-      box-shadow: 0 6px 20px rgba(115, 103, 240, 0.55);
-      color: #ffffff !important;
-    }
-    .btn-back-header i {
-      font-size: 18px;
+      box-shadow: 0 6px 20px rgba(115, 103, 240, 0.5);
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 16px;
+      font-weight: 800;
       color: var(--dark);
       border-left: 2px solid var(--border);
       padding-left: 20px;
@@ -104,9 +101,15 @@
       font-size: 24px;
       color: var(--primary);
     }
+    .brand-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      display: block;
+    }
     .search-box {
       position: relative;
-      width: 380px;
+      width: 400px;
     }
     .search-box input {
       width: 100%;
@@ -149,7 +152,57 @@
       bottom: 0;
       left: 0;
       overflow-y: auto;
-      padding: 20px 12px;
+      padding: 18px 14px 36px 14px;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 12px 4px 12px;
+      margin-top: 10px;
+    }
+    .nav-list {
+      list-style: none;
+    }
+    .nav-item {
+      margin-bottom: 3px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .nav-link .step-num {
+      min-width: 24px;
+      height: 24px;
+      padding: 0 5px;
+      background: #ecebf9;
+      color: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .nav-link:hover .step-num, .nav-link.active .step-num {
+      background: var(--primary);
+      color: #fff;
     }
 
     /* FLOATING BACK BUTTON */
@@ -177,160 +230,195 @@
       background: linear-gradient(135deg, #5e50ee 0%, #4a3adb 100%);
       transform: translateY(-3px) scale(1.02);
       box-shadow: 0 12px 28px rgba(115, 103, 240, 0.6);
-      color: #ffffff !important;
-    }
-    .floating-back-btn i {
-      font-size: 16px;
-    }
-    .sidebar-title {
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.8px;
-      color: var(--text-muted);
-      padding: 8px 12px;
-      margin-top: 10px;
-    }
-    .nav-list {
-      list-style: none;
-    }
-    .nav-item {
-      margin-bottom: 4px;
-    }
-    .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-radius: 8px;
-      color: var(--text);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .nav-link:hover, .nav-link.active {
-      background: var(--primary-light);
-      color: var(--primary);
-      font-weight: 600;
-    }
-    .nav-link .step-num {
-      width: 22px;
-      height: 22px;
-      background: #ecebf9;
-      color: var(--primary);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-    .nav-link:hover .step-num, .nav-link.active .step-num {
-      background: var(--primary);
-      color: #fff;
     }
 
     /* MAIN CONTENT */
     .main-content {
       margin-left: var(--sidebar-w);
       flex: 1;
-      padding: 32px 48px;
-      max-width: 1050px;
+      padding: 32px 44px 80px 44px;
+      max-width: 1140px;
     }
 
     /* FLOW OVERVIEW BANNER */
     .flow-banner {
-      background: linear-gradient(135deg, #7367f0 0%, #9055fd 100%);
+      background: linear-gradient(135deg, #5e50ee 0%, #7367f0 55%, #9055fd 100%);
       color: #fff;
-      padding: 28px;
+      padding: 28px 32px;
       border-radius: 14px;
-      margin-bottom: 36px;
-      box-shadow: 0 8px 24px rgba(115, 103, 240, 0.25);
+      margin-bottom: 32px;
+      box-shadow: 0 10px 28px rgba(115, 103, 240, 0.25);
     }
     .flow-banner h1 {
       font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 10px;
+      font-weight: 800;
+      margin-bottom: 8px;
     }
     .flow-banner p {
       font-size: 14px;
-      opacity: 0.9;
-      margin-bottom: 20px;
+      opacity: 0.92;
+      margin-bottom: 18px;
     }
     .flow-steps-pill {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      align-items: center;
+      gap: 8px;
     }
     .flow-pill {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.18);
       backdrop-filter: blur(4px);
-      padding: 6px 14px;
+      padding: 6px 13px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    /* DEMO SCENARIO BOX */
+    .demo-persona-card {
+      background: #ffffff;
+      border: 1px solid #dcd7fe;
+      border-left: 5px solid var(--primary);
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 10px rgba(115, 103, 240, 0.06);
+    }
+    .demo-persona-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .demo-persona-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      font-size: 13px;
+    }
+    .demo-persona-item {
+      background: #f8f7ff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #ede9fe;
+    }
+    .demo-persona-item strong {
+      color: var(--dark);
+      display: block;
+      margin-bottom: 2px;
     }
 
     /* SECTION CARD */
     .guide-section {
       background: var(--bg-card);
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      padding: 30px;
-      margin-bottom: 36px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-      scroll-margin-top: 84px;
+      padding: 30px 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+      scroll-margin-top: 86px;
     }
     .section-header {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 18px;
+      padding-bottom: 16px;
       margin-bottom: 24px;
     }
     .section-badge {
       background: var(--primary);
       color: #fff;
       font-weight: 700;
-      padding: 6px 14px;
+      padding: 5px 14px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
     }
     .section-title {
-      font-size: 20px;
-      font-weight: 700;
+      font-size: 19px;
+      font-weight: 800;
       color: var(--dark);
     }
     .section-role {
       margin-left: auto;
       font-size: 12px;
-      background: var(--bg-body);
-      border: 1px solid var(--border);
-      padding: 4px 12px;
+      font-weight: 600;
+      background: var(--primary-light);
+      border: 1px solid #dcd7fe;
+      padding: 5px 12px;
       border-radius: 6px;
-      color: var(--text-muted);
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* MENU PATH BAR */
+    .menu-path-bar {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .menu-path-bar .path-label {
+      font-weight: 700;
+      color: var(--dark);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .menu-crumb {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 12.5px;
+    }
+    .menu-url {
+      margin-left: auto;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      color: var(--primary);
+      background: #ede9fe;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 600;
     }
 
     /* STEP LIST */
     .step-item {
       position: relative;
-      padding-left: 36px;
-      margin-bottom: 24px;
+      padding-left: 38px;
+      margin-bottom: 28px;
     }
     .step-item::before {
       content: '';
       position: absolute;
       left: 13px;
-      top: 26px;
-      bottom: -16px;
+      top: 28px;
+      bottom: -18px;
       width: 2px;
       background: var(--border);
+    }
+    .step-item:last-child {
+      margin-bottom: 8px;
     }
     .step-item:last-child::before {
       display: none;
@@ -353,77 +441,211 @@
       box-shadow: 0 0 0 2px var(--primary);
     }
     .step-title {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 15.5px;
+      font-weight: 700;
       color: var(--dark);
       margin-bottom: 8px;
     }
     .step-desc {
       color: var(--text);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
+    .step-desc ul, .step-desc ol {
+      padding-left: 20px;
+      margin-top: 6px;
+    }
+    .step-desc li {
+      margin-bottom: 6px;
+    }
+
+    /* TWO-CASE COMPARISON GRID (FOR CHECKIN) */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 18px 0 26px 0;
+    }
+    @media (max-width: 900px) {
+      .scenario-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .scenario-card {
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px solid var(--border);
+      background: #ffffff;
+      position: relative;
+    }
+    .scenario-card.case-crm {
+      border-color: #28c76f;
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 45%);
+    }
+    .scenario-card.case-walkin {
+      border-color: #ff9f43;
+      background: linear-gradient(180deg, #fffbeb 0%, #ffffff 45%);
+    }
+    .scenario-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .case-crm .scenario-tag {
+      background: #28c76f;
+      color: #ffffff;
+    }
+    .case-walkin .scenario-tag {
+      background: #ff9f43;
+      color: #ffffff;
+    }
+    .scenario-card h3 {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+    .scenario-card p {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .scenario-flow-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .scenario-flow-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      padding: 6px 0;
+      border-top: 1px dashed rgba(100, 116, 139, 0.25);
+    }
+    .scenario-flow-steps li i {
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    /* TABLES FOR STATUS & FIELDS */
+    .guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 18px 0;
+      font-size: 13px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .guide-table th {
+      background: #f1f5f9;
+      color: var(--dark);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .guide-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+    }
+    .guide-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* STATUS PILLS */
+    .pill-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .pill-gray { background: #f1f5f9; color: #475569; }
+    .pill-warning { background: #fef3c7; color: #b45309; }
+    .pill-info { background: #e0f2fe; color: #0369a1; }
+    .pill-success { background: #dcfce7; color: #166534; }
+    .pill-danger { background: #fee2e2; color: #991b1b; }
 
     /* ALERT BOXES */
     .alert-box {
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 14px 18px;
       display: flex;
       gap: 12px;
-      margin: 16px 0;
+      margin: 14px 0;
       font-size: 13px;
+      align-items: flex-start;
+    }
+    .alert-box i {
+      font-size: 16px;
+      margin-top: 2px;
     }
     .alert-warning {
       background: var(--warning-light);
       border-left: 4px solid var(--warning);
-      color: #9b5a00;
+      color: #92400e;
     }
     .alert-tip {
       background: var(--success-light);
       border-left: 4px solid var(--success);
-      color: #176d3b;
+      color: #166534;
     }
     .alert-danger {
       background: var(--danger-light);
       border-left: 4px solid var(--danger);
-      color: #9a191a;
+      color: #991b1b;
+    }
+    .alert-info {
+      background: var(--info-light);
+      border-left: 4px solid var(--info);
+      color: #0e7490;
     }
 
-    /* SCREENSHOT PLACEHOLDER & IMAGE BOX */
+    /* SCREENSHOT CONTAINER */
     .screenshot-container {
       margin: 16px 0 24px 0;
       background: #fafafc;
-      border: 1px dashed #c9c7dd;
+      border: 1px solid #cbd5e1;
       border-radius: 10px;
       overflow: hidden;
       transition: all 0.2s;
     }
     .screenshot-container:hover {
       border-color: var(--primary);
-      box-shadow: 0 4px 16px rgba(115, 103, 240, 0.08);
+      box-shadow: 0 6px 20px rgba(115, 103, 240, 0.1);
     }
     .screenshot-header {
-      background: #f1f0f8;
-      padding: 8px 14px;
+      background: #f1f5f9;
+      padding: 9px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--dark);
       border-bottom: 1px solid var(--border);
     }
     .screenshot-header .file-path {
-      font-family: monospace;
+      font-family: Consolas, monospace;
       color: var(--primary);
       font-weight: 600;
+      font-size: 12px;
     }
     .screenshot-body {
-      padding: 16px;
+      padding: 14px;
       text-align: center;
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       background: #fff;
     }
     .screenshot-body img {
@@ -431,26 +653,14 @@
       height: auto;
       border-radius: 6px;
       border: 1px solid var(--border);
-      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
       cursor: zoom-in;
     }
-    .screenshot-body img[src=""], .screenshot-body img:not([src]) {
-      display: none;
-    }
-    .screenshot-placeholder-info {
-      color: var(--text-muted);
-      padding: 20px;
-    }
-    .screenshot-placeholder-info i {
-      font-size: 36px;
-      color: #b4b7bd;
-      margin-bottom: 10px;
-    }
     .screenshot-caption {
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-muted);
+      margin-top: 10px;
       font-style: italic;
-      margin-top: 8px;
     }
 
     /* LIGHTBOX MODAL */
@@ -462,14 +672,14 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.85);
+      background: rgba(15, 23, 42, 0.88);
       align-items: center;
       justify-content: center;
       padding: 20px;
     }
     .modal-lightbox img {
       max-width: 95%;
-      max-height: 90vh;
+      max-height: 92vh;
       border-radius: 8px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
@@ -481,7 +691,7 @@
       top: 20px;
       right: 30px;
       color: #fff;
-      font-size: 32px;
+      font-size: 36px;
       cursor: pointer;
     }
 
@@ -491,8 +701,9 @@
       color: var(--primary);
       padding: 2px 6px;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 12.5px;
       font-family: Consolas, monospace;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -507,104 +718,107 @@
       </a>
       <div class="brand">
         <i class="fa-solid fa-graduation-cap"></i>
-        <span>SỔ TAY HƯỚNG DẪN VẬN HÀNH</span>
+        <div>
+          <span>SỔ TAY HƯỚNG DẪN VẬN HÀNH STEMKEY ERP</span>
+          <span class="brand-sub">Tài liệu nghiệp vụ chuẩn hóa theo luồng khách hàng toàn trình (Có dữ liệu Demo minh họa)</span>
+        </div>
       </div>
     </div>
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="guideSearch" placeholder="Tìm kiếm nghiệp vụ (ví dụ: checkin, chuyển lớp, hợp đồng...)" onkeyup="filterGuide()">
+      <input type="text" id="guideSearch" placeholder="Tìm nhanh nghiệp vụ (VD: checkin, học thử, thu phí, xếp lớp, học bù...)" onkeyup="filterGuide()">
     </div>
   </header>
 
   <div class="layout-container">
     <!-- SIDEBAR MỤC LỤC -->
     <aside class="sidebar">
-      <div class="sidebar-title">Bắt đầu</div>
+      <div class="sidebar-title">Khởi động</div>
       <ul class="nav-list">
         <li class="nav-item">
-          <a href="#chang-0" class="nav-link">
+          <a href="#chang-0" class="nav-link active">
             <span class="step-num">0</span>
             <span>Đăng nhập hệ thống</span>
           </a>
         </li>
       </ul>
 
-      <div class="sidebar-title">Luồng khách hàng</div>
+      <div class="sidebar-title">Luồng Tuyển sinh & Nhập học</div>
       <ul class="nav-list">
         <li class="nav-item">
-          <a href="#chang-1" class="nav-link active">
+          <a href="#chang-1" class="nav-link">
             <span class="step-num">1</span>
-            <span>Sale lên Data Phụ huynh</span>
+            <span>Sale lên Data & Chăm sóc KH</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-2" class="nav-link">
             <span class="step-num">2</span>
-            <span>Tạo hồ sơ Học sinh</span>
+            <span>Tạo Học sinh & Đặt lịch Check-in</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-3" class="nav-link">
             <span class="step-num">3</span>
-            <span>Check-in tại Trung tâm</span>
+            <span>Tiếp đón & Check-in (2 Trường hợp)</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-4" class="nav-link">
             <span class="step-num">4</span>
-            <span>Lên Học viên Chính thức</span>
+            <span>Lên Chính thức & Cấp mã STK</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-5" class="nav-link">
             <span class="step-num">5</span>
-            <span>Hợp đồng & Đóng học phí</span>
+            <span>Tạo Hợp đồng & Thu Học phí</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-6" class="nav-link">
             <span class="step-num">6</span>
-            <span>Xếp lớp (Enrolment)</span>
+            <span>Xếp lớp Học viên (Enrolment)</span>
           </a>
         </li>
       </ul>
 
-      <div class="sidebar-title">Vận hành sau xếp lớp</div>
+      <div class="sidebar-title">Vận hành Đào tạo sau xếp lớp</div>
       <ul class="nav-list">
         <li class="nav-item">
           <a href="#chang-7-1" class="nav-link">
             <span class="step-num">7.1</span>
-            <span>Điểm danh chuyên cần</span>
+            <span>Điểm danh & Đăng ký Học bù</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-2" class="nav-link">
             <span class="step-num">7.2</span>
-            <span>Đánh giá & Test định kỳ</span>
+            <span>Khảo sát & Đánh giá Năng lực</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-3" class="nav-link">
             <span class="step-num">7.3</span>
-            <span>Học bù & Đổi ca học</span>
+            <span>Quy đổi Gói phí (Exchange)</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-4" class="nav-link">
             <span class="step-num">7.4</span>
-            <span>Chuyển lớp & Chuyển cơ sở</span>
+            <span>Chuyển lớp & Chuyển trung tâm</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-5" class="nav-link">
             <span class="step-num">7.5</span>
-            <span>Bảo lưu & Chuyển phí</span>
+            <span>Bảo lưu & Chuyển nhượng phí</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-6" class="nav-link">
             <span class="step-num">7.6</span>
-            <span>Tái tục / Gia hạn hợp đồng</span>
+            <span>Tái tục / Gia hạn Hợp đồng</span>
           </a>
         </li>
       </ul>
@@ -615,547 +829,935 @@
 
       <!-- BANNER TỔNG QUAN LUỒNG -->
       <div class="flow-banner">
-        <h1>Quy trình Khách hàng Toàn trình (Customer Journey)</h1>
-        <p>Hướng dẫn chuẩn hóa các thao tác nghiệp vụ trên hệ thống ERP từ giai đoạn tiếp cận khách hàng tiềm năng đến vận hành đào tạo chuyên sâu.</p>
+        <h1>Quy trình Khách hàng Toàn trình (End-to-End Customer Journey)</h1>
+        <p>Tài liệu hướng dẫn chi tiết từng bước thao tác trên hệ thống STEMKey ERP, bám sát luồng thực tế từ khi Sale tiếp nhận Lead đến khi Học sinh Check-in, Nhập học, Đóng phí, Xếp lớp và Vận hành đào tạo.</p>
         <div class="flow-steps-pill">
-          <div class="flow-pill"><i class="fa-solid fa-1"></i> Sale lên Data</div>
+          <div class="flow-pill"><i class="fa-solid fa-headset"></i> 1. Sale lên Data</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-2"></i> Nhập Học sinh</div>
+          <div class="flow-pill"><i class="fa-solid fa-child-reaching"></i> 2. Tạo HS & Hẹn Check-in</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-3"></i> Check-in Test</div>
+          <div class="flow-pill"><i class="fa-solid fa-clipboard-check"></i> 3. Check-in tại Cơ sở</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-4"></i> Lên chính thức</div>
+          <div class="flow-pill"><i class="fa-solid fa-id-badge"></i> 4. Cấp mã STK Chính thức</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-5"></i> Đóng phí / HĐ</div>
+          <div class="flow-pill"><i class="fa-solid fa-file-invoice-dollar"></i> 5. Hợp đồng & Thu phí</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-6"></i> Xếp lớp</div>
+          <div class="flow-pill"><i class="fa-solid fa-chalkboard-user"></i> 6. Xếp lớp</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-7"></i> Vận hành & Chăm sóc</div>
+          <div class="flow-pill"><i class="fa-solid fa-gears"></i> 7. Điểm danh, Test & Tái phí</div>
         </div>
       </div>
 
+      <!-- HỒ SƠ DEMO XUYÊN SUỐT -->
+      <div class="demo-persona-card">
+        <div class="demo-persona-header">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>BỘ DỮ LIỆU DEMO XUYÊN SUỐT TRONG TÀI LIỆU NÀY</span>
+        </div>
+        <div class="demo-persona-grid">
+          <div class="demo-persona-item">
+            <strong>Phụ huynh (CRM Lead):</strong>
+            Chị <b>Nguyễn Thị Thu Hằng</b> — SĐT: <code>0986004600</code> (Nguồn: Marketing Facebook Ads)
+          </div>
+          <div class="demo-persona-item">
+            <strong>Học sinh (Con của PH):</strong>
+            1. Bé <b>Phạm Hữu Khánh An</b> (<code>STK000069</code>)<br>
+            2. Bé <b>Phạm Hữu An Khánh</b> (<code>STK000077</code>)
+          </div>
+          <div class="demo-persona-item">
+            <strong>Khách vãng lai (Walk-in):</strong>
+            Anh <b>Đỗ Quang Huy</b> (<code>0936889911</code>) — Bé <b>Đỗ Gia Khiêm</b> (đến trực tiếp quầy Lễ tân)
+          </div>
+          <div class="demo-persona-item">
+            <strong>Cơ sở & Nhân sự phụ trách:</strong>
+            Cơ sở: <b>CS1 — Thăng Long Victory</b><br>
+            Sale/EC: <b>Nguyễn Hà Phương (EC002)</b> | CM: <b>Lê Thu Trang (CM003)</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
       <!-- CHẶNG 0: ĐĂNG NHẬP -->
+      <!-- ========================================================= -->
       <section id="chang-0" class="guide-section">
         <div class="section-header">
           <span class="section-badge">BẮT ĐẦU</span>
           <h2 class="section-title">Đăng nhập Cổng thông tin STEMKey ERP</h2>
-          <span class="section-role"><i class="fa-solid fa-key"></i> Tất cả nhân sự</span>
+          <span class="section-role"><i class="fa-solid fa-users"></i> Tất cả bộ phận</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-compass text-primary"></i> Đường dẫn truy cập:</span>
+          <span class="menu-crumb">Trình duyệt Chrome / Edge</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Trang Đăng nhập</span>
+          <span class="menu-url">/pages/login</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Truy cập Cổng thông tin đào tạo</div>
+          <div class="step-title">Đăng nhập bằng Mã nhân viên (HRM ID)</div>
           <div class="step-desc">
-            Nhân viên truy cập địa chỉ website hệ thống: <code>https://stemkey.congnghegiaoduc.com</code> và đăng nhập bằng <strong>Mã nhân viên (HRM ID)</strong> và <strong>Mật khẩu</strong> được cấp.
+            Nhân sự truy cập địa chỉ hệ thống <code>https://stemkey.congnghegiaoduc.com</code>, nhập <strong>Mã nhân viên</strong> (ví dụ: <code>EC002</code>, <code>CM003</code>, <code>admin</code>) và <strong>Mật khẩu</strong> được cấp rồi nhấn <strong>Đăng nhập</strong>.
           </div>
 
-          <!-- KHUNG ẢNH 0 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 0.1: Cổng đăng nhập hệ thống STEMKey Education</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 0.1: Giao diện Đăng nhập hệ thống STEMKey Education</span>
               <span class="file-path">/images/guide/00-login.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/00-login.png" alt="Đăng nhập STEMKey" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 0.1]</strong></p>
-                <p class="screenshot-caption">Giao diện đăng nhập với Mã nhân viên và Mật khẩu.</p>
-              </div>
+              <img src="../images/guide/00-login.png" alt="Đăng nhập STEMKey" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Màn hình đăng nhập với tài khoản nhân viên tư vấn tuyển sinh (Mã NV: EC002).</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 1 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 1: SALE LÊN DATA & CHĂM SÓC PHỤ HUYNH -->
+      <!-- ========================================================= -->
       <section id="chang-1" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 1</span>
-          <h2 class="section-title">Sale Tiếp nhận Data & Quản lý Phụ huynh (CRM)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Tuyển sinh / Marketing</span>
+          <h2 class="section-title">Sale Lên Data Khách hàng & Ghi nhận Chăm sóc (CRM)</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tie"></i> Sale (EC) / Telesales / Marketing</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">CRM</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Khách hàng</span>
+          <span class="menu-url">/crm/parent/detail-list</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Truy cập màn hình Khách hàng</div>
-          <div class="step-desc">Trên menu điều hướng bên trái, chọn <code>CRM</code> &rarr; <code>Khách hàng</code> (URL: <code>/crm/parent</code>).</div>
-          
-          <!-- KHUNG ẢNH 1 -->
+          <div class="step-title">Tra cứu & Quản lý Danh sách Khách hàng (Chế độ Chi tiết / Tổng quan)</div>
+          <div class="step-desc">
+            Tại màn hình <strong>Danh sách khách hàng (Chi tiết)</strong>, nhân viên Sale có thể:
+            <ul>
+              <li>Sử dụng <strong>Bộ lọc nhanh</strong> theo Từ khóa (Tên phụ huynh, SĐT), Lịch chăm sóc tiếp theo, Trạng thái khách hàng (Level 1 &rarr; 12), Nguồn khách hàng hoặc Người phụ trách.</li>
+              <li>Theo dõi các tab công việc hàng ngày: <code>Tất cả</code>, <code>Chưa chăm sóc</code>, <code>Lịch chăm sóc trong ngày</code>, <code>KH quá hạn xử lý</code>, <code>Ticket chưa xử lý</code>.</li>
+              <li>Chuyển đổi linh hoạt giữa 2 chế độ hiển thị ở góc phải: <strong>Tổng quan</strong> và <strong>Chi tiết</strong> (hiển thị ngay lịch sử cuộc gọi và danh sách các con ngay trên bảng).</li>
+            </ul>
+          </div>
+
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 1.1: Danh sách Khách hàng</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 1.1: Màn hình Danh sách Khách hàng CRM (Chế độ Chi tiết)</span>
               <span class="file-path">/images/guide/01-crm-parent-list.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/01-crm-parent-list.png" alt="Danh sách Khách hàng CRM" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 1.1]</strong></p>
-                <p class="screenshot-caption">Màn hình danh sách phụ huynh kèm bộ lọc trạng thái và nút "Thêm mới".</p>
-              </div>
+              <img src="../images/guide/01-crm-parent-list.png" alt="Danh sách Khách hàng CRM" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Danh sách khách hàng hiển thị rõ SĐT, tên học sinh trực thuộc, lịch sử cuộc gọi gần nhất và nhân viên quản lý.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Thêm mới Phụ huynh (Lead)</div>
+          <div class="step-title">Thêm mới Hồ sơ Phụ huynh (Lead mới)</div>
           <div class="step-desc">
-            Nhấp nút <strong>Thêm mới</strong> (hoặc vào <code>/crm/imports</code> nếu tải lên hàng loạt từ file Excel):
+            Nhấn nút <strong>+ Thêm mới</strong> màu xanh lá (URL: <code>/crm/parent/add</code>) để nhập thông tin khách hàng tiềm năng (hoặc vào <code>CRM</code> &rarr; <code>Import</code> nếu tải lên từ file Excel):
             <ul>
-              <li><strong>Họ tên phụ huynh:</strong> Điền đầy đủ họ và tên.</li>
-              <li><strong>Số điện thoại 1 (*):</strong> Trường bắt buộc dùng để định danh và liên lạc.</li>
-              <li><strong>Nguồn khách hàng:</strong> Facebook, Hotline, Giới thiệu (B2B/C2C), Sự kiện...</li>
-              <li><strong>Người phụ trách:</strong> Gán cho nhân viên tư vấn chịu trách nhiệm chăm sóc.</li>
+              <li><strong>Danh xưng (*) & Họ tên (*):</strong> Ví dụ: <em>Bà — Nguyễn Thị Thu Hằng</em>.</li>
+              <li><strong>Điện thoại (*):</strong> Nhập số điện thoại chính (ví dụ: <code>0986004600</code>). Hệ thống tự động kiểm tra trùng lặp ngay khi nhập xong.</li>
+              <li><strong>Người phụ trách (*) & Nguồn (*):</strong> Chọn Sale phụ trách (<em>EC002 - Nguyễn Hà Phương</em>), Nguồn (<em>Marketing &rarr; Facebook Fanpage STEMKey</em>) và Trạng thái khách hàng.</li>
+              <li><strong>Thông tin học sinh đi kèm (nếu biết trước):</strong> Có thể nhập luôn Họ tên học sinh, Ngày sinh, Giới tính, Trường học ngay ở nửa dưới biểu mẫu.</li>
             </ul>
           </div>
 
           <div class="alert-box alert-warning">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <div><strong>Lưu ý quan trọng:</strong> Hệ thống sẽ kiểm tra trùng số điện thoại. Nếu phụ huynh đã tồn tại, hệ thống sẽ cảnh báo để tránh xung đột dữ liệu giữa các nhân viên Sale.</div>
+            <i class="fa-solid fa-shield-halved"></i>
+            <div>
+              <strong>Cơ chế chống trùng Data:</strong> Khi rời ô <em>Điện thoại</em>, hệ thống tự động gọi API kiểm tra số điện thoại. Nếu SĐT đã tồn tại trên hệ thống, cảnh báo sẽ bật lên để tránh 2 nhân viên Sale chăm sóc trùng một phụ huynh.
+            </div>
           </div>
 
-          <!-- KHUNG ẢNH 2 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 1.2: Form Thêm mới / Chi tiết Phụ huynh</span>
-              <span class="file-path">/images/guide/02-crm-parent-detail.png</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 1.2: Biểu mẫu Thêm mới Khách hàng (Phụ huynh & Học sinh)</span>
+              <span class="file-path">/images/guide/01b-crm-parent-add.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/02-crm-parent-detail.png" alt="Chi tiết hồ sơ phụ huynh" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 1.2]</strong></p>
-                <p class="screenshot-caption">Form nhập thông tin phụ huynh, cấp độ tương tác (Level khách hàng) và lịch chăm sóc tiếp theo.</p>
-              </div>
+              <img src="../images/guide/01b-crm-parent-add.png" alt="Thêm mới Phụ huynh CRM" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Điền đầy đủ thông tin phụ huynh Nguyễn Thị Thu Hằng (0986004600) và thông tin bé Phạm Hữu Khánh An.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">3</div>
-          <div class="step-title">Ghi nhận Chăm sóc & Cập nhật Level khách hàng</div>
+          <div class="step-title">Ghi nhận Lịch sử Chăm sóc & Cập nhật Trạng thái Khách hàng</div>
           <div class="step-desc">
-            Trong màn hình chi tiết phụ huynh:
+            Nhấp vào tên phụ huynh để mở trang <strong>Chi tiết khách hàng</strong> (URL: <code>/crm/parent/{id}/detail</code>):
             <ul>
-              <li>Vào tab <strong>Chăm sóc</strong>: Ghi lại nội dung cuộc gọi, nhu cầu của gia đình.</li>
-              <li>Chọn <strong>Lịch chăm sóc tiếp theo</strong> để hệ thống nhắc việc.</li>
-              <li>Cập nhật <strong>Level khách hàng</strong> theo mức độ tiềm năng (ví dụ: Khách quan tâm, Hẹn test, Chờ chốt phí...).</li>
+              <li>Tại tab <strong>Chăm sóc</strong>, bấm nút <strong>+ Thêm mới chăm sóc</strong> để ghi lại kết quả cuộc gọi, tin nhắn Zalo/SMS, nhu cầu của phụ huynh và đặt <strong>Lịch chăm sóc tiếp theo</strong>.</li>
+              <li>Cập nhật <strong>Trạng thái khách hàng</strong> ở góc trên bên phải phù hợp với tiến độ thực tế (ví dụ: chuyển sang <code>8. KH Hẹn lịch Checkin</code> sau khi phụ huynh đồng ý đưa con đến cơ sở).</li>
             </ul>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 1.3: Hồ sơ Chi tiết Phụ huynh — Tab Lịch sử Chăm sóc</span>
+              <span class="file-path">/images/guide/02-crm-parent-detail.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/02-crm-parent-detail.png" alt="Chi tiết hồ sơ phụ huynh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Theo dõi toàn bộ nhật ký tương tác (Điện thoại, Zalo, SMS), trạng thái cuộc gọi và lịch hẹn chăm sóc tiếp theo.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 2 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 2: TẠO HỒ SƠ HỌC SINH & SALE ĐẶT LỊCH CHECKIN TỪ CRM -->
+      <!-- ========================================================= -->
       <section id="chang-2" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 2</span>
-          <h2 class="section-title">Khởi tạo Hồ sơ Học sinh</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Sale / Lễ tân</span>
+          <h2 class="section-title">Quản lý Học sinh & Sale Đặt lịch Check-in từ Hồ sơ Khách hàng</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tie"></i> Sale (EC) / Tư vấn Tuyển sinh</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Vị trí thao tác:</span>
+          <span class="menu-crumb">CRM</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Chi tiết Khách hàng</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Tab "Học sinh"</span>
+          <span class="menu-url">/crm/parent/{id}/detail</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Thêm học sinh trực thuộc Phụ huynh</div>
-          <div class="step-desc">Tại màn hình Chi tiết Phụ huynh, chuyển sang tab <strong>Học sinh</strong> &rarr; Nhấp <strong>Thêm mới học sinh</strong>.</div>
+          <div class="step-title">Thêm mới Học sinh vào Hồ sơ Phụ huynh</div>
+          <div class="step-desc">
+            Trong màn hình <strong>Chi tiết khách hàng</strong>, chuyển sang tab <strong>Học sinh</strong>:
+            <ul>
+              <li>Nếu phụ huynh có thêm bé chưa được tạo hồ sơ, bấm nút <strong>+ Thêm mới học sinh</strong>.</li>
+              <li>Nhập <strong>Họ tên học sinh</strong>, <strong>Ngày sinh</strong>, <strong>Giới tính</strong> và <strong>Ghi chú</strong> (trường lớp, sở thích, tính cách của bé) rồi nhấn <strong>Lưu</strong>.</li>
+              <li>Học sinh vừa tạo sẽ có trạng thái ban đầu là <span class="pill-status pill-gray">Mới tạo</span>.</li>
+            </ul>
+          </div>
 
-          <!-- KHUNG ẢNH 3 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 2.1: Thêm mới Học sinh từ hồ sơ Phụ huynh</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.1: Popup Thêm mới Học sinh trong Hồ sơ Phụ huynh</span>
               <span class="file-path">/images/guide/03-add-student-modal.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/03-add-student-modal.png" alt="Modal thêm học sinh" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 2.1]</strong></p>
-                <p class="screenshot-caption">Cửa sổ popup nhập họ tên học sinh, ngày sinh, giới tính và trung tâm đăng ký.</p>
-              </div>
+              <img src="../images/guide/03-add-student-modal.png" alt="Modal thêm học sinh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Nhập thông tin bé Phạm Hữu Khánh An trực thuộc hồ sơ phụ huynh Nguyễn Thị Thu Hằng.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Điền thông tin học sinh</div>
+          <div class="step-title">Sale tạo lịch hẹn Check-in ngay trên thẻ Học sinh (Trước khi khách đến)</div>
           <div class="step-desc">
-            <ul>
-              <li><strong>Họ và tên học sinh (*):</strong> Nhập đầy đủ họ tên bé.</li>
-              <li><strong>Ngày sinh:</strong> Để hệ thống gợi ý độ tuổi và chương trình học phù hợp.</li>
-              <li><strong>Trường đang theo học / Lớp:</strong> Thu thập thông tin hỗ trợ tư vấn lộ trình.</li>
-            </ul>
+            Khi phụ huynh chốt lịch đưa con đến trung tâm test đầu vào hoặc học trải nghiệm, <strong>Sale thực hiện đặt lịch Check-in ngay tại tab <code>Học sinh</code> này</strong>:
+            <ol>
+              <li>Trên thẻ của học sinh đang ở trạng thái <strong>Mới tạo</strong> (hoặc <strong>Đã kết thúc</strong>), bấm vào <strong>nút biểu tượng mũi tên định vị màu đỏ</strong> (<i class="fa fa-location-arrow text-danger"></i>) cạnh tên học sinh.</li>
+              <li>Cửa sổ <strong>TẠO CHECKIN HỌC SINH</strong> hiện ra:
+                <ul>
+                  <li><strong>Trung tâm checkin:</strong> Chọn cơ sở khách sẽ đến (ví dụ: <em>CS1 — Thăng Long Victory</em>).</li>
+                  <li><strong>Ngày/Giờ Checkin:</strong> Thời gian hẹn khách đến cơ sở.</li>
+                  <li><strong>Khóa học:</strong> Chọn chương trình học sinh dự kiến test/trải nghiệm (ví dụ: <em>Ucrea</em>, <em>Bright I.G</em>).</li>
+                </ul>
+              </li>
+              <li>Nhấn <strong>Lưu</strong>: Trạng thái trên thẻ học sinh lập tức chuyển thành <span class="pill-status pill-warning">Thêm mới checkin</span> và dữ liệu được đẩy thẳng sang danh sách <code>LMS &rarr; Học sinh &rarr; Checkin</code> của cơ sở để Lễ tân/Giáo vụ chuẩn bị đón tiếp.</li>
+              <li>Nếu khách xin đổi giờ hẹn hoặc đổi khóa học trước khi đến, Sale chỉ cần bấm nút <strong>Cập nhật checkin</strong> (<i class="fa fa-edit text-primary"></i>) ngay dưới thẻ học sinh.</li>
+            </ol>
           </div>
-          <div class="alert-box alert-tip">
-            <i class="fa-solid fa-lightbulb"></i>
-            <div><strong>Mẹo:</strong> Một phụ huynh có thể thêm nhiều học sinh (anh/chị em ruột). Các bé này sau này có thể cùng chia sẻ hoặc chuyển đổi gói phí dễ dàng.</div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.2: Thẻ Học sinh trong tab "Học sinh" & Nút tạo lịch Check-in (Màu đỏ)</span>
+              <span class="file-path">/images/guide/03b-crm-student-tab-checkin.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/03b-crm-student-tab-checkin.png" alt="Tab Học sinh và các trạng thái Checkin" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Minh họa trực quan 3 trạng thái thẻ học sinh: (1) "Mới tạo" có nút đỏ đặt lịch Check-in, (2) "Thêm mới checkin" có nút sửa lịch hẹn, (3) "Đã lên chính thức" có nút xem hồ sơ LMS.</p>
+            </div>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.3: Cửa sổ "Tạo Checkin Học sinh" từ Tab Học sinh</span>
+              <span class="file-path">/images/guide/03c-crm-modal-create-checkin.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/03c-crm-modal-create-checkin.png" alt="Popup Tạo Checkin Học sinh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Sale chọn Trung tâm checkin (CS1 — Thăng Long Victory) và Khóa học (Ucrea) rồi bấm Lưu để đẩy lịch hẹn xuống cơ sở.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 3 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 3: CHECK-IN TẠI TRUNG TÂM (PHÂN NHÁNH 2 TRƯỜNG HỢP RÕ RÀNG) -->
+      <!-- ========================================================= -->
       <section id="chang-3" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 3</span>
-          <h2 class="section-title">Check-in Khách hàng tại Trung tâm (Test / Học thử)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Lễ tân / Sale tại cơ sở</span>
+          <h2 class="section-title">Tiếp đón & Check-in Học sinh tại Trung tâm</h2>
+          <span class="section-role"><i class="fa-solid fa-clipboard-user"></i> Lễ tân / Giáo vụ (CM) / Sale tại cơ sở</span>
         </div>
 
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Học sinh</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Checkin</span>
+          <span class="menu-url">/lms/checkin</span>
+        </div>
+
+        <div class="alert-box alert-info">
+          <i class="fa-solid fa-code-branch"></i>
+          <div>
+            <strong>Nguyên tắc phân luồng nghiệp vụ Check-in quan trọng:</strong><br>
+            Khi phụ huynh đưa học sinh đến quầy Lễ tân cơ sở, nhân viên <strong>KHÔNG mặc định bấm "Thêm mới Checkin" ngay</strong> mà cần phân biệt rõ <strong>2 trường hợp</strong> dưới đây để tránh tạo trùng dữ liệu khách hàng:
+          </div>
+        </div>
+
+        <!-- BẢNG SO SÁNH 2 TRƯỜNG HỢP -->
+        <div class="scenario-grid">
+          <!-- TRƯỜNG HỢP 1 -->
+          <div class="scenario-card case-crm">
+            <span class="scenario-tag"><i class="fa-solid fa-circle-check"></i> Trường hợp 1 — Phổ biến nhất</span>
+            <h3>Sale ĐÃ tạo Check-in từ Tab Học sinh (CRM)</h3>
+            <p>Khách hàng đã được Sale chăm sóc từ trước và đã bấm đặt lịch Check-in tại tab <strong>Học sinh</strong> trong Chi tiết khách hàng (như hướng dẫn ở Chặng 2).</p>
+            <ul class="scenario-flow-steps">
+              <li>
+                <i class="fa-solid fa-ban text-danger"></i>
+                <span><strong>Tuyệt đối KHÔNG</strong> bấm nút <em>"+ Thêm mới Checkin"</em> để nhập lại từ đầu.</span>
+              </li>
+              <li>
+                <i class="fa-solid fa-magnifying-glass text-success"></i>
+                <span>Vào <code>LMS &rarr; Học sinh &rarr; Checkin</code>, gõ Tên hoặc SĐT phụ huynh vào ô <strong>Tìm kiếm</strong> để lọc học sinh đã có sẵn trong danh sách (đang ở trạng thái <span class="pill-status pill-warning">Chưa đến checkin</span>).</span>
+              </li>
+              <li>
+                <i class="fa-solid fa-user-check text-success"></i>
+                <span>Khi khách đến và đồng ý nhập học/học thử, chỉ cần <strong>Xác nhận Check-in / Bấm nút "Lên chính thức"</strong> ngay trên dòng của học sinh đó.</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- TRƯỜNG HỢP 2 -->
+          <div class="scenario-card case-walkin">
+            <span class="scenario-tag"><i class="fa-solid fa-person-walking-arrow-right"></i> Trường hợp 2 — Khách vãng lai (Walk-in)</span>
+            <h3>Sale CHƯA lên Data trên hệ thống</h3>
+            <p>Phụ huynh trực tiếp đến quầy Lễ tân tìm hiểu (khách Walk-in) hoặc chưa từng có hồ sơ trong CRM / chưa được tạo lịch Check-in trước.</p>
+            <ul class="scenario-flow-steps">
+              <li>
+                <i class="fa-solid fa-plus-circle text-warning"></i>
+                <span>Tại màn hình <code>LMS &rarr; Học sinh &rarr; Checkin</code>, bấm nút <strong>+ Thêm mới Checkin</strong> ở góc trên bên phải (URL: <code>/lms/checkin/add</code>).</span>
+              </li>
+              <li>
+                <i class="fa-solid fa-keyboard text-warning"></i>
+                <span>Nhập đồng thời <strong>Thông tin Phụ huynh</strong> + <strong>Thông tin Học sinh</strong> + <strong>Trung tâm checkin & Khóa học</strong> trên cùng 1 biểu mẫu.</span>
+              </li>
+              <li>
+                <i class="fa-solid fa-bolt text-warning"></i>
+                <span>Khi bấm <strong>Thêm mới</strong> (có chọn Trung tâm checkin), hệ thống tự động tạo hồ sơ CRM, ghi nhận lượt Check-in và <strong>chuyển thẳng học sinh lên Chính thức</strong> (cấp mã <code>STK...</code> ngay lập tức).</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- CHI TIẾT TRƯỜNG HỢP 1 -->
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Tạo lượt Check-in khi khách đến cơ sở</div>
-          <div class="step-desc">Khi phụ huynh đưa học sinh đến trung tâm tham quan, kiểm tra năng lực hoặc học trải nghiệm, truy cập <code>LMS</code> &rarr; <code>Checkin</code> &rarr; Chọn <strong>Tạo mới checkin</strong>.</div>
+          <div class="step-title">Thao tác chi tiết Trường hợp 1: Khi Sale ĐÃ thêm mới Check-in từ Tab Học sinh</div>
+          <div class="step-desc">
+            <ol>
+              <li>Truy cập <code>LMS</code> &rarr; <code>Học sinh</code> &rarr; <code>Checkin</code> (URL: <code>/lms/checkin</code>).</li>
+              <li>Tại bộ lọc, gõ <strong>SĐT phụ huynh</strong> (ví dụ: <code>0986004600</code>) hoặc tên bé (<em>Phạm Hữu Khánh An</em>) rồi bấm <strong>Tìm kiếm</strong>.</li>
+              <li>Kiểm tra thông tin trên dòng kết quả: Học sinh đã hiển thị sẵn kèm tên Phụ huynh, SĐT, Nguồn, EC phụ trách, Cơ sở checkin và Khóa học với trạng thái <span class="pill-status pill-warning">Chưa đến checkin</span> (hoặc <span class="pill-status pill-info">Đã checkin</span>).</li>
+              <li><strong>Xác nhận học sinh đến cơ sở & Chuyển lên chính thức:</strong>
+                <ul>
+                  <li>Ghi nhận thời gian học sinh thực tế có mặt tại cơ sở và kết quả buổi trải nghiệm / làm bài test đầu vào tại cột <strong>Ghi chú</strong>.</li>
+                  <li>Tại cột <strong>Thao tác</strong>, nhấn nút màu xanh <strong><i class="fa-solid fa-user-check"></i> Lên chính thức</strong> &rarr; Chọn <strong>Đồng ý</strong> ở hộp thoại xác nhận.</li>
+                  <li>Hệ thống tự động cập nhật xác nhận thời gian đến checkin (nếu trước đó đang ở trạng thái <em>Chưa đến checkin</em>), đồng thời kích hoạt hồ sơ Học viên chính thức và chuyển hướng sang trang Chi tiết học sinh LMS.</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
 
-          <!-- KHUNG ẢNH 4 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 3.1: Màn hình Check-in Trung tâm</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 3.1 (Trường hợp 1): Danh sách Check-in — Tìm học sinh Sale đã hẹn & Bấm xác nhận "Lên chính thức"</span>
+              <span class="file-path">/images/guide/04a-checkin-list-confirm.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/04a-checkin-list-confirm.png" alt="Danh sách Checkin học sinh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Học sinh Phạm Hữu Khánh An (do Sale đặt lịch từ CRM) đã nằm sẵn trong danh sách — Lễ tân/Sale chỉ cần kiểm tra và bấm nút xanh để xác nhận.</p>
+            </div>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 3.2 (Trường hợp 1): Cửa sổ Xác nhận Thời gian đến Check-in & Ghi chú kết quả tiếp đón</span>
+              <span class="file-path">/images/guide/04b-checkin-confirm-modal.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/04b-checkin-confirm-modal.png" alt="Modal Xác nhận Checkin" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Ghi nhận chính xác thời điểm phụ huynh đưa bé đến quầy Lễ tân và ghi chú bàn giao cho Giáo viên làm bài Diagnostic Test.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHI TIẾT TRƯỜNG HỢP 2 -->
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Thao tác chi tiết Trường hợp 2: Khi Sale CHƯA lên Data (Nhập Thêm mới Check-in trực tiếp)</div>
+          <div class="step-desc">
+            Chỉ áp dụng khi tra cứu SĐT phụ huynh chưa có trên hệ thống (khách vãng lai Walk-in đến trực tiếp cơ sở):
+            <ol>
+              <li>Tại màn hình <code>LMS</code> &rarr; <code>Học sinh</code> &rarr; <code>Checkin</code>, bấm nút <strong>+ Thêm mới Checkin</strong> ở góc phải trên cùng (URL: <code>/lms/checkin/add</code>).</li>
+              <li><strong>Phần THÔNG TIN PHỤ HUYNH:</strong> Nhập <em>Danh xưng (*)</em>, <em>Họ tên (*)</em> (ví dụ: <em>Ông — Đỗ Quang Huy</em>), <em>Điện thoại (*)</em> (<code>0936889911</code>), <em>Người phụ trách (*)</em>, <em>Nguồn (*)</em> (chọn <em>Trung tâm &rarr; Khách Walk-in tại quầy Lễ tân</em>) và <em>Trạng thái</em> (<code>9. KH Đã đến Checkin</code>).</li>
+              <li><strong>Phần THÔNG TIN HỌC SINH:</strong>
+                <ul>
+                  <li>Nhập <em>Họ tên học sinh</em> (<em>Đỗ Gia Khiêm</em>), <em>Ngày sinh</em>, <em>Giới tính</em>, <em>Trường học</em>.</li>
+                  <li>Chọn <strong>Trung tâm checkin</strong> (<em>CS1 — Thăng Long Victory</em>) và <strong>Khóa học</strong> (<em>Bright I.G</em>). Nếu phụ huynh đi cùng 2 bé trở lên, bấm <strong>+ Thêm học sinh</strong> để khai báo thêm.</li>
+                </ul>
+              </li>
+              <li>Nhấn nút <strong>Thêm mới</strong>: Hệ thống tự động khởi tạo đồng bộ cả 3 bản ghi (Phụ huynh CRM + Lượt Check-in + Hồ sơ Học sinh chính thức có mã <code>STK...</code>).</li>
+            </ol>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 3.3 (Trường hợp 2): Form "Thêm mới Checkin" dành cho khách chưa có Data trên CRM</span>
               <span class="file-path">/images/guide/04-checkin-add.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/04-checkin-add.png" alt="Checkin Add" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 3.1]</strong></p>
-                <p class="screenshot-caption">Giao diện ghi nhận check-in cơ sở, tìm kiếm học sinh và ghi nhận người tiếp đón.</p>
-              </div>
+              <img src="../images/guide/04-checkin-add.png" alt="Form Thêm mới Checkin Walk-in" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Biểu mẫu nhập mới đồng thời Phụ huynh Đỗ Quang Huy và Học sinh Đỗ Gia Khiêm khi khách đến trực tiếp cơ sở mà Sale chưa lên data.</p>
             </div>
-          </div>
-        </div>
-
-        <div class="step-item">
-          <div class="step-bullet">2</div>
-          <div class="step-title">Xác nhận thông tin & Mục đích buổi gặp</div>
-          <div class="step-desc">
-            <ul>
-              <li>Chọn <strong>Trung tâm (Branch)</strong> đang tiếp đón.</li>
-              <li>Tìm kiếm Phụ huynh/Học sinh theo Số điện thoại hoặc Tên.</li>
-              <li>Ghi nhận kết quả: Học sinh đã làm bài Diagnostic Test đầu vào hoặc trải nghiệm lớp.</li>
-            </ul>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 4 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 4: LÊN HỌC VIÊN CHÍNH THỨC & CẤP MÃ LMS -->
+      <!-- ========================================================= -->
       <section id="chang-4" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 4</span>
-          <h2 class="section-title">Chuyển Trạng thái Học viên Chính thức & Cấp mã LMS</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Quản lý Tuyển sinh / Giáo vụ</span>
+          <h2 class="section-title">Quản lý Hồ sơ Học viên Chính thức & Mã định danh STK</h2>
+          <span class="section-role"><i class="fa-solid fa-user-graduate"></i> Giáo vụ (CM) / Tư vấn Tuyển sinh (EC)</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Học sinh</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Danh sách</span>
+          <span class="menu-url">/lms/students</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Chuyển đổi trạng thái học viên</div>
+          <div class="step-title">Cơ chế cấp Mã học sinh tự động (STK Code) & Đồng bộ Nhân sự quản lý</div>
           <div class="step-desc">
-            Sau khi phụ huynh đồng ý nhập học:
+            Ngay sau khi học sinh được bấm <strong>Lên chính thức</strong> từ danh sách Check-in (hoặc tạo trực tiếp từ form Thêm mới Checkin có chọn cơ sở):
             <ul>
-              <li>Học sinh được cập nhật trạng thái sang <strong>Chính thức (Official Student)</strong>.</li>
-              <li>Hệ thống tự động cấp <strong>Mã LMS (Student LMS Code)</strong> duy nhất dùng cho toàn bộ quá trình học tập, thi cử và theo dõi học phí sau này.</li>
+              <li>Hệ thống tự động sinh <strong>Mã học sinh duy nhất</strong> theo định dạng <code>STK</code> + 6 chữ số (ví dụ: <code>STK000069</code>, <code>STK000077</code>). Nhân viên có thể nhấp trực tiếp vào huy hiệu mã <code>STK...</code> trên bảng để sao chép nhanh vào bộ nhớ tạm.</li>
+              <li>Tự động gán <strong>Trung tâm quản lý</strong>, <strong>EC phụ trách</strong>, <strong>EC Leader</strong> và <strong>Giám đốc trung tâm</strong> dựa theo người phụ trách hồ sơ Check-in.</li>
+              <li>Trạng thái ban đầu của học sinh khi chưa xếp lớp sẽ hiển thị là <code>Chờ xếp lớp học thử</code> hoặc <code>Chờ xếp lớp chính thức</code>.</li>
             </ul>
           </div>
 
-          <!-- KHUNG ẢNH 5 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 4.1: Hồ sơ Học sinh Chính thức với Mã LMS</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 4.1: Danh sách Học sinh Chính thức (LMS Students)</span>
               <span class="file-path">/images/guide/05-student-official.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/05-student-official.png" alt="Hồ sơ Học sinh LMS" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 4.1]</strong></p>
-                <p class="screenshot-caption">Màn hình LMS -> Students hiển thị mã LMS, trung tâm và trạng thái hoạt động.</p>
-              </div>
+              <img src="../images/guide/05-student-official.png" alt="Danh sách Học sinh LMS" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Màn hình quản lý học sinh LMS hiển thị Mã STK, thông tin phụ huynh, lớp đang theo học, EC/CM phụ trách và thanh tiến độ số buổi học.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 5 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 5: TẠO HỢP ĐỒNG NHẬP HỌC & THU HỌC PHÍ -->
+      <!-- ========================================================= -->
       <section id="chang-5" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 5</span>
-          <h2 class="section-title">Tạo Hợp đồng & Đóng Học phí</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Thu ngân / Sale</span>
+          <h2 class="section-title">Tạo Hợp đồng Nhập học & Thu Học phí</h2>
+          <span class="section-role"><i class="fa-solid fa-file-invoice-dollar"></i> Sale (EC) / Kế toán / Thu ngân</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Vận hành &rarr; Nhập học</span>
+          <span>&amp;</span>
+          <span class="menu-crumb">Kế toán &rarr; Chờ thu phí</span>
+          <span class="menu-url">/lms/contracts/add &bull; /lms/waitcharges</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Tạo mới Hợp đồng nhập học</div>
-          <div class="step-desc">Truy cập <code>LMS</code> &rarr; <code>Hợp đồng (Contracts)</code> &rarr; Bấm <strong>Tạo mới hợp đồng</strong> (URL: <code>/lms/contracts/add</code>).</div>
+          <div class="step-title">Bước 1: Tạo mới Hợp đồng tại mục "Nhập học"</div>
+          <div class="step-desc">
+            Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Nhập học</code> &rarr; Nhấn nút <strong>+ Thêm mới</strong> (URL: <code>/lms/contracts/add</code>):
+            <ol>
+              <li><strong>Cột trái — Thông tin học sinh:</strong>
+                <ul>
+                  <li>Chọn <strong>Trung tâm (*)</strong> trước để giới hạn phạm vi tìm kiếm (ví dụ: <em>CS1 — Thăng Long Victory</em>).</li>
+                  <li>Tại ô <strong>Chọn học sinh (*)</strong>, gõ từ 3 ký tự trở lên (Tên học sinh, Mã <code>STK...</code> hoặc SĐT phụ huynh) rồi chọn học sinh trong danh sách gợi ý. Toàn bộ thông tin Họ tên, Mã HS, Phụ huynh, SĐT, Địa chỉ, EC, EC Leader, Giám đốc TT sẽ tự động điền.</li>
+                </ul>
+              </li>
+              <li><strong>Cột phải — Thông tin đăng ký học & Chính sách ưu đãi:</strong>
+                <ul>
+                  <li><strong>Loại hợp đồng (*):</strong> Chọn <code>Học thử</code> (nếu đăng ký gói trải nghiệm 0đ/ngắn hạn) hoặc <code>Chính thức</code> (nếu mua gói khóa học tiêu chuẩn).</li>
+                  <li><strong>Khóa học & Gói học phí:</strong> Chọn khóa học (<em>Ucrea</em>, <em>Bright I.G</em>, <em>Tiếng Anh</em>...) và gói phí tương ứng (3 tháng, 6 tháng, 12 tháng, 24 tháng).</li>
+                  <li><strong>Chính sách ưu đãi STEMKey 2026:</strong> Hệ thống tự động tính <em>Học bổng theo kỳ hạn</em>, quà tặng kèm, và cho phép tích chọn các ưu đãi cộng thêm: <em>Giảm trừ anh chị em học cùng (-5%)</em>, <em>Ưu đãi tặng thêm 10% (gói &ge; 6 tháng)</em>, <em>Đăng ký nhóm 3 / Check-in</em>, <em>Khách hàng nội khu (-5%)</em>.</li>
+                  <li><strong>Sách & Học liệu mua kèm (nếu có):</strong> Chọn bộ học liệu để gộp chung vào phiếu thu.</li>
+                  <li>Chọn <strong>Ngày dự kiến học</strong> và bấm <strong>Lưu</strong> để khởi tạo hợp đồng (mã dạng <code>C000085</code>).</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
 
-          <!-- KHUNG ẢNH 6 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 5.1: Màn hình Tạo Hợp đồng & Chọn Biểu phí</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 5.1: Màn hình Thêm mới Hợp đồng Nhập học & Áp dụng Chính sách Ưu đãi</span>
               <span class="file-path">/images/guide/06-contract-add.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/06-contract-add.png" alt="Tạo hợp đồng" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 5.1]</strong></p>
-                <p class="screenshot-caption">Form tạo hợp đồng: Chọn trung tâm, tìm học sinh, gói học phí, áp dụng chiết khấu/voucher.</p>
-              </div>
+              <img src="../images/guide/06-contract-add.png" alt="Tạo hợp đồng nhập học" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Tạo hợp đồng Chính thức gói 12 tháng Ucrea (96 buổi) cho bé Phạm Hữu An Khánh (STK000077) với đầy đủ ưu đãi học bổng, anh chị em ruột và cư dân nội khu.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Thiết lập các thông số tài chính</div>
+          <div class="step-title">Bước 2: Kế toán / Thu ngân Xác nhận Thu phí Hợp đồng</div>
           <div class="step-desc">
-            <ul>
-              <li><strong>Chọn Học sinh:</strong> Gõ tên hoặc Mã LMS để lấy thông tin tự động.</li>
-              <li><strong>Chọn Gói học phí (Tuition Fee):</strong> Chọn khóa học (3 tháng, 6 tháng, 1 năm, số buổi tương ứng).</li>
-              <li><strong>Áp dụng Voucher / Mã giảm giá:</strong> Nhập mã ưu đãi hoặc chiết khấu chính sách (nếu có).</li>
-              <li><strong>Hình thức thanh toán:</strong> Tiền mặt, Chuyển khoản, Quẹt thẻ POS, Trả góp.</li>
-            </ul>
+            Sau khi hợp đồng chính thức được tạo, hợp đồng sẽ ở trạng thái <code>Chưa đóng phí</code> và xuất hiện trong phân hệ Kế toán:
+            <ol>
+              <li>Vào <code>LMS</code> &rarr; <code>Kế toán</code> &rarr; <code>Chờ thu phí</code> (URL: <code>/lms/waitcharges</code>).</li>
+              <li>Tìm hợp đồng của học sinh (ví dụ: <code>C000085</code> — Số tiền còn phải đóng: <code>16,380,000đ</code>), bấm vào nút biểu tượng thanh toán ở cột <strong>Thao tác</strong> (hoặc nhấp vào mã hợp đồng).</li>
+              <li>Trong màn hình <strong>Thông tin thu phí</strong>: Nhập <strong>Số tiền thu</strong>, chọn <strong>Phương thức đóng phí</strong> (<em>Tiền mặt</em>, <em>Chuyển khoản</em>, <em>Thẻ tín dụng</em>), chọn <strong>Ngày thu phí</strong> và bấm <strong>Thêm phiếu thu</strong>.</li>
+              <li><strong>Kết quả sau khi thu phí:</strong>
+                <ul>
+                  <li>Nếu đóng <strong>đủ 100% học phí</strong> (Công nợ = 0đ): Hợp đồng tự động chuyển sang trạng thái <span class="pill-status pill-success">Chờ xếp lớp chính thức</span>.</li>
+                  <li>Nếu đóng <strong>một phần (Đặt cọc)</strong>: Hợp đồng chuyển sang trạng thái <span class="pill-status pill-warning">Đặt cọc</span> và hệ thống tự động quy đổi số buổi được phép học tương ứng với số tiền đã đóng.</li>
+                  <li>Xem lại lịch sử phiếu thu và in biên lai tại mục <code>LMS</code> &rarr; <code>Kế toán</code> &rarr; <code>Đã thu phí</code> (URL: <code>/lms/charges</code>).</li>
+                </ul>
+              </li>
+            </ol>
           </div>
 
           <div class="alert-box alert-danger">
             <i class="fa-solid fa-circle-exclamation"></i>
-            <div><strong>Điều kiện tiên quyết:</strong> Học sinh bắt buộc phải có hợp đồng hợp lệ (hoặc xác nhận thanh toán/đặt cọc) thì hệ thống mới cho phép xếp vào danh sách lớp học chính thức.</div>
+            <div>
+              <strong>Điều kiện tiên quyết để Xếp lớp:</strong> Đối với hợp đồng Chính thức, học sinh <strong>bắt buộc phải được ghi nhận phiếu thu phí</strong> (đóng đủ hoặc đặt cọc) thì mới xuất hiện trong danh sách chờ xếp lớp của Giáo vụ. (Riêng hợp đồng <em>Học thử 0đ</em> được phép xếp lớp ngay sau khi tạo).
+            </div>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 5.2: Màn hình "Danh sách chờ đóng phí" dành cho Kế toán / Thu ngân</span>
+              <span class="file-path">/images/guide/06b-accounting-waitcharges.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/06b-accounting-waitcharges.png" alt="Danh sách chờ đóng phí" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Kế toán kiểm tra các hợp đồng còn công nợ tại mục Kế toán &rarr; Chờ thu phí và bấm nút Thao tác để lập phiếu thu.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 6 -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 6: XẾP LỚP CHO HỌC SINH (ENROLMENT) -->
+      <!-- ========================================================= -->
       <section id="chang-6" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 6</span>
-          <h2 class="section-title">Xếp lớp cho Học sinh (Enrolment)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ (Academic Admin)</span>
+          <h2 class="section-title">Xếp lớp cho Học viên (Enrolment)</h2>
+          <span class="section-role"><i class="fa-solid fa-chalkboard-user"></i> Giáo vụ (CM) / Quản lý Đào tạo</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Xếp lớp</span>
+          <span class="menu-url">/lms/enrolments</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Truy cập danh sách chờ xếp lớp</div>
-          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Xếp lớp (Enrolments)</code> để lọc danh sách các học viên đã hoàn tất thủ tục phí nhưng chưa có lớp.</div>
+          <div class="step-title">Chọn Lớp học trên Cây thư mục Chương trình</div>
+          <div class="step-desc">
+            Tại màn hình <strong>Xếp lớp</strong> (<code>/lms/enrolments</code>):
+            <ol>
+              <li>Ở cột bên trái, chọn <strong>Trung tâm (*)</strong> (ví dụ: <em>CS1 — Thăng Long Victory</em>) và <strong>Khóa học</strong> (ví dụ: <em>Ucrea</em>).</li>
+              <li>Cây thư mục cấp độ (ví dụ: <code>L1</code>) sẽ hiển thị danh sách các lớp đang hoạt động. Nhấp vào tên lớp cần xếp (ví dụ: <code>STM.04.U.21.Thứ 7-cn</code>).</li>
+              <li>Khung <strong>Thông tin lớp học</strong> bên phải sẽ hiển thị chi tiết:
+                <ul>
+                  <li>Thời gian khóa học, Giáo viên đứng lớp, Ca học & Phòng học, CM quản lý lớp.</li>
+                  <li><strong>Sĩ số hiện tại / Tối đa:</strong> Ví dụ <code>5/16</code> (còn trống 11 chỗ).</li>
+                  <li>Các thẻ lịch học trực quan bên dưới thể hiện các buổi <span class="pill-status pill-success">Đã học</span> và các buổi <span class="pill-status pill-info">Sắp học</span>.</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
 
-          <!-- KHUNG ẢNH 7 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 6.1: Màn hình Xếp lớp</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 6.1: Giao diện Quản lý Lớp học & Sĩ số tại màn hình Xếp lớp</span>
               <span class="file-path">/images/guide/07-enrolment-class.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/07-enrolment-class.png" alt="Xếp lớp" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 6.1]</strong></p>
-                <p class="screenshot-caption">Thao tác chọn lớp, giáo viên phụ trách, ca học và ngày bắt đầu buổi học đầu tiên.</p>
-              </div>
+              <img src="../images/guide/07-enrolment-class.png" alt="Màn hình Xếp lớp" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Chọn lớp STM.04.U.21.Thứ 7-cn để kiểm tra sĩ số (5/16), lịch các buổi sắp học và danh sách học viên đang trong lớp.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Gán học sinh vào Lớp học thực tế</div>
+          <div class="step-title">Thêm Học sinh vào Lớp & Chọn Ngày bắt đầu học chính thức</div>
           <div class="step-desc">
-            <ul>
-              <li><strong>Chọn Lớp học (`Classes`):</strong> Kiểm tra sĩ số hiện tại so với sĩ số tối đa của phòng học (`Rooms`).</li>
-              <li><strong>Ngày bắt đầu học (Start date):</strong> Chọn ngày học sinh chính thức vào lớp.</li>
-              <li>Hệ thống sẽ tự động tính toán lịch học dự kiến và ngày dự kiến kết thúc khóa học dựa theo số buổi đã đóng trong hợp đồng.</li>
-            </ul>
+            <ol>
+              <li>Nhấn nút <strong>+ Thêm học sinh</strong> ở góc phải phía trên bảng danh sách học viên của lớp (lưu ý: lớp phải có gán CM quản lý và chưa vượt quá sĩ số tối đa).</li>
+              <li>Trong cửa sổ <strong>THÊM HỌC SINH VÀO LỚP</strong>:
+                <ul>
+                  <li>Tích chọn ô vuông cạnh học sinh cần xếp lớp (ví dụ: bé <em>Phạm Hữu An Khánh — STK000077</em>).</li>
+                  <li>Tại cột <strong>Ngày bắt đầu học</strong>, chọn buổi học thực tế đầu tiên của bé từ danh sách các ngày có lịch học của lớp (ví dụ: <code>2026-11-14</code>).</li>
+                </ul>
+              </li>
+              <li>Nhấn nút <strong>Thêm học sinh</strong> màu xanh lá: Hệ thống tự động khởi tạo toàn bộ lịch học cá nhân theo số buổi của hợp đồng, tính toán ngày kết thúc dự kiến và cập nhật trạng thái học viên sang <span class="pill-status pill-success">Đang học chính thức</span>.</li>
+            </ol>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 6.2: Popup "Thêm học sinh vào lớp" & Chọn Ngày bắt đầu học</span>
+              <span class="file-path">/images/guide/07b-enrolment-modal.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/07b-enrolment-modal.png" alt="Popup Thêm học sinh vào lớp" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Tích chọn học sinh Phạm Hữu An Khánh (STK000077), chọn Ngày bắt đầu học (2026-11-14) và bấm "Thêm học sinh".</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- CHẶNG 7: VẬN HÀNH SAU XẾP LỚP -->
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.1: ĐIỂM DANH & HỌC BÙ -->
+      <!-- ========================================================= -->
       <section id="chang-7-1" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.1</span>
-          <h2 class="section-title">Vận hành: Điểm danh & Quản lý Chuyên cần</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo viên / Trợ giảng / Giáo vụ</span>
+          <h2 class="section-title">Vận hành: Điểm danh Chuyên cần & Đăng ký Học bù</h2>
+          <span class="section-role"><i class="fa-solid fa-user-check"></i> Giáo vụ (CM) / Giáo viên / Trợ giảng</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Điểm danh</span>
+          <span class="menu-url">/lms/attendances</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Điểm danh theo buổi học</div>
-          <div class="step-desc">Truy cập <code>LMS</code> &rarr; <code>Điểm danh (Attendances)</code> &rarr; Chọn Cơ sở, Lớp học và Ngày học:</div>
+          <div class="step-title">Điểm danh theo Tháng & Buổi học</div>
+          <div class="step-desc">
+            Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Điểm danh</code> (URL: <code>/lms/attendances</code>):
+            <ol>
+              <li>Chọn <strong>Trung tâm (*)</strong>, <strong>Khóa học</strong>, <strong>Lớp học</strong> (ví dụ: <code>STM.04.U.21.Thứ 7-cn</code>) và <strong>Chọn tháng</strong> (ví dụ: <code>2026-11</code>).</li>
+              <li>Bảng điểm danh hiển thị danh sách học viên theo hàng và các buổi học trong tháng theo cột. Tại mỗi ô buổi học, chọn trạng thái tương ứng:
+                <ul>
+                  <li><code>Chưa điểm danh</code>: Buổi học chưa diễn ra hoặc chưa chấm công.</li>
+                  <li><code>Đi học</code>: Học sinh có mặt tham gia buổi học (hệ thống ghi nhận hoàn thành 1 buổi học).</li>
+                  <li><code>Học bù</code>: Khi chọn trạng thái này, cửa sổ <strong>ĐĂNG KÝ HỌC BÙ</strong> sẽ tự động bật lên để chọn <em>Lớp học bù</em> và <em>Buổi học bù</em> tương đương cho học sinh.</li>
+                  <li><code>Đã học bù</code>: Hệ thống tự động cập nhật sau khi học sinh hoàn thành buổi học bù tại bảng <strong>Đăng ký học bù</strong> bên dưới.</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
 
-          <!-- KHUNG ẢNH 8 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.1: Giao diện Điểm danh</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.1: Bảng Điểm danh theo Tháng & Quản lý Danh sách Đăng ký Học bù</span>
               <span class="file-path">/images/guide/08-attendances.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/08-attendances.png" alt="Điểm danh" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 7.1]</strong></p>
-                <p class="screenshot-caption">Bảng danh sách học sinh trong ca học với các nút đánh dấu: Có mặt, Muộn, Nghỉ có phép, Không phép.</p>
-              </div>
+              <img src="../images/guide/08-attendances.png" alt="Màn hình Điểm danh và Học bù" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Giao diện điểm danh lớp STM.04.U.21.Thứ 7-cn tháng 11/2026 kèm bảng theo dõi trạng thái "Đăng ký học bù" ngay phía dưới.</p>
             </div>
-          </div>
-          <div class="step-desc">
-            Đánh dấu trạng thái học sinh:
-            <ul>
-              <li><strong style="color:var(--success)">Có mặt:</strong> Trừ 1 buổi học trong gói hợp đồng.</li>
-              <li><strong style="color:var(--warning)">Nghỉ có phép:</strong> Bảo lưu buổi học hoặc xếp lịch học bù (`Exchange`).</li>
-              <li><strong style="color:var(--danger)">Nghỉ không phép:</strong> Vẫn trừ buổi theo quy chế đào tạo.</li>
-            </ul>
           </div>
         </div>
       </section>
 
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.2: KHẢO SÁT & ĐÁNH GIÁ NĂNG LỰC -->
+      <!-- ========================================================= -->
       <section id="chang-7-2" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.2</span>
-          <h2 class="section-title">Vận hành: Kiểm tra & Đánh giá Năng lực (Evaluations)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo viên / Chuyên môn Đào tạo</span>
+          <h2 class="section-title">Vận hành: Kiểm tra Đầu vào & Đánh giá Năng lực Định kỳ</h2>
+          <span class="section-role"><i class="fa-solid fa-star"></i> Giáo viên / Chuyên môn Đào tạo / Giáo vụ</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">TEST &amp; ĐÁNH GIÁ</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">QUẢN LÝ UCREA / QUẢN LÝ IG.BH</span>
+          <span class="menu-url">/lms/evaluations/igbh/diagnostic &bull; /lms/assessments</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Các hình thức đánh giá trong hệ thống</div>
-          <div class="step-desc">Hệ thống hỗ trợ đánh giá theo chuẩn giáo trình IGBH và UCREA tại mục <code>LMS</code> &rarr; <code>Evaluations</code>:</div>
+          <div class="step-title">Hệ thống Bài kiểm tra & Đánh giá Chuyên môn toàn diện</div>
+          <div class="step-desc">
+            STEMKey ERP cung cấp bộ công cụ đánh giá chuẩn hóa theo từng chương trình đào tạo:
+            <ul>
+              <li><strong>Khảo sát đầu vào (Diagnostic Test — <code>/lms/evaluations/igbh/diagnostic</code>):</strong> Khởi tạo bài khảo sát năng lực chẩn đoán khi học sinh mới Check-in hoặc nhập học, chấm <em>Điểm môn học</em> + <em>Điểm tư duy</em>, tự động gán <strong>Level đề xuất</strong> (ví dụ: <code>IG.BH Level 2</code>, <code>Ucrea L1</code>) và xuất báo cáo PDF gửi phụ huynh.</li>
+              <li><strong>Đánh giá Tuần (Weekly — <code>/lms/evaluations/igbh/weekly</code>) & Đánh giá UCREA (<code>/lms/evaluations/ucrea</code>):</strong> Ghi nhận mức độ tiếp thu, kỹ năng tư duy và thái độ học tập của học viên sau từng chủ đề.</li>
+              <li><strong>Đánh giá Cuối kỳ (Summative — <code>/lms/evaluations/igbh/summative</code>) & Nhận xét chung (<code>/lms/assessments</code>):</strong> Tổng kết năng lực cuối khóa để xét duyệt lên cấp độ tiếp theo và phục vụ tư vấn tái phí.</li>
+            </ul>
+          </div>
 
-          <!-- KHUNG ẢNH 9 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.2: Đánh giá Học viên</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.2: Màn hình Quản lý Khảo sát Đầu vào & Gán Level Học viên</span>
               <span class="file-path">/images/guide/09-evaluations.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/09-evaluations.png" alt="Đánh giá học sinh" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 7.2]</strong></p>
-                <p class="screenshot-caption">Màn hình chấm điểm năng lực định kỳ (Weekly) và tổng kết khóa học (Summative).</p>
-              </div>
+              <img src="../images/guide/09-evaluations.png" alt="Đánh giá năng lực học sinh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Bảng tổng hợp kết quả bài kiểm tra đầu vào với Điểm môn học, Điểm tư duy, Tổng điểm, Level gán và nút Xem báo cáo PDF.</p>
             </div>
-          </div>
-          <div class="step-desc">
-            <ul>
-              <li><strong>Diagnostic Test:</strong> Đánh giá đầu vào lúc mới check-in để xếp trình độ.</li>
-              <li><strong>Weekly Evaluation:</strong> Nhận xét và chấm điểm định kỳ hàng tuần/buổi học.</li>
-              <li><strong>Summative Evaluation:</strong> Đánh giá tổng kết cuối kỳ/cuối khóa để cấp chứng chỉ hoặc đề xuất lên cấp độ mới.</li>
-            </ul>
           </div>
         </div>
       </section>
 
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.3: QUY ĐỔI GÓI PHÍ (EXCHANGE) -->
+      <!-- ========================================================= -->
       <section id="chang-7-3" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.3</span>
-          <h2 class="section-title">Vận hành: Học bù & Đổi ca (Exchange)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ / Chăm sóc Khách hàng</span>
+          <h2 class="section-title">Vận hành: Quy đổi Khóa học / Gói phí (Exchange)</h2>
+          <span class="section-role"><i class="fa-solid fa-arrows-rotate"></i> Giáo vụ (CM) / Kế toán</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Quy đổi</span>
+          <span class="menu-url">/lms/exchange</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Xử lý học bù khi học sinh nghỉ có phép</div>
+          <div class="step-title">Quy đổi số dư học phí & số buổi giữa các Khóa học</div>
           <div class="step-desc">
-            Vào mục <code>LMS</code> &rarr; <code>Học bù / Đổi ca (Exchange)</code>:
+            Khi phụ huynh có nhu cầu chuyển đổi chương trình học cho con (ví dụ: đang học <em>Ucrea</em> muốn chuyển số buổi còn lại sang <em>Bright I.G</em> hoặc <em>Tiếng Anh</em>):
             <ul>
-              <li>Chọn học sinh đã xin nghỉ buổi trước.</li>
-              <li>Chọn lớp học tương đương đang diễn ra bài học đó để xếp học sinh vào học bù mà không làm lệch sĩ số cố định của lớp.</li>
+              <li>Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Quy đổi</code> &rarr; Bấm <strong>+ Thêm mới</strong> (URL: <code>/lms/exchange/add</code>).</li>
+              <li>Chọn Trung tâm, tìm kiếm Học sinh và chọn Gói phí đích muốn quy đổi sang. Hệ thống tự động tính toán số phí còn lại và số buổi sau quy đổi một cách minh bạch.</li>
+            </ul>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.3: Màn hình Danh sách Quy đổi Gói phí (Exchange)</span>
+              <span class="file-path">/images/guide/10b-exchange.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/10b-exchange.png" alt="Quy đổi gói phí" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Theo dõi lịch sử quy đổi từ gói Ucrea sang gói Bright I.G kèm số tiền và số buổi còn lại tương ứng.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.4: CHUYỂN LỚP & CHUYỂN TRUNG TÂM -->
+      <!-- ========================================================= -->
+      <section id="chang-7-4" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 7.4</span>
+          <h2 class="section-title">Vận hành: Chuyển lớp & Chuyển Trung tâm</h2>
+          <span class="section-role"><i class="fa-solid fa-people-arrows"></i> Giáo vụ (CM) / Giám đốc Cơ sở</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS &rarr; Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Chuyển lớp</span>
+          <span>hoặc</span>
+          <span class="menu-crumb">Chuyển trung tâm</span>
+          <span class="menu-url">/lms/class_transfers &bull; /lms/branch_transfers</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chuyển lớp nội bộ hoặc Chuyển kỳ học (`Class Transfers`)</div>
+          <div class="step-desc">
+            Vào <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển lớp</code> (URL: <code>/lms/class_transfers</code>):
+            <ul>
+              <li>Bấm <strong>+ Thêm mới</strong> khi học sinh muốn đổi lịch/ca học sang một lớp khác cùng cấp độ.</li>
+              <li>Bấm <strong>+ Thêm mới chuyển kỳ</strong> khi học sinh hoàn thành cấp độ hiện tại và chuyển lên lớp ở học kỳ/cấp độ cao hơn.</li>
+              <li>Hệ thống tự động rút học sinh khỏi danh sách <em>Lớp đi</em> và cập nhật vào <em>Lớp đến</em> kể từ <strong>Ngày chuyển lớp</strong> được chọn, bảo toàn nguyên vẹn số buổi học còn lại.</li>
+            </ul>
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.4: Màn hình Quản lý Chuyển lớp & Chuyển kỳ học</span>
+              <span class="file-path">/images/guide/10-transfers.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/10-transfers.png" alt="Danh sách chuyển lớp" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Danh sách chuyển lớp hiển thị rõ Lớp đi, Lớp đến, Ngày chuyển hiệu lực và phân loại (Chuyển lớp / Chuyển kỳ).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Chuyển cơ sở đào tạo (`Branch Transfers`)</div>
+          <div class="step-desc">
+            Khi gia đình học sinh chuyển nơi ở sang khu vực khác thuộc hệ thống STEMKey (ví dụ: từ <em>CS1 — Thăng Long Victory</em> sang <em>CS2 — Eurowindow River Park</em>):
+            <ul>
+              <li>Vào <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển trung tâm</code> (URL: <code>/lms/branch_transfers</code>) &rarr; Nhấn <strong>+ Thêm mới</strong>.</li>
+              <li>Chọn học sinh, chọn <strong>Trung tâm nhận</strong> và <strong>Ngày chuyển</strong>. Sau khi được phê duyệt, toàn bộ hồ sơ, hợp đồng và số buổi còn lại của học viên sẽ được bàn giao sang cơ sở mới để xếp lớp.</li>
             </ul>
           </div>
         </div>
       </section>
 
-      <section id="chang-7-4" class="guide-section">
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.5: BẢO LƯU & CHUYỂN PHÍ -->
+      <!-- ========================================================= -->
+      <section id="chang-7-5" class="guide-section">
         <div class="section-header">
-          <span class="section-badge">CHẶNG 7.4</span>
-          <h2 class="section-title">Vận hành: Chuyển lớp & Chuyển cơ sở</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Giáo vụ / Giám đốc cơ sở</span>
+          <span class="section-badge">CHẶNG 7.5</span>
+          <h2 class="section-title">Vận hành: Bảo lưu Học tập & Chuyển nhượng Học phí</h2>
+          <span class="section-role"><i class="fa-solid fa-pause-circle"></i> Giáo vụ (CM) / Kế toán / Giám đốc Cơ sở</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS &rarr; Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Bảo lưu / Bảo lưu cả lớp / Chuyển phí</span>
+          <span class="menu-url">/lms/reserves &bull; /lms/tuition_transfers</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Chuyển lớp nội bộ (`Class Transfers`)</div>
-          <div class="step-desc">Khi học sinh muốn đổi ca học hoặc lên lớp trình độ cao hơn: Vào <code>LMS</code> &rarr; <code>Chuyển lớp</code> &rarr; Chọn Lớp hiện tại &rarr; Chọn Lớp đích &rarr; Chọn Ngày chuyển hiệu lực. Hệ thống tự động chuyển số buổi còn lại sang lớp mới.</div>
+          <div class="step-title">Bảo lưu cá nhân (`Reserves`) & Bảo lưu cả lớp (`Reserves Multi`)</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Bảo lưu cá nhân (<code>/lms/reserves</code>):</strong> Khi học sinh xin tạm nghỉ dài ngày (ốm đau, việc gia đình), Giáo vụ bấm <strong>+ Thêm mới</strong>, chọn số buổi bảo lưu, khoảng thời gian (Từ ngày &ndash; Đến ngày), loại bảo lưu (<em>Bảo lưu thường</em> / <em>Bảo lưu đặc biệt</em>) và phương thức (<em>Giữ chỗ</em> trong lớp hoặc <em>Không giữ chỗ</em>).</li>
+              <li><strong>Bảo lưu cả lớp (<code>/lms/reserves-multi</code>):</strong> Dùng khi trung tâm tạm dừng lịch học của toàn bộ một lớp trong một khoảng thời gian nhất định để tự động lùi ngày kết thúc cho tất cả học sinh trong lớp.</li>
+            </ul>
+          </div>
 
-          <!-- KHUNG ẢNH 10 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.4: Chuyển lớp / Chuyển cơ sở</span>
-              <span class="file-path">/images/guide/10-transfers.png</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.5: Màn hình Quản lý Danh sách Bảo lưu Học tập</span>
+              <span class="file-path">/images/guide/10c-reserves.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/10-transfers.png" alt="Chuyển lớp" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 7.4]</strong></p>
-                <p class="screenshot-caption">Màn hình thao tác chuyển học sinh giữa các lớp hoặc giữa 2 cơ sở (Branch Transfers).</p>
-              </div>
+              <img src="../images/guide/10c-reserves.png" alt="Danh sách bảo lưu" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Theo dõi số buổi bảo lưu, loại bảo lưu (giữ chỗ / không giữ chỗ), thời gian hiệu lực và trạng thái phê duyệt.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Chuyển cơ sở (`Branch Transfers`)</div>
-          <div class="step-desc">Khi phụ huynh chuyển nhà: Giáo vụ thực hiện lệnh Chuyển cơ sở. Cơ sở đến (Destination Branch) sẽ nhận được thông báo tiếp nhận hồ sơ, hợp đồng và lịch sử học tập của học viên.</div>
+          <div class="step-title">Chuyển nhượng Học phí giữa các Học sinh (`Tuition Transfers`)</div>
+          <div class="step-desc">
+            Tại mục <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển phí</code> (URL: <code>/lms/tuition_transfers</code>): Cho phép chuyển số dư học phí chưa sử dụng từ <strong>Học sinh chuyển</strong> sang <strong>Học sinh nhận</strong> (ví dụ: chị ruột <em>Phạm Quỳnh Mai</em> chuyển số dư phí sang cho em trai <em>Phạm Hữu An Khánh</em>), có hỗ trợ in phiếu xác nhận chuyển phí.
+          </div>
         </div>
       </section>
 
-      <section id="chang-7-5" class="guide-section">
-        <div class="section-header">
-          <span class="section-badge">CHẶNG 7.5</span>
-          <h2 class="section-title">Vận hành: Bảo lưu & Chuyển học phí</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Giáo vụ</span>
-        </div>
-
-        <div class="step-item">
-          <div class="step-bullet">1</div>
-          <div class="step-title">Bảo lưu học tập (`Reserves`)</div>
-          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Bảo lưu (Reserves)</code>: Nhập ngày bắt đầu bảo lưu, hạn chót bảo lưu và lý do. Học sinh sẽ được rút khỏi sĩ số lớp hiện tại và đóng băng số buổi học còn lại.</div>
-        </div>
-
-        <div class="step-item">
-          <div class="step-bullet">2</div>
-          <div class="step-title">Chuyển nhượng số dư học phí (`Tuition Transfers`)</div>
-          <div class="step-desc">Vào <code>LMS</code> &rarr; <code>Chuyển phí</code>: Cho phép chuyển số dư tiền học phí từ học sinh này sang học sinh khác (ví dụ: chuyển từ anh sang em ruột).</div>
-        </div>
-      </section>
-
+      <!-- ========================================================= -->
+      <!-- CHẶNG 7.6: TÁI TỤC / GIA HẠN HỢP ĐỒNG -->
+      <!-- ========================================================= -->
       <section id="chang-7-6" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.6</span>
           <h2 class="section-title">Vận hành: Tái tục / Gia hạn Hợp đồng (Tái phí)</h2>
-          <span class="section-role"><i class="fa-solid fa-user-tag"></i> Vai trò: Kế toán / Sale / Tuyển sinh</span>
+          <span class="section-role"><i class="fa-solid fa-file-signature"></i> Sale (EC) / Giáo vụ (CM) / Kế toán</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Nhập học (Quản lý tập trung Hợp đồng mới &amp; Tái phí)</span>
+          <span class="menu-url">/lms/contracts</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Tạo gói Tái phí trực tiếp tại mục "Nhập học"</div>
+          <div class="step-title">Thực hiện Tái phí tập trung ngay tại mục "Nhập học"</div>
           <div class="step-desc">
-            Hệ thống đã tinh gọn quy trình: <strong>Toàn bộ hợp đồng mới và hợp đồng tái phí đều được thực hiện tập trung tại mục <code>LMS</code> &rarr; <code>Nhập học</code> (URL: <code>/lms/contracts/add</code>)</strong>:
-            <ul>
-              <li>Vào <code>Nhập học</code> &rarr; Bấm <strong>Thêm mới</strong>.</li>
-              <li>Chọn trung tâm và tìm kiếm học sinh đang theo học (học sinh cũ).</li>
-              <li>Chọn khóa học, gói học phí, áp dụng chính sách ưu đãi tái tục và bấm <strong>Lưu</strong>.</li>
-              <li><strong>Cơ chế tự động:</strong> Hệ thống tự động nhận diện học sinh đã từng có hợp đồng và tự động tăng số lần tái phí <code>count_recharge</code> (+1), đồng thời hiển thị ngay trên danh sách Nhập học chung.</li>
-            </ul>
+            Khi học sinh sắp hết số buổi của gói hiện tại, hệ thống <strong>không tách menu Tái phí riêng</strong> mà hợp nhất toàn bộ vào mục <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Nhập học</code> để đồng bộ quy trình:
+            <ol>
+              <li>Vào <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Nhập học</code> (URL: <code>/lms/contracts</code>) &rarr; Bấm nút <strong>+ Thêm mới</strong>.</li>
+              <li>Chọn Trung tâm và tìm kiếm học sinh đang theo học theo tên hoặc mã <code>STK...</code> (ví dụ: <em>Phạm Quỳnh Mai — STK000078</em>).</li>
+              <li>Chọn gói học phí gia hạn, áp dụng chính sách học bổng tái tục và nhấn <strong>Lưu</strong>.</li>
+              <li><strong>Cơ chế tự động của hệ thống:</strong> Hệ thống tự động kiểm tra lịch sử hợp đồng của học sinh; nếu học sinh đã từng có hợp đồng chính thức trước đó, hệ thống tự động ghi nhận đây là hợp đồng tái tục và cộng tăng chỉ số lần tái phí (<code>count_recharge + 1</code>).</li>
+            </ol>
           </div>
 
-          <!-- KHUNG ẢNH 11 -->
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image"></i> Ảnh minh họa 7.6: Danh sách Nhập học quản lý tập trung Hợp đồng mới & Tái phí</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.6: Danh sách Nhập học quản lý tập trung cả Hợp đồng mới & Hợp đồng Tái phí</span>
               <span class="file-path">/images/guide/11-contract-renew.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/11-contract-renew.png" alt="Danh sách hợp đồng nhập học và tái phí" onclick="zoomImage(this)" onerror="handleImgError(this)">
-              <div class="screenshot-placeholder-info">
-                <i class="fa-solid fa-camera"></i>
-                <p><strong>[Vị trí ảnh chụp màn hình 7.6]</strong></p>
-                <p class="screenshot-caption">Danh sách hợp đồng tập trung tại LMS -> Nhập học (đã gộp tái phí).</p>
-              </div>
+              <img src="../images/guide/11-contract-renew.png" alt="Danh sách hợp đồng nhập học và tái phí" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Màn hình Danh sách nhập học hiển thị đầy đủ thông tin Học sinh, EC/CM phụ trách, Mã hợp đồng, Gói phí, Công nợ, Trạng thái và nút Xem chi tiết / In hợp đồng.</p>
             </div>
           </div>
 
           <div class="alert-box alert-tip">
             <i class="fa-solid fa-lightbulb"></i>
-            <div><strong>Ghi chú:</strong> Nhân viên không cần chuyển qua menu riêng, chỉ cần thao tác tại màn hình Nhập học là hệ thống tự động quản trị lịch sử tái phí của từng học viên.</div>
+            <div>
+              <strong>Mẹo nối tiếp khóa học:</strong> Khi học sinh đã đóng phí hợp đồng tái tục, Giáo vụ có thể vào màn hình <code>Xếp lớp</code> để ghép nối tiếp hợp đồng mới vào lớp hiện tại giúp lộ trình học của bé diễn ra liên tục không bị gián đoạn.
+            </div>
           </div>
         </div>
       </section>
@@ -1176,26 +1778,22 @@
   </div>
 
   <script>
-    // Xử lý nút quay lại ERP
     function handleBack(e) {
       if (e) e.preventDefault();
-      // Nếu mở từ tab khác hoặc có trang trước đó trong ERP
       if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
         window.history.back();
       } else {
-        // Mở từ tab mới hoặc gõ trực tiếp
         window.location.href = '/';
       }
     }
 
-    // Smooth scroll & Active Nav tracking
     const sections = document.querySelectorAll('.guide-section');
     const navLinks = document.querySelectorAll('.nav-link');
 
     window.addEventListener('scroll', () => {
       let current = '';
       sections.forEach(section => {
-        const sectionTop = section.offsetTop - 120;
+        const sectionTop = section.offsetTop - 130;
         if (pageYOffset >= sectionTop) {
           current = section.getAttribute('id');
         }
@@ -1209,7 +1807,6 @@
       });
     });
 
-    // Image Zoom Modal
     function zoomImage(img) {
       if (!img.src || img.style.display === 'none') return;
       const modal = document.getElementById('imageModal');
@@ -1222,30 +1819,14 @@
       document.getElementById('imageModal').classList.remove('active');
     }
 
-    // Khi chưa có ảnh trong thư mục, ẩn thẻ img để hiện placeholder
-    function handleImgError(img) {
-      img.style.display = 'none';
-      const placeholder = img.nextElementSibling;
-      if (placeholder) {
-        placeholder.style.display = 'block';
-      }
-    }
-
-    // Live search trong nội dung tài liệu
     function filterGuide() {
       const input = document.getElementById('guideSearch').value.toLowerCase();
       const sections = document.querySelectorAll('.guide-section');
-      
       sections.forEach(sec => {
         const text = sec.innerText.toLowerCase();
-        if (text.includes(input)) {
-          sec.style.display = '';
-        } else {
-          sec.style.display = 'none';
-        }
+        sec.style.display = text.includes(input) ? '' : 'none';
       });
     }
   </script>
 </body>
 </html>
-
