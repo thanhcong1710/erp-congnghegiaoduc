@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\AddScheduleHasStudent;
 use App\Console\Commands\AutoWithdraw;
+use App\Console\Commands\ImportAnKhanhCommand;
 use App\Console\Commands\JobsProcessLockParent;
 use App\Console\Commands\JobsSendEmail;
 use App\Console\Commands\ProcessDataScheduleHasStudent;
@@ -25,6 +26,7 @@ class Kernel extends ConsoleKernel
         UpdateEnrolmentLastDate::class,
         JobsProcessLockParent::class,
         AutoWithdraw::class,
+        ImportAnKhanhCommand::class,
     ];
 
     /**
