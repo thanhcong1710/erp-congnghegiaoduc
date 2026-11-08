@@ -1,24 +1,30 @@
 <template>
-  <div class="student-detail-files mt-2">
+  <div class="student-detail-files mt-3">
     <!-- Compact Upload Form -->
-    <div class="compact-upload-bar mb-3">
-      <div class="upload-item" style="max-width: 250px;">
-        <label class="form-label">Chọn tệp đính kèm <span class="text-danger">*</span></label>
-        <input class="form-control-compact" type="file" @change="handleFileUpload" />
-      </div>
-      <div class="upload-item flex-1">
-        <label class="form-label">Ghi chú tệp <span class="text-danger">*</span></label>
-        <input
-          class="form-control-compact"
-          type="text"
-          placeholder="Nhập ghi chú tệp hồ sơ..."
-          v-model="upload.note"
-        />
-      </div>
-      <div class="upload-btn-item">
-        <button class="btn-compact-save" @click="uploadFile">
-          <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Tải lên
-        </button>
+    <div class="upload-bar-card mb-4">
+      <div class="vx-row items-end">
+        <div class="vx-col md:w-1/3 w-full mb-2 md:mb-0">
+          <label class="upload-label">
+            <i class="fa-solid fa-paperclip mr-1 text-primary"></i> Chọn tệp đính kèm <span class="text-danger">*</span>
+          </label>
+          <input class="upload-input-file" type="file" @change="handleFileUpload" />
+        </div>
+        <div class="vx-col md:w-1/2 w-full mb-2 md:mb-0">
+          <label class="upload-label">
+            <i class="fa-solid fa-note-sticky mr-1 text-gray-400"></i> Ghi chú tệp <span class="text-danger">*</span>
+          </label>
+          <input
+            class="upload-input-text"
+            type="text"
+            placeholder="Nhập ghi chú hoặc mô tả tệp..."
+            v-model="upload.note"
+          />
+        </div>
+        <div class="vx-col md:w-1/6 w-full">
+          <button class="btn-upload-submit" @click="uploadFile">
+            <i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> Tải lên
+          </button>
+        </div>
       </div>
     </div>
 
@@ -27,42 +33,49 @@
     </vs-alert>
 
     <!-- Files Table -->
-    <div class="table-responsive rounded border border-slate-200">
-      <table class="w-full bg-white modern-files-table">
-        <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-files-thead">
-          <tr>
-            <th class="py-2.5 px-3" style="width: 50px">STT</th>
-            <th class="py-2.5 px-3" style="width: 280px">Tên tệp</th>
-            <th class="py-2.5 px-3">Ghi chú</th>
-            <th class="py-2.5 px-3 text-center" style="width: 100px">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-if="!files || files.length === 0">
-            <td colspan="4" class="text-center py-4 text-gray-400 italic">
-              Chưa có tài liệu hồ sơ nào được lưu trữ
-            </td>
-          </tr>
-          <tr v-for="(item, index) in files" :key="index" class="hover:bg-slate-50">
-            <td class="py-2 px-3 text-center text-gray-500 font-semibold">{{ index + 1 }}</td>
-            <td class="py-2 px-3">
-              <a :href="item.file_path" target="_blank" class="text-primary font-semibold hover:underline flex items-center">
-                <i class="fa-solid fa-file-pdf text-rose-500 mr-1.5" style="font-size: 14px;"></i>
-                {{ item.file_name }}
-              </a>
-            </td>
-            <td class="py-2 px-3 text-gray-700">{{ item.note }}</td>
-            <td class="py-2 px-3 text-center">
-              <a :href="item.file_path" target="_blank" class="mr-2 text-primary" title="Xem tệp">
-                <i class="fa fa-eye"></i>
-              </a>
-              <button class="text-rose-500 hover:text-rose-700" @click="confirmDelete(item)" title="Xóa tệp">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="table-container-card">
+      <div class="table-responsive">
+        <table class="detail-data-table">
+          <thead>
+            <tr>
+              <th class="text-center" style="width: 60px">STT</th>
+              <th style="width: 320px">Tên tệp</th>
+              <th>Ghi chú</th>
+              <th class="text-center" style="width: 120px">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!files || files.length === 0">
+              <td colspan="4" class="text-center py-6 text-gray-400 italic">
+                <i class="fa-regular fa-folder-open text-2xl text-gray-300 block mb-2"></i>
+                Chưa có tài liệu hồ sơ nào được lưu trữ
+              </td>
+            </tr>
+            <tr v-for="(item, index) in files" :key="index" class="table-row-hover">
+              <td class="text-center font-semibold text-gray-500">{{ index + 1 }}</td>
+              <td>
+                <a :href="item.file_path" target="_blank" class="file-name-link">
+                  <i class="fa-solid fa-file-lines text-indigo-500 mr-2 text-base"></i>
+                  <span class="font-semibold">{{ item.file_name }}</span>
+                </a>
+              </td>
+              <td>
+                <span class="text-gray-700">{{ item.note || '---' }}</span>
+              </td>
+              <td class="text-center">
+                <div class="flex items-center justify-center gap-2">
+                  <a :href="item.file_path" target="_blank" class="action-btn-file btn-view" title="Xem tệp">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+                  <button class="action-btn-file btn-delete" @click="confirmDelete(item)" title="Xóa tệp">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -86,12 +99,12 @@
     },
     data() {
       return {
-        upload: {
-          note: "",
-          file: "",
-          fileName:"",
+        upload:{
+          file:"",
+          note:"",
+          fileName:""
         },
-        alert:{
+        alert: {
           active: false,
           body: '',
           color:'',
@@ -113,9 +126,9 @@
           color: 'danger',
           title: 'Thông báo',
           text: `Bạn chắc chắn xóa file ${item.file_name}?`,
-          accept: () => this.deleteFile(item),
-          acceptText: 'Xóa',
-          cancelText: 'Hủy'
+          accept: () => {
+            this.deleteFile(item)
+          }
         })
       },
       deleteFile(item){
@@ -177,13 +190,14 @@
         formData.append("note", this.upload.note);
         formData.append("student_id", this.student_info.id);
         this.$vs.loading()
-        axios.p("/api/lms/students/upload-file",formData,{
+        axios.p("/api/lms/students/upload-file", formData, {
           headers: {
             "Content-Type": "multipart/form-data"
           }
         })
         .then((response) => {
-          this.$vs.loading.close();
+          this.$vs.loading.close()
+          this.getStudentFiles();
           this.$vs.notify({
             title: 'Thành Công',
             text: response.data.message,
@@ -193,87 +207,167 @@
           })
           this.upload.file = ""
           this.upload.note = ""
-          this.getStudentFiles();
+          this.upload.fileName = ""
         })
-        .catch((e) => {
-          console.log(e);
+        .catch((error) => {
+          console.log(error);
           this.$vs.loading.close();
-        });
+        })
       }
     }
   }
 </script>
 
 <style scoped>
-.compact-upload-bar {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+.upload-bar-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 8px 12px;
+  border-radius: 8px;
+  padding: 14px 18px;
 }
 
-.upload-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-label {
-  font-size: 14px;
+.upload-label {
+  display: block;
+  font-size: 13.5px;
   font-weight: 600;
   color: #475569;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
-.form-control-compact {
-  height: 38px;
-  border: 1px solid #cbd5e1;
-  border-radius: 5px;
-  padding: 6px 10px;
-  font-size: 14px;
-  background: #ffffff;
-  outline: none;
+.upload-input-file {
   width: 100%;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 13.5px;
 }
 
-.upload-btn-item {
-  height: 38px;
-  display: flex;
-  align-items: flex-end;
+.upload-input-text {
+  width: 100%;
+  padding: 7px 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1e293b;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
-.btn-compact-save {
+.upload-input-text:focus {
+  border-color: #7367f0;
+}
+
+.btn-upload-submit {
+  width: 100%;
   height: 38px;
-  padding: 0 16px;
+  background: linear-gradient(135deg, #7367f0, #5e50ee);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
-  background: #28c76f;
-  color: #ffffff;
-  border: 1px solid #28c76f;
-  border-radius: 5px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-.btn-compact-save:hover {
-  background: #20a159;
+.btn-upload-submit:hover {
+  background: linear-gradient(135deg, #5e50ee, #4839eb);
+  box-shadow: 0 2px 6px rgba(115, 103, 240, 0.4);
 }
 
-.modern-files-table {
-  font-size: 14px;
-}
-
-.modern-files-thead {
-  font-size: 13.5px;
+.table-container-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+}
+
+.detail-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.detail-data-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 12px 16px;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.detail-data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #334155;
+}
+
+.table-row-hover:hover {
+  background-color: #f8fafc;
+}
+
+.detail-data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.file-name-link {
+  display: inline-flex;
+  align-items: center;
+  color: #7367f0;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.file-name-link:hover {
+  text-decoration: underline;
+}
+
+.action-btn-file {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-view {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.btn-view:hover {
+  background: #dbeafe;
+}
+
+.btn-delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.btn-delete:hover {
+  background: #fee2e2;
 }
 </style>

@@ -1,126 +1,164 @@
 <template>
-  <div class="student-detail-operating mt-2">
+  <div class="student-detail-operating mt-3">
     <!-- 1. Thông tin chuyển lớp -->
-    <div class="operating-section mb-4">
-      <div class="operating-header">
-        <span class="operating-title">
-          <i class="fa-solid fa-arrow-right-arrow-left text-primary mr-1.5"></i>
+    <div class="operating-section mb-5">
+      <div class="section-card-header">
+        <span class="section-card-title text-indigo-700">
+          <i class="fa-solid fa-arrow-right-arrow-left mr-2"></i>
           1. Thông tin chuyển lớp
         </span>
-        <span class="operating-count">
+        <span class="section-count-badge">
           {{ class_transfer ? class_transfer.length : 0 }} lượt
         </span>
       </div>
-      <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full bg-white modern-op-table">
-          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
-            <tr>
-              <th class="py-2.5 px-3">Học sinh</th>
-              <th class="py-2.5 px-3">Trung tâm</th>
-              <th class="py-2.5 px-3">Lớp đi</th>
-              <th class="py-2.5 px-3">Lớp đến</th>
-              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="!class_transfer || class_transfer.length === 0">
-              <td colspan="5" class="text-center py-4 text-gray-400 italic">
-                Chưa có dữ liệu chuyển lớp
-              </td>
-            </tr>
-            <tr v-for="(item, index) in class_transfer" :key="'ct_' + index" class="hover:bg-slate-50">
-              <td class="py-2 px-3 font-semibold text-gray-800">{{ item.name }} - <span class="text-primary">{{ item.lms_code }}</span></td>
-              <td class="py-2 px-3">{{ item.from_branch_name }}</td>
-              <td class="py-2 px-3 text-rose-600">{{ item.from_class_name }}</td>
-              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_class_name }}</td>
-              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="table-container-card">
+        <div class="table-responsive">
+          <table class="detail-data-table">
+            <thead>
+              <tr>
+                <th>Học sinh</th>
+                <th>Trung tâm</th>
+                <th>Lớp đi</th>
+                <th>Lớp đến</th>
+                <th class="text-center" style="width: 140px">Ngày chuyển</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!class_transfer || class_transfer.length === 0">
+                <td colspan="5" class="text-center py-5 text-gray-400 italic">
+                  Chưa có dữ liệu chuyển lớp
+                </td>
+              </tr>
+              <tr v-for="(item, index) in class_transfer" :key="'ct_' + index" class="table-row-hover">
+                <td class="font-semibold text-gray-800">
+                  {{ item.name }}
+                  <span class="stk-code-badge ml-1">{{ item.lms_code }}</span>
+                </td>
+                <td class="text-gray-700">{{ item.from_branch_name }}</td>
+                <td>
+                  <span class="class-pill class-from">
+                    <i class="fa-solid fa-arrow-left text-xs mr-1"></i> {{ item.from_class_name }}
+                  </span>
+                </td>
+                <td>
+                  <span class="class-pill class-to">
+                    <i class="fa-solid fa-arrow-right text-xs mr-1"></i> {{ item.to_class_name }}
+                  </span>
+                </td>
+                <td class="text-center text-gray-500 font-medium">
+                  {{ item.transfer_date | formatDateView }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- 2. Thông tin chuyển trung tâm -->
-    <div class="operating-section mb-4">
-      <div class="operating-header">
-        <span class="operating-title">
-          <i class="fa-solid fa-building-circle-arrow-right text-emerald-600 mr-1.5"></i>
+    <div class="operating-section mb-5">
+      <div class="section-card-header">
+        <span class="section-card-title text-emerald-700">
+          <i class="fa-solid fa-building-circle-arrow-right mr-2"></i>
           2. Thông tin chuyển trung tâm
         </span>
-        <span class="operating-count">
+        <span class="section-count-badge">
           {{ branch_transfer ? branch_transfer.length : 0 }} lượt
         </span>
       </div>
-      <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full bg-white modern-op-table">
-          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
-            <tr>
-              <th class="py-2.5 px-3">Học sinh</th>
-              <th class="py-2.5 px-3">Trung tâm chuyển</th>
-              <th class="py-2.5 px-3">Trung tâm nhận</th>
-              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
-              <th class="py-2.5 px-3 text-center">Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="!branch_transfer || branch_transfer.length === 0">
-              <td colspan="5" class="text-center py-4 text-gray-400 italic">
-                Chưa có dữ liệu chuyển trung tâm
-              </td>
-            </tr>
-            <tr v-for="(item, index) in branch_transfer" :key="'bt_' + index" class="hover:bg-slate-50">
-              <td class="py-2 px-3 font-semibold text-gray-800">{{ item.name }} - <span class="text-primary">{{ item.lms_code }}</span></td>
-              <td class="py-2 px-3 text-rose-600">{{ item.from_branch_name }}</td>
-              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_branch_name }}</td>
-              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
-              <td class="py-2 px-3 text-center">
-                <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusName }}</vs-chip>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="table-container-card">
+        <div class="table-responsive">
+          <table class="detail-data-table">
+            <thead>
+              <tr>
+                <th>Học sinh</th>
+                <th>Trung tâm chuyển</th>
+                <th>Trung tâm nhận</th>
+                <th class="text-center" style="width: 140px">Ngày chuyển</th>
+                <th class="text-center" style="width: 130px">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!branch_transfer || branch_transfer.length === 0">
+                <td colspan="5" class="text-center py-5 text-gray-400 italic">
+                  Chưa có dữ liệu chuyển trung tâm
+                </td>
+              </tr>
+              <tr v-for="(item, index) in branch_transfer" :key="'bt_' + index" class="table-row-hover">
+                <td class="font-semibold text-gray-800">
+                  {{ item.name }}
+                  <span class="stk-code-badge ml-1">{{ item.lms_code }}</span>
+                </td>
+                <td class="text-rose-600 font-semibold">
+                  <i class="fa-solid fa-building mr-1 text-gray-400"></i> {{ item.from_branch_name }}
+                </td>
+                <td class="text-emerald-600 font-semibold">
+                  <i class="fa-solid fa-building mr-1 text-emerald-500"></i> {{ item.to_branch_name }}
+                </td>
+                <td class="text-center text-gray-500 font-medium">
+                  {{ item.transfer_date | formatDateView }}
+                </td>
+                <td class="text-center">
+                  <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusName }}</vs-chip>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <!-- 3. Thông tin chuyển phí -->
     <div class="operating-section mb-3">
-      <div class="operating-header">
-        <span class="operating-title">
-          <i class="fa-solid fa-money-bill-transfer text-amber-600 mr-1.5"></i>
+      <div class="section-card-header">
+        <span class="section-card-title text-amber-700">
+          <i class="fa-solid fa-money-bill-transfer mr-2"></i>
           3. Thông tin chuyển phí
         </span>
-        <span class="operating-count">
+        <span class="section-count-badge">
           {{ tuition_transfer ? tuition_transfer.length : 0 }} lượt
         </span>
       </div>
-      <div class="table-responsive rounded border border-slate-200">
-        <table class="w-full bg-white modern-op-table">
-          <thead class="bg-slate-50 text-gray-700 font-bold border-b border-slate-200 uppercase modern-op-thead">
-            <tr>
-              <th class="py-2.5 px-3">Học sinh chuyển</th>
-              <th class="py-2.5 px-3">Học sinh nhận</th>
-              <th class="py-2.5 px-3">Số tiền chuyển</th>
-              <th class="py-2.5 px-3 text-center">Ngày chuyển</th>
-              <th class="py-2.5 px-3 text-center">Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="!tuition_transfer || tuition_transfer.length === 0">
-              <td colspan="5" class="text-center py-4 text-gray-400 italic">
-                Chưa có dữ liệu chuyển phí
-              </td>
-            </tr>
-            <tr v-for="(item, index) in tuition_transfer" :key="'tt_' + index" class="hover:bg-slate-50">
-              <td class="py-2 px-3 text-rose-600 font-semibold">{{ item.from_student_name }} - {{ item.from_student_lms_code }}</td>
-              <td class="py-2 px-3 text-emerald-600 font-semibold">{{ item.to_student_name }} - {{ item.to_student_lms_code }}</td>
-              <td class="py-2 px-3 font-bold text-gray-900">{{ item.transferred_amount | formatMoney }}</td>
-              <td class="py-2 px-3 text-center text-gray-500">{{ item.transfer_date | formatDateView }}</td>
-              <td class="py-2 px-3 text-center">
-                <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusNameTuitionTrasfer }}</vs-chip>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="table-container-card">
+        <div class="table-responsive">
+          <table class="detail-data-table">
+            <thead>
+              <tr>
+                <th>Học sinh chuyển</th>
+                <th>Học sinh nhận</th>
+                <th>Số tiền chuyển</th>
+                <th class="text-center" style="width: 140px">Ngày chuyển</th>
+                <th class="text-center" style="width: 130px">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!tuition_transfer || tuition_transfer.length === 0">
+                <td colspan="5" class="text-center py-5 text-gray-400 italic">
+                  Chưa có dữ liệu chuyển phí
+                </td>
+              </tr>
+              <tr v-for="(item, index) in tuition_transfer" :key="'tt_' + index" class="table-row-hover">
+                <td class="text-rose-600 font-semibold">
+                  {{ item.from_student_name }}
+                  <span class="stk-code-badge ml-1" v-if="item.from_student_lms_code">{{ item.from_student_lms_code }}</span>
+                </td>
+                <td class="text-emerald-600 font-semibold">
+                  {{ item.to_student_name }}
+                  <span class="stk-code-badge ml-1" v-if="item.to_student_lms_code">{{ item.to_student_lms_code }}</span>
+                </td>
+                <td class="font-bold text-gray-800">
+                  {{ item.transferred_amount | formatMoney }}
+                </td>
+                <td class="text-center text-gray-500 font-medium">
+                  {{ item.transfer_date | formatDateView }}
+                </td>
+                <td class="text-center">
+                  <vs-chip :color="getStatusColor(item.status)">{{ item.status | getStatusName }}</vs-chip>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -145,21 +183,21 @@
     },
     data() {
       return {
-        class_transfer:[],
-        branch_transfer:[],
-        tuition_transfer:[],
+        class_transfer: [],
+        branch_transfer: [],
+        tuition_transfer: [],
       }
     },
     filters: {
-      getStatusName(status) {
-        switch (Number(status)) {
-          case 0: return 'Chờ duyệt';
-          case 1: return 'Đã duyệt';
-          case 2: return 'Từ chối';
-          default: return 'Khác';
-        }
+      formatDateView(date) {
+        if (!date) return '---';
+        return moment(date).format('DD/MM/YYYY');
       },
-      getStatusNameTuitionTrasfer(status) {
+      formatMoney(num) {
+        if (!num) return '0 đ';
+        return Number(num).toLocaleString('vi-VN') + ' đ';
+      },
+      getStatusName(status) {
         switch (Number(status)) {
           case 0: return 'Chờ duyệt';
           case 1: return 'Đã duyệt';
@@ -202,42 +240,108 @@
 </script>
 
 <style scoped>
-.operating-section {
-  background: #ffffff;
-}
-
-.operating-header {
+.section-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
 }
 
-.operating-title {
-  font-size: 14.5px;
+.section-card-title {
+  font-size: 15px;
   font-weight: 700;
-  color: #334155;
+  display: flex;
+  align-items: center;
 }
 
-.operating-count {
-  font-size: 13px;
-  background: #f1f5f9;
+.section-count-badge {
+  font-size: 12px;
+  font-weight: 700;
   color: #64748b;
-  padding: 2px 10px;
+  background: #f1f5f9;
+  padding: 3px 10px;
   border-radius: 9999px;
-  font-weight: 600;
+  border: 1px solid #e2e8f0;
 }
 
-.modern-op-table {
-  font-size: 14px;
-}
-
-.modern-op-thead {
-  font-size: 13.5px;
+.table-container-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+}
+
+.detail-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.detail-data-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 13.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 12px 16px;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.detail-data-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #334155;
+}
+
+.table-row-hover:hover {
+  background-color: #f8fafc;
+}
+
+.detail-data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.stk-code-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7367f0;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.class-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.class-from {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.class-to {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 </style>

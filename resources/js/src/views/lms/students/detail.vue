@@ -467,10 +467,38 @@ export default {
 
 /* Compact Tabs Card */
 .compact-tabs-card >>> .vx-card__collapsible-content .vx-card__body {
-  padding: 10px 16px !important;
+  padding: 12px 18px !important;
+}
+
+.modern-student-tabs >>> .vs-tabs--ul {
+  border-bottom: 2px solid #e2e8f0;
+  box-shadow: none !important;
+}
+
+.modern-student-tabs >>> .vs-tabs--btn {
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  padding: 12px 18px !important;
+  transition: all 0.2s ease;
+}
+
+.modern-student-tabs >>> .vs-tabs--btn:hover {
+  color: #7367f0 !important;
+}
+
+.modern-student-tabs >>> .vs-tabs--btn.activeBtn {
+  color: #7367f0 !important;
+  font-weight: 700 !important;
+}
+
+.modern-student-tabs >>> .line-vs-tabs {
+  height: 3px !important;
+  background: linear-gradient(90deg, #7367f0, #9084f7) !important;
+  border-radius: 3px 3px 0 0;
 }
 
 .tab-content-area {
-  padding-top: 10px;
+  padding-top: 14px;
 }
 </style>
