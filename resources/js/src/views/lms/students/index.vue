@@ -1,7 +1,7 @@
 <template>
   <div id="page-students-list">
     <!-- Header Banner -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 mt-1">
+    <div class="student-page-header">
       <div>
         <h4 class="font-bold text-gray-800 flex items-center text-lg m-0">
           <i class="fa-solid fa-user-graduate text-primary mr-2" style="font-size: 20px;"></i>
@@ -9,7 +9,7 @@
         </h4>
         <span class="text-gray-500 text-sm">Quản lý hồ sơ học sinh, tiến độ buổi học và thông tin lớp học</span>
       </div>
-      <div class="self-start sm:self-auto flex-shrink-0">
+      <div class="student-header-badge">
         <span class="badge-total-students">
           <i class="fa-solid fa-users mr-1"></i>
           Tổng cộng: <strong>{{ pagination.total }}</strong> học sinh
@@ -92,7 +92,7 @@
     <!-- Table / Content Card -->
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <!-- Mobile View Mode Toggle -->
-      <div class="mobile-view-toggle-bar mb-3 flex items-center justify-between md:hidden">
+      <div class="mobile-view-toggle-bar">
         <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
         <div class="inline-flex rounded shadow-sm">
           <button
@@ -115,7 +115,7 @@
       </div>
 
       <!-- Mobile Card View -->
-      <div v-if="viewMode === 'card'" class="mobile-student-cards md:hidden">
+      <div v-if="!isDesktop && viewMode === 'card'" class="mobile-student-cards">
         <div v-if="!students || students.length === 0" class="text-center py-8 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
           <i class="fa-solid fa-folder-open text-gray-300 mb-2" style="font-size: 36px; display: block;"></i>
           Không tìm thấy dữ liệu học sinh nào phù hợp
@@ -232,7 +232,7 @@
       </div>
 
       <!-- Table View (Desktop & Khi chọn 'Dạng bảng' trên mobile) -->
-      <div :class="{ 'hidden md:block': viewMode === 'card', 'block': viewMode === 'table' }">
+      <div v-show="isDesktop || viewMode === 'table'" class="desktop-table-wrapper">
         <div class="table-responsive">
           <table class="modern-student-table">
             <thead>
@@ -469,6 +469,9 @@ export default {
     }
   },
   computed: {
+    isDesktop() {
+      return this.windowWidth >= 768;
+    },
     paginationMaxButtons() {
       return this.windowWidth < 640 ? 4 : 7;
     }
@@ -718,11 +721,69 @@ export default {
   border-color: #94a3b8;
 }
 
-/* Table Responsive Container - Crucial for mobile */
+/* Container reset */
+#page-students-list {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.student-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .student-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .student-header-badge {
+    width: 100%;
+  }
+  .badge-total-students {
+    display: inline-flex;
+    width: auto;
+  }
+}
+
+/* Card & Table Responsive Container - Crucial for mobile */
+.compact-table-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.compact-table-card >>> .vx-card__collapsible-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.compact-table-card >>> .vx-card__body {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  padding: 16px !important;
+}
+
+.desktop-table-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
 .table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  display: block !important;
 }
 
 /* Modern Student Table - Readable fonts */
@@ -850,8 +911,10 @@ export default {
 
 /* Mobile View Toggle Buttons */
 .mobile-view-toggle-bar {
+  display: none;
   border-bottom: 1px solid #f1f5f9;
   padding-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .mobile-view-toggle-btn {
@@ -883,6 +946,10 @@ export default {
 }
 
 /* Mobile Student Cards */
+.mobile-student-cards {
+  display: block;
+}
+
 .mobile-student-card {
   transition: all 0.2s ease;
 }
@@ -937,6 +1004,14 @@ export default {
   justify-content: flex-end;
 }
 
+@media (max-width: 767px) {
+  .mobile-view-toggle-bar {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 640px) {
   .compact-table-card >>> .vx-card__body {
     padding: 12px !important;
@@ -954,12 +1029,12 @@ export default {
     padding: 0;
   }
   .filter-actions-bar {
-    display: flex;
-    gap: 8px;
+    display: flex !important;
+    gap: 8px !important;
   }
   .btn-filter-action {
-    flex: 1;
-    justify-content: center;
+    flex: 1 !important;
+    justify-content: center !important;
   }
 }
 </style>

@@ -705,13 +705,255 @@
       font-family: Consolas, monospace;
       font-weight: 600;
     }
+
+    /* RESPONSIVE STYLES FOR GUIDE */
+    .mobile-menu-toggle {
+      display: none;
+      background: #f1f0f8;
+      border: 1px solid #dcd7fe;
+      color: var(--primary);
+      font-size: 18px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .mobile-menu-toggle:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .sidebar-mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 6px 14px 6px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-mobile-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.5px;
+    }
+    .btn-close-sidebar {
+      background: transparent;
+      border: none;
+      font-size: 26px;
+      line-height: 1;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(2px);
+      z-index: 1040;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .sidebar-backdrop.active {
+      display: block;
+      opacity: 1;
+    }
+
+    @media (max-width: 1024px) {
+      :root {
+        --sidebar-w: 260px;
+      }
+      .main-content {
+        padding: 24px 24px 80px 24px;
+      }
+      .search-box {
+        width: 260px;
+      }
+      .brand {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .mobile-menu-toggle {
+        display: inline-flex;
+      }
+      .sidebar-mobile-header {
+        display: flex;
+      }
+      .top-header {
+        height: 60px;
+        padding: 0 14px;
+      }
+      .header-left {
+        gap: 12px;
+      }
+      .layout-container {
+        margin-top: 60px;
+      }
+      .sidebar {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 300px;
+        max-width: 85vw;
+        padding: 20px 16px 40px 16px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1050;
+        box-shadow: 6px 0 24px rgba(15, 23, 42, 0.2);
+      }
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0 !important;
+        padding: 20px 14px 80px 14px !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow-x: hidden;
+      }
+      .brand {
+        border-left: none;
+        padding-left: 0;
+        font-size: 13.5px;
+      }
+      .brand-sub {
+        display: none;
+      }
+      .search-box {
+        display: none;
+      }
+      .btn-back-header {
+        padding: 8px 14px;
+        font-size: 12.5px;
+        border-radius: 8px;
+        gap: 6px;
+      }
+      .flow-banner {
+        padding: 20px 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+      .flow-banner h1 {
+        font-size: 18px;
+      }
+      .guide-section {
+        padding: 20px 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+      }
+      .section-header {
+        gap: 8px;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+      }
+      .section-title {
+        font-size: 16px;
+      }
+      .section-role {
+        margin-left: 0;
+        width: 100%;
+      }
+      .menu-path-bar {
+        padding: 8px 12px;
+        gap: 6px;
+        font-size: 12px;
+      }
+      .menu-url {
+        margin-left: 0;
+        width: 100%;
+        word-break: break-all;
+      }
+      .step-item {
+        padding-left: 32px;
+      }
+      .step-bullet {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+      }
+      .step-item::before {
+        left: 11px;
+        top: 24px;
+      }
+      .screenshot-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 8px 12px;
+      }
+      .screenshot-header .file-path {
+        word-break: break-all;
+      }
+      .guide-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .floating-back-btn {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 18px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .top-header {
+        padding: 0 10px;
+      }
+      .btn-back-header span {
+        display: none;
+      }
+      .btn-back-header {
+        padding: 8px 12px;
+      }
+      .brand {
+        gap: 6px;
+      }
+      .brand i {
+        font-size: 18px;
+      }
+      .brand div span:first-child {
+        font-size: 13px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        max-width: 170px;
+      }
+      .demo-persona-card {
+        padding: 14px 16px;
+      }
+      .demo-persona-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
 
+  <!-- SIDEBAR BACKDROP FOR MOBILE -->
+  <div class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+
   <!-- TOP HEADER -->
   <header class="top-header">
     <div class="header-left">
+      <button type="button" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Mở mục lục">
+        <i class="fa-solid fa-bars"></i>
+      </button>
       <a href="/" onclick="handleBack(event)" class="btn-back-header" title="Quay lại hệ thống ERP">
         <i class="fa-solid fa-arrow-left"></i>
         <span>QUAY LẠI ERP</span>
@@ -733,6 +975,10 @@
   <div class="layout-container">
     <!-- SIDEBAR MỤC LỤC -->
     <aside class="sidebar">
+      <div class="sidebar-mobile-header">
+        <span class="sidebar-mobile-title"><i class="fa-solid fa-book-open mr-1.5"></i> MỤC LỤC TÀI LIỆU</span>
+        <button type="button" class="btn-close-sidebar" onclick="toggleSidebar(false)">&times;</button>
+      </div>
       <div class="sidebar-title">Khởi động</div>
       <ul class="nav-list">
         <li class="nav-item">
@@ -1778,6 +2024,21 @@
   </div>
 
   <script>
+    function toggleSidebar(open) {
+      const sidebar = document.querySelector('.sidebar');
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      const isOpen = typeof open === 'boolean' ? open : !sidebar.classList.contains('active');
+      if (isOpen) {
+        sidebar.classList.add('active');
+        backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      } else {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+
     function handleBack(e) {
       if (e) e.preventDefault();
       if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
@@ -1789,6 +2050,14 @@
 
     const sections = document.querySelectorAll('.guide-section');
     const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 900) {
+          toggleSidebar(false);
+        }
+      });
+    });
 
     window.addEventListener('scroll', () => {
       let current = '';
