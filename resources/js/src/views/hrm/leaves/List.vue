@@ -161,8 +161,14 @@
                         <span class="emp-code-badge">{{ emp.employee_code }}</span>
                       </td>
                       <td class="td vs-table--td">
-                        <div class="font-semibold text-gray-900 cursor-pointer hover:text-primary transition" @click="viewEmployeeHistory(emp)">
-                          {{ emp.full_name }}
+                        <div class="font-semibold text-gray-900 cursor-pointer hover:text-primary transition flex items-center flex-wrap" @click="viewEmployeeHistory(emp)">
+                          <span>{{ emp.full_name }}</span>
+                          <span
+                            class="ml-1.5 text-xs px-1.5 py-0.5 rounded font-bold"
+                            :class="emp.is_fulltime ? 'bg-blue-50 text-primary border border-blue-200' : 'bg-gray-100 text-gray-600'"
+                          >
+                            {{ emp.is_fulltime ? 'Fulltime' : (emp.contract_type || 'CTV') }}
+                          </span>
                           <span v-if="emp.work_status === 'resigned'" class="ml-1 text-xs text-danger font-normal bg-red-50 px-1 py-0.5 rounded border border-red-200">Đã thôi việc</span>
                         </div>
                       </td>
@@ -170,27 +176,36 @@
                         {{ emp.department_name }}
                       </td>
                       <td class="td vs-table--td text-center font-semibold text-gray-700">
-                        {{ emp.total_days }} ngày
+                        <span v-if="emp.is_fulltime">{{ emp.total_days }} ngày</span>
+                        <span v-else class="text-xs text-gray-400 italic">0 ngày (CTV)</span>
                       </td>
                       <td class="td vs-table--td text-center font-bold text-warning" style="font-size: 14px;">
                         {{ emp.used_days }} ngày
                       </td>
-                      <td class="td vs-table--td text-center font-bold" :class="emp.remaining_days > 0 ? 'text-success' : 'text-danger'" style="font-size: 14px;">
-                        {{ emp.remaining_days }} ngày
+                      <td class="td vs-table--td text-center font-bold" :class="emp.is_fulltime ? (emp.remaining_days > 0 ? 'text-success' : 'text-danger') : 'text-gray-400'" style="font-size: 14px;">
+                        <span v-if="emp.is_fulltime">{{ emp.remaining_days }} ngày</span>
+                        <span v-else class="text-xs text-gray-400 font-normal">---</span>
                       </td>
                       <td class="td vs-table--td text-center">
-                        <span v-if="emp.is_over_limit" class="status-tag status-danger">
-                          Vượt +{{ emp.over_days }} ngày
-                        </span>
-                        <span v-else-if="emp.is_out_of_leave" class="status-tag status-warning">
-                          Đã hết phép
-                        </span>
-                        <span v-else-if="emp.used_days > 0" class="status-tag status-success">
-                          Bình thường
-                        </span>
-                        <span v-else class="status-tag status-gray">
-                          Chưa nghỉ
-                        </span>
+                        <template v-if="emp.is_fulltime">
+                          <span v-if="emp.is_over_limit" class="status-tag status-danger">
+                            Vượt +{{ emp.over_days }} ngày
+                          </span>
+                          <span v-else-if="emp.is_out_of_leave" class="status-tag status-warning">
+                            Đã hết phép
+                          </span>
+                          <span v-else-if="emp.used_days > 0" class="status-tag status-success">
+                            Bình thường
+                          </span>
+                          <span v-else class="status-tag status-gray">
+                            Chưa nghỉ
+                          </span>
+                        </template>
+                        <template v-else>
+                          <span class="status-tag status-gray" title="CTV không có định mức phép năm 12 ngày">
+                            Không áp dụng
+                          </span>
+                        </template>
                       </td>
                       <td class="td vs-table--td text-center">
                         <button 
@@ -390,11 +405,20 @@
           </div>
         </div>
 
+        <!-- Banner lưu ý cho nhân sự CTV / không phải fulltime -->
+        <div v-if="!selectedStaffHistory.summary.is_fulltime" class="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 mb-4 flex items-center">
+          <i class="fa-solid fa-circle-info mr-2 text-base text-warning"></i>
+          <span>Nhân sự thuộc diện <strong>Cộng tác viên (CTV) / Bán thời gian</strong>, không có định mức nghỉ phép năm 12 ngày. Các ngày nghỉ phép không tính vào quỹ phép năm.</span>
+        </div>
+
         <!-- 4 Card Tóm tắt số ngày phép của nhân viên -->
         <div class="grid grid-cols-4 gap-3 mb-5">
           <div class="summary-card card-blue">
             <span class="summary-label">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
-            <span class="summary-value text-primary">{{ selectedStaffHistory.summary.total_days }} <small class="text-xs font-normal">ngày</small></span>
+            <span class="summary-value text-primary">
+              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.total_days }} <small class="text-xs font-normal">ngày</small></span>
+              <span v-else class="text-sm font-semibold text-gray-500">0 ngày (CTV)</span>
+            </span>
           </div>
 
           <div class="summary-card card-orange">
@@ -404,13 +428,17 @@
 
           <div class="summary-card card-green">
             <span class="summary-label">Số ngày còn lại</span>
-            <span class="summary-value text-success">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
+            <span class="summary-value text-success">
+              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
+              <span v-else class="text-gray-400 font-normal">---</span>
+            </span>
           </div>
 
-          <div class="summary-card" :class="selectedStaffHistory.summary.over_days > 0 ? 'card-red' : 'card-gray'">
+          <div class="summary-card" :class="selectedStaffHistory.summary.is_fulltime && selectedStaffHistory.summary.over_days > 0 ? 'card-red' : 'card-gray'">
             <span class="summary-label">Vượt hạn mức</span>
-            <span class="summary-value" :class="selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
-              {{ selectedStaffHistory.summary.over_days }} <small class="text-xs font-normal">ngày</small>
+            <span class="summary-value" :class="selectedStaffHistory.summary.is_fulltime && selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
+              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.over_days }} <small class="text-xs font-normal">ngày</small></span>
+              <span v-else class="text-gray-400 font-normal">---</span>
             </span>
           </div>
         </div>

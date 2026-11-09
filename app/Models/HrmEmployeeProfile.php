@@ -52,6 +52,24 @@ class HrmEmployeeProfile extends Model
     ];
 
     /**
+     * Kiểm tra nhân sự có phải fulltime không (để tính phép năm 12 ngày)
+     */
+    public function isFulltime()
+    {
+        $empType = strtolower($this->employee_type ?? '');
+        $contractType = strtolower($this->contract_type ?? '');
+        return $empType === 'fulltime' || $contractType === 'fulltime';
+    }
+
+    /**
+     * Số ngày phép năm mặc định: chỉ Fulltime mới có 12 ngày, CTV hoặc loại khác là 0 ngày
+     */
+    public function getDefaultAnnualLeaveDays()
+    {
+        return $this->isFulltime() ? 12.0 : 0.0;
+    }
+
+    /**
      * Generate next sequential code like CHAM01, CHAM02...
      */
     public static function generateNextEmployeeCode()
