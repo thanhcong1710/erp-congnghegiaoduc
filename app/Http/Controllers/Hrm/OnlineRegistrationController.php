@@ -266,6 +266,15 @@ class OnlineRegistrationController extends Controller
         }
 
         $reg = HrmOnlineRegistration::findOrFail($id);
+
+        if ((int)$reg->status !== 0) {
+            $statusText = ((int)$reg->status === 1) ? 'Đã duyệt' : 'Đã từ chối';
+            return response()->json([
+                'status' => 0,
+                'message' => "Đơn này đã ở trạng thái cuối ({$statusText}), không thể cập nhật thêm!"
+            ], 422);
+        }
+
         $reg->status = 1; // Đã duyệt
         $reg->approved_by = $currentUser->id;
         $reg->approved_at = Carbon::now();
@@ -303,6 +312,15 @@ class OnlineRegistrationController extends Controller
         }
 
         $reg = HrmOnlineRegistration::findOrFail($id);
+
+        if ((int)$reg->status !== 0) {
+            $statusText = ((int)$reg->status === 1) ? 'Đã duyệt' : 'Đã từ chối';
+            return response()->json([
+                'status' => 0,
+                'message' => "Đơn này đã ở trạng thái cuối ({$statusText}), không thể cập nhật thêm!"
+            ], 422);
+        }
+
         $reg->status = 2; // Từ chối
         $reg->approved_by = $currentUser->id;
         $reg->approved_at = Carbon::now();

@@ -125,6 +125,16 @@ class LeaveRequestController extends Controller
 
             $leave = HrmLeaveRequest::findOrFail($id);
 
+            // Chỉ cho phép duyệt hoặc từ chối khi bản ghi ở trạng thái mới tạo (chờ duyệt: status == 0)
+            // Nếu đã ở trạng thái cuối (1: đã duyệt, 2: đã từ chối) thì chặn không cho cập nhật
+            if ((int)$leave->status !== 0) {
+                $statusText = ((int)$leave->status === 1) ? 'Đã duyệt' : 'Đã từ chối';
+                return response()->json([
+                    'status' => 0,
+                    'message' => "Đơn này đã ở trạng thái cuối ({$statusText}), không thể cập nhật thêm!"
+                ], 422);
+            }
+
             // Kiểm tra quyền phê duyệt đơn nghỉ phép: Admin, Kế toán hoặc Leader
             $canApprove = $currentUser->canApproveHrmLeave();
             if (!$canApprove) {

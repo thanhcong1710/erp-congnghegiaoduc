@@ -276,15 +276,15 @@
                 <table class="vs-table vs-table--tbody-table w-full">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th width="5%" class="text-center">STT</th>
-                      <th width="12%">Mã NS</th>
-                      <th width="18%">Người làm đơn</th>
-                      <th width="15%">Loại yêu cầu</th>
-                      <th width="18%">Thời gian xin phép</th>
-                      <th width="8%" class="text-center">Số ngày</th>
-                      <th width="12%" class="text-center">Trạng thái</th>
-                      <th width="15%">Phê duyệt</th>
-                      <th width="80" class="text-center" style="white-space: nowrap;">Thao tác</th>
+                      <th width="4%" class="text-center">STT</th>
+                      <th width="11%">Mã NS</th>
+                      <th width="16%">Người làm đơn</th>
+                      <th width="13%">Loại yêu cầu</th>
+                      <th width="16%">Thời gian xin phép</th>
+                      <th width="7%" class="text-center">Số ngày</th>
+                      <th width="10%" class="text-center">Trạng thái</th>
+                      <th width="13%">Phê duyệt</th>
+                      <th class="text-center" style="min-width: 170px; width: 170px; white-space: nowrap;">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -321,30 +321,31 @@
                         </div>
                         <span v-else class="text-gray-400 text-xs italic">Chờ duyệt</span>
                       </td>
-                      <td class="td vs-table--td text-center list-action">
-                        <div class="flex items-center justify-center space-x-1" v-if="canApprove">
+                      <td class="td vs-table--td text-center list-action" style="min-width: 170px; width: 170px; white-space: nowrap;">
+                        <div class="flex items-center justify-center space-x-2" v-if="canApprove && tr.status === 0" style="white-space: nowrap;">
                           <vs-button 
-                            v-if="tr.status === 0" 
                             size="small" 
                             color="success" 
+                            type="filled"
+                            class="px-3 py-1.5 whitespace-nowrap text-xs font-semibold inline-flex items-center"
+                            style="white-space: nowrap;"
                             @click="openApprovePopup(tr)"
                             title="Phê duyệt đơn"
                           >
                             <i class="fa-solid fa-check mr-1"></i> Duyệt
                           </vs-button>
                           <vs-button 
-                            v-if="tr.status !== 2" 
                             size="small" 
                             color="danger" 
-                            type="flat"
-                            class="p-2"
+                            type="border"
+                            class="px-3 py-1.5 whitespace-nowrap text-xs font-semibold inline-flex items-center"
+                            style="white-space: nowrap;"
                             @click="openRejectPopup(tr)"
                             title="Từ chối đơn"
                           >
                             <i class="fa-solid fa-ban mr-1"></i> Từ chối
                           </vs-button>
                         </div>
-                        <span v-else-if="tr.status === 0" class="text-xs text-gray-400 italic">Chờ duyệt</span>
                         <span v-else class="text-xs text-gray-400">---</span>
                       </td>
                     </tr>
@@ -1058,6 +1059,14 @@ export default {
     },
 
     openApprovePopup(leave) {
+      if (leave.status !== 0) {
+        this.$vs.notify({
+          title: 'Cảnh báo',
+          text: 'Đơn này đã ở trạng thái cuối (' + (leave.status === 1 ? 'Đã duyệt' : 'Đã từ chối') + '), không thể cập nhật thêm!',
+          color: 'warning'
+        });
+        return;
+      }
       this.selectedLeave = leave;
       this.approveForm = {
         approval_type: leave.request_category === 'off_to_onl' ? 'half_salary' : 'approved',
@@ -1067,6 +1076,14 @@ export default {
     },
 
     openRejectPopup(leave) {
+      if (leave.status !== 0) {
+        this.$vs.notify({
+          title: 'Cảnh báo',
+          text: 'Đơn này đã ở trạng thái cuối (' + (leave.status === 1 ? 'Đã duyệt' : 'Đã từ chối') + '), không thể cập nhật thêm!',
+          color: 'warning'
+        });
+        return;
+      }
       this.targetRejectLeave = leave;
       this.rejectReason = '';
       this.rejectPopupActive = true;
@@ -1275,6 +1292,25 @@ export default {
   color: #4b5563;
   background-color: #f3f4f6;
   border: 1px solid #e5e7eb;
+}
+
+/* Thao tác nút Duyệt & Từ chối không bị vỡ giao diện */
+.list-action {
+  white-space: nowrap !important;
+}
+.list-action .vs-button {
+  margin: 0 4px !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px 12px !important;
+}
+.list-action .vs-button .vs-button--text {
+  display: inline-flex !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
 }
 
 /* POPUP CHI TIẾT LỊCH SỬ NGHỈ */

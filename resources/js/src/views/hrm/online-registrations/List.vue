@@ -183,11 +183,11 @@
                       <div class="text-gray-500 italic" :title="tr.rejected_reason">Ghi chú: {{ tr.rejected_reason }}</div>
                     </div>
                   </td>
-                  <td class="td vs-table--td text-center">
-                    <div class="flex items-center justify-center space-x-1">
+                  <td class="td vs-table--td text-center" style="white-space: nowrap; min-width: 120px;">
+                    <div class="flex items-center justify-center space-x-1" v-if="tr.status === 0">
                       <!-- Nút Duyệt cho Kế toán & Admin -->
                       <vs-button
-                        v-if="canApproveRegistration && tr.status === 0"
+                        v-if="canApproveRegistration"
                         size="small"
                         color="success"
                         type="flat"
@@ -200,7 +200,7 @@
 
                       <!-- Nút Từ chối cho Kế toán & Admin -->
                       <vs-button
-                        v-if="canApproveRegistration && tr.status !== 2"
+                        v-if="canApproveRegistration"
                         size="small"
                         color="danger"
                         type="flat"
@@ -211,9 +211,9 @@
                         <i class="fa-solid fa-xmark text-base"></i>
                       </vs-button>
 
-                      <!-- Nút Xóa -->
+                      <!-- Nút Xóa (khi chưa duyệt) -->
                       <vs-button
-                        v-if="canApproveRegistration || (tr.status === 0 && canDeleteRegistration(tr))"
+                        v-if="canApproveRegistration || canDeleteRegistration(tr)"
                         size="small"
                         color="danger"
                         type="flat"
@@ -224,6 +224,7 @@
                         <i class="fa-solid fa-trash-can text-sm"></i>
                       </vs-button>
                     </div>
+                    <span v-else class="text-xs text-gray-400">---</span>
                   </td>
                 </tr>
                 <tr v-if="!registrations.length">
