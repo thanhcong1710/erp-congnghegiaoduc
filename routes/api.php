@@ -526,6 +526,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('list', 'Hrm\LeaveRequestController@list');
                 Route::post('add', 'Hrm\LeaveRequestController@add');
                 Route::post('approve/{id}', 'Hrm\LeaveRequestController@approve');
+                Route::post('reject/{id}', 'Hrm\LeaveRequestController@reject');
                 Route::post('balance', 'Hrm\LeaveRequestController@getLeaveBalance');
                 Route::post('all-balances', 'Hrm\LeaveRequestController@allBalances');
                 Route::post('employee-history/{employeeId}', 'Hrm\LeaveRequestController@employeeLeaveHistory');

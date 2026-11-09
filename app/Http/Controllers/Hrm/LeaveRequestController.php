@@ -154,9 +154,32 @@ class LeaveRequestController extends Controller
             $approvalType = $request->approval_type ?: 'approved'; // approved, half_salary, late_unpaid, rejected
 
             if ($approvalType === 'rejected') {
+                $wasApproved = ($leave->status == 1);
                 $leave->status = 2; // Từ chối
                 $leave->approval_type = 'rejected';
-                $leave->rejection_reason = $request->rejection_reason;
+                $leave->rejection_reason = $request->rejection_reason ?: 'Quản lý từ chối';
+
+                // Nếu đơn này trước đó đã được duyệt thì hoàn lại số ngày phép và hoàn lại trạng thái điểm danh
+                if ($wasApproved) {
+                    if ($leave->request_category === 'leave') {
+                        $year = Carbon::parse($leave->start_date)->year;
+                        $balance = HrmLeaveBalance::where('user_id', $leave->user_id)->where('year', $year)->first();
+                        if ($balance) {
+                            $balance->used_days = max(0, $balance->used_days - $leave->duration_days);
+                            $balance->save();
+                        }
+                    }
+
+                    $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
+                    $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
+                    HrmAttendance::where(function ($q) use ($empId, $leave) {
+                        if ($empId) $q->where('employee_id', $empId);
+                        if ($leave->user_id) $q->orWhere('user_id', $leave->user_id);
+                    })
+                    ->whereBetween('date', [$leave->start_date, $leave->end_date])
+                    ->whereIn('attendance_status', ['leave_approved', 'leave_approved_half'])
+                    ->update(['attendance_status' => 'not_checked']);
+                }
             } else {
                 $leave->status = 1; // Đã duyệt
                 $leave->approval_type = $approvalType;
@@ -184,6 +207,8 @@ class LeaveRequestController extends Controller
                     $attStatus = 'leave_approved';
                     if ($approvalType === 'late_unpaid') {
                         $attStatus = 'late_submitted';
+                    } elseif ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1) {
+                        $attStatus = 'leave_approved_half';
                     }
 
                     $condition = ['date' => $dateStr];
@@ -212,7 +237,7 @@ class LeaveRequestController extends Controller
 
             return response()->json([
                 'status' => 1,
-                'message' => 'Phê duyệt đơn thành công!'
+                'message' => ($approvalType === 'rejected') ? 'Đã từ chối đơn thành công!' : 'Phê duyệt đơn thành công!'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -220,6 +245,15 @@ class LeaveRequestController extends Controller
                 'message' => 'Lỗi: ' . $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     * Từ chối đơn nghỉ phép trực tiếp với lý do
+     */
+    public function reject(Request $request, $id)
+    {
+        $request->merge(['approval_type' => 'rejected']);
+        return $this->approve($request, $id);
     }
 
     /**

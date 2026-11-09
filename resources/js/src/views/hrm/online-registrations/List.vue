@@ -180,9 +180,8 @@
                     </div>
                     <div v-else-if="tr.status === 2">
                       <div class="font-semibold text-danger">{{ tr.approved_by_name || 'Từ chối' }}</div>
-                      <div class="text-gray-500 italic" :title="tr.rejected_reason">Lý do: {{ tr.rejected_reason }}</div>
+                      <div class="text-gray-500 italic" :title="tr.rejected_reason">Ghi chú: {{ tr.rejected_reason }}</div>
                     </div>
-                    <span v-else class="text-gray-400 italic">Đang chờ duyệt</span>
                   </td>
                   <td class="td vs-table--td text-center">
                     <div class="flex items-center justify-center space-x-1">
@@ -201,7 +200,7 @@
 
                       <!-- Nút Từ chối cho Kế toán & Admin -->
                       <vs-button
-                        v-if="canApproveRegistration && tr.status === 0"
+                        v-if="canApproveRegistration && tr.status !== 2"
                         size="small"
                         color="danger"
                         type="flat"
@@ -404,9 +403,9 @@
         </div>
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
-            <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do từ chối (*)</label>
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Ghi chú / Lý do từ chối (*)</label>
             <textarea
-              placeholder="Nhập lý do Kế toán/Admin từ chối..."
+              placeholder="Nhập ghi chú lý do Kế toán/Admin từ chối..."
               rows="3"
               class="vs-inputx vs-input--input normal w-full"
               style="padding: 10px 14px; font-size: 13px;"
@@ -508,10 +507,10 @@ export default {
       return Math.ceil(this.filteredList.length / this.perPage) || 1;
     },
     canApproveRegistration() {
-      if (!this.canApprove) return false;
+      if (this.canApprove) return true;
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
       if (user.uid === 1 || user.id === 1) return true;
-      const adminRoleNames = ['admin', 'hrm_manager'];
+      const adminRoleNames = ['admin', 'hrm_manager', 'accountant', 'ke_toan', 'ketoan'];
       const roleName = (user.roleName || user.role_name || '').toLowerCase();
       return adminRoleNames.some(r => roleName.includes(r));
     }

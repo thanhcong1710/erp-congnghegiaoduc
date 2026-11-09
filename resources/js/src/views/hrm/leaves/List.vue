@@ -296,22 +296,41 @@
                         <span v-if="tr.status === 1" class="font-semibold text-xs" :class="getApprovalTypeClass(tr.approval_type)">
                           {{ getApprovalTypeText(tr.approval_type) }}
                         </span>
-                        <span v-else-if="tr.status === 2" class="text-danger text-xs">
-                          {{ tr.rejection_reason || 'Từ chối' }}
-                        </span>
-                        <span v-else class="text-gray-400 text-xs">---</span>
+                        <div v-else-if="tr.status === 2" class="text-danger text-xs">
+                          <div class="font-semibold flex items-center">
+                            <i class="fa-solid fa-circle-xmark mr-1"></i> Từ chối
+                          </div>
+                          <div v-if="tr.rejection_reason" class="text-gray-500 italic mt-0.5 truncate max-w-xs" :title="tr.rejection_reason">
+                            Ghi chú: {{ tr.rejection_reason }}
+                          </div>
+                        </div>
+                        <span v-else class="text-gray-400 text-xs italic">Chờ duyệt</span>
                       </td>
                       <td class="td vs-table--td text-center list-action">
-                        <vs-button 
-                          v-if="tr.status === 0 && canApprove" 
-                          size="small" 
-                          color="primary" 
-                          @click="openApprovePopup(tr)"
-                          title="Phê duyệt đơn"
-                        >
-                          <i class="fa-solid fa-check mr-1"></i> Duyệt
-                        </vs-button>
+                        <div class="flex items-center justify-center space-x-1" v-if="canApprove">
+                          <vs-button 
+                            v-if="tr.status === 0" 
+                            size="small" 
+                            color="success" 
+                            @click="openApprovePopup(tr)"
+                            title="Phê duyệt đơn"
+                          >
+                            <i class="fa-solid fa-check mr-1"></i> Duyệt
+                          </vs-button>
+                          <vs-button 
+                            v-if="tr.status !== 2" 
+                            size="small" 
+                            color="danger" 
+                            type="flat"
+                            class="p-2"
+                            @click="openRejectPopup(tr)"
+                            title="Từ chối đơn"
+                          >
+                            <i class="fa-solid fa-ban mr-1"></i> Từ chối
+                          </vs-button>
+                        </div>
                         <span v-else-if="tr.status === 0" class="text-xs text-gray-400 italic">Chờ duyệt</span>
+                        <span v-else class="text-xs text-gray-400">---</span>
                       </td>
                     </tr>
                     <tr v-if="!leaves.data || !leaves.data.length">
@@ -655,15 +674,54 @@
 
         <div class="vx-row mb-4" v-if="approveForm.approval_type === 'rejected'">
           <div class="vx-col w-full">
-            <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do từ chối (*)</label>
-            <textarea placeholder="Nhập lý do từ chối..." rows="3" class="filter-input w-full" v-model="approveForm.rejection_reason"></textarea>
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Ghi chú / Lý do từ chối (*)</label>
+            <textarea placeholder="Nhập ghi chú lý do từ chối đơn..." rows="3" class="filter-input w-full" v-model="approveForm.rejection_reason"></textarea>
           </div>
         </div>
 
         <div class="vx-row mt-6">
           <div class="vx-col w-full flex justify-end">
-            <vs-button @click="submitApproval()" color="success" type="filled" class="p-2.5 px-4 mr-2"><i class="fa-solid fa-check mr-1"></i> Xác Nhận Duyệt</vs-button>
+            <vs-button
+              @click="submitApproval()"
+              :color="approveForm.approval_type === 'rejected' ? 'danger' : 'success'"
+              type="filled"
+              class="p-2.5 px-4 mr-2"
+            >
+              <i :class="approveForm.approval_type === 'rejected' ? 'fa-solid fa-ban mr-1' : 'fa-solid fa-check mr-1'"></i>
+              {{ approveForm.approval_type === 'rejected' ? 'Xác Nhận Từ Chối' : 'Xác Nhận Duyệt' }}
+            </vs-button>
             <button class="btn-close-modal" @click="approvePopupActive = false">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </vs-popup>
+
+    <!-- ========================================== -->
+    <!-- POPUP TỪ CHỐI ĐƠN NGHỈ PHÉP TRỰC TIẾP -->
+    <!-- ========================================== -->
+    <vs-popup title="TỪ CHỐI ĐƠN NGHỈ PHÉP" :active.sync="rejectPopupActive">
+      <div class="p-4" v-if="targetRejectLeave">
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800">
+          Từ chối đơn của nhân sự: <strong>{{ targetRejectLeave.employee ? targetRejectLeave.employee.full_name : (targetRejectLeave.user ? targetRejectLeave.user.name : '') }}</strong>
+          ({{ targetRejectLeave.duration_days }} ngày: {{ targetRejectLeave.start_date }} đến {{ targetRejectLeave.end_date }}).
+        </div>
+        <div class="vx-row mb-4">
+          <div class="vx-col w-full">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Ghi chú / Lý do từ chối (*)</label>
+            <textarea
+              placeholder="Nhập ghi chú lý do từ chối đơn nghỉ phép..."
+              rows="3"
+              class="filter-input w-full"
+              v-model="rejectReason"
+            ></textarea>
+          </div>
+        </div>
+        <div class="vx-row mt-6">
+          <div class="vx-col w-full flex justify-end">
+            <vs-button @click="submitDirectReject()" color="danger" type="filled" class="p-2.5 px-4 mr-2">
+              <i class="fa-solid fa-ban mr-1"></i> Xác Nhận Từ Chối
+            </vs-button>
+            <button class="btn-close-modal" @click="rejectPopupActive = false">Hủy</button>
           </div>
         </div>
       </div>
@@ -737,7 +795,12 @@ export default {
       approveForm: {
         approval_type: 'approved',
         rejection_reason: ''
-      }
+      },
+
+      // Popup Từ chối đơn
+      rejectPopupActive: false,
+      targetRejectLeave: null,
+      rejectReason: ''
     };
   },
   computed: {
@@ -973,6 +1036,37 @@ export default {
         rejection_reason: ''
       };
       this.approvePopupActive = true;
+    },
+
+    openRejectPopup(leave) {
+      this.targetRejectLeave = leave;
+      this.rejectReason = '';
+      this.rejectPopupActive = true;
+    },
+
+    submitDirectReject() {
+      if (!this.rejectReason || !this.rejectReason.trim()) {
+        this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng nhập ghi chú / lý do từ chối', color: 'warning' });
+        return;
+      }
+      this.$vs.loading();
+      axios.p(`/api/hrm/leaves/reject/${this.targetRejectLeave.id}`, {
+        rejection_reason: this.rejectReason.trim()
+      }).then(res => {
+        this.$vs.loading.close();
+        if (res.data.status === 1) {
+          this.$vs.notify({ title: 'Thành công', text: res.data.message || 'Đã từ chối đơn thành công', color: 'success' });
+          this.rejectPopupActive = false;
+          this.fetchLeaves();
+          this.fetchAllBalances();
+        } else {
+          this.$vs.notify({ title: 'Lỗi', text: res.data.message, color: 'danger' });
+        }
+      }).catch(err => {
+        this.$vs.loading.close();
+        const msg = err.response && err.response.data && err.response.data.message ? err.response.data.message : (err.message || 'Lỗi khi từ chối đơn');
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
+      });
     },
 
     submitApproval() {

@@ -211,6 +211,21 @@
                   <i class="fa-solid fa-laptop mr-2"></i> Đăng Ký Làm Online
                 </vs-button>
               </router-link>
+              <!-- Trạng thái tự động lưu -->
+              <div v-if="isHrmAdmin" class="flex items-center mr-2 px-3 py-2 bg-gray-100 rounded text-xs font-semibold shadow-sm">
+                <span v-if="lastSaveStatus === 'saving'" class="text-warning flex items-center">
+                  <i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Đang tự động lưu...
+                </span>
+                <span v-else-if="lastSaveStatus === 'saved'" class="text-success flex items-center">
+                  <i class="fa-solid fa-circle-check mr-1.5"></i> Đã tự động lưu ({{ lastSavedTime }})
+                </span>
+                <span v-else-if="lastSaveStatus === 'error'" class="text-danger flex items-center">
+                  <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Lỗi tự động lưu
+                </span>
+                <span v-else class="text-gray-600 flex items-center">
+                  <i class="fa-solid fa-bolt mr-1.5 text-primary"></i> Tự động lưu: Bật
+                </span>
+              </div>
               <vs-button
                 v-if="isHrmAdmin"
                 class="p-3"
@@ -247,6 +262,12 @@
                     >
                       <td class="td vs-table--td text-center">
                         {{ (dailyPage - 1) * dailyPerPage + index + 1 }}
+                        <span v-if="tr._saving" class="ml-1 text-warning" title="Đang lưu...">
+                          <i class="fa-solid fa-spinner fa-spin text-xs"></i>
+                        </span>
+                        <span v-else-if="tr._saved" class="ml-1 text-success" title="Đã lưu">
+                          <i class="fa-solid fa-check text-xs font-bold"></i>
+                        </span>
                       </td>
                       <td class="td vs-table--td font-bold text-primary">
                         {{ tr.employee_code || "---" }}
@@ -259,6 +280,7 @@
                         <select
                           v-model="tr.shift_id"
                           :disabled="!isHrmAdmin"
+                          @change="autoSaveRecord(tr)"
                           class="vs-inputx vs-input--input normal w-full font-medium"
                           style="padding: 8px 10px; font-size: 13px"
                         >
@@ -277,7 +299,8 @@
                         <div v-if="tr.is_leave_approved && !tr.override_edit" class="flex flex-col">
                           <div class="flex items-center">
                             <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700 border border-blue-300 w-max">
-                              <i class="fa-solid fa-calendar-check mr-1.5"></i> Nghỉ phép (Đã duyệt)
+                              <i class="fa-solid fa-calendar-check mr-1.5"></i>
+                              Nghỉ phép {{ Number(tr.leave_duration_days) === 0.5 ? '0.5 ngày' : '1 ngày' }} (Đã duyệt)
                             </span>
                             <button
                               v-if="isHrmAdmin"
@@ -320,26 +343,78 @@
                           <select
                             v-model="tr.attendance_status"
                             :disabled="!isHrmAdmin"
+                            @change="autoSaveRecord(tr)"
                             class="vs-inputx vs-input--input normal w-full font-semibold"
                             style="padding: 8px 12px; font-size: 13px"
                             :style="getStatusStyle(tr.attendance_status)"
                           >
                             <option value="not_checked">⚪ Chưa điểm danh</option>
-                            <option value="present">✓ Có mặt / Đúng giờ</option>
-                            <option value="leave_approved">📅 Đã gửi phép</option>
-                            <option value="unexcused_absent">
-                              ✗ Vắng k phép
-                            </option>
-                            <option value="late_fined">
-                              ⏱ Đi muộn (đã nộp phạt)
-                            </option>
+                            <option value="present">✓ Có mặt / Đúng giờ (1 công)</option>
+                            <option value="leave_approved">📅 Nghỉ phép (1 ngày)</option>
+                            <option value="leave_approved_half">📅 Nghỉ phép (0.5 ngày)</option>
+                            <option value="unexcused_absent">✗ Vắng k phép (1 ngày)</option>
+                            <option value="unexcused_absent_half">✗ Vắng k phép (0.5 ngày)</option>
+                            <option value="late_fined">⏱ Đi muộn (đã nộp phạt)</option>
                             <option value="late_submitted">⚠ Gửi đơn muộn</option>
                             <option value="online">🌐 Làm Online</option>
                           </select>
+
+                          <!-- Nút chọn nhanh thời lượng 0.5 ngày / 1 ngày khi Nghỉ phép -->
+                          <div
+                            v-if="isHrmAdmin && (tr.attendance_status === 'leave_approved' || tr.attendance_status === 'leave_approved_half')"
+                            class="flex items-center mt-1.5 space-x-1"
+                          >
+                            <span class="text-xs text-gray-500 mr-1 font-medium">Nghỉ:</span>
+                            <button
+                              type="button"
+                              @click="setLeaveDuration(tr, 0.5)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'leave_approved_half' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Nghỉ phép 0.5 ngày (làm nửa ngày)"
+                            >
+                              0.5 ngày
+                            </button>
+                            <button
+                              type="button"
+                              @click="setLeaveDuration(tr, 1)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'leave_approved' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Nghỉ phép 1 ngày"
+                            >
+                              1 ngày
+                            </button>
+                          </div>
+
+                          <!-- Nút chọn nhanh thời lượng 0.5 ngày / 1 ngày khi Vắng không phép -->
+                          <div
+                            v-if="isHrmAdmin && (tr.attendance_status === 'unexcused_absent' || tr.attendance_status === 'unexcused_absent_half')"
+                            class="flex items-center mt-1.5 space-x-1"
+                          >
+                            <span class="text-xs text-gray-500 mr-1 font-medium">Vắng:</span>
+                            <button
+                              type="button"
+                              @click="setAbsentDuration(tr, 0.5)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'unexcused_absent_half' ? 'bg-danger text-white border-danger' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Vắng không phép 0.5 ngày"
+                            >
+                              0.5 ngày
+                            </button>
+                            <button
+                              type="button"
+                              @click="setAbsentDuration(tr, 1)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'unexcused_absent' ? 'bg-danger text-white border-danger' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Vắng không phép 1 ngày"
+                            >
+                              1 ngày
+                            </button>
+                          </div>
+
                           <div v-if="tr.override_edit && isHrmAdmin" class="text-right mt-1">
                             <button
                               type="button"
-                              @click="$set(tr, 'override_edit', false)"
+                              @click="onRelock(tr)"
                               class="text-xs text-primary hover:underline"
                             >
                               Khóa lại
@@ -355,6 +430,9 @@
                           placeholder="Nhập ghi chú..."
                           class="vs-inputx vs-input--input normal w-full"
                           style="padding: 8px 12px; font-size: 13px"
+                          @input="onNoteInput(tr)"
+                          @blur="onNoteBlur(tr)"
+                          @keyup.enter="onNoteBlur(tr)"
                         />
                       </td>
                     </tr>
@@ -625,6 +703,9 @@ export default {
       quickSearchModalActive: false,
       quickSearchResult: null,
       isHrmAdminServer: null,
+      lastSaveStatus: 'idle', // 'idle' | 'saving' | 'saved' | 'error'
+      lastSavedTime: '',
+      isAutoSaving: false,
     };
   },
   watch: {
@@ -704,6 +785,7 @@ export default {
     },
     fetchDailySheet() {
       this.$vs.loading();
+      this.lastSaveStatus = 'idle';
       axios.p('/api/hrm/attendances/daily-sheet', {
         date: this.selectedDate,
         department_id: this.selectedDepartment || null,
@@ -717,6 +799,87 @@ export default {
         this.$vs.notify({ title: 'Lỗi', text: 'Không thể tải bảng điểm danh', color: 'danger' });
       });
     },
+    autoSaveRecord(record) {
+      if (!this.isHrmAdmin) return;
+      this.$set(record, '_saving', true);
+      this.lastSaveStatus = 'saving';
+
+      axios.p('/api/hrm/attendances/update-status', {
+        date: this.selectedDate,
+        records: [record]
+      }).then(res => {
+        this.$set(record, '_saving', false);
+        this.$set(record, '_saved', true);
+        this.lastSaveStatus = 'saved';
+        this.lastSavedTime = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        setTimeout(() => {
+          this.$set(record, '_saved', false);
+        }, 2000);
+
+        this.debouncedFetchMonthlySummary();
+      }).catch(err => {
+        this.$set(record, '_saving', false);
+        this.lastSaveStatus = 'error';
+        const msg = (err.response && err.response.data && err.response.data.message)
+          ? err.response.data.message
+          : 'Không thể tự động lưu điểm danh cho ' + (record.name || 'nhân sự');
+        this.$vs.notify({
+          title: 'Lỗi tự động lưu',
+          text: msg,
+          color: 'danger',
+          time: 4000
+        });
+      });
+    },
+    onNoteInput(tr) {
+      if (!this.isHrmAdmin) return;
+      const key = tr.user_id || tr.employee_id || tr.employee_profile_id;
+      if (!this._noteTimers) this._noteTimers = {};
+      clearTimeout(this._noteTimers[key]);
+      this._noteTimers[key] = setTimeout(() => {
+        this.autoSaveRecord(tr);
+      }, 700);
+    },
+    onNoteBlur(tr) {
+      if (!this.isHrmAdmin) return;
+      const key = tr.user_id || tr.employee_id || tr.employee_profile_id;
+      if (this._noteTimers && this._noteTimers[key]) {
+        clearTimeout(this._noteTimers[key]);
+      }
+      this.autoSaveRecord(tr);
+    },
+    setLeaveDuration(tr, days) {
+      if (!this.isHrmAdmin) return;
+      tr.attendance_status = days === 0.5 ? 'leave_approved_half' : 'leave_approved';
+      this.autoSaveRecord(tr);
+    },
+    setAbsentDuration(tr, days) {
+      if (!this.isHrmAdmin) return;
+      tr.attendance_status = days === 0.5 ? 'unexcused_absent_half' : 'unexcused_absent';
+      this.autoSaveRecord(tr);
+    },
+    onRelock(tr) {
+      this.$set(tr, 'override_edit', false);
+      if (tr.is_leave_approved) {
+        if (tr.leave_approval_type === 'late_unpaid') {
+          tr.attendance_status = 'late_submitted';
+        } else if (tr.leave_duration_days && Number(tr.leave_duration_days) === 0.5) {
+          tr.attendance_status = 'leave_approved_half';
+        } else {
+          tr.attendance_status = 'leave_approved';
+        }
+      } else if (tr.is_online) {
+        tr.attendance_status = 'online';
+      }
+      this.autoSaveRecord(tr);
+    },
+    debouncedFetchMonthlySummary() {
+      clearTimeout(this._monthlySummaryTimer);
+      this._monthlySummaryTimer = setTimeout(() => {
+        this.fetchMonthlySummary();
+      }, 1500);
+    },
     saveDailyAttendance() {
       this.$vs.loading();
       axios.p('/api/hrm/attendances/update-status', {
@@ -724,7 +887,9 @@ export default {
         records: this.dailyRecords
       }).then(res => {
         this.$vs.loading.close();
-        this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+        this.lastSaveStatus = 'saved';
+        this.lastSavedTime = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        this.$vs.notify({ title: 'Thành công', text: res.data.message || 'Lưu bảng điểm danh thành công', color: 'success' });
         this.fetchMonthlySummary();
       }).catch(err => {
         this.$vs.loading.close();
@@ -770,8 +935,10 @@ export default {
         case 'present':
           return 'color: #28c76f; border-color: #28c76f; background-color: #f0fdf4;';
         case 'leave_approved':
+        case 'leave_approved_half':
           return 'color: #7367f0; border-color: #7367f0; background-color: #f5f3ff;';
         case 'unexcused_absent':
+        case 'unexcused_absent_half':
           return 'color: #ea5455; border-color: #ea5455; background-color: #fef2f2;';
         case 'late_fined':
           return 'color: #ff9f43; border-color: #ff9f43; background-color: #fffbeb;';

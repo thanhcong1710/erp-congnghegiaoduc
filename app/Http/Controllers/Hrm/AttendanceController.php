@@ -179,16 +179,34 @@ class AttendanceController extends Controller
             $isLeaveApproved = !empty($leaveReq);
             $leaveReason = $leaveReq ? $leaveReq->reason : null;
             $leaveApprovalType = $leaveReq ? $leaveReq->approval_type : null;
+            $leaveDurationDays = $leaveReq ? (float)$leaveReq->duration_days : 1.0;
 
             // Trạng thái điểm danh:
-            // 1. Ưu tiên Nghỉ phép đã duyệt: tự động mang trạng thái 'leave_approved' (hoặc 'late_submitted')
+            // 1. Ưu tiên Nghỉ phép đã duyệt: tự động mang trạng thái 'leave_approved' / 'leave_approved_half' (hoặc 'late_submitted')
             // 2. Tiếp theo: Online -> tự động mang trạng thái 'online'
             // 3. Mặc định: lấy từ bản ghi attendance hoặc 'not_checked'
             $attendanceStatus = $att ? $att->attendance_status : 'not_checked';
+            $overrideEdit = false;
             if ($isLeaveApproved) {
-                $attendanceStatus = ($leaveApprovalType === 'late_unpaid') ? 'late_submitted' : 'leave_approved';
+                if ($leaveApprovalType === 'late_unpaid') {
+                    $expectedLeaveStatus = 'late_submitted';
+                } elseif ($leaveDurationDays > 0 && $leaveDurationDays < 1) {
+                    $expectedLeaveStatus = 'leave_approved_half';
+                } else {
+                    $expectedLeaveStatus = 'leave_approved';
+                }
+
+                if ($att && $att->attendance_status && $att->attendance_status !== $expectedLeaveStatus) {
+                    $overrideEdit = true;
+                } else {
+                    $attendanceStatus = $expectedLeaveStatus;
+                }
             } elseif ($isOnline) {
-                $attendanceStatus = 'online';
+                if ($att && $att->attendance_status && $att->attendance_status !== 'online') {
+                    $overrideEdit = true;
+                } else {
+                    $attendanceStatus = 'online';
+                }
             }
 
             $result[] = [
@@ -207,7 +225,9 @@ class AttendanceController extends Controller
                 'is_leave_approved' => $isLeaveApproved,
                 'leave_reason' => $leaveReason,
                 'leave_approval_type' => $leaveApprovalType,
-                // not_checked, online, present, leave_approved, unexcused_absent, late_fined, late_submitted
+                'leave_duration_days' => $leaveDurationDays,
+                'override_edit' => $overrideEdit,
+                // not_checked, online, present, leave_approved, leave_approved_half, unexcused_absent, unexcused_absent_half, late_fined, late_submitted
                 'attendance_status' => $attendanceStatus,
                 'check_in' => $att ? $att->check_in : null,
                 'check_out' => $att ? $att->check_out : null,
@@ -254,10 +274,11 @@ class AttendanceController extends Controller
             }
 
             // Lấy ca làm việc từ record gửi lên
-            $shiftId = !empty($item['shift_id']) ? $item['shift_id'] : null;
-
-            // Nếu record chưa có shift_id, tìm từ bảng xếp ca hoặc ca áp dụng của nhân sự
-            if (!$shiftId) {
+            $shiftId = null;
+            if (array_key_exists('shift_id', $item)) {
+                $shiftId = !empty($item['shift_id']) ? $item['shift_id'] : null;
+            } else {
+                // Nếu record chưa có shift_id, tìm từ bảng xếp ca hoặc ca áp dụng của nhân sự
                 $asn = HrmShiftAssignment::where('date', $date)
                     ->where(function ($q) use ($empId, $userId) {
                         if ($empId)
@@ -277,10 +298,17 @@ class AttendanceController extends Controller
             }
 
             $statusToSave = $item['attendance_status'] ?? 'not_checked';
-            if (!empty($item['is_leave_approved'])) {
-                $statusToSave = ($item['leave_approval_type'] ?? '') === 'late_unpaid' ? 'late_submitted' : 'leave_approved';
-            } elseif (!empty($item['is_online'])) {
-                $statusToSave = 'online';
+            if (empty($item['override_edit'])) {
+                if (!empty($item['is_leave_approved'])) {
+                    if (($item['leave_approval_type'] ?? '') === 'late_unpaid') {
+                        $statusToSave = 'late_submitted';
+                    } else {
+                        $leaveDays = isset($item['leave_duration_days']) ? (float)$item['leave_duration_days'] : 1.0;
+                        $statusToSave = ($leaveDays > 0 && $leaveDays < 1) ? 'leave_approved_half' : 'leave_approved';
+                    }
+                } elseif (!empty($item['is_online'])) {
+                    $statusToSave = 'online';
+                }
             }
 
             HrmAttendance::updateOrCreate(
@@ -293,6 +321,20 @@ class AttendanceController extends Controller
                     'note' => $item['note'] ?? null,
                 ]
             );
+
+            if ($shiftId) {
+                HrmShiftAssignment::updateOrCreate(
+                    [
+                        'date' => $date,
+                        'employee_id' => $empId,
+                    ],
+                    [
+                        'user_id' => $userId,
+                        'shift_id' => $shiftId,
+                        'is_overtime' => 0
+                    ]
+                );
+            }
         }
 
         return response()->json([
@@ -371,10 +413,14 @@ class AttendanceController extends Controller
                 return ($att->employee_id && $att->employee_id == $emp->id) || ($emp->user_id && $att->user_id == $emp->user_id);
             });
 
-            $workedDays = $userAtts->where('attendance_status', 'present')->count();
+            $workedDays = $userAtts->where('attendance_status', 'present')->count()
+                + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5)
+                + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
             $lateFined = $userAtts->where('attendance_status', 'late_fined')->count();
-            $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count();
-            $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count();
+            $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count()
+                + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5);
+            $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count()
+                + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
             $lateSubmitted = $userAtts->where('attendance_status', 'late_submitted')->count();
 
             // Tính số ngày làm online:
@@ -479,10 +525,14 @@ class AttendanceController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->get();
 
-        $workedDays = $userAtts->where('attendance_status', 'present')->count();
+        $workedDays = $userAtts->where('attendance_status', 'present')->count()
+            + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5)
+            + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
         $lateFined = $userAtts->where('attendance_status', 'late_fined')->count();
-        $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count();
-        $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count();
+        $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count()
+            + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5);
+        $unexcusedAbsent = $userAtts->where('attendance_status', 'unexcused_absent')->count()
+            + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
         $lateSubmitted = $userAtts->where('attendance_status', 'late_submitted')->count();
 
         // Tính số ngày làm online:

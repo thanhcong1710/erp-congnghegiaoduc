@@ -309,6 +309,17 @@ class OnlineRegistrationController extends Controller
         $reg->rejected_reason = $request->rejected_reason ?: 'Kế toán/Admin từ chối';
         $reg->save();
 
+        // Đồng bộ điểm danh: nếu trước đó đã được duyệt (status = online), revert về not_checked
+        $att = HrmAttendance::where(function ($q) use ($reg) {
+            if ($reg->employee_id) $q->where('employee_id', $reg->employee_id);
+            if ($reg->user_id) $q->orWhere('user_id', $reg->user_id);
+        })->where('date', $reg->date)->first();
+
+        if ($att && $att->attendance_status === 'online') {
+            $att->attendance_status = 'not_checked';
+            $att->save();
+        }
+
         return response()->json([
             'status' => 1,
             'message' => 'Đã từ chối đơn đăng ký làm online.'
