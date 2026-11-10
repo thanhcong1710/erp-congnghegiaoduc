@@ -400,32 +400,58 @@ class ChargesController extends Controller
     }
 
     public function printWaitcharge(Request $request, $id){
-        $data = u::first("SELECT '' AS text_1,c.code AS contract_code, c.debt_amount, p.amount AS charge_amount,p.method,
-            s.gud_name1,s.address, s.name,p.charge_date,
+        // 1. Tìm phiếu thu trong tmp_payments
+        $data = u::first("SELECT '' AS text_1, c.id AS contract_id, c.code AS contract_code, c.debt_amount, tp.charge_amount, tp.method,
+            s.gud_name1, s.address, s.name, tp.charge_date, tp.code AS receipt_code,
             (SELECT number_of_months FROM tuition_fee WHERE id = c.tuition_fee_id) AS number_of_months,
-            (SELECT name FROM products WHERe id=c.product_id) AS product_name, p.note,
-            '' AS text_2, '' AS text_amount, '' AS text_amount_words,'' AS text_3,'' AS text_debt_amount
-          FROM payments AS p
-            LEFT JOIN contracts AS c ON p.contract_id=c.id
+            (SELECT name FROM products WHERE id=c.product_id) AS product_name, tp.note,
+            '' AS text_2, '' AS text_amount, '' AS text_amount_words, '' AS text_3, '' AS text_debt_amount
+          FROM tmp_payments AS tp
+            LEFT JOIN contracts AS c ON tp.contract_id=c.id
             LEFT JOIN students AS s ON c.student_id = s.id
-          WHERE p.id = $id");
-        $data->text_1 = "Ngày ".date('d', strtotime(data_get($data, 'charge_date'))).  " tháng ". date('m', strtotime(data_get($data, 'charge_date'))). " năm ". date('Y', strtotime(data_get($data, 'charge_date')));
-        $materials = u::query("SELECT m.name AS material_name, cm.quantity, cm.final_price 
-            FROM contract_materials AS cm 
-            JOIN materials AS m ON m.id = cm.material_id 
-            JOIN payments AS p ON p.contract_id = cm.contract_id
-            WHERE p.id = $id");
+          WHERE tp.id = $id");
+
+        // 2. Nếu không tìm thấy trong tmp_payments, tìm trong payments (khoản đã thu)
+        if (!$data) {
+            $data = u::first("SELECT '' AS text_1, c.id AS contract_id, c.code AS contract_code, c.debt_amount, p.amount AS charge_amount, p.method,
+                s.gud_name1, s.address, s.name, p.charge_date, p.code AS receipt_code,
+                (SELECT number_of_months FROM tuition_fee WHERE id = c.tuition_fee_id) AS number_of_months,
+                (SELECT name FROM products WHERE id=c.product_id) AS product_name, p.note,
+                '' AS text_2, '' AS text_amount, '' AS text_amount_words, '' AS text_3, '' AS text_debt_amount
+              FROM payments AS p
+                LEFT JOIN contracts AS c ON p.contract_id=c.id
+                LEFT JOIN students AS s ON c.student_id = s.id
+              WHERE p.id = $id");
+        }
+
+        if (!$data) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy thông tin phiếu thu hoặc khoản thanh toán.'
+            ], 404);
+        }
+
+        $charge_date = !empty($data->charge_date) ? $data->charge_date : date('Y-m-d');
+        $data->text_1 = "Ngày " . date('d', strtotime($charge_date)) . " tháng " . date('m', strtotime($charge_date)) . " năm " . date('Y', strtotime($charge_date));
+        
+        $materials = [];
+        if (!empty($data->contract_id)) {
+            $materials = u::query("SELECT m.name AS material_name, cm.quantity, cm.final_price 
+                FROM contract_materials AS cm 
+                JOIN materials AS m ON m.id = cm.material_id 
+                WHERE cm.contract_id = " . (int)$data->contract_id);
+        }
         $matText = "";
         if (!empty($materials)) {
             $names = array_map(function($m) { return $m->material_name; }, $materials);
             $matText = " kèm học liệu (" . implode(", ", $names) . ")";
         }
-        $data->text_2 = "Thanh toán học phí khóa học ".$data->product_name." ".$data->number_of_months." tháng cho học viên ".$data->name . $matText;
+        $data->text_2 = "Thanh toán học phí khóa học " . ($data->product_name ?? '') . " " . ($data->number_of_months ?? '') . " tháng cho học viên " . ($data->name ?? '') . $matText;
         $data->materials = $materials;
-        $data->text_debt_amount = number_format($data->debt_amount, 0, '', '.');
-        $data->text_amount = number_format($data->charge_amount, 0, '', '.');
-        $data->text_amount_words = u::convert_number_to_words($data->charge_amount);
-        $data->text_3 = $data->method == 0 ? "Tiền mặt" : ( $data->method == 2 ? "Quẹt thẻ tín dụng" : "Chuyển khoản");
+        $data->text_debt_amount = number_format((int)$data->debt_amount, 0, '', '.');
+        $data->text_amount = number_format((int)$data->charge_amount, 0, '', '.');
+        $data->text_amount_words = u::convert_number_to_words((int)$data->charge_amount) . " đồng";
+        $data->text_3 = $data->method == 0 ? "Tiền mặt" : ($data->method == 2 ? "Quẹt thẻ tín dụng" : "Chuyển khoản");
         return response()->json([
             'payment_info' => $data,
         ]);

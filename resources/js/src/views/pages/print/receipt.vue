@@ -22,6 +22,7 @@
                         </div>
                         <div class="print-content">
                             <h2 class="title" style="margin-bottom:0px">PHIẾU THU TIỀN HỌC</h2>
+                            <p style="text-align: center;margin-bottom: 5px; font-weight: bold;" v-if="contract.receipt_code">Số: {{ contract.receipt_code }}</p>
                             <p style="text-align: center;margin-bottom: 20px">{{contract.text_1}}</p>
                             
                             <div>
