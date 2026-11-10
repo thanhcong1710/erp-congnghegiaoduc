@@ -13,6 +13,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 { 
@@ -174,7 +175,7 @@ class AuthController extends Controller
                 'note' => $user->note,
                 'gender' => $user->gender,
                 'roleName' => $user->role_name,
-                'roles' => DB::table('role_has_user')
+                'roles' => \DB::table('role_has_user')
                     ->join('roles', 'roles.id', '=', 'role_has_user.role_id')
                     ->where('role_has_user.user_id', $user->id)
                     ->pluck('roles.name')
