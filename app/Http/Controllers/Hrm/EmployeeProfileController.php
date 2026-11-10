@@ -56,6 +56,17 @@ class EmployeeProfileController extends Controller
             $query->where('department_id', $request->department_id);
         }
 
+        // Lọc theo mã đăng nhập (mã HRM employee_code hoặc mã users.hrm_id)
+        if ($request->filled('login_code')) {
+            $loginCode = trim($request->login_code);
+            $query->where(function ($q) use ($loginCode) {
+                $q->where('employee_code', 'like', "%{$loginCode}%")
+                    ->orWhereHas('user', function ($sub) use ($loginCode) {
+                        $sub->where('hrm_id', 'like', "%{$loginCode}%");
+                    });
+            });
+        }
+
         // Tìm kiếm từ khóa
         if ($request->filled('keyword')) {
             $kw = trim($request->keyword);

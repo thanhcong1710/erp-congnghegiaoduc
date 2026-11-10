@@ -74,8 +74,8 @@
             <input 
               type="text" 
               class="vs-inputx vs-input--input normal" 
-              style="padding: 10px 14px; font-size: 13px; min-width: 250px;" 
-              placeholder="Mã, tên, số điện thoại..." 
+              style="padding: 10px 14px; font-size: 13px; min-width: 280px;" 
+              placeholder="Mã NS, mã đăng nhập, họ tên, SĐT..." 
               v-model="searchKeyword" 
               @input="fetchEmployees"
             >
