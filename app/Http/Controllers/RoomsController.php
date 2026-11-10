@@ -35,9 +35,16 @@ class RoomsController extends Controller
         $total = u::first("SELECT count(r.id) AS total 
             FROM rooms AS r WHERE $cond");
         
-        $list = u::query("SELECT r.*, (SELECT count(id) FROM sessions WHERE room_id=r.id) AS disabled_delete,
-                (SELECT name FROM branches WHERE id=r.branch_id) AS branch_name
+        $list = u::query("SELECT r.*, 
+                COALESCE(s.disabled_delete, 0) AS disabled_delete,
+                b.name AS branch_name
             FROM rooms AS r 
+            LEFT JOIN branches AS b ON b.id = r.branch_id
+            LEFT JOIN (
+                SELECT room_id, COUNT(id) AS disabled_delete 
+                FROM sessions 
+                GROUP BY room_id
+            ) AS s ON s.room_id = r.id
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
         return response()->json($data);
