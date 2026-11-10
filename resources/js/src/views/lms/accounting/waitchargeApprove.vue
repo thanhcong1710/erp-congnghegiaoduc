@@ -7,7 +7,7 @@
           <i class="fa-solid fa-clipboard-check text-primary mr-2" style="font-size: 20px;"></i>
           Phê Duyệt Phiếu Thu Học Phí
         </h4>
-        <span class="text-gray-500 text-sm">Kiểm tra, xác thực và phê duyệt các khoản thu học phí từ bộ phận tư vấn</span>
+        <span class="text-gray-500 ">Kiểm tra, xác thực và phê duyệt các khoản thu học phí từ bộ phận tư vấn</span>
       </div>
       <div class="approve-header-badge">
         <span class="badge-total-items">
@@ -99,7 +99,7 @@
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <!-- Mobile View Mode Toggle -->
       <div class="mobile-view-toggle-bar">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
+        <span class=" font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
         <div class="inline-flex rounded shadow-sm">
           <button
             type="button"
@@ -152,17 +152,17 @@
               </div>
             </div>
             <div class="flex flex-col items-end gap-1 flex-shrink-0">
-              <span class="text-xs text-gray-400 font-semibold">
+              <span class=" text-gray-400 font-semibold">
                 #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </span>
-              <span :class="getApproveBadgeClass(item.status)" class="text-xs font-semibold">
+              <span :class="getApproveBadgeClass(item.status)" class=" font-semibold">
                 {{ item.status == 0 ? 'Chờ duyệt' : (item.status == 1 ? 'Đã duyệt' : 'Từ chối') }}
               </span>
             </div>
           </div>
 
           <!-- Body -->
-          <div class="py-2.5 text-sm space-y-1.5">
+          <div class="py-2.5  space-y-1.5">
             <div class="flex items-center justify-between text-gray-600">
               <span class="text-gray-500"><i class="fa-solid fa-money-bill-wave text-success mr-1.5"></i>Số tiền thu:</span>
               <span class="font-bold text-danger text-base">{{ item.charge_amount | formatMoney }}</span>
@@ -186,12 +186,12 @@
               <span class="text-gray-700">{{ item.product_name }}</span>
             </div>
 
-            <div class="flex items-center justify-between text-gray-500 text-xs pt-1 border-t border-dashed border-gray-100">
+            <div class="flex items-center justify-between text-gray-500  pt-1 border-t border-dashed border-gray-100">
               <span><i class="fa-regular fa-calendar text-gray-400 mr-1"></i>Ngày thu: <strong>{{ item.charge_date }}</strong></span>
               <span v-if="item.creator_name"><i class="fa-solid fa-user text-gray-400 mr-1"></i>Sale: <strong>{{ item.creator_name }}</strong></span>
             </div>
 
-            <div class="flex items-center justify-between text-gray-500 text-xs" v-if="item.approver_name">
+            <div class="flex items-center justify-between text-gray-500 " v-if="item.approver_name">
               <span><i class="fa-solid fa-user-check text-emerald-500 mr-1"></i>Người duyệt: <strong>{{ item.approver_name }}</strong></span>
               <span>{{ item.approved_at }}</span>
             </div>
@@ -302,14 +302,14 @@
 
                 <!-- Trung tâm & Khóa học -->
                 <td>
-                  <div class="font-semibold text-gray-800 text-xs mb-0.5 flex items-center">
-                    <i class="fa-solid fa-building text-primary mr-1 text-xs"></i>
+                  <div class="font-semibold text-gray-800  mb-0.5 flex items-center">
+                    <i class="fa-solid fa-building text-primary mr-1 "></i>
                     {{ item.branch_name }}
                   </div>
-                  <div class="text-xs text-gray-700 truncate" :title="item.product_name" v-if="item.product_name">
-                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 text-xs"></i>{{ item.product_name }}
+                  <div class=" text-gray-700 truncate" :title="item.product_name" v-if="item.product_name">
+                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 "></i>{{ item.product_name }}
                   </div>
-                  <div class="text-xs text-gray-400 truncate" v-if="item.tuition_fee_name">
+                  <div class=" text-gray-400 truncate" v-if="item.tuition_fee_name">
                     {{ item.tuition_fee_name }}
                   </div>
                 </td>
@@ -330,16 +330,16 @@
                 </td>
 
                 <!-- Ngày thu -->
-                <td class="text-center text-xs text-gray-700 font-medium">
+                <td class="text-center  text-gray-700 font-medium">
                   {{ item.charge_date }}
                 </td>
 
                 <!-- Người tạo -->
                 <td>
-                  <div class="text-xs font-semibold text-gray-800 mb-0.5">
+                  <div class=" font-semibold text-gray-800 mb-0.5">
                     {{ item.creator_name || '—' }}
                   </div>
-                  <div class="text-xs text-gray-400" v-if="item.created_at">
+                  <div class=" text-gray-400" v-if="item.created_at">
                     {{ item.created_at }}
                   </div>
                 </td>
@@ -353,13 +353,13 @@
 
                 <!-- Người duyệt -->
                 <td>
-                  <div class="text-xs font-semibold text-gray-800 mb-0.5" v-if="item.approver_name">
+                  <div class=" font-semibold text-gray-800 mb-0.5" v-if="item.approver_name">
                     {{ item.approver_name }}
                   </div>
-                  <div class="text-xs text-gray-400" v-if="item.approved_at">
+                  <div class=" text-gray-400" v-if="item.approved_at">
                     {{ item.approved_at }}
                   </div>
-                  <span v-if="!item.approver_name" class="text-gray-400 text-xs">—</span>
+                  <span v-if="!item.approver_name" class="text-gray-400 ">—</span>
                 </td>
 
                 <!-- Thao tác -->

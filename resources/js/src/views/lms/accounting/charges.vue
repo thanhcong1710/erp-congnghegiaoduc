@@ -7,7 +7,7 @@
           <i class="fa-solid fa-receipt text-primary mr-2" style="font-size: 20px;"></i>
           Danh Sách Phiếu Thu Học Phí
         </h4>
-        <span class="text-gray-500 text-sm">Quản lý lịch sử các đợt thu học phí, theo dõi chứng từ kế toán và tiến độ thanh toán</span>
+        <span class="text-gray-500 ">Quản lý lịch sử các đợt thu học phí, theo dõi chứng từ kế toán và tiến độ thanh toán</span>
       </div>
       <div class="charges-header-badge">
         <span class="badge-total-items">
@@ -88,7 +88,7 @@
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <!-- Mobile View Mode Toggle -->
       <div class="mobile-view-toggle-bar">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
+        <span class=" font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
         <div class="inline-flex rounded shadow-sm">
           <button
             type="button"
@@ -141,17 +141,17 @@
               </div>
             </div>
             <div class="flex flex-col items-end gap-1 flex-shrink-0">
-              <span class="text-xs text-gray-400 font-semibold">
+              <span class=" text-gray-400 font-semibold">
                 #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </span>
-              <span class="amount-tag text-xs font-bold">
+              <span class="amount-tag  font-bold">
                 {{ item.amount | formatMoney }}
               </span>
             </div>
           </div>
 
           <!-- Body -->
-          <div class="py-2.5 text-sm space-y-1.5">
+          <div class="py-2.5  space-y-1.5">
             <div class="flex items-center justify-between text-gray-600" v-if="item.product_name">
               <span class="text-gray-500"><i class="fa-solid fa-book-open text-indigo-500 mr-1.5"></i>Khóa học:</span>
               <span class="font-medium text-gray-800">{{ item.product_name }}</span>
@@ -177,7 +177,7 @@
               <span class="font-bold text-danger">{{ item.debt | formatMoney }}</span>
             </div>
 
-            <div class="flex items-center justify-between text-gray-500 text-xs pt-1 border-t border-dashed border-gray-100">
+            <div class="flex items-center justify-between text-gray-500  pt-1 border-t border-dashed border-gray-100">
               <span><i class="fa-regular fa-calendar-check text-primary mr-1"></i>Ngày thu: <strong>{{ item.charge_date }}</strong></span>
               <span v-if="item.creator_name"><i class="fa-solid fa-user-pen text-gray-400 mr-1"></i>Lập bởi: <strong>{{ item.creator_name }}</strong></span>
             </div>
@@ -245,10 +245,10 @@
                       <i class="fa-regular fa-copy ml-1 opacity-70"></i>
                     </span>
                   </div>
-                  <div class="text-gray-800 font-semibold text-sm mb-0.5" v-if="item.product_name">
-                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 text-xs"></i>{{ item.product_name }}
+                  <div class="text-gray-800 font-semibold  mb-0.5" v-if="item.product_name">
+                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 "></i>{{ item.product_name }}
                   </div>
-                  <div class="text-xs text-gray-500" v-if="item.tuition_fee_name">
+                  <div class=" text-gray-500" v-if="item.tuition_fee_name">
                     Gói phí: {{ item.tuition_fee_name }}
                   </div>
                 </td>
@@ -256,30 +256,30 @@
                 <!-- Thông tin thu phí -->
                 <td>
                   <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs text-gray-500">Thu đợt này:</span>
-                    <span class="amount-tag font-bold text-sm">
+                    <span class=" text-gray-500">Thu đợt này:</span>
+                    <span class="amount-tag font-bold ">
                       <i class="fa-solid fa-money-bill-wave mr-1"></i>
                       {{ item.amount | formatMoney }}
                     </span>
                   </div>
-                  <div class="text-xs text-gray-600 mb-0.5">
+                  <div class=" text-gray-600 mb-0.5">
                     Phải đóng: <strong>{{ item.must_charge | formatMoney }}</strong> &bull; Đã thu: <strong class="text-success">{{ item.total | formatMoney }}</strong>
                   </div>
-                  <div class="text-xs text-gray-500">
+                  <div class=" text-gray-500">
                     Công nợ còn: <strong :class="item.debt > 0 ? 'text-danger' : 'text-success'">{{ item.debt | formatMoney }}</strong>
                   </div>
                 </td>
 
                 <!-- Ngày thu & Thu ngân -->
                 <td>
-                  <div class="font-semibold text-gray-800 text-sm mb-1 flex items-center">
+                  <div class="font-semibold text-gray-800  mb-1 flex items-center">
                     <i class="fa-regular fa-calendar-check text-primary mr-1.5"></i>
                     {{ item.charge_date }}
                   </div>
-                  <div class="text-xs text-gray-500 mb-0.5" v-if="item.creator_name">
+                  <div class=" text-gray-500 mb-0.5" v-if="item.creator_name">
                     <i class="fa-solid fa-user-pen text-gray-400 mr-1"></i>Người lập: <strong>{{ item.creator_name }}</strong>
                   </div>
-                  <div class="text-xs text-gray-400" v-if="item.created_at">
+                  <div class=" text-gray-400" v-if="item.created_at">
                     <i class="fa-regular fa-clock mr-1"></i>{{ item.created_at }}
                   </div>
                 </td>

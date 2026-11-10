@@ -7,7 +7,7 @@
           <i class="fa-solid fa-clock-rotate-left text-warning mr-2" style="font-size: 20px;"></i>
           Danh Sách Hợp Đồng Chờ Thu Phí
         </h4>
-        <span class="text-gray-500 text-sm">Theo dõi các hợp đồng học sinh còn công nợ và thực hiện thu phí học sinh</span>
+        <span class="text-gray-500 ">Theo dõi các hợp đồng học sinh còn công nợ và thực hiện thu phí học sinh</span>
       </div>
       <div class="waitcharges-header-badge">
         <span class="badge-total-items">
@@ -72,7 +72,7 @@
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <!-- Mobile View Mode Toggle -->
       <div class="mobile-view-toggle-bar">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
+        <span class=" font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
         <div class="inline-flex rounded shadow-sm">
           <button
             type="button"
@@ -125,17 +125,17 @@
               </div>
             </div>
             <div class="flex flex-col items-end gap-1 flex-shrink-0">
-              <span class="text-xs text-gray-400 font-semibold">
+              <span class=" text-gray-400 font-semibold">
                 #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </span>
-              <span class="debt-tag text-xs font-bold">
+              <span class="debt-tag  font-bold">
                 {{ item.debt_amount | formatMoney }}
               </span>
             </div>
           </div>
 
           <!-- Body -->
-          <div class="py-2.5 text-sm space-y-1.5">
+          <div class="py-2.5  space-y-1.5">
             <div class="flex items-center justify-between text-gray-600" v-if="item.product_name">
               <span class="text-gray-500"><i class="fa-solid fa-book-open text-indigo-500 mr-1.5"></i>Khóa học:</span>
               <span class="font-medium text-gray-800">{{ item.product_name }}</span>
@@ -146,7 +146,7 @@
               <span class="text-gray-700">{{ item.tuition_fee_name }}</span>
             </div>
 
-            <div class="flex items-center justify-between text-gray-500 text-xs pt-1 border-t border-dashed border-gray-100" v-if="item.ec_name">
+            <div class="flex items-center justify-between text-gray-500  pt-1 border-t border-dashed border-gray-100" v-if="item.ec_name">
               <span><i class="fa-solid fa-user-tag text-gray-400 mr-1"></i>EC tư vấn:</span>
               <span class="font-semibold text-gray-800">{{ item.ec_name }}</span>
             </div>
@@ -220,18 +220,18 @@
 
                 <!-- Khóa học & Gói phí -->
                 <td>
-                  <div class="text-gray-800 font-semibold text-sm mb-0.5" v-if="item.product_name">
-                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 text-xs"></i>{{ item.product_name }}
+                  <div class="text-gray-800 font-semibold  mb-0.5" v-if="item.product_name">
+                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 "></i>{{ item.product_name }}
                   </div>
-                  <div class="text-xs text-gray-500" v-if="item.tuition_fee_name">
+                  <div class=" text-gray-500" v-if="item.tuition_fee_name">
                     Gói phí: {{ item.tuition_fee_name }}
                   </div>
                 </td>
 
                 <!-- EC tư vấn -->
                 <td>
-                  <div class="text-sm font-medium text-gray-700 flex items-center">
-                    <i class="fa-solid fa-user-tag text-gray-400 mr-1.5 text-xs"></i>
+                  <div class=" font-medium text-gray-700 flex items-center">
+                    <i class="fa-solid fa-user-tag text-gray-400 mr-1.5 "></i>
                     {{ item.ec_name || 'Chưa cập nhật' }}
                   </div>
                 </td>
