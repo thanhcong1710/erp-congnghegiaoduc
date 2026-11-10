@@ -96,6 +96,7 @@ class ChargesController extends Controller
             $contract_info = u::getObject(array('id'=>data_get($tmp_payment, 'contract_id')), 'contracts');
             u::insertSimpleRow(array(
                 'contract_id' => data_get($contract_info, 'id'),
+                'code' => data_get($tmp_payment, 'code'),
                 'student_id' => data_get($contract_info, 'student_id'), 
                 'branch_id' => data_get($contract_info, 'branch_id'), 
                 'cm_id' => data_get($contract_info, 'cm_id'), 
@@ -108,34 +109,40 @@ class ChargesController extends Controller
                 'charge_date' => data_get($tmp_payment, 'charge_date'),
                 'note' => data_get($tmp_payment, 'note'),
                 'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>Auth::user()->id,
+                'creator_id'=>data_get($tmp_payment, 'creator_id', Auth::user()->id),
             ), 'payments');
 
             $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($tmp_payment, 'charge_amount');
-            if($debt_amount == 0){
+            if($debt_amount <= 0){
+                $availableSession = data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') > 0 ? data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') : 0;
                 u::updateSimpleRow(array(
-                    'status' => data_get($contract_info, 'status') ==6 ? 6 :3,
-                    'reservable_sessions' => floor(data_get($contract_info, 'total_sessions')/config('app.num_session_of_reservable')),
-                    'summary_sessions' => data_get($contract_info, 'total_sessions'), 
-                    'left_sessions' => data_get($contract_info, 'total_sessions') - data_get($contract_info, 'done_sessions'), 
+                    'status' => data_get($contract_info, 'status') > 3 ? data_get($contract_info, 'status') : 3,
+                    'reservable_sessions' => floor(data_get($contract_info, 'init_tuition_fee_session')/config('app.num_session_of_reservable')),
+                    'summary_sessions' => $availableSession, 
+                    'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
                     'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'debt_amount' => 0,
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
                 ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Kế toán duyệt phiếu thu '.data_get($tmp_payment, 'code').' (Thu đủ phí) cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
                 self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
             }else{
+                $availableSession = (int)data_get($contract_info, 'init_tuition_fee_session') && (int)data_get($contract_info, 'must_charge') ? 
+                    round(((int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount')) / ((int)data_get($contract_info, 'must_charge')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
+                $availableSession = $availableSession - (int)data_get($contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($contract_info, 'last_done_sessions') : 0;
                 u::updateSimpleRow(array(
-                    'status' => 2,
+                    'status' => data_get($contract_info, 'status') > 2 ? data_get($contract_info, 'status') : 2,
                     'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($tmp_payment, 'charge_amount'),
                     'debt_amount' => $debt_amount,
+                    'summary_sessions' => $availableSession, 
+                    'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
                     'updated_at'=>date('Y-m-d H:i:s'),
                     'updator_id'=>Auth::user()->id,
                 ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($tmp_payment, 'charge_amount')).' cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+                LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Kế toán duyệt phiếu thu '.data_get($tmp_payment, 'code').' ('.u::formatCurrency(data_get($tmp_payment, 'charge_amount')).') cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
             }
             
             u::addLogContracts(data_get($contract_info, 'id'));
@@ -150,7 +157,8 @@ class ChargesController extends Controller
             );
         }else {
             u::updateSimpleRow(array(
-                'status' => data_get($request, 'status'),
+                'status' => 2,
+                'note' => data_get($request, 'reject_reason') ? data_get($tmp_payment, 'note') . ' [Từ chối: ' . data_get($request, 'reject_reason') . ']' : data_get($tmp_payment, 'note'),
                 'approver_id' => Auth::user()->id,
                 'approved_at' => date('Y-m-d H:i:s'),
             ), array('id'=>data_get($request, 'id')), 'tmp_payments');
@@ -284,6 +292,7 @@ class ChargesController extends Controller
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
+        $status = isset($request->status) ? $request->status : '';
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -295,24 +304,30 @@ class ChargesController extends Controller
         if (!empty($branch_id)) {
             $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
         }
+
+        if ($status !== '' && $status !== null) {
+            $cond .= " AND tp.status = " . (int)$status;
+        }
         
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR tp.code LIKE '%$keyword%') ";
         }
         
         $order_by = " ORDER BY tp.id DESC ";
 
-        $total = u::first("SELECT count(c.id) AS total 
+        $total = u::first("SELECT count(tp.id) AS total 
             FROM tmp_payments AS tp 
                 LEFT JOIN contracts AS c ON c.id = tp.contract_id
                 LEFT JOIN students AS s ON s.id=c.student_id WHERE $cond");
         
-        $list = u::query("SELECT c.id AS contract_id, s.name, s.lms_code, 
+        $list = u::query("SELECT tp.id, tp.code AS receipt_code, tp.code, tp.charge_amount, tp.charge_date, tp.method, tp.note, tp.status, tp.created_at, tp.approved_at,
+                c.id AS contract_id, c.code AS contract_code,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
-                c.code, (SELECT name FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
-                tp.*
+                (SELECT name FROM tuition_fee WHERE id=c.init_tuition_fee_id) AS tuition_fee_name,
+                (SELECT name FROM branches WHERE id=c.branch_id) AS branch_name,
+                s.name, s.lms_code
             FROM tmp_payments AS tp 
                  LEFT JOIN contracts AS c ON c.id = tp.contract_id
                 LEFT JOIN students AS s ON s.id=c.student_id
@@ -377,61 +392,43 @@ class ChargesController extends Controller
 
     public function add(Request $request){
         $contract_info = u::getObject(array('id'=>$request->contract_id), 'contracts');
-        u::insertSimpleRow(array(
-            'contract_id' => data_get($contract_info, 'id'),
-            'student_id' => data_get($contract_info, 'student_id'), 
-            'branch_id' => data_get($contract_info, 'branch_id'), 
-            'cm_id' => data_get($contract_info, 'cm_id'), 
-            'ec_id' => data_get($contract_info, 'ec_id'), 
-            'method' => data_get($request, 'method'),
-            'must_charge' => data_get($contract_info, 'must_charge'),
-            'amount' => data_get($request, 'amount'),
-            'total' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-            'debt' => (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount'),
-            'charge_date' => data_get($request, 'charge_date'),
-            'note' => data_get($request, 'note'),
-            'created_at'=>date('Y-m-d H:i:s'),
-            'creator_id'=>Auth::user()->id,
-        ), 'payments');
-
-        $debt_amount = (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - (int)data_get($request, 'amount');
-        if($debt_amount == 0){
-            $availableSession = data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') > 0 ? data_get($contract_info, 'total_sessions') - (int)data_get($contract_info, 'last_done_sessions') : 0;
-            u::updateSimpleRow(array(
-                'status' => data_get($contract_info, 'status') >3  ? data_get($contract_info, 'status') : 3,
-                'reservable_sessions' => floor(data_get($contract_info, 'init_tuition_fee_session')/config('app.num_session_of_reservable')),
-                'summary_sessions' => $availableSession, 
-                'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
-                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'debt_amount' => 0,
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Thu đủ phí cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
-            self::processC2C(data_get($contract_info, 'student_id'), data_get($contract_info, 'init_tuition_fee_id'), data_get($contract_info, 'id'));
-        }else{
-            $availableSession = (int)data_get($contract_info, 'init_tuition_fee_session') && (int)data_get($contract_info, 'must_charge') ? 
-                round(((int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount')) / ((int)data_get($contract_info, 'must_charge')/(int)data_get($contract_info, 'init_tuition_fee_session'))) : 0; 
-            $availableSession = $availableSession - (int)data_get($contract_info, 'last_done_sessions') > 0 ? $availableSession - (int)data_get($contract_info, 'last_done_sessions') : 0;
-            u::updateSimpleRow(array(
-                'status' => data_get($contract_info, 'status') >2  ? data_get($contract_info, 'status') : 2,
-                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'init_total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'debt_amount' => $debt_amount,
-                'summary_sessions' => $availableSession, 
-                'left_sessions' => $availableSession - (int)data_get($contract_info, 'done_sessions'), 
-                'total_charged' => (int)data_get($contract_info, 'total_charged') + (int)data_get($request, 'amount'),
-                'updated_at'=>date('Y-m-d H:i:s'),
-                'updator_id'=>Auth::user()->id,
-            ), array('id'=>data_get($contract_info, 'id')), 'contracts');
-            LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Đặt cọc '.u::formatCurrency(data_get($request, 'amount')).' cho hợp đồng - '.data_get($contract_info, 'code'), Auth::user()->id);
+        if (!$contract_info) {
+            return response()->json(['status' => 0, 'message' => 'Hợp đồng không tồn tại.'], 404);
         }
-        
-        u::addLogContracts(data_get($contract_info, 'id'));
+
+        $amount = (int)data_get($request, 'amount');
+        if ($amount <= 0) {
+            return response()->json(['status' => 0, 'message' => 'Số tiền thu phải lớn hơn 0.'], 422);
+        }
+
+        $tmp_id = u::insertSimpleRow(array(
+            'contract_id' => data_get($contract_info, 'id'),
+            'charge_amount' => $amount,
+            'debt_amount' => (int)data_get($contract_info, 'must_charge') - (int)data_get($contract_info, 'total_charged') - $amount,
+            'total_charged' => (int)data_get($contract_info, 'total_charged') + $amount,
+            'charge_date' => data_get($request, 'charge_date', date('Y-m-d')),
+            'method' =>  data_get($request, 'method', 0),
+            'note' => data_get($request, 'note'),
+            'meta_data' => json_encode($request->input()),
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'status' => 0, // Chờ kế toán duyệt
+        ), 'tmp_payments');
+
+        $receipt_code = 'PT' . str_pad($tmp_id, 6, '0', STR_PAD_LEFT);
+        u::updateSimpleRow(['code' => $receipt_code], ['id' => $tmp_id], 'tmp_payments');
+
+        LogStudents::logAdd(
+            data_get($contract_info, 'student_id'),
+            'Lên phiếu thu ' . $receipt_code . ' số tiền ' . u::formatCurrency($amount) . ' cho hợp đồng ' . data_get($contract_info, 'code') . ' (Chờ Kế toán duyệt)',
+            Auth::user()->id
+        );
+
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới phiếu thu thành công.'
+            'message' => "Tạo phiếu thu {$receipt_code} thành công. Phiếu thu đã được chuyển sang Kế toán chờ check duyệt.",
+            'receipt_code' => $receipt_code,
+            'receipt_id' => $tmp_id,
         );
         return response()->json($result);
     }

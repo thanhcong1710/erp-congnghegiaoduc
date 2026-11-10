@@ -119,11 +119,14 @@
           </div>
         </div>
         <div class="vx-col md:w-1/2 w-full item-last">
+          <vs-alert color="warning" icon="icon-lock" icon-pack="feather" class="mb-4" v-if="contract.can_edit_all === false">
+            <strong>Phân quyền:</strong> Tài khoản Sale chỉ được phép cập nhật <strong>Sách & Học liệu mua kèm</strong> và <strong>Phiếu thu</strong>. Quyền sửa thông tin đăng ký học chỉ cấp cho Ban Giám đốc và Kế toán.
+          </vs-alert>
           <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin đăng ký học</h5>
           <div class="vx-row">
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Loại hợp đồng <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="contract.type" @change="loadTuitionFee();">
+              <select class="vs-inputx vs-input--input normal" v-model="contract.type" :disabled="!contract.can_edit_all" @change="loadTuitionFee();">
                 <option value="" disabled>Chọn loại hợp đồng</option>
                 <option value="0">Học thử</option>
                 <option value="1">Chính thức</option>
@@ -139,6 +142,7 @@
                     :searchable="true"
                     language="tv-VN"
                     @input="saveProduct"
+                    :disabled="!contract.can_edit_all"
                 ></vue-select>
             </div>
             <div class="vx-col w-full mb-4">
@@ -151,7 +155,7 @@
                     :searchable="true"
                     language="tv-VN"
                     @input="saveTuitionFee"
-                    :disabled="!contract.product_id"
+                    :disabled="!contract.can_edit_all || !contract.product_id"
                 ></vue-select>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
@@ -229,7 +233,7 @@
             </div>
             -->
             <div class="vx-col md:w-1/2 w-full mb-4" v-if="contract.count_sibling > 0">
-              <label> <input type="checkbox" v-model="contract.sibling" @change="caculatorSession">
+              <label> <input type="checkbox" v-model="contract.sibling" :disabled="!contract.can_edit_all" @change="caculatorSession">
                 Giảm trừ anh chị em học cùng 5%</label>
               <input
                 class="vs-inputx vs-input--input normal"
@@ -324,7 +328,7 @@
 
                   <div class="vx-col md:w-1/2 w-full mb-3">
                     <label class="flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="contract.is_promo_extra" :disabled="Number(contract.number_of_months) < 6" @change="caculatorSession">
+                      <input type="checkbox" v-model="contract.is_promo_extra" :disabled="!contract.can_edit_all || Number(contract.number_of_months) < 6" @change="caculatorSession">
                       <span class="ml-2 font-medium">Ưu đãi tháng 11: Tặng thêm 10% (gói ≥ 6 tháng)</span>
                     </label>
                     <span v-if="contract.is_promo_extra" class="text-xs text-success block">Đã giảm thêm 10%: -{{ contract.promo_extra_amount | formatNumber }} đ</span>
@@ -332,7 +336,7 @@
 
                   <div class="vx-col md:w-1/2 w-full mb-3">
                     <label class="flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="contract.is_checkin_group" @change="caculatorSession">
+                      <input type="checkbox" v-model="contract.is_checkin_group" :disabled="!contract.can_edit_all" @change="caculatorSession">
                       <span class="ml-2 font-medium">Đăng ký nhóm 3 / Check-in (-{{ contract.checkin_group_percent }}%)</span>
                     </label>
                     <span v-if="contract.is_checkin_group" class="text-xs text-success block">Đã giảm: -{{ contract.checkin_group_amount | formatNumber }} đ</span>
@@ -340,7 +344,7 @@
 
                   <div class="vx-col md:w-1/2 w-full mb-3">
                     <label class="flex items-center cursor-pointer">
-                      <input type="checkbox" v-model="contract.is_resident" @change="caculatorSession">
+                      <input type="checkbox" v-model="contract.is_resident" :disabled="!contract.can_edit_all" @change="caculatorSession">
                       <span class="ml-2 font-medium">Khách hàng nội khu (-5% toàn khóa)</span>
                     </label>
                     <span v-if="contract.is_resident" class="text-xs text-success block">Đã giảm nội khu: -{{ contract.resident_amount | formatNumber }} đ</span>
@@ -444,6 +448,7 @@
                 v-model="contract.start_date"
                 placeholder="Chọn ngày dự kiến học"
                 :lang="datepickerOptions.lang"
+                :disabled="!contract.can_edit_all"
                 @change="selectDate"
               />
             </div>
@@ -459,15 +464,131 @@
         </div>
       </div>
 
+      <!-- KHỐI PHIẾU THU TIỀN -->
+      <vs-divider class="my-5" />
+      <div class="vx-row">
+        <div class="vx-col w-full">
+          <div class="flex justify-between items-center mb-3">
+            <h5 class="font-bold text-primary"><i class="fa-solid fa-receipt mr-1"></i> Lịch sử Phiếu thu & Đóng phí</h5>
+            <vs-button size="small" color="success" v-if="contract.debt_amount > 0" @click="openReceiptModal">
+              <i class="fa-solid fa-plus mr-1"></i> Lên phiếu thu mới
+            </vs-button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="table table-bordered w-full text-sm" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f1f5f9; text-align: center;">
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">STT</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Mã phiếu thu</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Ngày thu</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Số tiền thu</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Hình thức</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Người tạo (Sale)</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Trạng thái</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Người duyệt (Kế toán)</th>
+                  <th style="padding: 8px; border: 1px solid #cbd5e1;">Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="!contract.receipts || contract.receipts.length === 0">
+                  <td colspan="9" class="text-center py-4 text-muted">Chưa có phiếu thu nào được tạo cho hợp đồng này.</td>
+                </tr>
+                <tr v-for="(rc, idx) in contract.receipts" :key="idx" style="text-align: center;">
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">{{ idx + 1 }}</td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; color: #2563eb;">{{ rc.code }}</td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">{{ rc.charge_date }}</td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: bold; color: #dc2626;">{{ rc.charge_amount | formatNumber }} đ</td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">
+                    {{ rc.method == 0 ? 'Tiền mặt' : (rc.method == 1 ? 'Chuyển khoản' : 'Thẻ tín dụng') }}
+                  </td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">{{ rc.creator_name }}</td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">
+                    <span v-if="rc.status == 0" class="badge" style="background: #fef3c7; color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: bold;">
+                      Chờ Kế toán duyệt
+                    </span>
+                    <span v-else-if="rc.status == 1" class="badge" style="background: #dcfce7; color: #15803d; padding: 3px 8px; border-radius: 4px; font-weight: bold;">
+                      Kế toán đã duyệt
+                    </span>
+                    <span v-else-if="rc.status == 2" class="badge" style="background: #fee2e2; color: #b91c1c; padding: 3px 8px; border-radius: 4px; font-weight: bold;">
+                      Từ chối duyệt
+                    </span>
+                  </td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1;">
+                    <span v-if="rc.approver_name">{{ rc.approver_name }} ({{ rc.approved_at }})</span>
+                    <span v-else class="text-muted">-</span>
+                  </td>
+                  <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">{{ rc.note || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="vx-row mt-5">
         <div class="vx-col w-full text-right">
           <router-link class="btn btn-danger" :to="`/lms/contracts/${contract.id}/detail`">
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
           </router-link>
+          <vs-button class="mb-2 mr-3" color="primary" v-if="contract.debt_amount > 0" @click="openReceiptModal">
+            <i class="fa-solid fa-receipt mr-1"></i> Lên phiếu thu
+          </vs-button>
           <vs-button class="mb-2" color="success" @click="save">Lưu</vs-button>
         </div>
       </div>
     </vx-card>
+
+    <!-- MODAL LÊN PHIẾU THU -->
+    <vs-popup title="Lên Phiếu Thu Tiền" :active.sync="receiptModal.active">
+      <div class="vx-row">
+        <div class="vx-col w-full mb-3" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+          <p class="mb-1"><strong>Học sinh:</strong> {{ contract.name }} (Mã: {{ contract.lms_code }})</p>
+          <p class="mb-1"><strong>Hợp đồng:</strong> {{ contract.code }} - {{ contract.product_name }}</p>
+          <p class="mb-1"><strong>Phải đóng:</strong> {{ contract.total_amount | formatNumber }} đ | <strong>Đã thu:</strong> <span class="text-success font-bold">{{ contract.total_charged | formatNumber }} đ</span></p>
+          <p class="mb-0"><strong>Công nợ hiện tại:</strong> <span class="text-danger font-bold" style="font-size: 15px;">{{ contract.debt_amount | formatNumber }} đ</span></p>
+        </div>
+        <div class="vx-col w-full mb-3">
+          <label class="vs-input--label">Số tiền thu <span class="text-danger">(*)</span></label>
+          <div class="flex items-center">
+            <input
+              type="number"
+              class="vs-inputx vs-input--input normal flex-1"
+              v-model="receiptModal.amount"
+              placeholder="Nhập số tiền thu"
+              :max="contract.debt_amount"
+              min="1000"
+            />
+            <vs-button size="small" class="ml-2" type="border" @click="receiptModal.amount = contract.debt_amount">Đóng hết nợ</vs-button>
+          </div>
+        </div>
+        <div class="vx-col md:w-1/2 w-full mb-3">
+          <label class="vs-input--label">Phương thức đóng phí</label>
+          <select class="vs-inputx vs-input--input normal" v-model="receiptModal.method">
+            <option :value="0">Tiền mặt</option>
+            <option :value="1">Chuyển khoản</option>
+            <option :value="2">Quẹt thẻ tín dụng</option>
+          </select>
+        </div>
+        <div class="vx-col md:w-1/2 w-full mb-3">
+          <label class="vs-input--label">Ngày thu phí</label>
+          <datepicker
+            v-model="receiptModal.charge_date"
+            format="YYYY-MM-DD"
+            value-type="format"
+            style="width: 100%"
+            :clearable="false"
+          ></datepicker>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label class="vs-input--label">Ghi chú</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="receiptModal.note" placeholder="Nhập ghi chú thu phí (VD: Đóng học phí lần 2, Đặt cọc...)"></textarea>
+        </div>
+        <div class="vx-col w-full text-right">
+          <vs-button color="dark" type="border" class="mr-2" @click="receiptModal.active = false">Hủy</vs-button>
+          <vs-button color="success" @click="submitReceipt"><i class="fa fa-save mr-1"></i> Tạo phiếu thu</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 
 </template>
@@ -601,6 +722,13 @@
         },
         tmp_tuition_fee_id:'',
         tmp_discount_code_id:'',
+        receiptModal: {
+          active: false,
+          amount: 0,
+          method: 1,
+          charge_date: moment().format('YYYY-MM-DD'),
+          note: '',
+        },
       }
     },
     async created() {
@@ -666,6 +794,8 @@
           this.contract.resident_percent = response.data.resident_percent || 0;
           this.contract.is_resident = (response.data.resident_percent > 0);
           this.contract.gift_note = response.data.gift_note || '';
+          this.contract.can_edit_all = (response.data.can_edit_all !== undefined) ? response.data.can_edit_all : true;
+          this.contract.receipts = response.data.receipts || [];
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.tmp_discount_code_id = response.data.discount_code_id
           this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
@@ -674,6 +804,65 @@
           this.loadB2BCampaign();
           this.caculatorSession();
         })
+      },
+      openReceiptModal() {
+        this.receiptModal = {
+          active: true,
+          amount: this.contract.debt_amount,
+          method: 1,
+          charge_date: moment().format('YYYY-MM-DD'),
+          note: (this.contract.total_charged > 0) ? 'Thu phí đợt tiếp theo' : 'Thu tiền đợt 1',
+        };
+      },
+      submitReceipt() {
+        if (!this.receiptModal.amount || Number(this.receiptModal.amount) <= 0) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền thu phải lớn hơn 0',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        if (Number(this.receiptModal.amount) > Number(this.contract.debt_amount)) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền thu không được vượt quá công nợ hiện tại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        this.$vs.loading();
+        axios.p('/api/lms/contracts/add-receipt', {
+          contract_id: this.contract.id || this.contract.contract_id,
+          amount: this.receiptModal.amount,
+          method: this.receiptModal.method,
+          charge_date: this.receiptModal.charge_date,
+          note: this.receiptModal.note
+        }).then(response => {
+          this.$vs.loading.close();
+          this.receiptModal.active = false;
+          this.$vs.notify({
+            title: 'Thành công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          });
+          this.loadDetail();
+        }).catch(err => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Có lỗi xảy ra khi tạo phiếu thu',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+        });
       },
       
       saveProduct(data = null){

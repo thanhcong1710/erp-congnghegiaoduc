@@ -2,7 +2,15 @@
 
   <div id="page-users-list">
     <vx-card no-shadow class="mt-5">
-        <h5 class="w-full mb-3"><i class="fa-solid fa-file-contract mr-1"></i> Thông tin hợp đồng</h5>
+        <div class="flex justify-between items-center mb-4 pb-2 border-b">
+          <h5 class="font-bold"><i class="fa-solid fa-file-contract mr-1"></i> Chi tiết duyệt Phiếu Thu: <span class="text-primary">{{ payment.code }}</span></h5>
+          <div>
+            <span v-if="payment.status == 0" class="badge" style="background: #fef3c7; color: #b45309; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;">Chờ duyệt</span>
+            <span v-else-if="payment.status == 1" class="badge" style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;">Đã duyệt</span>
+            <span v-else-if="payment.status == 2" class="badge" style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;">Từ chối duyệt</span>
+          </div>
+        </div>
+        <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Thông tin hợp đồng & Học sinh</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/3 w-full mb-4">
             <label>Tên học sinh</label>
@@ -307,7 +315,10 @@
     },
     methods: {
       checkPermission(text){
-        return u.checkPermission(this.$store.state.AppActiveUser, text)
+        return u.checkPermission(this.$store.state.AppActiveUser, text) || 
+               u.checkPermission(this.$store.state.AppActiveUser, 'lms_charges') || 
+               u.checkPermission(this.$store.state.AppActiveUser, 'lms_waitcharges') || 
+               u.checkPermission(this.$store.state.AppActiveUser, 'lms_waitcharge_approve');
       },
       selectDate(date){
         if (date) {

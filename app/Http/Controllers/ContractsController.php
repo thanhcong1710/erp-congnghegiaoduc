@@ -221,9 +221,37 @@ class ContractsController extends Controller
         $text_mess = $count_recharge > 0 ? 'tái phí' : 'nhập học';
         LogStudents::logAdd(data_get($student_info, 'student_id'), 'Thêm mới hợp đồng '.$text_mess.' - '.$contract_code, Auth::user()->id);
 
+        // Nếu Sale có nhập số tiền thu lần 1 ngay khi tạo hợp đồng => tự động lên phiếu thu chờ Kế toán duyệt
+        $initial_payment_amount = (int) data_get($request, 'initial_payment_amount', 0);
+        $receipt_code = null;
+        if ($initial_payment_amount > 0) {
+            $tmp_id = u::insertSimpleRow([
+                'contract_id' => $contract_id,
+                'charge_amount' => $initial_payment_amount,
+                'debt_amount' => (int) data_get($request, 'total_amount') - $initial_payment_amount,
+                'total_charged' => $initial_payment_amount,
+                'charge_date' => data_get($request, 'initial_payment_date', date('Y-m-d')),
+                'method' => (int) data_get($request, 'initial_payment_method', 1),
+                'note' => data_get($request, 'initial_payment_note', 'Lên phiếu thu lần 1 khi nhập học'),
+                'meta_data' => json_encode($request->input()),
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => Auth::user()->id,
+                'status' => 0,
+            ], 'tmp_payments');
+            $receipt_code = 'PT' . str_pad($tmp_id, 6, '0', STR_PAD_LEFT);
+            u::updateSimpleRow(['code' => $receipt_code], ['id' => $tmp_id], 'tmp_payments');
+            LogStudents::logAdd(
+                data_get($student_info, 'student_id'),
+                'Sale lên phiếu thu ' . $receipt_code . ' số tiền ' . u::formatCurrency($initial_payment_amount) . ' cho hợp đồng ' . $contract_code . ' (Chờ Kế toán duyệt)',
+                Auth::user()->id
+            );
+        }
+
         $result = array(
             'status' => 1,
-            'message' => 'Thêm mới '.$text_mess.' thành công'
+            'message' => 'Thêm mới '.$text_mess.' thành công' . ($receipt_code ? ". Đã tạo phiếu thu {$receipt_code} chờ Kế toán duyệt." : ""),
+            'contract_id' => $contract_id,
+            'receipt_code' => $receipt_code
         );
         return response()->json($result);
     }
@@ -235,6 +263,7 @@ class ContractsController extends Controller
         $end_date = isset($request->end_date) ? $request->end_date : '';
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_contract = isset($request->type_contract) ? $request->type_contract : 0;
+        $debt_status = isset($request->debt_status) ? $request->debt_status : '';
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -263,6 +292,12 @@ class ContractsController extends Controller
         } elseif ($type_contract == 2) {
             $cond .= " AND c.count_recharge > 0 ";
         }
+
+        if ($debt_status === 'debt' || $debt_status === '1') {
+            $cond .= " AND c.debt_amount > 0 ";
+        } elseif ($debt_status === 'no_debt' || $debt_status === '2') {
+            $cond .= " AND c.debt_amount = 0 ";
+        }
         
         $order_by = " ORDER BY c.id DESC ";
 
@@ -275,7 +310,8 @@ class ContractsController extends Controller
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.cm_id) AS cm_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
                 c.code, (SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name,
-                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type, c.summary_sessions
+                c.total_sessions,c.bonus_sessions, c.real_sessions, c.init_tuition_fee_amount, c.must_charge, c.debt_amount, c.total_charged, c.status, c.type, c.summary_sessions,
+                (SELECT COUNT(tp.id) FROM tmp_payments AS tp WHERE tp.contract_id = c.id AND tp.status = 0) AS pending_receipts_count
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
@@ -297,6 +333,30 @@ class ContractsController extends Controller
         );
         return response()->json($result);
     } 
+
+    public function isManagerOrAccountant()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        // 999999: Quản trị hệ thống, 686868: Giám đốc trung tâm / BGĐ, 1000002: Kế toán
+        if ($user->checkRole('999999') || $user->checkRole('686868') || $user->checkRole('1000002')) {
+            return true;
+        }
+
+        $roles = u::query("SELECT r.code, r.name FROM role_has_user ru JOIN roles r ON r.id = ru.role_id WHERE ru.user_id = {$user->id}");
+        foreach ($roles as $r) {
+            $code = strtolower($r->code ?? '');
+            $name = strtolower($r->name ?? '');
+            if (in_array($code, ['admin', 'ceo', 'cashier']) || in_array($name, ['admin', 'ceo', 'cashier', 'kế toán'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public function show(Request $request,$contract_id)
     {
@@ -320,15 +380,82 @@ class ContractsController extends Controller
                 FROM contract_materials AS cm 
                 JOIN materials AS m ON m.id = cm.material_id 
                 WHERE cm.contract_id = $contract_id");
+            $data->can_edit_all = $this->isManagerOrAccountant();
+            $data->receipts = u::query("SELECT tp.id, tp.code, tp.charge_amount, tp.charge_date, tp.method, tp.note, tp.status, tp.created_at, tp.approved_at,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.creator_id) AS creator_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.approver_id) AS approver_name
+                FROM tmp_payments AS tp 
+                WHERE tp.contract_id = $contract_id 
+                ORDER BY tp.id DESC");
+            $data->payments = u::query("SELECT p.id, p.code, p.amount, p.charge_date, p.method, p.note, p.created_at,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=p.creator_id) AS creator_name
+                FROM payments AS p 
+                WHERE p.contract_id = $contract_id 
+                ORDER BY p.id DESC");
         }
         return response()->json($data);
     }
 
     public function update(Request $request)
     {
-        $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
-        $pre_update_contract_info = u::getObject(['id'=>data_get($request, 'id')], 'contracts');
         $contract_id = data_get($request, 'id');
+        $pre_update_contract_info = u::getObject(['id'=>$contract_id], 'contracts');
+        if (!$pre_update_contract_info) {
+            return response()->json(['status' => 0, 'message' => 'Hợp đồng không tồn tại.'], 404);
+        }
+
+        $can_edit_all = $this->isManagerOrAccountant();
+
+        // 1. Cập nhật Sách & Học liệu mua kèm (Áp dụng cho cả Sale và Ban Giám đốc / Kế toán)
+        $materials = data_get($request, 'materials', []);
+        u::query("DELETE FROM contract_materials WHERE contract_id = $contract_id");
+        $book_receivable = 0;
+        if (!empty($materials) && is_array($materials)) {
+            foreach ($materials as $mat) {
+                $final_price = (int)data_get($mat, 'final_price', 0);
+                $book_receivable += $final_price;
+                u::insertSimpleRow(array(
+                    'contract_id' => $contract_id,
+                    'material_id' => data_get($mat, 'material_id'),
+                    'package_months' => data_get($mat, 'package_months', 0),
+                    'quantity' => data_get($mat, 'quantity', 1),
+                    'original_price' => data_get($mat, 'original_price', 0),
+                    'discount_percent' => data_get($mat, 'discount_percent', 0),
+                    'final_price' => $final_price,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ), 'contract_materials');
+            }
+        }
+
+        // 2. Kiểm tra quyền của Sale
+        if (!$can_edit_all) {
+            // SALE: Khóa quyền sửa "Thông tin đăng ký học". Chỉ cho phép cập nhật Sách/Học liệu và Ghi chú
+            $tuition_receivable = (int)data_get($pre_update_contract_info, 'tuition_receivable', data_get($pre_update_contract_info, 'must_charge'));
+            $must_charge = $tuition_receivable + $book_receivable;
+            $total_charged = (int)data_get($pre_update_contract_info, 'total_charged', 0);
+            $debt_amount = $must_charge - $total_charged > 0 ? $must_charge - $total_charged : 0;
+
+            u::updateSimpleRow([
+                'book_receivable' => $book_receivable,
+                'must_charge' => $must_charge,
+                'debt_amount' => $debt_amount,
+                'note' => data_get($request, 'note', data_get($pre_update_contract_info, 'note')),
+                'gift_note' => data_get($request, 'gift_note', data_get($pre_update_contract_info, 'gift_note')),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+            ], ['id' => $contract_id], 'contracts');
+
+            u::addLogContracts($contract_id);
+            LogStudents::logAdd(data_get($pre_update_contract_info, 'student_id'), 'Sale cập nhật Sách/Học liệu và Ghi chú hợp đồng - ' . data_get($pre_update_contract_info, 'code'), Auth::user()->id);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Cập nhật thành công (Chỉ lưu Sách/Học liệu và Ghi chú do tài khoản Sale bị khóa quyền sửa thông tin đăng ký học)'
+            ]);
+        }
+
+        // 3. BAN GIÁM ĐỐC & KẾ TOÁN: Toàn quyền cập nhật tất cả thông tin hợp đồng
+        $student_info = u::getObject(['student_id'=>data_get($request, 'student_id', data_get($pre_update_contract_info, 'student_id')), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
@@ -341,13 +468,13 @@ class ContractsController extends Controller
             
         u::updateSimpleRow(array(
             'type' => data_get($request, 'type'),
-           'student_id' => data_get($request, 'student_id'), 
-           'branch_id' => data_get($student_info, 'branch_id'),
-           'ceo_branch_id' => data_get($student_info, 'ceo_branch_id'),
-           'ec_id' => data_get($student_info, 'ec_id'),
-           'ec_leader_id' => data_get($student_info, 'ec_leader_id'),
-           'cm_id' => data_get($student_info, 'cm_id'),
-           'cm_leader_id' => data_get($student_info, 'cm_leader_id'),
+           'student_id' => data_get($request, 'student_id', data_get($pre_update_contract_info, 'student_id')), 
+           'branch_id' => data_get($student_info, 'branch_id', data_get($pre_update_contract_info, 'branch_id')),
+           'ceo_branch_id' => data_get($student_info, 'ceo_branch_id', data_get($pre_update_contract_info, 'ceo_branch_id')),
+           'ec_id' => data_get($student_info, 'ec_id', data_get($pre_update_contract_info, 'ec_id')),
+           'ec_leader_id' => data_get($student_info, 'ec_leader_id', data_get($pre_update_contract_info, 'ec_leader_id')),
+           'cm_id' => data_get($student_info, 'cm_id', data_get($pre_update_contract_info, 'cm_id')),
+           'cm_leader_id' => data_get($student_info, 'cm_leader_id', data_get($pre_update_contract_info, 'cm_leader_id')),
            'product_id' => data_get($request, 'product_id'),
            'tuition_fee_id' => data_get($request, 'tuition_fee_id'),
            'init_tuition_fee_id' => data_get($request, 'tuition_fee_id'),
@@ -370,8 +497,8 @@ class ContractsController extends Controller
            'total_sessions' => data_get($request, 'total_session'),
            'real_sessions' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? 0 : data_get($request, 'tuition_fee_session'),
            'bonus_sessions' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? data_get($request, 'total_session') : ((int)data_get($request, 'total_session') - (int)data_get($request, 'tuition_fee_session')),
-           'summary_sessions' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? data_get($request, 'total_session') : $availableSession, // chưa đóng phí
-           'reservable_sessions' =>0, // khi nào có buổi summary_sessions mới được bảo lưu,
+           'summary_sessions' => data_get($request, 'type') ==0 || data_get($request, 'total_amount') == 0 ? data_get($request, 'total_session') : $availableSession,
+           'reservable_sessions' =>0,
            'start_date'=> data_get($request, 'start_date'),
            'note'=> data_get($request, 'note'),
            'updated_at'=>date('Y-m-d H:i:s'),
@@ -382,6 +509,9 @@ class ContractsController extends Controller
            'b2b_amount' => data_get($request,'b2b_amount'),
            'b2b_bonus_session' => data_get($request,'b2b_bonus_session'),
            'sibling_discount' => $sibling_discount,
+           'tuition_receivable' => data_get($request, 'tuition_receivable', data_get($request, 'total_amount')),
+           'book_receivable' => $book_receivable,
+           'gift_note' => data_get($request, 'gift_note', ''),
         ), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
@@ -423,6 +553,76 @@ class ContractsController extends Controller
             'message' => 'Cập nhật thông tin '.$text_mess.' thành công'
         );
         return response()->json($result);
+    }
+
+    public function addReceipt(Request $request)
+    {
+        $contract_id = data_get($request, 'contract_id');
+        $amount = (int) data_get($request, 'amount');
+        $charge_date = data_get($request, 'charge_date', date('Y-m-d'));
+        $method = (int) data_get($request, 'method', 0);
+        $note = data_get($request, 'note', '');
+
+        if (!$contract_id) {
+            return response()->json(['status' => 0, 'message' => 'Vui lòng chọn hợp đồng.'], 422);
+        }
+        if ($amount <= 0) {
+            return response()->json(['status' => 0, 'message' => 'Số tiền thu phải lớn hơn 0.'], 422);
+        }
+
+        $contract = u::getObject(['id' => $contract_id], 'contracts');
+        if (!$contract) {
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy hợp đồng.'], 404);
+        }
+
+        $debt_amount = (int) data_get($contract, 'debt_amount');
+        if ($amount > $debt_amount) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Số tiền thu (' . number_format($amount) . ' đ) không được vượt quá số nợ hiện tại (' . number_format($debt_amount) . ' đ).'
+            ], 422);
+        }
+
+        $tmp_id = u::insertSimpleRow([
+            'contract_id' => $contract_id,
+            'charge_amount' => $amount,
+            'debt_amount' => $debt_amount - $amount,
+            'total_charged' => (int) data_get($contract, 'total_charged') + $amount,
+            'charge_date' => $charge_date,
+            'method' => $method,
+            'note' => $note,
+            'meta_data' => json_encode($request->input()),
+            'created_at' => date('Y-m-d H:i:s'),
+            'creator_id' => Auth::user()->id,
+            'status' => 0,
+        ], 'tmp_payments');
+
+        $receipt_code = 'PT' . str_pad($tmp_id, 6, '0', STR_PAD_LEFT);
+        u::updateSimpleRow(['code' => $receipt_code], ['id' => $tmp_id], 'tmp_payments');
+
+        LogStudents::logAdd(
+            data_get($contract, 'student_id'),
+            'Sale lên phiếu thu ' . $receipt_code . ' số tiền ' . u::formatCurrency($amount) . ' cho hợp đồng ' . data_get($contract, 'code') . ' (Chờ Kế toán duyệt)',
+            Auth::user()->id
+        );
+
+        return response()->json([
+            'status' => 1,
+            'message' => "Tạo phiếu thu {$receipt_code} thành công. Phiếu thu đã được chuyển sang Kế toán chờ check duyệt.",
+            'receipt_code' => $receipt_code,
+            'receipt_id' => $tmp_id,
+        ]);
+    }
+
+    public function getReceipts(Request $request, $contract_id)
+    {
+        $receipts = u::query("SELECT tp.id, tp.code, tp.charge_amount, tp.charge_date, tp.method, tp.note, tp.status, tp.created_at, tp.approved_at,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.creator_id) AS creator_name,
+            (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.approver_id) AS approver_name
+            FROM tmp_payments AS tp 
+            WHERE tp.contract_id = $contract_id 
+            ORDER BY tp.id DESC");
+        return response()->json($receipts);
     }
 
     public function print(Request $request,$contract_id)

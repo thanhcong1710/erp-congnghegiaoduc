@@ -33,6 +33,14 @@
             <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
               :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
           </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Công nợ</label>
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.debt_status">
+              <option value="">-- Tất cả công nợ --</option>
+              <option value="debt">Còn công nợ</option>
+              <option value="no_debt">Đã hoàn thành đóng phí</option>
+            </select>
+          </div>
         </div>
         <div class="vx-row mt-3">
           <div class="vx-col w-full">
@@ -57,6 +65,7 @@
                   <th colspan="1" rowspan="1">Trung tâm</th>
                   <th colspan="1" rowspan="1">Hợp đồng</th>
                   <th colspan="1" rowspan="1">Đóng phí</th>
+                  <th colspan="1" rowspan="1" class="text-center">Công nợ</th>
                   <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
                   <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
                 </tr>
@@ -84,18 +93,34 @@
                 <td class="td vs-table--td">
                   <p>Giá gốc: <strong>{{ item.init_tuition_fee_amount | formatMoney }}</strong></p>
                   <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
-                  <p>Công nợ: {{ item.debt_amount | formatMoney }}</p>
-                  <p v-if="item.debt_amount>0 && item.total_charged"><strong>Đặt cọc: {{ item.summary_sessions }} buổi</strong></p>
+                  <p>Đã thu: <strong class="text-success">{{ item.total_charged | formatMoney }}</strong></p>
+                </td>
+                <td class="td vs-table--td text-center">
+                  <div v-if="item.debt_amount > 0">
+                    <p class="text-danger font-bold" style="font-size: 15px;">{{ item.debt_amount | formatMoney }}</p>
+                    <p v-if="item.summary_sessions && item.total_charged" class="text-xs text-muted"><strong>Cọc: {{ item.summary_sessions }} buổi</strong></p>
+                    <div v-if="item.pending_receipts_count > 0" class="mt-1">
+                      <span class="badge" style="background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                        <i class="fa fa-clock"></i> Chờ duyệt {{ item.pending_receipts_count }} PT
+                      </span>
+                    </div>
+                  </div>
+                  <div v-else>
+                    <span class="text-success font-semibold" style="color: #10b981;">0 đ (Đã thu đủ)</span>
+                  </div>
                 </td>
                 <td class="td vs-table--td text-center">{{ item.label_status}}</td>
                 <td class="td vs-table--td text-center list-action"> 
                     <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
-                      <vs-button size="small"><i class="fa fa-eye"></i></vs-button>
+                      <vs-button size="small" title="Xem chi tiết"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
+                    <vs-button size="small" color="success" v-if="item.debt_amount > 0" @click="openReceiptModal(item)" title="Lên phiếu thu tiền">
+                      <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </vs-button>
                     <router-link :to="`/pages/print/contract/${item.contract_id}`" target="_blank"> 
-                      <vs-button size="small" style="background: rgb(19 128 213) !important"><i class="fa-solid fa-print"></i></vs-button>
+                      <vs-button size="small" style="background: rgb(19 128 213) !important" title="In hợp đồng"><i class="fa-solid fa-print"></i></vs-button>
                     </router-link> 
-                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)"><i class="fa-solid fa-trash"></i></vs-button>
+                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)" title="Hủy hợp đồng"><i class="fa-solid fa-trash"></i></vs-button>
                 </td>
               </tr>
             </table>
@@ -123,6 +148,59 @@
               v-model="pagination.cpage" @change="changePage()"/>
       </div>
     </vx-card>
+
+    <!-- MODAL LÊN PHIẾU THU TIỀN -->
+    <vs-popup title="Lên Phiếu Thu Tiền" :active.sync="receiptModal.active">
+      <div class="vx-row" v-if="receiptModal.contract">
+        <div class="vx-col w-full mb-3" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+          <p class="mb-1"><strong>Học sinh:</strong> {{ receiptModal.contract.name }} (Mã: {{ receiptModal.contract.lms_code }})</p>
+          <p class="mb-1"><strong>Hợp đồng:</strong> {{ receiptModal.contract.code }} - {{ receiptModal.contract.product_name }}</p>
+          <p class="mb-1"><strong>Phải đóng:</strong> {{ receiptModal.contract.must_charge | formatMoney }} | <strong>Đã thu:</strong> <span class="text-success font-bold">{{ receiptModal.contract.total_charged | formatMoney }}</span></p>
+          <p class="mb-0"><strong>Công nợ hiện tại:</strong> <span class="text-danger font-bold" style="font-size: 15px;">{{ receiptModal.contract.debt_amount | formatMoney }}</span></p>
+        </div>
+        <div class="vx-col w-full mb-3">
+          <label class="vs-input--label">Số tiền thu <span class="text-danger">(*)</span></label>
+          <div class="flex items-center">
+            <input
+              type="number"
+              class="vs-inputx vs-input--input normal flex-1"
+              v-model="receiptModal.amount"
+              placeholder="Nhập số tiền thu"
+              :max="receiptModal.contract.debt_amount"
+              min="1000"
+            />
+            <vs-button size="small" class="ml-2" type="border" @click="receiptModal.amount = receiptModal.contract.debt_amount">Đóng hết nợ</vs-button>
+          </div>
+        </div>
+        <div class="vx-col md:w-1/2 w-full mb-3">
+          <label class="vs-input--label">Phương thức đóng phí</label>
+          <select class="vs-inputx vs-input--input normal" v-model="receiptModal.method">
+            <option :value="0">Tiền mặt</option>
+            <option :value="1">Chuyển khoản</option>
+            <option :value="2">Quẹt thẻ tín dụng</option>
+          </select>
+        </div>
+        <div class="vx-col md:w-1/2 w-full mb-3">
+          <label class="vs-input--label">Ngày thu phí</label>
+          <date-picker
+            v-model="receiptModal.charge_date"
+            format="YYYY-MM-DD"
+            value-type="format"
+            style="width: 100%"
+            :clearable="false"
+            :lang="datepickerOptions.lang"
+          ></date-picker>
+        </div>
+        <div class="vx-col w-full mb-4">
+          <label class="vs-input--label">Ghi chú</label>
+          <textarea class="vs-inputx vs-input--input normal" v-model="receiptModal.note" placeholder="Nhập ghi chú thu phí (VD: Đóng học phí lần 2, Đặt cọc...)"></textarea>
+        </div>
+        <div class="vx-col w-full text-right">
+          <vs-button color="dark" type="border" class="mr-2" @click="receiptModal.active = false">Hủy</vs-button>
+          <vs-button color="success" @click="submitReceipt"><i class="fa fa-save mr-1"></i> Tạo phiếu thu</vs-button>
+        </div>
+      </div>
+    </vs-popup>
   </div>
 
 </template>
@@ -134,6 +212,7 @@
   import Multiselect from "vue-multiselect";
   import DatePicker from "vue2-datepicker";
   import u from '../../../until/helper.js'
+  import moment from 'moment';
 
   export default {
     components: { 
@@ -149,6 +228,15 @@
           branch_id:"",
           keyword: "",
           dateRange: "",
+          debt_status: "",
+        },
+        receiptModal: {
+          active: false,
+          contract: null,
+          amount: 0,
+          method: 1,
+          charge_date: moment().format('YYYY-MM-DD'),
+          note: "",
         },
         datepickerOptions: {
           closed: true,
@@ -200,10 +288,71 @@
       this.getData();
     },
     methods: {
+      openReceiptModal(item) {
+        this.receiptModal = {
+          active: true,
+          contract: item,
+          amount: item.debt_amount,
+          method: 1,
+          charge_date: moment().format('YYYY-MM-DD'),
+          note: item.total_charged > 0 ? 'Thu phí đợt tiếp theo' : 'Thu tiền đợt 1',
+        };
+      },
+      submitReceipt() {
+        if (!this.receiptModal.amount || Number(this.receiptModal.amount) <= 0) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền thu phải lớn hơn 0',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        if (Number(this.receiptModal.amount) > Number(this.receiptModal.contract.debt_amount)) {
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: 'Số tiền thu không được lớn hơn công nợ hiện tại',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+          return;
+        }
+        this.$vs.loading();
+        axios.p('/api/lms/contracts/add-receipt', {
+          contract_id: this.receiptModal.contract.contract_id,
+          amount: this.receiptModal.amount,
+          method: this.receiptModal.method,
+          charge_date: this.receiptModal.charge_date,
+          note: this.receiptModal.note
+        }).then(response => {
+          this.$vs.loading.close();
+          this.receiptModal.active = false;
+          this.$vs.notify({
+            title: 'Thành công',
+            text: response.data.message,
+            color: 'success',
+            iconPack: 'feather',
+            icon: 'icon-check'
+          });
+          this.getData();
+        }).catch(err => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Có lỗi xảy ra khi tạo phiếu thu',
+            color: 'danger',
+            iconPack: 'feather',
+            icon: 'icon-alert-circle'
+          });
+        });
+      },
       reset() {
         this.searchData.keyword = ""
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
+        this.searchData.debt_status = ""
         this.searchData.pagination= this.pagination
         this.searchData.dateRange= ""
         this.getData();
@@ -224,6 +373,7 @@
             branch_id: this.searchData.branch_id,
             start_date:startDate,
             end_date:endDate,
+            debt_status: this.searchData.debt_status,
             pagination:this.pagination,
             type_contract:1
           }

@@ -471,6 +471,64 @@
         </div>
       </div>
 
+      <!-- LÊN PHIẾU THU LẦN ĐẦU -->
+      <vs-divider class="my-5" />
+      <div class="vx-row" v-if="contract.total_amount > 0">
+        <div class="vx-col w-full">
+          <vx-card no-shadow style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
+            <div class="flex items-center mb-3">
+              <input type="checkbox" id="create_first_receipt" v-model="has_first_receipt" class="cursor-pointer mr-2" style="width: 18px; height: 18px;" @change="toggleFirstReceipt" />
+              <label for="create_first_receipt" class="font-bold text-success cursor-pointer" style="font-size: 15px;">
+                <i class="fa-solid fa-receipt mr-1"></i> Lên phiếu thu tiền ngay khi nhập học (Tạo phiếu thu gửi Kế toán duyệt)
+              </label>
+            </div>
+            <div class="vx-row mt-2" v-if="has_first_receipt">
+              <div class="vx-col md:w-1/3 w-full mb-3">
+                <label>Số tiền thu lần 1 <span class="text-danger">(*)</span></label>
+                <div class="flex items-center">
+                  <input
+                    type="number"
+                    class="vs-inputx vs-input--input normal flex-1"
+                    v-model="contract.initial_payment_amount"
+                    placeholder="Nhập số tiền thu"
+                    :max="contract.total_amount"
+                    min="1000"
+                  />
+                  <vs-button size="small" class="ml-2" type="border" @click="contract.initial_payment_amount = contract.total_amount">Đóng đủ</vs-button>
+                </div>
+              </div>
+              <div class="vx-col md:w-1/3 w-full mb-3">
+                <label>Hình thức thanh toán</label>
+                <select class="vs-inputx vs-input--input normal" v-model="contract.initial_payment_method">
+                  <option :value="0">Tiền mặt</option>
+                  <option :value="1">Chuyển khoản</option>
+                  <option :value="2">Quẹt thẻ tín dụng</option>
+                </select>
+              </div>
+              <div class="vx-col md:w-1/3 w-full mb-3">
+                <label>Ngày thu phí</label>
+                <datepicker
+                  v-model="contract.initial_payment_date"
+                  format="YYYY-MM-DD"
+                  value-type="format"
+                  style="width: 100%"
+                  :clearable="false"
+                ></datepicker>
+              </div>
+              <div class="vx-col w-full mb-2">
+                <label>Ghi chú phiếu thu</label>
+                <input
+                  type="text"
+                  class="vs-inputx vs-input--input normal"
+                  v-model="contract.initial_payment_note"
+                  placeholder="VD: Thu học phí lần 1 / Đặt cọc giữ chỗ..."
+                />
+              </div>
+            </div>
+          </vx-card>
+        </div>
+      </div>
+
       <div class="vx-row mt-5">
         <div class="vx-col w-full text-right">
           <router-link class="btn btn-danger" :to="`/lms/contracts`">
@@ -602,7 +660,12 @@
           b2b_bonus_session:'',
           sibling_discount:'',
           sibling: false,
+          initial_payment_amount: 0,
+          initial_payment_method: 1,
+          initial_payment_date: moment().format('YYYY-MM-DD'),
+          initial_payment_note: 'Lên phiếu thu lần 1 khi nhập học',
         },
+        has_first_receipt: false,
         student_info:{
 
         },
@@ -1008,6 +1071,15 @@
           Number(this.contract.discount_code_session || 0) + 
           Number(this.contract.coupon_session || 0) + 
           Number(this.contract.b2b_bonus_session || 0);
+
+        if (this.has_first_receipt && (!this.contract.initial_payment_amount || this.contract.initial_payment_amount <= 0)) {
+          this.contract.initial_payment_amount = this.contract.total_amount;
+        }
+      },
+      toggleFirstReceipt() {
+        if (this.has_first_receipt && (!this.contract.initial_payment_amount || this.contract.initial_payment_amount <= 0)) {
+          this.contract.initial_payment_amount = this.contract.total_amount;
+        }
       },
       save() {
         let mess = "";
@@ -1036,11 +1108,18 @@
           mess += " - Ngày dự kiến học không được để trống<br/>";
           resp = false;
         }
+        if (this.has_first_receipt && Number(this.contract.initial_payment_amount) > Number(this.contract.total_amount)) {
+          mess += " - Số tiền thu lần 1 không được vượt quá tổng thanh toán<br/>";
+          resp = false;
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
           this.alert.active = true;
           return false;
+        }
+        if (!this.has_first_receipt) {
+          this.contract.initial_payment_amount = 0;
         }
         this.$vs.loading()
         axios.p("/api/lms/contracts/add",this.contract)

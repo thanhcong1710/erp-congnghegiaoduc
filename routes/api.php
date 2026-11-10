@@ -161,6 +161,8 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('contracts/exit-depost', 'ContractsController@exitDepost');
             Route::get('contracts/show/{contract_id}', 'ContractsController@show');
             Route::post('contracts/update', 'ContractsController@update');
+            Route::post('contracts/add-receipt', 'ContractsController@addReceipt');
+            Route::get('contracts/receipts/{contract_id}', 'ContractsController@getReceipts');
             Route::get('contracts/print/{contract_id}', 'ContractsController@print');
             Route::get('tuition_transfer/print/{contract_id}', 'TuitionTransfersController@print');
             Route::post('accounting/charges/list', 'ChargesController@list');
