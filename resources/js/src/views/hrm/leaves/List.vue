@@ -176,18 +176,35 @@
                         {{ emp.department_name }}
                       </td>
                       <td class="td vs-table--td text-center font-semibold text-gray-700">
-                        <span v-if="emp.is_fulltime">{{ emp.total_days }} ngày</span>
-                        <span v-else class="text-xs text-gray-400 italic">0 ngày (CTV)</span>
+                        <div class="flex items-center justify-center">
+                          <span class="font-bold text-gray-800" style="font-size: 14px;">
+                            {{ emp.total_days }} ngày
+                          </span>
+                          <button
+                            v-if="canAdjustBalance"
+                            class="ml-1 text-primary hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition"
+                            @click.stop="openAdjustBalancePopup(emp)"
+                            title="Điều chỉnh số ngày phép"
+                          >
+                            <i class="fa-solid fa-pen-to-square" style="font-size: 12px;"></i>
+                          </button>
+                        </div>
+                        <div v-if="emp.balance_note" class="text-xs text-blue-600 font-medium truncate max-w-xs mx-auto" :title="emp.balance_note">
+                          <i class="fa-solid fa-note-sticky text-xs mr-0.5"></i> {{ emp.balance_note }}
+                        </div>
+                        <div v-else-if="!emp.is_fulltime && emp.total_days == 0" class="text-xs text-gray-400 italic">
+                          (CTV mặc định 0d)
+                        </div>
                       </td>
                       <td class="td vs-table--td text-center font-bold text-warning" style="font-size: 14px;">
                         {{ emp.used_days }} ngày
                       </td>
-                      <td class="td vs-table--td text-center font-bold" :class="emp.is_fulltime ? (emp.remaining_days > 0 ? 'text-success' : 'text-danger') : 'text-gray-400'" style="font-size: 14px;">
-                        <span v-if="emp.is_fulltime">{{ emp.remaining_days }} ngày</span>
+                      <td class="td vs-table--td text-center font-bold" :class="emp.total_days > 0 ? (emp.remaining_days > 0 ? 'text-success' : 'text-danger') : 'text-gray-400'" style="font-size: 14px;">
+                        <span v-if="emp.total_days > 0 || emp.is_fulltime">{{ emp.remaining_days }} ngày</span>
                         <span v-else class="text-xs text-gray-400 font-normal">---</span>
                       </td>
                       <td class="td vs-table--td text-center">
-                        <template v-if="emp.is_fulltime">
+                        <template v-if="emp.total_days > 0 || emp.is_fulltime">
                           <span v-if="emp.is_over_limit" class="status-tag status-danger">
                             Vượt +{{ emp.over_days }} ngày
                           </span>
@@ -202,18 +219,26 @@
                           </span>
                         </template>
                         <template v-else>
-                          <span class="status-tag status-gray" title="CTV không có định mức phép năm 12 ngày">
+                          <span class="status-tag status-gray" title="Chưa có định mức phép năm">
                             Không áp dụng
                           </span>
                         </template>
                       </td>
-                      <td class="td vs-table--td text-center">
+                      <td class="td vs-table--td text-center whitespace-no-wrap">
                         <button 
                           class="btn-detail-history"
                           @click="viewEmployeeHistory(emp)"
                           title="Xem chi tiết các đợt nghỉ phép"
                         >
                           <i class="fa-solid fa-clock-rotate-left mr-1"></i> Chi tiết
+                        </button>
+                        <button 
+                          v-if="canAdjustBalance"
+                          class="btn-adjust-action ml-1.5"
+                          @click="openAdjustBalancePopup(emp)"
+                          title="Điều chỉnh quỹ phép năm nhân sự"
+                        >
+                          <i class="fa-solid fa-sliders mr-1 text-primary"></i> Sửa phép
                         </button>
                       </td>
                     </tr>
@@ -756,6 +781,195 @@
       </div>
     </vs-popup>
 
+    <!-- ========================================== -->
+    <!-- POPUP ĐIỀU CHỈNH QUỸ PHÉP NĂM NHÂN SỰ -->
+    <!-- ========================================== -->
+    <vs-popup 
+      class="modal-custom-leave modal-adjust-balance" 
+      :title="adjustPopupTitle" 
+      :active.sync="adjustPopupActive"
+    >
+      <div class="p-2" v-if="adjustingEmployee">
+        <!-- Card thông tin nhân viên -->
+        <div class="p-3 mb-4 rounded-lg bg-gray-50 border border-gray-200">
+          <div class="flex flex-wrap items-center justify-between">
+            <div class="flex items-center space-x-2 flex-wrap">
+              <span class="emp-code-badge">{{ adjustingEmployee.employee_code }}</span>
+              <strong class="text-base text-gray-900 ml-1">{{ adjustingEmployee.full_name }}</strong>
+              <span class="text-xs px-2 py-0.5 rounded font-bold bg-blue-50 text-primary border border-blue-200 ml-1">
+                {{ adjustingEmployee.department_name }}
+              </span>
+              <span class="text-xs px-2 py-0.5 rounded font-semibold bg-gray-200 text-gray-700 ml-1">
+                {{ adjustingEmployee.is_fulltime ? 'Fulltime' : (adjustingEmployee.contract_type || 'CTV') }}
+              </span>
+            </div>
+            <div class="text-xs text-gray-600 mt-2 sm:mt-0">
+              <span v-if="adjustingEmployee.start_date">
+                <i class="fa-solid fa-calendar-check text-primary mr-1"></i>
+                Vào làm: <strong>{{ formatDate(adjustingEmployee.start_date) }}</strong>
+                <span class="text-primary font-semibold ml-1">({{ getWorkingMonthsNote(adjustingEmployee.start_date) }})</span>
+              </span>
+              <span v-else class="text-gray-400 italic">Chưa có ngày bắt đầu làm việc</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form điều chỉnh -->
+        <div class="vx-row mb-4">
+          <!-- Năm -->
+          <div class="vx-col w-full sm:w-1/3 mb-3 sm:mb-0">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Năm áp dụng (*)</label>
+            <input type="number" class="filter-input w-full bg-gray-100 font-semibold" v-model="adjustForm.year" readonly />
+          </div>
+
+          <!-- Số ngày phép được hưởng -->
+          <div class="vx-col w-full sm:w-2/3">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">
+              Số ngày phép năm được hưởng (*)
+              <span class="text-xs font-normal text-gray-500 ml-1">(Hỗ trợ số lẻ như 2.5, 3.5...)</span>
+            </label>
+            <div class="flex items-center">
+              <input 
+                type="number" 
+                step="0.5" 
+                min="0" 
+                max="365" 
+                class="filter-input w-full font-bold text-primary text-base" 
+                v-model.number="adjustForm.total_days" 
+                placeholder="Nhập số ngày phép..."
+              />
+              <span class="ml-2 font-semibold text-gray-600 whitespace-no-wrap">ngày</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Các phím tắt chọn nhanh -->
+        <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+          <label class="text-xs font-bold text-blue-900 uppercase block mb-2">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Gợi ý chọn nhanh định mức phép:
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              type="button" 
+              class="quick-preset-btn"
+              @click="setQuickDays(2, 'Nhân viên mới làm được 2 tháng (2 ngày phép)')"
+            >
+              2 ngày (2 tháng)
+            </button>
+            <button 
+              type="button" 
+              class="quick-preset-btn"
+              @click="setQuickDays(3, 'Nhân viên mới làm được 3 tháng (3 ngày phép)')"
+            >
+              3 ngày (3 tháng)
+            </button>
+            <button 
+              type="button" 
+              class="quick-preset-btn"
+              @click="setQuickDays(6, 'Làm việc 6 tháng (6 ngày phép)')"
+            >
+              6 ngày (Nửa năm)
+            </button>
+            <button 
+              type="button" 
+              class="quick-preset-btn"
+              @click="setQuickDays(12, 'Định mức chuẩn 1 năm (12 ngày phép)')"
+            >
+              12 ngày (Chuẩn 1 năm)
+            </button>
+            <button 
+              type="button" 
+              class="quick-preset-btn preset-gold"
+              @click="setQuickDays(15, 'Thâm niên công tác (15 ngày phép)')"
+            >
+              15 ngày (Thâm niên)
+            </button>
+            <button 
+              v-if="adjustingEmployee.start_date"
+              type="button" 
+              class="quick-preset-btn preset-primary"
+              @click="autoCalculateFromStartDate()"
+              title="Tự động tính số tháng làm việc từ ngày bắt đầu đến hết năm"
+            >
+              <i class="fa-solid fa-bolt mr-1"></i> Tự tính theo ngày vào làm
+            </button>
+          </div>
+        </div>
+
+        <!-- Xem / Chỉnh số ngày đã sử dụng (tùy chọn đối soát) -->
+        <div class="vx-row mb-4">
+          <div class="vx-col w-full">
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-sm font-semibold text-gray-700">
+                Số ngày đã nghỉ / sử dụng
+              </label>
+              <label class="text-xs text-primary font-medium cursor-pointer flex items-center">
+                <input type="checkbox" v-model="adjustForm.enable_custom_used" class="mr-1" />
+                Cho phép điều chỉnh số ngày đã nghỉ
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input 
+                type="number" 
+                step="0.5" 
+                min="0" 
+                class="filter-input w-full font-bold text-warning text-base" 
+                :class="{'bg-gray-100 cursor-not-allowed': !adjustForm.enable_custom_used}"
+                :readonly="!adjustForm.enable_custom_used"
+                v-model.number="adjustForm.used_days" 
+              />
+              <span class="ml-2 font-semibold text-gray-600 whitespace-no-wrap">ngày</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1" v-if="!adjustForm.enable_custom_used">
+              * Mặc định số ngày đã dùng được hệ thống cộng dồn tự động từ các đơn xin phép đã được duyệt.
+            </p>
+          </div>
+        </div>
+
+        <!-- Xem trước còn lại sau điều chỉnh -->
+        <div class="p-3 mb-4 rounded-lg bg-green-50 border border-green-200 flex items-center justify-between">
+          <span class="text-sm text-green-900 font-semibold">
+            Số ngày phép còn lại dự kiến sau điều chỉnh:
+          </span>
+          <span class="text-lg font-bold" :class="previewRemainingDays >= 0 ? 'text-success' : 'text-danger'">
+            {{ previewRemainingDays }} ngày
+          </span>
+        </div>
+
+        <!-- Ghi chú / Lý do điều chỉnh -->
+        <div class="vx-row mb-4">
+          <div class="vx-col w-full">
+            <label class="text-sm font-semibold text-gray-700 block mb-1">
+              Lý do / Ghi chú điều chỉnh (*)
+            </label>
+            <textarea
+              placeholder="VD: Mới làm được 2 tháng, Thâm niên trên 5 năm được 15 ngày, Thỏa thuận hợp đồng..."
+              rows="2"
+              class="filter-input w-full"
+              v-model="adjustForm.note"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Footer nút hành động -->
+        <div class="vx-row mt-6">
+          <div class="vx-col w-full flex justify-end items-center">
+            <button class="btn-close-modal mr-2" @click="adjustPopupActive = false" :disabled="isSavingBalance">Hủy</button>
+            <vs-button
+              @click="submitAdjustBalance()"
+              color="primary"
+              type="filled"
+              class="p-2.5 px-5"
+              :disabled="isSavingBalance"
+            >
+              <i class="fa-solid fa-floppy-disk mr-1.5"></i>
+              {{ isSavingBalance ? 'Đang lưu...' : 'Lưu Thay Đổi' }}
+            </vs-button>
+          </div>
+        </div>
+      </div>
+    </vs-popup>
+
   </div>
 </template>
 
@@ -777,6 +991,7 @@ export default {
       searchStaffKeyword: '',
       searchDebounce: null,
       departments: [],
+      canAdjustBalance: false,
       stats: {
         total_employees: 0,
         total_company_used_days: 0,
@@ -794,6 +1009,19 @@ export default {
       leaves: { data: [], total: 0, per_page: 20, current_page: 1 },
       leaveTypes: [],
       canApprove: false,
+
+      // Popup Điều Chỉnh Quỹ Phép Năm
+      adjustPopupActive: false,
+      adjustingEmployee: null,
+      isSavingBalance: false,
+      adjustForm: {
+        employee_id: null,
+        year: 2026,
+        total_days: 12.0,
+        used_days: 0.0,
+        enable_custom_used: false,
+        note: ''
+      },
 
       // Popup Chi tiết Lịch sử Nghỉ phép
       popupHistoryActive: false,
@@ -836,6 +1064,15 @@ export default {
     popupHistoryTitle() {
       if (!this.selectedStaffHistory) return 'LỊCH SỬ NGHỈ PHÉP NHÂN SỰ';
       return `LỊCH SỬ NGHỈ PHÉP - ${this.selectedStaffHistory.employee.full_name} (${this.selectedStaffHistory.employee.employee_code})`;
+    },
+    adjustPopupTitle() {
+      if (!this.adjustingEmployee) return 'ĐIỀU CHỈNH QUỸ PHÉP NĂM';
+      return `ĐIỀU CHỈNH QUỸ PHÉP NĂM - ${this.adjustingEmployee.full_name} (${this.adjustingEmployee.employee_code})`;
+    },
+    previewRemainingDays() {
+      const total = parseFloat(this.adjustForm.total_days) || 0;
+      const used = parseFloat(this.adjustForm.used_days) || 0;
+      return Math.max(0, Math.round((total - used) * 100) / 100);
     }
   },
   created() {
@@ -860,6 +1097,7 @@ export default {
           this.departments = res.data.departments || [];
           this.staffBalances.data = res.data.data || [];
           this.staffBalances.pagination = res.data.pagination || this.staffBalances.pagination;
+          this.canAdjustBalance = res.data.can_adjust_balance || false;
         }
       }).catch(err => {
         console.error(err);
@@ -910,6 +1148,169 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+
+    // ----------------------------------------------------
+    // ADJUST LEAVE BALANCE (ADMIN & QUẢN LÝ NHÂN SỰ)
+    // ----------------------------------------------------
+    openAdjustBalancePopup(emp) {
+      this.adjustingEmployee = emp;
+      this.adjustForm = {
+        employee_id: emp.id,
+        year: parseInt(this.filterYear) || 2026,
+        total_days: emp.total_days !== undefined ? emp.total_days : (emp.is_fulltime ? 12 : 0),
+        used_days: emp.used_days !== undefined ? emp.used_days : 0,
+        enable_custom_used: false,
+        note: emp.balance_note || ''
+      };
+      this.adjustPopupActive = true;
+    },
+
+    setQuickDays(days, defaultNote) {
+      this.adjustForm.total_days = days;
+      if (!this.adjustForm.note) {
+        this.adjustForm.note = defaultNote;
+      }
+    },
+
+    autoCalculateFromStartDate() {
+      if (!this.adjustingEmployee || !this.adjustingEmployee.start_date) {
+        this.$vs.notify({
+          title: 'Thông báo',
+          text: 'Nhân sự này chưa cập nhật ngày bắt đầu làm việc trong hồ sơ!',
+          color: 'warning'
+        });
+        return;
+      }
+
+      const startDate = new Date(this.adjustingEmployee.start_date);
+      if (isNaN(startDate.getTime())) {
+        this.$vs.notify({ title: 'Lỗi', text: 'Ngày bắt đầu làm việc không hợp lệ!', color: 'danger' });
+        return;
+      }
+
+      const filterYear = parseInt(this.filterYear) || 2026;
+      const startYear = startDate.getFullYear();
+      const startMonth = startDate.getMonth() + 1; // 1 - 12
+      const startDay = startDate.getDate();
+
+      let calculatedDays = 12.0;
+      let note = '';
+
+      if (startYear > filterYear) {
+        // Vào làm sau năm xét duyệt
+        calculatedDays = 0.0;
+        note = `Vào làm năm ${startYear} (sau năm ${filterYear})`;
+      } else if (startYear === filterYear) {
+        // Vào làm trong năm xét duyệt
+        // Tính số tháng làm việc trong năm:
+        let activeMonths = 12 - startMonth + 1;
+        if (startDay > 15) {
+          activeMonths = Math.max(0, activeMonths - 0.5);
+        }
+        calculatedDays = Math.max(0, Math.min(12, activeMonths));
+        note = `Vào làm ${startMonth}/${startYear} (~${activeMonths} tháng làm việc trong năm ${filterYear})`;
+      } else {
+        // Làm từ các năm trước
+        const yearsOfService = filterYear - startYear;
+        // Cứ 5 năm làm việc thì được cộng thêm 1 ngày phép
+        const extraSeniorityDays = Math.floor(yearsOfService / 5);
+        calculatedDays = 12.0 + extraSeniorityDays;
+        if (extraSeniorityDays > 0) {
+          note = `Thâm niên ${yearsOfService} năm (+${extraSeniorityDays} ngày theo luật LĐ)`;
+        } else {
+          note = `Làm việc trọn năm ${filterYear} (định mức chuẩn 12 ngày)`;
+        }
+      }
+
+      this.adjustForm.total_days = calculatedDays;
+      this.adjustForm.note = note;
+
+      this.$vs.notify({
+        title: 'Đã tính toán gợi ý',
+        text: `Định mức đề xuất: ${calculatedDays} ngày (${note})`,
+        color: 'success'
+      });
+    },
+
+    getWorkingMonthsNote(startDateStr) {
+      if (!startDateStr) return '';
+      const startDate = new Date(startDateStr);
+      if (isNaN(startDate.getTime())) return '';
+      const filterYear = parseInt(this.filterYear) || 2026;
+      const startYear = startDate.getFullYear();
+      const startMonth = startDate.getMonth() + 1;
+
+      if (startYear === filterYear) {
+        const months = 12 - startMonth + 1;
+        return `mới làm được ${months} tháng trong năm ${filterYear}`;
+      } else if (startYear < filterYear) {
+        const years = filterYear - startYear;
+        return `thâm niên ~${years} năm`;
+      } else {
+        return `vào làm từ năm ${startYear}`;
+      }
+    },
+
+    formatDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    },
+
+    submitAdjustBalance() {
+      if (this.adjustForm.total_days === '' || isNaN(this.adjustForm.total_days) || this.adjustForm.total_days < 0) {
+        this.$vs.notify({
+          title: 'Cảnh báo',
+          text: 'Vui lòng nhập số ngày phép hợp lệ (>= 0)!',
+          color: 'warning'
+        });
+        return;
+      }
+
+      this.isSavingBalance = true;
+      const payload = {
+        employee_id: this.adjustForm.employee_id,
+        year: this.adjustForm.year,
+        total_days: parseFloat(this.adjustForm.total_days),
+        note: this.adjustForm.note
+      };
+
+      if (this.adjustForm.enable_custom_used) {
+        payload.used_days = parseFloat(this.adjustForm.used_days) || 0;
+      }
+
+      axios.p('/api/hrm/leaves/update-balance', payload)
+        .then(res => {
+          this.isSavingBalance = false;
+          if (res.data.status === 1) {
+            this.$vs.notify({
+              title: 'Thành công',
+              text: res.data.message || 'Cập nhật số ngày phép thành công!',
+              color: 'success'
+            });
+            this.adjustPopupActive = false;
+            this.fetchAllBalances();
+          } else {
+            this.$vs.notify({
+              title: 'Lỗi',
+              text: res.data.message || 'Không thể điều chỉnh số ngày phép',
+              color: 'danger'
+            });
+          }
+        })
+        .catch(err => {
+          this.isSavingBalance = false;
+          const msg = (err.response && err.response.data && err.response.data.message) ? err.response.data.message : err.message;
+          this.$vs.notify({
+            title: 'Lỗi',
+            text: msg,
+            color: 'danger'
+          });
+        });
     },
 
     // ----------------------------------------------------
@@ -1461,6 +1862,71 @@ export default {
   background-color: #e5e7eb;
   color: #1f2937;
 }
+
+/* Nút Sửa Phép */
+.btn-adjust-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #2563eb !important;
+  background-color: #eff6ff !important;
+  border: 1px solid #bfdbfe !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  line-height: 1.4 !important;
+}
+.btn-adjust-action:hover {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+}
+.btn-adjust-action:hover i {
+  color: #ffffff !important;
+}
+
+/* Phím tắt chọn nhanh định mức phép */
+.quick-preset-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e40af;
+  background-color: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+.quick-preset-btn:hover {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+.preset-gold {
+  color: #b45309;
+  border-color: #fde68a;
+  background-color: #fffbeb;
+}
+.preset-gold:hover {
+  background-color: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+.preset-primary {
+  color: #ffffff;
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+.preset-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
 </style>
 
 <!-- CSS Toàn cục cho Modal Vuesax không bị scoped chặn -->
@@ -1470,6 +1936,9 @@ export default {
   max-width: 95vw !important;
   border-radius: 12px !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+.modal-adjust-balance.con-vs-popup .vs-popup {
+  width: 720px !important;
 }
 .modal-custom-leave .vs-popup--header {
   padding: 16px 20px !important;

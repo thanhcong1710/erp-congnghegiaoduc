@@ -203,14 +203,27 @@ class LeaveRequestController extends Controller
                         ->first();
                     $defaultDays = $empProfile ? $empProfile->getDefaultAnnualLeaveDays() : 12.0;
 
-                    $balance = HrmLeaveBalance::firstOrCreate(
-                        ['user_id' => $leave->user_id, 'year' => $year],
-                        ['employee_id' => $empProfile ? $empProfile->id : null, 'leave_type_id' => $leave->leave_type_id ?: 1, 'total_days' => $defaultDays, 'used_days' => 0]
-                    );
-                    if ($balance && $empProfile && !$empProfile->isFulltime()) {
-                        $balance->total_days = 0.0;
+                    $balance = HrmLeaveBalance::where(function ($q) use ($leave, $empProfile) {
+                        if ($empProfile) {
+                            $q->where('employee_id', $empProfile->id);
+                        }
+                        if ($leave->user_id) {
+                            $q->orWhere('user_id', $leave->user_id);
+                        }
+                    })->where('year', $year)->first();
+
+                    if (!$balance) {
+                        $balance = HrmLeaveBalance::create([
+                            'user_id' => $leave->user_id,
+                            'employee_id' => $empProfile ? $empProfile->id : null,
+                            'leave_type_id' => $leave->leave_type_id ?: 1,
+                            'year' => $year,
+                            'total_days' => $defaultDays,
+                            'used_days' => 0
+                        ]);
                     }
-                    $balance->used_days = min($balance->total_days, $balance->used_days + $leave->duration_days);
+
+                    $balance->used_days = (float)$balance->used_days + (float)$leave->duration_days;
                     $balance->save();
                 }
 
@@ -276,7 +289,7 @@ class LeaveRequestController extends Controller
 
     /**
      * Lấy thông tin số dư phép năm:
-     * Phép năm được hưởng: chỉ Fulltime có 12 ngày, CTV hoặc khác là 0 ngày
+     * Phép năm được hưởng: mặc định Fulltime có 12 ngày, CTV hoặc khác là 0 ngày, hoặc số ngày theo cấu hình balance do Admin/HR điều chỉnh
      * Đã sử dụng: X ngày
      * Còn lại: Y ngày
      */
@@ -289,31 +302,151 @@ class LeaveRequestController extends Controller
         $isFulltime = $empProfile ? $empProfile->isFulltime() : false;
         $defaultDays = $isFulltime ? 12.0 : 0.0;
 
-        $balance = HrmLeaveBalance::firstOrCreate(
-            ['user_id' => $userId, 'year' => $year],
-            ['employee_id' => $empProfile ? $empProfile->id : null, 'leave_type_id' => 1, 'total_days' => $defaultDays, 'used_days' => 0]
-        );
+        $balance = HrmLeaveBalance::where(function ($q) use ($userId, $empProfile) {
+            if ($empProfile) {
+                $q->where('employee_id', $empProfile->id);
+            }
+            if ($userId) {
+                $q->orWhere('user_id', $userId);
+            }
+        })->where('year', $year)->first();
 
-        if ($balance && !$isFulltime) {
-            $balance->total_days = 0.0;
-            $balance->save();
+        if (!$balance) {
+            $balance = HrmLeaveBalance::create([
+                'user_id' => $userId,
+                'employee_id' => $empProfile ? $empProfile->id : null,
+                'leave_type_id' => 1,
+                'year' => $year,
+                'total_days' => $defaultDays,
+                'used_days' => 0
+            ]);
         }
 
-        $remainingDays = $isFulltime ? max(0, $balance->total_days - $balance->used_days) : 0.0;
+        $totalDays = (float)$balance->total_days;
+        $usedDays = (float)$balance->used_days;
+        $remainingDays = max(0, $totalDays - $usedDays);
 
         return response()->json([
             'status' => 1,
             'data' => [
                 'user_id' => $userId,
+                'employee_id' => $empProfile ? $empProfile->id : null,
                 'year' => $year,
                 'is_fulltime' => $isFulltime,
                 'employee_type' => $empProfile ? $empProfile->employee_type : null,
                 'contract_type' => $empProfile ? $empProfile->contract_type : null,
-                'total_days' => (float)$balance->total_days,
-                'used_days' => (float)$balance->used_days,
-                'remaining_days' => (float)$remainingDays,
+                'start_date' => $empProfile ? $empProfile->start_date : null,
+                'total_days' => $totalDays,
+                'used_days' => $usedDays,
+                'remaining_days' => $remainingDays,
+                'note' => $balance->note,
             ]
         ]);
+    }
+
+    /**
+     * Admin hoặc Quản lý nhân sự điều chỉnh số ngày phép năm của nhân viên
+     */
+    public function updateLeaveBalance(Request $request)
+    {
+        try {
+            $currentUser = Auth::user();
+            if (!$currentUser) {
+                return response()->json(['status' => 0, 'message' => 'Vui lòng đăng nhập'], 401);
+            }
+
+            // Chỉ Admin hoặc Quản lý nhân sự (HR Manager) mới có quyền điều chỉnh
+            if (!HrmScopeService::isHrmAdmin($currentUser) && !$currentUser->isHrmAdmin()) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Bạn không có quyền điều chỉnh số ngày phép! Chỉ Admin hoặc Quản lý nhân sự mới có quyền này.'
+                ], 403);
+            }
+
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'employee_id' => 'required|exists:hrm_employee_profiles,id',
+                'year' => 'required|integer',
+                'total_days' => 'required|numeric|min:0|max:365',
+                'used_days' => 'nullable|numeric|min:0|max:365',
+                'note' => 'nullable|string|max:255'
+            ], [
+                'employee_id.required' => 'Chưa chọn nhân viên',
+                'employee_id.exists' => 'Không tìm thấy hồ sơ nhân viên',
+                'year.required' => 'Chưa chọn năm',
+                'total_days.required' => 'Vui lòng nhập số ngày phép được hưởng',
+                'total_days.numeric' => 'Số ngày phép phải là số hợp lệ',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => $validator->errors()->first()
+                ], 422);
+            }
+
+            $profile = HrmEmployeeProfile::findOrFail($request->employee_id);
+            $year = (int)$request->year;
+            $totalDays = (float)$request->total_days;
+
+            // Tìm hoặc tạo mới balance theo employee_id hoặc user_id
+            $balance = HrmLeaveBalance::where('employee_id', $profile->id)
+                ->where('year', $year)
+                ->first();
+
+            if (!$balance && $profile->user_id) {
+                $balance = HrmLeaveBalance::where('user_id', $profile->user_id)
+                    ->where('year', $year)
+                    ->first();
+            }
+
+            if (!$balance) {
+                $balance = new HrmLeaveBalance();
+                $balance->employee_id = $profile->id;
+                $balance->user_id = $profile->user_id ?: null;
+                $balance->leave_type_id = 1; // Mặc định phép năm
+                $balance->year = $year;
+                $balance->used_days = 0;
+            } else {
+                if (!$balance->employee_id) {
+                    $balance->employee_id = $profile->id;
+                }
+                if (!$balance->user_id && $profile->user_id) {
+                    $balance->user_id = $profile->user_id;
+                }
+            }
+
+            $balance->total_days = $totalDays;
+            if ($request->has('used_days') && $request->used_days !== null && $request->used_days !== '') {
+                $balance->used_days = (float)$request->used_days;
+            }
+            if ($request->has('note')) {
+                $balance->note = trim($request->note) ?: null;
+            }
+            $balance->updated_by = $currentUser->id;
+            $balance->save();
+
+            $remainingDays = max(0, $balance->total_days - (float)$balance->used_days);
+            $overDays = max(0, (float)$balance->used_days - $balance->total_days);
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Đã điều chỉnh thành công quỹ phép năm {$year} cho nhân sự {$profile->full_name}: {$totalDays} ngày!",
+                'data' => [
+                    'employee_id' => $profile->id,
+                    'year' => $year,
+                    'total_days' => (float)$balance->total_days,
+                    'used_days' => (float)$balance->used_days,
+                    'remaining_days' => (float)$remainingDays,
+                    'over_days' => (float)$overDays,
+                    'note' => $balance->note,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Lỗi điều chỉnh: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -326,10 +459,12 @@ class LeaveRequestController extends Controller
             $limit = $request->limit ? (int)$request->limit : 20;
             $departmentId = $request->department_id;
             $keyword = trim($request->keyword ?? '');
+            $currentUser = Auth::user();
+            $canAdjustBalance = $currentUser ? ($currentUser->isHrmAdmin() || HrmScopeService::isHrmAdmin($currentUser)) : false;
 
             // Query nhân sự có hồ sơ profile
             $query = HrmEmployeeProfile::with(['department', 'user']);
-            $query = HrmScopeService::applyProfileScope($query, Auth::user());
+            $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
             if ($departmentId && $departmentId !== 'all') {
                 $query->where('department_id', $departmentId);
@@ -370,7 +505,8 @@ class LeaveRequestController extends Controller
             foreach ($allScopedProfiles as $profile) {
                 $isFulltime = $profile->isFulltime();
                 $balance = $allBalances->get($profile->id);
-                $totalDays = $isFulltime ? ($balance ? (float)$balance->total_days : 12.0) : 0.0;
+                // Ưu tiên số ngày phép cấu hình trong balance (do Admin/HR gán hoặc điều chỉnh)
+                $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
                 if ($balance && $balance->used_days !== null) {
                     $used = (float)$balance->used_days;
                 } else {
@@ -381,8 +517,7 @@ class LeaveRequestController extends Controller
                 }
 
                 $totalScopedUsedDays += $used;
-                // Chỉ đếm vượt định mức và hết phép đối với nhân sự fulltime
-                if ($isFulltime) {
+                if ($totalDays > 0 || $used > 0) {
                     if ($used > $totalDays) {
                         $overLimitCount++;
                     }
@@ -399,7 +534,7 @@ class LeaveRequestController extends Controller
             foreach ($paginated->items() as $index => $profile) {
                 $isFulltime = $profile->isFulltime();
                 $balance = $allBalances->get($profile->id);
-                $totalDays = $isFulltime ? ($balance ? (float)$balance->total_days : 12.0) : 0.0;
+                $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
                 $usedDays = $balance ? (float)$balance->used_days : 0.0;
 
                 // Nếu chưa có balance mà có leave requests đã duyệt thì tính
@@ -414,8 +549,8 @@ class LeaveRequestController extends Controller
                       ->sum('duration_days');
                 }
 
-                $remainingDays = $isFulltime ? max(0, $totalDays - $usedDays) : 0.0;
-                $overDays = $isFulltime ? max(0, $usedDays - $totalDays) : 0.0;
+                $remainingDays = max(0, $totalDays - $usedDays);
+                $overDays = max(0, $usedDays - $totalDays);
 
                 // Lấy 3 đợt nghỉ gần nhất
                 $recentLeaves = HrmLeaveRequest::where(function ($q) use ($profile) {
@@ -436,6 +571,8 @@ class LeaveRequestController extends Controller
                     'full_name' => $profile->full_name,
                     'employee_type' => $profile->employee_type,
                     'contract_type' => $profile->contract_type,
+                    'start_date' => $profile->start_date,
+                    'probation_start_date' => $profile->probation_start_date,
                     'is_fulltime' => $isFulltime,
                     'department_id' => $profile->department_id,
                     'department_name' => $profile->department ? $profile->department->name : 'Chưa phân bổ',
@@ -444,8 +581,10 @@ class LeaveRequestController extends Controller
                     'used_days' => $usedDays,
                     'remaining_days' => $remainingDays,
                     'over_days' => $overDays,
-                    'is_over_limit' => $isFulltime && $overDays > 0,
-                    'is_out_of_leave' => $isFulltime && $remainingDays <= 0 && $usedDays > 0,
+                    'balance_note' => $balance ? $balance->note : null,
+                    'has_custom_balance' => (bool)$balance,
+                    'is_over_limit' => $overDays > 0,
+                    'is_out_of_leave' => $remainingDays <= 0 && $usedDays > 0,
                     'recent_leaves' => $recentLeaves,
                 ];
             }
@@ -456,6 +595,7 @@ class LeaveRequestController extends Controller
             return response()->json([
                 'status' => 1,
                 'year' => $year,
+                'can_adjust_balance' => $canAdjustBalance,
                 'stats' => [
                     'total_employees' => $paginated->total(),
                     'total_company_used_days' => (float)$totalScopedUsedDays,
@@ -506,10 +646,16 @@ class LeaveRequestController extends Controller
                 ->where('year', $year)
                 ->first();
 
+            if (!$balance && $profile->user_id) {
+                $balance = HrmLeaveBalance::where('user_id', $profile->user_id)
+                    ->where('year', $year)
+                    ->first();
+            }
+
             $isFulltime = $profile->isFulltime();
-            $totalDays = $isFulltime ? ($balance ? (float)$balance->total_days : 12.0) : 0.0;
+            $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
             $usedDays = (float)$leaves->where('status', 1)->sum('duration_days');
-            $remainingDays = $isFulltime ? max(0, $totalDays - $usedDays) : 0.0;
+            $remainingDays = max(0, $totalDays - $usedDays);
 
             return response()->json([
                 'status' => 1,
@@ -519,6 +665,7 @@ class LeaveRequestController extends Controller
                     'full_name' => $profile->full_name,
                     'employee_type' => $profile->employee_type,
                     'contract_type' => $profile->contract_type,
+                    'start_date' => $profile->start_date,
                     'is_fulltime' => $isFulltime,
                     'department_name' => $profile->department ? $profile->department->name : 'Chưa phân bổ',
                     'work_status' => $profile->work_status,
@@ -529,8 +676,9 @@ class LeaveRequestController extends Controller
                     'total_days' => $totalDays,
                     'used_days' => $usedDays,
                     'remaining_days' => $remainingDays,
-                    'over_days' => $isFulltime ? max(0, $usedDays - $totalDays) : 0.0,
+                    'over_days' => max(0, $usedDays - $totalDays),
                     'total_requests' => $leaves->count(),
+                    'balance_note' => $balance ? $balance->note : null,
                 ],
                 'leaves' => $leaves,
             ]);
