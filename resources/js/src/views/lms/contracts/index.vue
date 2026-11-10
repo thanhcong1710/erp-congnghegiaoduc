@@ -1,187 +1,505 @@
-
-
 <template>
+  <div id="page-contracts-list">
+    <!-- Header Banner -->
+    <div class="contracts-page-header">
+      <div>
+        <h4 class="font-bold text-gray-800 flex items-center text-lg m-0">
+          <i class="fa-solid fa-file-signature text-primary mr-2" style="font-size: 20px;"></i>
+          Danh Sách Nhập Học & Hợp Đồng
+        </h4>
+        <span class="text-gray-500 text-sm">Quản lý hồ sơ nhập học, gói học phí, công nợ và tiến độ đóng phí</span>
+      </div>
+      <div class="header-action-group">
+        <router-link to="/lms/contracts/add">
+          <vs-button color="success" class="header-add-btn">
+            <i class="fa-solid fa-plus mr-1.5"></i> Thêm mới hợp đồng
+          </vs-button>
+        </router-link>
+        <div class="contracts-header-badge">
+          <span class="badge-total-items">
+            <i class="fa-solid fa-file-lines mr-1.5"></i>
+            Tổng cộng: <strong>{{ pagination.total }}</strong> hợp đồng
+          </span>
+        </div>
+      </div>
+    </div>
 
-  <div id="page-roles-list">
-    <vx-card no-shadow class="mt-5">
-      <div class="mb-5">
-        <div class="vx-row">
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Trung tâm</label>
-            <multiselect
-                name="search_branch"
-                placeholder="Chọn trung tâm"
-                v-model="searchData.arr_branch"
-                :options="branch_list"
-                label="name"
-                :close-on-select="false"
-                :hide-selected="true"
-                :multiple="true"
-                :searchable="true"
-                track-by="id"
-                selectedLabel="" selectLabel="" deselectLabel=""
-              >
-                <span slot="noResult">Không tìm thấy dữ liệu</span>
-              </multiselect>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã tên học sinh, mã hợp đồng" v-model="searchData.keyword"></vs-input>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Thời gian tạo</label>
-            <date-picker name="item-date" v-model="searchData.dateRange" range format="YYYY-MM-DD" style="width: 100%"
-              :clearable="true" :lang="datepickerOptions.lang" placeholder="Chọn khoảng thời gian tìm kiếm"></date-picker>
-          </div>
-          <div class="vx-col sm:w-1/4 w-full mb-4">
-            <label for="" class="vs-input--label">Công nợ</label>
-            <select class="vs-inputx vs-input--input normal" v-model="searchData.debt_status">
-              <option value="">-- Tất cả công nợ --</option>
-              <option value="debt">Còn công nợ</option>
-              <option value="no_debt">Đã hoàn thành đóng phí</option>
-            </select>
+    <!-- Filter Card -->
+    <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg">
+      <div class="vx-row">
+        <!-- Trung tâm -->
+        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+          <label class="filter-label"><i class="fa-solid fa-location-dot text-primary mr-1"></i> Trung tâm</label>
+          <multiselect
+            class="custom-multiselect"
+            name="search_branch"
+            placeholder="Tất cả trung tâm"
+            v-model="searchData.arr_branch"
+            :options="branch_list"
+            label="name"
+            :close-on-select="false"
+            :hide-selected="true"
+            :multiple="true"
+            :searchable="true"
+            track-by="id"
+            selectedLabel="" selectLabel="" deselectLabel=""
+          >
+            <span slot="noResult">Không tìm thấy</span>
+          </multiselect>
+        </div>
+
+        <!-- Từ khóa -->
+        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+          <label class="filter-label"><i class="fa-solid fa-magnifying-glass text-primary mr-1"></i> Tìm kiếm</label>
+          <div class="filter-search-wrapper">
+            <i class="fa-solid fa-search filter-search-icon"></i>
+            <input
+              type="text"
+              class="filter-input-text"
+              placeholder="Mã HS, tên HS, mã hợp đồng..."
+              v-model="searchData.keyword"
+              @keyup.enter="getData"
+            />
           </div>
         </div>
-        <div class="vx-row mt-3">
-          <div class="vx-col w-full">
-            <router-link class="btn btn-success" :to="'/lms/contracts/add'">
-              <vs-button class="mr-3 mb-2" color="success"><i class="fa fa-plus"></i> Thêm mới</vs-button>
+
+        <!-- Khoảng thời gian tạo -->
+        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+          <label class="filter-label"><i class="fa-regular fa-calendar-days text-primary mr-1"></i> Thời gian tạo</label>
+          <date-picker
+            name="item-date"
+            class="w-full custom-datepicker"
+            v-model="searchData.dateRange"
+            range
+            format="YYYY-MM-DD"
+            style="width: 100%"
+            :clearable="true"
+            :lang="datepickerOptions.lang"
+            placeholder="Chọn khoảng thời gian"
+          ></date-picker>
+        </div>
+
+        <!-- Trạng thái công nợ -->
+        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+          <label class="filter-label"><i class="fa-solid fa-scale-balanced text-primary mr-1"></i> Công nợ</label>
+          <select class="custom-select-box" v-model="searchData.debt_status" @change="getData">
+            <option value="">-- Tất cả công nợ --</option>
+            <option value="debt">Còn công nợ</option>
+            <option value="no_debt">Đã hoàn thành đóng phí</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="filter-actions-bar">
+        <button class="btn-filter-action btn-filter-submit" @click="getData" title="Tìm kiếm">
+          <i class="fa fa-search mr-1.5"></i> Tìm kiếm
+        </button>
+        <button class="btn-filter-action btn-filter-reset" @click="reset" title="Đặt lại bộ lọc">
+          <i class="fas fa-undo-alt mr-1.5"></i> Đặt lại
+        </button>
+      </div>
+    </vx-card>
+
+    <!-- Table / Content Card -->
+    <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
+      <!-- Mobile View Mode Toggle -->
+      <div class="mobile-view-toggle-bar">
+        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
+        <div class="inline-flex rounded shadow-sm">
+          <button
+            type="button"
+            class="mobile-view-toggle-btn"
+            :class="{ 'active': viewMode === 'card' }"
+            @click="viewMode = 'card'"
+          >
+            <i class="fa-solid fa-id-card mr-1"></i> Dạng thẻ
+          </button>
+          <button
+            type="button"
+            class="mobile-view-toggle-btn"
+            :class="{ 'active': viewMode === 'table' }"
+            @click="viewMode = 'table'"
+          >
+            <i class="fa-solid fa-table mr-1"></i> Dạng bảng
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div v-if="!isDesktop && viewMode === 'card'" class="mobile-cards-list">
+        <div v-if="!contracts || contracts.length === 0" class="text-center py-8 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+          <i class="fa-solid fa-folder-open text-gray-300 mb-2" style="font-size: 36px; display: block;"></i>
+          Không tìm thấy hợp đồng nào phù hợp
+        </div>
+
+        <div
+          v-for="(item, index) in contracts"
+          :key="'card-' + index"
+          class="mobile-item-card mb-3 p-3 bg-white rounded-lg border border-solid border-grey-light shadow-sm"
+        >
+          <!-- Card Header -->
+          <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-gray-100">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <router-link :to="`/lms/contracts/${item.contract_id}/detail`" class="font-bold text-gray-900 hover:text-primary text-base truncate">
+                  {{ item.name }}
+                </router-link>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                <span class="stk-code-badge" @click="copyCode(item.lms_code)" title="Bấm để sao chép mã học sinh">
+                  <i class="fa-solid fa-id-badge mr-1"></i>
+                  <strong>{{ item.lms_code || '---' }}</strong>
+                  <i class="fa-regular fa-copy ml-1 opacity-70"></i>
+                </span>
+                <span class="contract-code-badge" @click="copyCode(item.code)" title="Bấm để sao chép mã hợp đồng">
+                  <i class="fa-solid fa-file-contract mr-1"></i>
+                  <strong>{{ item.code }}</strong>
+                  <i class="fa-regular fa-copy ml-1 opacity-70"></i>
+                </span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+              <span class="text-xs text-gray-400 font-semibold">
+                #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
+              </span>
+              <span :class="getStatusBadgeClass(item.label_status)" class="text-xs">
+                {{ item.label_status || 'Chưa cập nhật' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="py-2.5 text-sm space-y-1.5">
+            <div class="flex items-center justify-between text-gray-600">
+              <span class="text-gray-500"><i class="fa-solid fa-building text-primary mr-1.5"></i>Trung tâm:</span>
+              <span class="font-medium text-gray-800">{{ item.branch_name || '—' }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600" v-if="item.product_name">
+              <span class="text-gray-500"><i class="fa-solid fa-book-open text-indigo-500 mr-1.5"></i>Khóa học:</span>
+              <span class="font-medium text-gray-800">{{ item.product_name }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600" v-if="item.tuition_fee_name">
+              <span class="text-gray-500"><i class="fa-solid fa-tags text-gray-400 mr-1.5"></i>Gói phí:</span>
+              <span class="text-gray-700">{{ item.tuition_fee_name }} ({{ item.total_sessions }} buổi)</span>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600 pt-1 border-t border-dashed border-gray-100">
+              <span class="text-gray-500"><i class="fa-solid fa-money-bill-wave text-emerald-500 mr-1.5"></i>Phải đóng:</span>
+              <span class="font-bold text-gray-800">{{ item.must_charge | formatMoney }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600">
+              <span class="text-gray-500"><i class="fa-solid fa-circle-check text-success mr-1.5"></i>Đã thu:</span>
+              <span class="font-bold text-success">{{ item.total_charged | formatMoney }}</span>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-600">
+              <span class="text-gray-500"><i class="fa-solid fa-scale-balanced text-danger mr-1.5"></i>Công nợ:</span>
+              <div class="text-right">
+                <span v-if="item.debt_amount > 0" class="font-bold text-danger">
+                  {{ item.debt_amount | formatMoney }}
+                </span>
+                <span v-else class="text-success font-semibold text-xs">
+                  <i class="fa-solid fa-check-circle mr-1"></i>0 đ (Đã thu đủ)
+                </span>
+                <div v-if="item.pending_receipts_count > 0" class="mt-0.5">
+                  <span class="pending-tag">
+                    <i class="fa fa-clock mr-1"></i>Chờ duyệt {{ item.pending_receipts_count }} PT
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-gray-500 text-xs pt-1" v-if="item.ec_name || item.cm_name">
+              <span><i class="fa-solid fa-user-tag text-gray-400 mr-1"></i>Phụ trách:</span>
+              <div class="flex items-center gap-2">
+                <span v-if="item.ec_name">EC: <strong>{{ item.ec_name }}</strong></span>
+                <span v-if="item.cm_name">CM: <strong>{{ item.cm_name }}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="pt-2 border-t border-gray-100 flex flex-wrap gap-2">
+            <router-link :to="`/lms/contracts/${item.contract_id}/detail`" class="flex-1">
+              <vs-button size="small" color="primary" type="relief" class="w-full flex items-center justify-center font-semibold">
+                <i class="fa-solid fa-eye mr-1.5"></i> Xem
+              </vs-button>
             </router-link>
-            <vs-button class="mr-3 mb-2" @click="getData"><i class="fa fa-search"></i> Tìm kiếm</vs-button>
-            <vs-button color="dark" type="border" class="mb-2" @click="reset" ><i class="fas fa-undo-alt"></i> Hủy</vs-button>
+            <vs-button
+              v-if="item.debt_amount > 0"
+              size="small"
+              color="success"
+              type="relief"
+              class="flex-1 flex items-center justify-center font-semibold"
+              @click="openReceiptModal(item)"
+            >
+              <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Thu phí
+            </vs-button>
+            <router-link :to="`/pages/print/contract/${item.contract_id}`" target="_blank">
+              <vs-button size="small" color="#1380d5" type="relief" title="In hợp đồng">
+                <i class="fa-solid fa-print"></i>
+              </vs-button>
+            </router-link>
+            <vs-button
+              v-if="(item.total_charged == 0 && item.type == 1) || (item.status == 3 && item.type == 0)"
+              size="small"
+              color="danger"
+              type="relief"
+              title="Hủy hợp đồng"
+              @click="confirmDelete(item)"
+            >
+              <i class="fa-solid fa-trash"></i>
+            </vs-button>
           </div>
         </div>
       </div>
 
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody ">
-            <table class="vs-table vs-table--tbody-table">
-              <thead class="vs-table--thead">
-                <tr>
-                  <!---->
-                  <th colspan="1" rowspan="1" class="text-center">STT</th>
-                  <th colspan="1" rowspan="1">Học sinh</th>
-                  <th colspan="1" rowspan="1">Trung tâm</th>
-                  <th colspan="1" rowspan="1">Hợp đồng</th>
-                  <th colspan="1" rowspan="1">Đóng phí</th>
-                  <th colspan="1" rowspan="1" class="text-center">Công nợ</th>
-                  <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
-                  <th colspan="1" rowspan="1" class="text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in contracts" :key="index">
-                <!---->
-                
-                <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.name }}</strong></p>
-                  <p>Mã: {{item.lms_code}}</p>
-                  <p>Mã: {{item.lms_id}}</p>
+      <!-- Desktop Table View -->
+      <div v-show="isDesktop || viewMode === 'table'" class="desktop-table-wrapper">
+        <div class="table-responsive">
+          <table class="modern-lms-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 50px">STT</th>
+                <th style="width: 240px">Học sinh</th>
+                <th style="width: 240px">Hợp đồng & Khóa học</th>
+                <th style="width: 200px">Trung tâm & Phụ trách</th>
+                <th style="width: 220px">Đóng phí</th>
+                <th style="width: 170px" class="text-center">Công nợ</th>
+                <th style="width: 130px" class="text-center">Trạng thái</th>
+                <th style="width: 150px" class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!contracts || contracts.length === 0">
+                <td colspan="8" class="text-center py-8 text-gray-500">
+                  <i class="fa-solid fa-folder-open text-gray-300 mb-2" style="font-size: 36px; display: block;"></i>
+                  Không tìm thấy hợp đồng nào phù hợp
                 </td>
-                <td class="td vs-table--td">
-                  <p><strong>{{ item.branch_name }}</strong></p>
-                  <p>EC: {{ item.ec_name }}</p>
-                  <p>CM: {{ item.cm_name }}</p>
+              </tr>
+
+              <tr v-for="(item, index) in contracts" :key="index" class="table-row-hover">
+                <!-- STT -->
+                <td class="text-center text-gray-500 font-semibold">
+                  {{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
                 </td>
-                <td class="td vs-table--td">
-                  <p>Mã:  <router-link :to="`/lms/contracts/${item.contract_id}/detail`" ><strong>{{ item.code }}</strong></router-link></p>
-                  <p>Khóa học: {{ item.product_name }}</p>
-                  <p>Gói phí: {{ item.tuition_fee_name }}</p>
-                  <p>Số buổi: {{ item.total_sessions }} ({{ item.bonus_sessions }} buổi học bổng)</p>
+
+                <!-- Học sinh -->
+                <td>
+                  <div class="item-title-text mb-1">
+                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" class="hover:text-primary transition-colors">
+                      {{ item.name }}
+                    </router-link>
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="stk-code-badge" @click="copyCode(item.lms_code)" title="Bấm để sao chép mã học sinh">
+                      <i class="fa-solid fa-id-badge mr-1"></i>
+                      <strong>{{ item.lms_code || '---' }}</strong>
+                      <i class="fa-regular fa-copy ml-1 opacity-70"></i>
+                    </span>
+                    <span v-if="item.lms_id" class="text-xs text-gray-400">ID: #{{ item.lms_id }}</span>
+                  </div>
                 </td>
-                <td class="td vs-table--td">
-                  <p>Giá gốc: <strong>{{ item.init_tuition_fee_amount | formatMoney }}</strong></p>
-                  <p>Phải đóng: {{ item.must_charge | formatMoney }}</p>
-                  <p>Đã thu: <strong class="text-success">{{ item.total_charged | formatMoney }}</strong></p>
+
+                <!-- Hợp đồng & Khóa học -->
+                <td>
+                  <div class="flex items-center gap-1.5 mb-1">
+                    <span class="contract-code-badge" @click="copyCode(item.code)" title="Bấm để sao chép mã hợp đồng">
+                      <i class="fa-solid fa-file-contract mr-1"></i>
+                      <strong>{{ item.code }}</strong>
+                      <i class="fa-regular fa-copy ml-1 opacity-70"></i>
+                    </span>
+                  </div>
+                  <div class="text-gray-800 font-semibold text-sm mb-0.5" v-if="item.product_name">
+                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 text-xs"></i>{{ item.product_name }}
+                  </div>
+                  <div class="text-xs text-gray-500" v-if="item.tuition_fee_name">
+                    Gói: {{ item.tuition_fee_name }} - <strong>{{ item.total_sessions }}</strong> buổi
+                    <span v-if="item.bonus_sessions > 0" class="text-emerald-600 font-medium">
+                      (+{{ item.bonus_sessions }} HB)
+                    </span>
+                  </div>
                 </td>
-                <td class="td vs-table--td text-center">
+
+                <!-- Trung tâm & Phụ trách -->
+                <td>
+                  <div class="font-semibold text-gray-800 mb-1 flex items-center">
+                    <i class="fa-solid fa-building text-primary mr-1.5 text-xs"></i>
+                    {{ item.branch_name }}
+                  </div>
+                  <div class="text-xs text-gray-500 flex flex-col gap-0.5">
+                    <span v-if="item.ec_name"><i class="fa-solid fa-user-tag text-gray-400 mr-1"></i>EC: <strong>{{ item.ec_name }}</strong></span>
+                    <span v-if="item.cm_name"><i class="fa-solid fa-headset text-gray-400 mr-1"></i>CM: <strong>{{ item.cm_name }}</strong></span>
+                  </div>
+                </td>
+
+                <!-- Đóng phí -->
+                <td>
+                  <div class="text-xs text-gray-500 mb-0.5">
+                    Giá gốc: <span class="line-through text-gray-400">{{ item.init_tuition_fee_amount | formatMoney }}</span>
+                  </div>
+                  <div class="text-sm font-semibold text-gray-800 mb-0.5">
+                    Phải đóng: {{ item.must_charge | formatMoney }}
+                  </div>
+                  <div class="text-xs text-success font-bold">
+                    <i class="fa-solid fa-circle-check mr-1"></i>Đã thu: {{ item.total_charged | formatMoney }}
+                  </div>
+                </td>
+
+                <!-- Công nợ -->
+                <td class="text-center">
                   <div v-if="item.debt_amount > 0">
-                    <p class="text-danger font-bold" style="font-size: 15px;">{{ item.debt_amount | formatMoney }}</p>
-                    <p v-if="item.summary_sessions && item.total_charged" class="text-xs text-muted"><strong>Cọc: {{ item.summary_sessions }} buổi</strong></p>
+                    <div class="text-danger font-bold text-base">
+                      {{ item.debt_amount | formatMoney }}
+                    </div>
+                    <div v-if="item.summary_sessions && item.total_charged" class="text-xs text-gray-500 mt-0.5">
+                      Cọc: <strong>{{ item.summary_sessions }} buổi</strong>
+                    </div>
                     <div v-if="item.pending_receipts_count > 0" class="mt-1">
-                      <span class="badge" style="background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
-                        <i class="fa fa-clock"></i> Chờ duyệt {{ item.pending_receipts_count }} PT
+                      <span class="pending-tag">
+                        <i class="fa fa-clock mr-1"></i> Chờ duyệt {{ item.pending_receipts_count }} PT
                       </span>
                     </div>
                   </div>
                   <div v-else>
-                    <span class="text-success font-semibold" style="color: #10b981;">0 đ (Đã thu đủ)</span>
+                    <span class="completed-tag">
+                      <i class="fa-solid fa-circle-check mr-1"></i> Đã thu đủ
+                    </span>
                   </div>
                 </td>
-                <td class="td vs-table--td text-center">{{ item.label_status}}</td>
-                <td class="td vs-table--td text-center list-action"> 
-                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`" >
-                      <vs-button size="small" title="Xem chi tiết"><i class="fa fa-eye"></i></vs-button>
-                    </router-link> 
-                    <vs-button size="small" color="success" v-if="item.debt_amount > 0" @click="openReceiptModal(item)" title="Lên phiếu thu tiền">
+
+                <!-- Trạng thái -->
+                <td class="text-center">
+                  <span :class="getStatusBadgeClass(item.label_status)">
+                    {{ item.label_status || 'Chưa cập nhật' }}
+                  </span>
+                </td>
+
+                <!-- Thao tác -->
+                <td class="text-center">
+                  <div class="flex items-center justify-center gap-1.5">
+                    <router-link :to="`/lms/contracts/${item.contract_id}/detail`">
+                      <button class="action-circle-btn action-view" title="Xem chi tiết hợp đồng">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                    </router-link>
+                    <button
+                      v-if="item.debt_amount > 0"
+                      class="action-circle-btn action-charge"
+                      @click="openReceiptModal(item)"
+                      title="Lên phiếu thu tiền"
+                    >
                       <i class="fa-solid fa-file-invoice-dollar"></i>
-                    </vs-button>
-                    <router-link :to="`/pages/print/contract/${item.contract_id}`" target="_blank"> 
-                      <vs-button size="small" style="background: rgb(19 128 213) !important" title="In hợp đồng"><i class="fa-solid fa-print"></i></vs-button>
-                    </router-link> 
-                    <vs-button size="small" color="danger" v-if="(item.total_charged == 0 && item.type==1) || (item.status == 3 && item.type==0)" @click="confirmDelete(item)" title="Hủy hợp đồng"><i class="fa-solid fa-trash"></i></vs-button>
+                    </button>
+                    <router-link :to="`/pages/print/contract/${item.contract_id}`" target="_blank">
+                      <button class="action-circle-btn action-print" title="In hợp đồng">
+                        <i class="fa-solid fa-print"></i>
+                      </button>
+                    </router-link>
+                    <button
+                      v-if="(item.total_charged == 0 && item.type == 1) || (item.status == 3 && item.type == 0)"
+                      class="action-circle-btn action-delete"
+                      @click="confirmDelete(item)"
+                      title="Hủy hợp đồng"
+                    >
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
                 </td>
               </tr>
-            </table>
-            
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
-      <div class="flex flex-wrap items-center mt-5">
-        <vs-dropdown vs-trigger-click class="cursor-pointer mr-4 items-per-page-handler">
-          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-            <span class="mr-2">{{ pagination.cpage * pagination.limit - (pagination.limit - 1) }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
+
+      <!-- Pagination -->
+      <div class="pagination-footer-container">
+        <vs-dropdown vs-trigger-click class="cursor-pointer items-per-page-handler">
+          <div class="pagination-dropdown-pill">
+            <span class="mr-2">{{ pagination.total > 0 ? (pagination.cpage * pagination.limit - (pagination.limit - 1)) : 0 }} - {{ pagination.total - pagination.cpage * pagination.limit > 0 ? pagination.cpage * pagination.limit : pagination.total }} of {{ pagination.total }}</span>
             <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
           </div>
           <vs-dropdown-menu>
-            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)" >
-              <span>{{item}}</span>
+            <vs-dropdown-item v-for="(item, index) in limitSource" :key="index" @click="changePageLimit(item)">
+              <span>{{ item }}</span>
             </vs-dropdown-item>
           </vs-dropdown-menu>
         </vs-dropdown>
-        <vs-pagination
-              style="width: calc(100% - 160px);"
-              v-if="Math.ceil(pagination.total / pagination.limit) >1"
-              :total="Math.ceil(pagination.total / pagination.limit)"
-              :max="7"
-              v-model="pagination.cpage" @change="changePage()"/>
+        <div class="pagination-control-wrapper" v-if="pagination.total && Math.ceil(pagination.total / pagination.limit) > 1">
+          <vs-pagination
+            :total="Math.ceil(pagination.total / pagination.limit)"
+            :max="7"
+            v-model="pagination.cpage"
+            @change="changePage()"
+          />
+        </div>
       </div>
     </vx-card>
 
     <!-- MODAL LÊN PHIẾU THU TIỀN -->
-    <vs-popup title="Lên Phiếu Thu Tiền" :active.sync="receiptModal.active">
+    <vs-popup title="Lên Phiếu Thu Tiền" :active.sync="receiptModal.active" class="modern-receipt-modal">
       <div class="vx-row" v-if="receiptModal.contract">
-        <div class="vx-col w-full mb-3" style="background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-          <p class="mb-1"><strong>Học sinh:</strong> {{ receiptModal.contract.name }} (Mã: {{ receiptModal.contract.lms_code }})</p>
-          <p class="mb-1"><strong>Hợp đồng:</strong> {{ receiptModal.contract.code }} - {{ receiptModal.contract.product_name }}</p>
-          <p class="mb-1"><strong>Phải đóng:</strong> {{ receiptModal.contract.must_charge | formatMoney }} | <strong>Đã thu:</strong> <span class="text-success font-bold">{{ receiptModal.contract.total_charged | formatMoney }}</span></p>
-          <p class="mb-0"><strong>Công nợ hiện tại:</strong> <span class="text-danger font-bold" style="font-size: 15px;">{{ receiptModal.contract.debt_amount | formatMoney }}</span></p>
-        </div>
         <div class="vx-col w-full mb-3">
-          <label class="vs-input--label">Số tiền thu <span class="text-danger">(*)</span></label>
-          <div class="flex items-center">
+          <div class="modal-info-box">
+            <div class="flex items-center justify-between mb-1.5 pb-1.5 border-b border-gray-200">
+              <span class="font-bold text-gray-800 text-sm">
+                <i class="fa-solid fa-user-graduate text-primary mr-1"></i> {{ receiptModal.contract.name }}
+              </span>
+              <span class="stk-code-badge">
+                {{ receiptModal.contract.lms_code }}
+              </span>
+            </div>
+            <div class="text-xs text-gray-600 mb-1">
+              <strong>Hợp đồng:</strong> {{ receiptModal.contract.code }} &bull; {{ receiptModal.contract.product_name }}
+            </div>
+            <div class="flex items-center justify-between text-xs text-gray-600 pt-1">
+              <span>Phải đóng: <strong>{{ receiptModal.contract.must_charge | formatMoney }}</strong></span>
+              <span>Đã thu: <strong class="text-success">{{ receiptModal.contract.total_charged | formatMoney }}</strong></span>
+            </div>
+            <div class="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
+              <span class="text-sm font-semibold text-gray-700">Công nợ hiện tại:</span>
+              <span class="text-base font-bold text-danger">{{ receiptModal.contract.debt_amount | formatMoney }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vx-col w-full mb-3">
+          <label class="filter-label">Số tiền thu <span class="text-danger">(*)</span></label>
+          <div class="flex items-center gap-2">
             <input
               type="number"
-              class="vs-inputx vs-input--input normal flex-1"
+              class="custom-form-input flex-1"
               v-model="receiptModal.amount"
               placeholder="Nhập số tiền thu"
               :max="receiptModal.contract.debt_amount"
               min="1000"
             />
-            <vs-button size="small" class="ml-2" type="border" @click="receiptModal.amount = receiptModal.contract.debt_amount">Đóng hết nợ</vs-button>
+            <button
+              type="button"
+              class="quick-fill-btn"
+              @click="receiptModal.amount = receiptModal.contract.debt_amount"
+              title="Đóng toàn bộ số tiền còn nợ"
+            >
+              <i class="fa-solid fa-check-double mr-1"></i> Đóng hết nợ
+            </button>
           </div>
         </div>
+
         <div class="vx-col md:w-1/2 w-full mb-3">
-          <label class="vs-input--label">Phương thức đóng phí</label>
-          <select class="vs-inputx vs-input--input normal" v-model="receiptModal.method">
+          <label class="filter-label">Phương thức đóng phí</label>
+          <select class="custom-select-box" v-model="receiptModal.method">
             <option :value="0">Tiền mặt</option>
             <option :value="1">Chuyển khoản</option>
             <option :value="2">Quẹt thẻ tín dụng</option>
           </select>
         </div>
+
         <div class="vx-col md:w-1/2 w-full mb-3">
-          <label class="vs-input--label">Ngày thu phí</label>
+          <label class="filter-label">Ngày thu phí</label>
           <date-picker
             v-model="receiptModal.charge_date"
             format="YYYY-MM-DD"
@@ -191,142 +509,188 @@
             :lang="datepickerOptions.lang"
           ></date-picker>
         </div>
+
         <div class="vx-col w-full mb-4">
-          <label class="vs-input--label">Ghi chú</label>
-          <textarea class="vs-inputx vs-input--input normal" v-model="receiptModal.note" placeholder="Nhập ghi chú thu phí (VD: Đóng học phí lần 2, Đặt cọc...)"></textarea>
+          <label class="filter-label">Ghi chú</label>
+          <textarea
+            class="custom-textarea"
+            rows="2"
+            v-model="receiptModal.note"
+            placeholder="Nhập ghi chú thu phí (VD: Đóng học phí lần 2, Đặt cọc...)"
+          ></textarea>
         </div>
-        <div class="vx-col w-full text-right">
-          <vs-button color="dark" type="border" class="mr-2" @click="receiptModal.active = false">Hủy</vs-button>
-          <vs-button color="success" @click="submitReceipt"><i class="fa fa-save mr-1"></i> Tạo phiếu thu</vs-button>
+
+        <div class="vx-col w-full flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+          <button type="button" class="btn-filter-action btn-filter-reset" @click="receiptModal.active = false">
+            Hủy
+          </button>
+          <button type="button" class="btn-filter-action btn-filter-submit" @click="submitReceipt">
+            <i class="fa fa-save mr-1.5"></i> Tạo phiếu thu
+          </button>
         </div>
       </div>
     </vs-popup>
   </div>
-
 </template>
 
 <script>
+import vSelect from 'vue-select';
+import axios from '../../../http/axios.js';
+import Multiselect from 'vue-multiselect';
+import DatePicker from 'vue2-datepicker';
+import u from '../../../until/helper.js';
+import moment from 'moment';
 
-  import vSelect from 'vue-select'
-  import axios from '../../../http/axios.js'
-  import Multiselect from "vue-multiselect";
-  import DatePicker from "vue2-datepicker";
-  import u from '../../../until/helper.js'
-  import moment from 'moment';
-
-  export default {
-    components: { 
-      vSelect,
-      Multiselect,
-      DatePicker
-    },
-    data() {
-      return {
-        branch_list: [],
-        searchData: {
-          arr_branch: "",
-          branch_id:"",
-          keyword: "",
-          dateRange: "",
-          debt_status: "",
-        },
-        receiptModal: {
-          active: false,
-          contract: null,
-          amount: 0,
-          method: 1,
-          charge_date: moment().format('YYYY-MM-DD'),
-          note: "",
-        },
-        datepickerOptions: {
-          closed: true,
-          value: "",
-          minDate: "",
-          lang: {
-            days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
-            months: [
-              "Tháng 1",
-              "Tháng 2",
-              "Tháng 3",
-              "Tháng 4",
-              "Tháng 5",
-              "Tháng 6",
-              "Tháng 7",
-              "Tháng 8",
-              "Tháng 9",
-              "Tháng 10",
-              "Tháng 11",
-              "Tháng 12"
-            ]
-          }
-        },
-        contracts: [],
-        limitSource: [20, 50, 100, 500],
-        pagination: {
-          url: "/api/roles/list",
-          id: "",
-          style: "line",
-          class: "",
-          spage: 1,
-          ppage: 1,
-          npage: 0,
-          lpage: 1,
-          cpage: 1,
-          total: 0,
-          limit: 20,
-          pages: [],
-          init: 0
-        },
-        delete_id:'',
-      }
-    },
-    created() {
-      axios.g(`/api/system/branches-has-user`)
-        .then(response => {
-        this.branch_list = response.data
-      })
-      this.getData();
-    },
-    methods: {
-      openReceiptModal(item) {
-        this.receiptModal = {
-          active: true,
-          contract: item,
-          amount: item.debt_amount,
-          method: 1,
-          charge_date: moment().format('YYYY-MM-DD'),
-          note: item.total_charged > 0 ? 'Thu phí đợt tiếp theo' : 'Thu tiền đợt 1',
-        };
+export default {
+  components: {
+    vSelect,
+    Multiselect,
+    DatePicker
+  },
+  data() {
+    return {
+      windowWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
+      viewMode: 'table',
+      branch_list: [],
+      searchData: {
+        arr_branch: '',
+        branch_id: '',
+        keyword: '',
+        dateRange: '',
+        debt_status: ''
       },
-      submitReceipt() {
-        if (!this.receiptModal.amount || Number(this.receiptModal.amount) <= 0) {
-          this.$vs.notify({
-            title: 'Lỗi',
-            text: 'Số tiền thu phải lớn hơn 0',
-            color: 'danger',
-            iconPack: 'feather',
-            icon: 'icon-alert-circle'
-          });
-          return;
+      receiptModal: {
+        active: false,
+        contract: null,
+        amount: 0,
+        method: 1,
+        charge_date: moment().format('YYYY-MM-DD'),
+        note: ''
+      },
+      datepickerOptions: {
+        closed: true,
+        value: '',
+        minDate: '',
+        lang: {
+          days: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+          months: [
+            'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+          ]
         }
-        if (Number(this.receiptModal.amount) > Number(this.receiptModal.contract.debt_amount)) {
-          this.$vs.notify({
-            title: 'Lỗi',
-            text: 'Số tiền thu không được lớn hơn công nợ hiện tại',
-            color: 'danger',
-            iconPack: 'feather',
-            icon: 'icon-alert-circle'
-          });
-          return;
-        }
-        this.$vs.loading();
-        axios.p('/api/lms/contracts/add-receipt', {
+      },
+      contracts: [],
+      limitSource: [20, 50, 100, 500],
+      pagination: {
+        url: '/api/roles/list',
+        id: '',
+        style: 'line',
+        class: '',
+        spage: 1,
+        ppage: 1,
+        npage: 0,
+        lpage: 1,
+        cpage: 1,
+        total: 0,
+        limit: 20,
+        pages: [],
+        init: 0
+      },
+      delete_id: ''
+    };
+  },
+  computed: {
+    isDesktop() {
+      return this.windowWidth >= 768;
+    }
+  },
+  created() {
+    axios.g('/api/system/branches-has-user').then((response) => {
+      this.branch_list = response.data;
+    });
+    this.getData();
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize);
+  },
+  methods: {
+    handleResize() {
+      this.windowWidth = window.innerWidth;
+    },
+    copyCode(code) {
+      if (!code) return;
+      navigator.clipboard.writeText(code).then(() => {
+        this.$vs.notify({
+          title: 'Đã sao chép',
+          text: `Mã "${code}" đã được lưu vào clipboard`,
+          color: 'success',
+          iconPack: 'feather',
+          icon: 'icon-check',
+          time: 2500
+        });
+      });
+    },
+    getStatusBadgeClass(status) {
+      if (!status) return 'status-badge status-default';
+      const s = status.toLowerCase();
+      if (s.includes('chính thức') || s.includes('hoàn thành') || s.includes('đang học') || s.includes('đã duyệt')) {
+        return 'status-badge status-success';
+      }
+      if (s.includes('học thử') || s.includes('chờ') || s.includes('cọc')) {
+        return 'status-badge status-warning';
+      }
+      if (s.includes('hủy') || s.includes('thôi') || s.includes('rút') || s.includes('từ chối')) {
+        return 'status-badge status-danger';
+      }
+      if (s.includes('bảo lưu') || s.includes('chuyển')) {
+        return 'status-badge status-info';
+      }
+      return 'status-badge status-default';
+    },
+    openReceiptModal(item) {
+      this.receiptModal = {
+        active: true,
+        contract: item,
+        amount: item.debt_amount,
+        method: 1,
+        charge_date: moment().format('YYYY-MM-DD'),
+        note: item.total_charged > 0 ? 'Thu phí đợt tiếp theo' : 'Thu tiền đợt 1'
+      };
+    },
+    submitReceipt() {
+      if (!this.receiptModal.amount || Number(this.receiptModal.amount) <= 0) {
+        this.$vs.notify({
+          title: 'Lỗi',
+          text: 'Số tiền thu phải lớn hơn 0',
+          color: 'danger',
+          iconPack: 'feather',
+          icon: 'icon-alert-circle'
+        });
+        return;
+      }
+      if (Number(this.receiptModal.amount) > Number(this.receiptModal.contract.debt_amount)) {
+        this.$vs.notify({
+          title: 'Lỗi',
+          text: 'Số tiền thu không được lớn hơn công nợ hiện tại',
+          color: 'danger',
+          iconPack: 'feather',
+          icon: 'icon-alert-circle'
+        });
+        return;
+      }
+      this.$vs.loading();
+      axios
+        .p('/api/lms/contracts/add-receipt', {
           contract_id: this.receiptModal.contract.contract_id,
           amount: this.receiptModal.amount,
           method: this.receiptModal.method,
           charge_date: this.receiptModal.charge_date,
           note: this.receiptModal.note
-        }).then(response => {
+        })
+        .then((response) => {
           this.$vs.loading.close();
           this.receiptModal.active = false;
           this.$vs.notify({
@@ -337,123 +701,606 @@
             icon: 'icon-check'
           });
           this.getData();
-        }).catch(err => {
+        })
+        .catch((err) => {
           this.$vs.loading.close();
           this.$vs.notify({
             title: 'Lỗi',
-            text: err.response && err.response.data && err.response.data.message ? err.response.data.message : 'Có lỗi xảy ra khi tạo phiếu thu',
+            text:
+              err.response && err.response.data && err.response.data.message
+                ? err.response.data.message
+                : 'Có lỗi xảy ra khi tạo phiếu thu',
             color: 'danger',
             iconPack: 'feather',
             icon: 'icon-alert-circle'
           });
         });
-      },
-      reset() {
-        this.searchData.keyword = ""
-        this.searchData.arr_branch= ""
-        this.searchData.branch_id= ""
-        this.searchData.debt_status = ""
-        this.searchData.pagination= this.pagination
-        this.searchData.dateRange= ""
-        this.getData();
-      },
-      getData() {
-        const startDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[0] ?`${u.dateToString(this.searchData.dateRange[0])}`:''
-        const endDate = typeof this.searchData.dateRange != 'undefined' && this.searchData.dateRange!='' && this.searchData.dateRange[1] ?`${u.dateToString(this.searchData.dateRange[1])}`:''
-        
-        const ids_branch = []
-        if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
-          this.searchData.arr_branch.map(item => {
-            ids_branch.push(item.id)
-          })
-        }
-        this.searchData.branch_id = ids_branch
-        const data = {
-            keyword: this.searchData.keyword,
-            branch_id: this.searchData.branch_id,
-            start_date:startDate,
-            end_date:endDate,
-            debt_status: this.searchData.debt_status,
-            pagination:this.pagination,
-            type_contract:1
-          }
+    },
+    reset() {
+      this.searchData.keyword = '';
+      this.searchData.arr_branch = '';
+      this.searchData.branch_id = '';
+      this.searchData.debt_status = '';
+      this.searchData.pagination = this.pagination;
+      this.searchData.dateRange = '';
+      this.getData();
+    },
+    getData() {
+      const startDate =
+        typeof this.searchData.dateRange !== 'undefined' &&
+        this.searchData.dateRange !== '' &&
+        this.searchData.dateRange[0]
+          ? `${u.dateToString(this.searchData.dateRange[0])}`
+          : '';
+      const endDate =
+        typeof this.searchData.dateRange !== 'undefined' &&
+        this.searchData.dateRange !== '' &&
+        this.searchData.dateRange[1]
+          ? `${u.dateToString(this.searchData.dateRange[1])}`
+          : '';
 
-        this.$vs.loading()
-        axios.p('/api/lms/contracts/list', data)
-          .then((response) => {
-            this.$vs.loading.close()
-            this.contracts = response.data.list
-            this.pagination = response.data.paging;
-            setTimeout(() => {
-              this.pagination.init = 1;
-            }, 500)
-          })
-          .catch((error) => {
-            console.log(error);
-            this.$vs.loading.close();
-          })
-      },
-      changePage() {
-        if (this.pagination.init) {
-          this.getData();
-        }
-      },
-      changePageLimit(limit) {
-        this.pagination.cpage = 1
-        this.pagination.limit = limit
-        this.getData();
-      },
-      confirmDelete (item) {
-        this.delete_id = item.contract_id
-        this.$vs.dialog({
-          type: 'confirm',
-          color: 'danger',
-          title: 'Thông báo',
-          text: `Bạn chắc chắn hủy hợp đồng nhập học - ${item.code}?`,
-          accept: this.deleteContract,
-          acceptText: 'Xóa',
-          cancelText: 'Hủy'
-        })
-      },
-      deleteContract(){
-        const data = {
-          contract_id: this.delete_id,
-        };
-        this.$vs.loading();
-        axios.p(`/api/lms/contracts/delete`,data)
+      const ids_branch = [];
+      if (this.searchData.arr_branch && this.searchData.arr_branch.length) {
+        this.searchData.arr_branch.map((item) => {
+          ids_branch.push(item.id);
+        });
+      }
+      this.searchData.branch_id = ids_branch;
+      const data = {
+        keyword: this.searchData.keyword,
+        branch_id: this.searchData.branch_id,
+        start_date: startDate,
+        end_date: endDate,
+        debt_status: this.searchData.debt_status,
+        pagination: this.pagination,
+        type_contract: 1
+      };
+
+      this.$vs.loading();
+      axios
+        .p('/api/lms/contracts/list', data)
         .then((response) => {
           this.$vs.loading.close();
-          this.getData();
-          this.$vs.notify({
-            title: 'Thành Công',
-            text: response.data.message,
-            color: 'success',
-            iconPack: 'feather',
-            icon: 'icon-check'
-          })
+          this.contracts = response.data.list;
+          this.pagination = response.data.paging;
+          setTimeout(() => {
+            this.pagination.init = 1;
+          }, 500);
         })
-      },
+        .catch((error) => {
+          console.log(error);
+          this.$vs.loading.close();
+        });
     },
-    filters: {
+    changePage() {
+      if (this.pagination.init) {
+        this.getData();
+      }
     },
+    changePageLimit(limit) {
+      this.pagination.cpage = 1;
+      this.pagination.limit = limit;
+      this.getData();
+    },
+    confirmDelete(item) {
+      this.delete_id = item.contract_id;
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: 'Thông báo',
+        text: `Bạn chắc chắn muốn hủy hợp đồng nhập học - ${item.code}?`,
+        accept: this.deleteContract,
+        acceptText: 'Xóa',
+        cancelText: 'Hủy'
+      });
+    },
+    deleteContract() {
+      const data = {
+        contract_id: this.delete_id
+      };
+      this.$vs.loading();
+      axios.p(`/api/lms/contracts/delete`, data).then((response) => {
+        this.$vs.loading.close();
+        this.getData();
+        this.$vs.notify({
+          title: 'Thành Công',
+          text: response.data.message,
+          color: 'success',
+          iconPack: 'feather',
+          icon: 'icon-check'
+        });
+      });
+    }
   }
+};
 </script>
-<style>
-@media only screen and (min-width: 600px) {
-  #page-roles-list .vs-table--search {
-    max-width: 360px;
+
+<style scoped>
+#page-contracts-list {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.contracts-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  margin-top: 4px;
+}
+
+.header-action-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-add-btn {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(40, 199, 111, 0.25);
+}
+
+.badge-total-items {
+  display: inline-flex;
+  align-items: center;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13.5px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid #bfdbfe;
+}
+
+.filter-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.filter-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.filter-input-text,
+.custom-form-input {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px 6px 34px !important;
+  font-size: 14px !important;
+  color: #1e293b !important;
+  outline: none !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-form-input {
+  padding-left: 12px !important;
+}
+
+.filter-input-text:focus,
+.custom-form-input:focus,
+.custom-select-box:focus {
+  border-color: #7367f0 !important;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15) !important;
+}
+
+.custom-select-box {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 38px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+  font-size: 14px !important;
+  color: #1e293b !important;
+  outline: none !important;
+  background: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-textarea {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  color: #1e293b !important;
+  outline: none !important;
+  background: #ffffff !important;
+  resize: vertical;
+}
+
+.custom-multiselect >>> .multiselect {
+  min-height: 38px !important;
+}
+
+.custom-multiselect >>> .multiselect__tags {
+  box-sizing: border-box !important;
+  min-height: 38px !important;
+  padding: 6px 32px 6px 12px !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  background: #ffffff !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+.custom-multiselect >>> .multiselect__select {
+  height: 36px !important;
+  width: 30px !important;
+  padding: 4px 8px !important;
+}
+
+.filter-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-filter-action {
+  height: 38px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-filter-submit {
+  background: #7367f0;
+  color: #ffffff;
+  border: 1px solid #7367f0;
+}
+
+.btn-filter-submit:hover {
+  background: #5e50ee;
+  box-shadow: 0 2px 6px rgba(115, 103, 240, 0.3);
+}
+
+.btn-filter-reset {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-filter-reset:hover {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #94a3b8;
+}
+
+/* Mobile Toggle Bar */
+.mobile-view-toggle-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mobile-view-toggle-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-view-toggle-btn:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  border-right: none;
+}
+
+.mobile-view-toggle-btn:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.mobile-view-toggle-btn.active {
+  background: #7367f0;
+  color: #ffffff;
+  border-color: #7367f0;
+}
+
+@media (max-width: 767px) {
+  .mobile-view-toggle-bar {
+    display: flex;
   }
-  #page-roles-list .vs-table--search-input{
-    width: 360px;
+  .contracts-page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .header-action-group {
+    width: 100%;
+    justify-content: space-between;
   }
 }
-th .sort-th, th .vs-table-text{
-  display: contents;
+
+/* Table Style */
+.compact-table-card {
+  width: 100% !important;
+  overflow: hidden !important;
 }
-.multiselect{
-  z-index: 999;
+
+.compact-table-card >>> .vx-card__body {
+  padding: 16px !important;
 }
-.td.vs-table--td{
-  vertical-align: top;
+
+.table-responsive {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.modern-lms-table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+
+.modern-lms-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 12px 14px;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.modern-lms-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table-row-hover:hover {
+  background-color: #f8fafc;
+}
+
+.item-title-text {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.stk-code-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7367f0;
+  background-color: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  padding: 2px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stk-code-badge:hover {
+  background-color: #ede9fe;
+}
+
+.contract-code-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0284c7;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 2px 7px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.contract-code-badge:hover {
+  background-color: #e0f2fe;
+}
+
+.pending-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #fef3c7;
+  color: #b45309;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.completed-tag {
+  display: inline-flex;
+  align-items: center;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-success {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-warning {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-info {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.status-default {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+/* Action Circle Buttons */
+.action-circle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-view {
+  background: #f5f3ff;
+  color: #7367f0;
+  border-color: #ddd6fe;
+}
+.action-view:hover {
+  background: #7367f0;
+  color: #ffffff;
+}
+
+.action-charge {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #bbf7d0;
+}
+.action-charge:hover {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.action-print {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-color: #bae6fd;
+}
+.action-print:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.action-delete {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+.action-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Pagination Footer */
+.pagination-footer-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pagination-dropdown-pill {
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.pagination-control-wrapper {
+  margin-left: auto;
+}
+
+/* Modal Helpers */
+.modal-info-box {
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.quick-fill-btn {
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7367f0;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.quick-fill-btn:hover {
+  background: #ede9fe;
 }
 </style>
