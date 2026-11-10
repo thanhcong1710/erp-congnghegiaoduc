@@ -429,7 +429,7 @@
               />
             </div>
             <div class="vx-col md:w-1/3 w-full mb-4">
-              <label>Tổng thanh toán (Học phí + Sách)</label>
+              <label>Tổng (Học phí + Sách)</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"

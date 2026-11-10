@@ -339,7 +339,7 @@
               />
             </div>
             <div class="vx-col md:w-1/3 w-full mb-4">
-              <label>Tổng thanh toán (Học phí + Sách)</label>
+              <label>Tổng (Học phí + Sách)</label>
               <input
                 class="vs-inputx vs-input--input normal"
                 type="text"
@@ -383,9 +383,6 @@
         <div class="vx-col w-full">
           <div class="flex justify-between items-center mb-3">
             <h5 class="font-bold text-primary"><i class="fa-solid fa-receipt mr-1"></i> Lịch sử Phiếu thu & Đóng phí</h5>
-            <vs-button size="small" color="success" v-if="contract_info.debt_amount > 0" @click="openReceiptModal">
-              <i class="fa-solid fa-plus mr-1"></i> Lên phiếu thu mới
-            </vs-button>
           </div>
           <div class="overflow-x-auto">
             <table class="table table-bordered w-full text-sm" style="width: 100%; border-collapse: collapse;">
@@ -444,7 +441,7 @@
             <vs-button color="dark" type="border" class="mb-2 mr-3" >Thoát</vs-button>
           </router-link>
           <vs-button class="mb-2 mr-3" color="primary" v-if="contract_info.debt_amount > 0" @click="openReceiptModal">
-            <i class="fa-solid fa-receipt mr-1"></i> Lên phiếu thu
+            <i class="fa-solid fa-receipt mr-1"></i> Lên phiếu thu mới
           </vs-button>
           <router-link class="btn btn-danger" :to="`/lms/contracts/${contract_info.contract_id}/edit`" v-if="contract_info.debt_amount > 0">
             <vs-button class="mb-2" color="success" >Cập nhật hợp đồng</vs-button>
