@@ -403,7 +403,7 @@ class ChargesController extends Controller
         // 1. Tìm phiếu thu trong tmp_payments
         $data = u::first("SELECT '' AS text_1, c.id AS contract_id, c.code AS contract_code, c.debt_amount, tp.charge_amount, tp.method,
             s.gud_name1, s.address, s.name, tp.charge_date, tp.code AS receipt_code,
-            (SELECT number_of_months FROM tuition_fee WHERE id = c.tuition_fee_id) AS number_of_months,
+            (SELECT number_of_months FROM tuition_fee WHERE id = COALESCE(c.tuition_fee_id, c.init_tuition_fee_id)) AS number_of_months,
             (SELECT name FROM products WHERE id=c.product_id) AS product_name, tp.note,
             '' AS text_2, '' AS text_amount, '' AS text_amount_words, '' AS text_3, '' AS text_debt_amount
           FROM tmp_payments AS tp
@@ -415,7 +415,7 @@ class ChargesController extends Controller
         if (!$data) {
             $data = u::first("SELECT '' AS text_1, c.id AS contract_id, c.code AS contract_code, c.debt_amount, p.amount AS charge_amount, p.method,
                 s.gud_name1, s.address, s.name, p.charge_date, p.code AS receipt_code,
-                (SELECT number_of_months FROM tuition_fee WHERE id = c.tuition_fee_id) AS number_of_months,
+                (SELECT number_of_months FROM tuition_fee WHERE id = COALESCE(c.tuition_fee_id, c.init_tuition_fee_id)) AS number_of_months,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name, p.note,
                 '' AS text_2, '' AS text_amount, '' AS text_amount_words, '' AS text_3, '' AS text_debt_amount
               FROM payments AS p
