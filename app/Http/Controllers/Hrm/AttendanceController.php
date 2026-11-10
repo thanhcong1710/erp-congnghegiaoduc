@@ -202,8 +202,10 @@ class AttendanceController extends Controller
                     $attendanceStatus = $expectedLeaveStatus;
                 }
             } elseif ($isOnline) {
-                if ($att && $att->attendance_status && $att->attendance_status !== 'online') {
+                if ($att && $att->attendance_status && !in_array($att->attendance_status, ['online', 'online_half'])) {
                     $overrideEdit = true;
+                } elseif ($att && $att->attendance_status === 'online_half') {
+                    $attendanceStatus = 'online_half';
                 } else {
                     $attendanceStatus = 'online';
                 }
@@ -307,7 +309,11 @@ class AttendanceController extends Controller
                         $statusToSave = ($leaveDays > 0 && $leaveDays < 1) ? 'leave_approved_half' : 'leave_approved';
                     }
                 } elseif (!empty($item['is_online'])) {
-                    $statusToSave = 'online';
+                    if (isset($item['attendance_status']) && $item['attendance_status'] === 'online_half') {
+                        $statusToSave = 'online_half';
+                    } else {
+                        $statusToSave = 'online';
+                    }
                 }
             }
 
@@ -415,7 +421,8 @@ class AttendanceController extends Controller
 
             $workedDays = $userAtts->where('attendance_status', 'present')->count()
                 + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5)
-                + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
+                + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5)
+                + ($userAtts->where('attendance_status', 'online_half')->count() * 0.5);
             $lateFined = $userAtts->where('attendance_status', 'late_fined')->count();
             $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count()
                 + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5);
@@ -432,11 +439,18 @@ class AttendanceController extends Controller
                     return ($r->employee_id && $r->employee_id == $emp->id) || ($emp->user_id && $r->user_id == $emp->user_id);
                 })->map(function ($r) {
                     return Carbon::parse($r->date)->format('Y-m-d');
-                });
+                })->unique();
+
                 $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
                     return Carbon::parse($a->date)->format('Y-m-d');
-                });
-                $onlineDays = $userOnlineRegs->merge($attOnlineDates)->unique()->count();
+                })->unique();
+
+                $attOnlineHalfDates = $userAtts->where('attendance_status', 'online_half')->map(function ($a) {
+                    return Carbon::parse($a->date)->format('Y-m-d');
+                })->unique();
+
+                $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique();
+                $onlineDays = $fullOnlineDates->count() + ($attOnlineHalfDates->count() * 0.5);
             }
 
             $summary[] = [
@@ -527,7 +541,8 @@ class AttendanceController extends Controller
 
         $workedDays = $userAtts->where('attendance_status', 'present')->count()
             + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5)
-            + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
+            + ($userAtts->where('attendance_status', 'unexcused_absent_half')->count() * 0.5)
+            + ($userAtts->where('attendance_status', 'online_half')->count() * 0.5);
         $lateFined = $userAtts->where('attendance_status', 'late_fined')->count();
         $leaveApproved = $userAtts->where('attendance_status', 'leave_approved')->count()
             + ($userAtts->where('attendance_status', 'leave_approved_half')->count() * 0.5);
@@ -547,12 +562,19 @@ class AttendanceController extends Controller
                 ->whereBetween('date', [$startDate, $endDate])
                 ->where('status', 1)
                 ->get()
-                ->map(function ($r) { return Carbon::parse($r->date)->format('Y-m-d'); });
+                ->map(function ($r) { return Carbon::parse($r->date)->format('Y-m-d'); })
+                ->unique();
 
             $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
                 return Carbon::parse($a->date)->format('Y-m-d');
-            });
-            $onlineDays = $userOnlineRegs->merge($attOnlineDates)->unique()->count();
+            })->unique();
+
+            $attOnlineHalfDates = $userAtts->where('attendance_status', 'online_half')->map(function ($a) {
+                return Carbon::parse($a->date)->format('Y-m-d');
+            })->unique();
+
+            $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique();
+            $onlineDays = $fullOnlineDates->count() + ($attOnlineHalfDates->count() * 0.5);
         }
 
         return response()->json([

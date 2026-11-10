@@ -76,7 +76,7 @@ export default {
           ],
           pageTitle: 'Thêm mới Hồ sơ Nhân viên',
           rule: 'editor',
-          permission: 'hrm_admin'
+          permission: 'hrm'
         },
       },
       {
@@ -92,7 +92,7 @@ export default {
           ],
           pageTitle: 'Hồ sơ Nhân viên',
           rule: 'editor',
-          permission: 'hrm_admin'
+          permission: 'hrm'
         },
       },
       {

@@ -133,11 +133,23 @@ class HrmScopeService
             $directDeptIds = array_merge($directDeptIds, $managedDeptIds);
         }
 
-        // 2. Nếu user là Leader/Trưởng nhóm, lấy phòng ban trong hồ sơ HRM của họ
+        // 2. Nếu user là Leader/Trưởng nhóm, lấy phòng ban trong hồ sơ HRM của họ hoặc của các nhân sự cấp dưới
         if (self::isLeader($user)) {
             $profile = $user->hrmProfile ?: HrmEmployeeProfile::where('user_id', $user->id)->first();
             if ($profile && $profile->department_id) {
                 $directDeptIds[] = (int)$profile->department_id;
+            }
+
+            // Lấy thêm các phòng ban của nhân sự cấp dưới trực thuộc
+            $subordinateUserIds = self::getSubordinateUserIds($user);
+            if (!empty($subordinateUserIds)) {
+                $subDeptIds = HrmEmployeeProfile::whereIn('user_id', $subordinateUserIds)
+                    ->whereNotNull('department_id')
+                    ->pluck('department_id')
+                    ->all();
+                if (!empty($subDeptIds)) {
+                    $directDeptIds = array_merge($directDeptIds, $subDeptIds);
+                }
             }
         }
 

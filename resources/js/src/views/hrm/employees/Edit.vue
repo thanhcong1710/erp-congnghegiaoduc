@@ -125,7 +125,9 @@
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Phòng ban / Team</label>
+                <label class="text-sm font-semibold text-gray-700 block mb-1">
+                  Phòng ban / Team <span v-if="!isHrmAdmin" class="text-xs text-primary font-normal">(Phòng ban bạn quản lý)</span>
+                </label>
                 <v-select class="w-full" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="displayName" placeholder="Chọn phòng ban / team..." />
               </div>
               <div class="vx-col w-1/2">
@@ -430,6 +432,16 @@ export default {
       }
     }
   },
+  computed: {
+    isHrmAdmin() {
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase().replace(/[\s\-_]+/g, '_');
+      return (Array.isArray(user.roles) && user.roles.includes('hrm_manager')) ||
+        roleStr.includes('admin') ||
+        roleStr.includes('hrm_manager');
+    }
+  },
   created() {
     this.fetchOptions();
     if (this.$route.params.id) {
@@ -446,8 +458,12 @@ export default {
   },
   methods: {
     fetchOptions() {
-      axios.p('/api/hrm/departments/list').then(res => {
+      axios.p('/api/hrm/departments/list', { scoped: 1 }).then(res => {
         this.departments = this.flattenDepartments(res.data || []);
+        // Nếu là Trưởng phòng thêm mới và chưa chọn phòng ban, tự động chọn phòng ban quản lý đầu tiên
+        if (!this.id && !this.form.department_id && this.departments.length > 0 && !this.isHrmAdmin) {
+          this.form.department_id = this.departments[0].id;
+        }
       });
       axios.p('/api/hrm/job-titles/list').then(res => this.jobTitles = res.data || []);
       axios.p('/api/hrm/job-levels/list').then(res => this.jobLevels = res.data || []);

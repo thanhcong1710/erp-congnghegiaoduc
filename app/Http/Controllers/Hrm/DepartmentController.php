@@ -14,6 +14,17 @@ class DepartmentController extends Controller
 {
     public function list(Request $request)
     {
+        $currentUser = Auth::user();
+        $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
+        $scoped = $request->get('scoped');
+
+        // Nếu request có flag scoped và user là Trưởng phòng (không phải HRM Admin), chỉ trả về phòng ban quản lý
+        if ($scoped && !$isHrmAdmin && $currentUser) {
+            $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
+            $scopedDepts = HrmDepartment::whereIn('id', $accessibleDeptIds)->orderBy('id', 'asc')->get();
+            return response()->json($scopedDepts);
+        }
+
         // Get root departments and load nested children with counts
         $departments = HrmDepartment::with([
             'manager',

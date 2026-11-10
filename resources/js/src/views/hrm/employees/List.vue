@@ -8,7 +8,7 @@
         </h3>
         <p class="text-sm text-gray-500 mt-1">Phân loại Fulltime, CTV, Thử việc & theo dõi trạng thái hoạt động</p>
       </div>
-      <div v-if="isHrmAdmin">
+      <div v-if="canAdd">
         <router-link :to="'/hrm/employees/add'">
           <vs-button class="p-3" color="success" type="border">
             <i class="fa-solid fa-user-plus mr-2"></i> Thêm Nhân Sự Mới
@@ -549,6 +549,7 @@ export default {
       selectedEmployee: null,
       canDeleteServer: null,
       isHrmAdminServer: null,
+      canAddServer: null,
       statusForm: {
         work_status: 'working',
         resigned_date: '',
@@ -607,6 +608,16 @@ export default {
       }
       return this.checkCanDeleteLocal();
     },
+    canAdd() {
+      if (this.canAddServer !== null) {
+        return this.canAddServer;
+      }
+      if (this.isHrmAdmin) return true;
+      const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
+      if (user.is_leader) return true;
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase();
+      return roleStr.includes('trưởng') || roleStr.includes('lead') || roleStr.includes('quản lý');
+    },
     isHrmAdmin() {
       if (this.isHrmAdminServer !== null) {
         return this.isHrmAdminServer;
@@ -652,6 +663,7 @@ export default {
           this.employees = res.data.data;
           this.canDeleteServer = typeof res.data.can_delete !== 'undefined' ? !!res.data.can_delete : null;
           this.isHrmAdminServer = typeof res.data.is_hrm_admin !== 'undefined' ? !!res.data.is_hrm_admin : null;
+          this.canAddServer = typeof res.data.can_add !== 'undefined' ? !!res.data.can_add : null;
         } else if (Array.isArray(res.data)) {
           this.employees = res.data;
         } else {

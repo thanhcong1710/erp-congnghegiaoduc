@@ -311,7 +311,7 @@
                         <div v-else-if="tr.is_online && !tr.override_edit" class="flex flex-col">
                           <div class="flex items-center">
                             <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-purple-100 text-purple-700 border border-purple-300 w-max">
-                              <i class="fa-solid fa-laptop mr-1.5"></i> Làm Online
+                              <i class="fa-solid fa-laptop mr-1.5"></i> {{ tr.attendance_status === 'online_half' ? 'Làm Online (0.5 ngày)' : 'Làm Online (1 ngày)' }}
                             </span>
                             <button
                               v-if="isHrmAdmin"
@@ -340,14 +340,41 @@
                           >
                             <option value="not_checked">⚪ Chưa điểm danh</option>
                             <option value="present">✓ Có mặt / Đúng giờ (1 công)</option>
+                            <option value="online">🌐 Làm Online (1 ngày)</option>
+                            <option value="online_half">🌐 Làm Online (0.5 ngày)</option>
                             <option value="leave_approved">📅 Nghỉ phép (1 ngày)</option>
                             <option value="leave_approved_half">📅 Nghỉ phép (0.5 ngày)</option>
                             <option value="unexcused_absent">✗ Vắng k phép (1 ngày)</option>
                             <option value="unexcused_absent_half">✗ Vắng k phép (0.5 ngày)</option>
                             <option value="late_fined">⏱ Đi muộn (đã nộp phạt)</option>
                             <option value="late_submitted">⚠ Gửi đơn muộn</option>
-                            <option value="online">🌐 Làm Online</option>
                           </select>
+
+                          <!-- Nút chọn nhanh thời lượng 0.5 ngày / 1 ngày khi Làm Online -->
+                          <div
+                            v-if="isHrmAdmin && (tr.attendance_status === 'online' || tr.attendance_status === 'online_half')"
+                            class="flex items-center mt-1.5 space-x-1"
+                          >
+                            <span class="text-xs text-gray-500 mr-1 font-medium">Online:</span>
+                            <button
+                              type="button"
+                              @click="setOnlineDuration(tr, 0.5)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'online_half' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Làm Online 0.5 ngày"
+                            >
+                              0.5 ngày
+                            </button>
+                            <button
+                              type="button"
+                              @click="setOnlineDuration(tr, 1)"
+                              class="px-2 py-0.5 rounded text-xs font-bold transition border"
+                              :class="tr.attendance_status === 'online' ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
+                              title="Làm Online 1 ngày"
+                            >
+                              1 ngày
+                            </button>
+                          </div>
 
                           <!-- Nút chọn nhanh thời lượng 0.5 ngày / 1 ngày khi Nghỉ phép -->
                           <div
@@ -844,6 +871,11 @@ export default {
       tr.attendance_status = days === 0.5 ? 'leave_approved_half' : 'leave_approved';
       this.autoSaveRecord(tr);
     },
+    setOnlineDuration(tr, days) {
+      if (!this.isHrmAdmin) return;
+      tr.attendance_status = days === 0.5 ? 'online_half' : 'online';
+      this.autoSaveRecord(tr);
+    },
     setAbsentDuration(tr, days) {
       if (!this.isHrmAdmin) return;
       tr.attendance_status = days === 0.5 ? 'unexcused_absent_half' : 'unexcused_absent';
@@ -935,6 +967,7 @@ export default {
         case 'late_submitted':
           return 'color: #82868b; border-color: #82868b; background-color: #f9fafb;';
         case 'online':
+        case 'online_half':
           return 'color: #7c3aed; border-color: #a78bfa; background-color: #f5f3ff;';
         default:
           return 'color: #6e6b7b; border-color: #d8d6de; background-color: #f8f9fa;';

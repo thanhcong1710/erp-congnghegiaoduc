@@ -78,10 +78,15 @@ class EmployeeProfileController extends Controller
         $employees = $query->orderBy('id', 'desc')->get();
         $canDelete = $currentUser ? $currentUser->canDeleteHrmEmployee() : false;
         $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
+        $isLeader = $currentUser ? HrmScopeService::isLeader($currentUser) : false;
+        $canAdd = $isHrmAdmin || $isLeader;
+        $accessibleDeptIds = $currentUser ? HrmScopeService::getAccessibleDepartmentIds($currentUser) : [];
         return response()->json([
             'status' => 1,
             'can_delete' => $canDelete,
             'is_hrm_admin' => $isHrmAdmin,
+            'can_add' => $canAdd,
+            'accessible_department_ids' => $accessibleDeptIds,
             'data' => $employees
         ]);
     }
@@ -89,7 +94,10 @@ class EmployeeProfileController extends Controller
     public function add(Request $request)
     {
         $currentUser = Auth::user();
-        if (!HrmScopeService::isHrmAdmin($currentUser)) {
+        $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
+        $isLeader = $currentUser ? HrmScopeService::isLeader($currentUser) : false;
+
+        if (!$isHrmAdmin && !$isLeader) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Bạn chỉ có quyền xem danh sách nhân sự, không có quyền thêm mới!'
@@ -97,6 +105,19 @@ class EmployeeProfileController extends Controller
         }
 
         $data = $request->all();
+
+        // Với nhân sự Trưởng phòng (không phải HRM Admin), chỉ được quyền thêm nhân viên cho phòng ban mình quản lý
+        if (!$isHrmAdmin && $isLeader) {
+            $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
+            $targetDeptId = !empty($data['department_id']) ? (int)$data['department_id'] : null;
+
+            if (!$targetDeptId || !in_array($targetDeptId, $accessibleDeptIds, true)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Trưởng phòng chỉ được quyền thêm nhân viên cho phòng ban mình quản lý!'
+                ], 422);
+            }
+        }
 
         // Tự sinh mã nhân sự nếu chưa có (format: CHAM01, CHAM02...)
         if (empty($data['employee_code'])) {
@@ -207,13 +228,25 @@ class EmployeeProfileController extends Controller
     public function update(Request $request, $id)
     {
         $currentUser = Auth::user();
-        if (!HrmScopeService::isHrmAdmin($currentUser)) {
-            return response()->json(['status' => 0, 'message' => 'Bạn chỉ có quyền xem thông tin nhân sự, không có quyền chỉnh sửa!'], 403);
-        }
+        $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
+        $isLeader = $currentUser ? HrmScopeService::isLeader($currentUser) : false;
 
         $profile = HrmEmployeeProfile::find($id);
         if (!$profile) {
             return response()->json(['status' => 0, 'message' => 'Không tìm thấy hồ sơ'], 404);
+        }
+
+        if (!$isHrmAdmin) {
+            $accessibleDeptIds = $currentUser ? HrmScopeService::getAccessibleDepartmentIds($currentUser) : [];
+            if (!$isLeader || !$profile->department_id || !in_array((int)$profile->department_id, $accessibleDeptIds, true)) {
+                return response()->json(['status' => 0, 'message' => 'Bạn chỉ có quyền xem thông tin nhân sự, không có quyền chỉnh sửa!'], 403);
+            }
+            if ($request->filled('department_id')) {
+                $newDeptId = (int)$request->department_id;
+                if (!in_array($newDeptId, $accessibleDeptIds, true)) {
+                    return response()->json(['status' => 0, 'message' => 'Bạn không thể chuyển nhân sự sang phòng ban không do bạn quản lý!'], 422);
+                }
+            }
         }
 
         $data = $request->all();
