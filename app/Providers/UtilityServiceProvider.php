@@ -6,9 +6,12 @@ use App\Models\LogStudents;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class UtilityServiceProvider extends ServiceProvider
 {
+    private static $logContractsColumns = null;
     public static function query($query, $print = false)
     {
         $resp = null;
@@ -353,7 +356,19 @@ class UtilityServiceProvider extends ServiceProvider
         $contract_info['log_time'] = date('Y-m-d H:i:s');
         self::updateDoneSessions(data_get($contract_info, 'id'));
         unset($contract_info['id']);
-        $log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
+
+        try {
+            if (self::$logContractsColumns === null) {
+                self::$logContractsColumns = Schema::getColumnListing('log_contracts');
+            }
+            if (!empty(self::$logContractsColumns)) {
+                $contract_info = array_intersect_key($contract_info, array_flip(self::$logContractsColumns));
+            }
+            $log_contract_id = self::insertSimpleRow($contract_info, 'log_contracts');
+        } catch (\Exception $e) {
+            Log::error('addLogContracts failed: ' . $e->getMessage());
+            $log_contract_id = null;
+        }
         return $log_contract_id;
     }
 
