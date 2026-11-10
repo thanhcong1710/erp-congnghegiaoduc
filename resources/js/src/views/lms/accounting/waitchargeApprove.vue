@@ -1,12 +1,10 @@
-
-
 <template>
 
   <div id="page-roles-list">
     <vx-card no-shadow class="mt-5">
       <div class="mb-5">
         <div class="vx-row">
-          <div class="vx-col sm:w-1/3 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trung tâm</label>
             <multiselect
                 name="search_branch"
@@ -24,18 +22,27 @@
                 <span slot="noResult">Không tìm thấy dữ liệu</span>
               </multiselect>
           </div>
-          <div class="vx-col sm:w-1/3 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Từ khóa</label>
-            <vs-input class="w-full" placeholder="Mã phiếu thu, mã HS, tên HS, mã HĐ" v-model="searchData.keyword"></vs-input>
+            <vs-input class="w-full" placeholder="Mã phiếu thu, mã HS, tên HS, mã HĐ, SĐT" v-model="searchData.keyword"></vs-input>
           </div>
-          <div class="vx-col sm:w-1/3 w-full mb-4">
+          <div class="vx-col sm:w-1/4 w-full mb-4">
             <label for="" class="vs-input--label">Trạng thái phiếu thu</label>
-            <select class="vs-inputx vs-input--input normal" v-model="searchData.status">
+            <select class="vs-inputx vs-input--input normal" v-model="searchData.status" @change="getData">
               <option value="">-- Tất cả trạng thái --</option>
               <option value="0">Chờ duyệt</option>
               <option value="1">Đã duyệt</option>
               <option value="2">Từ chối duyệt</option>
             </select>
+          </div>
+          <div class="vx-col sm:w-1/4 w-full mb-4">
+            <label for="" class="vs-input--label">Ngày đóng phí</label>
+            <datepicker class="w-full"
+              v-model="searchData.dateRange"
+              range
+              placeholder="Chọn khoảng thời gian"
+              :lang="datepickerOptions.lang"
+            />
           </div>
         </div>
         <div class="vx-row mt-3">
@@ -128,10 +135,10 @@
                     <router-link :to="`/lms/waitcharge-approve/${item.id}/detail`" >
                       <vs-button size="small" title="Xem chi tiết"><i class="fa fa-eye"></i></vs-button>
                     </router-link> 
-                    <vs-button size="small" color="success" v-if="item.status == 0" @click="confirmApprove(item)" title="Duyệt phiếu thu">
+                    <vs-button size="small" color="success" v-if="item.status == 0 && canApprove" @click="confirmApprove(item)" title="Duyệt phiếu thu">
                       <i class="fa fa-check"></i>
                     </vs-button>
-                    <vs-button size="small" color="danger" v-if="item.status == 0" @click="confirmReject(item)" title="Từ chối duyệt">
+                    <vs-button size="small" color="danger" v-if="item.status == 0 && canApprove" @click="confirmReject(item)" title="Từ chối duyệt">
                       <i class="fa fa-times"></i>
                     </vs-button>
                     <router-link :to="`/pages/print/receipt/${item.id}`" target="_blank"> 
@@ -174,15 +181,24 @@
   import axios from '../../../http/axios.js'
   import Multiselect from "vue-multiselect";
   import u from '../../../until/helper.js'
+  import datepicker from "vue2-datepicker";
+  import moment from 'moment';
 
   export default {
     components: { 
       vSelect,
-      Multiselect
+      Multiselect,
+      datepicker
     },
     data() {
       return {
         branch_list: [],
+        datepickerOptions: { 
+          lang: { 
+            days: ['CN','T2','T3','T4','T5','T6','T7'], 
+            months: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'] 
+          } 
+        },
         searchData: {
           arr_branch: "",
           branch_id:"",
@@ -210,6 +226,16 @@
         delete_id:'',
       }
     },
+    computed: {
+      canApprove() {
+        const user = this.$store.state.AppActiveUser || {};
+        return u.checkPermission(user, 'approve_add_fee') || 
+               u.checkPermission(user, 'lms_charges') ||
+               u.checkPermission(user, 'lms_waitcharges') ||
+               [999999, 686868, 1000002].includes(Number(user.role_id)) ||
+               ['admin', 'cashier', 'ceo'].includes(user.roleName);
+      }
+    },
     created() {
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
@@ -223,6 +249,7 @@
         this.searchData.arr_branch= ""
         this.searchData.branch_id= ""
         this.searchData.status = ""
+        this.searchData.dateRange = ""
         this.searchData.pagination= this.pagination
         this.getData();
       },
@@ -238,6 +265,8 @@
             keyword: this.searchData.keyword,
             branch_id: this.searchData.branch_id,
             status: this.searchData.status,
+            start_date: this.searchData.dateRange && this.searchData.dateRange[0] ? moment(this.searchData.dateRange[0]).format("YYYY-MM-DD") : "",
+            end_date: this.searchData.dateRange && this.searchData.dateRange[1] ? moment(this.searchData.dateRange[1]).format("YYYY-MM-DD") : "",
             pagination:this.pagination,
           }
 

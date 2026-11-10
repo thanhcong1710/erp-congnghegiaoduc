@@ -91,6 +91,18 @@ class ChargesController extends Controller
     }
 
     public function approve(Request $request){
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
+        $can_approve = in_array(999999, $roles) || in_array(686868, $roles) || in_array(1000002, $roles);
+        if (!$can_approve) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Bạn không có quyền duyệt phiếu thu. Chỉ Kế toán hoặc Ban Giám đốc mới được thực hiện thao tác này.'
+            ], 403);
+        }
+
         $tmp_payment = u::getObject(array('id'=>$request->id), 'tmp_payments');
         if (data_get($request, 'status') == 1){
             $contract_info = u::getObject(array('id'=>data_get($tmp_payment, 'contract_id')), 'contracts');
@@ -293,6 +305,8 @@ class ChargesController extends Controller
         $branch_id = isset($request->branch_id) ? $request->branch_id : [];
         $keyword = isset($request->keyword) ? $request->keyword : '';
         $status = isset($request->status) ? $request->status : '';
+        $start_date = isset($request->start_date) ? $request->start_date : '';
+        $end_date = isset($request->end_date) ? $request->end_date : '';
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -308,9 +322,26 @@ class ChargesController extends Controller
         if ($status !== '' && $status !== null) {
             $cond .= " AND tp.status = " . (int)$status;
         }
+
+        if ($start_date !== '') {
+            $cond .= " AND tp.charge_date >= '$start_date'";
+        }
+        if ($end_date !== '') {
+            $cond .= " AND tp.charge_date <= '$end_date'";
+        }
         
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR tp.code LIKE '%$keyword%') ";
+            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%' OR tp.code LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%') ";
+        }
+
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
+        if (in_array(68, $roles) || in_array(69, $roles)) {
+            $staff_ids = Auth::user()->getStaffHasUser();
+            $my_id = Auth::user()->id;
+            $cond .= " AND (c.ec_id IN ($staff_ids) OR tp.creator_id IN ($staff_ids) OR tp.creator_id = $my_id)";
         }
         
         $order_by = " ORDER BY tp.id DESC ";
@@ -322,6 +353,8 @@ class ChargesController extends Controller
         
         $list = u::query("SELECT tp.id, tp.code AS receipt_code, tp.code, tp.charge_amount, tp.charge_date, tp.method, tp.note, tp.status, tp.created_at, tp.approved_at,
                 c.id AS contract_id, c.code AS contract_code,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
+                (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_leader_id) AS ec_leader_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.creator_id) AS creator_name,
                 (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= tp.approver_id) AS approver_name,
                 (SELECT name FROM products WHERE id =c.product_id) AS product_name,
@@ -352,9 +385,17 @@ class ChargesController extends Controller
             c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session
         FROM contracts AS c 
             LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=".data_get($paymentInfo, 'contract_id', 0));
+
+        $role_ids = u::query("SELECT role_id FROM role_has_user WHERE user_id = " . Auth::user()->id);
+        $roles = array_map(function ($r) {
+            return $r->role_id;
+        }, $role_ids);
+        $can_approve = in_array(999999, $roles) || in_array(686868, $roles) || in_array(1000002, $roles);
+
         return response()->json([
             'payment_info' => $paymentInfo,
-            'contract_info' => $contractInfo
+            'contract_info' => $contractInfo,
+            'can_approve' => $can_approve
         ]);
     }
 

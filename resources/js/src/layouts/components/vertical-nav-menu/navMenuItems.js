@@ -171,7 +171,7 @@ export default [
           },
           {
             url: '/lms/waitcharge-approve',
-            name: 'Duyệt phiếu thu',
+            name: 'Duyệt phí',
             slug: 'lms-waitcharge-approve',
             permission:'lms_waitcharge_approve',
           }

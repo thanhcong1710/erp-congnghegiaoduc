@@ -10,6 +10,11 @@
             <span v-else-if="payment.status == 2" class="badge" style="background: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 13px;">Từ chối duyệt</span>
           </div>
         </div>
+
+        <div v-if="!canApprove" class="p-3 mb-4 rounded flex items-center" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; font-size: 13px;">
+          <i class="feather icon-info mr-2" style="font-size: 18px;"></i>
+          <span><strong>Chế độ xem phiếu thu:</strong> Bạn đang xem phiếu thu do Sale tạo. Quyền kiểm tra đối soát và phê duyệt thuộc về bộ phận Kế toán / Ban Giám đốc.</span>
+        </div>
         <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Thông tin hợp đồng & Học sinh</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/3 w-full mb-4">
@@ -313,12 +318,19 @@
         }
       }
     },
+    computed: {
+      canApprove() {
+        const user = this.$store.state.AppActiveUser || {};
+        return u.checkPermission(user, 'approve_add_fee') || 
+               u.checkPermission(user, 'lms_charges') || 
+               u.checkPermission(user, 'lms_waitcharges') || 
+               [999999, 686868, 1000002].includes(Number(user.role_id)) ||
+               ['admin', 'cashier', 'ceo'].includes(user.roleName);
+      }
+    },
     methods: {
       checkPermission(text){
-        return u.checkPermission(this.$store.state.AppActiveUser, text) || 
-               u.checkPermission(this.$store.state.AppActiveUser, 'lms_charges') || 
-               u.checkPermission(this.$store.state.AppActiveUser, 'lms_waitcharges') || 
-               u.checkPermission(this.$store.state.AppActiveUser, 'lms_waitcharge_approve');
+        return this.canApprove;
       },
       selectDate(date){
         if (date) {

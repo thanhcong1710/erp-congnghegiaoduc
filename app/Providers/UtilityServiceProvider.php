@@ -125,13 +125,13 @@ class UtilityServiceProvider extends ServiceProvider
     }
     public static function makingPagination($list, $total, $page, $limit)
     {
-        $pagination = (object)[];
-        $data = (object)[];
+        $pagination = (object) [];
+        $data = (object) [];
         $pagination->spage = 1;
         $pagination->cpage = $page;
         $pagination->total = $total;
         $pagination->limit = $limit;
-        $pagination->lpage = ($total % $limit) == 0 ? (int)($total / $limit) : (int)($total / $limit) + 1;
+        $pagination->lpage = ($total % $limit) == 0 ? (int) ($total / $limit) : (int) ($total / $limit) + 1;
         $pagination->ppage = $page > 0 ? $page - 1 : 0;
         $pagination->npage = $page < $pagination->lpage ? $page + 1 : $pagination->lpage;
         $data->list = $list;
@@ -183,7 +183,7 @@ class UtilityServiceProvider extends ServiceProvider
         return array(
             'displayName' => data_get($data, 'name'),
             'name' => data_get($data, 'name'),
-            'email' =>  data_get($data, 'email'),
+            'email' => data_get($data, 'email'),
             'phone' => data_get($data, 'phone'),
             'photoURL' => data_get($data, 'avatar_url') ? data_get($data, 'avatar_url') : "/images/avatar-default.jpg",
             'providerId' => "jwt",
@@ -198,7 +198,7 @@ class UtilityServiceProvider extends ServiceProvider
     {
         $resp = false;
         if ($number) {
-            $resp = trim(str_replace(array('-', '.', ' '), '', (string)$number));
+            $resp = trim(str_replace(array('-', '.', ' '), '', (string) $number));
             if (substr($resp, 0, 2) == "84") {
                 $resp = "0" . substr($resp, 2);
             } elseif (substr($resp, 0, 1) != "0") {
@@ -213,35 +213,35 @@ class UtilityServiceProvider extends ServiceProvider
     public static function getStatusParent($status)
     {
         $arr_status = array(
-            '1'=>'1. KH mới',
-            '2'=>'2. KH Không nghe máy',
-            '3'=>'3. KH Thuê bao / Không đúng số',
-            '4'=>'4. Không đúng đối tượng / không gần cơ sở',
-            '5'=>'5. KH Bận, gọi lại sau',
-            '6'=>'6. KH Không có nhu cầu',
-            '7'=>'7. KH Tiếp tục chăm sóc (Quan tâm, cần follow)',
-            '8'=>'8. KH Hẹn lịch Checkin',
-            '9'=>'9. KH Đã đến Checkin',
-            '10'=>'10. KH Đã mua gói phí',
-            '11'=>'11. KH Đến hạn tái tục',
-            '12'=>'12. KH Danh sách đen',
+            '1' => '1. KH mới',
+            '2' => '2. KH Không nghe máy',
+            '3' => '3. KH Thuê bao / Không đúng số',
+            '4' => '4. Không đúng đối tượng / không gần cơ sở',
+            '5' => '5. KH Bận, gọi lại sau',
+            '6' => '6. KH Không có nhu cầu',
+            '7' => '7. KH Tiếp tục chăm sóc (Quan tâm, cần follow)',
+            '8' => '8. KH Hẹn lịch Checkin',
+            '9' => '9. KH Đã đến Checkin',
+            '10' => '10. KH Đã mua gói phí',
+            '11' => '11. KH Đến hạn tái tục',
+            '12' => '12. KH Danh sách đen',
         );
         return $arr_status[$status] ?? '';
     }
     public static function getTitleCallStatus($call_status, $call_status_sub)
     {
         $arr_status_care = array(
-            '1'=>'Blank',
-            '2'=>'Thuê bao - Tắt máy - Sai số',
-            '3'=>'Location',
-            '4'=>'Máy bận - Không nghe máy',
-            '5'=>'KH hẹn gọi lại sau',
-            '6'=>'KH không phù hợp',
-            '7'=>'Không có con/Không có con trong độ tuổi học',
-            '8'=>'Lý do khác',
-            '9'=>'KH quan tâm cần follow update',
-            '10'=>'KH đồng ý đặt lịch checkin',
-            '11'=>'Danh sách đen',
+            '1' => 'Blank',
+            '2' => 'Thuê bao - Tắt máy - Sai số',
+            '3' => 'Location',
+            '4' => 'Máy bận - Không nghe máy',
+            '5' => 'KH hẹn gọi lại sau',
+            '6' => 'KH không phù hợp',
+            '7' => 'Không có con/Không có con trong độ tuổi học',
+            '8' => 'Lý do khác',
+            '9' => 'KH quan tâm cần follow update',
+            '10' => 'KH đồng ý đặt lịch checkin',
+            '11' => 'Danh sách đen',
         );
         return $arr_status_care[$call_status] ?? '';
     }
@@ -277,7 +277,7 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function explodeName($text)
     {
-        $data = (object)[
+        $data = (object) [
             'firstname' => "",
             'midname' => "",
             'lastname' => "",
@@ -306,7 +306,7 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function addLogContracts($contract_id)
     {
-        $contract_info = (array)self::getObject(['id' => $contract_id], 'contracts');
+        $contract_info = (array) self::getObject(['id' => $contract_id], 'contracts');
         $class_date = date('Y-m-d');
         if (data_get($contract_info, 'status') == 6) {
             $schedule = self::first("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id,s.subject_id, s.subject_stt
@@ -346,7 +346,7 @@ class UtilityServiceProvider extends ServiceProvider
                 }
             } else {
                 if ($schedule_has_student_info) {
-                    self::query("DELETE FROM  schedule_has_student WHERE id=" . (int)data_get($schedule_has_student_info, 'id')." AND `status`=0");
+                    self::query("DELETE FROM  schedule_has_student WHERE id=" . (int) data_get($schedule_has_student_info, 'id') . " AND `status`=0");
                 }
             }
         } else {
@@ -400,13 +400,13 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function calculatorSessions($start, $end, $holidays = [], $classdays = [], $onlyTotal = false)
     {
-        $resp = (object)[
+        $resp = (object) [
             "date" => [],
             "total" => 0,
             "end_date" => null
         ];
         $startTime = strtotime(date("Y-m-d", strtotime($start)));
-        $endTime =   strtotime(date("Y-m-d", strtotime($end)));
+        $endTime = strtotime(date("Y-m-d", strtotime($end)));
         if (!$startTime || !$endTime || !is_array($classdays) || !count($classdays)) {
             return $resp;
         }
@@ -447,11 +447,11 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function validClassdays($classdays = [])
     {
-        foreach($classdays AS $k => $row){
-            if($row==8){
+        foreach ($classdays as $k => $row) {
+            if ($row == 8) {
                 $classdays[$k] = 0;
-            }else{
-                $classdays[$k] = $row-1;
+            } else {
+                $classdays[$k] = $row - 1;
             }
         }
         $resp = count($classdays) ? $classdays : [2, 5];
@@ -468,7 +468,8 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function stringToTimestampHolidays($holidays, $startTime, $endTime)
     {
-        if (!$holidays) return null;
+        if (!$holidays)
+            return null;
         $res = [];
         foreach ($holidays as $holiday) {
             $hStart = strtotime(date("Y-m-d", strtotime($holiday->start_date)));
@@ -486,7 +487,7 @@ class UtilityServiceProvider extends ServiceProvider
     }
 
     public static function getSessionsByNumberOfSessions($startTime, $numberOfSessions, $classdays, $holidays, $onlyEndDate = false)
-    { 
+    {
         $weekday = (int) date('N', $startTime);
         if ($weekday === 7) {
             $weekday = 0;
@@ -504,10 +505,10 @@ class UtilityServiceProvider extends ServiceProvider
                     continue;
                 }
                 $startTime += ($classday - $weekday) * $timeOfDay;
-                if($numberOfSessions<=0){
-                    if($onlyEndDate){
+                if ($numberOfSessions <= 0) {
+                    if ($onlyEndDate) {
                         $l = count($days);
-                        return $l> 0 ? $days[$l - 1] : null;
+                        return $l > 0 ? $days[$l - 1] : null;
                     }
                     return $days;
                 }
@@ -524,14 +525,15 @@ class UtilityServiceProvider extends ServiceProvider
         }
         if ($onlyEndDate) {
             $l = count($days);
-            return $l> 0 ? $days[$l - 1] : null;
+            return $l > 0 ? $days[$l - 1] : null;
         }
         return $days;
     }
 
     public static function mergeHolidays($holidays, $pStart, $pEnd)
     {
-        if (!$holidays || count($holidays) <= 1) return $holidays;
+        if (!$holidays || count($holidays) <= 1)
+            return $holidays;
         $res = [];
         foreach ($holidays as $holiday) {
             if ($holiday['end_date'] >= $pStart) {
@@ -543,7 +545,8 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function checkInHolidayByTimestampBinarySearch($date, $holidays)
     {
-        if (!$holidays) return false;
+        if (!$holidays)
+            return false;
         foreach ($holidays as $holiday) {
             if ($date >= $holiday['start_date'] && $date <= $holiday['end_date']) {
                 return true;
@@ -615,7 +618,7 @@ class UtilityServiceProvider extends ServiceProvider
                     $product_ids = explode(',', $re->products);
                     foreach ($holidays as $key => $holiday) {
                         if (in_array($key, $product_ids)) {
-                            $holidays[$key][] = (object)[
+                            $holidays[$key][] = (object) [
                                 'start_date' => $re->start_date,
                                 'end_date' => $re->end_date
                             ];
@@ -626,7 +629,7 @@ class UtilityServiceProvider extends ServiceProvider
                 $resp = $holidays;
             } else {
                 foreach ($resp as &$re) {
-                    $re = (object)[
+                    $re = (object) [
                         'start_date' => $re->start_date,
                         'end_date' => $re->end_date
                     ];
@@ -695,7 +698,7 @@ class UtilityServiceProvider extends ServiceProvider
     {
         $done_sessions = self::first("SELECT count(id) AS total FROM schedule_has_student WHERE contract_id = $contract_id AND status=1 ");
         $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code FROM contracts WHERE id=$contract_id");
-        if($contract_info){
+        if ($contract_info) {
             if ($contract_info->status == 6) {
                 $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
                 $reserved_dates = self::getReservedDates_transfer($contract_id);
@@ -757,7 +760,8 @@ class UtilityServiceProvider extends ServiceProvider
         return $text;
     }
 
-    public static function getPermissions($user_id){
+    public static function getPermissions($user_id)
+    {
         $permissions = self::query("SELECT DISTINCT p.name , p.group_id
             FROM role_has_user AS ru 
                 LEFT JOIN permission_has_role AS pr ON pr.role_id=ru.role_id
@@ -765,14 +769,14 @@ class UtilityServiceProvider extends ServiceProvider
             WHERE ru.user_id = $user_id");
         $arr = [];
         $arr_group = [0];
-        foreach($permissions AS $p){
+        foreach ($permissions as $p) {
             $arr[] = $p->name;
-            if(!in_array($p->group_id,$arr_group)){
+            if (!in_array($p->group_id, $arr_group)) {
                 $arr_group[] = $p->group_id;
             }
         }
-        $permission_groups = self::query("SELECT DISTINCT g.name FROM permission_groups AS g WHERE g.id IN(".implode(",",$arr_group).")");
-        foreach($permission_groups AS $p){
+        $permission_groups = self::query("SELECT DISTINCT g.name FROM permission_groups AS g WHERE g.id IN(" . implode(",", $arr_group) . ")");
+        foreach ($permission_groups as $p) {
             $arr[] = $p->name;
         }
         return $arr;
@@ -780,29 +784,29 @@ class UtilityServiceProvider extends ServiceProvider
 
     public static function calcTransferTuitionFeeForTuitionTransfer($from_tuition_fee_id, $transfer_amount, $to_branch_id, $to_product_id, $transfer_session)
     {
-        $resp = (object)[];
+        $resp = (object) [];
         if ($from_tuition_fee_id) {
-            $from_tuition_fee_info =self::first("SELECT * FROM tuition_fee WHERE id=$from_tuition_fee_id");
-            if(data_get($from_tuition_fee_info, 'product_id') ==  $to_product_id){
+            $from_tuition_fee_info = self::first("SELECT * FROM tuition_fee WHERE id=$from_tuition_fee_id");
+            if (data_get($from_tuition_fee_info, 'product_id') == $to_product_id) {
                 $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
                         FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
                         WHERE t.id=$from_tuition_fee_id");
                 $resp->sessions = $transfer_session;
                 $resp->receive_tuition_fee = $to_tuition_fee;
                 $resp->transfer_amount = $transfer_amount;
-            } else{
+            } else {
                 $available_tuiotion_fee_ids = self::query("SELECT exchange_tuition_fee_id FROM tuition_fee_relation WHERE tuition_fee_id = $from_tuition_fee_id AND status = 1");
                 if (count($available_tuiotion_fee_ids)) {
                     $available_ids = [];
                     foreach ($available_tuiotion_fee_ids as $id) {
-                        $available_ids[] = (int)$id->exchange_tuition_fee_id;
+                        $available_ids[] = (int) $id->exchange_tuition_fee_id;
                     }
                     $available_ids = implode(',', $available_ids);
                     $to_tuition_fee = self::first("SELECT t.*, p.name AS product_name 
                         FROM tuition_fee AS t LEFT JOIN products AS p ON t.product_id = p.id 
                         WHERE t.product_id = $to_product_id AND (t.branch_id LIKE '%,$to_branch_id' OR t.branch_id LIKE '%,$to_branch_id,%' OR t.branch_id LIKE '$to_branch_id,%' OR t.branch_id = '$to_branch_id') 
                             AND t.id IN ($available_ids)");
-                    if($to_tuition_fee){
+                    if ($to_tuition_fee) {
                         // $resp->sessions = ceil($transfer_amount / ( $to_tuition_fee->price / $to_tuition_fee->session));
                         //Quy đổi ngang số buổi
                         $resp->sessions = $transfer_session;
@@ -811,75 +815,77 @@ class UtilityServiceProvider extends ServiceProvider
                     }
                 }
             }
-            
+
         }
         return $resp;
     }
 
-    public static function update_file_name($file) 
-	{
-	  $pos = strrpos($file,'.');
-	  $ext = substr($file,$pos); 
-	  $dir = strrpos($file,'/');
-	  $dr  = substr($file,0,($dir+1)); 
-  
-	  $arr = explode('/',$file);
-	  $fName = self::convert_slug(trim($arr[(count($arr) - 1)],$ext));
-  
-	  $exist = FALSE;
-	  $i = 0;
-	  
-	  while(!$exist)
-	  {
-		$file = $i > 0 ? $dr.$fName.'_'.$i.$ext : $dr.$fName.$ext;
-		
-		if(!file_exists($file))
-		  $exist = TRUE;
-		
-		$i++;
-	  }
-  
-	  return $file;
-	}
+    public static function update_file_name($file)
+    {
+        $pos = strrpos($file, '.');
+        $ext = substr($file, $pos);
+        $dir = strrpos($file, '/');
+        $dr = substr($file, 0, ($dir + 1));
 
-    public static function convert_slug($str) {
-		
-        $str = trim(mb_strtolower($str));
-		$str = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $str);
-		$str = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $str);
-		$str = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $str);
-		$str = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $str);
-		$str = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $str);
-		$str = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $str);
-		$str = preg_replace('/(đ)/', 'd', $str);
-		$str = preg_replace('/[^a-z0-9-\s]/', '', $str);
-		$str = preg_replace('/([\s]+)/', '_', $str);
-		return $str;
+        $arr = explode('/', $file);
+        $fName = self::convert_slug(trim($arr[(count($arr) - 1)], $ext));
+
+        $exist = FALSE;
+        $i = 0;
+
+        while (!$exist) {
+            $file = $i > 0 ? $dr . $fName . '_' . $i . $ext : $dr . $fName . $ext;
+
+            if (!file_exists($file))
+                $exist = TRUE;
+
+            $i++;
+        }
+
+        return $file;
     }
 
-    public static function generateRandomAlphanumeric($length = 10) {
+    public static function convert_slug($str)
+    {
+
+        $str = trim(mb_strtolower($str));
+        $str = preg_replace('/(à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ)/', 'a', $str);
+        $str = preg_replace('/(è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ)/', 'e', $str);
+        $str = preg_replace('/(ì|í|ị|ỉ|ĩ)/', 'i', $str);
+        $str = preg_replace('/(ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ)/', 'o', $str);
+        $str = preg_replace('/(ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ)/', 'u', $str);
+        $str = preg_replace('/(ỳ|ý|ỵ|ỷ|ỹ)/', 'y', $str);
+        $str = preg_replace('/(đ)/', 'd', $str);
+        $str = preg_replace('/[^a-z0-9-\s]/', '', $str);
+        $str = preg_replace('/([\s]+)/', '_', $str);
+        return $str;
+    }
+
+    public static function generateRandomAlphanumeric($length = 10)
+    {
         // Define the characters to be used
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
-        
+
         // Generate random string
         for ($i = 0; $i < $length; $i++) {
             $randomIndex = rand(0, $charactersLength - 1); // Generate random index
             $randomString .= $characters[$randomIndex];   // Append character
         }
-        
+
         return $randomString;
     }
 
-    public static function convert_number_to_words( $number ){
+    public static function convert_number_to_words($number)
+    {
         $number = str_replace([',', '.'], '', $number);
-        $number = (int)$number;
-    
+        $number = (int) $number;
+
         if ($number === 0) {
             return 'Không đồng';
         }
-    
+
         $words = [
             0 => 'không',
             1 => 'một',
@@ -892,27 +898,27 @@ class UtilityServiceProvider extends ServiceProvider
             8 => 'tám',
             9 => 'chín',
         ];
-    
+
         $units = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
-    
-        $chunks = array_reverse(str_split(str_pad($number, ceil(strlen($number)/3)*3, '0', STR_PAD_LEFT), 3));
+
+        $chunks = array_reverse(str_split(str_pad($number, ceil(strlen($number) / 3) * 3, '0', STR_PAD_LEFT), 3));
         $result = [];
         $hasNonZeroChunk = false;
-    
+
         foreach ($chunks as $i => $chunk) {
-            $hundreds = (int)$chunk[0];
-            $tens = (int)$chunk[1];
-            $unitsDigit = (int)$chunk[2];
-    
+            $hundreds = (int) $chunk[0];
+            $tens = (int) $chunk[1];
+            $unitsDigit = (int) $chunk[2];
+
             $chunkWords = [];
-    
+
             // Trăm
             if ($hundreds > 0) {
                 $chunkWords[] = $words[$hundreds] . ' trăm';
             } elseif (($tens > 0 || $unitsDigit > 0) && $i != count($chunks) - 1) {
                 $chunkWords[] = 'không trăm';
             }
-    
+
             // Chục
             if ($tens == 0 && $unitsDigit != 0) {
                 if (!empty($chunkWords)) {
@@ -923,7 +929,7 @@ class UtilityServiceProvider extends ServiceProvider
             } elseif ($tens > 1) {
                 $chunkWords[] = $words[$tens] . ' mươi';
             }
-    
+
             // Đơn vị
             if ($unitsDigit > 0) {
                 if ($tens == 0 || $tens == 1) {
@@ -942,22 +948,22 @@ class UtilityServiceProvider extends ServiceProvider
                     }
                 }
             }
-    
+
             if (!empty(array_filter([$hundreds, $tens, $unitsDigit]))) {
                 $result[] = implode(' ', $chunkWords) . ($units[$i] ? ' ' . $units[$i] : '');
                 $hasNonZeroChunk = true;
             }
         }
-    
+
         $final = implode(' ', array_reverse($result));
         $final = preg_replace('/\s+/', ' ', trim($final));
-    
-        return ucfirst($final) ." đồng";
+
+        return ucfirst($final) . " đồng";
     }
 
     public static function processDataContractsPast($contract_id, $process_date)
     {
-        $contract_info = (array)self::getObject(['id' => $contract_id], 'contracts');
+        $contract_info = (array) self::getObject(['id' => $contract_id], 'contracts');
         $curr_date = date('Y-m-d');
         if (data_get($contract_info, 'status') == 6) {
             $schedules = self::query("SELECT c.student_id, c.branch_id, c.class_id, c.id AS contract_id, c.product_id, cl.program_id,s.subject_id, s.subject_stt, s.class_date
@@ -965,7 +971,7 @@ class UtilityServiceProvider extends ServiceProvider
                     LEFT JOIN classes AS cl ON cl.id = c.class_id
                     LEFT JOIN schedules AS s ON s.class_id=cl.id
                 WHERE c.id=$contract_id AND s.status=1 AND s.class_date < '$curr_date' AND s.class_date >= '$process_date'");
-            foreach($schedules AS $schedule){
+            foreach ($schedules as $schedule) {
                 $class_date = data_get($schedule, 'class_date');
                 $schedule_has_student_info = self::first("SELECT id FROM schedule_has_student WHERE contract_id= $contract_id AND class_date='$class_date'");
                 $reserve_info = self::first("SELECT id FROM reserves WHERE start_date <= '$class_date' AND end_date>='$class_date' AND status=2 
@@ -1030,44 +1036,46 @@ class UtilityServiceProvider extends ServiceProvider
         }
         return $weekday;
     }
-    public static function logRequest($url,$method,$header,$body,$response,$table){
+    public static function logRequest($url, $method, $header, $body, $response, $table)
+    {
         self::insertSimpleRow(array(
-            'url'=>$url,
-            'method'=>$method,
-            'header'=>is_string($header) ? $header : json_encode($header),
-            'body'=>is_string($body) ? $body :json_encode($body),
-            'response'=>is_string($response) ? $response :json_encode($response),
-            'created_at'=>date('Y-m-d H:i:s')
-        ),$table);
+            'url' => $url,
+            'method' => $method,
+            'header' => is_string($header) ? $header : json_encode($header),
+            'body' => is_string($body) ? $body : json_encode($body),
+            'response' => is_string($response) ? $response : json_encode($response),
+            'created_at' => date('Y-m-d H:i:s')
+        ), $table);
         return true;
     }
 
-    public static function updateScheduleHasStudent($contract_id, $start_date){
-        $contractInfo = self::getObject(array('id'=>$contract_id),'contracts');
-        if(data_get($contractInfo, 'status') ==6 && data_get($contractInfo, 'class_id')){
+    public static function updateScheduleHasStudent($contract_id, $start_date)
+    {
+        $contractInfo = self::getObject(array('id' => $contract_id), 'contracts');
+        if (data_get($contractInfo, 'status') == 6 && data_get($contractInfo, 'class_id')) {
             $enrolment_start_date = data_get($contractInfo, 'enrolment_start_date');
-            $enrolment_start_date =  $enrolment_start_date < $start_date ? $start_date : $enrolment_start_date;
+            $enrolment_start_date = $enrolment_start_date < $start_date ? $start_date : $enrolment_start_date;
             $currDate = date('Y-m-d');
-            if( $enrolment_start_date < $currDate){
-                $class_info = self::getObject(array('id'=>data_get($contractInfo,'class_id')), 'classes');
+            if ($enrolment_start_date < $currDate) {
+                $class_info = self::getObject(array('id' => data_get($contractInfo, 'class_id')), 'classes');
                 $arr_day = explode(',', $class_info->class_day);
-                $holidays = self::getPublicHolidays(data_get($contractInfo,'branch_id'), data_get($contractInfo,'product_id'));
+                $holidays = self::getPublicHolidays(data_get($contractInfo, 'branch_id'), data_get($contractInfo, 'product_id'));
                 $data_sessions = self::calculatorSessions($enrolment_start_date, $currDate, $holidays, $arr_day);
-                $student_id= data_get($contractInfo,'student_id');
-                if(!empty(data_get($data_sessions, 'dates'))){
-                    foreach(data_get($data_sessions, 'dates') AS $row){
+                $student_id = data_get($contractInfo, 'student_id');
+                if (!empty(data_get($data_sessions, 'dates'))) {
+                    foreach (data_get($data_sessions, 'dates') as $row) {
                         $checkExit = self::first("SELECT id FROM schedule_has_student WHERE student_id = $student_id AND class_date = '$row'");
-                        if(!$checkExit){
+                        if (!$checkExit) {
                             self::insertSimpleRow(array(
-                                'student_id'=>$student_id,
-                                'branch_id'=>data_get($contractInfo, 'branch_id'),
-                                'class_id'=>data_get($contractInfo, 'class_id'),
-                                'contract_id'=>data_get($contractInfo, 'id'),
-                                'product_id'=>data_get($contractInfo, 'product_id'),
-                                'program_id'=>data_get($contractInfo, 'program_id'),
-                                'class_date'=>$row,
-                                'created_at'=>date('Y-m-d H:i:s'),
-                                'status'=>1
+                                'student_id' => $student_id,
+                                'branch_id' => data_get($contractInfo, 'branch_id'),
+                                'class_id' => data_get($contractInfo, 'class_id'),
+                                'contract_id' => data_get($contractInfo, 'id'),
+                                'product_id' => data_get($contractInfo, 'product_id'),
+                                'program_id' => data_get($contractInfo, 'program_id'),
+                                'class_date' => $row,
+                                'created_at' => date('Y-m-d H:i:s'),
+                                'status' => 1
                             ), 'schedule_has_student');
                         }
                         self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.class_date = '$row' 
@@ -1077,14 +1085,15 @@ class UtilityServiceProvider extends ServiceProvider
 
                 self::updateDoneSessions(data_get($contractInfo, 'id'));
             }
-        }elseif(data_get($contractInfo, 'status') !=7){
+        } elseif (data_get($contractInfo, 'status') != 7) {
             self::query("UPDATE schedule_has_student AS s SET s.status=2 WHERE s.contract_id = $contract_id AND
                 (SELECT count(id) FROM reserves WHERE start_date <= s.class_date AND end_date>=s.class_date AND status=4 AND student_id=s.student_id AND contract_id=s.contract_id)>0");
             self::updateDoneSessions(data_get($contractInfo, 'id'));
         }
     }
 
-    public static function updateEnrolmentLastDate($contract_id) {
+    public static function updateEnrolmentLastDate($contract_id)
+    {
         $contract_info = self::first("SELECT id, product_id, branch_id, class_id, `status`, enrolment_start_date, summary_sessions, student_id, code, left_sessions FROM contracts WHERE id=$contract_id");
         $holidays = self::getPublicHolidays(data_get($contract_info, 'branch_id'), data_get($contract_info, 'product_id'));
         $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
@@ -1092,8 +1101,9 @@ class UtilityServiceProvider extends ServiceProvider
         $reserved_dates = self::getReservedDates_transfer($contract_id);
         if (!empty($reserved_dates)) {
             $holidays = array_merge($holidays, $reserved_dates);
-        };
-        if($contract_info->left_sessions > 0){
+        }
+        ;
+        if ($contract_info->left_sessions > 0) {
             $data_sessions = self::calculatorSessionsByNumberOfSessions(date('Y-m-d'), $contract_info->left_sessions, $holidays, $arr_day);
             self::updateSimpleRow(array(
                 'enrolment_last_date' => data_get($data_sessions, 'end_date'),
@@ -1110,15 +1120,16 @@ class UtilityServiceProvider extends ServiceProvider
 
             if (!empty($data)) {
                 foreach ($data as $da) {
-                $res[] = (object)['start_date' => $da->start_date, 'end_date' => $da->end_date, 'sessions' => $da->session];
+                    $res[] = (object) ['start_date' => $da->start_date, 'end_date' => $da->end_date, 'sessions' => $da->session];
                 }
             }
         }
 
         return $res;
     }
-    public static function getBranchIdByUserID ($user_id){
-        $list_branches = self::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = ".$user_id);
+    public static function getBranchIdByUserID($user_id)
+    {
+        $list_branches = self::query("SELECT u.branch_id FROM branch_has_user AS u WHERE u.user_id = " . $user_id);
         return $list_branches;
     }
 }
