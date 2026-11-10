@@ -7,7 +7,7 @@
           <i class="fa-solid fa-file-signature text-primary mr-2" style="font-size: 20px;"></i>
           Danh Sách Nhập Học & Hợp Đồng
         </h4>
-        <span class="text-gray-500 text-sm">Quản lý hồ sơ nhập học, gói học phí, công nợ và tiến độ đóng phí</span>
+        <span class="text-gray-500 ">Quản lý hồ sơ nhập học, gói học phí, công nợ và tiến độ đóng phí</span>
       </div>
       <div class="header-action-group">
         <router-link to="/lms/contracts/add">
@@ -105,7 +105,7 @@
     <vx-card no-shadow class="shadow-sm border border-solid border-grey-light rounded-lg compact-table-card">
       <!-- Mobile View Mode Toggle -->
       <div class="mobile-view-toggle-bar">
-        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
+        <span class=" font-semibold text-gray-500 uppercase tracking-wider">Chế độ hiển thị</span>
         <div class="inline-flex rounded shadow-sm">
           <button
             type="button"
@@ -160,17 +160,17 @@
               </div>
             </div>
             <div class="flex flex-col items-end gap-1 flex-shrink-0">
-              <span class="text-xs text-gray-400 font-semibold">
+              <span class=" text-gray-400 font-semibold">
                 #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </span>
-              <span :class="getStatusBadgeClass(item.label_status)" class="text-xs">
+              <span :class="getStatusBadgeClass(item.label_status)" class="">
                 {{ item.label_status || 'Chưa cập nhật' }}
               </span>
             </div>
           </div>
 
           <!-- Card Body -->
-          <div class="py-2.5 text-sm space-y-1.5">
+          <div class="py-2.5  space-y-1.5">
             <div class="flex items-center justify-between text-gray-600">
               <span class="text-gray-500"><i class="fa-solid fa-building text-primary mr-1.5"></i>Trung tâm:</span>
               <span class="font-medium text-gray-800">{{ item.branch_name || '—' }}</span>
@@ -202,7 +202,7 @@
                 <span v-if="item.debt_amount > 0" class="font-bold text-danger">
                   {{ item.debt_amount | formatMoney }}
                 </span>
-                <span v-else class="text-success font-semibold text-xs">
+                <span v-else class="text-success font-semibold ">
                   <i class="fa-solid fa-check-circle mr-1"></i>0 đ (Đã thu đủ)
                 </span>
                 <div v-if="item.pending_receipts_count > 0" class="mt-0.5">
@@ -213,7 +213,7 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-between text-gray-500 text-xs pt-1" v-if="item.ec_name || item.cm_name">
+            <div class="flex items-center justify-between text-gray-500  pt-1" v-if="item.ec_name || item.cm_name">
               <span><i class="fa-solid fa-user-tag text-gray-400 mr-1"></i>Phụ trách:</span>
               <div class="flex items-center gap-2">
                 <span v-if="item.ec_name">EC: <strong>{{ item.ec_name }}</strong></span>
@@ -301,7 +301,7 @@
                       <strong>{{ item.lms_code || '---' }}</strong>
                       <i class="fa-regular fa-copy ml-1 opacity-70"></i>
                     </span>
-                    <span v-if="item.lms_id" class="text-xs text-gray-400">ID: #{{ item.lms_id }}</span>
+                    <span v-if="item.lms_id" class=" text-gray-400">ID: #{{ item.lms_id }}</span>
                   </div>
                 </td>
 
@@ -314,10 +314,10 @@
                       <i class="fa-regular fa-copy ml-1 opacity-70"></i>
                     </span>
                   </div>
-                  <div class="text-gray-800 font-semibold text-sm mb-0.5" v-if="item.product_name">
-                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 text-xs"></i>{{ item.product_name }}
+                  <div class="text-gray-800 font-semibold  mb-0.5" v-if="item.product_name">
+                    <i class="fa-solid fa-book-open text-indigo-500 mr-1 "></i>{{ item.product_name }}
                   </div>
-                  <div class="text-xs text-gray-500" v-if="item.tuition_fee_name">
+                  <div class=" text-gray-500" v-if="item.tuition_fee_name">
                     Gói: {{ item.tuition_fee_name }} - <strong>{{ item.total_sessions }}</strong> buổi
                     <span v-if="item.bonus_sessions > 0" class="text-emerald-600 font-medium">
                       (+{{ item.bonus_sessions }} HB)
@@ -328,10 +328,10 @@
                 <!-- Trung tâm & Phụ trách -->
                 <td>
                   <div class="font-semibold text-gray-800 mb-1 flex items-center">
-                    <i class="fa-solid fa-building text-primary mr-1.5 text-xs"></i>
+                    <i class="fa-solid fa-building text-primary mr-1.5 "></i>
                     {{ item.branch_name }}
                   </div>
-                  <div class="text-xs text-gray-500 flex flex-col gap-0.5">
+                  <div class=" text-gray-500 flex flex-col gap-0.5">
                     <span v-if="item.ec_name"><i class="fa-solid fa-user-tag text-gray-400 mr-1"></i>EC: <strong>{{ item.ec_name }}</strong></span>
                     <span v-if="item.cm_name"><i class="fa-solid fa-headset text-gray-400 mr-1"></i>CM: <strong>{{ item.cm_name }}</strong></span>
                   </div>
@@ -339,13 +339,13 @@
 
                 <!-- Đóng phí -->
                 <td>
-                  <div class="text-xs text-gray-500 mb-0.5">
+                  <div class=" text-gray-500 mb-0.5">
                     Giá gốc: <span class="line-through text-gray-400">{{ item.init_tuition_fee_amount | formatMoney }}</span>
                   </div>
-                  <div class="text-sm font-semibold text-gray-800 mb-0.5">
+                  <div class=" font-semibold text-gray-800 mb-0.5">
                     Phải đóng: {{ item.must_charge | formatMoney }}
                   </div>
-                  <div class="text-xs text-success font-bold">
+                  <div class=" text-success font-bold">
                     <i class="fa-solid fa-circle-check mr-1"></i>Đã thu: {{ item.total_charged | formatMoney }}
                   </div>
                 </td>
@@ -356,7 +356,7 @@
                     <div class="text-danger font-bold text-base">
                       {{ item.debt_amount | formatMoney }}
                     </div>
-                    <div v-if="item.summary_sessions && item.total_charged" class="text-xs text-gray-500 mt-0.5">
+                    <div v-if="item.summary_sessions && item.total_charged" class=" text-gray-500 mt-0.5">
                       Cọc: <strong>{{ item.summary_sessions }} buổi</strong>
                     </div>
                     <div v-if="item.pending_receipts_count > 0" class="mt-1">
@@ -446,22 +446,22 @@
         <div class="vx-col w-full mb-3">
           <div class="modal-info-box">
             <div class="flex items-center justify-between mb-1.5 pb-1.5 border-b border-gray-200">
-              <span class="font-bold text-gray-800 text-sm">
+              <span class="font-bold text-gray-800 ">
                 <i class="fa-solid fa-user-graduate text-primary mr-1"></i> {{ receiptModal.contract.name }}
               </span>
               <span class="stk-code-badge">
                 {{ receiptModal.contract.lms_code }}
               </span>
             </div>
-            <div class="text-xs text-gray-600 mb-1">
+            <div class=" text-gray-600 mb-1">
               <strong>Hợp đồng:</strong> {{ receiptModal.contract.code }} &bull; {{ receiptModal.contract.product_name }}
             </div>
-            <div class="flex items-center justify-between text-xs text-gray-600 pt-1">
+            <div class="flex items-center justify-between  text-gray-600 pt-1">
               <span>Phải đóng: <strong>{{ receiptModal.contract.must_charge | formatMoney }}</strong></span>
               <span>Đã thu: <strong class="text-success">{{ receiptModal.contract.total_charged | formatMoney }}</strong></span>
             </div>
             <div class="mt-2 pt-2 border-t border-gray-200 flex items-center justify-between">
-              <span class="text-sm font-semibold text-gray-700">Công nợ hiện tại:</span>
+              <span class=" font-semibold text-gray-700">Công nợ hiện tại:</span>
               <span class="text-base font-bold text-danger">{{ receiptModal.contract.debt_amount | formatMoney }}</span>
             </div>
           </div>
