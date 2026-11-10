@@ -282,13 +282,33 @@ export default {
     updateMenu(){
       // Auto-sanitize stale permissions from localStorage/AppActiveUser
       const user = this.$store.state.AppActiveUser || {}
-      const adminRoleNames = ['admin', 'hrm_manager']
-      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase()
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase().replace(/[\s\-_]+/g, '_')
       const isRealHrmAdmin = user.id === 1 || 
         user.uid === 1 || 
-        adminRoleNames.some(r => roleStr.includes(r))
+        user.is_hrm_admin === true ||
+        (Array.isArray(user.roles) && user.roles.includes('hrm_manager')) ||
+        roleStr.includes('admin') ||
+        roleStr.includes('hrm_manager')
 
-      if (!isRealHrmAdmin) {
+      if (isRealHrmAdmin) {
+        user.is_hrm_admin = true
+        if (Array.isArray(user.permissions)) {
+          if (!user.permissions.includes('hrm_admin')) user.permissions.push('hrm_admin')
+          if (!user.permissions.includes('hrm')) user.permissions.push('hrm')
+        }
+        try {
+          const raw = localStorage.getItem('userInfo')
+          if (raw) {
+            const parsed = JSON.parse(raw)
+            if (Array.isArray(parsed.permissions)) {
+              if (!parsed.permissions.includes('hrm_admin')) parsed.permissions.push('hrm_admin')
+              if (!parsed.permissions.includes('hrm')) parsed.permissions.push('hrm')
+            }
+            parsed.is_hrm_admin = true
+            localStorage.setItem('userInfo', JSON.stringify(parsed))
+          }
+        } catch (e) {}
+      } else {
         user.is_hrm_admin = false
         if (Array.isArray(user.permissions)) {
           const hrmAdminIdx = user.permissions.indexOf('hrm_admin')

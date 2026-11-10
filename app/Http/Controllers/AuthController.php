@@ -174,6 +174,11 @@ class AuthController extends Controller
                 'note' => $user->note,
                 'gender' => $user->gender,
                 'roleName' => $user->role_name,
+                'roles' => DB::table('role_has_user')
+                    ->join('roles', 'roles.id', '=', 'role_has_user.role_id')
+                    ->where('role_has_user.user_id', $user->id)
+                    ->pluck('roles.name')
+                    ->toArray(),
                 'is_leader' => method_exists($user, 'isLeader') ? $user->isLeader() : false,
                 'is_hrm_admin' => method_exists($user, 'isHrmAdmin') ? $user->isHrmAdmin() : false,
                 'permissions' => (function () use ($user) {

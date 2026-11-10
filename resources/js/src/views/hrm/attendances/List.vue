@@ -755,11 +755,11 @@ export default {
         return this.isHrmAdminServer;
       }
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1) return true;
-      const adminRoleNames = ['admin', 'hrm_manager'];
-      const roleName = (user.roleName || user.role_name || '').toLowerCase();
-      if (adminRoleNames.some(r => roleName.includes(r))) return true;
-      return false;
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase().replace(/[\s\-_]+/g, '_');
+      return (Array.isArray(user.roles) && user.roles.includes('hrm_manager')) ||
+        roleStr.includes('admin') ||
+        roleStr.includes('hrm_manager');
     }
   },
   created() {

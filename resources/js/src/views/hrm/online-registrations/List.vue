@@ -510,10 +510,13 @@ export default {
     canApproveRegistration() {
       if (this.canApprove) return true;
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
-      if (user.uid === 1 || user.id === 1) return true;
-      const adminRoleNames = ['admin', 'hrm_manager', 'accountant', 'ke_toan', 'ketoan'];
-      const roleName = (user.roleName || user.role_name || '').toLowerCase();
-      return adminRoleNames.some(r => roleName.includes(r));
+      if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
+      const roleStr = ((user.roleName || user.role_name || '') + '').toLowerCase().replace(/[\s\-_]+/g, '_');
+      const hasPermittedRole = (Array.isArray(user.roles) && (user.roles.includes('hrm_manager') || user.roles.includes('account'))) ||
+        roleStr.includes('admin') ||
+        roleStr.includes('hrm_manager') ||
+        roleStr.includes('account');
+      return hasPermittedRole;
     }
   },
   created() {
