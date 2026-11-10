@@ -201,16 +201,6 @@
               </div>
             </div>
             <div class="mb-2 flex items-center">
-              <router-link to="/hrm/leaves" class="mr-2">
-                <vs-button class="p-3" color="warning" type="border">
-                  <i class="fa-solid fa-calendar-days mr-2"></i> Đơn Nghỉ Phép
-                </vs-button>
-              </router-link>
-              <router-link to="/hrm/online-registrations" class="mr-2">
-                <vs-button class="p-3" color="primary" type="border">
-                  <i class="fa-solid fa-laptop mr-2"></i> Đăng Ký Làm Online
-                </vs-button>
-              </router-link>
               <!-- Trạng thái tự động lưu -->
               <div v-if="isHrmAdmin" class="flex items-center mr-2 px-3 py-2 bg-gray-100 rounded text-xs font-semibold shadow-sm">
                 <span v-if="lastSaveStatus === 'saving'" class="text-warning flex items-center">
