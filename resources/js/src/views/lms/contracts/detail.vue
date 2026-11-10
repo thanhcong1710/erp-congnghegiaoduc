@@ -610,3 +610,8 @@
     },
   }
 </script>
+<style>
+  th{
+    text-align: center;
+  }
+</style>
