@@ -247,7 +247,7 @@
                 <!-- Cột 3: Điện thoại -->
                 <th class="th-center" style="width: 130px;">Điện thoại</th>
                 <!-- Cột 4: Họ và tên -->
-                <th style="width: 170px;">Họ và tên</th>
+                <th style="width: 200px;">Họ và tên</th>
                 <!-- Cột 5: Lịch sử chăm sóc -->
                 <th style="width: 480px;">Lịch sử chăm sóc</th>
                 <!-- Cột 6: Ghi chú -->
@@ -367,7 +367,7 @@
 
                 <!-- Cột 4: Họ và tên -->
                 <td>
-                  <router-link :to="`/crm/parent/${item.id}/detail`" class="font-medium text-blue-600 hover:underline">
+                  <router-link :to="`/crm/parent/${item.id}/detail`" class="font-semibold text-blue-600 hover:underline">
                     {{ item.name }}
                   </router-link>
                   <div v-if="item.students && item.students.length" class="text-xs text-gray-500 mt-1">
