@@ -200,15 +200,15 @@ module.exports = {
 
       fontSize: {
         'xs': '13px',       // 13px (chuẩn tối thiểu font-size ERP, không để < 13px)
-        'sm': '.875rem',    // 14px
-        'base': '1rem',     // 16px
-        'lg': '1.125rem',   // 18px
-        'xl': '1.25rem',    // 20px
-        '2xl': '1.5rem',    // 24px
-        '3xl': '1.875rem',  // 30px
-        '4xl': '2.25rem',   // 36px
-        '5xl': '3rem',      // 48px
-        '6xl': '4rem',      // 64px
+        'sm': '14px',       // 14px (chuẩn text-sm, không dùng rem tránh bị scale xuống 12.25px)
+        'base': '15px',     // 15px
+        'lg': '16px',       // 16px
+        'xl': '18px',       // 18px
+        '2xl': '20px',      // 20px
+        '3xl': '24px',      // 24px
+        '4xl': '30px',      // 30px
+        '5xl': '36px',      // 36px
+        '6xl': '48px',      // 48px
       },
 
 

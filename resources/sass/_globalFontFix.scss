@@ -3,14 +3,34 @@
    ========================================================================== */
 
 // 1. Root & Body base
-body {
+html {
   font-size: 14px;
 }
 
-// 2. Ép toàn bộ các utility class nhỏ hơn 13px về tối thiểu 13px
+body {
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+// 2. Ép cứng các class utility text-xs, text-sm không dùng rem để tránh co nhỏ
 .text-xs,
 .text-2xs,
-.text-3xs,
+.text-3xs {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+
+.text-sm {
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+}
+
+.text-base {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+// 3. Toàn bộ chữ nhỏ: small, caption, sub, sup, help-block, text-muted
 small,
 .small,
 caption,
@@ -18,22 +38,24 @@ sub,
 sup,
 .help-block,
 .form-text,
-.text-muted {
+.text-muted,
+.text-secondary {
   font-size: 13px !important;
-  line-height: 1.4 !important;
 }
 
-// 3. Toàn bộ Bảng dữ liệu (Tables, Vuesax Tables, AG-Grid)
+// 4. Toàn bộ Bảng dữ liệu (HTML Tables, Vuesax Tables, AG-Grid, CRM Tables)
 table,
+.table,
 .vs-table,
-.table {
-  font-size: 13.5px;
+.crm-table {
+  font-size: 13.5px !important;
 
   th,
   .vs-table--thead th,
   .vs-table--th {
     font-size: 13px !important;
-    font-weight: 700;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em;
   }
 
   td,
@@ -52,11 +74,12 @@ table,
   font-size: 13px !important;
 }
 
-// 4. Nhãn (Labels), Input, Select & Form controls
+// 5. Nhãn (Labels), Input, Select & Form controls
 label,
 .vs-input--label,
 .vs-select--label {
   font-size: 13px !important;
+  font-weight: 500;
 }
 
 input,
@@ -74,7 +97,7 @@ textarea::placeholder,
   font-size: 13px !important;
 }
 
-// 5. Nút bấm, Tabs, Badges & Chips
+// 6. Nút bấm, Tabs, Badges & Chips
 .vs-button,
 .vs-button--text {
   font-size: 13.5px;
@@ -94,11 +117,13 @@ textarea::placeholder,
   font-size: 13px !important;
 }
 
-.vs-tabs--btn {
-  font-size: 13.5px !important;
+.vs-tabs--btn,
+.vs-tabs--btn span {
+  font-size: 14px !important;
+  font-weight: 600;
 }
 
-// 6. Dropdown, Tooltips, Alerts, Breadcrumbs
+// 7. Dropdown, Tooltips, Alerts, Breadcrumbs
 .vs-select--options,
 .vs-select--item,
 .vs-dropdown--menu,
@@ -119,7 +144,7 @@ textarea::placeholder,
   font-size: 13.5px !important;
 }
 
-// 7. Thư viện bên ngoài (Vue-select, Datepicker)
+// 8. Thư viện bên ngoài (Vue-select, Datepicker)
 .v-select,
 .vs__selected,
 .vs__dropdown-option,
@@ -135,3 +160,9 @@ textarea::placeholder,
   font-size: 13px !important;
 }
 
+// 9. Footer & Copyright
+footer,
+.footer,
+.copyright {
+  font-size: 13px !important;
+}
