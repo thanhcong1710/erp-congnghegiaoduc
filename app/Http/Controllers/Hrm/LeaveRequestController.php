@@ -264,6 +264,7 @@ class LeaveRequestController extends Controller
 
             $leave->hr_approved_by = $currentUser->id;
             $leave->approved_by = $currentUser->id;
+            $leave->approved_at = Carbon::now();
             $leave->save();
 
             return response()->json([
@@ -772,6 +773,7 @@ class LeaveRequestController extends Controller
                 $req->approval_type = $approvalType;
                 $req->approved_by = Auth::id() ?: 1;
                 $req->hr_approved_by = Auth::id() ?: 1;
+                $req->approved_at = Carbon::now();
                 $req->save();
 
                 $importedCount++;

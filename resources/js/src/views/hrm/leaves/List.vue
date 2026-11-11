@@ -301,15 +301,17 @@
                 <table class="vs-table vs-table--tbody-table w-full">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th width="4%" class="text-center">STT</th>
-                      <th width="11%">Mã NS</th>
-                      <th width="16%">Người làm đơn</th>
-                      <th width="13%">Loại yêu cầu</th>
-                      <th width="16%">Thời gian xin phép</th>
-                      <th width="7%" class="text-center">Số ngày</th>
-                      <th width="10%" class="text-center">Trạng thái</th>
-                      <th width="13%">Phê duyệt</th>
-                      <th class="text-center" style="min-width: 170px; width: 170px; white-space: nowrap;">Thao tác</th>
+                      <th width="3%" class="text-center">STT</th>
+                      <th width="8%">Mã NS</th>
+                      <th width="12%">Người làm đơn</th>
+                      <th width="9%">Loại yêu cầu</th>
+                      <th width="13%">Thời gian xin phép</th>
+                      <th width="5%" class="text-center">Số ngày</th>
+                      <th width="10%" class="text-center">Thời gian tạo</th>
+                      <th width="8%" class="text-center">Trạng thái</th>
+                      <th width="11%">Chế độ duyệt</th>
+                      <th width="11%" class="text-center">Thời gian duyệt</th>
+                      <th class="text-center" style="min-width: 150px; width: 150px; white-space: nowrap;">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -327,6 +329,12 @@
                         <div class="text-xs text-gray-500 truncate" :title="tr.reason">Lý do: {{ tr.reason }}</div>
                       </td>
                       <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
+
+                      <!-- Thời gian tạo -->
+                      <td class="td vs-table--td text-center text-xs whitespace-no-wrap">
+                        <div class="font-semibold text-gray-800">{{ formatDateTime(tr.created_at) }}</div>
+                      </td>
+
                       <td class="td vs-table--td text-center">
                         <vs-chip :color="tr.status === 1 ? 'success' : (tr.status === 2 ? 'danger' : 'warning')">
                           {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
@@ -346,7 +354,19 @@
                         </div>
                         <span v-else class="text-gray-400 text-xs italic">Chờ duyệt</span>
                       </td>
-                      <td class="td vs-table--td text-center list-action" style="min-width: 170px; width: 170px; white-space: nowrap;">
+
+                      <!-- Thời gian duyệt -->
+                      <td class="td vs-table--td text-center text-xs whitespace-no-wrap">
+                        <div v-if="tr.status !== 0">
+                          <div class="font-semibold text-gray-800">{{ formatDateTime(tr.approved_at || tr.updated_at) }}</div>
+                          <div v-if="tr.manager_approver || tr.hr_approver" class="text-gray-500 text-xs mt-0.5 truncate max-w-xs" :title="'Người duyệt: ' + ((tr.manager_approver ? tr.manager_approver.name : '') || (tr.hr_approver ? tr.hr_approver.name : ''))">
+                            Bởi: {{ (tr.manager_approver ? tr.manager_approver.name : '') || (tr.hr_approver ? tr.hr_approver.name : '') }}
+                          </div>
+                        </div>
+                        <span v-else class="text-gray-400 text-xs italic">---</span>
+                      </td>
+
+                      <td class="td vs-table--td text-center list-action" style="min-width: 150px; width: 150px; white-space: nowrap;">
                         <div class="flex items-center justify-center space-x-2" v-if="canApprove && tr.status === 0" style="white-space: nowrap;">
                           <vs-button 
                             size="small" 
@@ -375,7 +395,7 @@
                       </td>
                     </tr>
                     <tr v-if="!leaves.data || !leaves.data.length">
-                      <td colspan="9" class="text-center p-4 text-gray-500">Không có dữ liệu đơn nghỉ phép</td>
+                      <td colspan="11" class="text-center p-4 text-gray-500">Không có dữ liệu đơn nghỉ phép</td>
                     </tr>
                   </tbody>
                 </table>
@@ -483,11 +503,13 @@
             <thead>
               <tr>
                 <th style="width: 45px;" class="text-center">STT</th>
-                <th style="width: 140px;">Thời gian nghỉ</th>
-                <th style="width: 90px;" class="text-center">Số ngày</th>
-                <th style="min-width: 180px;">Lý do / Ghi chú</th>
-                <th style="width: 170px;">Chế độ phê duyệt</th>
-                <th style="width: 105px;" class="text-center">Trạng thái</th>
+                <th style="width: 130px;">Thời gian nghỉ</th>
+                <th style="width: 80px;" class="text-center">Số ngày</th>
+                <th style="min-width: 150px;">Lý do / Ghi chú</th>
+                <th style="width: 130px;" class="text-center">Thời gian tạo</th>
+                <th style="width: 150px;">Chế độ phê duyệt</th>
+                <th style="width: 130px;" class="text-center">Thời gian duyệt</th>
+                <th style="width: 95px;" class="text-center">Trạng thái</th>
               </tr>
             </thead>
             <tbody>
@@ -502,6 +524,9 @@
                 </td>
                 <td class="text-sm text-gray-700">
                   {{ lv.reason || '---' }}
+                </td>
+                <td class="text-center text-xs whitespace-no-wrap">
+                  <span class="text-gray-700 font-medium">{{ formatDateTime(lv.created_at) }}</span>
                 </td>
                 <td>
                   <span v-if="lv.approval_type === 'approved'" class="mode-badge mode-approved">
@@ -518,6 +543,10 @@
                   </span>
                   <span v-else class="text-gray-400 text-xs">---</span>
                 </td>
+                <td class="text-center text-xs whitespace-no-wrap">
+                  <span v-if="lv.status !== 0" class="text-gray-700 font-medium">{{ formatDateTime(lv.approved_at || lv.updated_at) }}</span>
+                  <span v-else class="text-gray-400 italic">---</span>
+                </td>
                 <td class="text-center">
                   <span v-if="lv.status === 1" class="status-tag status-success">Đã duyệt</span>
                   <span v-else-if="lv.status === 2" class="status-tag status-danger">Từ chối</span>
@@ -525,7 +554,7 @@
                 </td>
               </tr>
               <tr v-if="!selectedStaffHistory.leaves.length">
-                <td colspan="6" class="text-center p-4 text-gray-400 text-sm">
+                <td colspan="8" class="text-center p-4 text-gray-400 text-sm">
                   Chưa có lịch sử nghỉ phép nào trong năm này
                 </td>
               </tr>
@@ -682,10 +711,11 @@
     <!-- ========================================== -->
     <vs-popup title="PHÊ DUYỆT ĐƠN NGHỈ PHÉP" :active.sync="approvePopupActive">
       <div class="p-4" v-if="selectedLeave">
-        <p class="mb-4 text-sm text-gray-700">
-          Phê duyệt đơn của nhân sự: <strong class="text-primary">{{ selectedLeave.employee ? selectedLeave.employee.full_name : (selectedLeave.user ? selectedLeave.user.name : '') }}</strong> 
-          ({{ selectedLeave.duration_days }} ngày: {{ selectedLeave.start_date }} đến {{ selectedLeave.end_date }})
-        </p>
+        <div class="mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">
+          <div>Phê duyệt đơn của nhân sự: <strong class="text-primary">{{ selectedLeave.employee ? selectedLeave.employee.full_name : (selectedLeave.user ? selectedLeave.user.name : '') }}</strong> 
+          ({{ selectedLeave.duration_days }} ngày: {{ selectedLeave.start_date }} đến {{ selectedLeave.end_date }})</div>
+          <div class="text-xs text-gray-500 mt-1">Thời gian tạo đơn: <strong class="text-gray-700">{{ formatDateTime(selectedLeave.created_at) }}</strong></div>
+        </div>
 
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
@@ -975,6 +1005,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 
 export default {
   data() {
@@ -1259,6 +1290,19 @@ export default {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
       }
       return dateStr;
+    },
+
+    formatDateTime(dateTimeStr) {
+      if (!dateTimeStr) return '---';
+      try {
+        const m = moment(dateTimeStr);
+        if (m.isValid()) {
+          return m.format('HH:mm DD/MM/YYYY');
+        }
+      } catch (e) {
+        // fallback
+      }
+      return dateTimeStr;
     },
 
     submitAdjustBalance() {
