@@ -83,60 +83,85 @@ label,
   color: #334155;
 }
 
-// 5.1 Input & Select ACTIVE (Có thể chọn / Thao tác được)
-input:not(:disabled):not([readonly]),
-select:not(:disabled):not([readonly]),
-textarea:not(:disabled):not([readonly]),
-.vs-inputx:not(:disabled):not([readonly]),
-.vs-input--input:not(:disabled):not([readonly]),
-.vs-select--input:not(:disabled):not([readonly]) {
+// 5.1 Cỡ chữ chuẩn cho Form controls (font-size >= 13px)
+input,
+select,
+textarea,
+.vs-inputx,
+.vs-input--input,
+.vs-select--input {
   font-size: 13.5px !important;
-  background-color: #ffffff !important;
-  border: 1.5px solid #cbd5e1 !important;
-  color: #1e293b !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease-in-out;
+}
 
-  &:hover {
-    border-color: #7367f0 !important;
-    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12);
+// 5.2 Style phân biệt Active vs Disabled cho các ô nhập liệu tiêu chuẩn
+// (Tuyệt đối loại trừ search input bên trong v-select, vue-multiselect, checkbox, radio)
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"]:not(.vs__search),
+input[type="date"],
+input[type="datetime-local"],
+select:not(.vs__select),
+textarea,
+.vs-inputx:not(.vs__search),
+.vs-input--input:not(.vs__search),
+.crm-control-select {
+  &:not(:disabled):not([readonly]) {
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #1e293b;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      border-color: #7367f0;
+    }
+
+    &:focus {
+      border-color: #7367f0 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15) !important;
+      outline: none;
+    }
   }
 
-  &:focus {
-    border-color: #7367f0 !important;
-    background-color: #ffffff !important;
-    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.25) !important;
-    outline: none;
+  &:disabled,
+  &[readonly],
+  &.is-disabled,
+  &.disabled {
+    background-color: #f1f5f9 !important;
+    border: 1px dashed #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+
+    &:hover,
+    &:focus {
+      border-color: #cbd5e1 !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
   }
 }
 
-// 5.2 Input & Select DISABLED (Bị khóa / Chỉ xem / Không chọn được)
-input:disabled,
-select:disabled,
-textarea:disabled,
-input[readonly],
-select[readonly],
-textarea[readonly],
-.vs-inputx:disabled,
-.vs-input--input:disabled,
-.vs-select--input:disabled,
-.is-disabled,
-[disabled],
-.disabled {
-  font-size: 13.5px !important;
-  background-color: #f1f5f9 !important;
-  border: 1px dashed #cbd5e1 !important;
-  color: #94a3b8 !important;
-  cursor: not-allowed !important;
+// 5.3 Reset triệt để cho input tìm kiếm bên trong Vue-Select và Multiselect
+.v-select .vs__search,
+.v-select input[type="search"],
+.v-select input,
+.form-vselect-compact .vs__search,
+.multiselect .multiselect__input {
+  border: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
   box-shadow: none !important;
-  pointer-events: none;
-
-  &:hover,
-  &:focus {
-    border-color: #cbd5e1 !important;
-    box-shadow: none !important;
-    outline: none !important;
-  }
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: auto !important;
+  line-height: inherit !important;
 }
 
 input::placeholder,
@@ -199,6 +224,19 @@ textarea::placeholder,
 .vs__dropdown-option,
 .vs__search {
   font-size: 13.5px !important;
+}
+
+.v-select .vs__search,
+.v-select input[type="search"],
+.v-select input,
+.form-vselect-compact .vs__search {
+  border: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .mx-datepicker,

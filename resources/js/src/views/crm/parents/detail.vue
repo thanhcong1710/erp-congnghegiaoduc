@@ -611,7 +611,7 @@
                             <!-- Nút Nhập học ngay -->
                             <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank">
                               <button type="button" class="btn-action-enroll" title="Tạo hợp đồng nhập học ngay cho học sinh">
-                                <i class="fa fa-file-signature mr-1.5"></i> Nhập học ngay
+                                <i class="fa fa-file-signature mr-1.5"></i> Nhập học
                               </button>
                             </router-link>
                             <!-- Nút Sửa -->
