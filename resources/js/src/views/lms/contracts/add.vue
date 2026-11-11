@@ -680,16 +680,54 @@
       }
     },
     created() {
+      const qStudentId = this.$route.query.student_id;
+      const qBranchId = this.$route.query.branch_id;
+
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
-        this.html.branches.list = response.data
-      })
+          this.html.branches.list = response.data
+          if (qBranchId && this.html.branches.list && this.html.branches.list.length) {
+            const matchedBranch = this.html.branches.list.find(b => b.id == qBranchId)
+            if (matchedBranch) {
+              this.html.branches.item = matchedBranch
+              this.contract.branch_id = matchedBranch.id
+            }
+          }
+          if (qStudentId) {
+            this.autoLoadStudent(qStudentId, this.contract.branch_id || qBranchId || 0)
+          }
+        })
       axios.g(`/api/system/products`)
         .then(response => {
-        this.html.products.list = response.data
-      })
+          this.html.products.list = response.data
+        })
     },
     methods: {
+      autoLoadStudent(student_id, branch_id) {
+        this.$vs.loading();
+        axios.p(`/api/lms/students/search-contract`, {
+          student_id: student_id,
+          branch_id: branch_id
+        }).then(response => {
+          this.$vs.loading.close();
+          if (response.data && response.data.length > 0) {
+            const student = response.data[0];
+            if (!this.contract.branch_id && student.student_branch_id) {
+              this.contract.branch_id = student.student_branch_id;
+              if (this.html.branches.list && this.html.branches.list.length) {
+                const matchedBranch = this.html.branches.list.find(b => b.id == student.student_branch_id);
+                if (matchedBranch) {
+                  this.html.branches.item = matchedBranch;
+                }
+              }
+            }
+            this.selectStudent(student);
+          }
+        }).catch(e => {
+          this.$vs.loading.close();
+          console.log(e);
+        });
+      },
       searchSuggestStudent(keyword) {
         if (keyword && keyword.length >= 3 && this.calling === false) {
           this.calling = true

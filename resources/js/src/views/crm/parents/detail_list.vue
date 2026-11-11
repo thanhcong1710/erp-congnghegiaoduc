@@ -1472,6 +1472,8 @@ export default {
       this.student_form = {
         parent_id: item.id,
         parent_name: item.name,
+        branch_id: item.branch_id || '',
+        owner_id: item.owner_id || '',
         name: '',
         birthday: '',
         gender: 'M',

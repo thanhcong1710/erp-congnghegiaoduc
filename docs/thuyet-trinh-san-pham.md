@@ -1,7 +1,7 @@
 # ERP GIAO DUC — THUYET TRINH THEO HANH TRINH KHACH HANG
 
 ## LUONG TONG QUAN
-DATA THO -> KHACH HANG -> CHAM SOC -> NHAP HOC -> XEP LOP -> DIEM DANH -> VAN HANH
+DATA THO -> KHACH HANG -> CHAM SOC -> THEM HOC SINH (CHINH THUC) -> NHAP HOC (1-CHAM) -> XEP LOP -> DIEM DANH -> VAN HANH
 
 ---
 
@@ -67,32 +67,33 @@ Xem khach hang -> Ghi nhat ky cham soc -> Dat lich hen tiep theo
 
 ---
 
-## BUOC 4: DONG Y MUA — NHAP HOC (LMS)
+## BUOC 4: DONG Y MUA — THEM HOC SINH & NHAP HOC (LMS)
 
-### Hai luong nhap hoc
+### DIEM CAI TIEN: BO BUOC CHECKIN TRUNG GIAN — LEN CHINH THUC & NHAP HOC NGAY
+He thong da rut gon toan bo quy trinh phuc tap cu (Them HS -> Dat lich checkin -> Den co so checkin -> Bam nang cap len chinh thuc):
+- **Them moi hoc sinh = Hoc sinh chinh thuc ngay lap tuc**: Ngay khi them hoc sinh tai ho so Khach hang CRM hoac danh sach KH, he thong tu dong:
+  - Sinh ma hoc sinh LMS chuan (`STK...`)
+  - Ghi nhan vao bang hoc sinh LMS (`students` va `term_student_user`)
+  - Gan trung tam va EC phu trach
+  - Trang thai tu dong la **Chinh thuc**
+- **Nhap hoc 1-cham (Quick Enroll)**:
+  - Tren the hoc sinh tai CRM co nut **"Nhap hoc"**: Click se mo ngay man hinh Tao hop dong nhap hoc (`/lms/contracts/add`) voi Hoc sinh va Co so da duoc dien san.
+  - Tai ho so chi tiet hoc sinh LMS (`/lms/students/:id/detail`), cung co san nut **"Nhap hoc ngay"**.
+  - EC chi can chon goi hoc phi, len phieu thu va bam Luu -> Hop dong duoc tao tuc thi.
 
-**Luong A — Hoc vien da co trong he thong (Dang ky lai)**
-- Tim kiem hoc vien theo ten/SDT — he thong tu dien thong tin
-- Chon trung tam (neu hoc vien chua gan trung tam)
-- Chon goi hoc phi — danh sach goi phi tu loc theo trung tam
-- He thong hien thi bang chi tiet neu la goi combo (gom cac goi le, so buoi, gia tung phan)
-- Chon lop hoc (xem ngay thong tin lop — si so, GV, lich hoc, phong)
-- Ghi chu, dang ky nhan sach, nhan hop dong
-- Luu -> Hop dong duoc tao tu dong
+### Hai luong nhap hoc linh hoat
 
-**Luong B — Hoc vien hoan toan moi (Dang ky moi)**
-- Tat ca trong 1 form duy nhat:
-  - Thong tin ca nhan: Ho ten, SDT, Email, Gioi tinh, Ngay sinh
-  - Facebook, Diem TOEIC dau vao
-  - Tinh/Thanh pho, Xa/Phuong, Dia chi
-  - Chon nguon, Gan EC phu trach (tu dong lay EC Leader)
-  - Chon hinh thuc hoc (Offline / Online)
-  - Chon goi hoc phi
-  - Chon lop hoc ngay
-- Xac nhan -> Tao hoc vien + Hop dong cung luc
+**Luong A — Nhap hoc 1-cham tu CRM hoac Ho so hoc sinh (Khuyen nghi)**
+- Tu the hoc sinh o tab "Hoc sinh" (CRM) hoac trang ho so hoc sinh (LMS) -> Nhan nut **"Nhap hoc"**
+- He thong tu dong mo form Tao hop dong, dien san thong tin hoc sinh, co so, EC phu trach
+- Chon goi hoc phi (loc theo co so) -> xem ngay chi tiet buoi, don gia, uu dai
+- Chon lop hoc neu xep lop luon (hoac de xep lop sau)
+- Luu -> Tao hop dong + cap nhat cong no/phieu thu ngay
 
-> Demo diem: Tu form duy nhat, 1 thao tac luu -> he thong tao ra:
-> Ho so hoc vien moi + Ma LMS + Hop dong + Xep lop
+**Luong B — Nhap hoc tu menu Quan ly Hop dong (`/lms/contracts/add`)**
+- Chon trung tam -> Tim kiem hoc sinh theo Ten, So dien thoai hoac Ma LMS
+- He thong hien thi ngay thong tin hoc sinh (so buoi con lai, lich su dang ky)
+- Chon goi hoc phi & lop hoc -> Luu hop dong
 
 ---
 
@@ -192,7 +193,9 @@ DANH SACH KH (tab phan loai tu dong)
         |
 CHAM SOC -> Ghi lich su -> Dat lich hen -> Cap nhat trang thai
         |
-DONG Y MUA -> Tao hop dong (1 form, 1 thao tac)
+THEM HOC SINH -> Tu dong len Chinh thuc + Cap ma LMS tuc thi (Bo check-in)
+        |
+DONG Y MUA -> Nhap hoc 1-cham (Dien san HS, chon goi hoc phi, len phieu thu)
         |
 XEP LOP -> Xem chi tiet lop ngay tai form
         |
@@ -204,4 +207,4 @@ AI HO TRO tra cuu & bao cao bang tieng Viet moi luc
 
 ---
 
-Cap nhat: 2026-03-31 | Phien ban: 1.0
+Cap nhat: 2026-11-11 | Phien ban: 2.0 (Toi uu hoa quy trinh Nhap hoc & Bo Checkin trung gian)

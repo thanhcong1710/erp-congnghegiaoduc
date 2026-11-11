@@ -28,7 +28,7 @@
       <!-- 2. Middle Main Info Block -->
       <div class="hero-info-wrapper">
         <!-- Line 1: Student Name + Code + Status -->
-        <div class="hero-title-line">
+        <div class="hero-title-line flex items-center flex-wrap gap-2">
           <h3 class="hero-name">{{ student_info.name || 'Học sinh' }}</h3>
           <span class="hero-stk-badge" @click="copyCode(student_info.lms_code)" title="Bấm để sao chép mã">
             <i class="fa-solid fa-id-badge text-primary mr-1"></i>
@@ -38,6 +38,11 @@
           <span :class="getStatusBadgeClass(student_info.status_label)">
             {{ student_info.status_label || 'Chưa xác định' }}
           </span>
+          <router-link :to="`/lms/contracts/add?student_id=${student_info.id}&branch_id=${student_info.branch_id || ''}`" class="ml-auto">
+            <vs-button color="success" size="small" class="shadow-sm flex items-center">
+              <i class="fa fa-file-signature mr-1.5"></i> Nhập học ngay
+            </vs-button>
+          </router-link>
         </div>
 
         <!-- Line 2: Demographic & Branch Tags -->

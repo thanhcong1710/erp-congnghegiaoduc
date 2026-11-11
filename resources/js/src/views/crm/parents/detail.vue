@@ -351,31 +351,39 @@
           <vs-tab label="Học sinh"  @click="changeTab()">
             <div class="tab-text">
               <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
-               <p><i>(Đối với các học sinh ở trạnh thái kết thúc, các trung tâm khác có thể tạo mới checkin để tiếp tục tư vấn)</i></p>
               <div class="vx-row mt-3">
                 <div class="vx-col md:w-1/3 w-full item-first" v-for="(item, index) in students" :key="index">
                   <vx-card class="mb-base">
-                    <div class="card-header list-action">
-                      <strong>{{ item.name }}</strong>
-                      <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)"> <i class="fa fa-edit"></i> </vs-button>
-                      <vs-button :disabled="disabled_action" color="danger" class="small" v-if="item.status==0 || item.status==4" @click="showModalCheckin(item)"> <i class="fa fa-location-arrow"></i></vs-button>
-                      <router-link :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
-                        <vs-button v-if="item.status==3" class="small"> <i class="fa fa-eye"></i></vs-button>
-                      </router-link>
+                    <div class="card-header list-action flex flex-wrap items-center justify-between gap-1">
+                      <div class="min-w-0">
+                        <strong class="text-base">{{ item.name }}</strong>
+                        <span v-if="item.lms_code" class="text-xs text-primary font-bold ml-1">({{ item.lms_code }})</span>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)" title="Sửa thông tin"> <i class="fa fa-edit"></i> </vs-button>
+                        
+                        <!-- Nút Nhập học ngay -->
+                        <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank">
+                          <vs-button color="primary" class="small" title="Tạo hợp đồng nhập học ngay">
+                            <i class="fa fa-file-signature mr-1"></i> Nhập học
+                          </vs-button>
+                        </router-link>
+
+                        <!-- Nút Xem chi tiết LMS -->
+                        <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
+                          <vs-button class="small" color="dark" type="border" title="Xem hồ sơ học sinh LMS"> <i class="fa fa-eye"></i></vs-button>
+                        </router-link>
+                      </div>
                     </div>
                     <div class="card-body">
+                      <p v-if="item.lms_code">Mã LMS: <b class="text-primary">{{ item.lms_code }}</b></p>
                       <p>Ngày sinh: {{ item.birthday }}</p>
                       <p>Giới tính: {{ item.gender | genTextGender}}</p>
-                      <p>Ghi chú: {{ item.note}}</p>
+                      <p>Cơ sở / Trung tâm: <b>{{ item.checkin_branch_name || parent.branch_name || 'Chưa gán' }}</b></p>
+                      <p>Ghi chú: {{ item.note || '---' }}</p>
                       <p>Ngày tạo: {{ item.created_at}}</p>
                       <p>Người tạo: {{ item.creator_name}}</p>
-                      <p>Trạng thái: <b>{{ item.status | genStudentStatus}}</b></p>
-                      <p v-if="item.status>0">Trung tâm checkin: {{ item.checkin_branch_name}}</p>
-                      <p v-if="item.status>0">Thời gian checkin: {{ item.checkin_at}}</p>
-                      <p v-if="item.status>0">Khóa học: {{ item.checkin_product_name}}</p>
-                      <p v-if="item.status==1" class="list-action">Cập nhật checkin: 
-                        <vs-button :disabled="disabled_action" v-if="item.status==1" @click="showModalUpdateCheckin(item)" class="small"><i class="fa fa-edit"></i></vs-button>
-                      </p>
+                      <p>Trạng thái: <b :class="item.status == 3 ? 'text-success font-bold' : ''">{{ item.status | genStudentStatus}}</b></p>
                     </div>
                   </vx-card>
                 </div>
@@ -527,6 +535,13 @@
             <select class="vs-inputx vs-input--input normal" v-model="student.gender">
               <option value="M">Nam</option>
               <option value="F">Nữ</option>
+            </select>
+          </div>
+          <div class="vx-col md:w-1/2 w-full mb-4">
+            <label>Cơ sở / Trung tâm</label>
+            <select class="vs-inputx vs-input--input normal" v-model="student.branch_id">
+              <option value="">-- Mặc định theo phụ huynh --</option>
+              <option :value="item.id" v-for="(item, index) in branches" :key="index">{{item.name}}</option>
             </select>
           </div>
           
@@ -803,6 +818,7 @@
         student:{
           id:0,
           parent_id:"",
+          branch_id:"",
           name:"",
           gender:"",
           school_level:"",
@@ -1548,9 +1564,10 @@
           this.modal_student.error_message=""
           this.modal_student.title ="THÊM MỚI HỌC SINH"
           this.student.id =0
-          this.student.parent_id =""
+          this.student.parent_id = this.parent.id || ""
+          this.student.branch_id = this.parent.branch_id || (this.branches && this.branches.length ? this.branches[0].id : "")
           this.student.name =""
-          this.student.gender =""
+          this.student.gender ="M"
           this.student.school_level =""
           this.student.birthday =""
           this.student.select_school =""
@@ -1562,6 +1579,7 @@
           this.modal_student.title ="CẬP NHẬT THÔNG TIN HỌC SINH"
           this.student.id =data.id
           this.student.parent_id =data.parent_id
+          this.student.branch_id = data.checkin_branch_id || this.parent.branch_id || ""
           this.student.name =data.name
           this.student.gender =data.gender
           this.student.school_level =data.school_level
@@ -1637,6 +1655,10 @@
       },
       addStudent(){
         this.student.parent_id = this.parent.id
+        this.student.owner_id = this.parent.owner_id
+        if (!this.student.branch_id) {
+          this.student.branch_id = this.parent.branch_id || ""
+        }
         let mess = "";
         let resp = true;
         if (this.student.name == "") {

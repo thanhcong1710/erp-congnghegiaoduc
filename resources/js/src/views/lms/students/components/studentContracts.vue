@@ -5,9 +5,23 @@
       <i class="fa-solid fa-file-invoice-dollar empty-state-icon"></i>
       <h5 class="empty-state-title">Chưa có gói phí / hợp đồng nào</h5>
       <p class="empty-state-desc">Học sinh chưa được tạo gói phí nhập học hoặc nạp phí trên hệ thống.</p>
+      <router-link :to="`/lms/contracts/add?student_id=${student_info.id}&branch_id=${student_info.branch_id || ''}`" class="mt-3 inline-block">
+        <vs-button color="success" class="shadow-md">
+          <i class="fa fa-plus-circle mr-1.5"></i> Tạo gói phí / Nhập học ngay
+        </vs-button>
+      </router-link>
     </div>
 
     <div v-else>
+      <!-- Top Action Bar -->
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm text-gray-500 font-medium">Hồ sơ gói học phí & hợp đồng nhập học</span>
+        <router-link :to="`/lms/contracts/add?student_id=${student_info.id}&branch_id=${student_info.branch_id || ''}`">
+          <vs-button color="primary" size="small" class="shadow-sm">
+            <i class="fa fa-plus-circle mr-1"></i> Nhập học / Thêm gói phí
+          </vs-button>
+        </router-link>
+      </div>
       <!-- 1. Top Summary KPI Cards -->
       <div class="vx-row mb-4">
         <div class="vx-col sm:w-1/4 w-full mb-2">

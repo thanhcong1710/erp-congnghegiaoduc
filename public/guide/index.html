@@ -1000,25 +1000,25 @@
         <li class="nav-item">
           <a href="#chang-2" class="nav-link">
             <span class="step-num">2</span>
-            <span>Tạo Học sinh & Đặt lịch Check-in</span>
+            <span>Tạo Học sinh Chính thức & Nhập học</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-3" class="nav-link">
             <span class="step-num">3</span>
-            <span>Tiếp đón & Check-in (2 Trường hợp)</span>
+            <span>Tiếp đón & Check-in Trải nghiệm</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-4" class="nav-link">
             <span class="step-num">4</span>
-            <span>Lên Chính thức & Cấp mã STK</span>
+            <span>Hồ sơ Học sinh LMS & Mã STK</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-5" class="nav-link">
             <span class="step-num">5</span>
-            <span>Tạo Hợp đồng & Thu Học phí</span>
+            <span>Tạo Hợp đồng Nhập học & Thu phí</span>
           </a>
         </li>
         <li class="nav-item">
@@ -1259,12 +1259,12 @@
       </section>
 
       <!-- ========================================================= -->
-      <!-- CHẶNG 2: TẠO HỒ SƠ HỌC SINH & SALE ĐẶT LỊCH CHECKIN TỪ CRM -->
+      <!-- CHẶNG 2: TẠO HỌC SINH CHÍNH THỨC & NHẬP HỌC 1-CHẠM TỪ CRM -->
       <!-- ========================================================= -->
       <section id="chang-2" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 2</span>
-          <h2 class="section-title">Quản lý Học sinh & Sale Đặt lịch Check-in từ Hồ sơ Khách hàng</h2>
+          <h2 class="section-title">Quản lý Học sinh & Nhập học 1-chạm từ Hồ sơ Khách hàng (Bỏ bước Check-in)</h2>
           <span class="section-role"><i class="fa-solid fa-user-tie"></i> Sale (EC) / Tư vấn Tuyển sinh</span>
         </div>
 
@@ -1278,68 +1278,78 @@
           <span class="menu-url">/crm/parent/{id}/detail</span>
         </div>
 
+        <div class="alert-box alert-success mb-4">
+          <i class="fa-solid fa-bolt"></i>
+          <div>
+            <strong>NÂNG CẤP MỚI — BỎ BƯỚC CHECKIN TRUNG GIAN:</strong><br>
+            Hệ thống đã tinh giản quy trình: Khi thêm mới học sinh từ CRM, hệ thống tự động sinh <strong>Mã học sinh LMS (STK...)</strong> và kích hoạt học sinh lên <strong>Chính thức</strong> ngay lập tức. Nhân viên có thể bấm trực tiếp nút <strong>Nhập học</strong> trên thẻ học sinh để mở form tạo hợp đồng với dữ liệu học sinh & cơ sở đã điền sẵn, không cần qua bước đặt lịch check-in hay duyệt trung gian.
+          </div>
+        </div>
+
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Thêm mới Học sinh vào Hồ sơ Phụ huynh</div>
+          <div class="step-title">Thêm mới Học sinh — Tự động cấp mã LMS & Lên chính thức ngay</div>
           <div class="step-desc">
             Trong màn hình <strong>Chi tiết khách hàng</strong>, chuyển sang tab <strong>Học sinh</strong>:
             <ul>
-              <li>Nếu phụ huynh có thêm bé chưa được tạo hồ sơ, bấm nút <strong>+ Thêm mới học sinh</strong>.</li>
-              <li>Nhập <strong>Họ tên học sinh</strong>, <strong>Ngày sinh</strong>, <strong>Giới tính</strong> và <strong>Ghi chú</strong> (trường lớp, sở thích, tính cách của bé) rồi nhấn <strong>Lưu</strong>.</li>
-              <li>Học sinh vừa tạo sẽ có trạng thái ban đầu là <span class="pill-status pill-gray">Mới tạo</span>.</li>
+              <li>Bấm nút <strong>+ Thêm mới học sinh</strong>.</li>
+              <li>Nhập các trường thông tin:
+                <ul>
+                  <li><strong>Họ tên học sinh:</strong> Nhập họ tên đầy đủ (ví dụ: <em>Phạm Hữu Khánh An</em>).</li>
+                  <li><strong>Ngày sinh:</strong> Chọn ngày sinh của bé.</li>
+                  <li><strong>Giới tính:</strong> Chọn Nam hoặc Nữ.</li>
+                  <li><strong>Cơ sở / Trung tâm:</strong> Mặc định theo cơ sở của phụ huynh hoặc nhân viên phụ trách (có thể chọn cơ sở khác nếu cần).</li>
+                  <li><strong>Ghi chú:</strong> Trường lớp, sở thích, lực học, lưu ý đặc biệt...</li>
+                </ul>
+              </li>
+              <li>Nhấn <strong>Lưu</strong>: Hệ thống tự động:
+                <ul>
+                  <li>Tạo hồ sơ học sinh chính thức trong phân hệ LMS (`students` & `term_student_user`).</li>
+                  <li>Cấp ngay <strong>Mã học sinh LMS</strong> chuẩn định dạng <code>STK...</code> (ví dụ: <code>STK001234</code>).</li>
+                  <li>Trạng thái trên thẻ học sinh chuyển thẳng sang <span class="pill-status pill-success">Đã lên chính thức</span>.</li>
+                </ul>
+              </li>
             </ul>
           </div>
 
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.1: Popup Thêm mới Học sinh trong Hồ sơ Phụ huynh</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.1: Popup Thêm mới Học sinh — Tích hợp chọn Cơ sở phụ trách</span>
               <span class="file-path">/images/guide/03-add-student-modal.png</span>
             </div>
             <div class="screenshot-body">
               <img src="../images/guide/03-add-student-modal.png" alt="Modal thêm học sinh" onclick="zoomImage(this)">
-              <p class="screenshot-caption">Nhập thông tin bé Phạm Hữu Khánh An trực thuộc hồ sơ phụ huynh Nguyễn Thị Thu Hằng.</p>
+              <p class="screenshot-caption">Thêm mới học sinh kèm chọn cơ sở, hệ thống tự động cấp mã LMS và kích hoạt chính thức ngay khi bấm Lưu.</p>
             </div>
           </div>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Sale tạo lịch hẹn Check-in ngay trên thẻ Học sinh (Trước khi khách đến)</div>
+          <div class="step-title">Nhập học 1-chạm (Quick Enroll) trực tiếp trên Thẻ học sinh</div>
           <div class="step-desc">
-            Khi phụ huynh chốt lịch đưa con đến trung tâm test đầu vào hoặc học trải nghiệm, <strong>Sale thực hiện đặt lịch Check-in ngay tại tab <code>Học sinh</code> này</strong>:
+            Ngay sau khi học sinh được tạo (hoặc bất kỳ lúc nào phụ huynh đồng ý đăng ký học), Sale thực hiện nhập học ngay tại tab <code>Học sinh</code>:
             <ol>
-              <li>Trên thẻ của học sinh đang ở trạng thái <strong>Mới tạo</strong> (hoặc <strong>Đã kết thúc</strong>), bấm vào <strong>nút biểu tượng mũi tên định vị màu đỏ</strong> (<i class="fa fa-location-arrow text-danger"></i>) cạnh tên học sinh.</li>
-              <li>Cửa sổ <strong>TẠO CHECKIN HỌC SINH</strong> hiện ra:
+              <li>Trên thẻ của học sinh, nhấn nút <strong>"Nhập học"</strong> (<i class="fa fa-file-signature text-primary"></i>).</li>
+              <li>Hệ thống tự động mở form <strong>Tạo hợp đồng nhập học</strong> (URL: <code>/lms/contracts/add</code>):
                 <ul>
-                  <li><strong>Trung tâm checkin:</strong> Chọn cơ sở khách sẽ đến (ví dụ: <em>CS1 — Thăng Long Victory</em>).</li>
-                  <li><strong>Ngày/Giờ Checkin:</strong> Thời gian hẹn khách đến cơ sở.</li>
-                  <li><strong>Khóa học:</strong> Chọn chương trình học sinh dự kiến test/trải nghiệm (ví dụ: <em>Ucrea</em>, <em>Bright I.G</em>).</li>
+                  <li><strong>Trung tâm:</strong> Đã được tự động chọn sẵn theo cơ sở học sinh.</li>
+                  <li><strong>Học sinh:</strong> Đã được tự động điền sẵn đầy đủ thông tin cá nhân, mã LMS, thông tin phụ huynh và EC phụ trách.</li>
                 </ul>
               </li>
-              <li>Nhấn <strong>Lưu</strong>: Trạng thái trên thẻ học sinh lập tức chuyển thành <span class="pill-status pill-warning">Thêm mới checkin</span> và dữ liệu được đẩy thẳng sang danh sách <code>LMS &rarr; Học sinh &rarr; Checkin</code> của cơ sở để Lễ tân/Giáo vụ chuẩn bị đón tiếp.</li>
-              <li>Nếu khách xin đổi giờ hẹn hoặc đổi khóa học trước khi đến, Sale chỉ cần bấm nút <strong>Cập nhật checkin</strong> (<i class="fa fa-edit text-primary"></i>) ngay dưới thẻ học sinh.</li>
+              <li>Sale chỉ cần chọn <strong>Khóa học & Gói học phí</strong>, áp dụng chính sách ưu đãi, lên phiếu thu lần 1 và nhấn <strong>Lưu hợp đồng</strong>.</li>
+              <li>Ngoài ra, cạnh nút Nhập học có icon con mắt (<i class="fa fa-eye"></i>) để xem toàn bộ hồ sơ chi tiết của học sinh tại phân hệ LMS.</li>
             </ol>
           </div>
 
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.2: Thẻ Học sinh trong tab "Học sinh" & Nút tạo lịch Check-in (Màu đỏ)</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.2: Thẻ Học sinh Chính thức kèm Nút "Nhập học" 1-chạm & Xem hồ sơ LMS</span>
               <span class="file-path">/images/guide/03b-crm-student-tab-checkin.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/03b-crm-student-tab-checkin.png" alt="Tab Học sinh và các trạng thái Checkin" onclick="zoomImage(this)">
-              <p class="screenshot-caption">Minh họa trực quan 3 trạng thái thẻ học sinh: (1) "Mới tạo" có nút đỏ đặt lịch Check-in, (2) "Thêm mới checkin" có nút sửa lịch hẹn, (3) "Đã lên chính thức" có nút xem hồ sơ LMS.</p>
-            </div>
-          </div>
-
-          <div class="screenshot-container">
-            <div class="screenshot-header">
-              <span><i class="fa-regular fa-image mr-1"></i> Hình 2.3: Cửa sổ "Tạo Checkin Học sinh" từ Tab Học sinh</span>
-              <span class="file-path">/images/guide/03c-crm-modal-create-checkin.png</span>
-            </div>
-            <div class="screenshot-body">
-              <img src="../images/guide/03c-crm-modal-create-checkin.png" alt="Popup Tạo Checkin Học sinh" onclick="zoomImage(this)">
-              <p class="screenshot-caption">Sale chọn Trung tâm checkin (CS1 — Thăng Long Victory) và Khóa học (Ucrea) rồi bấm Lưu để đẩy lịch hẹn xuống cơ sở.</p>
+              <img src="../images/guide/03b-crm-student-tab-checkin.png" alt="Thẻ học sinh chính thức có nút Nhập học" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Thẻ học sinh hiển thị mã STK, trạng thái Đã lên chính thức cùng nút Nhập học màu xanh dương giúp mở nhanh form làm hợp đồng.</p>
             </div>
           </div>
         </div>
@@ -1368,8 +1378,8 @@
         <div class="alert-box alert-info">
           <i class="fa-solid fa-code-branch"></i>
           <div>
-            <strong>Nguyên tắc phân luồng nghiệp vụ Check-in quan trọng:</strong><br>
-            Khi phụ huynh đưa học sinh đến quầy Lễ tân cơ sở, nhân viên <strong>KHÔNG mặc định bấm "Thêm mới Checkin" ngay</strong> mà cần phân biệt rõ <strong>2 trường hợp</strong> dưới đây để tránh tạo trùng dữ liệu khách hàng:
+            <strong>Lưu ý về nghiệp vụ Check-in tại cơ sở:</strong><br>
+            Nghiệp vụ Check-in tại quầy Lễ tân chủ yếu phục vụ các sự kiện đón tiếp học sinh đến trải nghiệm / Workshop hoặc khách vãng lai (Walk-in) tại trung tâm. <strong>Đối với học sinh đã được tạo từ CRM:</strong> Học sinh đã là chính thức và có thể tiến hành <strong>Nhập học 1-chạm</strong> ngay tại thẻ học sinh mà không bắt buộc phải qua bước Check-in này. Dưới đây là cách xử lý khi tiếp đón học sinh tại quầy:
           </div>
         </div>
 
@@ -1516,11 +1526,12 @@
           <div class="step-bullet">1</div>
           <div class="step-title">Cơ chế cấp Mã học sinh tự động (STK Code) & Đồng bộ Nhân sự quản lý</div>
           <div class="step-desc">
-            Ngay sau khi học sinh được bấm <strong>Lên chính thức</strong> từ danh sách Check-in (hoặc tạo trực tiếp từ form Thêm mới Checkin có chọn cơ sở):
+            Ngay sau khi học sinh được tạo mới từ CRM (hoặc tạo từ form Thêm mới Checkin có chọn cơ sở):
             <ul>
               <li>Hệ thống tự động sinh <strong>Mã học sinh duy nhất</strong> theo định dạng <code>STK</code> + 6 chữ số (ví dụ: <code>STK000069</code>, <code>STK000077</code>). Nhân viên có thể nhấp trực tiếp vào huy hiệu mã <code>STK...</code> trên bảng để sao chép nhanh vào bộ nhớ tạm.</li>
-              <li>Tự động gán <strong>Trung tâm quản lý</strong>, <strong>EC phụ trách</strong>, <strong>EC Leader</strong> và <strong>Giám đốc trung tâm</strong> dựa theo người phụ trách hồ sơ Check-in.</li>
+              <li>Tự động gán <strong>Trung tâm quản lý</strong>, <strong>EC phụ trách</strong>, <strong>EC Leader</strong> và <strong>Giám đốc trung tâm</strong> đồng bộ từ hồ sơ.</li>
               <li>Trạng thái ban đầu của học sinh khi chưa xếp lớp sẽ hiển thị là <code>Chờ xếp lớp học thử</code> hoặc <code>Chờ xếp lớp chính thức</code>.</li>
+              <li>Tại trang <strong>Chi tiết học sinh LMS</strong> (URL: <code>/lms/students/{id}/detail</code>), hệ thống tích hợp sẵn nút <strong>"Nhập học ngay"</strong> ở góc trên và tab Gói phí để làm hợp đồng ngay bất kỳ lúc nào.</li>
             </ul>
           </div>
 
@@ -1559,10 +1570,15 @@
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Bước 1: Tạo mới Hợp đồng tại mục "Nhập học"</div>
+          <div class="step-title">Bước 1: Tạo mới Hợp đồng Nhập học</div>
           <div class="step-desc">
-            Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Nhập học</code> &rarr; Nhấn nút <strong>+ Thêm mới</strong> (URL: <code>/lms/contracts/add</code>):
-            <ol>
+            Có <strong>2 cách linh hoạt</strong> để mở màn hình Tạo hợp đồng (URL: <code>/lms/contracts/add</code>):
+            <div class="mb-3 mt-2 p-2.5 bg-green-50 border border-green-200 rounded">
+              <strong class="text-success"><i class="fa-solid fa-bolt mr-1"></i> Cách 1 (Khuyên dùng — Nhập học 1-chạm):</strong><br>
+              Nhấn trực tiếp nút <strong>"Nhập học"</strong> ngay trên thẻ học sinh ở tab <em>Học sinh (CRM)</em> hoặc tại trang <em>Chi tiết học sinh (LMS)</em>. Hệ thống sẽ tự động điền sẵn Trung tâm và Học sinh, nhân viên không cần phải tìm kiếm thủ công!
+            </div>
+            <strong>Cách 2 (Thủ công):</strong> Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Nhập học</code> &rarr; Nhấn nút <strong>+ Thêm mới</strong>:
+            <ol class="mt-2">
               <li><strong>Cột trái — Thông tin học sinh:</strong>
                 <ul>
                   <li>Chọn <strong>Trung tâm (*)</strong> trước để giới hạn phạm vi tìm kiếm (ví dụ: <em>CS1 — Thăng Long Victory</em>).</li>

@@ -459,6 +459,8 @@ class ParentsController extends Controller
             'message'=>'Thêm mới khách hàng thành công'
         );
         $students  = data_get($request, 'students', []);
+        $parent_owner_id = data_get($parent, 'owner_id') ? data_get($parent, 'owner_id') : Auth::user()->id;
+        $parent_branch_id = data_get($parent, 'branch_id');
         foreach($students AS $student){
             if (data_get($student, 'name')){
                 $crm_student_id = u::insertSimpleRow(array(
@@ -469,13 +471,18 @@ class ParentsController extends Controller
                     'school_level' => data_get($student, 'school_level'),
                     'school' => data_get($student, 'school'),
                     'note' => data_get($student, 'note'),
+                    'checkin_branch_id' => $parent_branch_id ?: 0,
+                    'status' => 3, // Lên chính thức ngay
                     'created_at' => date('Y-m-d H:i:s'),
                     'creator_id' => Auth::user()->id,
                 ), 'crm_students');
-                $content = "Thêm mới học sinh: ".data_get($student, 'name')." (ID: $crm_student_id)";
-                LogParents::logAdd($request->parent_id,$content,Auth::user()->id);
+
+                // Tự động thăng cấp thành học sinh chính thức LMS (bỏ qua bước checkin)
+                $upgrade = StudentsController::promoteToOfficialStudent($crm_student_id, $parent_branch_id, $parent_owner_id);
+
+                $content = "Thêm mới học sinh chính thức: ".data_get($student, 'name')." (LMS: ".data_get($upgrade, 'lms_code').")";
+                LogParents::logAdd($parent_id, $content, Auth::user()->id);
             }
-            
         }
         return response()->json($result);
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LogParents;
 use App\Models\LogStudents;
+use App\Enums\SystemCode;
 use App\Providers\UtilityServiceProvider as u;
 use App\Providers\CurlServiceProvider as curl;
 use Illuminate\Http\Request;
@@ -14,7 +15,7 @@ class StudentsController extends Controller
     public function add(Request $request)
     {
         if ($request->id > 0) {
-            $pre_student_info = u::first("SELECT * FROM crm_students WHERE id= $request->id");
+            $pre_student_info = u::first("SELECT * FROM crm_students WHERE id= " . (int)$request->id);
             $data_update = array(
                 'parent_id' => $request->parent_id,
                 'name' => $request->name,
@@ -26,22 +27,51 @@ class StudentsController extends Controller
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
             );
+            if (!empty($request->branch_id)) {
+                $data_update['checkin_branch_id'] = (int)$request->branch_id;
+            }
             u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_students');
             LogParents::logUpdateStudentInfo($pre_student_info, $data_update, Auth::user()->id);
+
+            // Đồng bộ sang bảng students nếu đã có lms_id
+            if ($pre_student_info && !empty($pre_student_info->lms_id)) {
+                $arr_name = u::explodeName($request->name);
+                $lms_update = array(
+                    'name' => $request->name,
+                    'firstname' => data_get($arr_name, 'firstname'),
+                    'midname' => data_get($arr_name, 'midname'),
+                    'lastname' => data_get($arr_name, 'lastname'),
+                    'gender' => $request->gender,
+                    'date_of_birth' => $request->birthday,
+                    'note' => $request->note,
+                    'updated_at' => date('Y-m-d H:i:s'),
+                    'updator_id' => Auth::user()->id,
+                );
+                if (!empty($request->branch_id)) {
+                    $lms_update['branch_id'] = (int)$request->branch_id;
+                    u::updateSimpleRow(array('branch_id' => (int)$request->branch_id), array('student_id' => $pre_student_info->lms_id), 'term_student_user');
+                }
+                u::updateSimpleRow($lms_update, array('id' => $pre_student_info->lms_id), 'students');
+            } elseif ($pre_student_info) {
+                // Nếu bản ghi cũ chưa có lms_id thì tự động nâng cấp thành chính thức luôn
+                self::promoteToOfficialStudent($request->id, $request->branch_id, $request->owner_id);
+            }
+
             $result = (object) array(
                 'status' => 1,
                 'message' => 'Cập nhật học sinh thành công'
             );
             return response()->json($result);
         } else {
-            $exit = u::first("SELECT * FROM crm_students WHERE parent_id= $request->parent_id AND name LIKE '%$request->name%'");
+            $exit = u::first("SELECT * FROM crm_students WHERE parent_id= " . (int)$request->parent_id . " AND name LIKE '%" . addslashes($request->name) . "%'");
             if ($exit) {
                 $result = (object) array(
                     'status' => 0,
                     'message' => 'Học sinh đã tồn tại'
                 );
             } else {
-                $data = u::insertSimpleRow(array(
+                $branch_id = !empty($request->branch_id) ? (int)$request->branch_id : 0;
+                $crm_student_id = u::insertSimpleRow(array(
                     'parent_id' => $request->parent_id,
                     'name' => $request->name,
                     'gender' => $request->gender,
@@ -49,25 +79,158 @@ class StudentsController extends Controller
                     'school_level' => $request->school_level,
                     'school' => $request->school,
                     'note' => $request->note,
+                    'checkin_branch_id' => $branch_id,
+                    'status' => 3, // Lên chính thức ngay
                     'created_at' => date('Y-m-d H:i:s'),
                     'creator_id' => Auth::user()->id,
                 ), 'crm_students');
-                $content = "Thêm mới học sinh: $request->name (ID: $data)";
+
+                // Tự động thăng cấp thành học sinh chính thức LMS (bỏ qua bước check-in)
+                $upgradeInfo = self::promoteToOfficialStudent($crm_student_id, $branch_id, $request->owner_id);
+
+                $content = "Thêm mới học sinh chính thức: $request->name (LMS: " . data_get($upgradeInfo, 'lms_code') . ")";
                 LogParents::logAdd($request->parent_id, $content, Auth::user()->id);
+
                 $result = (object) array(
                     'status' => 1,
-                    'message' => 'Thêm mới học sinh thành công'
+                    'message' => 'Thêm mới học sinh chính thức thành công',
+                    'data' => $upgradeInfo
                 );
             }
 
             return response()->json($result);
         }
     }
+
+    public static function promoteToOfficialStudent($crm_student_id, $branch_id = null, $owner_id = null)
+    {
+        $crm_student_id = (int)$crm_student_id;
+        $crm_student_info = u::first("SELECT * FROM crm_students WHERE id = $crm_student_id");
+        if (!$crm_student_info) {
+            return null;
+        }
+
+        $parent_id = (int)data_get($crm_student_info, 'parent_id');
+        $crm_parent_info = $parent_id > 0 ? u::first("SELECT * FROM crm_parents WHERE id = $parent_id") : null;
+
+        // Xác định branch_id
+        if (!$branch_id) {
+            $branch_id = (int)data_get($crm_student_info, 'checkin_branch_id');
+        }
+        if (!$branch_id && $crm_parent_info) {
+            $branch_id = (int)data_get($crm_parent_info, 'branch_id') ?: (int)data_get($crm_parent_info, 'tmp_branch_id');
+        }
+        if (!$branch_id && $owner_id) {
+            $user_branch = u::first("SELECT branch_id FROM branch_has_user WHERE user_id = " . (int)$owner_id);
+            $branch_id = (int)data_get($user_branch, 'branch_id');
+        }
+        if (!$branch_id && $crm_parent_info && data_get($crm_parent_info, 'owner_id')) {
+            $user_branch = u::first("SELECT branch_id FROM branch_has_user WHERE user_id = " . (int)data_get($crm_parent_info, 'owner_id'));
+            $branch_id = (int)data_get($user_branch, 'branch_id');
+        }
+        if (!$branch_id && Auth::check()) {
+            $user_branch = u::first("SELECT branch_id FROM branch_has_user WHERE user_id = " . Auth::user()->id);
+            $branch_id = (int)data_get($user_branch, 'branch_id');
+        }
+
+        // Xác định owner_id (EC phụ trách)
+        if (!$owner_id) {
+            $owner_id = (int)data_get($crm_student_info, 'checkin_owner_id');
+        }
+        if (!$owner_id && $crm_parent_info) {
+            $owner_id = (int)data_get($crm_parent_info, 'owner_id');
+        }
+        if (!$owner_id && Auth::check()) {
+            $owner_id = Auth::user()->id;
+        }
+
+        $creator_id = Auth::check() ? Auth::user()->id : (int)data_get($crm_student_info, 'creator_id');
+        $lms_student_id = (int)data_get($crm_student_info, 'lms_id');
+        $arr_name = u::explodeName(data_get($crm_student_info, 'name'));
+
+        if (!$lms_student_id) {
+            $student_data = array(
+                'lms_code' => '',
+                'name' => data_get($crm_student_info, 'name'),
+                'firstname' => data_get($arr_name, 'firstname'),
+                'midname' => data_get($arr_name, 'midname'),
+                'lastname' => data_get($arr_name, 'lastname'),
+                'gender' => data_get($crm_student_info, 'gender'),
+                'date_of_birth' => data_get($crm_student_info, 'birthday'),
+                'gud_mobile1' => data_get($crm_parent_info, 'mobile_1'),
+                'gud_name1' => data_get($crm_parent_info, 'name'),
+                'gud_email1' => data_get($crm_parent_info, 'email'),
+                'address' => data_get($crm_parent_info, 'address'),
+                'province_id' => data_get($crm_parent_info, 'province_id'),
+                'district_id' => data_get($crm_parent_info, 'district_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => $creator_id,
+                'note' => data_get($crm_student_info, 'note'),
+                'branch_id' => $branch_id ?: 0,
+                'gud_birth_day1' => data_get($crm_parent_info, 'birthday'),
+                'gud_gender1' => data_get($crm_parent_info, 'gender'),
+                'gud_job1' => data_get($crm_parent_info, 'job_id'),
+                'status' => 1,
+                'source_detail_id' => data_get($crm_parent_info, 'source_detail_id'),
+                'source_id' => data_get($crm_parent_info, 'source_id'),
+                'c2c_mobile' => data_get($crm_parent_info, 'c2c_mobile'),
+                'avatar_url' => data_get($crm_student_info, 'gender') == 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg',
+            );
+            $lms_student_id = u::insertSimpleRow($student_data, 'students');
+
+            $last_lms_code = str_pad((string)$lms_student_id, 6, '0', STR_PAD_LEFT);
+            $lms_code = config('app.prefix_student_code') . $last_lms_code;
+            u::updateSimpleRow(array('lms_code' => $lms_code), array('id' => $lms_student_id), 'students');
+
+            $ceo_info = $branch_id ? u::first("SELECT u.id FROM role_has_user AS ru 
+                LEFT JOIN roles AS r ON r.id = ru.role_id
+                LEFT JOIN users AS u ON u.id = ru.user_id
+                LEFT JOIN branch_has_user AS b ON b.user_id = u.id
+                WHERE u.status=1 AND r.code ='" . SystemCode::ROLE_CEO_BRANCH . "' AND b.branch_id=" . (int)$branch_id) : null;
+            $ec_info = $owner_id ? u::first("SELECT u.id, u.manager_id FROM users AS u WHERE u.status=1 AND u.id = " . (int)$owner_id) : null;
+
+            u::insertSimpleRow(array(
+                'student_id' => $lms_student_id,
+                'ec_id' => data_get($ec_info, 'id'),
+                'branch_id' => $branch_id ?: 0,
+                'ceo_branch_id' => data_get($ceo_info, 'id'),
+                'ec_leader_id' => data_get($ec_info, 'manager_id'),
+                'created_at' => date('Y-m-d H:i:s'),
+                'creator_id' => $creator_id,
+                'status' => 1
+            ), 'term_student_user');
+
+            LogStudents::logAdd($lms_student_id, 'Khởi tạo học sinh chính thức', $creator_id);
+        } else {
+            $last_lms = u::first("SELECT lms_code FROM students WHERE id = $lms_student_id");
+            $lms_code = data_get($last_lms, 'lms_code');
+        }
+
+        // Cập nhật lại crm_students thành status = 3 (Chính thức)
+        u::updateSimpleRow(array(
+            'status' => 3,
+            'lms_id' => $lms_student_id,
+            'checkin_branch_id' => $branch_id ?: 0,
+            'checkin_owner_id' => $owner_id ?: 0,
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => $creator_id,
+        ), array('id' => $crm_student_id), 'crm_students');
+
+        return [
+            'crm_student_id' => $crm_student_id,
+            'lms_student_id' => $lms_student_id,
+            'lms_code' => $lms_code,
+            'branch_id' => $branch_id,
+        ];
+    }
     public function getAllDataByParent($parent_id)
     {
-        $data = u::query("SELECT s.*, (SELECT name FROM users WHERE id=s.creator_id) AS creator_name,
+        $parent_id = (int)$parent_id;
+        $data = u::query("SELECT s.*, 
+                (SELECT name FROM users WHERE id=s.creator_id) AS creator_name,
                 (SELECT name FROM branches WHERE id=s.checkin_branch_id) AS checkin_branch_name,
-                (SELECT name FROM products WHERE id=s.type_product) AS checkin_product_name
+                (SELECT name FROM products WHERE id=s.type_product) AS checkin_product_name,
+                (SELECT lms_code FROM students WHERE id=s.lms_id) AS lms_code
             FROM crm_students AS s WHERE s.parent_id=$parent_id ORDER BY s.id DESC");
         return response()->json($data);
     }
@@ -273,10 +436,20 @@ class StudentsController extends Controller
     public function searchContract(Request $request)
     {
         $keyword = $request->keyword;
-        $branch_id = $request->branch_id;
+        $branch_id = (int)$request->branch_id;
+        $student_id = isset($request->student_id) ? (int)$request->student_id : 0;
         $cond = "";
+        if ($student_id > 0) {
+            $where = " s.id = $student_id ";
+            if ($branch_id > 0) {
+                $where .= " AND t.branch_id = $branch_id ";
+            }
+        } else {
+            $where = " t.branch_id = $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+        }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
                 (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,
+                t.branch_id AS student_branch_id,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ec_leader_id) AS ec_leader_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =t.ceo_branch_id) AS ceo_branch_name, 
@@ -287,7 +460,7 @@ class StudentsController extends Controller
                 (SELECT enrolment_last_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_last_date,
                 (SELECT enrolment_start_date FROM contracts WHERE student_id=s.id AND type=0 AND status=7 ORDER BY id DESC LIMIT 1) AS trial_enrolment_start_date
             FROM students AS s LEFT JOIN term_student_user AS t ON t.student_id=s.id AND t.status=1 
-                WHERE t.branch_id= $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') $cond");
+                WHERE $where $cond");
         foreach ($data as $k => $row) {
             if ($data[$k]->trial_enrolment_last_date && (strtotime($data[$k]->trial_enrolment_last_date) > strtotime('-3 month', strtotime(date('Y-m-d'))))) {
                 $data[$k]->disabled_trial = 1;
