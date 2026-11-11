@@ -435,21 +435,21 @@ class AttendanceController extends Controller
             if ($isPermanentOnline) {
                 $onlineDays = $standardWorkDays;
             } else {
-                $userOnlineRegs = $approvedOnlineRegs->filter(function ($r) use ($emp) {
+                $userOnlineRegs = collect($approvedOnlineRegs->filter(function ($r) use ($emp) {
                     return ($r->employee_id && $r->employee_id == $emp->id) || ($emp->user_id && $r->user_id == $emp->user_id);
                 })->map(function ($r) {
                     return Carbon::parse($r->date)->format('Y-m-d');
-                })->unique();
+                })->values());
 
-                $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
+                $attOnlineDates = collect($userAtts->where('attendance_status', 'online')->map(function ($a) {
                     return Carbon::parse($a->date)->format('Y-m-d');
-                })->unique();
+                })->values());
 
-                $attOnlineHalfDates = $userAtts->where('attendance_status', 'online_half')->map(function ($a) {
+                $attOnlineHalfDates = collect($userAtts->where('attendance_status', 'online_half')->map(function ($a) {
                     return Carbon::parse($a->date)->format('Y-m-d');
-                })->unique();
+                })->values());
 
-                $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique();
+                $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique()->values();
                 $onlineDays = $fullOnlineDates->count() + ($attOnlineHalfDates->count() * 0.5);
             }
 
@@ -555,7 +555,7 @@ class AttendanceController extends Controller
         if ($isPermanentOnline) {
             $onlineDays = $standardWorkDays;
         } else {
-            $userOnlineRegs = HrmOnlineRegistration::where(function ($q) use ($profile) {
+            $userOnlineRegs = collect(HrmOnlineRegistration::where(function ($q) use ($profile) {
                 $q->where('employee_id', $profile->id);
                 if ($profile->user_id) $q->orWhere('user_id', $profile->user_id);
             })
@@ -563,17 +563,17 @@ class AttendanceController extends Controller
                 ->where('status', 1)
                 ->get()
                 ->map(function ($r) { return Carbon::parse($r->date)->format('Y-m-d'); })
-                ->unique();
+                ->values());
 
-            $attOnlineDates = $userAtts->where('attendance_status', 'online')->map(function ($a) {
+            $attOnlineDates = collect($userAtts->where('attendance_status', 'online')->map(function ($a) {
                 return Carbon::parse($a->date)->format('Y-m-d');
-            })->unique();
+            })->values());
 
-            $attOnlineHalfDates = $userAtts->where('attendance_status', 'online_half')->map(function ($a) {
+            $attOnlineHalfDates = collect($userAtts->where('attendance_status', 'online_half')->map(function ($a) {
                 return Carbon::parse($a->date)->format('Y-m-d');
-            })->unique();
+            })->values());
 
-            $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique();
+            $fullOnlineDates = $userOnlineRegs->merge($attOnlineDates)->diff($attOnlineHalfDates)->unique()->values();
             $onlineDays = $fullOnlineDates->count() + ($attOnlineHalfDates->count() * 0.5);
         }
 
