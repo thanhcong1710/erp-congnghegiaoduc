@@ -124,134 +124,175 @@
       :active.sync="employeeDetailModalActive"
       class="modal-attendance-month-detail"
     >
-      <div v-if="employeeDetailLoading" class="p-8 text-center text-gray-500">
-        <i class="fa-solid fa-spinner fa-spin text-2xl text-primary mb-2"></i>
-        <p class="font-medium text-sm">Đang tải dữ liệu chi tiết chấm công...</p>
+      <div v-if="employeeDetailLoading" class="att-modal-loading">
+        <i class="fa-solid fa-spinner fa-spin att-loading-spinner"></i>
+        <p class="att-loading-text">Đang tải dữ liệu chi tiết chấm công...</p>
       </div>
-      <div v-else-if="employeeDetailData" class="p-2 sm:p-3">
-        <!-- Thông tin nhân viên & Thẻ thống kê -->
-        <div class="p-4 rounded-lg border border-blue-200 bg-blue-50 text-gray-800 mb-4 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between border-b pb-3 mb-3 border-blue-200">
-            <div>
-              <h4 class="text-primary font-bold text-lg flex items-center">
-                <i class="fa-solid fa-user-tie mr-2 text-primary"></i>
-                {{ employeeDetailData.profile.full_name }}
-              </h4>
-              <div class="text-xs text-gray-600 mt-1 flex flex-wrap items-center space-x-2">
-                <span><strong>Mã NS:</strong> {{ employeeDetailData.profile.employee_code || '---' }}</span>
-                <span>•</span>
-                <span><strong>Team:</strong> {{ employeeDetailData.profile.team_name || 'N/A' }}</span>
-                <span>•</span>
-                <span><strong>Ca áp dụng:</strong> {{ employeeDetailData.profile.shift_name || 'Chưa xếp ca' }}</span>
-                <span v-if="employeeDetailData.profile.phone">•</span>
-                <span v-if="employeeDetailData.profile.phone"><strong>SĐT:</strong> {{ employeeDetailData.profile.phone }}</span>
+      <div v-else-if="employeeDetailData" class="att-modal-body">
+        <!-- Card thông tin nhân sự -->
+        <div class="att-profile-banner">
+          <div class="att-profile-top">
+            <div class="att-profile-info">
+              <div class="att-profile-avatar">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <div>
+                <h4 class="att-profile-name">
+                  {{ employeeDetailData.profile.full_name }}
+                </h4>
+                <div class="att-profile-tags">
+                  <span class="att-tag">
+                    <i class="fa-solid fa-id-badge mr-1"></i> Mã: <strong>{{ employeeDetailData.profile.employee_code || '---' }}</strong>
+                  </span>
+                  <span class="att-tag">
+                    <i class="fa-solid fa-users mr-1"></i> <strong>{{ employeeDetailData.profile.team_name || 'N/A' }}</strong>
+                  </span>
+                  <span class="att-tag">
+                    <i class="fa-solid fa-clock mr-1"></i> Ca: <strong>{{ employeeDetailData.profile.shift_name || 'Chưa xếp ca' }}</strong>
+                  </span>
+                  <span v-if="employeeDetailData.profile.phone" class="att-tag">
+                    <i class="fa-solid fa-phone mr-1"></i> {{ employeeDetailData.profile.phone }}
+                  </span>
+                </div>
               </div>
             </div>
-            <div class="flex items-center mt-2 sm:mt-0 space-x-2">
-              <vs-chip color="primary" class="font-bold">
-                Tháng {{ employeeDetailData.month }}/{{ employeeDetailData.year }}
-              </vs-chip>
-              <vs-button
-                color="success"
-                type="filled"
-                size="small"
-                class="py-1 px-3 text-xs font-semibold"
+            <div class="att-profile-actions">
+              <span class="att-chip-month">
+                <i class="fa-solid fa-calendar-check mr-1.5"></i> Tháng {{ employeeDetailData.month }}/{{ employeeDetailData.year }}
+              </span>
+              <button
+                type="button"
+                class="att-btn-export"
                 @click="exportEmployeeDetailExcel"
               >
-                <i class="fa-solid fa-file-excel mr-1"></i> Xuất Excel Chi Tiết
-              </vs-button>
+                <i class="fa-solid fa-file-excel mr-1.5"></i> Xuất Excel Chi Tiết
+              </button>
             </div>
           </div>
 
-          <!-- Grid thống kê các chỉ số -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Công chuẩn</div>
-              <div class="font-bold text-gray-900 text-base mt-1">{{ employeeDetailData.summary.standard_days }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">T2 - T6</div>
+          <!-- 7 Thẻ KPI Thống Kê Tổng Hợp -->
+          <div class="att-kpi-row">
+            <div class="att-kpi-item kpi-standard">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Công chuẩn</div>
+                <div class="kpi-num">{{ employeeDetailData.summary.standard_days }}</div>
+                <div class="kpi-hint">T2 - T6</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Tổng đã làm</div>
-              <div class="font-bold text-success text-base mt-1">{{ employeeDetailData.summary.worked_days }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">công</div>
+            <div class="att-kpi-item kpi-worked">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Đã làm tại VP</div>
+                <div class="kpi-num text-success">{{ employeeDetailData.summary.worked_days }}</div>
+                <div class="kpi-hint">công</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Làm Online</div>
-              <div class="font-bold text-purple-600 text-base mt-1">{{ employeeDetailData.summary.online_days }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            <div class="att-kpi-item kpi-online">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-laptop-house"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Làm Online</div>
+                <div class="kpi-num text-purple">{{ employeeDetailData.summary.online_days }}</div>
+                <div class="kpi-hint">ngày</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Đi muộn</div>
-              <div class="font-bold text-warning text-base mt-1">{{ employeeDetailData.summary.late_fined_count }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">lần</div>
+            <div class="att-kpi-item kpi-late">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-clock"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Đi muộn</div>
+                <div class="kpi-num text-warning">{{ employeeDetailData.summary.late_fined_count }}</div>
+                <div class="kpi-hint">lần phạt</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Nghỉ phép</div>
-              <div class="font-bold text-primary text-base mt-1">{{ employeeDetailData.summary.leave_approved_days }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            <div class="att-kpi-item kpi-leave">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-plane-departure"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Nghỉ phép</div>
+                <div class="kpi-num text-blue">{{ employeeDetailData.summary.leave_approved_days }}</div>
+                <div class="kpi-hint">ngày phép</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Vắng k phép</div>
-              <div class="font-bold text-danger text-base mt-1">{{ employeeDetailData.summary.unexcused_absent_days }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            <div class="att-kpi-item kpi-absent">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-user-xmark"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Vắng k phép</div>
+                <div class="kpi-num text-danger">{{ employeeDetailData.summary.unexcused_absent_days }}</div>
+                <div class="kpi-hint">ngày</div>
+              </div>
             </div>
-            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
-              <div class="text-gray-500 font-medium">Gửi muộn</div>
-              <div class="font-bold text-gray-700 text-base mt-1">{{ employeeDetailData.summary.late_submitted_count }}</div>
-              <div class="text-gray-400 mt-0.5 text-2xs">lần</div>
+            <div class="att-kpi-item kpi-latesub">
+              <div class="kpi-icon-wrap"><i class="fa-solid fa-file-circle-exclamation"></i></div>
+              <div class="kpi-body">
+                <div class="kpi-title">Gửi muộn</div>
+                <div class="kpi-num text-slate">{{ employeeDetailData.summary.late_submitted_count }}</div>
+                <div class="kpi-hint">đơn</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Bảng chi tiết từng ngày trong tháng -->
-        <div class="table-responsive rounded border border-gray-200 overflow-hidden" style="max-height: 480px; overflow-y: auto;">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead class="bg-gray-100 text-gray-700 uppercase font-semibold sticky top-0 z-10 shadow-xs">
+        <!-- Bảng danh sách chi tiết ngày trong tháng -->
+        <div class="att-table-box">
+          <table class="att-custom-table">
+            <thead>
               <tr>
-                <th class="p-2.5 text-center border-b" width="6%">Ngày</th>
-                <th class="p-2.5 border-b" width="9%">Thứ</th>
-                <th class="p-2.5 border-b" width="16%">Ca làm việc</th>
-                <th class="p-2.5 border-b" width="22%">Trạng thái</th>
-                <th class="p-2.5 text-center border-b" width="10%">Check-in</th>
-                <th class="p-2.5 text-center border-b" width="10%">Check-out</th>
-                <th class="p-2.5 text-center border-b" width="9%">Công tính</th>
-                <th class="p-2.5 border-b" width="18%">Ghi chú</th>
+                <th class="th-center" style="width: 58px;">Ngày</th>
+                <th style="width: 110px;">Thứ</th>
+                <th style="width: 140px;">Ca làm việc</th>
+                <th style="width: 210px;">Trạng thái điểm danh</th>
+                <th class="th-center" style="width: 90px;">Check-in</th>
+                <th class="th-center" style="width: 90px;">Check-out</th>
+                <th class="th-center" style="width: 100px;">Công tính</th>
+                <th>Ghi chú</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody>
               <tr
                 v-for="d in employeeDetailData.days"
                 :key="d.date"
-                :class="d.is_weekend ? 'bg-gray-50' : 'hover:bg-blue-50 transition-colors'"
+                :class="{ 'is-weekend-row': d.is_weekend }"
               >
-                <td class="p-2.5 text-center font-bold" :class="d.is_weekend ? 'text-gray-400' : 'text-gray-800'">
-                  {{ d.day_of_month }}
+                <td class="td-center">
+                  <span class="att-day-num" :class="{ 'is-weekend-num': d.is_weekend }">
+                    {{ d.day_of_month }}
+                  </span>
                 </td>
-                <td class="p-2.5 font-medium" :class="d.is_weekend ? 'text-red-500 font-semibold' : 'text-gray-700'">
-                  {{ d.day_name }}
-                  <span v-if="d.is_weekend" class="text-2xs font-normal text-gray-400 block">(Nghỉ)</span>
+                <td>
+                  <span class="att-day-label" :class="{ 'is-weekend-text': d.is_weekend }">
+                    {{ d.day_name }}
+                  </span>
+                  <span v-if="d.is_weekend" class="att-weekend-badge">Nghỉ cuối tuần</span>
                 </td>
-                <td class="p-2.5 text-gray-600">
-                  {{ d.shift_name || (d.is_weekend ? '---' : 'Chưa xếp ca') }}
+                <td>
+                  <span class="att-shift-pill" :class="{ 'is-weekend-pill': d.is_weekend }">
+                    {{ d.shift_name || (d.is_weekend ? 'Nghỉ' : 'Chưa xếp ca') }}
+                  </span>
                 </td>
-                <td class="p-2.5">
+                <td>
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold"
+                    class="att-status-badge"
                     :class="getStatusBadgeClass(d.attendance_status)"
                   >
                     {{ getStatusText(d.attendance_status) }}
                   </span>
                 </td>
-                <td class="p-2.5 text-center font-mono text-gray-700">
-                  {{ d.check_in || '---' }}
+                <td class="td-center">
+                  <span v-if="d.check_in" class="att-time-text">{{ d.check_in }}</span>
+                  <span v-else class="att-time-dash">- - : - -</span>
                 </td>
-                <td class="p-2.5 text-center font-mono text-gray-700">
-                  {{ d.check_out || '---' }}
+                <td class="td-center">
+                  <span v-if="d.check_out" class="att-time-text">{{ d.check_out }}</span>
+                  <span v-else class="att-time-dash">- - : - -</span>
                 </td>
-                <td class="p-2.5 text-center font-bold" :class="d.work_units > 0 ? 'text-success' : 'text-gray-400'">
-                  {{ d.work_units > 0 ? d.work_units + ' công' : '0' }}
+                <td class="td-center">
+                  <span
+                    class="att-work-badge"
+                    :class="d.work_units > 0 ? 'work-positive' : 'work-zero'"
+                  >
+                    {{ d.work_units > 0 ? d.work_units + ' công' : '0' }}
+                  </span>
                 </td>
-                <td class="p-2.5 text-gray-500 italic truncate max-w-xs" :title="d.note">
+                <td class="att-note-cell" :title="d.note">
                   {{ d.note || '---' }}
                 </td>
               </tr>
@@ -1326,28 +1367,7 @@ export default {
       }
     },
     getStatusBadgeClass(status) {
-      switch (status) {
-        case 'present':
-          return 'bg-green-100 text-green-700 border border-green-300';
-        case 'online':
-        case 'online_half':
-          return 'bg-purple-100 text-purple-700 border border-purple-300';
-        case 'leave_approved':
-        case 'leave_approved_half':
-          return 'bg-blue-100 text-blue-700 border border-blue-300';
-        case 'unexcused_absent':
-        case 'unexcused_absent_half':
-          return 'bg-red-100 text-red-700 border border-red-300';
-        case 'late_fined':
-          return 'bg-orange-100 text-orange-700 border border-orange-300';
-        case 'late_submitted':
-          return 'bg-gray-200 text-gray-700 border border-gray-300';
-        case 'weekend':
-          return 'bg-gray-100 text-gray-500 border border-gray-200';
-        case 'not_checked':
-        default:
-          return 'bg-gray-50 text-gray-400 border border-dashed border-gray-300';
-      }
+      return 'status-' + (status || 'not_checked');
     },
     getStatusText(status) {
       switch (status) {
@@ -1370,7 +1390,7 @@ export default {
         case 'late_submitted':
           return '⚠ Gửi đơn muộn';
         case 'weekend':
-          return '☕ Nghỉ cuối tuần';
+          return '☕ Nghỉ cuối tuần (T7/CN)';
         case 'not_checked':
         default:
           return '⚪ Chưa điểm danh';
@@ -1389,31 +1409,448 @@ export default {
 </script>
 
 <style>
+/* Custom Popup Styling */
 .modal-attendance-month-detail.con-vs-popup .vs-popup {
-  width: 980px !important;
-  max-width: 95vw !important;
-  border-radius: 12px !important;
+  width: 1040px !important;
+  max-width: 96vw !important;
+  border-radius: 14px !important;
   overflow: hidden !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
 }
 .modal-attendance-month-detail .vs-popup--header {
-  background: #ffffff !important;
+  background: #f8fafc !important;
   border-bottom: 1px solid #e2e8f0 !important;
-  padding: 16px 20px !important;
+  padding: 16px 24px !important;
 }
 .modal-attendance-month-detail .vs-popup--title h3 {
   font-size: 16px !important;
   font-weight: 700 !important;
-  color: #0f172a !important;
+  color: #1e293b !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
 }
 .modal-attendance-month-detail .vs-popup--content {
-  padding: 16px 20px !important;
-  background: #ffffff !important;
+  padding: 20px 24px !important;
+  background: #f8fafc !important;
 }
 .modal-attendance-month-detail .vs-popup--close {
   top: 14px !important;
-  right: 14px !important;
+  right: 18px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border-radius: 50% !important;
+}
+
+/* Loading */
+.att-modal-loading {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+}
+.att-loading-spinner {
+  font-size: 32px;
+  color: #2563eb;
+  margin-bottom: 12px;
+}
+.att-loading-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Profile Banner */
+.att-profile-banner {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.att-profile-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+.att-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.att-profile-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 1px solid #dbeafe;
+  flex-shrink: 0;
+}
+.att-profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+}
+.att-profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.att-tag {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+}
+.att-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.att-chip-month {
+  display: inline-flex;
+  align-items: center;
+  background: #1e40af;
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);
+}
+.att-btn-export {
+  display: inline-flex;
+  align-items: center;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+.att-btn-export:hover {
+  background: #059669;
+}
+
+/* KPI Row */
+.att-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+@media (max-width: 900px) {
+  .att-kpi-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .att-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.att-kpi-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.att-kpi-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.att-kpi-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.kpi-standard::before { background: #3b82f6; }
+.kpi-worked::before { background: #10b981; }
+.kpi-online::before { background: #8b5cf6; }
+.kpi-late::before { background: #f59e0b; }
+.kpi-leave::before { background: #06b6d4; }
+.kpi-absent::before { background: #ef4444; }
+.kpi-latesub::before { background: #64748b; }
+
+.kpi-icon-wrap {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+.kpi-standard .kpi-icon-wrap { color: #3b82f6; }
+.kpi-worked .kpi-icon-wrap { color: #10b981; }
+.kpi-online .kpi-icon-wrap { color: #8b5cf6; }
+.kpi-late .kpi-icon-wrap { color: #f59e0b; }
+.kpi-leave .kpi-icon-wrap { color: #06b6d4; }
+.kpi-absent .kpi-icon-wrap { color: #ef4444; }
+.kpi-latesub .kpi-icon-wrap { color: #64748b; }
+
+.kpi-body {
+  flex: 1;
+  min-width: 0;
+}
+.kpi-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kpi-num {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+.kpi-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+.text-success { color: #10b981 !important; }
+.text-purple { color: #8b5cf6 !important; }
+.text-warning { color: #f59e0b !important; }
+.text-blue { color: #0284c7 !important; }
+.text-danger { color: #ef4444 !important; }
+.text-slate { color: #475569 !important; }
+
+/* Table Container */
+.att-table-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  max-height: 520px;
+  overflow-y: auto;
+}
+.att-custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.att-custom-table thead th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 12px 14px;
+  border-bottom: 2px solid #cbd5e1;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
+}
+.att-custom-table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+.att-custom-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Weekend Rows */
+.att-custom-table tbody tr.is-weekend-row {
+  background-color: #fafbfc;
+}
+.att-custom-table tbody tr.is-weekend-row:hover {
+  background-color: #f1f5f9;
+}
+.att-custom-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.th-center, .td-center {
+  text-align: center;
+}
+
+/* Day Number Badge */
+.att-day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid #e2e8f0;
+}
+.is-weekend-num {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+}
+
+/* Day Label */
+.att-day-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+.is-weekend-text {
+  color: #ef4444;
+  font-weight: 700;
+}
+.att-weekend-badge {
+  display: block;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: normal;
+  margin-top: 1px;
+}
+
+/* Shift Pill */
+.att-shift-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.is-weekend-pill {
+  color: #94a3b8;
+  border-style: dashed;
+  background: transparent;
+}
+
+/* Status Badges */
+.att-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.status-present {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.status-online, .status-online_half {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+.status-leave_approved, .status-leave_approved_half {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+.status-unexcused_absent, .status-unexcused_absent_half {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.status-late_fined {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.status-late_submitted {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.status-weekend {
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+.status-not_checked {
+  background: #ffffff;
+  color: #9ca3af;
+  border: 1px dashed #d1d5db;
+}
+
+/* Time check-in / check-out */
+.att-time-text {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+.att-time-dash {
+  font-family: monospace;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+/* Work Units */
+.att-work-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.work-positive {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.work-zero {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.att-note-cell {
+  color: #64748b;
+  font-size: 12px;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

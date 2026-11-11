@@ -631,6 +631,10 @@ class AttendanceController extends Controller
                 $shiftName = $profile->shift->name;
             }
 
+            if ($isWeekend && !$att && (!$asn || !$asn->shift_id)) {
+                $shiftName = 'Nghỉ cuối tuần';
+            }
+
             // Trạng thái điểm danh
             $status = $att ? $att->attendance_status : ($isWeekend ? 'weekend' : 'not_checked');
             $note = $att ? $att->note : '';
@@ -638,18 +642,31 @@ class AttendanceController extends Controller
             $checkOut = $att ? $att->check_out : null;
 
             if (!$att) {
-                if ($leaveReq) {
-                    if ($leaveReq->approval_type === 'late_unpaid') {
-                        $status = 'late_submitted';
-                    } elseif ((float)$leaveReq->duration_days > 0 && (float)$leaveReq->duration_days < 1) {
-                        $status = 'leave_approved_half';
+                if ($isWeekend) {
+                    if ($onlineReg) {
+                        $status = 'online';
+                        $note = 'Đã duyệt làm Online cuối tuần';
+                    } elseif ($asn && $asn->shift_id) {
+                        $status = 'present';
+                        $note = 'Xếp ca làm cuối tuần';
                     } else {
-                        $status = 'leave_approved';
+                        $status = 'weekend';
+                        $note = 'Nghỉ cuối tuần (T7/CN)';
                     }
-                    $note = $leaveReq->reason ? 'Nghỉ phép: ' . $leaveReq->reason : 'Nghỉ phép đã duyệt';
-                } elseif ($onlineReg || $isPermanentOnline) {
-                    $status = 'online';
-                    $note = $onlineReg ? 'Đã duyệt làm Online' : 'Ca làm online';
+                } else {
+                    if ($leaveReq) {
+                        if ($leaveReq->approval_type === 'late_unpaid') {
+                            $status = 'late_submitted';
+                        } elseif ((float)$leaveReq->duration_days > 0 && (float)$leaveReq->duration_days < 1) {
+                            $status = 'leave_approved_half';
+                        } else {
+                            $status = 'leave_approved';
+                        }
+                        $note = $leaveReq->reason ? 'Nghỉ phép: ' . $leaveReq->reason : 'Nghỉ phép đã duyệt';
+                    } elseif ($onlineReg || $isPermanentOnline) {
+                        $status = 'online';
+                        $note = $onlineReg ? 'Đã duyệt làm Online' : 'Ca làm online';
+                    }
                 }
             }
 
@@ -666,6 +683,7 @@ class AttendanceController extends Controller
                 case 'online_half':
                     $workUnits = 0.5;
                     break;
+                case 'weekend':
                 default:
                     $workUnits = 0.0;
                     break;
