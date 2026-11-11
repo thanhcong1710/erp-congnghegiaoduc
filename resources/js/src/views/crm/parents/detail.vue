@@ -2,459 +2,627 @@
 
 <template>
 
-  <div id="page-parent-detail">
-    <vx-card no-shadow class="mb-base">
-        <div class="vx-row">
-          <div class="vx-col md:w-1/3 w-full item-first">
-            <div style="float: left; width: 110px; text-align: center">
-              <img class="rounded" :src="parent.avatar_url ? parent.avatar_url :'/images/common/avatar-default.jpg'" width="100%">
-              <label for="account-upload" style="padding: 5px 10px; font-size: 12px;" class="vs-component vs-button vs-button-primary vs-button-filled mb-2">Upload Avatar</label>
-              <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
-            </div>
-            <div style="float: left; padding: 10px; width: calc(100% - 110px);">
-               <h5><strong>{{parent.name}}</strong></h5>
-              <p style="margin-top: 5px;" class="list-action"><span> {{parent.mobile_1}}</span> 
-                <vs-button size="small" @click="callPhone(parent.mobile_1)"><i class="fa fa-phone"></i></vs-button>
-                <vs-button size="small" @click="showSendSms(parent.mobile_1)"><i class="fa fa-sms"></i></vs-button>
-              </p>
-              <p style="margin-top: 5px;" class="list-action" v-if="parent.mobile_2"> 
-                <span> {{parent.mobile_2}}</span> 
-                <vs-button size="small" @click="callPhone(parent.mobile_2)"><i class="fa fa-phone"></i></vs-button>
-                <vs-button size="small" @click="showSendSms(parent.mobile_2)"><i class="fa fa-sms"></i></vs-button>
-              </p>
-            </div>
+  <div id="page-parent-detail" class="crm-detail-page">
+    <!-- 1. MODERN CRM HERO CARD -->
+    <vx-card no-shadow class="mb-base crm-hero-card">
+      <div class="crm-hero-grid">
+        <!-- 1.1 Profile / Avatar & Basic Contact -->
+        <div class="crm-hero-profile">
+          <div class="crm-avatar-box">
+            <img class="crm-avatar-img" :src="parent.avatar_url ? parent.avatar_url : '/images/common/avatar-default.jpg'" :alt="parent.name">
+            <label for="account-upload" class="crm-avatar-upload-btn" title="Đổi ảnh đại diện">
+              <i class="fa fa-camera"></i>
+            </label>
+            <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
           </div>
-          <div class="vx-col md:w-1/3 w-full">
-            <p class="mb-1">Liên hệ lần cuối: {{parent.last_care}}</p>
-            <p class="mb-1">Tương tác: <strong>{{parent.num_care}}</strong></p>
-            <vs-divider/>
-            <p><i class="fa fa-calendar mr-1"></i> Lịch chăm sóc tiếp theo</p>
-            <p class="mb-1"><input class="vs-inputx vs-input--input normal" type="datetime-local" :value="parent.next_care_date ? parent.next_care_date.replace(' ', 'T').slice(0, 16) : ''" id="next_care_date" @change="updateNextCareDate" :disabled="disabled_action"></p>
-          </div>
-          <div class="vx-col md:w-1/3 w-full">
-            <p>Trạng thái khách hàng</p>
-            <p class="mb-1">
-              <select class="vs-inputx vs-input--input normal" @change="openConfirmChangeStatus" v-model="tmp_status" >
-                <option 
-                    v-for="option in levelOptionsParent" 
-                    :key="option.id" 
-                    :value="option.id">
-                    {{ option.label }}
-                  </option>
-              </select>
-            </p> 
-            <p>Người phụ trách</p>
-            <p class="mb-1">
-              <select class="vs-inputx vs-input--input normal" @change="openConfirmAssgin" v-model="tmp_owner_id" > 
-                <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{item.label_name}}</option>
-              </select>
-            </p>
-          </div>
-        </div>
-      </vx-card>
 
-      <vx-card no-shadow class="mb-base" v-if="phone.show">
-        <div class="alert alert-secondary" role="alert" >
-          <h5 class="alert-heading"> <i class="fa fa-phone" style="margin-right:10px"></i> {{phone.title}}</h5>
-          <vs-divider/>
-            <div v-html="phone.description"></div>
-            <div class="mt-3">
-              <label for="nf-email">Trạng thái cuộc gọi <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="phone.select_note_status">
-                <option value="">Chọn trạng thái</option>
-                <option 
-                  v-for="option in statusOptionsCare" 
-                  :key="option.id" 
-                  :value="option.id">
-                  {{ option.label }}
-                </option>
-              </select>
+          <div class="crm-profile-info">
+            <div class="flex items-center flex-wrap gap-2 mb-1">
+              <h4 class="font-bold text-gray-900 m-0 text-lg">{{ parent.name || 'Khách hàng' }}</h4>
+              <span class="badge-parent-gender" :class="parent.gender === 'F' ? 'badge-female' : 'badge-male'">
+                <i :class="parent.gender === 'F' ? 'fa fa-venus' : 'fa fa-mars'" class="mr-1"></i>
+                {{ parent.gender === 'F' ? 'Bà' : 'Ông' }}
+              </span>
+              <span class="badge-parent-id">ID: #{{ parent.id }}</span>
             </div>
-            <div class="mt-3">
-              <label >Ghi chú cuộc gọi<span class="text-danger"> (*)</span></label>
-              <textarea class="vs-inputx vs-input--input normal mt-2" v-model="phone.note" placeholder="Thêm ghi chú cuộc gọi"></textarea>
-            </div>
-            <vs-alert :active.sync="phone.alert.active" class="mb-5 mr-4 ml-4" :color="phone.alert.color" closable icon-pack="feather" close-icon="icon-x">
-              <div v-html="phone.alert.body"></div>
-            </vs-alert>
-            <div class="mt-3" style="text-align:right">
-              <vs-button color="success" @click="updateNotePhone"> <i class="fa fa-paper-plane"></i> Lưu</vs-button>
-              <vs-button color="dark" @click="phone.show=false"> <i class="fa fa-times"></i> Hủy</vs-button>
-            </div>
-        </div>
-      </vx-card>
-      
-      <vx-card no-shadow class="mb-base" v-if="sms.show">
-        <div class="alert alert-secondary" role="alert" >
-          <h5 class="alert-heading"> <i class="fa fa-sms" style="margin-right:10px"></i> {{sms.title}}</h5>
-          <vs-divider/>
-            <textarea class="vs-inputx vs-input--input normal" v-model="sms.content" placeholder="Nhập nội dung tin nhắn"></textarea>
-            <div style="margin-top:5px;text-align:right">
-              <vs-button color="success" @click="sendSms"> <i class="fa fa-paper-plane"></i> Gửi</vs-button>
-              <vs-button color="dark" @click="sms.show=false"> <i class="fa fa-times"></i> Hủy</vs-button>
-            </div>
-        </div>
-      </vx-card>
 
-      <vx-card no-shadow class="mt-5">
-        <vs-tabs v-model="active_tab">
-          <vs-tab label="Thông tin" @click="changeTab()">
-            <div class="tab-text">
-              <div class="vx-row">
-                <div class="vx-col md:w-1/2 w-full item-first">
-                  <div class="vx-row">
-                    <div class="vx-col md:w-1/3 w-full mb-4">
-                      <label>Danh xưng <span class="text-danger"> (*)</span></label>
-                      <select class="vs-inputx vs-input--input normal" v-model="parent.gender" :disabled="disabled_edit">
-                        <option value="M">Ông</option>
-                        <option value="F">Bà</option>
-                      </select>
-                    </div>
-                    <div class="vx-col md:w-2/3 w-full mb-4">
-                      <label>Họ tên <span class="text-danger"> (*)</span></label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.name"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label  >Điện thoại <span class="text-danger"> (*)</span></label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.mobile_1"
-                        @change="validatePhone"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label  >Điện thoại 2</label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.mobile_2"
-                        @change="validatePhone2"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Email</label>
-                      <input
-                        class="vs-inputx vs-input--input normal"
-                        type="text"
-                        name="title"
-                        v-model="parent.email"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Ngày sinh </label>
-                      <datepicker class="w-full"
-                        v-model="parent.birthday"
-                        placeholder="Chọn ngày sinh nhật"
-                        :lang="datepickerOptions.lang"
-                        @change="selectDateParent"
-                        :disabled="disabled_edit"
-                      />
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Nghề nghiệp</label>
-                      <vue-select
-                            label="title"
-                            placeholder="Chọn nghề nghiệp"
-                            :options="html.jobs.list"
-                            v-model="parent_input.job"
-                            :searchable="true"
-                            language="tv-VN"
-                            @input="saveJob"
-                            :disabled="disabled_edit"
-                        ></vue-select>
-                    </div>
-                    <div class="vx-col w-full mb-4">
-                      <label >Ghi chú</label>
-                      <textarea class="vs-inputx vs-input--input normal" v-model="parent.note" :disabled="disabled_edit"></textarea>
-                    </div>
-                  </div>
+            <div class="crm-phone-chips mt-2">
+              <div class="crm-phone-pill" v-if="parent.mobile_1">
+                <i class="fa fa-phone text-emerald-500 mr-1.5"></i>
+                <strong class="text-gray-800">{{ parent.mobile_1 }}</strong>
+                <div class="crm-phone-actions">
+                  <button type="button" class="btn-circle-action btn-call" @click="callPhone(parent.mobile_1)" title="Gọi điện">
+                    <i class="fa fa-phone"></i>
+                  </button>
+                  <button type="button" class="btn-circle-action btn-sms" @click="showSendSms(parent.mobile_1)" title="Gửi tin nhắn SMS">
+                    <i class="fa fa-comment-dots"></i>
+                  </button>
                 </div>
-                <div class="vx-col md:w-1/2 w-full item-last">
-                  <div class="vx-row">
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Tỉnh Thành Phố</label>
+              </div>
+
+              <div class="crm-phone-pill" v-if="parent.mobile_2">
+                <i class="fa fa-phone text-blue-500 mr-1.5"></i>
+                <strong class="text-gray-800">{{ parent.mobile_2 }}</strong>
+                <div class="crm-phone-actions">
+                  <button type="button" class="btn-circle-action btn-call" @click="callPhone(parent.mobile_2)" title="Gọi điện số 2">
+                    <i class="fa fa-phone"></i>
+                  </button>
+                  <button type="button" class="btn-circle-action btn-sms" @click="showSendSms(parent.mobile_2)" title="Gửi SMS số 2">
+                    <i class="fa fa-comment-dots"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.2 Middle: Interaction & Care KPIs -->
+        <div class="crm-hero-kpis">
+          <div class="crm-kpi-item">
+            <div class="crm-kpi-icon bg-blue-50 text-blue-600">
+              <i class="fa fa-headset"></i>
+            </div>
+            <div class="crm-kpi-text">
+              <span class="crm-kpi-label">Số lần chăm sóc</span>
+              <strong class="crm-kpi-val text-blue-700">{{ parent.num_care || 0 }} <span class="text-xs font-normal">lượt</span></strong>
+            </div>
+          </div>
+
+          <div class="crm-kpi-item">
+            <div class="crm-kpi-icon bg-emerald-50 text-emerald-600">
+              <i class="fa fa-history"></i>
+            </div>
+            <div class="crm-kpi-text">
+              <span class="crm-kpi-label">Liên hệ lần cuối</span>
+              <strong class="crm-kpi-val text-gray-800 text-xs">{{ parent.last_care || 'Chưa liên hệ' }}</strong>
+            </div>
+          </div>
+
+          <div class="crm-kpi-next-care">
+            <label class="crm-next-care-label">
+              <i class="fa fa-calendar-alt text-amber-500 mr-1"></i> Lịch chăm sóc tiếp theo:
+            </label>
+            <div class="crm-next-care-input-box">
+              <input
+                class="crm-next-care-input"
+                type="datetime-local"
+                :value="parent.next_care_date ? parent.next_care_date.replace(' ', 'T').slice(0, 16) : ''"
+                id="next_care_date"
+                @change="updateNextCareDate"
+                :disabled="disabled_action"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.3 Right: Status & Owner Quick Controls -->
+        <div class="crm-hero-controls">
+          <div class="crm-control-box">
+            <label class="crm-control-label"><i class="fa fa-tag text-primary mr-1"></i> Trạng thái khách hàng</label>
+            <select class="crm-control-select" @change="openConfirmChangeStatus" v-model="tmp_status">
+              <option 
+                v-for="option in levelOptionsParent" 
+                :key="option.id" 
+                :value="option.id">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="crm-control-box mt-2">
+            <label class="crm-control-label"><i class="fa fa-user-tie text-primary mr-1"></i> Người phụ trách (EC)</label>
+            <select class="crm-control-select" @change="openConfirmAssgin" v-model="tmp_owner_id">
+              <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{ item.label_name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </vx-card>
+
+    <!-- Calling card modal-inline -->
+    <vx-card no-shadow class="mb-base crm-inline-card" v-if="phone.show">
+      <div class="crm-action-panel">
+        <h5 class="alert-heading flex items-center font-bold text-gray-800 m-0">
+          <i class="fa fa-phone text-emerald-500 mr-2"></i> {{ phone.title }}
+        </h5>
+        <vs-divider class="my-3"/>
+        <div v-html="phone.description" class="text-sm text-gray-700"></div>
+        <div class="mt-3">
+          <label class="font-medium text-sm text-gray-700">Trạng thái cuộc gọi <span class="text-danger">*</span></label>
+          <select class="vs-inputx vs-input--input normal mt-1" v-model="phone.select_note_status">
+            <option value="">Chọn trạng thái</option>
+            <option 
+              v-for="option in statusOptionsCare" 
+              :key="option.id" 
+              :value="option.id">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        <div class="mt-3">
+          <label class="font-medium text-sm text-gray-700">Ghi chú cuộc gọi <span class="text-danger">*</span></label>
+          <textarea rows="3" class="vs-inputx vs-input--input normal mt-1" v-model="phone.note" placeholder="Thêm ghi chú cuộc gọi..."></textarea>
+        </div>
+        <vs-alert :active.sync="phone.alert.active" class="my-3" :color="phone.alert.color" closable icon-pack="feather" close-icon="icon-x">
+          <div v-html="phone.alert.body"></div>
+        </vs-alert>
+        <div class="mt-3 flex justify-end gap-2">
+          <vs-button color="dark" type="border" @click="phone.show = false"><i class="fa fa-times mr-1"></i> Hủy</vs-button>
+          <vs-button color="success" class="shadow-sm" @click="updateNotePhone"><i class="fa fa-paper-plane mr-1"></i> Lưu ghi chú</vs-button>
+        </div>
+      </div>
+    </vx-card>
+      
+    <!-- SMS card modal-inline -->
+    <vx-card no-shadow class="mb-base crm-inline-card" v-if="sms.show">
+      <div class="crm-action-panel">
+        <h5 class="alert-heading flex items-center font-bold text-gray-800 m-0">
+          <i class="fa fa-sms text-blue-500 mr-2"></i> {{ sms.title }}
+        </h5>
+        <vs-divider class="my-3"/>
+        <textarea rows="3" class="vs-inputx vs-input--input normal" v-model="sms.content" placeholder="Nhập nội dung tin nhắn SMS..."></textarea>
+        <div class="mt-3 flex justify-end gap-2">
+          <vs-button color="dark" type="border" @click="sms.show = false"><i class="fa fa-times mr-1"></i> Hủy</vs-button>
+          <vs-button color="success" class="shadow-sm" @click="sendSms"><i class="fa fa-paper-plane mr-1"></i> Gửi SMS</vs-button>
+        </div>
+      </div>
+    </vx-card>
+
+      <!-- 2. MODERN TABS CARD -->
+      <vx-card no-shadow class="mt-4 crm-tabs-card">
+        <vs-tabs v-model="active_tab" class="crm-modern-tabs">
+          <!-- TAB 1: THÔNG TIN CHI TIẾT -->
+          <vs-tab label="Thông tin" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="vx-row">
+                <!-- Cột trái: Thông tin cá nhân -->
+                <div class="vx-col md:w-1/2 w-full mb-3">
+                  <div class="crm-form-section">
+                    <h6 class="crm-section-title"><i class="fa fa-user text-primary mr-1.5"></i> Thông tin cá nhân</h6>
+                    
+                    <div class="vx-row">
+                      <div class="vx-col sm:w-1/3 w-full mb-3">
+                        <label class="crm-field-label">Danh xưng <span class="text-danger">*</span></label>
+                        <select class="vs-inputx vs-input--input normal" v-model="parent.gender" :disabled="disabled_edit">
+                          <option value="M">Ông</option>
+                          <option value="F">Bà</option>
+                        </select>
+                      </div>
+                      <div class="vx-col sm:w-2/3 w-full mb-3">
+                        <label class="crm-field-label">Họ tên phụ huynh <span class="text-danger">*</span></label>
+                        <input
+                          class="vs-inputx vs-input--input normal"
+                          type="text"
+                          v-model="parent.name"
+                          :disabled="disabled_edit"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="vx-row">
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Điện thoại chính <span class="text-danger">*</span></label>
+                        <input
+                          class="vs-inputx vs-input--input normal"
+                          type="text"
+                          v-model="parent.mobile_1"
+                          @change="validatePhone"
+                          :disabled="disabled_edit"
+                        />
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Điện thoại phụ</label>
+                        <input
+                          class="vs-inputx vs-input--input normal"
+                          type="text"
+                          v-model="parent.mobile_2"
+                          @change="validatePhone2"
+                          :disabled="disabled_edit"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="vx-row">
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Email</label>
+                        <input
+                          class="vs-inputx vs-input--input normal"
+                          type="text"
+                          v-model="parent.email"
+                          :disabled="disabled_edit"
+                        />
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Ngày sinh</label>
+                        <datepicker class="w-full calendar-input"
+                          v-model="parent.birthday"
+                          placeholder="Chọn ngày sinh nhật"
+                          :lang="datepickerOptions.lang"
+                          @change="selectDateParent"
+                          :disabled="disabled_edit"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="crm-field-label">Nghề nghiệp</label>
                       <vue-select
-                        naem="input_province"
-                        label="name"
-                        placeholder="Chọn Tỉnh/Thành Phố"
-                        :options="html.province.list"
-                        v-model="parent_input.province"
+                        label="title"
+                        placeholder="Chọn nghề nghiệp"
+                        :options="html.jobs.list"
+                        v-model="parent_input.job"
                         :searchable="true"
                         language="tv-VN"
-                        @input="getDistrict"
+                        @input="saveJob"
                         :disabled="disabled_edit"
                       ></vue-select>
                     </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Quận huyện</label>
-                      <vue-select
-                            naem="input_district"
-                            label="name"
-                            placeholder="Chọn Quận/Huyện/Thị Xã"
-                            :options="html.district.list"
-                            v-model="parent_input.district"
-                            :searchable="true"
-                            language="tv-VN"
-                            @input="saveDistrict"
-                            :disabled="disabled_edit"
-                        ></vue-select>
+
+                    <div class="mb-2">
+                      <label class="crm-field-label">Ghi chú phụ huynh</label>
+                      <textarea rows="3" class="vs-inputx vs-input--input normal" v-model="parent.note" :disabled="disabled_edit" placeholder="Thói quen, mong muốn, lưu ý đặc biệt..."></textarea>
                     </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Nguồn  <span class="text-danger"> (*)</span></label>
-                      <vue-select
-                            label="name"
-                            placeholder="Chọn nguồn"
-                            :options="html.source.list"
-                            v-model="parent_input.source"
-                            :searchable="true"
-                            language="tv-VN"
-                            @input="localeDataSourceDetail"
-                            :disabled="disabled_edit"
+                  </div>
+                </div>
+
+                <!-- Cột phải: Địa chỉ & Nguồn tiếp cận -->
+                <div class="vx-col md:w-1/2 w-full mb-3">
+                  <div class="crm-form-section">
+                    <h6 class="crm-section-title"><i class="fa fa-map-marker-alt text-primary mr-1.5"></i> Địa chỉ & Nguồn tiếp cận</h6>
+
+                    <div class="vx-row">
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Tỉnh / Thành Phố</label>
+                        <vue-select
+                          label="name"
+                          placeholder="Chọn Tỉnh/Thành Phố"
+                          :options="html.province.list"
+                          v-model="parent_input.province"
+                          :searchable="true"
+                          language="tv-VN"
+                          @input="getDistrict"
+                          :disabled="disabled_edit"
                         ></vue-select>
-                    </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4">
-                      <label >Nguồn chi tiết</label>
-                      <vue-select
-                            label="name"
-                            placeholder="Chọn nguồn chi tiết"
-                            :options="html.source_detail.list"
-                            v-model="parent_input.source_detail"
-                            :searchable="true"
-                            language="tv-VN"
-                            @input="saveSourceDetail"
-                            :disabled="disabled_edit"
+                      </div>
+                      <div class="vx-col sm:w-1/2 w-full mb-3">
+                        <label class="crm-field-label">Quận / Huyện</label>
+                        <vue-select
+                          label="name"
+                          placeholder="Chọn Quận/Huyện/Thị Xã"
+                          :options="html.district.list"
+                          v-model="parent_input.district"
+                          :searchable="true"
+                          language="tv-VN"
+                          @input="saveDistrict"
+                          :disabled="disabled_edit"
                         ></vue-select>
+                      </div>
                     </div>
-                    <div class="vx-col md:w-1/2 w-full mb-4" v-if="this.parent.source_id ==3">
-                      <label  >Người giới thiệu (ĐT)</label>
+
+                    <div class="mb-3">
+                      <label class="crm-field-label">Nguồn dữ liệu <span class="text-danger">*</span></label>
+                      <vue-select
+                        label="name"
+                        placeholder="Chọn nguồn"
+                        :options="html.source.list"
+                        v-model="parent_input.source"
+                        :searchable="true"
+                        language="tv-VN"
+                        @input="localeDataSourceDetail"
+                        :disabled="disabled_edit"
+                      ></vue-select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="crm-field-label">Nguồn chi tiết</label>
+                      <vue-select
+                        label="name"
+                        placeholder="Chọn nguồn chi tiết"
+                        :options="html.source_detail.list"
+                        v-model="parent_input.source_detail"
+                        :searchable="true"
+                        language="tv-VN"
+                        @input="saveSourceDetail"
+                        :disabled="disabled_edit"
+                      ></vue-select>
+                    </div>
+
+                    <div class="mb-3" v-if="this.parent.source_id == 3">
+                      <label class="crm-field-label">Người giới thiệu (SĐT C2C)</label>
                       <input
                         class="vs-inputx vs-input--input normal"
                         type="text"
-                        name="title"
                         v-model="parent.c2c_mobile"
                         @change="validatePhoneC2C"
                         :disabled="disabled_edit"
+                        placeholder="Nhập số điện thoại người giới thiệu..."
                       />
-                    </div>
-                    <div class="vx-col w-full mb-4" v-if="this.parent.source_id ==3">
-                      <p><i>{{c2c_info}}</i></p>
+                      <p v-if="c2c_info" class="text-xs text-primary font-medium mt-1"><i>{{ c2c_info }}</i></p>
                     </div>
                   </div>
                 </div>
-                <vs-alert :active.sync="alert.active" class="mb-5 mr-4 ml-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
-                  <div v-html="alert.body"></div>
-                </vs-alert>
-                <div class="vx-col w-full">
-                  <vs-button class="mb-2" @click="disabled_edit=false" v-if="disabled_edit== true">Cập nhật thông tin</vs-button>
-                  <vs-button color="dark" class="mb-2 mr-3" @click="reloadPage" v-if="disabled_edit== false">Hủy</vs-button>
-                  <vs-button class="mb-2" color="success" @click="saveInfo" v-if="disabled_edit== false">Lưu</vs-button>
-                </div>
-              </div>
-            </div>
-          </vs-tab>
-          <vs-tab :label="'Ticket ('+ total_unsuccess +')'"  @click="changeTab()">
-            <div class="tab-text">
-              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalTicket"><i class="fa fa-plus"></i> Thêm mới Ticket</vs-button>
-              <div class="vs-component vs-con-table stripe vs-table-primary">
-                <div class="con-tablex vs-table--content">
-                  <div class="vs-con-tbody vs-table--tbody ">
-                    <table class="vs-table vs-table--tbody-table">
-                      <thead class="vs-table--thead">
-                        <tr>
-                          <!---->
-                          <th colspan="1" rowspan="1" class="text-center">Thời gian tạo</th>
-                          <th colspan="1" rowspan="1" class="text-center">Loại</th>
-                          <th colspan="1" rowspan="1" >Nội dung</th>
-                          <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
-                          <th colspan="1" rowspan="1" >Ghi chú xử lý</th>
-                        </tr>
-                      </thead>
-                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in tickets" :key="index">
-                        <td class="td vs-table--td text-center">{{ item.created_at }}</td>
-                        <td class="td vs-table--td text-center">{{ item.type | genTypeTicket }}</td>
-                        <td class="td vs-table--td" style="max-width: 284px">{{ item.description }}</td>
-                        <td class="td vs-table--td text-center">
-                          <select class="vs-inputx vs-input--input normal" v-model="item.status" @change="updateTicket(item)">
-                            <option value="1">Mới tạo</option>
-                            <option value="2">Đã tiếp nhận</option>
-                            <option value="3">Chờ xử lý</option>
-                            <option value="4">Hoàn thành</option>
-                            <option value="5">Hủy</option>
-                          </select>
-                        </td>
-                        <td class="td vs-table--td">
-                          <textarea class="vs-inputx vs-input--input normal" v-model="item.note" @change="updateTicket(item)"></textarea>
-                        </td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </vs-tab>
-          <vs-tab label="Chăm sóc"  @click="changeTab()">
-            <div class="tab-text">
-              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-2" @click="showModalCare"><i class="fa fa-plus"></i> Thêm mới chăm sóc</vs-button>
-              <div class="vs-component vs-con-table stripe vs-table-primary">
-                <div class="con-tablex vs-table--content">
-                  <div class="vs-con-tbody vs-table--tbody ">
-                    <table class="vs-table vs-table--tbody-table">
-                      <thead class="vs-table--thead">
-                        <tr>
-                          <!---->
-                          <th colspan="1" rowspan="1" class="text-center">Thời gian</th>
-                          <th colspan="1" rowspan="1">Phụ trách</th>
-                          <!-- <th colspan="1" rowspan="1" class="text-center">Trung tâm</th> -->
-                          <th colspan="1" rowspan="1" class="text-center">Phương thức</th>
-                          <th colspan="1" rowspan="1" class="text-center">Trạng thái cuộc gọi</th>
-                          <th colspan="1" rowspan="1" class="text-center">Lịch chăm sóc tiếp theo</th>
-                          <th colspan="1" rowspan="1" >Chi tiết</th>
-                        </tr>
-                      </thead>
-                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in cares" :key="index">
-                        <td class="td vs-table--td text-center">{{ item.care_date }}</td>
-                        <td class="td vs-table--td">{{ item.creator_name }}</td>
-                        <!-- <td class="td vs-table--td text-center">{{ item.branch_name }}</td> -->
-                        <td class="td vs-table--td text-center">{{ item.method_name}}{{item.type_call?" - "+item.type_call:''}}</td>
-                        <td class="td vs-table--td text-center">{{ item.call_status_label }}</td>
-                        <td class="td vs-table--td text-center">{{ item.next_care_date }}</td>
-                        <td class="td vs-table--td">
-                          <p v-if="item.link_record">
-                            <audio controls style="height: 40px; width: 256px; border: 1px solid #ccc;">
-                              <source :src="item.link_record" type="audio/x-wav">
-                            </audio>
-                          </p>
-                          <p v-html="item.note"></p>
-                          <p v-if="item.attached_file">
-                            <a :href="item.attached_file" target="blank">File đính kèm</a>
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </vs-tab>
-          <vs-tab label="Học sinh"  @click="changeTab()">
-            <div class="tab-text">
-              <vs-button :disabled="disabled_action" color="success" class=" mt-3 mb-3" @click="showModalStudent(0)"><i class="fa fa-plus"></i> Thêm mới học sinh</vs-button>
-              <div class="vx-row mt-3">
-                <div class="vx-col md:w-1/3 w-full item-first" v-for="(item, index) in students" :key="index">
-                  <vx-card class="mb-base">
-                    <div class="card-header list-action flex flex-wrap items-center justify-between gap-1">
-                      <div class="min-w-0">
-                        <strong class="text-base">{{ item.name }}</strong>
-                        <span v-if="item.lms_code" class="text-xs text-primary font-bold ml-1">({{ item.lms_code }})</span>
-                      </div>
-                      <div class="flex items-center gap-1">
-                        <vs-button :disabled="disabled_action" color="success" class="small" @click="showModalStudent(item)" title="Sửa thông tin"> <i class="fa fa-edit"></i> </vs-button>
-                        
-                        <!-- Nút Nhập học ngay -->
-                        <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank">
-                          <vs-button color="primary" class="small" title="Tạo hợp đồng nhập học ngay">
-                            <i class="fa fa-file-signature mr-1"></i> Nhập học
-                          </vs-button>
-                        </router-link>
 
-                        <!-- Nút Xem chi tiết LMS -->
+                <!-- Thanh nút thao tác -->
+                <div class="vx-col w-full mt-2">
+                  <vs-alert :active.sync="alert.active" class="mb-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+                    <div v-html="alert.body"></div>
+                  </vs-alert>
+                  <div class="flex items-center gap-2">
+                    <vs-button color="primary" class="shadow-sm" @click="disabled_edit = false" v-if="disabled_edit">
+                      <i class="fa fa-edit mr-1"></i> Cập nhật thông tin
+                    </vs-button>
+                    <vs-button color="dark" type="border" @click="reloadPage" v-if="!disabled_edit">
+                      Hủy bỏ
+                    </vs-button>
+                    <vs-button color="success" class="shadow-sm" @click="saveInfo" v-if="!disabled_edit">
+                      <i class="fa fa-save mr-1"></i> Lưu thông tin
+                    </vs-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </vs-tab>
+
+          <!-- TAB 2: TICKET -->
+          <vs-tab :label="'Ticket (' + total_unsuccess + ')'" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-semibold text-gray-700">Yêu cầu & Khiếu nại từ khách hàng</span>
+                <vs-button :disabled="disabled_action" color="success" size="small" class="shadow-sm" @click="showModalTicket">
+                  <i class="fa fa-plus mr-1"></i> Thêm mới Ticket
+                </vs-button>
+              </div>
+
+              <div class="table-responsive crm-table-wrapper">
+                <table class="crm-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width: 140px;" class="text-center">Thời gian tạo</th>
+                      <th style="min-width: 130px;" class="text-center">Loại</th>
+                      <th style="min-width: 250px;">Nội dung yêu cầu</th>
+                      <th style="min-width: 140px;" class="text-center">Trạng thái</th>
+                      <th style="min-width: 200px;">Ghi chú xử lý</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="!tickets || tickets.length === 0">
+                      <td colspan="5" class="text-center py-4 text-gray-500">Chưa có ticket nào được tạo</td>
+                    </tr>
+                    <tr v-for="(item, index) in tickets" :key="index">
+                      <td class="text-center font-mono text-xs">{{ item.created_at }}</td>
+                      <td class="text-center">
+                        <span class="badge-ticket-type">{{ item.type | genTypeTicket }}</span>
+                      </td>
+                      <td class="text-sm text-gray-800">{{ item.description }}</td>
+                      <td class="text-center">
+                        <select class="crm-cell-select" v-model="item.status" @change="updateTicket(item)">
+                          <option value="1">Mới tạo</option>
+                          <option value="2">Đã tiếp nhận</option>
+                          <option value="3">Chờ xử lý</option>
+                          <option value="4">Hoàn thành</option>
+                          <option value="5">Hủy</option>
+                        </select>
+                      </td>
+                      <td>
+                        <textarea rows="2" class="crm-cell-textarea" v-model="item.note" @change="updateTicket(item)" placeholder="Nhập ghi chú xử lý..."></textarea>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </vs-tab>
+
+          <!-- TAB 3: CHĂM SÓC -->
+          <vs-tab label="Chăm sóc" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-semibold text-gray-700">Lịch sử tương tác & Chăm sóc khách hàng</span>
+                <vs-button :disabled="disabled_action" color="success" size="small" class="shadow-sm" @click="showModalCare">
+                  <i class="fa fa-plus mr-1"></i> Thêm mới chăm sóc
+                </vs-button>
+              </div>
+
+              <div class="table-responsive crm-table-wrapper">
+                <table class="crm-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width: 140px;" class="text-center">Thời gian</th>
+                      <th style="min-width: 130px;">Phụ trách</th>
+                      <th style="min-width: 140px;" class="text-center">Phương thức</th>
+                      <th style="min-width: 140px;" class="text-center">Trạng thái gọi</th>
+                      <th style="min-width: 150px;" class="text-center">Lịch hẹn tiếp</th>
+                      <th style="min-width: 250px;">Chi tiết nội dung</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="!cares || cares.length === 0">
+                      <td colspan="6" class="text-center py-4 text-gray-500">Chưa có lịch sử chăm sóc nào</td>
+                    </tr>
+                    <tr v-for="(item, index) in cares" :key="index">
+                      <td class="text-center font-mono text-xs">{{ item.care_date }}</td>
+                      <td class="font-medium text-gray-900">{{ item.creator_name }}</td>
+                      <td class="text-center">
+                        <span class="badge-care-method">{{ item.method_name }}{{ item.type_call ? ' - ' + item.type_call : '' }}</span>
+                      </td>
+                      <td class="text-center text-xs font-semibold">{{ item.call_status_label || '---' }}</td>
+                      <td class="text-center text-xs text-amber-600 font-medium">{{ item.next_care_date || '---' }}</td>
+                      <td>
+                        <div v-if="item.link_record" class="mb-1">
+                          <audio controls class="crm-audio-player">
+                            <source :src="item.link_record" type="audio/x-wav">
+                          </audio>
+                        </div>
+                        <div class="text-sm text-gray-800" v-html="item.note"></div>
+                        <div v-if="item.attached_file" class="mt-1">
+                          <a :href="item.attached_file" target="_blank" class="text-primary text-xs underline font-medium">
+                            <i class="fa fa-paperclip mr-1"></i>File đính kèm
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </vs-tab>
+
+          <!-- TAB 4: HỌC SINH -->
+          <vs-tab label="Học sinh" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="flex items-center justify-between flex-wrap gap-2 mb-4 mt-1">
+                <div>
+                  <h5 class="font-bold text-gray-800 m-0 flex items-center">
+                    <i class="fa fa-user-graduate text-primary mr-2" style="font-size: 20px;"></i>
+                    Danh Sách Học Sinh ({{ students.length }})
+                  </h5>
+                  <span class="text-xs text-gray-500">Học sinh tạo từ CRM đã là chính thức, sẵn sàng tạo hợp đồng nhập học ngay</span>
+                </div>
+                <vs-button :disabled="disabled_action" color="success" class="flex items-center shadow-md" @click="showModalStudent(0)">
+                  <i class="fa fa-plus mr-1.5"></i> Thêm mới học sinh
+                </vs-button>
+              </div>
+
+              <!-- Empty state -->
+              <div v-if="!students || students.length === 0" class="crm-empty-state">
+                <i class="fa fa-user-graduate crm-empty-icon"></i>
+                <h6 class="font-bold text-gray-700 mt-2">Chưa có thông tin học sinh</h6>
+                <p class="text-sm text-gray-500 mb-3">Phụ huynh này chưa được thêm học sinh nào trong hệ thống.</p>
+                <vs-button :disabled="disabled_action" color="primary" size="small" @click="showModalStudent(0)">
+                  <i class="fa fa-plus mr-1"></i> Thêm học sinh ngay
+                </vs-button>
+              </div>
+
+              <!-- Student Cards Grid -->
+              <div v-else class="vx-row">
+                <div class="vx-col lg:w-1/3 md:w-1/2 w-full mb-4" v-for="(item, index) in students" :key="index">
+                  <div class="crm-student-card">
+                    <!-- Card Header -->
+                    <div class="crm-student-card-header">
+                      <div class="crm-student-identity">
+                        <img
+                          class="crm-student-mini-avatar"
+                          :src="item.gender === 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'"
+                          :alt="item.name"
+                        />
+                        <div class="min-w-0">
+                          <h6 class="crm-student-name truncate" :title="item.name">{{ item.name }}</h6>
+                          <span v-if="item.lms_code" class="crm-student-lms-badge" :title="item.lms_code">
+                            <i class="fa fa-id-badge mr-1"></i>{{ item.lms_code }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="flex items-center gap-1">
+                        <button type="button" class="btn-icon-soft text-gray-600" :disabled="disabled_action" @click="showModalStudent(item)" title="Sửa thông tin học sinh">
+                          <i class="fa fa-edit"></i>
+                        </button>
                         <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
-                          <vs-button class="small" color="dark" type="border" title="Xem hồ sơ học sinh LMS"> <i class="fa fa-eye"></i></vs-button>
+                          <button type="button" class="btn-icon-soft text-primary" title="Xem hồ sơ LMS chi tiết">
+                            <i class="fa fa-eye"></i>
+                          </button>
                         </router-link>
                       </div>
                     </div>
-                    <div class="card-body">
-                      <p v-if="item.lms_code">Mã LMS: <b class="text-primary">{{ item.lms_code }}</b></p>
-                      <p>Ngày sinh: {{ item.birthday }}</p>
-                      <p>Giới tính: {{ item.gender | genTextGender}}</p>
-                      <p>Cơ sở / Trung tâm: <b>{{ item.checkin_branch_name || parent.branch_name || 'Chưa gán' }}</b></p>
-                      <p>Ghi chú: {{ item.note || '---' }}</p>
-                      <p>Ngày tạo: {{ item.created_at}}</p>
-                      <p>Người tạo: {{ item.creator_name}}</p>
-                      <p>Trạng thái: <b :class="item.status == 3 ? 'text-success font-bold' : ''">{{ item.status | genStudentStatus}}</b></p>
+
+                    <!-- Card Body -->
+                    <div class="crm-student-card-body">
+                      <div class="crm-student-meta-row">
+                        <span class="crm-meta-label"><i class="fa fa-calendar-alt text-primary mr-1"></i> Ngày sinh:</span>
+                        <span class="crm-meta-val">{{ item.birthday || '---' }}</span>
+                      </div>
+                      <div class="crm-student-meta-row">
+                        <span class="crm-meta-label"><i :class="item.gender === 'F' ? 'fa fa-venus text-pink-500' : 'fa fa-mars text-blue-500'" class="mr-1"></i> Giới tính:</span>
+                        <span class="crm-meta-val">{{ item.gender | genTextGender }}</span>
+                      </div>
+                      <div class="crm-student-meta-row">
+                        <span class="crm-meta-label"><i class="fa fa-building text-primary mr-1"></i> Cơ sở:</span>
+                        <span class="crm-meta-val font-semibold text-gray-800">{{ item.checkin_branch_name || parent.branch_name || 'Chưa gán' }}</span>
+                      </div>
+                      <div class="crm-student-meta-row" v-if="item.note">
+                        <span class="crm-meta-label"><i class="fa fa-sticky-note text-amber-500 mr-1"></i> Ghi chú:</span>
+                        <span class="crm-meta-val text-gray-600 truncate" :title="item.note">{{ item.note }}</span>
+                      </div>
+                      <div class="crm-student-meta-row">
+                        <span class="crm-meta-label"><i class="fa fa-check-circle text-emerald-500 mr-1"></i> Trạng thái:</span>
+                        <span class="badge-status-pill badge-status-official">
+                          {{ item.status | genStudentStatus }}
+                        </span>
+                      </div>
                     </div>
-                  </vx-card>
-                </div>
-              </div>
-            </div>
-          </vs-tab>
-          <vs-tab label="Lịch sử cập nhật"  @click="changeTab()">
-            <div class="tab-text">
-              <div class="vs-component vs-con-table stripe vs-table-primary">
-                <div class="con-tablex vs-table--content">
-                  <div class="vs-con-tbody vs-table--tbody ">
-                    <table class="vs-table vs-table--tbody-table">
-                      <thead class="vs-table--thead">
-                        <tr>
-                          <!---->
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text text-center">Thời gian
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Nội dung
-                              <!---->
-                            </div>
-                          </th>
-                          <th colspan="1" rowspan="1" class="text-center">
-                            <div class="vs-table-text">Người thực hiện
-                              <!---->
-                            </div>
-                          </th>
-                          
-                        </tr>
-                      </thead>
-                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in logs" :key="index">
-                        <td class="td vs-table--td">{{ item.created_at }}</td>
-                        <td class="td vs-table--td">{{ item.content }}</td>
-                        <td class="td vs-table--td">{{ item.creator_name }}</td>
-                      </tr>
-                    </table>
+
+                    <!-- Card Footer: Quick Action -->
+                    <div class="crm-student-card-footer">
+                      <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank" class="w-full">
+                        <vs-button color="primary" class="w-full flex items-center justify-center shadow-sm">
+                          <i class="fa fa-file-signature mr-1.5"></i> Nhập học ngay (Tạo hợp đồng)
+                        </vs-button>
+                      </router-link>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </vs-tab>
-          <vs-tab label="Vouchers"  @click="changeTab()">
-            <div class="tab-text">
-              <div class="vs-component vs-con-table stripe vs-table-primary">
-                <div class="con-tablex vs-table--content">
-                  <div class="vs-con-tbody vs-table--tbody ">
-                    <table class="vs-table vs-table--tbody-table">
-                      <thead class="vs-table--thead">
-                        <tr>
-                          <!---->
-                          <th colspan="1" rowspan="1" class="text-center">Mã voucher</th>
-                          <th colspan="1" rowspan="1" class="text-center">Số tiền giảm trừ</th>
-                          <th colspan="1" rowspan="1" class="text-center">Số buổi học bổng</th>
-                          <th colspan="1" rowspan="1" class="text-center">Ngày hiệu lực</th>
-                          <th colspan="1" rowspan="1" class="text-center">Trạng thái</th>
-                          
-                        </tr>
-                      </thead>
-                      <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in vouchers" :key="index">
-                        <td class="td vs-table--td text-center">{{ item.code }}</td>
-                        <td class="td vs-table--td text-center">{{ item.coupon_amount | formatMoney}}</td>
-                        <td class="td vs-table--td text-center">{{ item.coupon_session }}</td>
-                        <td class="td vs-table--td text-center">{{ item.end_date | formatDateView }}</td>
-                        <td class="td vs-table--td text-center">{{ item.status == 2 ? "Đã sử dụng" : "Chưa sử dụng"}}</td>
-                      </tr>
-                    </table>
-                  </div>
-                </div>
+
+          <!-- TAB 5: LỊCH SỬ CẬP NHẬT -->
+          <vs-tab label="Lịch sử cập nhật" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="table-responsive crm-table-wrapper">
+                <table class="crm-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width: 160px;" class="text-center">Thời gian</th>
+                      <th style="min-width: 300px;">Nội dung cập nhật</th>
+                      <th style="min-width: 160px;" class="text-center">Người thực hiện</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="!logs || logs.length === 0">
+                      <td colspan="3" class="text-center py-4 text-gray-500">Chưa có lịch sử cập nhật nào</td>
+                    </tr>
+                    <tr v-for="(item, index) in logs" :key="index">
+                      <td class="text-center font-mono text-xs">{{ item.created_at }}</td>
+                      <td class="text-sm text-gray-800">{{ item.content }}</td>
+                      <td class="text-center font-medium">{{ item.creator_name }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </vs-tab>
+
+          <!-- TAB 6: VOUCHERS -->
+          <vs-tab label="Vouchers" @click="changeTab()">
+            <div class="tab-content-wrapper p-2">
+              <div class="table-responsive crm-table-wrapper">
+                <table class="crm-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width: 150px;" class="text-center">Mã voucher</th>
+                      <th style="min-width: 150px;" class="text-right">Số tiền giảm trừ</th>
+                      <th style="min-width: 140px;" class="text-center">Số buổi học bổng</th>
+                      <th style="min-width: 140px;" class="text-center">Ngày hiệu lực</th>
+                      <th style="min-width: 130px;" class="text-center">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="!vouchers || vouchers.length === 0">
+                      <td colspan="5" class="text-center py-4 text-gray-500">Chưa có voucher nào</td>
+                    </tr>
+                    <tr v-for="(item, index) in vouchers" :key="index">
+                      <td class="text-center font-mono font-bold text-primary">{{ item.code }}</td>
+                      <td class="text-right font-semibold text-emerald-600">{{ item.coupon_amount | formatMoney }}</td>
+                      <td class="text-center font-medium">{{ item.coupon_session }} buổi</td>
+                      <td class="text-center text-xs">{{ item.end_date | formatDateView }}</td>
+                      <td class="text-center">
+                        <span :class="item.status == 2 ? 'badge-status-pill badge-status-used' : 'badge-status-pill badge-status-official'">
+                          {{ item.status == 2 ? 'Đã sử dụng' : 'Chưa sử dụng' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </vs-tab>
@@ -1782,5 +1950,423 @@
 .popup-care-lg.con-vs-popup .vs-popup {
   width: 850px !important;
   max-width: 95vw !important;
+}
+
+/* ==========================================================================
+   CRM Parent Detail Modern UI Styles
+   ========================================================================== */
+
+/* Hero Header Card */
+.crm-hero-card {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #edf2f7;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.crm-hero-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 1.25rem;
+}
+
+/* Hero Profile */
+.crm-hero-profile {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1 1 360px;
+  min-width: 280px;
+}
+
+.crm-avatar-box {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(115, 103, 240, 0.2);
+  border: 3px solid #7367f0;
+  flex-shrink: 0;
+  background: #f8fafc;
+}
+
+.crm-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.crm-avatar-upload-btn {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.crm-avatar-box:hover .crm-avatar-upload-btn {
+  opacity: 1;
+}
+
+/* Badges */
+.badge-parent-gender {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-parent-gender.badge-male {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.badge-parent-gender.badge-female {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.badge-parent-id {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Phone Pills */
+.crm-phone-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.crm-phone-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.crm-phone-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-circle-action {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-call {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.btn-call:hover {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.btn-sms {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+.btn-sms:hover {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+/* Hero KPIs */
+.crm-hero-kpis {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1 1 320px;
+  min-width: 260px;
+}
+
+.crm-kpi-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+}
+
+.crm-kpi-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.crm-kpi-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.crm-kpi-next-care {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.crm-next-care-input {
+  width: 100%;
+}
+.crm-next-care-input input {
+  padding: 4px 8px !important;
+  font-size: 0.8rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* Hero Controls */
+.crm-hero-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.65rem;
+  flex: 0 1 240px;
+  min-width: 200px;
+}
+
+.crm-control-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.crm-control-select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background-color: #f8fafc;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.crm-control-select:focus {
+  border-color: #7367f0;
+  background-color: #ffffff;
+}
+
+/* Tabs Card */
+.crm-tabs-card {
+  border-radius: 14px;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #edf2f7;
+  overflow: hidden;
+}
+
+.crm-form-section {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.crm-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+.crm-field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+/* Student Cards (Tab 4) */
+.crm-student-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+}
+
+.crm-student-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.crm-student-card-header {
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fcfcfd;
+}
+
+.crm-student-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.crm-student-lms-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #c7d2fe;
+}
+
+.crm-student-card-body {
+  padding: 1rem;
+  flex: 1;
+}
+
+.crm-student-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 0.35rem 0;
+  color: #475569;
+  border-bottom: 1px dashed #f1f5f9;
+}
+.crm-student-meta-row:last-child {
+  border-bottom: none;
+}
+
+.crm-student-card-footer {
+  padding: 0.85rem 1rem;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Table Responsive & Badges */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.crm-table-wrapper {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.crm-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.crm-table th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.crm-table td {
+  padding: 12px 14px;
+  font-size: 0.85rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.crm-table tr:hover td {
+  background: #fbfcfe;
+}
+
+.badge-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-official {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.crm-empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .crm-hero-grid {
+    flex-direction: column;
+  }
+  .crm-hero-controls {
+    flex: 1 1 100%;
+  }
 }
 </style>

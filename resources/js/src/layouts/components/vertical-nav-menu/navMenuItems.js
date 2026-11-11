@@ -61,23 +61,11 @@ export default [
     permission:'LMS',
     items: [
       {
-        url: null,
+        url: '/lms/students',
         name: 'Học sinh',
         icon: 'UserIcon',
-        submenu: [
-          {
-            url: '/lms/students',
-            name: 'Danh sách',
-            slug: 'lms-students',
-            permission:'lms_students',
-          },
-          {
-            url: '/lms/checkin',
-            name: 'Checkin',
-            slug: 'lms-checkin',
-            permission:'lms_checkin',
-          }
-        ],
+        slug: 'lms-students',
+        permission:'lms_students',
       },
       {
         url: null,
