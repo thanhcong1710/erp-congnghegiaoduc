@@ -118,6 +118,149 @@
       </div>
     </vs-popup>
 
+    <!-- Modal chi tiết chấm công tháng của 1 nhân sự -->
+    <vs-popup
+      :title="detailPopupTitle"
+      :active.sync="employeeDetailModalActive"
+      class="modal-attendance-month-detail"
+    >
+      <div v-if="employeeDetailLoading" class="p-8 text-center text-gray-500">
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-primary mb-2"></i>
+        <p class="font-medium text-sm">Đang tải dữ liệu chi tiết chấm công...</p>
+      </div>
+      <div v-else-if="employeeDetailData" class="p-2 sm:p-3">
+        <!-- Thông tin nhân viên & Thẻ thống kê -->
+        <div class="p-4 rounded-lg border border-blue-200 bg-blue-50 text-gray-800 mb-4 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between border-b pb-3 mb-3 border-blue-200">
+            <div>
+              <h4 class="text-primary font-bold text-lg flex items-center">
+                <i class="fa-solid fa-user-tie mr-2 text-primary"></i>
+                {{ employeeDetailData.profile.full_name }}
+              </h4>
+              <div class="text-xs text-gray-600 mt-1 flex flex-wrap items-center space-x-2">
+                <span><strong>Mã NS:</strong> {{ employeeDetailData.profile.employee_code || '---' }}</span>
+                <span>•</span>
+                <span><strong>Team:</strong> {{ employeeDetailData.profile.team_name || 'N/A' }}</span>
+                <span>•</span>
+                <span><strong>Ca áp dụng:</strong> {{ employeeDetailData.profile.shift_name || 'Chưa xếp ca' }}</span>
+                <span v-if="employeeDetailData.profile.phone">•</span>
+                <span v-if="employeeDetailData.profile.phone"><strong>SĐT:</strong> {{ employeeDetailData.profile.phone }}</span>
+              </div>
+            </div>
+            <div class="flex items-center mt-2 sm:mt-0 space-x-2">
+              <vs-chip color="primary" class="font-bold">
+                Tháng {{ employeeDetailData.month }}/{{ employeeDetailData.year }}
+              </vs-chip>
+              <vs-button
+                color="success"
+                type="filled"
+                size="small"
+                class="py-1 px-3 text-xs font-semibold"
+                @click="exportEmployeeDetailExcel"
+              >
+                <i class="fa-solid fa-file-excel mr-1"></i> Xuất Excel Chi Tiết
+              </vs-button>
+            </div>
+          </div>
+
+          <!-- Grid thống kê các chỉ số -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-xs">
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Công chuẩn</div>
+              <div class="font-bold text-gray-900 text-base mt-1">{{ employeeDetailData.summary.standard_days }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">T2 - T6</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Tổng đã làm</div>
+              <div class="font-bold text-success text-base mt-1">{{ employeeDetailData.summary.worked_days }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">công</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Làm Online</div>
+              <div class="font-bold text-purple-600 text-base mt-1">{{ employeeDetailData.summary.online_days }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Đi muộn</div>
+              <div class="font-bold text-warning text-base mt-1">{{ employeeDetailData.summary.late_fined_count }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">lần</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Nghỉ phép</div>
+              <div class="font-bold text-primary text-base mt-1">{{ employeeDetailData.summary.leave_approved_days }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Vắng k phép</div>
+              <div class="font-bold text-danger text-base mt-1">{{ employeeDetailData.summary.unexcused_absent_days }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">ngày</div>
+            </div>
+            <div class="p-2.5 bg-white rounded shadow-xs text-center border border-gray-100">
+              <div class="text-gray-500 font-medium">Gửi muộn</div>
+              <div class="font-bold text-gray-700 text-base mt-1">{{ employeeDetailData.summary.late_submitted_count }}</div>
+              <div class="text-gray-400 mt-0.5 text-2xs">lần</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng chi tiết từng ngày trong tháng -->
+        <div class="table-responsive rounded border border-gray-200 overflow-hidden" style="max-height: 480px; overflow-y: auto;">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-gray-100 text-gray-700 uppercase font-semibold sticky top-0 z-10 shadow-xs">
+              <tr>
+                <th class="p-2.5 text-center border-b" width="6%">Ngày</th>
+                <th class="p-2.5 border-b" width="9%">Thứ</th>
+                <th class="p-2.5 border-b" width="16%">Ca làm việc</th>
+                <th class="p-2.5 border-b" width="22%">Trạng thái</th>
+                <th class="p-2.5 text-center border-b" width="10%">Check-in</th>
+                <th class="p-2.5 text-center border-b" width="10%">Check-out</th>
+                <th class="p-2.5 text-center border-b" width="9%">Công tính</th>
+                <th class="p-2.5 border-b" width="18%">Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr
+                v-for="d in employeeDetailData.days"
+                :key="d.date"
+                :class="d.is_weekend ? 'bg-gray-50' : 'hover:bg-blue-50 transition-colors'"
+              >
+                <td class="p-2.5 text-center font-bold" :class="d.is_weekend ? 'text-gray-400' : 'text-gray-800'">
+                  {{ d.day_of_month }}
+                </td>
+                <td class="p-2.5 font-medium" :class="d.is_weekend ? 'text-red-500 font-semibold' : 'text-gray-700'">
+                  {{ d.day_name }}
+                  <span v-if="d.is_weekend" class="text-2xs font-normal text-gray-400 block">(Nghỉ)</span>
+                </td>
+                <td class="p-2.5 text-gray-600">
+                  {{ d.shift_name || (d.is_weekend ? '---' : 'Chưa xếp ca') }}
+                </td>
+                <td class="p-2.5">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold"
+                    :class="getStatusBadgeClass(d.attendance_status)"
+                  >
+                    {{ getStatusText(d.attendance_status) }}
+                  </span>
+                </td>
+                <td class="p-2.5 text-center font-mono text-gray-700">
+                  {{ d.check_in || '---' }}
+                </td>
+                <td class="p-2.5 text-center font-mono text-gray-700">
+                  {{ d.check_out || '---' }}
+                </td>
+                <td class="p-2.5 text-center font-bold" :class="d.work_units > 0 ? 'text-success' : 'text-gray-400'">
+                  {{ d.work_units > 0 ? d.work_units + ' công' : '0' }}
+                </td>
+                <td class="p-2.5 text-gray-500 italic truncate max-w-xs" :title="d.note">
+                  {{ d.note || '---' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </vs-popup>
+
     <!-- Tabs chuyển đổi -->
     <vs-tabs alignment="left" class="mt-4">
       <!-- TAB 1: Điểm danh hàng ngày -->
@@ -541,22 +684,69 @@
                   <option :value="2027">2027</option>
                 </select>
               </div>
+              <div class="mr-3 mb-2 flex items-center">
+                <span class="text-sm font-medium mr-2 text-gray-700">Team:</span>
+                <select
+                  v-model="selectedMonthlyDepartment"
+                  @change="fetchMonthlySummary"
+                  class="vs-inputx vs-input--input normal"
+                  style="padding: 8px 12px; font-size: 13px; min-width: 170px"
+                >
+                  <option value="">-- Tất cả team --</option>
+                  <option
+                    :value="dept.id"
+                    v-for="dept in departments"
+                    :key="dept.id"
+                  >
+                    {{ dept.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="mr-3 mb-2 flex items-center">
+                <span class="text-sm font-medium mr-2 text-gray-700">Ca làm việc:</span>
+                <select
+                  v-model="selectedMonthlyShift"
+                  @change="fetchMonthlySummary"
+                  class="vs-inputx vs-input--input normal"
+                  style="padding: 8px 12px; font-size: 13px; min-width: 160px"
+                >
+                  <option value="">-- Tất cả ca --</option>
+                  <option
+                    :value="shift.id"
+                    v-for="shift in shifts"
+                    :key="shift.id"
+                  >
+                    {{ shift.name }}
+                  </option>
+                  <option value="unassigned">-- Chưa có ca --</option>
+                </select>
+              </div>
               <div class="mr-3 mb-2">
                 <input
                   type="text"
                   class="vs-inputx vs-input--input normal"
-                  style="padding: 8px 14px; font-size: 13px; min-width: 200px;"
+                  style="padding: 8px 14px; font-size: 13px; min-width: 180px;"
                   placeholder="Lọc tên, mã NS..."
                   v-model="monthlySearchKeyword"
                 />
               </div>
             </div>
-            <div class="text-sm font-semibold text-primary mb-2">
-              <i class="fa-solid fa-circle-info mr-1"></i> Công chuẩn tháng:
-              <strong class="text-base text-gray-900">{{
-                standardDays
-              }}</strong>
-              công
+            <div class="flex items-center flex-wrap mb-2">
+              <div class="text-sm font-semibold text-primary mr-3 mb-1 sm:mb-0">
+                <i class="fa-solid fa-circle-info mr-1"></i> Công chuẩn:
+                <strong class="text-base text-gray-900">{{
+                  standardDays
+                }}</strong>
+                công (T2 - T6)
+              </div>
+              <vs-button
+                color="success"
+                type="filled"
+                class="p-2.5 sm:p-3 font-semibold shadow-md flex items-center"
+                @click="exportMonthlyExcel"
+              >
+                <i class="fa-solid fa-file-excel mr-1.5 text-base"></i> Xuất Excel
+              </vs-button>
             </div>
           </div>
 
@@ -567,17 +757,19 @@
                 <table class="vs-table vs-table--tbody-table">
                   <thead class="vs-table--thead">
                     <tr>
-                      <th width="4%" class="text-center">STT</th>
-                      <th width="9%">Mã NS</th>
-                      <th width="16%">Họ và tên</th>
-                      <th width="14%">Team</th>
-                      <th width="9%" class="text-center">Công chuẩn</th>
-                      <th width="9%" class="text-center">Đã làm</th>
-                      <th width="10%" class="text-center">Làm Online</th>
-                      <th width="9%" class="text-center">Đi muộn</th>
-                      <th width="9%" class="text-center">Nghỉ phép</th>
-                      <th width="11%" class="text-center">Vắng k phép</th>
-                      <th width="10%" class="text-center">Gửi muộn</th>
+                      <th width="3%" class="text-center">STT</th>
+                      <th width="8%">Mã NS</th>
+                      <th width="14%">Họ và tên</th>
+                      <th width="11%">Team</th>
+                      <th width="10%">Ca làm việc</th>
+                      <th width="6%" class="text-center">Công chuẩn</th>
+                      <th width="6%" class="text-center">Đã làm</th>
+                      <th width="7%" class="text-center">Làm Online</th>
+                      <th width="6%" class="text-center">Đi muộn</th>
+                      <th width="6%" class="text-center">Nghỉ phép</th>
+                      <th width="7%" class="text-center">Vắng k phép</th>
+                      <th width="6%" class="text-center">Gửi muộn</th>
+                      <th width="10%" class="text-center">Hành động</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -596,6 +788,11 @@
                         {{ tr.name }}
                       </td>
                       <td class="td vs-table--td">{{ tr.team_name }}</td>
+                      <td class="td vs-table--td">
+                        <span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                          {{ tr.shift_name || "Chưa xếp ca" }}
+                        </span>
+                      </td>
                       <td class="td vs-table--td text-center font-semibold">
                         {{ tr.standard_days }}
                       </td>
@@ -630,9 +827,21 @@
                       >
                         {{ tr.late_submitted_count }} lần
                       </td>
+                      <td class="td vs-table--td text-center">
+                        <vs-button
+                          size="small"
+                          color="primary"
+                          type="border"
+                          class="text-xs py-1 px-2 font-semibold"
+                          @click="openEmployeeMonthDetail(tr)"
+                          title="Xem chi tiết chấm công cả tháng của nhân sự này"
+                        >
+                          <i class="fa-solid fa-eye mr-1"></i> Chi tiết
+                        </vs-button>
+                      </td>
                     </tr>
                     <tr v-if="!filteredMonthlySummary.length">
-                      <td colspan="11" class="text-center p-4 text-gray-500">
+                      <td colspan="13" class="text-center p-4 text-gray-500">
                         Chưa có dữ liệu tổng hợp
                       </td>
                     </tr>
@@ -711,14 +920,20 @@ export default {
       dailyPerPage: 20,
       selectedMonth: new Date().getMonth() + 1,
       selectedYear: new Date().getFullYear(),
+      selectedMonthlyDepartment: '',
+      selectedMonthlyShift: '',
       monthlySummary: [],
       monthlySearchKeyword: '',
       monthlyPage: 1,
       monthlyPerPage: 20,
-      standardDays: 26,
+      standardDays: 22,
       quickSearchKeyword: '',
       quickSearchModalActive: false,
       quickSearchResult: null,
+      employeeDetailModalActive: false,
+      employeeDetailLoading: false,
+      employeeDetailData: null,
+      selectedEmployeeDetail: null,
       isHrmAdminServer: null,
       lastSaveStatus: 'idle', // 'idle' | 'saving' | 'saved' | 'error'
       lastSavedTime: '',
@@ -731,6 +946,14 @@ export default {
     },
     monthlySearchKeyword() {
       this.monthlyPage = 1;
+    },
+    selectedMonthlyDepartment() {
+      this.monthlyPage = 1;
+      this.fetchMonthlySummary();
+    },
+    selectedMonthlyShift() {
+      this.monthlyPage = 1;
+      this.fetchMonthlySummary();
     }
   },
   computed: {
@@ -757,7 +980,8 @@ export default {
       return this.monthlySummary.filter(r =>
         (r.name && r.name.toLowerCase().includes(kw)) ||
         (r.employee_code && r.employee_code.toLowerCase().includes(kw)) ||
-        (r.team_name && r.team_name.toLowerCase().includes(kw))
+        (r.team_name && r.team_name.toLowerCase().includes(kw)) ||
+        (r.shift_name && r.shift_name.toLowerCase().includes(kw))
       );
     },
     paginatedMonthlySummary() {
@@ -766,6 +990,12 @@ export default {
     },
     totalMonthlyPages() {
       return Math.ceil(this.filteredMonthlySummary.length / this.monthlyPerPage) || 1;
+    },
+    detailPopupTitle() {
+      if (this.selectedEmployeeDetail) {
+        return `CHI TIẾT CHẤM CÔNG THÁNG ${this.selectedMonth}/${this.selectedYear} - ${this.selectedEmployeeDetail.name}`;
+      }
+      return 'CHI TIẾT CHẤM CÔNG';
     },
     isHrmAdmin() {
       if (this.isHrmAdminServer !== null) {
@@ -919,12 +1149,134 @@ export default {
       });
     },
     fetchMonthlySummary() {
+      this.$vs.loading();
       axios.p('/api/hrm/attendances/monthly-summary', {
+        month: this.selectedMonth,
+        year: this.selectedYear,
+        department_id: this.selectedMonthlyDepartment || null,
+        shift_id: this.selectedMonthlyShift || null
+      }).then(res => {
+        this.monthlySummary = res.data.data || [];
+        this.standardDays = res.data.standard_days || 22;
+        this.$vs.loading.close();
+      }).catch(err => {
+        this.$vs.loading.close();
+        this.$vs.notify({ title: 'Lỗi', text: 'Không thể tải tổng hợp công tháng', color: 'danger' });
+      });
+    },
+    openEmployeeMonthDetail(tr) {
+      this.selectedEmployeeDetail = tr;
+      this.employeeDetailModalActive = true;
+      this.employeeDetailLoading = true;
+      this.employeeDetailData = null;
+
+      axios.p('/api/hrm/attendances/monthly-detail', {
+        employee_profile_id: tr.employee_profile_id || tr.id,
         month: this.selectedMonth,
         year: this.selectedYear
       }).then(res => {
-        this.monthlySummary = res.data.data || [];
-        this.standardDays = res.data.standard_days || 26;
+        this.employeeDetailLoading = false;
+        if (res.data.status === 1) {
+          this.employeeDetailData = res.data;
+        } else {
+          this.$vs.notify({ title: 'Lỗi', text: res.data.message || 'Không thể tải chi tiết', color: 'danger' });
+        }
+      }).catch(err => {
+        this.employeeDetailLoading = false;
+        const msg = (err.response && err.response.data && err.response.data.message) || 'Lỗi khi tải chi tiết chấm công';
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
+      });
+    },
+    exportMonthlyExcel() {
+      if (!this.filteredMonthlySummary || !this.filteredMonthlySummary.length) {
+        this.$vs.notify({ title: 'Thông báo', text: 'Không có dữ liệu để xuất Excel', color: 'warning' });
+        return;
+      }
+      this.$vs.loading();
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = [
+          'STT',
+          'Mã nhân sự',
+          'Họ và tên',
+          'Team / Phòng ban',
+          'Ca làm việc',
+          'Công chuẩn (T2-T6)',
+          'Đã làm (công)',
+          'Làm Online (ngày)',
+          'Đi muộn (lần)',
+          'Nghỉ phép (ngày)',
+          'Vắng k phép (ngày)',
+          'Gửi muộn (lần)'
+        ];
+        const data = this.filteredMonthlySummary.map((item, index) => [
+          index + 1,
+          item.employee_code || '',
+          item.name || '',
+          item.team_name || '',
+          item.shift_name || 'Chưa xếp ca',
+          item.standard_days || 0,
+          item.worked_days || 0,
+          item.online_days || 0,
+          item.late_fined_count || 0,
+          item.leave_approved_days || 0,
+          item.unexcused_absent_days || 0,
+          item.late_submitted_count || 0
+        ]);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: `Tong_Hop_Cham_Cong_Thang_${this.selectedMonth}_${this.selectedYear}`,
+          autoWidth: true,
+          bookType: 'xlsx'
+        });
+        this.$vs.loading.close();
+        this.$vs.notify({ title: 'Thành công', text: 'Xuất file Excel thành công', color: 'success' });
+      }).catch(err => {
+        this.$vs.loading.close();
+        this.$vs.notify({ title: 'Lỗi', text: 'Không thể xuất file: ' + (err.message || err), color: 'danger' });
+      });
+    },
+    exportEmployeeDetailExcel() {
+      if (!this.employeeDetailData || !this.employeeDetailData.days || !this.employeeDetailData.days.length) {
+        return;
+      }
+      this.$vs.loading();
+      import('@/vendor/Export2Excel').then(excel => {
+        const emp = this.employeeDetailData.profile;
+        const tHeader = [
+          'STT',
+          'Ngày',
+          'Thứ',
+          'Ca làm việc',
+          'Trạng thái điểm danh',
+          'Check-in',
+          'Check-out',
+          'Số công',
+          'Ghi chú'
+        ];
+        const data = this.employeeDetailData.days.map((d, idx) => [
+          idx + 1,
+          this.formatDateDMY(d.date),
+          d.day_name,
+          d.shift_name || '',
+          this.getStatusText(d.attendance_status),
+          d.check_in || '',
+          d.check_out || '',
+          d.work_units,
+          d.note || ''
+        ]);
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: `Chi_Tiet_Cham_Cong_${emp.employee_code || emp.id}_Thang_${this.selectedMonth}_${this.selectedYear}`,
+          autoWidth: true,
+          bookType: 'xlsx'
+        });
+        this.$vs.loading.close();
+        this.$vs.notify({ title: 'Thành công', text: 'Xuất file Excel chi tiết thành công', color: 'success' });
+      }).catch(err => {
+        this.$vs.loading.close();
+        this.$vs.notify({ title: 'Lỗi', text: 'Không thể xuất file: ' + (err.message || err), color: 'danger' });
       });
     },
     handleQuickSearch() {
@@ -972,7 +1324,96 @@ export default {
         default:
           return 'color: #6e6b7b; border-color: #d8d6de; background-color: #f8f9fa;';
       }
+    },
+    getStatusBadgeClass(status) {
+      switch (status) {
+        case 'present':
+          return 'bg-green-100 text-green-700 border border-green-300';
+        case 'online':
+        case 'online_half':
+          return 'bg-purple-100 text-purple-700 border border-purple-300';
+        case 'leave_approved':
+        case 'leave_approved_half':
+          return 'bg-blue-100 text-blue-700 border border-blue-300';
+        case 'unexcused_absent':
+        case 'unexcused_absent_half':
+          return 'bg-red-100 text-red-700 border border-red-300';
+        case 'late_fined':
+          return 'bg-orange-100 text-orange-700 border border-orange-300';
+        case 'late_submitted':
+          return 'bg-gray-200 text-gray-700 border border-gray-300';
+        case 'weekend':
+          return 'bg-gray-100 text-gray-500 border border-gray-200';
+        case 'not_checked':
+        default:
+          return 'bg-gray-50 text-gray-400 border border-dashed border-gray-300';
+      }
+    },
+    getStatusText(status) {
+      switch (status) {
+        case 'present':
+          return '✓ Có mặt (1 công)';
+        case 'online':
+          return '🌐 Làm Online (1 ngày)';
+        case 'online_half':
+          return '🌐 Làm Online (0.5 ngày)';
+        case 'leave_approved':
+          return '📅 Nghỉ phép (1 ngày)';
+        case 'leave_approved_half':
+          return '📅 Nghỉ phép (0.5 ngày)';
+        case 'unexcused_absent':
+          return '✗ Vắng k phép (1 ngày)';
+        case 'unexcused_absent_half':
+          return '✗ Vắng k phép (0.5 ngày)';
+        case 'late_fined':
+          return '⏱ Đi muộn (đã nộp phạt)';
+        case 'late_submitted':
+          return '⚠ Gửi đơn muộn';
+        case 'weekend':
+          return '☕ Nghỉ cuối tuần';
+        case 'not_checked':
+        default:
+          return '⚪ Chưa điểm danh';
+      }
+    },
+    formatDateDMY(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
     }
   }
 };
 </script>
+
+<style>
+.modal-attendance-month-detail.con-vs-popup .vs-popup {
+  width: 980px !important;
+  max-width: 95vw !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+}
+.modal-attendance-month-detail .vs-popup--header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 16px 20px !important;
+}
+.modal-attendance-month-detail .vs-popup--title h3 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+}
+.modal-attendance-month-detail .vs-popup--content {
+  padding: 16px 20px !important;
+  background: #ffffff !important;
+}
+.modal-attendance-month-detail .vs-popup--close {
+  top: 14px !important;
+  right: 14px !important;
+}
+</style>

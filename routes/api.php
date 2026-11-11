@@ -527,6 +527,7 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('daily-sheet', 'Hrm\AttendanceController@getDailyAttendanceSheet');
                 Route::post('update-status', 'Hrm\AttendanceController@updateAttendanceStatus');
                 Route::post('monthly-summary', 'Hrm\AttendanceController@getMonthlySummary');
+                Route::post('monthly-detail', 'Hrm\AttendanceController@getMonthlyDetail');
                 Route::post('quick-search', 'Hrm\AttendanceController@quickSearchSummary');
                 Route::post('check-in', 'Hrm\AttendanceController@checkIn');
                 Route::post('check-out/{id}', 'Hrm\AttendanceController@checkOut');

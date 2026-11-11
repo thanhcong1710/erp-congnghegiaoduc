@@ -366,12 +366,12 @@ class AttendanceController extends Controller
         $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
         $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
 
-        // Tính số ngày làm việc chuẩn (loại trừ Chủ nhật)
+        // Tính số ngày làm việc chuẩn từ Thứ 2 đến Thứ 6 (nghỉ Thứ 7, Chủ nhật)
         $standardWorkDays = 0;
         $current = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
         while ($current->lte($end)) {
-            if ($current->dayOfWeek !== Carbon::SUNDAY) {
+            if ($current->isWeekday()) {
                 $standardWorkDays++;
             }
             $current->addDay();
@@ -384,7 +384,21 @@ class AttendanceController extends Controller
         // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
         $query = HrmScopeService::applyProfileScope($query, $currentUser);
 
-        $employees = $query->get();
+        // Lọc theo Team (Phòng ban)
+        if ($request->filled('department_id')) {
+            $query->where('department_id', $request->department_id);
+        }
+
+        // Lọc theo Ca làm việc
+        if ($request->filled('shift_id')) {
+            if ($request->shift_id === 'unassigned') {
+                $query->whereNull('shift_id');
+            } else {
+                $query->where('shift_id', $request->shift_id);
+            }
+        }
+
+        $employees = $query->orderBy('full_name', 'asc')->get();
 
         $empIds = $employees->pluck('id')->filter()->all();
         $userIds = $employees->pluck('user_id')->filter()->all();
@@ -459,6 +473,9 @@ class AttendanceController extends Controller
                 'employee_code' => $emp->employee_code,
                 'name' => $emp->full_name ?: ($emp->user ? $emp->user->name : 'N/A'),
                 'team_name' => $emp->department ? $emp->department->name : 'N/A',
+                'department_id' => $emp->department_id,
+                'shift_id' => $emp->shift_id,
+                'shift_name' => $emp->shift ? $emp->shift->name : 'Chưa xếp ca',
                 'is_permanent_online' => $isPermanentOnline,
                 'standard_days' => $standardWorkDays,
                 'worked_days' => $workedDays,
@@ -475,6 +492,235 @@ class AttendanceController extends Controller
             'year' => $year,
             'standard_days' => $standardWorkDays,
             'data' => $summary
+        ]);
+    }
+
+    /**
+     * Xem chi tiết chấm công cả tháng của 1 nhân sự
+     */
+    public function getMonthlyDetail(Request $request)
+    {
+        $request->validate([
+            'employee_profile_id' => 'required',
+            'month' => 'required|numeric',
+            'year' => 'required|numeric',
+        ]);
+
+        $month = (int) $request->month;
+        $year = (int) $request->year;
+
+        $profile = HrmEmployeeProfile::with(['user', 'department', 'shift', 'position'])
+            ->find($request->employee_profile_id);
+
+        if (!$profile) {
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy thông tin nhân sự'], 404);
+        }
+
+        $currentUser = Auth::user();
+        if (!HrmScopeService::canAccessProfile($currentUser, $profile)) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền truy cập dữ liệu chấm công của nhân sự này'], 403);
+        }
+
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
+
+        // Tính công chuẩn tháng (T2 đến T6, nghỉ T7, Chủ nhật)
+        $standardWorkDays = 0;
+        $curr = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+        while ($curr->lte($end)) {
+            if ($curr->isWeekday()) {
+                $standardWorkDays++;
+            }
+            $curr->addDay();
+        }
+
+        // Lấy tất cả bản ghi chấm công của nhân sự trong tháng
+        $attendances = HrmAttendance::with('shift')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere('user_id', $profile->user_id);
+                }
+            })
+            ->get()
+            ->keyBy(function ($item) {
+                return Carbon::parse($item->date)->format('Y-m-d');
+            });
+
+        // Lấy phân ca trong tháng
+        $assignments = HrmShiftAssignment::with('shift')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere('user_id', $profile->user_id);
+                }
+            })
+            ->get()
+            ->keyBy(function ($item) {
+                return Carbon::parse($item->date)->format('Y-m-d');
+            });
+
+        // Lấy danh sách đơn nghỉ phép ĐÃ ĐƯỢC DUYỆT rơi vào tháng này
+        $approvedLeaves = HrmLeaveRequest::where('status', 1)
+            ->where('start_date', '<=', $endDate)
+            ->where('end_date', '>=', $startDate)
+            ->where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere('user_id', $profile->user_id);
+                }
+            })
+            ->get();
+
+        // Lấy danh sách đăng ký làm online ĐÃ ĐƯỢC DUYỆT trong tháng này
+        $approvedOnlineRegs = HrmOnlineRegistration::whereBetween('date', [$startDate, $endDate])
+            ->where('status', 1)
+            ->where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere('user_id', $profile->user_id);
+                }
+            })
+            ->get()
+            ->keyBy(function ($item) {
+                return Carbon::parse($item->date)->format('Y-m-d');
+            });
+
+        $isPermanentOnline = ($profile->shift && mb_stripos($profile->shift->name, 'online') !== false);
+        $allShifts = HrmShift::where('status', 1)->get()->keyBy('id');
+
+        $dayNames = [
+            0 => 'Chủ nhật',
+            1 => 'Thứ 2',
+            2 => 'Thứ 3',
+            3 => 'Thứ 4',
+            4 => 'Thứ 5',
+            5 => 'Thứ 6',
+            6 => 'Thứ 7',
+        ];
+
+        $days = [];
+        $curr = Carbon::parse($startDate);
+        while ($curr->lte($end)) {
+            $dateStr = $curr->format('Y-m-d');
+            $dayOfWeek = $curr->dayOfWeek;
+            $isWeekend = ($dayOfWeek === Carbon::SATURDAY || $dayOfWeek === Carbon::SUNDAY);
+
+            $att = $attendances[$dateStr] ?? null;
+            $asn = $assignments[$dateStr] ?? null;
+            $onlineReg = $approvedOnlineRegs[$dateStr] ?? null;
+
+            $leaveReq = $approvedLeaves->first(function ($l) use ($dateStr) {
+                return $l->start_date <= $dateStr && $l->end_date >= $dateStr;
+            });
+
+            // Xác định ca làm việc
+            $shiftName = null;
+            if ($att && $att->shift) {
+                $shiftName = $att->shift->name;
+            } elseif ($att && $att->shift_id && isset($allShifts[$att->shift_id])) {
+                $shiftName = $allShifts[$att->shift_id]->name;
+            } elseif ($asn && $asn->shift) {
+                $shiftName = $asn->shift->name;
+            } elseif ($asn && $asn->shift_id && isset($allShifts[$asn->shift_id])) {
+                $shiftName = $allShifts[$asn->shift_id]->name;
+            } elseif ($profile->shift) {
+                $shiftName = $profile->shift->name;
+            }
+
+            // Trạng thái điểm danh
+            $status = $att ? $att->attendance_status : ($isWeekend ? 'weekend' : 'not_checked');
+            $note = $att ? $att->note : '';
+            $checkIn = $att ? $att->check_in : null;
+            $checkOut = $att ? $att->check_out : null;
+
+            if (!$att) {
+                if ($leaveReq) {
+                    if ($leaveReq->approval_type === 'late_unpaid') {
+                        $status = 'late_submitted';
+                    } elseif ((float)$leaveReq->duration_days > 0 && (float)$leaveReq->duration_days < 1) {
+                        $status = 'leave_approved_half';
+                    } else {
+                        $status = 'leave_approved';
+                    }
+                    $note = $leaveReq->reason ? 'Nghỉ phép: ' . $leaveReq->reason : 'Nghỉ phép đã duyệt';
+                } elseif ($onlineReg || $isPermanentOnline) {
+                    $status = 'online';
+                    $note = $onlineReg ? 'Đã duyệt làm Online' : 'Ca làm online';
+                }
+            }
+
+            // Tính công làm việc trong ngày
+            $workUnits = 0.0;
+            switch ($status) {
+                case 'present':
+                case 'online':
+                case 'late_fined':
+                    $workUnits = 1.0;
+                    break;
+                case 'leave_approved_half':
+                case 'unexcused_absent_half':
+                case 'online_half':
+                    $workUnits = 0.5;
+                    break;
+                default:
+                    $workUnits = 0.0;
+                    break;
+            }
+
+            $days[] = [
+                'date' => $dateStr,
+                'day_name' => $dayNames[$dayOfWeek],
+                'day_of_month' => (int)$curr->format('d'),
+                'is_weekend' => $isWeekend,
+                'shift_name' => $shiftName,
+                'attendance_status' => $status,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'work_units' => $workUnits,
+                'note' => $note,
+            ];
+
+            $curr->addDay();
+        }
+
+        // Tính các chỉ số tổng hợp
+        $workedDays = collect($days)->whereIn('attendance_status', ['present', 'leave_approved_half', 'unexcused_absent_half', 'online_half'])->sum('work_units');
+        $onlineDays = collect($days)->where('attendance_status', 'online')->count() + (collect($days)->where('attendance_status', 'online_half')->count() * 0.5);
+        if ($isPermanentOnline) {
+            $onlineDays = $standardWorkDays;
+        }
+        $lateFined = collect($days)->where('attendance_status', 'late_fined')->count();
+        $leaveDays = collect($days)->where('attendance_status', 'leave_approved')->count() + (collect($days)->where('attendance_status', 'leave_approved_half')->count() * 0.5);
+        $absentDays = collect($days)->where('attendance_status', 'unexcused_absent')->count() + (collect($days)->where('attendance_status', 'unexcused_absent_half')->count() * 0.5);
+        $lateSubmitted = collect($days)->where('attendance_status', 'late_submitted')->count();
+
+        return response()->json([
+            'status' => 1,
+            'profile' => [
+                'id' => $profile->id,
+                'full_name' => $profile->full_name ?: ($profile->user ? $profile->user->name : 'N/A'),
+                'employee_code' => $profile->employee_code,
+                'phone' => $profile->phone,
+                'team_name' => $profile->department ? $profile->department->name : 'N/A',
+                'position' => $profile->position ? $profile->position->name : null,
+                'shift_name' => $profile->shift ? $profile->shift->name : null,
+            ],
+            'month' => $month,
+            'year' => $year,
+            'summary' => [
+                'standard_days' => $standardWorkDays,
+                'worked_days' => $workedDays,
+                'online_days' => $onlineDays,
+                'late_fined_count' => $lateFined,
+                'leave_approved_days' => $leaveDays,
+                'unexcused_absent_days' => $absentDays,
+                'late_submitted_count' => $lateSubmitted,
+            ],
+            'days' => $days,
         ]);
     }
 
@@ -519,12 +765,12 @@ class AttendanceController extends Controller
             return response()->json(['status' => 0, 'message' => 'Bạn không có quyền truy cập dữ liệu chấm công của nhân sự này'], 403);
         }
 
-        // Tính công chuẩn tháng
+        // Tính công chuẩn tháng (T2 đến T6, nghỉ T7, Chủ nhật)
         $standardWorkDays = 0;
         $current = Carbon::parse($startDate);
         $end = Carbon::parse($endDate);
         while ($current->lte($end)) {
-            if ($current->dayOfWeek !== Carbon::SUNDAY) {
+            if ($current->isWeekday()) {
                 $standardWorkDays++;
             }
             $current->addDay();
