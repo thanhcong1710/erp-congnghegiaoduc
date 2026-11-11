@@ -35,11 +35,16 @@ class EmployeeProfileController extends Controller
         // Tự động kiểm tra chuyển thử việc -> fulltime nếu hết hạn
         $this->autoPromoteProbationEmployees();
 
-        $query = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel', 'shift']);
+        $query = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel', 'shift', 'company']);
 
         // Phân quyền dữ liệu theo phạm vi (Admin xem ALL, Trưởng phòng/Lead xem cấp dưới & phòng ban, Nhân viên xem chính mình)
         $currentUser = Auth::user();
         $query = HrmScopeService::applyProfileScope($query, $currentUser);
+
+        // Lọc theo công ty (CHAM, MEGA...)
+        if ($request->filled('company_id') && $request->company_id !== 'all') {
+            $query->where('company_id', $request->company_id);
+        }
 
         // Lọc theo loại nhân sự
         if ($request->filled('employee_type') && $request->employee_type !== 'all') {
@@ -130,9 +135,12 @@ class EmployeeProfileController extends Controller
             }
         }
 
-        // Tự sinh mã nhân sự nếu chưa có (format: CHAM01, CHAM02...)
+        $companyId = !empty($data['company_id']) ? (int)$data['company_id'] : 1;
+        $data['company_id'] = $companyId;
+
+        // Tự sinh mã nhân sự nếu chưa có (format: CHAM01, CHAM02... hoặc MEGA01, MEGA02...)
         if (empty($data['employee_code'])) {
-            $data['employee_code'] = HrmEmployeeProfile::generateNextEmployeeCode();
+            $data['employee_code'] = HrmEmployeeProfile::generateNextEmployeeCode($companyId);
         }
 
         // Lưu trực tiếp họ tên và email vào profile độc lập
@@ -188,9 +196,9 @@ class EmployeeProfileController extends Controller
 
     public function show($id)
     {
-        $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->find($id);
+        $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel', 'company'])->find($id);
         if (!$profile) {
-            $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel'])->where('user_id', $id)->first();
+            $profile = HrmEmployeeProfile::with(['user', 'department', 'jobTitle', 'jobLevel', 'company'])->where('user_id', $id)->first();
         }
 
         $currentUser = Auth::user();
@@ -428,13 +436,24 @@ class EmployeeProfileController extends Controller
     }
 
     /**
-     * Thêm Hợp đồng (tự sinh mã CHAM01, CHAM02... nếu trống)
+     * Thêm Hợp đồng (tự sinh mã theo công ty: CHAM01, MEGA01... nếu trống)
      */
     public function addContract(Request $request)
     {
         $data = $request->all();
+        $empId = !empty($data['employee_profile_id']) ? $data['employee_profile_id'] : ($data['employee_id'] ?? null);
+        $companyId = !empty($data['company_id']) ? (int)$data['company_id'] : null;
+
+        if (!$companyId && $empId) {
+            $profile = HrmEmployeeProfile::find($empId);
+            if ($profile && $profile->company_id) {
+                $companyId = (int)$profile->company_id;
+            }
+        }
+        $data['company_id'] = $companyId ?: 1;
+
         if (empty($data['contract_number'])) {
-            $data['contract_number'] = HrmContract::generateNextContractNumber();
+            $data['contract_number'] = HrmContract::generateNextContractNumber($data['company_id']);
         }
         if (!empty($data['employee_profile_id']) && empty($data['employee_id'])) {
             $data['employee_id'] = $data['employee_profile_id'];

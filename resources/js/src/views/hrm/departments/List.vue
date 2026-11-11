@@ -117,15 +117,25 @@
           </vs-button>
         </div>
 
-        <!-- Search Input -->
-        <div class="mb-2 md:mb-0">
-          <input 
-            type="text" 
-            class="vs-inputx vs-input--input normal" 
-            style="padding: 10px 14px; font-size: 13px; min-width: 260px;" 
-            placeholder="Tìm theo tên phòng ban, mô tả..." 
-            v-model="searchKeyword"
-          >
+        <!-- Search & Company Filter -->
+        <div class="flex flex-wrap items-center mb-2 md:mb-0">
+          <div class="mr-3 mb-2 md:mb-0">
+            <select v-model="filterCompany" @change="fetchDepartments" class="vs-inputx vs-input--input normal font-medium" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
+              <option value="all">🏢 Tất cả công ty</option>
+              <option v-for="comp in companies" :key="comp.id" :value="comp.id">
+                🏢 {{ comp.code }} - {{ comp.name }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <input 
+              type="text" 
+              class="vs-inputx vs-input--input normal" 
+              style="padding: 10px 14px; font-size: 13px; min-width: 260px;" 
+              placeholder="Tìm theo tên phòng ban, mô tả..." 
+              v-model="searchKeyword"
+            >
+          </div>
         </div>
       </div>
 
@@ -133,11 +143,12 @@
       <vs-table :data="filteredDepartments" pagination :max-items="25">
         <template slot="thead">
           <vs-th style="width: 50px;">STT</vs-th>
-          <vs-th style="min-width: 300px;">Tên phòng ban / Cơ cấu tổ chức</vs-th>
-          <vs-th style="width: 130px;">Cấp bậc</vs-th>
-          <vs-th style="width: 170px; text-align: center;">Số lượng nhân viên</vs-th>
-          <vs-th style="min-width: 200px;">Mô tả chức năng</vs-th>
-          <vs-th style="width: 120px;">Trạng thái</vs-th>
+          <vs-th style="min-width: 280px;">Tên phòng ban / Cơ cấu tổ chức</vs-th>
+          <vs-th style="width: 100px;">Công ty</vs-th>
+          <vs-th style="width: 120px;">Cấp bậc</vs-th>
+          <vs-th style="width: 160px; text-align: center;">Số lượng nhân viên</vs-th>
+          <vs-th style="min-width: 180px;">Mô tả chức năng</vs-th>
+          <vs-th style="width: 110px;">Trạng thái</vs-th>
           <vs-th style="width: 160px; text-align: center;">Thao tác</vs-th>
         </template>
 
@@ -183,6 +194,16 @@
                   </div>
                 </div>
               </div>
+            </vs-td>
+
+            <!-- Công ty -->
+            <vs-td>
+              <span 
+                class="text-xs px-2 py-0.5 rounded font-semibold inline-block"
+                :class="tr.company && tr.company.code === 'MEGA' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+              >
+                {{ tr.company ? tr.company.code : (tr.company_id == 2 ? 'MEGA' : 'CHAM') }}
+              </span>
             </vs-td>
 
             <!-- Cấp bậc -->
@@ -286,6 +307,17 @@
       <div class="p-3">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
+            <label class="text-sm font-medium text-gray-700">Công ty trực thuộc (*)</label>
+            <select class="vs-inputx vs-input--input normal w-full font-medium mt-1" style="padding: 10px 14px; font-size: 13px;" v-model="form.company_id">
+              <option v-for="comp in companies" :key="comp.id" :value="comp.id">
+                🏢 {{ comp.code }} - {{ comp.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="vx-row mb-4">
+          <div class="vx-col w-full">
             <vs-input 
               class="w-full" 
               label="Tên phòng ban (*)" 
@@ -354,6 +386,8 @@ import axios from '../../../http/axios.js';
 export default {
   data() {
     return {
+      companies: [],
+      filterCompany: 'all',
       departments: [],
       flatDepartments: [],
       searchKeyword: '',
@@ -362,6 +396,7 @@ export default {
       isEdit: false,
       form: {
         id: null,
+        company_id: 1,
         name: '',
         parent_id: null,
         description: '',
@@ -415,12 +450,22 @@ export default {
     }
   },
   created() {
+    this.fetchCompanies();
     this.fetchDepartments();
   },
   methods: {
+    fetchCompanies() {
+      axios.g('/api/hrm/companies/all').then(res => {
+        if (res.data && res.data.data) {
+          this.companies = res.data.data;
+        }
+      });
+    },
     fetchDepartments() {
       this.$vs.loading();
-      axios.p('/api/hrm/departments/list')
+      axios.p('/api/hrm/departments/list', {
+        company_id: this.filterCompany
+      })
         .then(res => {
           this.$vs.loading.close();
           this.departments = res.data || [];
@@ -480,6 +525,7 @@ export default {
         this.isEdit = true;
         this.form = {
           id: item.id,
+          company_id: item.company_id || 1,
           name: item.name,
           parent_id: item.parent_id || null,
           description: item.description || '',
@@ -489,6 +535,7 @@ export default {
         this.isEdit = false;
         this.form = {
           id: null,
+          company_id: this.filterCompany !== 'all' ? this.filterCompany : 1,
           name: '',
           parent_id: null,
           description: '',
@@ -501,6 +548,7 @@ export default {
       this.isEdit = false;
       this.form = {
         id: null,
+        company_id: parentItem.company_id || 1,
         name: '',
         parent_id: parentItem.id,
         description: '',

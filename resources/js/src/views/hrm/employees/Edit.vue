@@ -31,18 +31,44 @@
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Mã nhân viên (Để trống tự sinh CHAMxx)</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_code" placeholder="CHAM01" :disabled="isEdit" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Công ty (*)</label>
+                <select 
+                  class="vs-inputx vs-input--input normal w-full font-medium" 
+                  style="padding: 10px 14px; font-size: 13px;" 
+                  v-model="form.company_id" 
+                  @change="onCompanyChange"
+                  :disabled="isEdit && !isHrmAdmin"
+                >
+                  <option v-for="comp in companies" :key="comp.id" :value="comp.id">
+                    🏢 {{ comp.code }} - {{ comp.name }}
+                  </option>
+                </select>
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày vào làm việc chính thức</label>
-                <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">
+                  Mã nhân viên (Để trống tự sinh {{ selectedCompanyPrefix }}xx)
+                </label>
+                <input 
+                  type="text" 
+                  class="vs-inputx vs-input--input normal w-full" 
+                  style="padding: 10px 14px; font-size: 13px;" 
+                  v-model="form.employee_code" 
+                  :placeholder="selectedCompanyPrefix + '01'" 
+                  :disabled="isEdit" 
+                />
               </div>
             </div>
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày vào làm việc chính thức</label>
+                <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+              </div>
+              <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
+                <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+              </div>
+            </div>
                 <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
@@ -380,6 +406,7 @@ export default {
       isEdit: false,
       id: null,
       userId: null,
+      companies: [],
       departments: [],
       jobTitles: [],
       jobLevels: [],
@@ -387,6 +414,7 @@ export default {
       history: [],
       documents: [],
       form: {
+        company_id: 1,
         user_id: null,
         user_name: '',
         email: '',
@@ -433,6 +461,10 @@ export default {
     }
   },
   computed: {
+    selectedCompanyPrefix() {
+      const comp = this.companies.find(c => c.id === this.form.company_id);
+      return comp ? comp.employee_prefix : 'CHAM';
+    },
     isHrmAdmin() {
       const user = this.$store.state.AppActiveUser || JSON.parse(localStorage.getItem('userInfo')) || {};
       if (user.uid === 1 || user.id === 1 || user.is_hrm_admin === true) return true;
@@ -458,15 +490,29 @@ export default {
   },
   methods: {
     fetchOptions() {
-      axios.p('/api/hrm/departments/list', { scoped: 1 }).then(res => {
+      axios.g('/api/hrm/companies/all').then(res => {
+        if (res.data && res.data.data) {
+          this.companies = res.data.data;
+        }
+      });
+      this.fetchDepartmentsByCompany();
+      axios.p('/api/hrm/job-titles/list').then(res => this.jobTitles = res.data || []);
+      axios.p('/api/hrm/job-levels/list').then(res => this.jobLevels = res.data || []);
+    },
+    onCompanyChange() {
+      this.fetchDepartmentsByCompany();
+    },
+    fetchDepartmentsByCompany() {
+      axios.p('/api/hrm/departments/list', { 
+        scoped: 1, 
+        company_id: this.form.company_id 
+      }).then(res => {
         this.departments = this.flattenDepartments(res.data || []);
         // Nếu là Trưởng phòng thêm mới và chưa chọn phòng ban, tự động chọn phòng ban quản lý đầu tiên
         if (!this.id && !this.form.department_id && this.departments.length > 0 && !this.isHrmAdmin) {
           this.form.department_id = this.departments[0].id;
         }
       });
-      axios.p('/api/hrm/job-titles/list').then(res => this.jobTitles = res.data || []);
-      axios.p('/api/hrm/job-levels/list').then(res => this.jobLevels = res.data || []);
     },
     flattenDepartments(deps, level = 0) {
       let flat = [];
@@ -490,9 +536,11 @@ export default {
         this.$vs.loading.close();
         if (res.data.profile) {
           this.form = { ...this.form, ...res.data.profile };
+          this.form.company_id = res.data.profile.company_id ? parseInt(res.data.profile.company_id) : 1;
           this.form.user_name = res.data.profile.full_name || (res.data.profile.user ? res.data.profile.user.name : '');
           this.form.email = res.data.profile.email || (res.data.profile.user ? res.data.profile.user.email : '');
           this.userId = this.form.user_id;
+          this.fetchDepartmentsByCompany();
         }
         this.contracts = res.data.contracts || [];
         this.history = res.data.history || [];

@@ -455,6 +455,15 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         // HRM Routes
         Route::prefix('hrm')->group(function () {
+            Route::prefix('companies')->group(function () {
+                Route::get('all', 'Hrm\CompanyController@all');
+                Route::post('all', 'Hrm\CompanyController@all');
+                Route::post('list', 'Hrm\CompanyController@list');
+                Route::post('add', 'Hrm\CompanyController@add');
+                Route::post('update/{id}', 'Hrm\CompanyController@update');
+                Route::get('next-employee-code', 'Hrm\CompanyController@nextEmployeeCode');
+                Route::post('next-employee-code', 'Hrm\CompanyController@nextEmployeeCode');
+            });
             Route::prefix('departments')->group(function () {
                 Route::post('list', 'Hrm\DepartmentController@list');
                 Route::post('add', 'Hrm\DepartmentController@add');

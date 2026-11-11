@@ -9,6 +9,7 @@ class HrmEmployeeProfile extends Model
     protected $table = 'hrm_employee_profiles';
 
     protected $fillable = [
+        'company_id',
         'user_id',
         'employee_code',
         'full_name',
@@ -70,21 +71,39 @@ class HrmEmployeeProfile extends Model
     }
 
     /**
-     * Generate next sequential code like CHAM01, CHAM02...
+     * Generate next sequential code like CHAM01, CHAM02... or MEGA01, MEGA02...
      */
-    public static function generateNextEmployeeCode()
+    public static function generateNextEmployeeCode($companyIdOrCode = null)
     {
-        $lastProfile = self::where('employee_code', 'LIKE', 'CHAM%')
-            ->orderByRaw('CAST(SUBSTRING(employee_code, 5) AS UNSIGNED) DESC')
+        $prefix = 'CHAM';
+        if (!empty($companyIdOrCode)) {
+            if (is_numeric($companyIdOrCode)) {
+                $comp = HrmCompany::find($companyIdOrCode);
+                if ($comp && !empty($comp->employee_prefix)) {
+                    $prefix = strtoupper(trim($comp->employee_prefix));
+                }
+            } else {
+                $prefix = strtoupper(trim($companyIdOrCode));
+            }
+        }
+
+        $prefixLen = strlen($prefix);
+        $lastProfile = self::where('employee_code', 'LIKE', $prefix . '%')
+            ->orderByRaw('CAST(SUBSTRING(employee_code, ' . ($prefixLen + 1) . ') AS UNSIGNED) DESC')
             ->first();
 
         if (!$lastProfile || !$lastProfile->employee_code) {
-            return 'CHAM01';
+            return $prefix . '01';
         }
 
-        $num = (int) substr($lastProfile->employee_code, 4);
+        $num = (int) substr($lastProfile->employee_code, $prefixLen);
         $nextNum = $num + 1;
-        return 'CHAM' . str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+        return $prefix . str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(HrmCompany::class, 'company_id');
     }
 
     public function user()

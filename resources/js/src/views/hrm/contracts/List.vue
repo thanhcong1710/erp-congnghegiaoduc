@@ -6,7 +6,7 @@
         <h3 class="font-bold text-gray-800 flex items-center">
           <feather-icon icon="FileTextIcon" class="mr-2 text-primary" /> Quản Lý Hợp Đồng Lao Động
         </h3>
-        <p class="text-sm text-gray-500 mt-1">Mã hợp đồng tự sinh theo format CHAM01, CHAM02... và đồng bộ theo nhân sự</p>
+        <p class="text-sm text-gray-500 mt-1">Mã hợp đồng tự sinh theo công ty (CHAMxx, MEGAxx...) và đồng bộ theo nhân sự</p>
       </div>
       <div>
         <vs-button class="p-3" color="success" type="border" @click="openAddModal">
@@ -51,7 +51,15 @@
               <tbody>
                 <tr class="tr-values vs-table--tr" v-for="(tr, index) in contracts.data" :key="index">
                   <td class="td vs-table--td text-center">{{ index + 1 + ((contracts.current_page || 1) - 1) * (contracts.per_page || 20) }}</td>
-                  <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
+                  <td class="td vs-table--td font-bold text-primary">
+                    <div>{{ tr.contract_number }}</div>
+                    <span 
+                      class="text-xs px-2 py-0.5 rounded font-semibold inline-block mt-1"
+                      :class="(tr.contract_number && tr.contract_number.startsWith('MEGA')) || (tr.company && tr.company.code === 'MEGA') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+                    >
+                      {{ (tr.contract_number && tr.contract_number.startsWith('MEGA')) || (tr.company && tr.company.code === 'MEGA') ? 'MEGA' : 'CHAM' }}
+                    </span>
+                  </td>
                   <td class="td vs-table--td">
                     <div class="font-semibold text-gray-900">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'N/A') }}</div>
                     <div v-if="tr.employee && tr.employee.employee_code" class="text-xs text-gray-500 font-normal">Mã NS: {{ tr.employee.employee_code }}</div>

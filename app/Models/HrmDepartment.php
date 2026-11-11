@@ -9,6 +9,7 @@ class HrmDepartment extends Model
     protected $table = 'hrm_departments';
 
     protected $fillable = [
+        'company_id',
         'name',
         'description',
         'manager_id',
@@ -16,6 +17,11 @@ class HrmDepartment extends Model
         'branch_id',
         'status',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(HrmCompany::class, 'company_id');
+    }
 
     public function manager()
     {

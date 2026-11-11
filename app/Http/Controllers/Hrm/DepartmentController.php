@@ -17,31 +17,41 @@ class DepartmentController extends Controller
         $currentUser = Auth::user();
         $isHrmAdmin = $currentUser ? HrmScopeService::isHrmAdmin($currentUser) : false;
         $scoped = $request->get('scoped');
+        $companyId = $request->get('company_id');
 
         // Nếu request có flag scoped và user là Trưởng phòng (không phải HRM Admin), chỉ trả về phòng ban quản lý
         if ($scoped && !$isHrmAdmin && $currentUser) {
             $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
-            $scopedDepts = HrmDepartment::whereIn('id', $accessibleDeptIds)->orderBy('id', 'asc')->get();
+            $query = HrmDepartment::whereIn('id', $accessibleDeptIds);
+            if ($companyId && $companyId !== 'all') {
+                $query->where('company_id', $companyId);
+            }
+            $scopedDepts = $query->orderBy('id', 'asc')->get();
             return response()->json($scopedDepts);
         }
 
         // Get root departments and load nested children with counts
-        $departments = HrmDepartment::with([
+        $deptQuery = HrmDepartment::with([
+            'company',
             'manager',
             'children' => function ($q) {
-                $q->withCount(['employees', 'children']);
+                $q->withCount(['employees', 'children'])->with('company');
             },
             'children.children' => function ($q) {
-                $q->withCount(['employees', 'children']);
+                $q->withCount(['employees', 'children'])->with('company');
             },
             'children.children.children' => function ($q) {
-                $q->withCount(['employees', 'children']);
+                $q->withCount(['employees', 'children'])->with('company');
             }
         ])
         ->withCount(['employees', 'children'])
-        ->whereNull('parent_id')
-        ->orderBy('id', 'asc')
-        ->get();
+        ->whereNull('parent_id');
+
+        if ($companyId && $companyId !== 'all') {
+            $deptQuery->where('company_id', $companyId);
+        }
+
+        $departments = $deptQuery->orderBy('id', 'asc')->get();
 
         return response()->json($departments);
     }
@@ -50,12 +60,14 @@ class DepartmentController extends Controller
         if (!HrmScopeService::isHrmAdmin(Auth::user())) {
             return response()->json(['status' => 0, 'message' => 'Chỉ Quản trị viên HRM mới có quyền thêm phòng ban!'], 403);
         }
-        $department = HrmDepartment::create($request->all());
+        $data = $request->all();
+        $data['company_id'] = !empty($data['company_id']) ? (int)$data['company_id'] : 1;
+        $department = HrmDepartment::create($data);
         return response()->json(['status' => 1, 'message' => 'Thêm phòng ban thành công!', 'data' => $department]);
     }
     
     public function show($id) {
-        $department = HrmDepartment::with(['manager', 'parent', 'children'])->find($id);
+        $department = HrmDepartment::with(['manager', 'parent', 'children', 'company'])->find($id);
         return response()->json($department);
     }
     

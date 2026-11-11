@@ -62,6 +62,16 @@
 
         <!-- Bộ lọc trạng thái & ô tìm kiếm -->
         <div class="flex flex-wrap items-center">
+          <!-- Bộ lọc Công ty -->
+          <div class="mr-3 mb-2 md:mb-0">
+            <select v-model="filterCompany" @change="fetchEmployees" class="vs-inputx vs-input--input normal font-medium" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
+              <option value="all">🏢 Tất cả công ty</option>
+              <option v-for="comp in companies" :key="comp.id" :value="comp.id">
+                🏢 {{ comp.code }} - {{ comp.name }}
+              </option>
+            </select>
+          </div>
+
           <div class="mr-3 mb-2 md:mb-0">
             <select v-model="filterWorkStatus" @change="fetchEmployees" class="vs-inputx vs-input--input normal" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
               <option value="all">-- Tất cả trạng thái --</option>
@@ -104,7 +114,15 @@
               <tbody>
                 <tr class="tr-values vs-table--tr" v-for="(tr, index) in paginatedEmployees" :key="tr.id || index">
                   <td class="td vs-table--td text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
-                  <td class="td vs-table--td font-bold text-primary">{{ tr.employee_code || '---' }}</td>
+                  <td class="td vs-table--td font-bold text-primary">
+                    <div>{{ tr.employee_code || '---' }}</div>
+                    <span 
+                      class="text-xs px-2 py-0.5 rounded font-semibold inline-block mt-1"
+                      :class="tr.company && tr.company.code === 'MEGA' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+                    >
+                      {{ tr.company ? tr.company.code : (tr.employee_code && tr.employee_code.startsWith('MEGA') ? 'MEGA' : 'CHAM') }}
+                    </span>
+                  </td>
                   <td class="td vs-table--td">
                     <div class="font-semibold text-gray-900">{{ tr.full_name || (tr.user ? tr.user.name : '') }}</div>
                     <div class="text-xs text-gray-500">{{ tr.phone || tr.email || (tr.user ? tr.user.email : '') }}</div>
@@ -542,6 +560,8 @@ export default {
         allowInput: true
       },
       employees: [],
+      companies: [],
+      filterCompany: 'all',
       filterType: 'all',
       filterWorkStatus: 'all',
       searchKeyword: '',
@@ -567,6 +587,10 @@ export default {
     };
   },
   watch: {
+    filterCompany() {
+      this.currentPage = 1;
+      this.fetchEmployees();
+    },
     filterType() {
       this.currentPage = 1;
     },
@@ -631,9 +655,19 @@ export default {
     }
   },
   created() {
+    this.fetchCompanies();
     this.fetchEmployees();
   },
   methods: {
+    fetchCompanies() {
+      axios.g('/api/hrm/companies/all').then(res => {
+        if (res.data && res.data.data) {
+          this.companies = res.data.data;
+        }
+      }).catch(err => {
+        console.error('Lỗi tải danh sách công ty:', err);
+      });
+    },
     formatDateDisplay(val) {
       if (!val || val === '0' || val === '0000-00-00' || val === '0000-00-00 00:00:00') return '---';
       const m = moment(val);
@@ -656,6 +690,7 @@ export default {
     fetchEmployees() {
       this.$vs.loading();
       axios.p('/api/hrm/employees/list', {
+        company_id: this.filterCompany,
         work_status: this.filterWorkStatus,
         keyword: this.searchKeyword
       }).then(res => {
