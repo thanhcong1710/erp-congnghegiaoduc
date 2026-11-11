@@ -238,8 +238,11 @@ select[readonly],
   // 3. RESET Ô SEARCH BÊN TRONG: Luôn trong suốt, không bao giờ nhận viền riêng
   .vs__search,
   input[type="search"],
-  input {
+  input,
+  .vs__dropdown-toggle input,
+  .vs__selected-options input {
     border: none !important;
+    border-width: 0 !important;
     background: transparent !important;
     background-color: transparent !important;
     box-shadow: none !important;

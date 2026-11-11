@@ -2452,19 +2452,36 @@
   margin-bottom: 0.35rem;
 }
 
-/* Đảm bảo toàn bộ select box và input trong form section có nền trắng tinh khi active */
+/* Đảm bảo toàn bộ select box (v-select, native select) và input trong form section có nền trắng tinh khi active */
 .crm-form-section .v-select:not(.vs--disabled) .vs__dropdown-toggle,
 .crm-form-section select:not(:disabled):not([readonly]),
-.crm-form-section input:not(:disabled):not([readonly]) {
+.crm-form-section input.vs-input--input:not(:disabled):not([readonly]),
+.crm-form-section textarea.vs-input--input:not(:disabled):not([readonly]) {
   background-color: #ffffff !important;
   border: 1.5px solid #cbd5e1 !important;
 }
 
 .crm-form-section .v-select.vs--disabled .vs__dropdown-toggle,
 .crm-form-section select:disabled,
-.crm-form-section input:disabled {
+.crm-form-section input.vs-input--input:disabled,
+.crm-form-section textarea.vs-input--input:disabled {
   background-color: #f1f5f9 !important;
   border: 1px dashed #cbd5e1 !important;
+}
+
+/* KHÓA CỨNG: Ô input tìm kiếm bên trong v-select TUYỆT ĐỐI không bao giờ có viền hoặc nền */
+.crm-form-section .v-select .vs__search,
+.crm-form-section .v-select input,
+.crm-form-section .v-select input[type="search"] {
+  border: none !important;
+  border-width: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto !important;
 }
 
 /* 4. Tab Học Sinh - BẢNG CHỐNG RỚT DÒNG TUYỆT ĐỐI */
