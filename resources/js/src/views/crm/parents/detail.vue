@@ -2074,7 +2074,7 @@
 
 /* 1. Hero Left / Profile - Dàn hàng ngang liền mạch */
 .crm-hero-left {
-  flex: 1 1 520px;
+  flex: 1 1 380px;
   min-width: 340px;
 }
 
@@ -2450,6 +2450,21 @@
   font-weight: 600;
   color: #475569;
   margin-bottom: 0.35rem;
+}
+
+/* Đảm bảo toàn bộ select box và input trong form section có nền trắng tinh khi active */
+.crm-form-section .v-select:not(.vs--disabled) .vs__dropdown-toggle,
+.crm-form-section select:not(:disabled):not([readonly]),
+.crm-form-section input:not(:disabled):not([readonly]) {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+.crm-form-section .v-select.vs--disabled .vs__dropdown-toggle,
+.crm-form-section select:disabled,
+.crm-form-section input:disabled {
+  background-color: #f1f5f9 !important;
+  border: 1px dashed #cbd5e1 !important;
 }
 
 /* 4. Tab Học Sinh - BẢNG CHỐNG RỚT DÒNG TUYỆT ĐỐI */

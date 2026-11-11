@@ -93,8 +93,8 @@ textarea,
   font-size: 13.5px !important;
 }
 
-// 5.2 Style phân biệt Active vs Disabled cho các ô nhập liệu tiêu chuẩn
-// (Tuyệt đối loại trừ search input bên trong v-select, vue-multiselect, checkbox, radio)
+// 5.2 Style phân biệt Active vs Disabled cho Form Controls tiêu chuẩn
+// A. Native Inputs & Textarea
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -104,20 +104,18 @@ input[type="url"],
 input[type="search"]:not(.vs__search),
 input[type="date"],
 input[type="datetime-local"],
-select:not(.vs__select),
 textarea,
 .vs-inputx:not(.vs__search),
-.vs-input--input:not(.vs__search),
-.crm-control-select {
+.vs-input--input:not(.vs__search) {
   &:not(:disabled):not([readonly]) {
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #1e293b;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #1e293b !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      border-color: #7367f0;
+      border-color: #7367f0 !important;
     }
 
     &:focus {
@@ -147,21 +145,151 @@ textarea,
   }
 }
 
-// 5.3 Reset triệt để cho input tìm kiếm bên trong Vue-Select và Multiselect
-.v-select .vs__search,
-.v-select input[type="search"],
-.v-select input,
-.form-vselect-compact .vs__search,
-.multiselect .multiselect__input {
-  border: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
+// B. Select box tiêu chuẩn (Native Select, Vuesax Select, CRM Select) - ACTIVE VS DISABLED
+select:not(:disabled):not([readonly]),
+.vs-select--input:not([disabled]),
+.crm-control-select:not(:disabled) {
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer !important;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: #7367f0 !important;
+  }
+  &:focus {
+    border-color: #7367f0 !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15) !important;
+    outline: none;
+  }
+}
+
+select:disabled,
+select[readonly],
+.vs-select--input[disabled],
+.crm-control-select:disabled {
+  background-color: #f1f5f9 !important;
+  border: 1px dashed #cbd5e1 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed !important;
   box-shadow: none !important;
-  outline: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: auto !important;
-  line-height: inherit !important;
+}
+
+// C. Vue-Select (.v-select) - BẮT BUỘC NỀN TRẮNG KHI ACTIVE, XÁM MỜ KHI DISABLED
+.v-select {
+  font-size: 13.5px !important;
+
+  // 1. ACTIVE STATE: Nền trắng tinh khôi (#ffffff), viền rõ nét
+  &:not(.vs--disabled) {
+    .vs__dropdown-toggle {
+      background-color: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease-in-out;
+    }
+
+    &:hover .vs__dropdown-toggle {
+      border-color: #7367f0 !important;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12) !important;
+    }
+
+    &.vs--open .vs__dropdown-toggle {
+      background-color: #ffffff !important;
+      border-color: #7367f0 !important;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2) !important;
+    }
+
+    .vs__selected {
+      color: #1e293b !important;
+      font-weight: 500;
+    }
+
+    .vs__open-indicator {
+      fill: #64748b;
+    }
+  }
+
+  // 2. DISABLED STATE: Nền xám mờ (#f1f5f9), viền nét đứt
+  &.vs--disabled {
+    .vs__dropdown-toggle {
+      background-color: #f1f5f9 !important;
+      border: 1px dashed #cbd5e1 !important;
+      border-radius: 6px !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+    }
+
+    .vs__selected {
+      color: #94a3b8 !important;
+    }
+
+    .vs__open-indicator,
+    .vs__clear {
+      opacity: 0.4;
+      cursor: not-allowed !important;
+    }
+  }
+
+  // 3. RESET Ô SEARCH BÊN TRONG: Luôn trong suốt, không bao giờ nhận viền riêng
+  .vs__search,
+  input[type="search"],
+  input {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+    line-height: inherit !important;
+  }
+}
+
+// D. Vue-Multiselect (.multiselect) - ACTIVE VS DISABLED
+.multiselect {
+  font-size: 13.5px !important;
+
+  &:not(.multiselect--disabled) {
+    .multiselect__tags {
+      background: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      cursor: pointer !important;
+      transition: all 0.2s ease-in-out;
+    }
+
+    &:hover .multiselect__tags {
+      border-color: #7367f0 !important;
+      box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.12) !important;
+    }
+  }
+
+  &.multiselect--disabled {
+    .multiselect__tags {
+      background: #f1f5f9 !important;
+      border: 1px dashed #cbd5e1 !important;
+      border-radius: 6px !important;
+      cursor: not-allowed !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .multiselect__input {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 input::placeholder,
