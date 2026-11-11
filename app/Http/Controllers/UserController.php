@@ -95,51 +95,62 @@ class UserController extends Controller
             $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '$request->manager_hrm_id'");
         }
         $role_name = '';
-        foreach ($request->roles as $role) {
-            if (data_get($role, 'selected')) {
-                $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
+        if (!empty($request->roles) && (is_array($request->roles) || is_iterable($request->roles))) {
+            foreach ($request->roles as $role) {
+                if (data_get($role, 'selected')) {
+                    $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
+                }
             }
         }
         $branch_name = '';
-        $branch_id = '';
-        foreach ($request->branches as $branch) {
-            if (data_get($branch, 'selected')) {
-                $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
-                $branch_id = data_get($branch, 'id');
+        $branch_id = null;
+        if (!empty($request->branches) && (is_array($request->branches) || is_iterable($request->branches))) {
+            foreach ($request->branches as $branch) {
+                if (data_get($branch, 'selected')) {
+                    $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
+                    $branch_id = data_get($branch, 'id');
+                }
             }
         }
+        $branch_id = !empty($branch_id) ? (int)$branch_id : null;
+        $branch_name = !empty($branch_name) ? $branch_name : null;
+
         $user_id = u::insertSimpleRow(array(
             'name' => $request->name,
-            'phone' => $request->phone,
+            'phone' => $request->phone ?: null,
             'email' => $request->email ?: null,
-            'hrm_id' => $request->hrm_id,
+            'hrm_id' => $request->hrm_id ?: null,
             'password' => Hash::make($request->password),
             'status' => $request->status,
-            'manager_hrm_id' => $request->manager_hrm_id,
+            'manager_hrm_id' => $request->manager_hrm_id ?: null,
             'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
-            'sip_id' => $request->sip_id,
-            'role_name' => $role_name,
+            'sip_id' => $request->sip_id ?: null,
+            'role_name' => $role_name ?: null,
             'branch_id' => $branch_id,
             'branch_name' => $branch_name,
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id
         ), 'users');
 
-        foreach ($request->roles as $role) {
-            if (data_get($role, 'selected')) {
-                u::insertSimpleRow(array(
-                    'role_id' => data_get($role, 'id'),
-                    'user_id' => $user_id,
-                ), 'role_has_user');
+        if (!empty($request->roles) && (is_array($request->roles) || is_iterable($request->roles))) {
+            foreach ($request->roles as $role) {
+                if (data_get($role, 'selected')) {
+                    u::insertSimpleRow(array(
+                        'role_id' => data_get($role, 'id'),
+                        'user_id' => $user_id,
+                    ), 'role_has_user');
+                }
             }
         }
 
-        foreach ($request->branches as $branch) {
-            if (data_get($branch, 'selected')) {
-                u::insertSimpleRow(array(
-                    'branch_id' => data_get($branch, 'id'),
-                    'user_id' => $user_id,
-                ), 'branch_has_user');
+        if (!empty($request->branches) && (is_array($request->branches) || is_iterable($request->branches))) {
+            foreach ($request->branches as $branch) {
+                if (data_get($branch, 'selected')) {
+                    u::insertSimpleRow(array(
+                        'branch_id' => data_get($branch, 'id'),
+                        'user_id' => $user_id,
+                    ), 'branch_has_user');
+                }
             }
         }
 
@@ -177,19 +188,26 @@ class UserController extends Controller
             $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '$request->manager_hrm_id'");
         }
         $role_name = '';
-        foreach ($request->roles as $role) {
-            if (data_get($role, 'selected')) {
-                $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
+        if (!empty($request->roles) && (is_array($request->roles) || is_iterable($request->roles))) {
+            foreach ($request->roles as $role) {
+                if (data_get($role, 'selected')) {
+                    $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
+                }
             }
         }
         $branch_name = '';
-        $branch_id = '';
-        foreach ($request->branches as $branch) {
-            if (data_get($branch, 'selected')) {
-                $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
-                $branch_id = data_get($branch, 'id');
+        $branch_id = null;
+        if (!empty($request->branches) && (is_array($request->branches) || is_iterable($request->branches))) {
+            foreach ($request->branches as $branch) {
+                if (data_get($branch, 'selected')) {
+                    $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
+                    $branch_id = data_get($branch, 'id');
+                }
             }
         }
+        $branch_id = !empty($branch_id) ? (int)$branch_id : null;
+        $branch_name = !empty($branch_name) ? $branch_name : null;
+
         if ($request->change_pass) {
             u::updateSimpleRow(array(
                 'password' => Hash::make($request->password)
@@ -197,14 +215,14 @@ class UserController extends Controller
         }
         u::updateSimpleRow(array(
             'name' => $request->name,
-            'phone' => $request->phone,
+            'phone' => $request->phone ?: null,
             'email' => $request->email ?: null,
-            'hrm_id' => $request->hrm_id,
+            'hrm_id' => $request->hrm_id ?: null,
             'status' => $request->status,
-            'manager_hrm_id' => $request->manager_hrm_id,
+            'manager_hrm_id' => $request->manager_hrm_id ?: null,
             'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
-            'sip_id' => $request->sip_id,
-            'role_name' => $role_name,
+            'sip_id' => $request->sip_id ?: null,
+            'role_name' => $role_name ?: null,
             'branch_id' => $branch_id,
             'branch_name' => $branch_name,
             'updated_at' => date('Y-m-d H:i:s'),
@@ -212,22 +230,26 @@ class UserController extends Controller
         ), array('id' => $request->user_id), 'users');
 
         u::query("DELETE FROM role_has_user WHERE user_id=$request->user_id");
-        foreach ($request->roles as $role) {
-            if (data_get($role, 'selected')) {
-                u::insertSimpleRow(array(
-                    'role_id' => data_get($role, 'id'),
-                    'user_id' => $request->user_id,
-                ), 'role_has_user');
+        if (!empty($request->roles) && (is_array($request->roles) || is_iterable($request->roles))) {
+            foreach ($request->roles as $role) {
+                if (data_get($role, 'selected')) {
+                    u::insertSimpleRow(array(
+                        'role_id' => data_get($role, 'id'),
+                        'user_id' => $request->user_id,
+                    ), 'role_has_user');
+                }
             }
         }
 
         u::query("DELETE FROM branch_has_user WHERE user_id=$request->user_id");
-        foreach ($request->branches as $branch) {
-            if (data_get($branch, 'selected')) {
-                u::insertSimpleRow(array(
-                    'branch_id' => data_get($branch, 'id'),
-                    'user_id' => $request->user_id,
-                ), 'branch_has_user');
+        if (!empty($request->branches) && (is_array($request->branches) || is_iterable($request->branches))) {
+            foreach ($request->branches as $branch) {
+                if (data_get($branch, 'selected')) {
+                    u::insertSimpleRow(array(
+                        'branch_id' => data_get($branch, 'id'),
+                        'user_id' => $request->user_id,
+                    ), 'branch_has_user');
+                }
             }
         }
 
