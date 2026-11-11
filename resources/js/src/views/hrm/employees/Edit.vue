@@ -65,13 +65,6 @@
                 <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
-                <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
-              </div>
-            </div>
-                <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
-              </div>
-              <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
                 <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.gender">
                   <option :value="1">Nam</option>
@@ -83,21 +76,28 @@
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
-                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" placeholder="Số CCCD/CMND..." />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
+                <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
               <div class="vx-col w-1/2">
-                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày cấp CCCD / CMND</label>
-                <flat-pickr v-model="form.id_card_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+                <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
+                <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" placeholder="Số CCCD/CMND..." />
               </div>
             </div>
 
             <div class="vx-row mb-4">
               <div class="vx-col w-1/2">
+                <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày cấp CCCD / CMND</label>
+                <flat-pickr v-model="form.id_card_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
+              </div>
+              <div class="vx-col w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.phone" placeholder="0987xxxxxx" />
               </div>
-              <div class="vx-col w-1/2">
+            </div>
+
+            <div class="vx-row mb-4">
+              <div class="vx-col w-full">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Địa chỉ thường trú</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.address" placeholder="Địa chỉ nơi ở hiện tại..." />
               </div>
