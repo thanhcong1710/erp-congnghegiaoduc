@@ -5,9 +5,9 @@
   <div id="page-parent-detail" class="crm-detail-page">
     <!-- 1. MODERN CRM HERO CARD -->
     <vx-card no-shadow class="mb-base crm-hero-card">
-      <div class="crm-hero-grid">
-        <!-- 1.1 Profile / Avatar & Basic Contact -->
-        <div class="crm-hero-profile">
+      <div class="crm-hero-container">
+        <!-- 1.1 Khối Hồ sơ Khách Hàng (Trái) -->
+        <div class="crm-hero-left">
           <div class="crm-avatar-box">
             <img class="crm-avatar-img" :src="parent.avatar_url ? parent.avatar_url : '/images/common/avatar-default.jpg'" :alt="parent.name">
             <label for="account-upload" class="crm-avatar-upload-btn" title="Đổi ảnh đại diện">
@@ -16,21 +16,23 @@
             <input type="file" ref="file" multiple="multiple" id="account-upload" hidden accept="image/*" @change="submitFiles"/>
           </div>
 
-          <div class="crm-profile-info">
-            <div class="flex items-center flex-wrap gap-2 mb-1">
-              <h4 class="font-bold text-gray-900 m-0 text-lg">{{ parent.name || 'Khách hàng' }}</h4>
+          <div class="crm-profile-details">
+            <div class="crm-name-line">
+              <h3 class="crm-customer-name">{{ parent.name || 'Khách hàng' }}</h3>
               <span class="badge-parent-gender" :class="parent.gender === 'F' ? 'badge-female' : 'badge-male'">
                 <i :class="parent.gender === 'F' ? 'fa fa-venus' : 'fa fa-mars'" class="mr-1"></i>
                 {{ parent.gender === 'F' ? 'Bà' : 'Ông' }}
               </span>
-              <span class="badge-parent-id">ID: #{{ parent.id }}</span>
+              <span class="badge-parent-id"><i class="fa fa-fingerprint mr-1"></i>#{{ parent.id }}</span>
             </div>
 
-            <div class="crm-phone-chips mt-2">
-              <div class="crm-phone-pill" v-if="parent.mobile_1">
-                <i class="fa fa-phone text-emerald-500 mr-1.5"></i>
-                <strong class="text-gray-800">{{ parent.mobile_1 }}</strong>
-                <div class="crm-phone-actions">
+            <!-- Chips thông tin liên hệ và phân loại -->
+            <div class="crm-meta-chips">
+              <!-- SĐT 1 -->
+              <div class="crm-chip-pill" v-if="parent.mobile_1">
+                <i class="fa fa-phone text-emerald-600 mr-1.5"></i>
+                <span class="font-bold text-gray-900">{{ parent.mobile_1 }}</span>
+                <div class="crm-chip-actions">
                   <button type="button" class="btn-circle-action btn-call" @click="callPhone(parent.mobile_1)" title="Gọi điện">
                     <i class="fa fa-phone"></i>
                   </button>
@@ -40,10 +42,11 @@
                 </div>
               </div>
 
-              <div class="crm-phone-pill" v-if="parent.mobile_2">
-                <i class="fa fa-phone text-blue-500 mr-1.5"></i>
-                <strong class="text-gray-800">{{ parent.mobile_2 }}</strong>
-                <div class="crm-phone-actions">
+              <!-- SĐT 2 -->
+              <div class="crm-chip-pill" v-if="parent.mobile_2">
+                <i class="fa fa-phone text-blue-600 mr-1.5"></i>
+                <span class="font-bold text-gray-900">{{ parent.mobile_2 }}</span>
+                <div class="crm-chip-actions">
                   <button type="button" class="btn-circle-action btn-call" @click="callPhone(parent.mobile_2)" title="Gọi điện số 2">
                     <i class="fa fa-phone"></i>
                   </button>
@@ -52,68 +55,98 @@
                   </button>
                 </div>
               </div>
+
+              <!-- Email -->
+              <div class="crm-chip-pill text-gray-700" v-if="parent.email">
+                <i class="fa fa-envelope text-blue-500 mr-1.5"></i>
+                <span>{{ parent.email }}</span>
+              </div>
+
+              <!-- Cơ sở / Trung tâm -->
+              <div class="crm-chip-pill text-gray-700" v-if="parent.branch_name">
+                <i class="fa fa-building text-amber-500 mr-1.5"></i>
+                <span>Cơ sở: <strong>{{ parent.branch_name }}</strong></span>
+              </div>
+
+              <!-- Nguồn tiếp cận -->
+              <div class="crm-chip-pill text-gray-700" v-if="parent.source_name">
+                <i class="fa fa-bullhorn text-purple-500 mr-1.5"></i>
+                <span>Nguồn: <strong>{{ parent.source_name }}</strong></span>
+              </div>
+
+              <!-- Khu vực / Tỉnh thành -->
+              <div class="crm-chip-pill text-gray-700" v-if="parent.province_name || parent.address">
+                <i class="fa fa-map-marker-alt text-red-500 mr-1.5"></i>
+                <span>{{ parent.address ? parent.address + ', ' : '' }}{{ parent.district_name ? parent.district_name + ', ' : '' }}{{ parent.province_name }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 1.2 Middle: Interaction & Care KPIs -->
-        <div class="crm-hero-kpis">
-          <div class="crm-kpi-item">
-            <div class="crm-kpi-icon bg-blue-50 text-blue-600">
-              <i class="fa fa-headset"></i>
+        <!-- 1.2 Khối Tương Tác Chăm Sóc & Điều Khiển (Phải) -->
+        <div class="crm-hero-right">
+          <!-- 3 Thẻ chỉ số chăm sóc -->
+          <div class="crm-care-stats-row">
+            <div class="crm-stat-box">
+              <div class="crm-stat-icon bg-blue-100 text-blue-600">
+                <i class="fa fa-headset"></i>
+              </div>
+              <div class="crm-stat-content">
+                <span class="crm-stat-label">Số lần chăm sóc</span>
+                <strong class="crm-stat-number text-blue-700">{{ parent.num_care || 0 }} <span class="crm-stat-unit">lượt</span></strong>
+              </div>
             </div>
-            <div class="crm-kpi-text">
-              <span class="crm-kpi-label">Số lần chăm sóc</span>
-              <strong class="crm-kpi-val text-blue-700">{{ parent.num_care || 0 }} <span class="text-xs font-normal">lượt</span></strong>
+
+            <div class="crm-stat-box">
+              <div class="crm-stat-icon bg-emerald-100 text-emerald-600">
+                <i class="fa fa-history"></i>
+              </div>
+              <div class="crm-stat-content">
+                <span class="crm-stat-label">Liên hệ gần nhất</span>
+                <strong class="crm-stat-val text-gray-800">{{ parent.last_care || 'Chưa liên hệ' }}</strong>
+              </div>
+            </div>
+
+            <div class="crm-stat-box crm-stat-next-care">
+              <div class="crm-stat-icon bg-amber-100 text-amber-600">
+                <i class="fa fa-calendar-check"></i>
+              </div>
+              <div class="crm-stat-content w-full">
+                <span class="crm-stat-label">Lịch chăm sóc tiếp theo</span>
+                <div class="crm-next-date-field">
+                  <input
+                    class="crm-next-care-input"
+                    type="datetime-local"
+                    :value="parent.next_care_date ? parent.next_care_date.replace(' ', 'T').slice(0, 16) : ''"
+                    id="next_care_date"
+                    @change="updateNextCareDate"
+                    :disabled="disabled_action"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="crm-kpi-item">
-            <div class="crm-kpi-icon bg-emerald-50 text-emerald-600">
-              <i class="fa fa-history"></i>
+          <!-- 2 Dropdown điều khiển -->
+          <div class="crm-care-controls-row">
+            <div class="crm-dropdown-box">
+              <label class="crm-dropdown-label"><i class="fa fa-tag text-primary mr-1"></i> Trạng thái khách hàng</label>
+              <select class="crm-control-select" @change="openConfirmChangeStatus" v-model="tmp_status">
+                <option 
+                  v-for="option in levelOptionsParent" 
+                  :key="option.id" 
+                  :value="option.id">
+                  {{ option.label }}
+                </option>
+              </select>
             </div>
-            <div class="crm-kpi-text">
-              <span class="crm-kpi-label">Liên hệ lần cuối</span>
-              <strong class="crm-kpi-val text-gray-800 text-xs">{{ parent.last_care || 'Chưa liên hệ' }}</strong>
+
+            <div class="crm-dropdown-box">
+              <label class="crm-dropdown-label"><i class="fa fa-user-tie text-primary mr-1"></i> Người phụ trách (EC)</label>
+              <select class="crm-control-select" @change="openConfirmAssgin" v-model="tmp_owner_id">
+                <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{ item.label_name }}</option>
+              </select>
             </div>
-          </div>
-
-          <div class="crm-kpi-next-care">
-            <label class="crm-next-care-label">
-              <i class="fa fa-calendar-alt text-amber-500 mr-1"></i> Lịch chăm sóc tiếp theo:
-            </label>
-            <div class="crm-next-care-input-box">
-              <input
-                class="crm-next-care-input"
-                type="datetime-local"
-                :value="parent.next_care_date ? parent.next_care_date.replace(' ', 'T').slice(0, 16) : ''"
-                id="next_care_date"
-                @change="updateNextCareDate"
-                :disabled="disabled_action"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- 1.3 Right: Status & Owner Quick Controls -->
-        <div class="crm-hero-controls">
-          <div class="crm-control-box">
-            <label class="crm-control-label"><i class="fa fa-tag text-primary mr-1"></i> Trạng thái khách hàng</label>
-            <select class="crm-control-select" @change="openConfirmChangeStatus" v-model="tmp_status">
-              <option 
-                v-for="option in levelOptionsParent" 
-                :key="option.id" 
-                :value="option.id">
-                {{ option.label }}
-              </option>
-            </select>
-          </div>
-
-          <div class="crm-control-box mt-2">
-            <label class="crm-control-label"><i class="fa fa-user-tie text-primary mr-1"></i> Người phụ trách (EC)</label>
-            <select class="crm-control-select" @change="openConfirmAssgin" v-model="tmp_owner_id">
-              <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{ item.label_name }}</option>
-            </select>
           </div>
         </div>
       </div>
@@ -337,7 +370,7 @@
                         :disabled="disabled_edit"
                         placeholder="Nhập số điện thoại người giới thiệu..."
                       />
-                      <p v-if="c2c_info" class="text-xs text-primary font-medium mt-1"><i>{{ c2c_info }}</i></p>
+                      <p v-if="c2c_info" class="text-sm text-primary font-medium mt-1"><i>{{ c2c_info }}</i></p>
                     </div>
                   </div>
                 </div>
@@ -389,7 +422,7 @@
                       <td colspan="5" class="text-center py-4 text-gray-500">Chưa có ticket nào được tạo</td>
                     </tr>
                     <tr v-for="(item, index) in tickets" :key="index">
-                      <td class="text-center font-mono text-xs">{{ item.created_at }}</td>
+                      <td class="text-center font-mono">{{ item.created_at }}</td>
                       <td class="text-center">
                         <span class="badge-ticket-type">{{ item.type | genTypeTicket }}</span>
                       </td>
@@ -440,13 +473,13 @@
                       <td colspan="6" class="text-center py-4 text-gray-500">Chưa có lịch sử chăm sóc nào</td>
                     </tr>
                     <tr v-for="(item, index) in cares" :key="index">
-                      <td class="text-center font-mono text-xs">{{ item.care_date }}</td>
+                      <td class="text-center font-mono">{{ item.care_date }}</td>
                       <td class="font-medium text-gray-900">{{ item.creator_name }}</td>
                       <td class="text-center">
                         <span class="badge-care-method">{{ item.method_name }}{{ item.type_call ? ' - ' + item.type_call : '' }}</span>
                       </td>
-                      <td class="text-center text-xs font-semibold">{{ item.call_status_label || '---' }}</td>
-                      <td class="text-center text-xs text-amber-600 font-medium">{{ item.next_care_date || '---' }}</td>
+                      <td class="text-center font-semibold">{{ item.call_status_label || '---' }}</td>
+                      <td class="text-center text-amber-600 font-medium">{{ item.next_care_date || '---' }}</td>
                       <td>
                         <div v-if="item.link_record" class="mb-1">
                           <audio controls class="crm-audio-player">
@@ -455,7 +488,7 @@
                         </div>
                         <div class="text-sm text-gray-800" v-html="item.note"></div>
                         <div v-if="item.attached_file" class="mt-1">
-                          <a :href="item.attached_file" target="_blank" class="text-primary text-xs underline font-medium">
+                          <a :href="item.attached_file" target="_blank" class="text-primary text-sm underline font-medium">
                             <i class="fa fa-paperclip mr-1"></i>File đính kèm
                           </a>
                         </div>
@@ -469,95 +502,149 @@
 
           <!-- TAB 4: HỌC SINH -->
           <vs-tab label="Học sinh" @click="changeTab()">
-            <div class="tab-content-wrapper p-2">
-              <div class="flex items-center justify-between flex-wrap gap-2 mb-4 mt-1">
-                <div>
-                  <h5 class="font-bold text-gray-800 m-0 flex items-center">
-                    <i class="fa fa-user-graduate text-primary mr-2" style="font-size: 20px;"></i>
+            <div class="tab-content-wrapper p-3">
+              <!-- Header Bar của Tab Học sinh -->
+              <div class="crm-student-header-bar">
+                <div class="crm-student-header-info">
+                  <h4 class="crm-student-title">
+                    <i class="fa fa-user-graduate text-primary mr-2"></i>
                     Danh Sách Học Sinh ({{ students.length }})
-                  </h5>
-                  <span class="text-xs text-gray-500">Học sinh tạo từ CRM đã là chính thức, sẵn sàng tạo hợp đồng nhập học ngay</span>
+                  </h4>
+                  <p class="crm-student-desc">
+                    Học sinh tạo từ CRM đã là học sinh chính thức trong hệ thống LMS và có thể nhập học (tạo hợp đồng) ngay lập tức.
+                  </p>
                 </div>
-                <vs-button :disabled="disabled_action" color="success" class="flex items-center shadow-md" @click="showModalStudent(0)">
-                  <i class="fa fa-plus mr-1.5"></i> Thêm mới học sinh
+                <vs-button :disabled="disabled_action" color="success" class="crm-btn-add-student shadow-md" @click="showModalStudent(0)">
+                  <i class="fa fa-plus-circle mr-2"></i> Thêm mới học sinh
                 </vs-button>
               </div>
 
-              <!-- Empty state -->
+              <!-- Khi chưa có học sinh -->
               <div v-if="!students || students.length === 0" class="crm-empty-state">
-                <i class="fa fa-user-graduate crm-empty-icon"></i>
-                <h6 class="font-bold text-gray-700 mt-2">Chưa có thông tin học sinh</h6>
-                <p class="text-sm text-gray-500 mb-3">Phụ huynh này chưa được thêm học sinh nào trong hệ thống.</p>
-                <vs-button :disabled="disabled_action" color="primary" size="small" @click="showModalStudent(0)">
-                  <i class="fa fa-plus mr-1"></i> Thêm học sinh ngay
+                <div class="crm-empty-icon-box">
+                  <i class="fa fa-user-graduate"></i>
+                </div>
+                <h5 class="crm-empty-title">Chưa có thông tin học sinh</h5>
+                <p class="crm-empty-desc">Phụ huynh này hiện chưa được liên kết với học sinh nào trong hệ thống.</p>
+                <vs-button :disabled="disabled_action" color="primary" class="shadow-md" @click="showModalStudent(0)">
+                  <i class="fa fa-plus mr-1.5"></i> Thêm học sinh ngay
                 </vs-button>
               </div>
 
-              <!-- Student Cards Grid -->
-              <div v-else class="vx-row">
-                <div class="vx-col lg:w-1/3 md:w-1/2 w-full mb-4" v-for="(item, index) in students" :key="index">
-                  <div class="crm-student-card">
-                    <!-- Card Header -->
-                    <div class="crm-student-card-header">
-                      <div class="crm-student-identity">
-                        <img
-                          class="crm-student-mini-avatar"
-                          :src="item.gender === 'F' ? '/images/common/avatar-girl.svg' : '/images/common/avatar-boy.svg'"
-                          :alt="item.name"
-                        />
-                        <div class="min-w-0">
-                          <h6 class="crm-student-name truncate" :title="item.name">{{ item.name }}</h6>
-                          <span v-if="item.lms_code" class="crm-student-lms-badge" :title="item.lms_code">
-                            <i class="fa fa-id-badge mr-1"></i>{{ item.lms_code }}
+              <!-- BẢNG HỌC SINH HIỆN ĐẠI (FULL-WIDTH 100%) -->
+              <div v-else class="crm-student-table-container">
+                <div class="table-responsive crm-table-wrapper">
+                  <table class="crm-table crm-student-table">
+                    <thead>
+                      <tr>
+                        <th style="min-width: 50px;" class="text-center">STT</th>
+                        <th style="min-width: 220px;">Học sinh</th>
+                        <th style="min-width: 150px;" class="text-center">Mã LMS</th>
+                        <th style="min-width: 140px;" class="text-center">Ngày sinh</th>
+                        <th style="min-width: 180px;">Cơ sở học</th>
+                        <th style="min-width: 140px;" class="text-center">Trạng thái</th>
+                        <th style="min-width: 180px;">Ghi chú</th>
+                        <th style="min-width: 210px;" class="text-center">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, index) in students" :key="index">
+                        <td class="text-center font-bold text-gray-500">{{ index + 1 }}</td>
+                        <td>
+                          <div class="crm-student-col-info">
+                            <div class="crm-student-avatar-circle" :class="item.gender === 'F' ? 'avatar-female' : (item.gender === 'M' ? 'avatar-male' : 'avatar-neutral')">
+                              <i class="fa fa-user-graduate"></i>
+                            </div>
+                            <div class="crm-student-text">
+                              <span class="crm-student-table-name">{{ item.name }}</span>
+                              <span class="badge-student-gender" :class="item.gender === 'F' ? 'gender-f' : (item.gender === 'M' ? 'gender-m' : 'gender-other')">
+                                <i :class="item.gender === 'F' ? 'fa fa-venus' : (item.gender === 'M' ? 'fa fa-mars' : 'fa fa-genderless')" class="mr-1"></i>
+                                {{ item.gender | genTextGender }}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank" class="crm-student-lms-pill" title="Click xem chi tiết học sinh LMS">
+                            <i class="fa fa-id-badge mr-1"></i>{{ item.lms_code || ('LMS#' + item.lms_id) }}
+                          </router-link>
+                          <span v-else class="text-gray-400 font-mono">---</span>
+                        </td>
+                        <td class="text-center">
+                          <div v-if="item.birthday" class="crm-birthday-cell">
+                            <i class="fa fa-calendar-alt text-primary mr-1"></i>
+                            <span>{{ item.birthday }}</span>
+                          </div>
+                          <span v-else class="text-gray-400">Chưa cập nhật</span>
+                        </td>
+                        <td>
+                          <div class="crm-branch-cell">
+                            <i class="fa fa-building text-amber-500 mr-1.5"></i>
+                            <span class="font-medium text-gray-800">{{ item.checkin_branch_name || parent.branch_name || 'Chưa gán' }}</span>
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge-status-pill badge-status-official">
+                            <i class="fa fa-check-circle mr-1"></i>{{ item.status | genStudentStatus }}
                           </span>
-                        </div>
-                      </div>
+                        </td>
+                        <td>
+                          <span class="text-gray-700" :title="item.note">{{ item.note || '---' }}</span>
+                        </td>
+                        <td class="text-center">
+                          <div class="crm-student-actions">
+                            <!-- Nút Nhập học ngay -->
+                            <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank">
+                              <button type="button" class="btn-action-enroll" title="Tạo hợp đồng nhập học ngay cho học sinh">
+                                <i class="fa fa-file-signature mr-1.5"></i> Nhập học ngay
+                              </button>
+                            </router-link>
+                            <!-- Nút Sửa -->
+                            <button type="button" class="btn-action-icon btn-edit" :disabled="disabled_action" @click="showModalStudent(item)" title="Sửa thông tin học sinh">
+                              <i class="fa fa-edit"></i>
+                            </button>
+                            <!-- Nút Xem LMS -->
+                            <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
+                              <button type="button" class="btn-action-icon btn-view" title="Xem hồ sơ LMS chi tiết">
+                                <i class="fa fa-eye"></i>
+                              </button>
+                            </router-link>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
 
-                      <div class="flex items-center gap-1">
-                        <button type="button" class="btn-icon-soft text-gray-600" :disabled="disabled_action" @click="showModalStudent(item)" title="Sửa thông tin học sinh">
-                          <i class="fa fa-edit"></i>
-                        </button>
-                        <router-link v-if="item.lms_id" :to="`/lms/students/${item.lms_id}/detail`" target="_blank">
-                          <button type="button" class="btn-icon-soft text-primary" title="Xem hồ sơ LMS chi tiết">
-                            <i class="fa fa-eye"></i>
-                          </button>
-                        </router-link>
+                <!-- Khối hướng dẫn quy trình nhập học nhanh (Lấp đầy không gian, chuyên nghiệp) -->
+                <div class="crm-student-workflow-card mt-4">
+                  <div class="crm-workflow-header">
+                    <i class="fa fa-lightbulb text-amber-500 mr-2"></i>
+                    <strong class="text-gray-800">Quy trình Nhập học Trực tiếp (1-Chạm)</strong>
+                  </div>
+                  <div class="crm-workflow-steps">
+                    <div class="crm-wf-step">
+                      <span class="crm-wf-number">1</span>
+                      <div class="crm-wf-content">
+                        <strong>Thêm học sinh:</strong>
+                        <p>Hệ thống tự động đồng bộ sang LMS và cấp mã học sinh chính thức (`STK...`).</p>
                       </div>
                     </div>
-
-                    <!-- Card Body -->
-                    <div class="crm-student-card-body">
-                      <div class="crm-student-meta-row">
-                        <span class="crm-meta-label"><i class="fa fa-calendar-alt text-primary mr-1"></i> Ngày sinh:</span>
-                        <span class="crm-meta-val">{{ item.birthday || '---' }}</span>
-                      </div>
-                      <div class="crm-student-meta-row">
-                        <span class="crm-meta-label"><i :class="item.gender === 'F' ? 'fa fa-venus text-pink-500' : 'fa fa-mars text-blue-500'" class="mr-1"></i> Giới tính:</span>
-                        <span class="crm-meta-val">{{ item.gender | genTextGender }}</span>
-                      </div>
-                      <div class="crm-student-meta-row">
-                        <span class="crm-meta-label"><i class="fa fa-building text-primary mr-1"></i> Cơ sở:</span>
-                        <span class="crm-meta-val font-semibold text-gray-800">{{ item.checkin_branch_name || parent.branch_name || 'Chưa gán' }}</span>
-                      </div>
-                      <div class="crm-student-meta-row" v-if="item.note">
-                        <span class="crm-meta-label"><i class="fa fa-sticky-note text-amber-500 mr-1"></i> Ghi chú:</span>
-                        <span class="crm-meta-val text-gray-600 truncate" :title="item.note">{{ item.note }}</span>
-                      </div>
-                      <div class="crm-student-meta-row">
-                        <span class="crm-meta-label"><i class="fa fa-check-circle text-emerald-500 mr-1"></i> Trạng thái:</span>
-                        <span class="badge-status-pill badge-status-official">
-                          {{ item.status | genStudentStatus }}
-                        </span>
+                    <div class="crm-wf-arrow"><i class="fa fa-angle-right"></i></div>
+                    <div class="crm-wf-step">
+                      <span class="crm-wf-number">2</span>
+                      <div class="crm-wf-content">
+                        <strong>Bấm "Nhập học ngay":</strong>
+                        <p>Chuyển đến màn hình Tạo Hợp Đồng, tự động điền sẵn học sinh và cơ sở.</p>
                       </div>
                     </div>
-
-                    <!-- Card Footer: Quick Action -->
-                    <div class="crm-student-card-footer">
-                      <router-link v-if="item.lms_id" :to="`/lms/contracts/add?student_id=${item.lms_id}&branch_id=${item.checkin_branch_id || parent.branch_id || ''}`" target="_blank" class="w-full">
-                        <vs-button color="primary" class="w-full flex items-center justify-center shadow-sm">
-                          <i class="fa fa-file-signature mr-1.5"></i> Nhập học ngay (Tạo hợp đồng)
-                        </vs-button>
-                      </router-link>
+                    <div class="crm-wf-arrow"><i class="fa fa-angle-right"></i></div>
+                    <div class="crm-wf-step">
+                      <span class="crm-wf-number">3</span>
+                      <div class="crm-wf-content">
+                        <strong>Chọn gói học phí & Ký hợp đồng:</strong>
+                        <p>Học sinh chính thức bắt đầu lộ trình học tập tại trung tâm.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -582,7 +669,7 @@
                       <td colspan="3" class="text-center py-4 text-gray-500">Chưa có lịch sử cập nhật nào</td>
                     </tr>
                     <tr v-for="(item, index) in logs" :key="index">
-                      <td class="text-center font-mono text-xs">{{ item.created_at }}</td>
+                      <td class="text-center font-mono">{{ item.created_at }}</td>
                       <td class="text-sm text-gray-800">{{ item.content }}</td>
                       <td class="text-center font-medium">{{ item.creator_name }}</td>
                     </tr>
@@ -614,7 +701,7 @@
                       <td class="text-center font-mono font-bold text-primary">{{ item.code }}</td>
                       <td class="text-right font-semibold text-emerald-600">{{ item.coupon_amount | formatMoney }}</td>
                       <td class="text-center font-medium">{{ item.coupon_session }} buổi</td>
-                      <td class="text-center text-xs">{{ item.end_date | formatDateView }}</td>
+                      <td class="text-center">{{ item.end_date | formatDateView }}</td>
                       <td class="text-center">
                         <span :class="item.status == 2 ? 'badge-status-pill badge-status-used' : 'badge-status-pill badge-status-official'">
                           {{ item.status == 2 ? 'Đã sử dụng' : 'Chưa sử dụng' }}
@@ -1907,13 +1994,9 @@
     },
     filters: {
       genTextGender(item){
-        let resp = ''
-        if(item== 'M'){
-          resp = 'Nam'
-        }else{
-          resp = 'Nữ'
-        }
-        return resp
+        if (item === 'M') return 'Nam';
+        if (item === 'F') return 'Nữ';
+        return 'Chưa xác định';
       },
       genStudentStatus(item){
         let resp = ''
@@ -1953,7 +2036,7 @@
 }
 
 /* ==========================================================================
-   CRM Parent Detail Modern UI Styles
+   CRM Parent Detail Modern UI Styles - Standard Typography (font-size >= 13px)
    ========================================================================== */
 
 /* Hero Header Card */
@@ -1966,26 +2049,30 @@
   transition: all 0.3s ease;
 }
 
-.crm-hero-grid {
+.crm-hero-container {
   display: flex;
   flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: space-between;
   align-items: stretch;
-  gap: 1.25rem;
 }
 
-/* Hero Profile */
-.crm-hero-profile {
+/* 1. Hero Left / Profile */
+.crm-hero-left {
+  flex: 1 1 540px;
+  min-width: 320px;
+}
+
+.crm-profile-main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1.25rem;
-  flex: 1 1 360px;
-  min-width: 280px;
 }
 
 .crm-avatar-box {
   position: relative;
-  width: 86px;
-  height: 86px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(115, 103, 240, 0.2);
@@ -2004,11 +2091,12 @@
 .crm-avatar-upload-btn {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
   opacity: 0;
   cursor: pointer;
   transition: opacity 0.2s ease;
@@ -2018,13 +2106,33 @@
   opacity: 1;
 }
 
-/* Badges */
+.crm-profile-details {
+  flex: 1;
+}
+
+.crm-name-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.crm-customer-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Badges (Tất cả font-size >= 13px) */
 .badge-parent-gender {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -2041,58 +2149,59 @@
 .badge-parent-id {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 13px;
   font-weight: 600;
   background: #f1f5f9;
-  color: #64748b;
+  color: #475569;
 }
 
-/* Phone Pills */
-.crm-phone-chips {
+/* Chips / Meta Pills */
+.crm-meta-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.crm-phone-pill {
+.crm-chip-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  font-size: 13px;
+  font-weight: 500;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
   color: #334155;
 }
 
-.crm-phone-actions {
-  display: flex;
+.crm-chip-actions {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  margin-left: 6px;
 }
 
 .btn-circle-action {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-call {
   background: #dcfce7;
-  color: #16a34a;
+  color: #15803d;
 }
 .btn-call:hover {
-  background: #16a34a;
+  background: #15803d;
   color: #ffffff;
 }
 
@@ -2105,81 +2214,120 @@
   color: #ffffff;
 }
 
-/* Hero KPIs */
-.crm-hero-kpis {
+/* 2. Hero Right / KPIs & Controls */
+.crm-hero-right {
+  flex: 1 1 440px;
+  min-width: 320px;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1 1 320px;
-  min-width: 260px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.85rem;
 }
 
-.crm-kpi-item {
-  flex: 1;
+.crm-care-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.crm-stat-box {
+  flex: 1 1 120px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.65rem 0.85rem;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
-  border-radius: 10px;
 }
 
-.crm-kpi-icon {
-  width: 36px;
-  height: 36px;
+.crm-stat-icon {
+  width: 38px;
+  height: 38px;
   border-radius: 8px;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.crm-kpi-text {
+.crm-stat-content {
   display: flex;
   flex-direction: column;
 }
 
-.crm-kpi-next-care {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
+.crm-stat-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.crm-stat-number {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.crm-stat-unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.crm-stat-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.crm-stat-next-care {
+  flex: 1 1 190px;
+}
+
+.crm-next-date-field {
+  margin-top: 3px;
 }
 
 .crm-next-care-input {
   width: 100%;
-}
-.crm-next-care-input input {
-  padding: 4px 8px !important;
-  font-size: 0.8rem !important;
-  border-radius: 6px !important;
-  border: 1px solid #cbd5e1 !important;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: #1e293b;
+  background: #ffffff;
+  outline: none;
 }
 
-/* Hero Controls */
-.crm-hero-controls {
+.crm-care-controls-row {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.65rem;
-  flex: 0 1 240px;
-  min-width: 200px;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-.crm-control-box {
+.crm-dropdown-box {
+  flex: 1 1 180px;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+}
+
+.crm-dropdown-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
 }
 
 .crm-control-select {
   width: 100%;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
-  padding: 6px 10px;
-  font-size: 0.85rem;
+  padding: 7px 10px;
+  font-size: 13.5px;
   background-color: #f8fafc;
-  color: #334155;
+  color: #1e293b;
+  font-weight: 500;
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s ease;
@@ -2190,7 +2338,7 @@
   background-color: #ffffff;
 }
 
-/* Tabs Card */
+/* 3. Tabs Card & Form Sections */
 .crm-tabs-card {
   border-radius: 14px;
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
@@ -2206,9 +2354,9 @@
 }
 
 .crm-section-title {
-  font-size: 0.95rem;
+  font-size: 15px;
   font-weight: 700;
-  color: #334155;
+  color: #1e293b;
   display: flex;
   align-items: center;
   margin-bottom: 1rem;
@@ -2218,84 +2366,295 @@
 
 .crm-field-label {
   display: block;
-  font-size: 0.8rem;
+  font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: #475569;
   margin-bottom: 0.35rem;
 }
 
-/* Student Cards (Tab 4) */
-.crm-student-card {
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+/* 4. Tab Học Sinh - Bảng & Quy trình chuẩn ERP */
+.crm-student-header-bar {
   display: flex;
-  flex-direction: column;
-  transition: all 0.25s ease;
-}
-
-.crm-student-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
-}
-
-.crm-student-card-header {
-  padding: 1rem;
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
   border-bottom: 1px solid #f1f5f9;
-  background: #fcfcfd;
 }
 
-.crm-student-name {
-  font-size: 1rem;
+.crm-student-title {
+  font-size: 17px;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 0.25rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
 }
 
-.crm-student-lms-badge {
+.crm-student-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+.crm-btn-add-student {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+}
+
+/* Student Table */
+.crm-student-table-container {
+  width: 100%;
+}
+
+.crm-student-table {
+  width: 100%;
+}
+
+.crm-student-table th {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
+  background: #f8fafc;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.crm-student-table td {
+  padding: 12px 14px;
+  font-size: 13.5px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.crm-student-col-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.crm-student-avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.crm-student-avatar-circle.avatar-female {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.crm-student-avatar-circle.avatar-male {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.crm-student-avatar-circle.avatar-neutral {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.crm-student-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crm-student-table-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.badge-student-gender {
+  font-size: 13px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+}
+
+.badge-student-gender.gender-f {
+  color: #db2777;
+}
+.badge-student-gender.gender-m {
+  color: #0284c7;
+}
+.badge-student-gender.gender-other {
+  color: #64748b;
+}
+
+.crm-student-lms-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 6px;
   background: #eef2ff;
   color: #4f46e5;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 6px;
   border: 1px solid #c7d2fe;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
-.crm-student-card-body {
-  padding: 1rem;
-  flex: 1;
+.crm-student-lms-pill:hover {
+  background: #4f46e5;
+  color: #ffffff;
 }
 
-.crm-student-meta-row {
+.crm-birthday-cell,
+.crm-branch-cell {
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-status-official {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* Action buttons */
+.crm-student-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-action-enroll {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
+  white-space: nowrap;
+}
+
+.btn-action-enroll:hover {
+  background: #059669;
+}
+
+.btn-action-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  color: #475569;
+}
+.btn-edit:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-view {
+  color: #7367f0;
+}
+.btn-view:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+/* 5. Workflow Guide Card */
+.crm-student-workflow-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.crm-workflow-header {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.crm-workflow-steps {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.85rem;
-  padding: 0.35rem 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.crm-wf-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 1 220px;
+}
+
+.crm-wf-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #7367f0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.crm-wf-content {
+  font-size: 13px;
   color: #475569;
-  border-bottom: 1px dashed #f1f5f9;
-}
-.crm-student-meta-row:last-child {
-  border-bottom: none;
+  line-height: 1.4;
 }
 
-.crm-student-card-footer {
-  padding: 0.85rem 1rem;
-  background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
+.crm-wf-content strong {
+  color: #1e293b;
+  display: block;
+  margin-bottom: 2px;
 }
 
-/* Table Responsive & Badges */
+.crm-wf-arrow {
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+/* 6. General Tables & Empty state */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -2318,38 +2677,24 @@
 .crm-table th {
   background: #f8fafc;
   color: #475569;
-  font-size: 0.78rem;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid #e2e8f0;
   white-space: nowrap;
 }
 
 .crm-table td {
   padding: 12px 14px;
-  font-size: 0.85rem;
+  font-size: 13.5px;
   color: #334155;
   border-bottom: 1px solid #f1f5f9;
 }
 
 .crm-table tr:hover td {
   background: #fbfcfe;
-}
-
-.badge-status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-status-official {
-  background: #dcfce7;
-  color: #15803d;
 }
 
 .crm-empty-state {
@@ -2360,13 +2705,43 @@
   border: 1px dashed #cbd5e1;
 }
 
-/* Responsive adjustments */
+.crm-empty-icon-box {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: #eef2ff;
+  color: #7367f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.crm-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.crm-empty-desc {
+  font-size: 13.5px;
+  color: #64748b;
+  margin-bottom: 14px;
+}
+
+/* Responsive */
 @media (max-width: 992px) {
-  .crm-hero-grid {
+  .crm-hero-container {
     flex-direction: column;
   }
-  .crm-hero-controls {
+  .crm-hero-right {
     flex: 1 1 100%;
+  }
+  .crm-wf-arrow {
+    display: none;
   }
 }
 </style>

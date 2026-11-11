@@ -199,7 +199,7 @@ module.exports = {
       */
 
       fontSize: {
-        'xs': '.75rem',     // 12px
+        'xs': '13px',       // 13px (chuẩn tối thiểu font-size ERP, không để < 13px)
         'sm': '.875rem',    // 14px
         'base': '1rem',     // 16px
         'lg': '1.125rem',   // 18px

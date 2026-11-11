@@ -521,3 +521,18 @@ vertical-align: top;
     margin: 0.6cm;
   }
 }
+
+/* ==========================================================================
+   ERP Global Typography Standard: MINIMUM FONT-SIZE 13px ACROSS ALL MODULES
+   ========================================================================== */
+.text-xs,
+.text-2xs,
+.text-3xs,
+small,
+.small,
+caption,
+sub,
+sup {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}

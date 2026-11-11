@@ -1,0 +1,137 @@
+/* ==========================================================================
+   ERP Global Typography Standard: MINIMUM FONT-SIZE 13px ACROSS ALL MODULES
+   ========================================================================== */
+
+// 1. Root & Body base
+body {
+  font-size: 14px;
+}
+
+// 2. Ép toàn bộ các utility class nhỏ hơn 13px về tối thiểu 13px
+.text-xs,
+.text-2xs,
+.text-3xs,
+small,
+.small,
+caption,
+sub,
+sup,
+.help-block,
+.form-text,
+.text-muted {
+  font-size: 13px !important;
+  line-height: 1.4 !important;
+}
+
+// 3. Toàn bộ Bảng dữ liệu (Tables, Vuesax Tables, AG-Grid)
+table,
+.vs-table,
+.table {
+  font-size: 13.5px;
+
+  th,
+  .vs-table--thead th,
+  .vs-table--th {
+    font-size: 13px !important;
+    font-weight: 700;
+  }
+
+  td,
+  .vs-table--tbody-table td,
+  .vs-table--td {
+    font-size: 13.5px !important;
+  }
+}
+
+.vs-table--header,
+.vs-table--pagination,
+.vs-pagination--li,
+.vs-pagination--buttons,
+.vs-pagination--input,
+.vs-table--search-input {
+  font-size: 13px !important;
+}
+
+// 4. Nhãn (Labels), Input, Select & Form controls
+label,
+.vs-input--label,
+.vs-select--label {
+  font-size: 13px !important;
+}
+
+input,
+select,
+textarea,
+.vs-inputx,
+.vs-input--input,
+.vs-select--input {
+  font-size: 13.5px !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+.vs-input--placeholder {
+  font-size: 13px !important;
+}
+
+// 5. Nút bấm, Tabs, Badges & Chips
+.vs-button,
+.vs-button--text {
+  font-size: 13.5px;
+}
+
+.vs-button-small,
+.vs-button-small .vs-button--text {
+  font-size: 13px !important;
+}
+
+.vs-chip,
+.con-vs-chip,
+.vs-chip--text,
+.badge,
+.badge-pill,
+[class*="badge-"] {
+  font-size: 13px !important;
+}
+
+.vs-tabs--btn {
+  font-size: 13.5px !important;
+}
+
+// 6. Dropdown, Tooltips, Alerts, Breadcrumbs
+.vs-select--options,
+.vs-select--item,
+.vs-dropdown--menu,
+.vs-dropdown--item-link {
+  font-size: 13.5px !important;
+}
+
+.vs-breadcrumb,
+.breadcrumb,
+.breadcrumb-item,
+.vs-tooltip,
+.con-vs-tooltip {
+  font-size: 13px !important;
+}
+
+.vs-alert,
+.con-vs-alert {
+  font-size: 13.5px !important;
+}
+
+// 7. Thư viện bên ngoài (Vue-select, Datepicker)
+.v-select,
+.vs__selected,
+.vs__dropdown-option,
+.vs__search {
+  font-size: 13.5px !important;
+}
+
+.mx-datepicker,
+.mx-input,
+.mx-calendar,
+.mx-date-row td,
+.mx-table th {
+  font-size: 13px !important;
+}
+
