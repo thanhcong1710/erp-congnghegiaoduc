@@ -146,7 +146,8 @@ class User extends Authenticatable implements JWTSubject
     public function isLeader()
     {
         return $this->hasAnyRole(['ec_leader', 'cm_leader', 'ta_leader', 'teacher_leader', 69, 56, 64, 37])
-            || self::where('manager_id', $this->id)->exists();
+            || self::where('manager_id', $this->id)->exists()
+            || (class_exists(\App\Services\Hrm\HrmScopeService::class) && \App\Services\Hrm\HrmScopeService::hasLeaderJobTitle($this));
     }
 
     public function checkPermission($permission)

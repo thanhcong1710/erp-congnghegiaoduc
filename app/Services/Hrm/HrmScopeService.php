@@ -40,6 +40,52 @@ class HrmScopeService
     }
 
     /**
+     * Danh sách chức danh HRM có quyền Leader (quản lý team / phòng ban cấp 2).
+     */
+    public const LEADER_JOB_TITLES = [
+        'Lead Sale',
+        'Trưởng nhóm Marketing',
+        'Quản lý Trợ giảng',
+        'Quản lý Giáo viên',
+    ];
+
+    /**
+     * Kiểm tra user có chức danh Leader trong HRM hay không (Lead Sale, Trưởng nhóm Marketing, Quản lý Trợ giảng, Quản lý Giáo viên).
+     */
+    public static function hasLeaderJobTitle(?User $user = null): bool
+    {
+        $user = $user ?: Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        $profile = $user->hrmProfile ?: HrmEmployeeProfile::where('user_id', $user->id)->first();
+        if (!$profile || !$profile->job_title_id) {
+            return false;
+        }
+
+        $jobTitle = $profile->jobTitle ?: \App\Models\HrmJobTitle::find($profile->job_title_id);
+        if (!$jobTitle) {
+            return false;
+        }
+
+        $name = trim($jobTitle->name);
+        if (in_array($name, self::LEADER_JOB_TITLES, true)) {
+            return true;
+        }
+
+        // Match tương đối không phân biệt hoa thường
+        $lowerName = mb_strtolower($name, 'UTF-8');
+        foreach (self::LEADER_JOB_TITLES as $leaderTitle) {
+            if (mb_strpos($lowerName, mb_strtolower($leaderTitle, 'UTF-8')) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Kiểm tra user có vai trò Leader / Quản lý / Trưởng phòng hay không.
      */
     public static function isLeader(?User $user = null): bool
@@ -50,6 +96,11 @@ class HrmScopeService
         }
 
         if (self::isHrmAdmin($user)) {
+            return true;
+        }
+
+        // 1. Kiểm tra chức danh Leader trong hồ sơ HRM (Lead Sale, Trưởng nhóm Marketing, Quản lý Trợ giảng, Quản lý Giáo viên)
+        if (self::hasLeaderJobTitle($user)) {
             return true;
         }
 
