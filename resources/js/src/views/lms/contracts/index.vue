@@ -883,10 +883,12 @@ export default {
   box-sizing: border-box !important;
   width: 100% !important;
   height: 38px !important;
-  border: 1px solid #cbd5e1 !important;
+  min-height: 38px !important;
+  line-height: 36px !important;
+  border: 1.5px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  padding: 6px 12px 6px 34px !important;
-  font-size: 14px !important;
+  padding: 0 12px 0 34px !important;
+  font-size: 13.5px !important;
   color: #1e293b !important;
   outline: none !important;
   background: #ffffff !important;
@@ -908,50 +910,128 @@ export default {
   box-sizing: border-box !important;
   width: 100% !important;
   height: 38px !important;
-  border: 1px solid #cbd5e1 !important;
+  min-height: 38px !important;
+  line-height: 36px !important;
+  border: 1.5px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  padding: 6px 12px !important;
-  font-size: 14px !important;
+  padding: 0 12px !important;
+  font-size: 13.5px !important;
   color: #1e293b !important;
   outline: none !important;
   background: #ffffff !important;
   transition: all 0.2s ease !important;
+  cursor: pointer;
 }
 
 .custom-textarea {
   box-sizing: border-box !important;
   width: 100% !important;
-  border: 1px solid #cbd5e1 !important;
+  border: 1.5px solid #cbd5e1 !important;
   border-radius: 6px !important;
   padding: 8px 12px !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   color: #1e293b !important;
   outline: none !important;
   background: #ffffff !important;
   resize: vertical;
 }
 
+/* Đồng bộ Multiselect: Khóa cứng chiều cao 38px và triệt tiêu viền ô input search bên trong */
 .custom-multiselect >>> .multiselect {
   min-height: 38px !important;
+  height: 38px !important;
 }
 
 .custom-multiselect >>> .multiselect__tags {
   box-sizing: border-box !important;
   min-height: 38px !important;
-  padding: 6px 32px 6px 12px !important;
-  border: 1px solid #cbd5e1 !important;
+  height: 38px !important;
+  padding: 0 32px 0 10px !important;
+  border: 1.5px solid #cbd5e1 !important;
   border-radius: 6px !important;
-  font-size: 14px !important;
+  font-size: 13.5px !important;
   background: #ffffff !important;
   display: flex !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   align-items: center !important;
+  overflow: hidden !important;
 }
 
 .custom-multiselect >>> .multiselect__select {
   height: 36px !important;
   width: 30px !important;
   padding: 4px 8px !important;
+  top: 1px !important;
+}
+
+.custom-multiselect >>> .multiselect__placeholder {
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  line-height: 36px !important;
+  font-size: 13.5px !important;
+  color: #94a3b8 !important;
+  white-space: nowrap !important;
+}
+
+.custom-multiselect >>> .multiselect__single {
+  margin-bottom: 0 !important;
+  line-height: 36px !important;
+  font-size: 13.5px !important;
+  white-space: nowrap !important;
+}
+
+.custom-multiselect >>> .multiselect__input,
+.custom-multiselect >>> input {
+  border: none !important;
+  border-width: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 13.5px !important;
+}
+
+.custom-multiselect >>> .multiselect__input:focus,
+.custom-multiselect >>> .multiselect__input:hover,
+.custom-multiselect >>> input:focus {
+  border: none !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* Đồng bộ DatePicker trong filter: Khóa cứng chiều cao 38px */
+.custom-datepicker >>> .mx-input {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  line-height: 36px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 0 30px 0 12px !important;
+  font-size: 13.5px !important;
+  color: #1e293b !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s ease !important;
+}
+
+.custom-datepicker >>> .mx-input:focus {
+  border-color: #7367f0 !important;
+  box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.15) !important;
+  outline: none !important;
+}
+
+.custom-datepicker >>> .mx-icon-calendar,
+.custom-datepicker >>> .mx-icon-clear {
+  line-height: 38px !important;
+  height: 38px !important;
 }
 
 .filter-actions-bar {
