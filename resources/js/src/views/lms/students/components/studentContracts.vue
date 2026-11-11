@@ -108,11 +108,11 @@
                     </button>
                   </div>
                   <div class="meta-item">
-                    <i class="fa-regular fa-clock text-gray-400"></i>
+                    <i class="fa-regular fa-clock text-gray-400 mr-1"></i>
                     <span>{{ item.created_at }}</span>
                   </div>
                   <div class="meta-item" v-if="item.creator_name">
-                    <i class="fa-regular fa-user text-gray-400"></i>
+                    <i class="fa-regular fa-user text-gray-400 mr-1"></i>
                     <span class="text-gray-600">{{ item.creator_name }}</span>
                   </div>
                 </td>
@@ -164,11 +164,11 @@
 
                   <div class="roadmap-timeline">
                     <div v-if="item.enrolment_start_date" class="timeline-row start-date">
-                      <i class="fa-regular fa-calendar-check text-emerald-600"></i>
+                      <i class="fa-regular fa-calendar-check text-emerald-600 mr-1"></i>
                       <span>Bắt đầu: <strong>{{ item.enrolment_start_date }}</strong></span>
                     </div>
                     <div v-if="item.enrolment_last_date" class="timeline-row end-date">
-                      <i class="fa-regular fa-calendar-xmark text-rose-500"></i>
+                      <i class="fa-regular fa-calendar-xmark text-rose-500 mr-1"></i>
                       <span>Kết thúc: <strong>{{ item.enrolment_last_date }}</strong></span>
                     </div>
                   </div>

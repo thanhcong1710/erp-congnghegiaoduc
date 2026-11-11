@@ -62,7 +62,7 @@
             </div>
           </div>
           <div class="mt-5">
-            <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate"></i> Học sinh áp dụng</h5>
+            <h5 class="w-full mb-3"><i class="fa-solid fa-user-graduate mr-1"></i> Học sinh áp dụng</h5>
             <div class="vs-component vs-con-table stripe vs-table-primary">
               <div class="con-tablex vs-table--content">
                 <div class="vs-con-tbody vs-table--tbody ">

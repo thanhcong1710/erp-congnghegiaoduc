@@ -160,7 +160,7 @@
       </div>
       <vs-divider/>
 
-      <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay"></i> Thông tin thu phí</h5>
+      <h5 class="w-full mb-3"><i class="fa-brands fa-cc-amazon-pay mr-1"></i> Thông tin thu phí</h5>
         <div class="vx-row">
           <div class="vx-col md:w-1/4 w-full mb-4">
             <label>Số tiền phải đóng</label>

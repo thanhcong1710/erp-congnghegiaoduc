@@ -151,7 +151,7 @@
                     <i class="fa-regular fa-copy ml-1 opacity-70"></i>
                   </span>
                   <span v-if="item.gender" class="gender-pill">
-                    <i :class="item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'"></i>
+                    <i :class="[item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500', 'mr-1']"></i>
                     {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}
                   </span>
                 </div>
@@ -294,7 +294,7 @@
 
                     <!-- Gender & Dob -->
                     <span v-if="item.gender" class="gender-pill">
-                      <i :class="item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500'"></i>
+                      <i :class="[item.gender == 'F' ? 'fa-solid fa-venus text-pink-500' : 'fa-solid fa-mars text-blue-500', 'mr-1']"></i>
                       {{ item.gender == 'F' ? 'Nữ' : 'Nam' }}
                     </span>
                   </div>
