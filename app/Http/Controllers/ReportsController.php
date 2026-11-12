@@ -1836,10 +1836,21 @@ class ReportsController extends Controller
         $totalRevPerData = $sumData > 0 ? round($sumActual / $sumData) : 0;
         $totalCompletionPct = $sumTarget > 0 ? round(($sumActual / $sumTarget) * 100, 2) : 0.0;
 
+        // Phân trang giống cơ chế báo cáo cũ
+        $paginationReq = (object)$request->input('pagination', []);
+        $cpage = isset($paginationReq->cpage) && (int)$paginationReq->cpage > 0 ? (int)$paginationReq->cpage : 1;
+        $limit = isset($paginationReq->limit) && (int)$paginationReq->limit > 0 ? (int)$paginationReq->limit : 20;
+        $totalRows = count($rows);
+        $offset = ($cpage - 1) * $limit;
+        $pagedRows = $limit > 0 ? array_slice($rows, $offset, $limit) : $rows;
+        $pagedMeta = u::makingPagination($pagedRows, $totalRows, $cpage, $limit);
+
         return response()->json([
             'status' => 1,
             'data' => [
-                'rows' => $rows,
+                'rows' => $pagedRows,
+                'all_rows_count' => $totalRows,
+                'pagination' => $pagedMeta->pagination,
                 'summary' => [
                     'data_count' => $sumData,
                     'contract_count' => $sumContracts,
@@ -2264,18 +2275,33 @@ class ReportsController extends Controller
 
         // Tính tỷ trọng sản phẩm
         $productRows = array_values($productStats);
-        foreach ($productRows as &$pr) {
+        foreach ($productRows as $pIdx => &$pr) {
+            $pr['stt'] = $pIdx + 1;
             $pr['contract_share_percent'] = $sumContracts > 0 ? round(($pr['contract_count'] / $sumContracts) * 100, 2) : 0.0;
             $pr['revenue_share_percent'] = $sumProv > 0 ? round(($pr['provisional_revenue'] / $sumProv) * 100, 2) : 0.0;
         }
         unset($pr);
+
+        // Phân trang giống cơ chế báo cáo cũ
+        $paginationReq = (object)$request->input('pagination', []);
+        $cpage = isset($paginationReq->cpage) && (int)$paginationReq->cpage > 0 ? (int)$paginationReq->cpage : 1;
+        $limit = isset($paginationReq->limit) && (int)$paginationReq->limit > 0 ? (int)$paginationReq->limit : 20;
+        $totalRows = count($rows);
+        $offset = ($cpage - 1) * $limit;
+        $pagedRows = $limit > 0 ? array_slice($rows, $offset, $limit) : $rows;
+        $pagedMeta = u::makingPagination($pagedRows, $totalRows, $cpage, $limit);
+
+        $totalProductRows = count($productRows);
+        $pagedProductRows = $limit > 0 ? array_slice($productRows, $offset, $limit) : $productRows;
+        $pagedProductMeta = u::makingPagination($pagedProductRows, $totalProductRows, $cpage, $limit);
 
         return response()->json([
             'status' => 1,
             'data' => [
                 'group_by' => $groupBy,
                 'sources' => $sources,
-                'rows' => $rows,
+                'rows' => $pagedRows,
+                'pagination' => $pagedMeta->pagination,
                 'summary' => [
                     'data_count' => $sumData,
                     'contract_count' => $sumContracts,
@@ -2289,7 +2315,8 @@ class ReportsController extends Controller
                     'source_provisional' => $sumSourceProv,
                     'source_contracts' => $sumSourceContracts,
                 ],
-                'product_breakdown' => $productRows,
+                'product_breakdown' => $pagedProductRows,
+                'product_pagination' => $pagedProductMeta->pagination,
                 'period' => [
                     'year' => $targetYear,
                     'month' => $targetMonth,
