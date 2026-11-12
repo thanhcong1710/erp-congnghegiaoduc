@@ -148,6 +148,7 @@
                       <th style="width: 110px;" class="text-center">Phép năm</th>
                       <th style="width: 110px;" class="text-center">Đã sử dụng</th>
                       <th style="width: 100px;" class="text-center">Còn lại</th>
+                      <th style="width: 120px;" class="text-center">Làm Online</th>
                       <th style="width: 130px;" class="text-center">Tình trạng</th>
                       <th style="width: 120px;" class="text-center">Thao tác</th>
                     </tr>
@@ -203,6 +204,13 @@
                         <span v-if="emp.total_days > 0 || emp.is_fulltime">{{ emp.remaining_days }} ngày</span>
                         <span v-else class="text-xs text-gray-400 font-normal">---</span>
                       </td>
+                      <td class="td vs-table--td text-center" style="font-size: 14px;">
+                        <div v-if="emp.online_days > 0" class="font-bold text-primary">
+                          {{ emp.online_days }} ngày
+                          <div class="text-xs text-gray-500 font-normal">({{ emp.online_count || 0 }} đợt • K.trừ phép)</div>
+                        </div>
+                        <span v-else class="text-xs text-gray-400">0 ngày</span>
+                      </td>
                       <td class="td vs-table--td text-center">
                         <template v-if="emp.total_days > 0 || emp.is_fulltime">
                           <span v-if="emp.is_over_limit" class="status-tag status-danger">
@@ -243,7 +251,7 @@
                       </td>
                     </tr>
                     <tr v-if="!staffBalances.data || !staffBalances.data.length">
-                      <td colspan="9" class="text-center p-4 text-gray-500">Không tìm thấy dữ liệu nhân sự</td>
+                      <td colspan="10" class="text-center p-4 text-gray-500">Không tìm thấy dữ liệu nhân sự</td>
                     </tr>
                   </tbody>
                 </table>
@@ -457,8 +465,8 @@
           <span>Nhân sự thuộc diện <strong>Cộng tác viên (CTV) / Bán thời gian</strong>, không có định mức nghỉ phép năm 12 ngày. Các ngày nghỉ phép không tính vào quỹ phép năm.</span>
         </div>
 
-        <!-- 4 Card Tóm tắt số ngày phép của nhân viên -->
-        <div class="grid grid-cols-4 gap-3 mb-5">
+        <!-- 5 Card Tóm tắt số ngày phép & đăng ký làm Online của nhân viên -->
+        <div class="grid grid-cols-5 gap-3 mb-5">
           <div class="summary-card card-blue">
             <span class="summary-label">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
             <span class="summary-value text-primary">
@@ -468,7 +476,7 @@
           </div>
 
           <div class="summary-card card-orange">
-            <span class="summary-label">Đã sử dụng</span>
+            <span class="summary-label">Đã sử dụng (Nghỉ phép)</span>
             <span class="summary-value text-warning">{{ selectedStaffHistory.summary.used_days }} <small class="text-xs font-normal">ngày</small></span>
           </div>
 
@@ -477,6 +485,13 @@
             <span class="summary-value text-success">
               <span v-if="selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
               <span v-else class="text-gray-400 font-normal">---</span>
+            </span>
+          </div>
+
+          <div class="summary-card card-purple">
+            <span class="summary-label">Đăng ký làm Online</span>
+            <span class="summary-value" style="color: #6366f1;">
+              {{ selectedStaffHistory.summary.online_days || 0 }} <small class="text-xs font-normal">ngày (K.trừ phép)</small>
             </span>
           </div>
 
@@ -493,7 +508,7 @@
         <div class="flex items-center justify-between mb-2">
           <h5 class="font-bold text-gray-800 text-sm flex items-center">
             <i class="fa-solid fa-calendar-days mr-2 text-primary"></i> 
-            Chi tiết các đợt nghỉ phép ({{ selectedStaffHistory.leaves.length }} đợt)
+            Chi tiết các đợt nghỉ phép & đăng ký làm Online ({{ selectedStaffHistory.leaves.length }} đợt)
           </h5>
         </div>
 
@@ -502,19 +517,37 @@
           <table class="history-table">
             <thead>
               <tr>
-                <th style="width: 45px;" class="text-center">STT</th>
-                <th style="width: 130px;">Thời gian nghỉ</th>
-                <th style="width: 80px;" class="text-center">Số ngày</th>
-                <th style="min-width: 150px;">Lý do / Ghi chú</th>
-                <th style="width: 130px;" class="text-center">Thời gian tạo</th>
-                <th style="width: 150px;">Chế độ phê duyệt</th>
-                <th style="width: 130px;" class="text-center">Thời gian duyệt</th>
-                <th style="width: 95px;" class="text-center">Trạng thái</th>
+                <th style="width: 40px;" class="text-center">STT</th>
+                <th style="width: 115px;">Loại yêu cầu</th>
+                <th style="width: 120px;">Thời gian</th>
+                <th style="width: 75px;" class="text-center">Số ngày</th>
+                <th style="min-width: 140px;">Lý do / Ghi chú</th>
+                <th style="width: 125px;" class="text-center">Thời gian tạo</th>
+                <th style="width: 155px;">Chế độ phê duyệt</th>
+                <th style="width: 125px;" class="text-center">Thời gian duyệt</th>
+                <th style="width: 90px;" class="text-center">Trạng thái</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(lv, idx) in selectedStaffHistory.leaves" :key="lv.id">
                 <td class="text-center text-gray-500 font-medium">{{ idx + 1 }}</td>
+                <td>
+                  <span
+                    v-if="lv.request_category === 'off_to_onl' || lv.type === 'off_to_onl' || lv.approval_type === 'half_salary'"
+                    class="mode-badge mode-online"
+                  >
+                    <i class="fa-solid fa-laptop-house mr-1"></i> Làm Online
+                  </span>
+                  <span
+                    v-else-if="lv.request_category === 'shift_change' || lv.type === 'shift_change'"
+                    class="mode-badge mode-late"
+                  >
+                    <i class="fa-solid fa-repeat mr-1"></i> Đổi ca
+                  </span>
+                  <span v-else class="mode-badge mode-leave">
+                    <i class="fa-solid fa-umbrella-beach mr-1"></i> Nghỉ phép
+                  </span>
+                </td>
                 <td>
                   <div class="font-semibold text-gray-900 text-sm">{{ lv.start_date }}</div>
                   <div class="text-xs text-gray-400" v-if="lv.start_date !== lv.end_date">đến {{ lv.end_date }}</div>
@@ -536,7 +569,7 @@
                     <i class="fa-solid fa-triangle-exclamation mr-1"></i> Gửi muộn (trừ lương)
                   </span>
                   <span v-else-if="lv.approval_type === 'half_salary'" class="mode-badge mode-half">
-                    <i class="fa-solid fa-circle-half-stroke mr-1"></i> Hưởng 50% lương
+                    <i class="fa-solid fa-circle-half-stroke mr-1"></i> 50% lương (K.trừ phép)
                   </span>
                   <span v-else-if="lv.approval_type === 'rejected'" class="mode-badge mode-rejected">
                     <i class="fa-solid fa-circle-xmark mr-1"></i> Từ chối
@@ -554,8 +587,8 @@
                 </td>
               </tr>
               <tr v-if="!selectedStaffHistory.leaves.length">
-                <td colspan="8" class="text-center p-4 text-gray-400 text-sm">
-                  Chưa có lịch sử nghỉ phép nào trong năm này
+                <td colspan="9" class="text-center p-4 text-gray-400 text-sm">
+                  Chưa có lịch sử nghỉ phép hoặc đăng ký làm Online nào trong năm này
                 </td>
               </tr>
             </tbody>
@@ -1816,6 +1849,10 @@ export default {
   background-color: #fef2f2;
   border-color: #fecaca;
 }
+.card-purple {
+  background-color: #f5f3ff;
+  border-color: #ddd6fe;
+}
 .card-gray {
   background-color: #f8fafc;
   border-color: #e2e8f0;
@@ -1877,6 +1914,16 @@ export default {
 .mode-approved {
   color: #15803d;
   background-color: #f0fdf4;
+}
+.mode-leave {
+  color: #1d4ed8;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+.mode-online {
+  color: #4f46e5;
+  background-color: #eef2ff;
+  border: 1px solid #c7d2fe;
 }
 .mode-late {
   color: #c2410c;

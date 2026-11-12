@@ -453,24 +453,26 @@ class LeaveRequestController extends Controller
                 HrmLeaveBalance::whereIn('id', $balances->slice(1)->pluck('id')->toArray())->delete();
             }
 
-            if (!$balance) {
-                $approvedUsedDays = (float)HrmLeaveRequest::where(function ($q) use ($profile) {
-                    $q->where('employee_id', $profile->id);
-                    if ($profile->user_id) {
-                        $q->orWhere('user_id', $profile->user_id);
-                    }
-                })->whereYear('start_date', $year)
-                  ->where('status', 1)
-                  ->where(function ($q) {
-                      $q->whereNull('request_category')
-                        ->orWhere('request_category', 'leave');
-                  })
-                  ->where(function ($q) {
-                      $q->whereNull('approval_type')
-                        ->orWhere('approval_type', '!=', 'half_salary');
-                  })
-                  ->sum('duration_days');
+            $approvedUsedDays = (float)HrmLeaveRequest::where(function ($q) use ($profile) {
+                $q->where('employee_id', $profile->id);
+                if ($profile->user_id) {
+                    $q->orWhere(function ($sub) use ($profile) {
+                        $sub->whereNull('employee_id')->where('user_id', $profile->user_id);
+                    });
+                }
+            })->whereYear('start_date', $year)
+              ->where('status', 1)
+              ->where(function ($q) {
+                  $q->whereNull('request_category')
+                    ->orWhere('request_category', 'leave');
+              })
+              ->where(function ($q) {
+                  $q->whereNull('approval_type')
+                    ->orWhere('approval_type', '!=', 'half_salary');
+              })
+              ->sum('duration_days');
 
+            if (!$balance) {
                 $balance = new HrmLeaveBalance();
                 $balance->employee_id = $profile->id;
                 $balance->user_id = $profile->user_id ?: null;
@@ -488,6 +490,9 @@ class LeaveRequestController extends Controller
             $balance->total_days = $totalDays;
             if ($request->has('used_days') && $request->used_days !== null && $request->used_days !== '') {
                 $balance->used_days = (float)$request->used_days;
+            } else {
+                // Nếu không tích chỉnh tay số ngày đã nghỉ, tự động tính từ các đơn nghỉ phép đã duyệt (không tính làm online)
+                $balance->used_days = $approvedUsedDays;
             }
             if ($request->has('note')) {
                 $balance->note = trim($request->note) ?: null;
@@ -569,24 +574,24 @@ class LeaveRequestController extends Controller
             $balancesByEmpId = $rawBalances->whereNotNull('employee_id')->keyBy('employee_id');
             $balancesByUserId = $rawBalances->whereNotNull('user_id')->keyBy('user_id');
 
-            // Lấy leave requests đã duyệt trong năm cho các nhân sự này (chỉ tính đơn nghỉ phép, KHÔNG tính làm online / đổi ca)
-            $scopedLeaveRequests = HrmLeaveRequest::where('status', 1)
+            // Lấy toàn bộ đơn đã duyệt trong năm (tách riêng đơn nghỉ phép và đơn đăng ký làm online)
+            $scopedApprovedRequests = HrmLeaveRequest::where('status', 1)
                 ->whereYear('start_date', $year)
-                ->where(function ($q) {
-                    $q->whereNull('request_category')
-                      ->orWhere('request_category', 'leave');
-                })
-                ->where(function ($q) {
-                    $q->whereNull('approval_type')
-                      ->orWhere('approval_type', '!=', 'half_salary');
-                })
                 ->where(function ($q) use ($scopedEmpIds, $scopedUserIds) {
-                    $q->whereIn('employee_id', $scopedEmpIds)
-                      ->orWhereIn('user_id', $scopedUserIds);
+                    if (!empty($scopedEmpIds)) {
+                        $q->whereIn('employee_id', $scopedEmpIds);
+                    }
+                    if (!empty($scopedUserIds)) {
+                        $q->orWhere(function ($sub) use ($scopedUserIds) {
+                            $sub->whereNull('employee_id')
+                                ->whereIn('user_id', $scopedUserIds);
+                        });
+                    }
                 })
-                ->get(['employee_id', 'user_id', 'duration_days']);
+                ->get(['id', 'employee_id', 'user_id', 'duration_days', 'request_category', 'type', 'approval_type', 'start_date', 'end_date', 'reason']);
 
             $totalScopedUsedDays = 0.0;
+            $totalScopedOnlineDays = 0.0;
             $overLimitCount = 0;
             $outOfLeaveCount = 0;
 
@@ -594,18 +599,34 @@ class LeaveRequestController extends Controller
                 $isFulltime = $profile->isFulltime();
                 $balance = $balancesByEmpId->get($profile->id)
                     ?: ($profile->user_id ? $balancesByUserId->get($profile->user_id) : null);
+
+                $empRequests = $scopedApprovedRequests->filter(function ($lr) use ($profile) {
+                    return ($lr->employee_id && $lr->employee_id == $profile->id)
+                        || (!$lr->employee_id && $profile->user_id && $lr->user_id == $profile->user_id);
+                });
+
+                $empLeaveRequests = $empRequests->filter(function ($lr) {
+                    $isOnline = ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
+                    $isShiftChange = ($lr->request_category === 'shift_change' || $lr->type === 'shift_change');
+                    return !$isOnline && !$isShiftChange;
+                });
+
+                $empOnlineRequests = $empRequests->filter(function ($lr) {
+                    return ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
+                });
+
                 // Ưu tiên số ngày phép cấu hình trong balance (do Admin/HR gán hoặc điều chỉnh)
                 $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
                 if ($balance && $balance->used_days !== null) {
                     $used = (float)$balance->used_days;
                 } else {
-                    $used = (float)$scopedLeaveRequests->filter(function ($lr) use ($profile) {
-                        return ($lr->employee_id && $lr->employee_id == $profile->id)
-                            || ($profile->user_id && $lr->user_id == $profile->user_id);
-                    })->sum('duration_days');
+                    $used = (float)$empLeaveRequests->sum('duration_days');
                 }
 
+                $onlineDays = (float)$empOnlineRequests->sum('duration_days');
+
                 $totalScopedUsedDays += $used;
+                $totalScopedOnlineDays += $onlineDays;
                 if ($totalDays > 0 || $used > 0) {
                     if ($used > $totalDays) {
                         $overLimitCount++;
@@ -624,51 +645,38 @@ class LeaveRequestController extends Controller
                 $isFulltime = $profile->isFulltime();
                 $balance = $balancesByEmpId->get($profile->id)
                     ?: ($profile->user_id ? $balancesByUserId->get($profile->user_id) : null);
-                $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
-                $usedDays = $balance ? (float)$balance->used_days : 0.0;
 
-                // Nếu chưa có balance mà có leave requests đã duyệt thì tính (không tính làm online / đổi ca)
-                if (!$balance) {
-                    $usedDays = (float)HrmLeaveRequest::where(function ($q) use ($profile) {
-                        $q->where('employee_id', $profile->id);
-                        if ($profile->user_id) {
-                            $q->orWhere('user_id', $profile->user_id);
-                        }
-                    })->whereYear('start_date', $year)
-                      ->where('status', 1)
-                      ->where(function ($q) {
-                          $q->whereNull('request_category')
-                            ->orWhere('request_category', 'leave');
-                      })
-                      ->where(function ($q) {
-                          $q->whereNull('approval_type')
-                            ->orWhere('approval_type', '!=', 'half_salary');
-                      })
-                      ->sum('duration_days');
-                }
+                $empRequests = $scopedApprovedRequests->filter(function ($lr) use ($profile) {
+                    return ($lr->employee_id && $lr->employee_id == $profile->id)
+                        || (!$lr->employee_id && $profile->user_id && $lr->user_id == $profile->user_id);
+                });
+
+                $empLeaveRequests = $empRequests->filter(function ($lr) {
+                    $isOnline = ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
+                    $isShiftChange = ($lr->request_category === 'shift_change' || $lr->type === 'shift_change');
+                    return !$isOnline && !$isShiftChange;
+                });
+
+                $empOnlineRequests = $empRequests->filter(function ($lr) {
+                    return ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
+                });
+
+                $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
+                $usedDays = ($balance && $balance->used_days !== null)
+                    ? (float)$balance->used_days
+                    : (float)$empLeaveRequests->sum('duration_days');
+
+                $onlineDays = (float)$empOnlineRequests->sum('duration_days');
+                $onlineCount = $empOnlineRequests->count();
 
                 $remainingDays = max(0, $totalDays - $usedDays);
                 $overDays = max(0, $usedDays - $totalDays);
 
                 // Lấy 3 đợt nghỉ phép gần nhất (không tính làm online / đổi ca)
-                $recentLeaves = HrmLeaveRequest::where(function ($q) use ($profile) {
-                    $q->where('employee_id', $profile->id);
-                    if ($profile->user_id) {
-                        $q->orWhere('user_id', $profile->user_id);
-                    }
-                })->whereYear('start_date', $year)
-                  ->where('status', 1)
-                  ->where(function ($q) {
-                      $q->whereNull('request_category')
-                        ->orWhere('request_category', 'leave');
-                  })
-                  ->where(function ($q) {
-                      $q->whereNull('approval_type')
-                        ->orWhere('approval_type', '!=', 'half_salary');
-                  })
-                  ->orderBy('start_date', 'desc')
-                  ->limit(3)
-                  ->get(['id', 'start_date', 'end_date', 'duration_days', 'reason', 'approval_type']);
+                $recentLeaves = $empLeaveRequests->sortByDesc('start_date')->take(3)->values();
+
+                // Lấy 3 đợt làm online gần nhất
+                $recentOnline = $empOnlineRequests->sortByDesc('start_date')->take(3)->values();
 
                 $data[] = [
                     'id' => $profile->id,
@@ -686,12 +694,15 @@ class LeaveRequestController extends Controller
                     'total_days' => $totalDays,
                     'used_days' => $usedDays,
                     'remaining_days' => $remainingDays,
+                    'online_days' => $onlineDays,
+                    'online_count' => $onlineCount,
                     'over_days' => $overDays,
                     'balance_note' => $balance ? $balance->note : null,
                     'has_custom_balance' => (bool)$balance,
                     'is_over_limit' => $overDays > 0,
                     'is_out_of_leave' => $remainingDays <= 0 && $usedDays > 0,
                     'recent_leaves' => $recentLeaves,
+                    'recent_online' => $recentOnline,
                 ];
             }
 
@@ -705,6 +716,7 @@ class LeaveRequestController extends Controller
                 'stats' => [
                     'total_employees' => $paginated->total(),
                     'total_company_used_days' => (float)$totalScopedUsedDays,
+                    'total_company_online_days' => (float)$totalScopedOnlineDays,
                     'over_limit_count' => $overLimitCount,
                     'out_of_leave_count' => $outOfLeaveCount,
                 ],
@@ -738,16 +750,10 @@ class LeaveRequestController extends Controller
                 ->where(function ($q) use ($profile) {
                     $q->where('employee_id', $profile->id);
                     if ($profile->user_id) {
-                        $q->orWhere('user_id', $profile->user_id);
+                        $q->orWhere(function ($sub) use ($profile) {
+                            $sub->whereNull('employee_id')->where('user_id', $profile->user_id);
+                        });
                     }
-                })
-                ->where(function ($q) {
-                    $q->whereNull('request_category')
-                      ->orWhere('request_category', 'leave');
-                })
-                ->where(function ($q) {
-                    $q->whereNull('approval_type')
-                      ->orWhere('approval_type', '!=', 'half_salary');
                 });
 
             if ($year) {
@@ -766,12 +772,27 @@ class LeaveRequestController extends Controller
                     ->first();
             }
 
+            // Tách riêng đơn nghỉ phép và đơn đăng ký làm online đã duyệt
+            $approvedLeaveOnly = $leaves->filter(function ($lv) {
+                if ((int)$lv->status !== 1) return false;
+                $isOnline = ($lv->request_category === 'off_to_onl' || $lv->type === 'off_to_onl' || $lv->approval_type === 'half_salary');
+                $isShiftChange = ($lv->request_category === 'shift_change' || $lv->type === 'shift_change');
+                return !$isOnline && !$isShiftChange;
+            });
+
+            $approvedOnlineOnly = $leaves->filter(function ($lv) {
+                if ((int)$lv->status !== 1) return false;
+                return ($lv->request_category === 'off_to_onl' || $lv->type === 'off_to_onl' || $lv->approval_type === 'half_salary');
+            });
+
             $isFulltime = $profile->isFulltime();
             $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
             $usedDays = ($balance && $balance->used_days !== null)
                 ? (float)$balance->used_days
-                : (float)$leaves->where('status', 1)->sum('duration_days');
+                : (float)$approvedLeaveOnly->sum('duration_days');
             $remainingDays = max(0, $totalDays - $usedDays);
+            $onlineDays = (float)$approvedOnlineOnly->sum('duration_days');
+            $onlineCount = $approvedOnlineOnly->count();
 
             return response()->json([
                 'status' => 1,
@@ -792,6 +813,8 @@ class LeaveRequestController extends Controller
                     'total_days' => $totalDays,
                     'used_days' => $usedDays,
                     'remaining_days' => $remainingDays,
+                    'online_days' => $onlineDays,
+                    'online_count' => $onlineCount,
                     'over_days' => max(0, $usedDays - $totalDays),
                     'total_requests' => $leaves->count(),
                     'balance_note' => $balance ? $balance->note : null,
