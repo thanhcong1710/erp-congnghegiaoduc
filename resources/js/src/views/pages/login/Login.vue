@@ -146,7 +146,7 @@ export default {
   .vs-input--input {
     border-radius: 10px !important;
     border: 1.5px solid #e2e8f0 !important;
-    padding: 12px 14px !important;
+    padding: 12px 34px 12px 14px !important;
     font-size: 14px !important;
     transition: border-color .2s, box-shadow .2s !important;
     background: #ffffff !important;

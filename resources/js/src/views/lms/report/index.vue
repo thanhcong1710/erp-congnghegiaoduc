@@ -121,19 +121,17 @@
       >
         <!-- Bộ lọc Tổng quan / Đội nhóm -->
         <div class="filter-grid-overview">
-          <!-- Từ ngày & Đến ngày -->
-          <div class="filter-date-pair">
-            <input
-              v-model="overviewFilters.start_date"
-              type="date"
-              class="erp-control"
-              title="Từ ngày"
-            />
-            <input
-              v-model="overviewFilters.end_date"
-              type="date"
-              class="erp-control"
-              title="Đến ngày"
+          <!-- Khoảng ngày lọc -->
+          <div class="filter-cell">
+            <date-picker
+              v-model="overviewFilters.dateRange"
+              range
+              format="YYYY-MM-DD"
+              :clearable="true"
+              :lang="datepickerLang"
+              placeholder="Từ ngày - Đến ngày"
+              class="report-datepicker"
+              style="width: 100%"
             />
           </div>
 
@@ -195,27 +193,17 @@
             </select>
           </div>
 
-          <!-- Từ ngày hóa đơn -->
+          <!-- Khoảng ngày hóa đơn -->
           <div class="filter-cell">
-            <input
-              v-model="overviewFilters.invoice_start_date"
-              type="text"
-              onfocus="(this.type='date')"
-              onblur="if(!this.value)this.type='text'"
-              placeholder="Từ ngày hóa đơn"
-              class="erp-control"
-            />
-          </div>
-
-          <!-- Đến ngày hóa đơn -->
-          <div class="filter-cell">
-            <input
-              v-model="overviewFilters.invoice_end_date"
-              type="text"
-              onfocus="(this.type='date')"
-              onblur="if(!this.value)this.type='text'"
-              placeholder="Đến ngày hóa đơn"
-              class="erp-control"
+            <date-picker
+              v-model="overviewFilters.invoiceDateRange"
+              range
+              format="YYYY-MM-DD"
+              :clearable="true"
+              :lang="datepickerLang"
+              placeholder="Từ ngày hóa đơn - Đến ngày hóa đơn"
+              class="report-datepicker"
+              style="width: 100%"
             />
           </div>
 
@@ -492,9 +480,17 @@
 
         <!-- Bộ lọc Báo cáo Kinh doanh -->
         <div class="filter-grid-business">
-          <div class="filter-date-pair">
-            <input v-model="businessFilters.start_date" type="date" class="erp-control" title="Từ ngày" />
-            <input v-model="businessFilters.end_date" type="date" class="erp-control" title="Đến ngày" />
+          <div class="filter-cell">
+            <date-picker
+              v-model="businessFilters.dateRange"
+              range
+              format="YYYY-MM-DD"
+              :clearable="true"
+              :lang="datepickerLang"
+              placeholder="Từ ngày - Đến ngày"
+              class="report-datepicker"
+              style="width: 100%"
+            />
           </div>
 
           <div class="filter-cell">
@@ -881,10 +877,15 @@
 </template>
 
 <script>
+import DatePicker from 'vue2-datepicker'
 import axios from '../../../http/axios.js'
+import u from '../../../until/helper.js'
 
 export default {
   name: 'LmsUnifiedReports',
+  components: {
+    DatePicker
+  },
   data() {
     const now = new Date()
     const yyyy = now.getFullYear()
@@ -892,6 +893,8 @@ export default {
     const dd = String(now.getDate()).padStart(2, '0')
     const firstDayOfMonth = `${yyyy}-${mm}-01`
     const todayStr = `${yyyy}-${mm}-${dd}`
+    const firstDayDate = new Date(yyyy, now.getMonth(), 1)
+    const todayDate = new Date(yyyy, now.getMonth(), now.getDate())
 
     return {
       // null = hiển thị màn hình Danh sách báo cáo như ảnh mẫu
@@ -901,6 +904,15 @@ export default {
       showKpiModal: false,
       defaultStartDate: firstDayOfMonth,
       defaultEndDate: todayStr,
+      datepickerLang: {
+        days: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+        months: ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'],
+        pickers: ['7 ngày tới', '30 ngày tới', '7 ngày trước', '30 ngày trước'],
+        placeholder: {
+          date: 'Chọn ngày',
+          dateRange: 'Từ ngày - Đến ngày'
+        }
+      },
 
       // Danh mục báo cáo hiển thị theo danh sách đánh số 01, 02, 03, 04
       reportCatalog: [
@@ -981,16 +993,14 @@ export default {
       },
 
       overviewFilters: {
-        start_date: firstDayOfMonth,
-        end_date: todayStr,
+        dateRange: [new Date(firstDayDate.getTime()), new Date(todayDate.getTime())],
         date_type: 'created_at',
         branch_id: 0,
         team_leader_id: 0,
         owner_id: 0,
         first_owner_id: 0,
         contract_type: '',
-        invoice_start_date: '',
-        invoice_end_date: '',
+        invoiceDateRange: null,
         pacing: '',
         trial_status: '',
         status: '',
@@ -1021,8 +1031,7 @@ export default {
 
       businessFilters: {
         group_by: 'sale', // 'sale' | 'team' | 'branch' | 'center'
-        start_date: firstDayOfMonth,
-        end_date: todayStr,
+        dateRange: [new Date(firstDayDate.getTime()), new Date(todayDate.getTime())],
         branch_id: 0,
         team_leader_id: 0,
         owner_id: 0,
@@ -1183,11 +1192,33 @@ export default {
       this.fetchOverviewReport()
     },
 
+    createDefaultDateRange() {
+      const now = new Date()
+      return [
+        new Date(now.getFullYear(), now.getMonth(), 1),
+        new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      ]
+    },
+
+    extractDateRange(range) {
+      if (!Array.isArray(range) || range.length < 2 || !range[0] || !range[1]) {
+        return ['', '']
+      }
+      return [u.dateToString(range[0]) || '', u.dateToString(range[1]) || '']
+    },
+
     async fetchOverviewReport() {
       this.loading = true
       try {
+        const { dateRange, invoiceDateRange, ...restFilters } = this.overviewFilters
+        const [startDate, endDate] = this.extractDateRange(dateRange)
+        const [invoiceStartDate, invoiceEndDate] = this.extractDateRange(invoiceDateRange)
         const payload = {
-          ...this.overviewFilters,
+          ...restFilters,
+          start_date: startDate,
+          end_date: endDate,
+          invoice_start_date: invoiceStartDate,
+          invoice_end_date: invoiceEndDate,
           pagination: this.pagination
         }
         if (this.activeReport === 'overview' && this.filterMeta.scope === 'all') {
@@ -1218,16 +1249,14 @@ export default {
     resetOverviewFilters() {
       this.pagination.cpage = 1
       this.overviewFilters = {
-        start_date: this.defaultStartDate,
-        end_date: this.defaultEndDate,
+        dateRange: this.createDefaultDateRange(),
         date_type: 'created_at',
         branch_id: 0,
         team_leader_id: this.filterMeta.scope === 'team' ? this.filterMeta.current_user.id : 0,
         owner_id: this.filterMeta.scope === 'self' ? this.filterMeta.current_user.id : 0,
         first_owner_id: 0,
         contract_type: '',
-        invoice_start_date: '',
-        invoice_end_date: '',
+        invoiceDateRange: null,
         pacing: '',
         trial_status: '',
         status: '',
@@ -1252,8 +1281,12 @@ export default {
     async fetchBusinessReport() {
       this.loading = true
       try {
+        const { dateRange, ...restFilters } = this.businessFilters
+        const [startDate, endDate] = this.extractDateRange(dateRange)
         const payload = {
-          ...this.businessFilters,
+          ...restFilters,
+          start_date: startDate,
+          end_date: endDate,
           pagination: this.pagination
         }
         const res = await axios.p('/api/lms/reports/business', payload)
@@ -1286,8 +1319,7 @@ export default {
       this.pagination.cpage = 1
       this.businessFilters = {
         group_by: this.businessFilters.group_by,
-        start_date: this.defaultStartDate,
-        end_date: this.defaultEndDate,
+        dateRange: this.createDefaultDateRange(),
         branch_id: 0,
         team_leader_id: this.filterMeta.scope === 'team' ? this.filterMeta.current_user.id : 0,
         owner_id: this.filterMeta.scope === 'self' ? this.filterMeta.current_user.id : 0,
@@ -1748,15 +1780,15 @@ export default {
 .filter-grid-overview,
 .filter-grid-business {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
   margin-bottom: 18px;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
   .filter-grid-overview,
   .filter-grid-business {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1771,22 +1803,60 @@ export default {
   }
 }
 
-.filter-date-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+@media (max-width: 576px) {
+  .filter-grid-overview,
+  .filter-grid-business {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-cell {
+  min-width: 0;
+  width: 100%;
+}
+
+.filter-cell >>> .mx-datepicker,
+.filter-cell >>> .mx-datepicker-range,
+.report-datepicker {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  display: block;
+}
+
+.filter-cell >>> .mx-input-wrapper {
+  width: 100%;
+}
+
+.filter-cell >>> .mx-input {
+  width: 100% !important;
+  height: 38px !important;
+  font-size: 13.5px !important;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  padding: 6px 32px 6px 10px !important;
+  box-shadow: none !important;
+  text-overflow: ellipsis;
+}
+
+.filter-cell >>> .mx-input:hover,
+.filter-cell >>> .mx-input:focus {
+  border-color: #6366f1 !important;
 }
 
 .erp-control {
   width: 100%;
-  height: 36px;
+  height: 38px;
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: 13.5px;
   color: #1e293b;
   background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
   outline: none;
+  box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

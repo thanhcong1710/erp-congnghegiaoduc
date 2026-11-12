@@ -1850,7 +1850,7 @@ class ReportsController extends Controller
             'data' => [
                 'rows' => $pagedRows,
                 'all_rows_count' => $totalRows,
-                'pagination' => $pagedMeta->pagination,
+                'pagination' => $pagedMeta->paging,
                 'summary' => [
                     'data_count' => $sumData,
                     'contract_count' => $sumContracts,
@@ -2301,7 +2301,7 @@ class ReportsController extends Controller
                 'group_by' => $groupBy,
                 'sources' => $sources,
                 'rows' => $pagedRows,
-                'pagination' => $pagedMeta->pagination,
+                'pagination' => $pagedMeta->paging,
                 'summary' => [
                     'data_count' => $sumData,
                     'contract_count' => $sumContracts,
@@ -2316,7 +2316,7 @@ class ReportsController extends Controller
                     'source_contracts' => $sumSourceContracts,
                 ],
                 'product_breakdown' => $pagedProductRows,
-                'product_pagination' => $pagedProductMeta->pagination,
+                'product_pagination' => $pagedProductMeta->paging,
                 'period' => [
                     'year' => $targetYear,
                     'month' => $targetMonth,
