@@ -41,7 +41,7 @@ class RoomsController extends Controller
             FROM rooms AS r 
             LEFT JOIN branches AS b ON b.id = r.branch_id
             LEFT JOIN (
-                SELECT room_id, COUNT(id) AS disabled_delete 
+                SELECT room_id, COUNT(*) AS disabled_delete 
                 FROM sessions 
                 GROUP BY room_id
             ) AS s ON s.room_id = r.id

@@ -35,7 +35,7 @@ class ShiftsController extends Controller
         $total = u::first("SELECT count(s.id) AS total 
             FROM shifts AS s WHERE $cond");
         
-        $list = u::query("SELECT s.*, (SELECT count(id) FROM sessions WHERE shift_id=s.id) AS disabled_delete
+        $list = u::query("SELECT s.*, (SELECT COUNT(*) FROM sessions WHERE shift_id=s.id) AS disabled_delete
             FROM shifts AS s 
             WHERE $cond $order_by $limitation");
         $data = u::makingPagination($list, $total->total, $page, $limit);
