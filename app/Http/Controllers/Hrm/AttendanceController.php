@@ -179,7 +179,7 @@ class AttendanceController extends Controller
             $isLeaveApproved = !empty($leaveReq);
             $leaveReason = $leaveReq ? $leaveReq->reason : null;
             $leaveApprovalType = $leaveReq ? $leaveReq->approval_type : null;
-            $leaveDurationDays = $leaveReq ? (float)$leaveReq->duration_days : 1.0;
+            $leaveDurationDays = $leaveReq ? (float) $leaveReq->duration_days : 1.0;
 
             // Trạng thái điểm danh:
             // 1. Ưu tiên Nghỉ phép đã duyệt: tự động mang trạng thái 'leave_approved' / 'leave_approved_half' (hoặc 'late_submitted')
@@ -305,7 +305,7 @@ class AttendanceController extends Controller
                     if (($item['leave_approval_type'] ?? '') === 'late_unpaid') {
                         $statusToSave = 'late_submitted';
                     } else {
-                        $leaveDays = isset($item['leave_duration_days']) ? (float)$item['leave_duration_days'] : 1.0;
+                        $leaveDays = isset($item['leave_duration_days']) ? (float) $item['leave_duration_days'] : 1.0;
                         $statusToSave = ($leaveDays > 0 && $leaveDays < 1) ? 'leave_approved_half' : 'leave_approved';
                     }
                 } elseif (!empty($item['is_online'])) {
@@ -657,7 +657,7 @@ class AttendanceController extends Controller
                     if ($leaveReq) {
                         if ($leaveReq->approval_type === 'late_unpaid') {
                             $status = 'late_submitted';
-                        } elseif ((float)$leaveReq->duration_days > 0 && (float)$leaveReq->duration_days < 1) {
+                        } elseif ((float) $leaveReq->duration_days > 0 && (float) $leaveReq->duration_days < 1) {
                             $status = 'leave_approved_half';
                         } else {
                             $status = 'leave_approved';
@@ -692,7 +692,7 @@ class AttendanceController extends Controller
             $days[] = [
                 'date' => $dateStr,
                 'day_name' => $dayNames[$dayOfWeek],
-                'day_of_month' => (int)$curr->format('d'),
+                'day_of_month' => (int) $curr->format('d'),
                 'is_weekend' => $isWeekend,
                 'shift_name' => $shiftName,
                 'attendance_status' => $status,
@@ -821,12 +821,14 @@ class AttendanceController extends Controller
         } else {
             $userOnlineRegs = collect(HrmOnlineRegistration::where(function ($q) use ($profile) {
                 $q->where('employee_id', $profile->id);
-                if ($profile->user_id) $q->orWhere('user_id', $profile->user_id);
+                if ($profile->user_id)
+                    $q->orWhere('user_id', $profile->user_id);
             })
                 ->whereBetween('date', [$startDate, $endDate])
                 ->where('status', 1)
                 ->get()
-                ->map(function ($r) { return Carbon::parse($r->date)->format('Y-m-d'); })
+                ->map(function ($r) {
+                    return Carbon::parse($r->date)->format('Y-m-d'); })
                 ->values());
 
             $attOnlineDates = collect($userAtts->where('attendance_status', 'online')->map(function ($a) {

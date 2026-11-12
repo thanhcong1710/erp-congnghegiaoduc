@@ -452,7 +452,7 @@
         </div>
 
         <!-- Banner lưu ý cho nhân sự CTV / không phải fulltime -->
-        <div v-if="!selectedStaffHistory.summary.is_fulltime" class="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 mb-4 flex items-center">
+        <div v-if="!selectedStaffHistory.summary.is_fulltime && !selectedStaffHistory.summary.total_days" class="p-3 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800 mb-4 flex items-center">
           <i class="fa-solid fa-circle-info mr-2 text-base text-warning"></i>
           <span>Nhân sự thuộc diện <strong>Cộng tác viên (CTV) / Bán thời gian</strong>, không có định mức nghỉ phép năm 12 ngày. Các ngày nghỉ phép không tính vào quỹ phép năm.</span>
         </div>
@@ -462,7 +462,7 @@
           <div class="summary-card card-blue">
             <span class="summary-label">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
             <span class="summary-value text-primary">
-              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.total_days }} <small class="text-xs font-normal">ngày</small></span>
+              <span v-if="selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0">{{ selectedStaffHistory.summary.total_days }} <small class="text-xs font-normal">ngày</small></span>
               <span v-else class="text-sm font-semibold text-gray-500">0 ngày (CTV)</span>
             </span>
           </div>
@@ -475,15 +475,15 @@
           <div class="summary-card card-green">
             <span class="summary-label">Số ngày còn lại</span>
             <span class="summary-value text-success">
-              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
+              <span v-if="selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0">{{ selectedStaffHistory.summary.remaining_days }} <small class="text-xs font-normal">ngày</small></span>
               <span v-else class="text-gray-400 font-normal">---</span>
             </span>
           </div>
 
-          <div class="summary-card" :class="selectedStaffHistory.summary.is_fulltime && selectedStaffHistory.summary.over_days > 0 ? 'card-red' : 'card-gray'">
+          <div class="summary-card" :class="(selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0) && selectedStaffHistory.summary.over_days > 0 ? 'card-red' : 'card-gray'">
             <span class="summary-label">Vượt hạn mức</span>
-            <span class="summary-value" :class="selectedStaffHistory.summary.is_fulltime && selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
-              <span v-if="selectedStaffHistory.summary.is_fulltime">{{ selectedStaffHistory.summary.over_days }} <small class="text-xs font-normal">ngày</small></span>
+            <span class="summary-value" :class="(selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0) && selectedStaffHistory.summary.over_days > 0 ? 'text-danger' : 'text-gray-400'">
+              <span v-if="selectedStaffHistory.summary.is_fulltime || selectedStaffHistory.summary.total_days > 0">{{ selectedStaffHistory.summary.over_days }} <small class="text-xs font-normal">ngày</small></span>
               <span v-else class="text-gray-400 font-normal">---</span>
             </span>
           </div>
