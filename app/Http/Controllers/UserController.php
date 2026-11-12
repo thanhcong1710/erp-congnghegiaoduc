@@ -57,22 +57,22 @@ class UserController extends Controller
     public function list(Request $request)
     {
         $keyword = isset($request->keyword) ? $request->keyword : '';
-        $role_id =  isset($request->role_id) ? $request->role_id : [];
-        $branch_id =  isset($request->branch_id) ? $request->branch_id : [];
-        $pagination = (object)$request->pagination;
+        $role_id = isset($request->role_id) ? $request->role_id : [];
+        $branch_id = isset($request->branch_id) ? $request->branch_id : [];
+        $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
-        $limitation =  $limit > 0 ? " LIMIT $offset, $limit" : "";
+        $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " 1=1 ";
         if ($keyword !== '') {
             $cond .= " AND (u.name LIKE '%$keyword%' OR u.hrm_id LIKE '%$keyword%')";
         }
-        if (!empty($branch_id)){
-            $cond .= " AND (SELECT count(id) FROM branch_has_user WHERE user_id = u.id AND branch_id IN (".implode(",",$branch_id).")) > 0";
+        if (!empty($branch_id)) {
+            $cond .= " AND (SELECT count(*) FROM branch_has_user WHERE user_id = u.id AND branch_id IN (" . implode(",", $branch_id) . ")) > 0";
         }
-        if (!empty($role_id)){
-            $cond .= " AND (SELECT count(id) FROM role_has_user WHERE user_id = u.id AND role_id IN (".implode(",",$role_id).")) > 0";
+        if (!empty($role_id)) {
+            $cond .= " AND (SELECT count(*) FROM role_has_user WHERE user_id = u.id AND role_id IN (" . implode(",", $role_id) . ")) > 0";
         }
         $total = u::first("SELECT count(u.id) AS total FROM users AS u WHERE $cond ");
         $list = u::query("SELECT u.*, IF(u.manager_id, (SELECT name FROM users WHERE id=u.manager_id), '') AS manager_name
@@ -84,8 +84,8 @@ class UserController extends Controller
 
     public function add(Request $request)
     {
-        $uesr_info = u::getObject(['hrm_id'=>$request->hrm_id], 'users');
-        if($uesr_info){
+        $uesr_info = u::getObject(['hrm_id' => $request->hrm_id], 'users');
+        if ($uesr_info) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Mã nhân viên đã tồn tại trên hệ thống',
@@ -93,22 +93,22 @@ class UserController extends Controller
         }
         $manager_hrm_info = null;
         if ($request->manager_id) {
-            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int)$request->manager_id);
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int) $request->manager_id);
         } elseif ($request->manager_hrm_id) {
             $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '" . addslashes($request->manager_hrm_id) . "'");
         }
         $role_name = '';
-        foreach($request->roles AS $role){
-            if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
+        foreach ($request->roles as $role) {
+            if (data_get($role, 'selected')) {
+                $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
             }
         }
         $branch_name = '';
         $branch_id = '';
-        foreach($request->branches AS $branch){
-            if(data_get($branch,'selected')){
-                $branch_name.= $branch_name ? ', '.data_get($branch,'name') : data_get($branch,'name'); 
-                $branch_id = data_get($branch,'id');
+        foreach ($request->branches as $branch) {
+            if (data_get($branch, 'selected')) {
+                $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
+                $branch_id = data_get($branch, 'id');
             }
         }
         $user_id = u::insertSimpleRow(array(
@@ -129,19 +129,19 @@ class UserController extends Controller
             'creator_id' => Auth::user()->id
         ), 'users');
 
-        foreach($request->roles AS $role){
-            if(data_get($role,'selected')){
+        foreach ($request->roles as $role) {
+            if (data_get($role, 'selected')) {
                 u::insertSimpleRow(array(
-                    'role_id' => data_get($role,'id'),
+                    'role_id' => data_get($role, 'id'),
                     'user_id' => $user_id,
                 ), 'role_has_user');
             }
         }
 
-        foreach($request->branches AS $branch){
-            if(data_get($branch,'selected')){
+        foreach ($request->branches as $branch) {
+            if (data_get($branch, 'selected')) {
                 u::insertSimpleRow(array(
-                    'branch_id' => data_get($branch,'id'),
+                    'branch_id' => data_get($branch, 'id'),
                     'user_id' => $user_id,
                 ), 'branch_has_user');
             }
@@ -153,7 +153,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function info(Request $request){
+    public function info(Request $request)
+    {
         $user_info = u::first("SELECT * FROM users WHERE id = $request->user_id");
         $roles = u::query("SELECT r.*, IF(u.user_id IS NOT NULL, 1, 0) AS selected 
             FROM roles AS r LEFT JOIN role_has_user AS u ON u.role_id=r.id AND u.user_id = $request->user_id");
@@ -167,9 +168,10 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $uesr_info = u::first("SELECT id FROM users WHERE hrm_id='$request->hrm_id' AND id!=$request->user_id");
-        if($uesr_info){
+        if ($uesr_info) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Mã nhân viên đã tồn tại trên hệ thống',
@@ -177,28 +179,28 @@ class UserController extends Controller
         }
         $manager_hrm_info = null;
         if ($request->manager_id) {
-            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int)$request->manager_id);
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int) $request->manager_id);
         } elseif ($request->manager_hrm_id) {
             $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '" . addslashes($request->manager_hrm_id) . "'");
         }
         $role_name = '';
-        foreach($request->roles AS $role){
-            if(data_get($role,'selected')){
-                $role_name.= $role_name ? ', '. data_get($role,'description') : data_get($role,'description'); 
+        foreach ($request->roles as $role) {
+            if (data_get($role, 'selected')) {
+                $role_name .= $role_name ? ', ' . data_get($role, 'description') : data_get($role, 'description');
             }
         }
         $branch_name = '';
         $branch_id = '';
-        foreach($request->branches AS $branch){
-            if(data_get($branch,'selected')){
-                $branch_name.= $branch_name ? ', '.data_get($branch,'name') : data_get($branch,'name'); 
-                $branch_id = data_get($branch,'id');
+        foreach ($request->branches as $branch) {
+            if (data_get($branch, 'selected')) {
+                $branch_name .= $branch_name ? ', ' . data_get($branch, 'name') : data_get($branch, 'name');
+                $branch_id = data_get($branch, 'id');
             }
         }
-        if($request->change_pass){
+        if ($request->change_pass) {
             u::updateSimpleRow(array(
                 'password' => Hash::make($request->password)
-            ), array('id'=>$request->user_id), 'users');
+            ), array('id' => $request->user_id), 'users');
         }
         u::updateSimpleRow(array(
             'name' => $request->name,
@@ -214,23 +216,23 @@ class UserController extends Controller
             'branch_name' => $branch_name,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id
-        ), array('id'=>$request->user_id), 'users');
+        ), array('id' => $request->user_id), 'users');
 
         u::query("DELETE FROM role_has_user WHERE user_id=$request->user_id");
-        foreach($request->roles AS $role){
-            if(data_get($role,'selected')){
+        foreach ($request->roles as $role) {
+            if (data_get($role, 'selected')) {
                 u::insertSimpleRow(array(
-                    'role_id' => data_get($role,'id'),
+                    'role_id' => data_get($role, 'id'),
                     'user_id' => $request->user_id,
                 ), 'role_has_user');
             }
         }
 
         u::query("DELETE FROM branch_has_user WHERE user_id=$request->user_id");
-        foreach($request->branches AS $branch){
-            if(data_get($branch,'selected')){
+        foreach ($request->branches as $branch) {
+            if (data_get($branch, 'selected')) {
                 u::insertSimpleRow(array(
-                    'branch_id' => data_get($branch,'id'),
+                    'branch_id' => data_get($branch, 'id'),
                     'user_id' => $request->user_id,
                 ), 'branch_has_user');
             }
@@ -242,14 +244,15 @@ class UserController extends Controller
         ]);
     }
 
-    public function getUsersManager(Request $request){
+    public function getUsersManager(Request $request)
+    {
         $cond = "";
-        if(!Auth::user()->checkPermission('canViewAllSale')){
-            $cond .= " AND u.id IN (".Auth::user()->getStaffHasUser().")";
+        if (!Auth::user()->checkPermission('canViewAllSale')) {
+            $cond .= " AND u.id IN (" . Auth::user()->getStaffHasUser() . ")";
         } else {
-            $cond .= " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( ".SystemCode::ROLE_EC.",".SystemCode::ROLE_EC_LEADER."))";
+            $cond .= " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( " . SystemCode::ROLE_EC . "," . SystemCode::ROLE_EC_LEADER . "))";
         }
-        if($request->branch_id){
+        if ($request->branch_id) {
             $cond .= " AND (SELECT count(branch_id) FROM branch_has_user WHERE u.id = user_id AND branch_id= $request->branch_id) > 0";
         }
         $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
@@ -257,29 +260,30 @@ class UserController extends Controller
         return response()->json($data);
     }
 
-    public function getAllUsers(Request $request){
+    public function getAllUsers(Request $request)
+    {
         $cond = "";
-        if($request->status !== null){
-            $cond = " AND status = ".(int)$request->status;
+        if ($request->status !== null) {
+            $cond = " AND status = " . (int) $request->status;
         }
         $data = u::query("SELECT id, hrm_id, name, role_name, CONCAT(hrm_id,' - ',name, IF(role_name IS NOT NULL AND role_name != '', CONCAT(' (', role_name, ')'), '')) AS label_name, id AS `value` 
             FROM users WHERE 1 $cond ORDER BY name ASC");
         return response()->json($data);
     }
-    
+
     public function uploadAvatar(Request $request)
     {
         $total = count($_FILES['files']['name']);
-        if ($total > 0){
+        if ($total > 0) {
             $tmpFilePath = $_FILES['files']['tmp_name'][0];
-            if ($tmpFilePath != ""){
-                $dir = __DIR__.'/../../../public/static/upload/avatars/'. date('Y_m').'/';
-                if(!file_exists($dir)){
+            if ($tmpFilePath != "") {
+                $dir = __DIR__ . '/../../../public/static/upload/avatars/' . date('Y_m') . '/';
+                if (!file_exists($dir)) {
                     mkdir($dir);
                 }
                 $newFilePath = $dir . $_FILES['files']['name'][0];
                 $newFilePath = u::update_file_name($newFilePath);
-                $dir_file_insert = str_replace(__DIR__.'/../../../public','',$newFilePath);
+                $dir_file_insert = str_replace(__DIR__ . '/../../../public', '', $newFilePath);
                 move_uploaded_file($tmpFilePath, $newFilePath);
                 u::updateSimpleRow(array(
                     'avatar_url' => $dir_file_insert
