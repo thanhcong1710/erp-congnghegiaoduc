@@ -305,6 +305,12 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('update', 'TeachersController@update');
             });
             Route::prefix('reports')->group(function () {
+                Route::get('init-filters', 'ReportsController@initFilters');
+                Route::post('init-filters', 'ReportsController@initFilters');
+                Route::post('overview', 'ReportsController@overviewReport');
+                Route::post('business', 'ReportsController@businessReport');
+                Route::post('save-targets', 'ReportsController@saveTargets');
+
                 Route::post('01', 'ReportsController@report01');
                 Route::post('02a', 'ReportsController@report02a');
                 Route::post('02b', 'ReportsController@report02b');

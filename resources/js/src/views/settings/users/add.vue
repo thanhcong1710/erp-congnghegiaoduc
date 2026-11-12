@@ -37,9 +37,14 @@
             </div>
           </div>
           <div class="mb-6">
-            <label>Mã Quản Lý</label>
-            <div class=w-full>
-              <input type="text" v-model="user_info.manager_hrm_id" class="vs-inputx vs-input--input normal">
+            <label>Người Quản Lý / Trưởng Nhóm (Team)</label>
+            <div class="w-full">
+              <select v-model="user_info.manager_hrm_id" class="vs-inputx vs-input--input normal" style="height: 38px; cursor: pointer;">
+                <option value="">-- Không thuộc Team / Tự quản lý --</option>
+                <option v-for="mgr in managers_list" :key="mgr.id" :value="mgr.hrm_id">
+                  {{ mgr.hrm_id }} - {{ mgr.name }}{{ mgr.role_name ? ' (' + mgr.role_name + ')' : '' }}
+                </option>
+              </select>
             </div>
           </div>
           <div class="mb-6">
@@ -111,6 +116,7 @@
         },
         branches:[],
         roles: [],
+        managers_list: [],
         user_info:{
           name: '',
           email: '',
@@ -203,6 +209,10 @@
       axios.g(`/api/system/branches`)
       .then(response => {
         this.branches = response.data
+      })
+      axios.g(`/api/users/get-data/all?status=1`)
+      .then(response => {
+        this.managers_list = response.data || []
       })
     },
   }

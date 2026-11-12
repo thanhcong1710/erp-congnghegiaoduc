@@ -75,7 +75,12 @@
                 <!---->
                 <td class="td vs-table--td text-center">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
                 <td class="td vs-table--td">{{item.branch_name}}</td>
-                <td class="td vs-table--td">{{item.hrm_id}} - {{item.name}}</td>
+                <td class="td vs-table--td">
+                  <div class="font-semibold">{{item.hrm_id}} - {{item.name}}</div>
+                  <div v-if="item.manager_name" class="text-primary" style="font-size: 13px; margin-top: 2px;">
+                    <i class="fa fa-users mr-1"></i>Team {{ item.manager_name }}
+                  </div>
+                </td>
                 <td class="td vs-table--td">{{item.role_name}}</td>
                 <td>
                   <vs-chip :color="item.status | getStatusColor" class="product-order-status">{{ item.status | getStatusText }}</vs-chip>

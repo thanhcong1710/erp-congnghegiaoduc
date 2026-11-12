@@ -424,8 +424,12 @@
                 </td>
 
                 <!-- Cột 7: Người quản lý -->
-                <td class="font-medium text-dark text-sm">
-                  {{ item.owner_name || '-' }}
+                <td class="font-medium text-dark text-sm" style="min-width: 180px;">
+                  <div v-if="item.owner_name">
+                    <span class="font-semibold text-dark">{{ item.owner_name }}</span>
+                    <span v-if="item.owner_team_name" class="text-primary font-medium"> / {{ item.owner_team_name }}</span>
+                  </div>
+                  <span v-else>-</span>
                 </td>
 
                 <!-- Cột 8: Quản lý đầu tiên -->

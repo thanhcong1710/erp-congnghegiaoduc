@@ -290,6 +290,13 @@ class StudentsController extends Controller
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " s.status > 0 ";
         $cond .= " AND s.branch_id IN (" . Auth::user()->getBranchesHasUser() . ")";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $cond .= " AND (EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = s.id AND (tsu.ec_id IN ($saleStaffIds) OR tsu.ec_leader_id IN ($saleStaffIds)))
+                OR EXISTS (SELECT 1 FROM contracts ct WHERE ct.student_id = s.id AND (ct.ec_id IN ($saleStaffIds) OR ct.creator_id IN ($saleStaffIds)))
+                OR EXISTS (SELECT 1 FROM crm_students cs JOIN crm_parents cp ON cp.id = cs.parent_id WHERE cs.lms_id = s.id AND cp.owner_id IN ($saleStaffIds))
+                OR s.creator_id IN ($saleStaffIds)) ";
+        }
 
         if (!empty($status)) {
             $cond_status = "";
@@ -353,6 +360,13 @@ class StudentsController extends Controller
 
     public function show(Request $request, $student_id)
     {
+        $student_id = (int)$student_id;
+        $saleCond = "";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $saleCond = " AND (t.ec_id IN ($saleStaffIds) OR t.ec_leader_id IN ($saleStaffIds) OR c.ec_id IN ($saleStaffIds) OR s.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM crm_students cs JOIN crm_parents cp ON cp.id = cs.parent_id WHERE cs.lms_id = s.id AND cp.owner_id IN ($saleStaffIds))) ";
+        }
         $data = u::first("SELECT s.*, c.init_total_charged, c.type AS contract_type, c.status AS contract_status,
                 c.summary_sessions,c.done_sessions, c.left_sessions, c.total_charged,c.real_sessions,
                 (SELECT name FROM branches WHERE id=t.branch_id) AS branch_name,
@@ -366,7 +380,7 @@ class StudentsController extends Controller
                     IF((SELECT count(id) FROM contracts WHERe student_id=s.id AND status!=7)>0,
                         (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
                         (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
-                OR c.id IS NULL) AND s.id=$student_id");
+                OR c.id IS NULL) AND s.id=$student_id $saleCond");
         if ($data) {
             $data->status_label = u::genStatusStudent($data->contract_status, $data->contract_type);
             if ($data->real_sessions > $data->done_sessions) {
@@ -446,6 +460,11 @@ class StudentsController extends Controller
             }
         } else {
             $where = " t.branch_id = $branch_id AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+        }
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $cond .= " AND (t.ec_id IN ($saleStaffIds) OR t.ec_leader_id IN ($saleStaffIds) OR s.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM crm_students cs JOIN crm_parents cp ON cp.id = cs.parent_id WHERE cs.lms_id = s.id AND cp.owner_id IN ($saleStaffIds))) ";
         }
         $data = u::query("SELECT s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.gud_email1, s.address,
                 (SELECT name FROM branches WHERE id =t.branch_id) AS student_branch_name,

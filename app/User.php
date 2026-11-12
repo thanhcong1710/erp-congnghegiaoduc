@@ -128,6 +128,48 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Trả về danh sách user_id được phép truy cập nếu user hiện tại là Sale (68) hoặc Trưởng nhóm Sale (69).
+     * Trả về null nếu user có quyền xem toàn bộ (Admin, CEO, Kế toán, CSKH, Giáo viên, hoặc có quyền canViewAllSale).
+     */
+    public function getSaleAllowedStaffIds()
+    {
+        if ($this->checkPermission('canViewAllSale') || $this->checkPermission('canViewAllParents')) {
+            return null;
+        }
+        $unrestrictedRoles = ['999999', '686868', '1000002', '55', '56', '36', '37'];
+        foreach ($unrestrictedRoles as $rId) {
+            if ($this->checkRole($rId) || (string)$this->role_id === $rId) {
+                return null;
+            }
+        }
+        if ($this->checkRole('68') || $this->checkRole('69') || in_array((int)$this->role_id, [68, 69])) {
+            return $this->getStaffHasUser();
+        }
+        return null;
+    }
+
+    /**
+     * Xác định phạm vi xem Báo cáo của user hiện tại:
+     * - 'all': Admin, CEO, Kế toán hoặc có canViewAllSale
+     * - 'team': Trưởng nhóm Kinh doanh (role 69) hoặc có nhân viên cấp dưới
+     * - 'self': Nhân viên Sale cá nhân (role 68)
+     */
+    public function getReportScope()
+    {
+        if ($this->checkPermission('canViewAllSale') || $this->checkRole('999999') || $this->checkRole('686868') || $this->checkRole('1000002') || in_array((int)$this->role_id, [999999, 686868, 1000002])) {
+            return 'all';
+        }
+        if ($this->checkRole('69') || (int)$this->role_id === 69) {
+            return 'team';
+        }
+        $staffIds = explode(',', $this->getStaffHasUser());
+        if (count($staffIds) > 1) {
+            return 'team';
+        }
+        return 'self';
+    }
+
+    /**
      * AI Permission relationship
      */
     public function aiPermission()

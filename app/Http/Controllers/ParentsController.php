@@ -98,6 +98,8 @@ class ParentsController extends Controller
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
                 p.care_date AS last_time_care,
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
+                (SELECT m.name FROM users uo JOIN users m ON m.id = uo.manager_id WHERE uo.id = p.owner_id LIMIT 1) AS owner_leader_name,
+                (SELECT COUNT(id) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
                 (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
                 (SELECT GROUP_CONCAT(DISTINCT pr.name SEPARATOR ', ')
@@ -106,6 +108,20 @@ class ParentsController extends Controller
                  INNER JOIN products AS pr ON (pr.id = csc.type_product OR pr.id = cs.type_product)
                  WHERE cs.parent_id = p.id) AS product_name
             FROM crm_parents AS p WHERE $cond $tmp_cond $order_by $limitation");
+        if (!empty($list)) {
+            foreach ($list as $item) {
+                if (!empty($item->owner_leader_name)) {
+                    $item->owner_team_name = 'Team ' . $item->owner_leader_name;
+                    $item->owner_display = $item->owner_name . ' / Team ' . $item->owner_leader_name;
+                } elseif (!empty($item->is_owner_leader) && !empty($item->owner_name)) {
+                    $item->owner_team_name = 'Team ' . $item->owner_name;
+                    $item->owner_display = $item->owner_name . ' / Team ' . $item->owner_name;
+                } else {
+                    $item->owner_team_name = '';
+                    $item->owner_display = $item->owner_name;
+                }
+            }
+        }
         $data = u::makingPagination($list, $total->total, $page, $limit);
 
         $total_0 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond ");
@@ -241,6 +257,8 @@ class ParentsController extends Controller
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name,
+                (SELECT m.name FROM users uo JOIN users m ON m.id = uo.manager_id WHERE uo.id = p.owner_id LIMIT 1) AS owner_leader_name,
+                (SELECT COUNT(id) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
                 (SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
                 (SELECT name FROM provinces WHERE id=p.province_id) AS province_name,
                 (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
@@ -260,6 +278,16 @@ class ParentsController extends Controller
             $pids = [];
             foreach ($list as $item) {
                 $pids[] = (int)$item->id;
+                if (!empty($item->owner_leader_name)) {
+                    $item->owner_team_name = 'Team ' . $item->owner_leader_name;
+                    $item->owner_display = $item->owner_name . ' / Team ' . $item->owner_leader_name;
+                } elseif (!empty($item->is_owner_leader) && !empty($item->owner_name)) {
+                    $item->owner_team_name = 'Team ' . $item->owner_name;
+                    $item->owner_display = $item->owner_name . ' / Team ' . $item->owner_name;
+                } else {
+                    $item->owner_team_name = '';
+                    $item->owner_display = $item->owner_name;
+                }
                 if (empty($item->first_owner_name)) {
                     $item->first_owner_name = !empty($item->creator_name) ? $item->creator_name : $item->owner_name;
                 }

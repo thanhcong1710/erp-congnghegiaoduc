@@ -272,6 +272,11 @@ class ContractsController extends Controller
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
         $cond = " c.status > 0 ";
         $cond .= " AND c.branch_id IN (" . Auth::user()->getBranchesHasUser().")";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $cond .= " AND (c.ec_id IN ($saleStaffIds) OR c.ec_leader_id IN ($saleStaffIds) OR c.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = c.student_id AND (tsu.ec_id IN ($saleStaffIds) OR tsu.ec_leader_id IN ($saleStaffIds)))) ";
+        }
 
         if (!empty($branch_id)) {
             $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
@@ -360,6 +365,13 @@ class ContractsController extends Controller
 
     public function show(Request $request,$contract_id)
     {
+        $contract_id = (int)$contract_id;
+        $saleCond = "";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $saleCond = " AND (c.ec_id IN ($saleStaffIds) OR c.ec_leader_id IN ($saleStaffIds) OR c.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = c.student_id AND (tsu.ec_id IN ($saleStaffIds) OR tsu.ec_leader_id IN ($saleStaffIds)))) ";
+        }
         $data = u::first("SELECT c.*,c.id AS contract_id, s.name, s.lms_code, s.gud_name1, s.gud_mobile1, s.address, s.gud_email1,
             (SELECT name FROM branches WHERE id =c.branch_id) AS branch_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id= c.ec_id) AS ec_name,
@@ -374,7 +386,7 @@ class ContractsController extends Controller
             c.b2b_campaign_id,c.b2b_amount, c.b2b_bonus_session,
             (SELECT count(id) FROM students WHERE gud_mobile1 = s.gud_mobile1 AND s.id != id) AS count_sibling
         FROM contracts AS c 
-            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id");
+            LEFT JOIN students AS s ON s.id=c.student_id WHERE c.id=$contract_id $saleCond");
         if ($data) {
             $data->materials = u::query("SELECT cm.*, m.name AS material_name, m.code AS material_code 
                 FROM contract_materials AS cm 

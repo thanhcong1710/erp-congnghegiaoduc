@@ -89,12 +89,18 @@ class EnrolmentsController extends Controller
         $class_info->room_text = $room_text ?: ($shift_text ? '' : (string)data_get($class_info, 'shift_name'));
         $class_info->shift_text = $shift_text;
         $class_info->class_day_text = u::getClassDayText($class_info->class_day);
+        $saleCond = "";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $saleCond = " AND (c.ec_id IN ($saleStaffIds) OR c.ec_leader_id IN ($saleStaffIds) OR c.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = c.student_id AND (tsu.ec_id IN ($saleStaffIds) OR tsu.ec_leader_id IN ($saleStaffIds)))) ";
+        }
         $students = u::query("SELECT c.code AS contract_code, c.id AS contract_id, s.name, s.lms_code,s.lms_id, c.type AS contract_type,
                 c.enrolment_start_date, c.enrolment_last_date, c.summary_sessions, c.real_sessions, c.bonus_sessions,
                 c.must_charge, c.total_charged, c.done_sessions,c.left_sessions, c.student_id, c.product_id,
                 (SELECT name FROM tuition_fee WHERE id= c.tuition_fee_id) AS tuition_fee_name
             FROM contracts AS c LEFT JOIN students AS s ON c.student_id=s.id
-            WHERE c.status!=7 AND c.class_id =$class_id");
+            WHERE c.status!=7 AND c.class_id =$class_id $saleCond");
         $class_info->num_students = count($students);
         // $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 AND class_date >= CURRENT_DATE ORDER BY class_date");
         $class_dates = u::query("SELECT class_date FROM schedules WHERE class_id = $class_id AND status=1 ORDER BY class_date");
@@ -126,6 +132,11 @@ class EnrolmentsController extends Controller
         $branch_id = data_get($class_info, 'branch_id'); 
         // $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
         $cond = " c.status IN ( 3, 4, 5) AND c.branch_id= $branch_id ";
+        $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
+        if (!empty($saleStaffIds)) {
+            $cond .= " AND (c.ec_id IN ($saleStaffIds) OR c.ec_leader_id IN ($saleStaffIds) OR c.creator_id IN ($saleStaffIds)
+                OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = c.student_id AND (tsu.ec_id IN ($saleStaffIds) OR tsu.ec_leader_id IN ($saleStaffIds)))) ";
+        }
         $cond.=" AND (SELECT count(id) FROM contracts WHERE student_id =c.student_id AND status=6 AND product_id = $product_id)= 0
             AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
 

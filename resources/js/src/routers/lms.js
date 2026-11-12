@@ -778,17 +778,29 @@ export default {
         }
       },
       {
-        path: '/lms/reports/operate',
-        name: 'lms-reports-operate',
-        component: () => import('@/views/lms/report/operate/index.vue'),
+        path: '/lms/reports',
+        name: 'lms-reports',
+        component: () => import('@/views/lms/report/index.vue'),
         meta: {
           breadcrumb: [
             { title: 'Home', url: '/' },
-            { title: 'Danh sách báo cáo vận hành', active: true},
+            { title: 'Báo cáo doanh thu & kinh doanh', active: true }
           ],
           pageTitle: 'Báo cáo',
           rule: 'editor'
         }
+      },
+      {
+        path: '/lms/reports/business',
+        redirect: '/lms/reports'
+      },
+      {
+        path: '/lms/reports/finance',
+        redirect: '/lms/reports'
+      },
+      {
+        path: '/lms/reports/operate',
+        redirect: '/lms/reports'
       },
       {
         path: '/lms/reports/operate/report-01',

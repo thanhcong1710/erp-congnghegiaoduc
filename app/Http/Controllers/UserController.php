@@ -91,8 +91,11 @@ class UserController extends Controller
                 'message' => 'Mã nhân viên đã tồn tại trên hệ thống',
             ]);
         }
-        if($request->manager_hrm_id){
-            $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '$request->manager_hrm_id'");
+        $manager_hrm_info = null;
+        if ($request->manager_id) {
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int)$request->manager_id);
+        } elseif ($request->manager_hrm_id) {
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '" . addslashes($request->manager_hrm_id) . "'");
         }
         $role_name = '';
         foreach($request->roles AS $role){
@@ -114,9 +117,10 @@ class UserController extends Controller
             'email' => $request->email,
             'hrm_id' => $request->hrm_id,
             'password' => Hash::make($request->password),
+            'menuroles' => 'user',
             'status' => $request->status,
-            'manager_hrm_id' => $request->manager_hrm_id,
-            'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
+            'manager_hrm_id' => $manager_hrm_info ? $manager_hrm_info->hrm_id : $request->manager_hrm_id,
+            'manager_id' => $manager_hrm_info ? $manager_hrm_info->id : null,
             'sip_id' => $request->sip_id,
             'role_name' => $role_name,
             'branch_id' => $branch_id,
@@ -171,8 +175,11 @@ class UserController extends Controller
                 'message' => 'Mã nhân viên đã tồn tại trên hệ thống',
             ]);
         }
-        if($request->manager_hrm_id){
-            $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '$request->manager_hrm_id'");
+        $manager_hrm_info = null;
+        if ($request->manager_id) {
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE id = " . (int)$request->manager_id);
+        } elseif ($request->manager_hrm_id) {
+            $manager_hrm_info = u::first("SELECT * FROM users WHERE hrm_id= '" . addslashes($request->manager_hrm_id) . "'");
         }
         $role_name = '';
         foreach($request->roles AS $role){
@@ -199,8 +206,8 @@ class UserController extends Controller
             'email' => $request->email,
             'hrm_id' => $request->hrm_id,
             'status' => $request->status,
-            'manager_hrm_id' => $request->manager_hrm_id,
-            'manager_id' => isset($manager_hrm_info) && $manager_hrm_info ? $manager_hrm_info->id : null,
+            'manager_hrm_id' => $manager_hrm_info ? $manager_hrm_info->hrm_id : $request->manager_hrm_id,
+            'manager_id' => $manager_hrm_info ? $manager_hrm_info->id : null,
             'sip_id' => $request->sip_id,
             'role_name' => $role_name,
             'branch_id' => $branch_id,
@@ -255,8 +262,8 @@ class UserController extends Controller
         if($request->status !== null){
             $cond = " AND status = ".(int)$request->status;
         }
-        $data = u::query("SELECT id, CONCAT(hrm_id,' - ',name) AS label_name, id AS `value` 
-            FROM users WHERE 1 $cond");
+        $data = u::query("SELECT id, hrm_id, name, role_name, CONCAT(hrm_id,' - ',name, IF(role_name IS NOT NULL AND role_name != '', CONCAT(' (', role_name, ')'), '')) AS label_name, id AS `value` 
+            FROM users WHERE 1 $cond ORDER BY name ASC");
         return response()->json($data);
     }
     
