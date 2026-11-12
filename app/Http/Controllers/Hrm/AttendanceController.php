@@ -110,7 +110,7 @@ class AttendanceController extends Controller
             }
         }
 
-        // Lấy danh sách đơn nghỉ phép ĐÃ ĐƯỢC DUYỆT (status = 1) rơi vào ngày này
+        // Lấy danh sách đơn nghỉ phép / chuyển làm online ĐÃ ĐƯỢC DUYỆT (status = 1) rơi vào ngày này
         $approvedLeaves = HrmLeaveRequest::where('status', 1)
             ->where('start_date', '<=', $date)
             ->where('end_date', '>=', $date)
@@ -125,12 +125,27 @@ class AttendanceController extends Controller
             ->get();
 
         $leaveByEmp = [];
+        $onlineLeaveByEmp = [];
         foreach ($approvedLeaves as $lv) {
-            if ($lv->employee_id) {
-                $leaveByEmp['emp_' . $lv->employee_id] = $lv;
+            $isOnlineReq = ($lv->request_category === 'off_to_onl' || $lv->type === 'off_to_onl' || $lv->approval_type === 'half_salary');
+            $isShiftChangeReq = ($lv->request_category === 'shift_change' || $lv->type === 'shift_change');
+            if ($isShiftChangeReq) {
+                continue;
             }
-            if ($lv->user_id) {
-                $leaveByEmp['user_' . $lv->user_id] = $lv;
+            if ($isOnlineReq) {
+                if ($lv->employee_id) {
+                    $onlineLeaveByEmp['emp_' . $lv->employee_id] = $lv;
+                }
+                if ($lv->user_id) {
+                    $onlineLeaveByEmp['user_' . $lv->user_id] = $lv;
+                }
+            } else {
+                if ($lv->employee_id) {
+                    $leaveByEmp['emp_' . $lv->employee_id] = $lv;
+                }
+                if ($lv->user_id) {
+                    $leaveByEmp['user_' . $lv->user_id] = $lv;
+                }
             }
         }
 
@@ -157,11 +172,14 @@ class AttendanceController extends Controller
 
             // Kiểm tra làm Online:
             // 1. Ca làm việc có tên chứa 'Online' hoặc 'online'
-            // 2. Hoặc nhân viên có đơn đăng ký làm online ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó
+            // 2. Hoặc nhân viên có đơn đăng ký làm online / chuyển Off sang Onl ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó
             $isShiftOnline = ($shiftName && mb_stripos($shiftName, 'online') !== false);
             $onlineReg = $onlineRegByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($onlineRegByEmp['user_' . $emp->user_id] ?? null) : null);
-            $isOnline = $isShiftOnline || !empty($onlineReg);
-            $onlineReason = $isShiftOnline ? 'Ca làm việc Online' : ($onlineReg ? 'Đã duyệt đăng ký làm Online' : null);
+            $onlineLeaveReq = $onlineLeaveByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($onlineLeaveByEmp['user_' . $emp->user_id] ?? null) : null);
+            $isOnline = $isShiftOnline || !empty($onlineReg) || !empty($onlineLeaveReq);
+            $onlineReason = $isShiftOnline
+                ? 'Ca làm việc Online'
+                : ($onlineReg ? 'Đã duyệt đăng ký làm Online' : ($onlineLeaveReq ? 'Đã duyệt chuyển Off sang Online' : null));
 
             // Lọc theo ca làm việc nếu request có truyền shift_id
             if ($request->filled('shift_id')) {
@@ -174,7 +192,7 @@ class AttendanceController extends Controller
                 }
             }
 
-            // Kiểm tra nghỉ phép ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó
+            // Kiểm tra nghỉ phép ĐÃ ĐƯỢC DUYỆT cho ngày hôm đó (không bao gồm làm online)
             $leaveReq = $leaveByEmp['emp_' . $emp->id] ?? ($emp->user_id ? ($leaveByEmp['user_' . $emp->user_id] ?? null) : null);
             $isLeaveApproved = !empty($leaveReq);
             $leaveReason = $leaveReq ? $leaveReq->reason : null;
@@ -183,7 +201,7 @@ class AttendanceController extends Controller
 
             // Trạng thái điểm danh:
             // 1. Ưu tiên Nghỉ phép đã duyệt: tự động mang trạng thái 'leave_approved' / 'leave_approved_half' (hoặc 'late_submitted')
-            // 2. Tiếp theo: Online -> tự động mang trạng thái 'online'
+            // 2. Tiếp theo: Online -> tự động mang trạng thái 'online' / 'online_half'
             // 3. Mặc định: lấy từ bản ghi attendance hoặc 'not_checked'
             $attendanceStatus = $att ? $att->attendance_status : 'not_checked';
             $overrideEdit = false;
@@ -202,12 +220,17 @@ class AttendanceController extends Controller
                     $attendanceStatus = $expectedLeaveStatus;
                 }
             } elseif ($isOnline) {
+                $defaultOnlineStatus = ($onlineLeaveReq && (float) $onlineLeaveReq->duration_days > 0 && (float) $onlineLeaveReq->duration_days < 1)
+                    ? 'online_half'
+                    : 'online';
                 if ($att && $att->attendance_status && !in_array($att->attendance_status, ['online', 'online_half'])) {
                     $overrideEdit = true;
                 } elseif ($att && $att->attendance_status === 'online_half') {
                     $attendanceStatus = 'online_half';
-                } else {
+                } elseif ($att && $att->attendance_status === 'online') {
                     $attendanceStatus = 'online';
+                } else {
+                    $attendanceStatus = $defaultOnlineStatus;
                 }
             }
 
@@ -614,7 +637,14 @@ class AttendanceController extends Controller
             $onlineReg = $approvedOnlineRegs[$dateStr] ?? null;
 
             $leaveReq = $approvedLeaves->first(function ($l) use ($dateStr) {
-                return $l->start_date <= $dateStr && $l->end_date >= $dateStr;
+                $isOnlineReq = ($l->request_category === 'off_to_onl' || $l->type === 'off_to_onl' || $l->approval_type === 'half_salary');
+                $isShiftChangeReq = ($l->request_category === 'shift_change' || $l->type === 'shift_change');
+                return !$isOnlineReq && !$isShiftChangeReq && $l->start_date <= $dateStr && $l->end_date >= $dateStr;
+            });
+
+            $onlineLeaveReq = $approvedLeaves->first(function ($l) use ($dateStr) {
+                $isOnlineReq = ($l->request_category === 'off_to_onl' || $l->type === 'off_to_onl' || $l->approval_type === 'half_salary');
+                return $isOnlineReq && $l->start_date <= $dateStr && $l->end_date >= $dateStr;
             });
 
             // Xác định ca làm việc
@@ -643,8 +673,8 @@ class AttendanceController extends Controller
 
             if (!$att) {
                 if ($isWeekend) {
-                    if ($onlineReg) {
-                        $status = 'online';
+                    if ($onlineReg || $onlineLeaveReq) {
+                        $status = ($onlineLeaveReq && (float) $onlineLeaveReq->duration_days > 0 && (float) $onlineLeaveReq->duration_days < 1) ? 'online_half' : 'online';
                         $note = 'Đã duyệt làm Online cuối tuần';
                     } elseif ($asn && $asn->shift_id) {
                         $status = 'present';
@@ -663,6 +693,9 @@ class AttendanceController extends Controller
                             $status = 'leave_approved';
                         }
                         $note = $leaveReq->reason ? 'Nghỉ phép: ' . $leaveReq->reason : 'Nghỉ phép đã duyệt';
+                    } elseif ($onlineLeaveReq) {
+                        $status = ((float) $onlineLeaveReq->duration_days > 0 && (float) $onlineLeaveReq->duration_days < 1) ? 'online_half' : 'online';
+                        $note = $onlineLeaveReq->reason ? 'Làm Online: ' . $onlineLeaveReq->reason : 'Đã duyệt làm Online';
                     } elseif ($onlineReg || $isPermanentOnline) {
                         $status = 'online';
                         $note = $onlineReg ? 'Đã duyệt làm Online' : 'Ca làm online';

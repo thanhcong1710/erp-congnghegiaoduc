@@ -198,7 +198,7 @@ class LeaveRequestController extends Controller
                         if ($leave->user_id) $q->orWhere('user_id', $leave->user_id);
                     })
                     ->whereBetween('date', [$leave->start_date, $leave->end_date])
-                    ->whereIn('attendance_status', ['leave_approved', 'leave_approved_half'])
+                    ->whereIn('attendance_status', ['leave_approved', 'leave_approved_half', 'online', 'online_half'])
                     ->update(['attendance_status' => 'not_checked']);
                 }
             } else {
@@ -206,8 +206,11 @@ class LeaveRequestController extends Controller
                 $leave->approval_type = $approvalType;
                 $leave->rejection_reason = null;
 
-                // Tự động trừ số ngày phép vào hrm_leave_balances nếu là đơn nghỉ phép đã duyệt
-                if ($leave->request_category === 'leave' && in_array($approvalType, ['approved'])) {
+                $isOnlineRequest = ($leave->request_category === 'off_to_onl' || $leave->type === 'off_to_onl' || $approvalType === 'half_salary');
+                $isShiftChangeRequest = ($leave->request_category === 'shift_change' || $leave->type === 'shift_change');
+
+                // Tự động trừ số ngày phép vào hrm_leave_balances CHỈ khi là đơn nghỉ phép (không tính làm online / đổi ca vào nghỉ phép)
+                if (!$isOnlineRequest && !$isShiftChangeRequest && in_array($approvalType, ['approved'])) {
                     $year = Carbon::parse($leave->start_date)->year;
                     $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)
                         ->orWhere('id', $leave->employee_id)
@@ -224,13 +227,34 @@ class LeaveRequestController extends Controller
                     })->where('year', $year)->first();
 
                     if (!$balance) {
+                        $existingApprovedDays = (float)HrmLeaveRequest::where(function ($q) use ($empProfile, $leave) {
+                            if ($empProfile) {
+                                $q->where('employee_id', $empProfile->id);
+                            }
+                            if ($leave->user_id) {
+                                $q->orWhere('user_id', $leave->user_id);
+                            }
+                        })
+                        ->whereYear('start_date', $year)
+                        ->where('status', 1)
+                        ->where('id', '!=', $leave->id)
+                        ->where(function ($q) {
+                            $q->whereNull('request_category')
+                              ->orWhere('request_category', 'leave');
+                        })
+                        ->where(function ($q) {
+                            $q->whereNull('approval_type')
+                              ->orWhere('approval_type', '!=', 'half_salary');
+                        })
+                        ->sum('duration_days');
+
                         $balance = HrmLeaveBalance::create([
                             'user_id' => $leave->user_id,
                             'employee_id' => $empProfile ? $empProfile->id : null,
                             'leave_type_id' => $leave->leave_type_id ?: 1,
                             'year' => $year,
                             'total_days' => $defaultDays,
-                            'used_days' => 0
+                            'used_days' => $existingApprovedDays
                         ]);
                     }
 
@@ -238,38 +262,48 @@ class LeaveRequestController extends Controller
                     $balance->save();
                 }
 
-                // Tự động cập nhật bảng điểm danh trong khoảng ngày nghỉ cho cả employee_id và user_id
-                $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
-                $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
+                // Tự động cập nhật bảng điểm danh trong khoảng ngày (nếu không phải đơn đổi ca)
+                if (!$isShiftChangeRequest) {
+                    $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
+                    $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
 
-                $currentDay = Carbon::parse($leave->start_date);
-                $endDay = Carbon::parse($leave->end_date);
-                while ($currentDay->lte($endDay)) {
-                    $dateStr = $currentDay->format('Y-m-d');
-                    $attStatus = 'leave_approved';
-                    if ($approvalType === 'late_unpaid') {
-                        $attStatus = 'late_submitted';
-                    } elseif ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1) {
-                        $attStatus = 'leave_approved_half';
+                    $currentDay = Carbon::parse($leave->start_date);
+                    $endDay = Carbon::parse($leave->end_date);
+                    while ($currentDay->lte($endDay)) {
+                        $dateStr = $currentDay->format('Y-m-d');
+                        if ($isOnlineRequest) {
+                            $attStatus = ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1)
+                                ? 'online_half'
+                                : 'online';
+                            $attNote = 'Theo đơn làm Online #' . $leave->id;
+                        } else {
+                            $attStatus = 'leave_approved';
+                            if ($approvalType === 'late_unpaid') {
+                                $attStatus = 'late_submitted';
+                            } elseif ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1) {
+                                $attStatus = 'leave_approved_half';
+                            }
+                            $attNote = 'Theo đơn xin phép #' . $leave->id;
+                        }
+
+                        $condition = ['date' => $dateStr];
+                        if ($empId) {
+                            $condition['employee_id'] = $empId;
+                        } else {
+                            $condition['user_id'] = $leave->user_id;
+                        }
+
+                        HrmAttendance::updateOrCreate(
+                            $condition,
+                            [
+                                'employee_id' => $empId,
+                                'user_id' => $leave->user_id,
+                                'attendance_status' => $attStatus,
+                                'note' => $attNote
+                            ]
+                        );
+                        $currentDay->addDay();
                     }
-
-                    $condition = ['date' => $dateStr];
-                    if ($empId) {
-                        $condition['employee_id'] = $empId;
-                    } else {
-                        $condition['user_id'] = $leave->user_id;
-                    }
-
-                    HrmAttendance::updateOrCreate(
-                        $condition,
-                        [
-                            'employee_id' => $empId,
-                            'user_id' => $leave->user_id,
-                            'attendance_status' => $attStatus,
-                            'note' => 'Theo đơn xin phép #' . $leave->id
-                        ]
-                    );
-                    $currentDay->addDay();
                 }
             }
 
@@ -427,6 +461,14 @@ class LeaveRequestController extends Controller
                     }
                 })->whereYear('start_date', $year)
                   ->where('status', 1)
+                  ->where(function ($q) {
+                      $q->whereNull('request_category')
+                        ->orWhere('request_category', 'leave');
+                  })
+                  ->where(function ($q) {
+                      $q->whereNull('approval_type')
+                        ->orWhere('approval_type', '!=', 'half_salary');
+                  })
                   ->sum('duration_days');
 
                 $balance = new HrmLeaveBalance();
@@ -527,9 +569,17 @@ class LeaveRequestController extends Controller
             $balancesByEmpId = $rawBalances->whereNotNull('employee_id')->keyBy('employee_id');
             $balancesByUserId = $rawBalances->whereNotNull('user_id')->keyBy('user_id');
 
-            // Lấy leave requests đã duyệt trong năm cho các nhân sự này
+            // Lấy leave requests đã duyệt trong năm cho các nhân sự này (chỉ tính đơn nghỉ phép, KHÔNG tính làm online / đổi ca)
             $scopedLeaveRequests = HrmLeaveRequest::where('status', 1)
                 ->whereYear('start_date', $year)
+                ->where(function ($q) {
+                    $q->whereNull('request_category')
+                      ->orWhere('request_category', 'leave');
+                })
+                ->where(function ($q) {
+                    $q->whereNull('approval_type')
+                      ->orWhere('approval_type', '!=', 'half_salary');
+                })
                 ->where(function ($q) use ($scopedEmpIds, $scopedUserIds) {
                     $q->whereIn('employee_id', $scopedEmpIds)
                       ->orWhereIn('user_id', $scopedUserIds);
@@ -577,7 +627,7 @@ class LeaveRequestController extends Controller
                 $totalDays = $balance ? (float)$balance->total_days : ($isFulltime ? 12.0 : 0.0);
                 $usedDays = $balance ? (float)$balance->used_days : 0.0;
 
-                // Nếu chưa có balance mà có leave requests đã duyệt thì tính
+                // Nếu chưa có balance mà có leave requests đã duyệt thì tính (không tính làm online / đổi ca)
                 if (!$balance) {
                     $usedDays = (float)HrmLeaveRequest::where(function ($q) use ($profile) {
                         $q->where('employee_id', $profile->id);
@@ -586,13 +636,21 @@ class LeaveRequestController extends Controller
                         }
                     })->whereYear('start_date', $year)
                       ->where('status', 1)
+                      ->where(function ($q) {
+                          $q->whereNull('request_category')
+                            ->orWhere('request_category', 'leave');
+                      })
+                      ->where(function ($q) {
+                          $q->whereNull('approval_type')
+                            ->orWhere('approval_type', '!=', 'half_salary');
+                      })
                       ->sum('duration_days');
                 }
 
                 $remainingDays = max(0, $totalDays - $usedDays);
                 $overDays = max(0, $usedDays - $totalDays);
 
-                // Lấy 3 đợt nghỉ gần nhất
+                // Lấy 3 đợt nghỉ phép gần nhất (không tính làm online / đổi ca)
                 $recentLeaves = HrmLeaveRequest::where(function ($q) use ($profile) {
                     $q->where('employee_id', $profile->id);
                     if ($profile->user_id) {
@@ -600,6 +658,14 @@ class LeaveRequestController extends Controller
                     }
                 })->whereYear('start_date', $year)
                   ->where('status', 1)
+                  ->where(function ($q) {
+                      $q->whereNull('request_category')
+                        ->orWhere('request_category', 'leave');
+                  })
+                  ->where(function ($q) {
+                      $q->whereNull('approval_type')
+                        ->orWhere('approval_type', '!=', 'half_salary');
+                  })
                   ->orderBy('start_date', 'desc')
                   ->limit(3)
                   ->get(['id', 'start_date', 'end_date', 'duration_days', 'reason', 'approval_type']);
@@ -674,6 +740,14 @@ class LeaveRequestController extends Controller
                     if ($profile->user_id) {
                         $q->orWhere('user_id', $profile->user_id);
                     }
+                })
+                ->where(function ($q) {
+                    $q->whereNull('request_category')
+                      ->orWhere('request_category', 'leave');
+                })
+                ->where(function ($q) {
+                    $q->whereNull('approval_type')
+                      ->orWhere('approval_type', '!=', 'half_salary');
                 });
 
             if ($year) {
