@@ -1,193 +1,163 @@
 <template>
-  <div id="igbh-diagnostic-list">
-    <vx-card no-shadow class="mt-5">
-      <div class="flex flex-wrap justify-between items-center mb-5">
-        <div>
-          <h4 class="font-bold text-xl">Quản lý Khảo Sát Đầu Vào (IG.BH Diagnostic)</h4>
-          <p class="text-sm text-gray-500">Khảo sát năng lực chẩn đoán, xếp lớp và phân bậc học sinh</p>
-        </div>
-        <div>
-          <vs-button color="primary" type="filled" icon="add" @click="openCreateModal">
-            Khởi tạo khảo sát đầu vào
-          </vs-button>
-        </div>
-      </div>
+  <div id="igbh-diagnostic-list" class="ev-page">
+    <eval-module-nav />
 
-      <!-- Filters -->
-      <div class="vx-row mb-4 filter-row" style="position: relative; z-index: 500;">
-        <div class="vx-col sm:w-1/4 w-full mb-2">
-          <label class="vs-input--label">Trung tâm</label>
-          <multiselect
-            placeholder="Chọn trung tâm"
-            v-model="selectedBranch"
-            :options="branches"
-            label="name"
-            track-by="id"
-            :searchable="true"
-            @input="fetchData"
-          />
-        </div>
-        <div class="vx-col sm:w-1/3 w-full mb-2">
-          <label class="vs-input--label">Tìm kiếm</label>
-          <vs-input
-            class="w-full"
-            placeholder="Nhập tên học sinh, người đăng ký, bài test..."
-            v-model="search"
-            @keyup.enter="fetchData"
-            icon="search"
-          />
-        </div>
-        <div class="vx-col sm:w-1/4 w-full mb-2 flex items-end">
-          <vs-button class="mr-2" @click="fetchData">Tìm kiếm</vs-button>
-          <vs-button color="dark" type="border" @click="resetFilters">Đặt lại</vs-button>
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody">
-            <table class="vs-table vs-table--tbody-table">
-              <thead class="vs-table--thead">
-                <tr>
-                  <th class="text-center">STT</th>
-                  <th>Bài kiểm tra</th>
-                  <th>Học sinh</th>
-                  <th>Người chấm / Đăng ký</th>
-                  <th class="text-center">Điểm môn học</th>
-                  <th class="text-center">Điểm tư duy</th>
-                  <th class="text-center">Tổng điểm</th>
-                  <th class="text-center">Level gán</th>
-                  <th class="text-center">Ngày thi</th>
-                  <th class="text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="loading">
-                  <td colspan="10" class="text-center py-6 text-gray-500">Đang tải dữ liệu...</td>
-                </tr>
-                <tr v-else-if="results.length === 0">
-                  <td colspan="10" class="text-center py-6 text-gray-500">Không có kết quả khảo sát nào</td>
-                </tr>
-                <tr v-for="(item, index) in results" :key="item.id" class="tr-values vs-table--tr">
-                  <td class="text-center">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
-                  <td><strong>{{ item.test_nm }}</strong></td>
-                  <td>
-                    <div><strong>{{ item.stu_nm }}</strong></div>
-                    <small class="text-gray-500" v-if="item.erp_student_code">{{ item.erp_student_code }}</small>
-                  </td>
-                  <td>{{ item.reg_name || '-' }}</td>
-                  <td class="text-center font-semibold text-gray-800">{{ item.subject_total || 0 }}</td>
-                  <td class="text-center font-semibold text-gray-800">{{ item.thinking_total || 0 }}</td>
-                  <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
-                  <td class="text-center">
-                    <vs-chip v-if="item.assigned_level" color="primary">{{ item.assigned_level }}</vs-chip>
-                    <span v-else class="text-gray-400">-</span>
-                  </td>
-                  <td class="text-center">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                  <td class="text-center">
-                    <div class="flex justify-center items-center gap-2">
-                      <router-link
-                        :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`"
-                        class="btn-action text-info mr-2"
-                        title="Xem báo cáo & In PDF"
-                      >
-                        <i class="feather icon-file-text text-lg"></i>
-                      </router-link>
-                      <router-link
-                        :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`"
-                        class="btn-action text-primary mr-2"
-                        title="Chấm điểm / Cập nhật"
-                      >
-                        <i class="feather icon-edit text-lg"></i>
-                      </router-link>
-                      <button
-                        @click="confirmDelete(item)"
-                        class="btn-action text-danger"
-                        title="Xóa kết quả"
-                      >
-                        <i class="feather icon-trash-2 text-lg"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div class="ev-card">
+      <div class="ev-hero">
+        <div class="ev-hero__main">
+          <span class="ev-hero__icon is-blue"><i class="feather icon-target"></i></span>
+          <div>
+            <h4 class="ev-hero__title">Khảo sát Đầu vào IG.BH (Diagnostic)</h4>
+            <p class="ev-hero__sub">Chẩn đoán năng lực kiến thức cơ bản và tư duy toán học để xếp lớp, gán level cho học sinh</p>
           </div>
         </div>
+        <div class="ev-hero__actions">
+          <button class="ev-btn ev-btn--primary" @click="openCreateModal">
+            <i class="feather icon-plus"></i> Khởi tạo khảo sát
+          </button>
+        </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between mt-5">
-        <div class="text-sm text-gray-500">
-          Tổng số: <strong>{{ pagination.total }}</strong> bài khảo sát
+      <div class="ev-filter">
+        <div>
+          <label class="ev-field__label">Trung tâm</label>
+          <multiselect v-model="selectedBranch" :options="branches" label="name" track-by="id"
+            placeholder="Tất cả trung tâm" selectLabel="" deselectLabel="Bỏ chọn" @input="onFilterChange" />
         </div>
-        <vs-pagination
-          v-if="Math.ceil(pagination.total / pagination.per_page) > 1"
-          :total="Math.ceil(pagination.total / pagination.per_page)"
-          :max="7"
-          v-model="pagination.current_page"
-          @change="fetchData"
-        />
+        <div>
+          <label class="ev-field__label">Lớp học</label>
+          <multiselect v-model="selectedClass" :options="filteredClasses" label="cls_name" track-by="id"
+            placeholder="Tất cả lớp" selectLabel="" deselectLabel="Bỏ chọn" @input="onFilterChange" />
+        </div>
+        <div>
+          <label class="ev-field__label">Tìm kiếm</label>
+          <div class="ev-search">
+            <i class="feather icon-search"></i>
+            <input v-model="search" class="ev-input" placeholder="Tên/mã học sinh, người chấm, bài test..." @keyup.enter="onFilterChange" />
+          </div>
+        </div>
+        <div class="ev-filter__actions">
+          <button class="ev-btn ev-btn--dark" @click="onFilterChange"><i class="feather icon-search"></i> Tìm</button>
+          <button class="ev-btn ev-btn--ghost" @click="resetFilters"><i class="feather icon-rotate-ccw"></i> Đặt lại</button>
+        </div>
       </div>
-    </vx-card>
 
-    <!-- Create Modal -->
-    <vs-popup title="Khởi tạo khảo sát đầu vào IG.BH" :active.sync="showCreateModal">
-      <div>
-        <div class="mb-4">
-          <label class="vs-input--label">1. Chọn Trung tâm (*)</label>
-          <multiselect
-            placeholder="Chọn trung tâm"
-            v-model="createForm.branch"
-            :options="branches"
-            label="name"
-            track-by="id"
-          />
-        </div>
+      <div class="ev-table-wrap">
+        <table class="ev-table">
+          <thead>
+            <tr>
+              <th class="col-stt">#</th>
+              <th>Học sinh</th>
+              <th>Bài khảo sát</th>
+              <th>Lớp học</th>
+              <th class="is-center">Kiến thức (40)</th>
+              <th class="is-center">Tư duy (60)</th>
+              <th class="is-center">Tổng điểm</th>
+              <th class="is-center">Level gán</th>
+              <th class="is-center">Ngày thi</th>
+              <th>Người chấm</th>
+              <th class="is-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="11" class="ev-state"><div class="ev-spinner"></div>Đang tải dữ liệu...</td>
+            </tr>
+            <tr v-else-if="results.length === 0">
+              <td colspan="11" class="ev-state">
+                <i class="feather icon-inbox"></i>
+                <div class="ev-state__title">Chưa có kết quả khảo sát nào</div>
+                <div class="ev-state__sub">Bấm “Khởi tạo khảo sát” để tạo bài cho học sinh.</div>
+              </td>
+            </tr>
+            <tr v-for="(item, index) in results" v-else :key="item.id">
+              <td class="col-stt">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
+              <td>
+                <div class="ev-person">
+                  <span class="ev-avatar" :style="avatarStyle(item.stu_nm)">{{ initials(item.stu_nm) }}</span>
+                  <div>
+                    <div class="ev-person__name">{{ item.stu_nm }}</div>
+                    <div class="ev-person__meta">{{ item.erp_student_code || '—' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="ev-strong">{{ item.test_nm || '—' }}</td>
+              <td>{{ item.erp_class_name || '—' }}</td>
+              <template v-if="isGraded(item)">
+                <td class="is-center"><span class="ev-score">{{ item.subject_total || 0 }}</span></td>
+                <td class="is-center"><span class="ev-score">{{ item.thinking_total || 0 }}</span></td>
+                <td class="is-center">
+                  <span class="ev-score is-primary">{{ item.total_score || 0 }}<small>/100</small></span>
+                  <div class="ev-bar" style="margin: 5px auto 0;"><span :style="{ width: Math.min(100, item.total_score || 0) + '%' }"></span></div>
+                </td>
+              </template>
+              <td v-else colspan="3" class="is-center"><span class="ev-badge ev-badge--warning">Chưa chấm điểm</span></td>
+              <td class="is-center">
+                <span v-if="item.assigned_level" class="ev-badge ev-badge--primary no-dot">{{ item.assigned_level }}</span>
+                <span v-else class="ev-muted">—</span>
+              </td>
+              <td class="is-center">{{ fmtDate(item.eval_dt) }}</td>
+              <td>{{ item.reg_name || '—' }}</td>
+              <td class="is-center">
+                <div class="ev-actions">
+                  <router-link v-if="isGraded(item)" :to="`/lms/evaluations/igbh/diagnostic/report/${item.id}`" class="ev-act-text ev-act-text--success">
+                    <i class="feather icon-file-text"></i> Báo cáo
+                  </router-link>
+                  <router-link v-else :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`" class="ev-act-text ev-act-text--primary">
+                    <i class="feather icon-edit-3"></i> Chấm điểm
+                  </router-link>
+                  <router-link v-if="isGraded(item)" :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`" class="ev-act ev-act--primary" title="Sửa điểm">
+                    <i class="feather icon-edit-2"></i>
+                  </router-link>
+                  <button class="ev-act ev-act--danger" title="Xóa kết quả" @click="confirmDelete(item)">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <div class="mb-4">
-          <label class="vs-input--label">2. Chọn Học sinh (*)</label>
-          <multiselect
-            placeholder="Chọn học sinh"
-            v-model="createForm.student"
-            :options="modalFilteredStudents"
-            label="display_name"
-            track-by="student_id"
-          />
-        </div>
+      <eval-table-foot
+        :page="pagination.current_page" :per-page="pagination.per_page" :total="pagination.total" unit="bài khảo sát"
+        @page="goPage" @per-page="setPerPage" />
+    </div>
 
-        <div class="mb-4">
-          <label class="vs-input--label">3. Chọn Bài kiểm tra (*)</label>
-          <multiselect
-            placeholder="Chọn bài kiểm tra"
-            v-model="createForm.test"
-            :options="tests"
-            label="test_nm"
-            track-by="test_seq"
-          />
+    <vs-popup class="ev-modal ev-page" title="Khởi tạo khảo sát đầu vào IG.BH" :active.sync="showCreateModal">
+      <div class="ev-form-grid">
+        <div>
+          <label class="ev-field__label">Trung tâm <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.branch" :options="branches" label="name" track-by="id" placeholder="Chọn trung tâm" selectLabel="" />
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">4. Giáo viên / Người chấm</label>
-          <multiselect
-            placeholder="Chọn giáo viên"
-            v-model="createForm.teacher"
-            :options="teachers"
-            label="name"
-            track-by="id"
-          />
+        <div>
+          <label class="ev-field__label">Lớp học</label>
+          <multiselect v-model="createForm.class" :options="modalClasses" label="cls_name" track-by="id"
+            placeholder="Chọn lớp (tùy chọn)" selectLabel="" @input="onModalClassChange" />
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">5. Ngày khảo sát</label>
-          <vs-input type="date" class="w-full" v-model="createForm.eval_dt" />
+        <div class="is-full">
+          <label class="ev-field__label">Học sinh <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.student" :options="modalFilteredStudents" label="display_name" track-by="student_id"
+            placeholder="Gõ tên hoặc mã học sinh" selectLabel="" />
         </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-          <vs-button color="dark" type="border" @click="showCreateModal = false">Hủy</vs-button>
-          <vs-button color="primary" @click="submitCreate">Tạo khảo sát</vs-button>
+        <div class="is-full">
+          <label class="ev-field__label">Bài khảo sát <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.test" :options="tests" label="test_nm" track-by="test_seq" placeholder="Chọn bài khảo sát" selectLabel="" />
         </div>
+        <div>
+          <label class="ev-field__label">Giáo viên / Người chấm</label>
+          <multiselect v-model="createForm.teacher" :options="teachers" label="name" track-by="id" placeholder="Chọn giáo viên" selectLabel="" />
+        </div>
+        <div>
+          <label class="ev-field__label">Ngày khảo sát</label>
+          <input v-model="createForm.eval_dt" type="date" class="ev-input" />
+        </div>
+      </div>
+      <div class="ev-modal__foot">
+        <button class="ev-btn ev-btn--ghost" @click="showCreateModal = false">Hủy</button>
+        <button class="ev-btn ev-btn--primary" :disabled="submitting" @click="submitCreate">
+          <i class="feather icon-check"></i> Tạo & chấm điểm
+        </button>
       </div>
     </vs-popup>
   </div>
@@ -196,42 +166,48 @@
 <script>
 import axios from '@/http/axios.js'
 import multiselect from 'vue-multiselect'
+import '../../_shared/eval-ui.css'
+import EvalModuleNav from '../../_shared/EvalModuleNav.vue'
+import EvalTableFoot from '../../_shared/EvalTableFoot.vue'
+import { initials, avatarStyle, fmtDate, todayISO } from '../../_shared/helpers'
 
 export default {
-  components: {
-    multiselect
-  },
+  components: { multiselect, EvalModuleNav, EvalTableFoot },
   data() {
     return {
       search: '',
       loading: false,
+      submitting: false,
       results: [],
       branches: [],
+      classes: [],
       teachers: [],
       tests: [],
       contracts: [],
       selectedBranch: null,
-      pagination: {
-        current_page: 1,
-        per_page: 20,
-        total: 0
-      },
+      selectedClass: null,
+      pagination: { current_page: 1, per_page: 20, total: 0 },
       showCreateModal: false,
-      createForm: {
-        branch: null,
-        student: null,
-        test: null,
-        teacher: null,
-        eval_dt: new Date().toISOString().substring(0, 10)
-      }
+      createForm: { branch: null, class: null, student: null, test: null, teacher: null, eval_dt: todayISO() }
     }
   },
   computed: {
+    filteredClasses() {
+      if (!this.selectedBranch) return this.classes
+      return this.classes.filter(c => c.branch_id === this.selectedBranch.id)
+    },
+    modalClasses() {
+      if (!this.createForm.branch) return this.classes
+      return this.classes.filter(c => c.branch_id === this.createForm.branch.id)
+    },
     modalFilteredStudents() {
       let list = this.contracts
-      return list.map(c => ({
+      if (this.createForm.class) list = list.filter(c => c.class_id === this.createForm.class.id)
+      const seen = {}
+      return list.filter(c => (seen[c.student_id] ? false : (seen[c.student_id] = true))).map(c => ({
         student_id: c.student_id,
         contract_id: c.contract_id,
+        class_id: c.class_id,
         display_name: `${c.student_name} (${c.student_lms_id || c.student_id})`
       }))
     }
@@ -241,11 +217,18 @@ export default {
     this.fetchData()
   },
   methods: {
+    initials,
+    avatarStyle,
+    fmtDate,
+    isGraded(item) {
+      return (item.total_score || 0) > 0 || !!item.assigned_level
+    },
     loadInitData() {
       axios.g('/api/lms/evaluations/igbh/init-data').then(res => {
         if (res && res.data && res.data.data) {
           const d = res.data.data
           this.branches = d.branches || []
+          this.classes = d.classes || []
           this.teachers = d.teachers || []
           this.tests = d.tests || []
           this.contracts = d.contracts || []
@@ -258,7 +241,8 @@ export default {
         search: this.search,
         page: this.pagination.current_page,
         per_page: this.pagination.per_page,
-        branch_id: this.selectedBranch ? this.selectedBranch.id : null
+        branch_id: this.selectedBranch ? this.selectedBranch.id : null,
+        class_id: this.selectedClass ? this.selectedClass.id : null
       }
       axios.g('/api/lms/evaluations/igbh/results', params).then(res => {
         this.loading = false
@@ -269,52 +253,71 @@ export default {
             this.pagination.current_page = res.data.pagination.current_page
           }
         }
-      }).catch(() => {
-        this.loading = false
-      })
+      }).catch(() => { this.loading = false })
+    },
+    onFilterChange() {
+      this.pagination.current_page = 1
+      this.fetchData()
+    },
+    goPage(p) {
+      this.pagination.current_page = p
+      this.fetchData()
+    },
+    setPerPage(n) {
+      this.pagination.per_page = n
+      this.onFilterChange()
     },
     resetFilters() {
       this.search = ''
       this.selectedBranch = null
-      this.pagination.current_page = 1
-      this.fetchData()
+      this.selectedClass = null
+      this.onFilterChange()
     },
     openCreateModal() {
       this.createForm = {
-        branch: this.branches[0] || null,
+        branch: this.selectedBranch || this.branches[0] || null,
+        class: this.selectedClass || null,
         student: null,
-        test: this.tests[0] || null,
+        test: null,
         teacher: null,
-        eval_dt: new Date().toISOString().substring(0, 10)
+        eval_dt: todayISO()
       }
       this.showCreateModal = true
     },
-    submitCreate() {
-      if (!this.createForm.test) {
-        this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn bài kiểm tra', color: 'danger' })
-        return
+    onModalClassChange(cls) {
+      if (cls && cls.teacher_id) {
+        const found = this.teachers.find(t => t.id === cls.teacher_id)
+        if (found) this.createForm.teacher = found
       }
+    },
+    submitCreate() {
       if (!this.createForm.student) {
         this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn học sinh', color: 'danger' })
         return
       }
-
+      if (!this.createForm.test) {
+        this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn bài khảo sát', color: 'danger' })
+        return
+      }
       const payload = {
         test_seq: this.createForm.test.test_seq,
         student_id: this.createForm.student.student_id,
         contract_id: this.createForm.student.contract_id,
+        class_id: this.createForm.class ? this.createForm.class.id : this.createForm.student.class_id,
         branch_id: this.createForm.branch ? this.createForm.branch.id : null,
         teacher_id: this.createForm.teacher ? this.createForm.teacher.id : null,
         eval_dt: this.createForm.eval_dt
       }
-
+      this.submitting = true
       axios.p('/api/lms/evaluations/igbh/results', payload).then(res => {
+        this.submitting = false
         if (res && res.data && res.data.status === 'success') {
-          this.$vs.notify({ title: 'Thành công', text: 'Khởi tạo bài khảo sát thành công', color: 'success' })
+          this.$vs.notify({ title: 'Thành công', text: 'Đã khởi tạo bài khảo sát – chuyển sang chấm điểm', color: 'success' })
           this.showCreateModal = false
-          this.fetchData()
+          this.$router.push(`/lms/evaluations/igbh/diagnostic/form/${res.data.data.id}`)
         }
       }).catch(err => {
+        this.submitting = false
         this.$vs.notify({ title: 'Lỗi', text: err.message || 'Không thể khởi tạo', color: 'danger' })
       })
     },
@@ -323,7 +326,7 @@ export default {
         type: 'confirm',
         color: 'danger',
         title: 'Xác nhận xóa',
-        text: `Bạn có chắc muốn xóa khảo sát của học sinh ${item.stu_nm}?`,
+        text: `Xóa kết quả khảo sát của học sinh ${item.stu_nm}? Thao tác không thể hoàn tác.`,
         acceptText: 'Xóa',
         cancelText: 'Hủy',
         accept: () => {
@@ -337,13 +340,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#igbh-diag-eval-list .multiselect--active {
-  z-index: 10000 !important;
-}
-#igbh-diag-eval-list .multiselect__content-wrapper {
-  z-index: 10000 !important;
-}
-</style>
-

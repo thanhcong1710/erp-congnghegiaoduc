@@ -1,241 +1,196 @@
 <template>
-  <div id="ucrea-eval-list">
-    <vx-card no-shadow class="mt-5">
-      <div class="flex flex-wrap justify-between items-center mb-5">
+  <div id="ucrea-eval-list" class="ev-page">
+    <eval-module-nav />
+
+    <div class="ev-card">
+      <div class="ev-hero">
+        <div class="ev-hero__main">
+          <span class="ev-hero__icon"><i class="feather icon-star"></i></span>
+          <div>
+            <h4 class="ev-hero__title">Đánh giá Năng lực UCREA</h4>
+            <p class="ev-hero__sub">Đánh giá tư duy cơ bản, toán học, logic và sáng tạo theo Rubric · Đầu kỳ / Giữa kỳ / Cuối kỳ</p>
+          </div>
+        </div>
+        <div class="ev-hero__actions">
+          <button class="ev-btn ev-btn--primary" @click="openCreateModal">
+            <i class="feather icon-plus"></i> Khởi tạo bài đánh giá
+          </button>
+        </div>
+      </div>
+
+      <div class="ev-kpis">
+        <div class="ev-kpi is-clickable" :class="{ 'is-active': activeTab === 'completed' }" @click="changeTab('completed')">
+          <span class="ev-kpi__icon tone-success"><i class="feather icon-check-circle"></i></span>
+          <div>
+            <div class="ev-kpi__val">{{ counts.completed }}</div>
+            <div class="ev-kpi__label">Bài đã chấm</div>
+          </div>
+        </div>
+        <div class="ev-kpi is-clickable" :class="{ 'is-active': activeTab === 'pending' }" @click="changeTab('pending')">
+          <span class="ev-kpi__icon tone-warning"><i class="feather icon-clock"></i></span>
+          <div>
+            <div class="ev-kpi__val">{{ counts.pending }}</div>
+            <div class="ev-kpi__label">Bài chờ chấm</div>
+          </div>
+        </div>
+        <div class="ev-kpi">
+          <span class="ev-kpi__icon tone-primary"><i class="feather icon-layers"></i></span>
+          <div>
+            <div class="ev-kpi__val">{{ counts.completed + counts.pending }}</div>
+            <div class="ev-kpi__label">Tổng số bài đánh giá</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ev-filter">
         <div>
-          <h4 class="font-bold text-xl">Quản lý Đánh giá Năng lực UCREA</h4>
-          <p class="text-sm text-gray-500">Đánh giá tư duy sáng tạo, toán học và logic</p>
+          <label class="ev-field__label">Trung tâm</label>
+          <multiselect v-model="selectedBranch" :options="branches" label="name" track-by="id"
+            placeholder="Tất cả trung tâm" selectLabel="" deselectLabel="Bỏ chọn" @input="onFilterChange" />
         </div>
-        <div class="flex items-center gap-3">
-          <vs-button color="primary" type="filled" icon="add" @click="openCreateModal">
-            Khởi tạo bài đánh giá
-          </vs-button>
-          <div class="flex border rounded overflow-hidden">
-            <button
-              class="px-4 py-2 text-sm font-medium"
-              :class="activeTab === 'completed' ? 'bg-primary text-white' : 'bg-white text-gray-700'"
-              @click="changeTab('completed')"
-            >
-              Đã hoàn thành
-            </button>
-            <button
-              class="px-4 py-2 text-sm font-medium"
-              :class="activeTab === 'pending' ? 'bg-warning text-white' : 'bg-white text-gray-700'"
-              @click="changeTab('pending')"
-            >
-              Chưa chấm
-            </button>
+        <div>
+          <label class="ev-field__label">Lớp học</label>
+          <multiselect v-model="selectedClass" :options="filteredClasses" label="cls_name" track-by="id"
+            placeholder="Tất cả lớp" selectLabel="" deselectLabel="Bỏ chọn" @input="onFilterChange" />
+        </div>
+        <div>
+          <label class="ev-field__label">Tìm kiếm</label>
+          <div class="ev-search">
+            <i class="feather icon-search"></i>
+            <input v-model="search" class="ev-input" placeholder="Tên/mã học sinh, giáo viên, bài test..." @keyup.enter="onFilterChange" />
           </div>
         </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="vx-row mb-4 filter-row" style="position: relative; z-index: 500;">
-        <div class="vx-col sm:w-1/4 w-full mb-2">
-          <label class="vs-input--label">Trung tâm</label>
-          <multiselect
-            placeholder="Chọn trung tâm"
-            v-model="selectedBranch"
-            :options="branches"
-            label="name"
-            track-by="id"
-            :searchable="true"
-            @input="fetchData"
-          />
-        </div>
-        <div class="vx-col sm:w-1/4 w-full mb-2">
-          <label class="vs-input--label">Lớp học</label>
-          <multiselect
-            placeholder="Chọn lớp học"
-            v-model="selectedClass"
-            :options="filteredClasses"
-            label="cls_name"
-            track-by="id"
-            :searchable="true"
-            @input="fetchData"
-          />
-        </div>
-        <div class="vx-col sm:w-1/3 w-full mb-2">
-          <label class="vs-input--label">Tìm kiếm</label>
-          <vs-input
-            class="w-full"
-            placeholder="Nhập tên học sinh, giáo viên, bài test..."
-            v-model="search"
-            @keyup.enter="fetchData"
-            icon="search"
-          />
-        </div>
-        <div class="vx-col sm:w-1/6 w-full mb-2 flex items-end">
-          <vs-button class="mr-2" @click="fetchData">Tìm kiếm</vs-button>
-          <vs-button color="dark" type="border" @click="resetFilters">Đặt lại</vs-button>
+        <div class="ev-filter__actions">
+          <button class="ev-btn ev-btn--dark" @click="onFilterChange"><i class="feather icon-search"></i> Tìm</button>
+          <button class="ev-btn ev-btn--ghost" @click="resetFilters"><i class="feather icon-rotate-ccw"></i> Đặt lại</button>
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody">
-            <table class="vs-table vs-table--tbody-table">
-              <thead class="vs-table--thead">
-                <tr>
-                  <th class="text-center">STT</th>
-                  <th>Bài kiểm tra</th>
-                  <th>Level</th>
-                  <th>Học sinh</th>
-                  <th>Lớp học</th>
-                  <th>Giáo viên</th>
-                  <th class="text-center">Ngày kiểm tra</th>
-                  <th class="text-center">Trạng thái</th>
-                  <th class="text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="loading">
-                  <td colspan="9" class="text-center py-6 text-gray-500">Đang tải dữ liệu...</td>
-                </tr>
-                <tr v-else-if="results.length === 0">
-                  <td colspan="9" class="text-center py-6 text-gray-500">Không có dữ liệu bài test nào</td>
-                </tr>
-                <tr v-for="(item, index) in results" :key="item.id" class="tr-values vs-table--tr">
-                  <td class="text-center">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
-                  <td><strong>{{ item.test_nm }}</strong></td>
-                  <td><vs-chip color="primary">{{ item.level_cd }}</vs-chip></td>
-                  <td>
-                    <div><strong>{{ item.stu_nm }}</strong></div>
-                    <small class="text-gray-500" v-if="item.erp_student_code">{{ item.erp_student_code }}</small>
-                  </td>
-                  <td>{{ item.erp_class_name || item.class_nm || '-' }}</td>
-                  <td>{{ item.memb_nm || '-' }}</td>
-                  <td class="text-center">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                  <td class="text-center">
-                    <vs-chip v-if="item.result_cd === 'IS002'" color="success">Đã chấm</vs-chip>
-                    <vs-chip v-else color="warning">{{ item.result_cd_nm || 'Chưa nhập' }}</vs-chip>
-                  </td>
-                  <td class="text-center">
-                    <div class="flex justify-center items-center gap-2">
-                      <router-link
-                        v-if="activeTab === 'pending'"
-                        :to="`/lms/evaluations/ucrea/form/${item.id}`"
-                        class="btn-action text-primary mr-2"
-                        title="Chấm điểm Rubric"
-                      >
-                        <i class="feather icon-edit text-lg"></i>
-                      </router-link>
-                      <router-link
-                        v-else
-                        :to="`/lms/evaluations/ucrea/report/${item.id}`"
-                        class="btn-action text-success mr-2"
-                        title="Xem báo cáo & Radar chart"
-                      >
-                        <i class="feather icon-bar-chart-2 text-lg"></i>
-                      </router-link>
-                      <router-link
-                        v-if="activeTab === 'completed'"
-                        :to="`/lms/evaluations/ucrea/form/${item.id}`"
-                        class="btn-action text-gray-600 mr-2"
-                        title="Chấm lại"
-                      >
-                        <i class="feather icon-edit-2 text-lg"></i>
-                      </router-link>
-                      <button
-                        @click="confirmDelete(item)"
-                        class="btn-action text-danger"
-                        title="Xóa bài test"
-                      >
-                        <i class="feather icon-trash-2 text-lg"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <div style="padding: 0 22px 14px;">
+        <div class="ev-tabs">
+          <button class="ev-tab" :class="{ 'is-active': activeTab === 'completed' }" @click="changeTab('completed')">
+            Đã chấm <span class="ev-tab__count is-success">{{ counts.completed }}</span>
+          </button>
+          <button class="ev-tab" :class="{ 'is-active': activeTab === 'pending' }" @click="changeTab('pending')">
+            Chờ chấm <span class="ev-tab__count is-warning">{{ counts.pending }}</span>
+          </button>
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between mt-5">
-        <div class="text-sm text-gray-500">
-          Tổng số: <strong>{{ pagination.total }}</strong> bản ghi
-        </div>
-        <vs-pagination
-          v-if="Math.ceil(pagination.total / pagination.per_page) > 1"
-          :total="Math.ceil(pagination.total / pagination.per_page)"
-          :max="7"
-          v-model="pagination.current_page"
-          @change="fetchData"
-        />
+      <div class="ev-table-wrap">
+        <table class="ev-table">
+          <thead>
+            <tr>
+              <th class="col-stt">#</th>
+              <th>Học sinh</th>
+              <th>Bài kiểm tra</th>
+              <th class="is-center">Kỳ</th>
+              <th class="is-center">Level</th>
+              <th>Lớp học</th>
+              <th>Giáo viên</th>
+              <th class="is-center">Ngày kiểm tra</th>
+              <th class="is-center">Trạng thái</th>
+              <th class="is-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="10" class="ev-state"><div class="ev-spinner"></div>Đang tải dữ liệu...</td>
+            </tr>
+            <tr v-else-if="results.length === 0">
+              <td colspan="10" class="ev-state">
+                <i class="feather icon-inbox"></i>
+                <div class="ev-state__title">{{ activeTab === 'pending' ? 'Không có bài nào đang chờ chấm' : 'Chưa có bài đánh giá nào' }}</div>
+                <div class="ev-state__sub">Bấm “Khởi tạo bài đánh giá” để tạo bài cho học sinh.</div>
+              </td>
+            </tr>
+            <tr v-for="(item, index) in results" v-else :key="item.id">
+              <td class="col-stt">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
+              <td>
+                <div class="ev-person">
+                  <span class="ev-avatar" :style="avatarStyle(item.stu_nm)">{{ initials(item.stu_nm) }}</span>
+                  <div>
+                    <div class="ev-person__name">{{ item.stu_nm }}</div>
+                    <div class="ev-person__meta">{{ item.erp_student_code || '—' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="ev-strong">{{ item.test_nm || '—' }}</td>
+              <td class="is-center"><span class="ev-badge no-dot" :class="periodClass(item.test_cd)">{{ periodName(item.test_cd) }}</span></td>
+              <td class="is-center"><span class="ev-badge ev-badge--gray no-dot">{{ item.level_cd }}</span></td>
+              <td>{{ item.erp_class_name || item.class_nm || '—' }}</td>
+              <td>{{ item.memb_nm || '—' }}</td>
+              <td class="is-center">{{ fmtDate(item.eval_dt) }}</td>
+              <td class="is-center">
+                <span v-if="['IS002','IS003','IS004'].includes(item.result_cd)" class="ev-badge ev-badge--success">Đã chấm</span>
+                <span v-else class="ev-badge ev-badge--warning">{{ item.result_cd_nm || 'Chưa nhập' }}</span>
+              </td>
+              <td class="is-center">
+                <div class="ev-actions">
+                  <template v-if="activeTab === 'pending'">
+                    <router-link :to="`/lms/evaluations/ucrea/form/${item.id}`" class="ev-act-text ev-act-text--primary">
+                      <i class="feather icon-edit-3"></i> Chấm điểm
+                    </router-link>
+                  </template>
+                  <template v-else>
+                    <router-link :to="`/lms/evaluations/ucrea/report/${item.id}`" class="ev-act-text ev-act-text--success">
+                      <i class="feather icon-file-text"></i> Báo cáo
+                    </router-link>
+                    <router-link :to="`/lms/evaluations/ucrea/form/${item.id}`" class="ev-act ev-act--primary" title="Chấm lại">
+                      <i class="feather icon-edit-2"></i>
+                    </router-link>
+                  </template>
+                  <button class="ev-act ev-act--danger" title="Xóa bài đánh giá" @click="confirmDelete(item)">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </vx-card>
 
-    <!-- Create Evaluation Modal -->
-    <vs-popup title="Khởi tạo bài đánh giá UCREA mới" :active.sync="showCreateModal">
-      <div>
-        <div class="mb-4">
-          <label class="vs-input--label">1. Chọn Trung tâm (*)</label>
-          <multiselect
-            placeholder="Chọn trung tâm"
-            v-model="createForm.branch"
-            :options="branches"
-            label="name"
-            track-by="id"
-          />
-        </div>
+      <eval-table-foot
+        :page="pagination.current_page" :per-page="pagination.per_page" :total="pagination.total" unit="bài đánh giá"
+        @page="goPage" @per-page="setPerPage" />
+    </div>
 
-        <div class="mb-4">
-          <label class="vs-input--label">2. Chọn Lớp học</label>
-          <multiselect
-            placeholder="Chọn lớp học (tùy chọn)"
-            v-model="createForm.class"
-            :options="modalFilteredClasses"
-            label="cls_name"
-            track-by="id"
-            @input="onModalClassChange"
-          />
+    <!-- Modal khởi tạo -->
+    <vs-popup class="ev-modal ev-page" title="Khởi tạo bài đánh giá UCREA" :active.sync="showCreateModal">
+      <div class="ev-form-grid">
+        <div>
+          <label class="ev-field__label">Trung tâm <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.branch" :options="branches" label="name" track-by="id" placeholder="Chọn trung tâm" selectLabel="" />
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">3. Chọn Học sinh (*)</label>
-          <multiselect
-            placeholder="Chọn học sinh"
-            v-model="createForm.student"
-            :options="modalFilteredStudents"
-            label="display_name"
-            track-by="student_id"
-          />
+        <div>
+          <label class="ev-field__label">Lớp học</label>
+          <multiselect v-model="createForm.class" :options="modalFilteredClasses" label="cls_name" track-by="id"
+            placeholder="Chọn lớp (tùy chọn)" selectLabel="" @input="onModalClassChange" />
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">4. Chọn Bài kiểm tra (*)</label>
-          <multiselect
-            placeholder="Chọn bài kiểm tra"
-            v-model="createForm.test"
-            :options="tests"
-            label="test_nm"
-            track-by="id"
-          />
+        <div class="is-full">
+          <label class="ev-field__label">Học sinh <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.student" :options="modalFilteredStudents" label="display_name" track-by="student_id"
+            placeholder="Gõ tên hoặc mã học sinh" selectLabel="" />
+          <div class="ev-hint">Danh sách lọc theo lớp đã chọn ({{ modalFilteredStudents.length }} học sinh).</div>
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">5. Giáo viên chấm</label>
-          <multiselect
-            placeholder="Chọn giáo viên"
-            v-model="createForm.teacher"
-            :options="teachers"
-            label="name"
-            track-by="id"
-          />
+        <div class="is-full">
+          <label class="ev-field__label">Bài kiểm tra <span class="ev-req">*</span></label>
+          <multiselect v-model="createForm.test" :options="tests" :custom-label="testLabel" track-by="id" placeholder="Chọn bài kiểm tra" selectLabel="" />
         </div>
-
-        <div class="mb-4">
-          <label class="vs-input--label">6. Ngày kiểm tra</label>
-          <vs-input type="date" class="w-full" v-model="createForm.eval_dt" />
+        <div>
+          <label class="ev-field__label">Giáo viên chấm</label>
+          <multiselect v-model="createForm.teacher" :options="teachers" label="name" track-by="id" placeholder="Chọn giáo viên" selectLabel="" />
         </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-          <vs-button color="dark" type="border" @click="showCreateModal = false">Hủy</vs-button>
-          <vs-button color="primary" @click="submitCreate">Tạo bài đánh giá</vs-button>
+        <div>
+          <label class="ev-field__label">Ngày kiểm tra</label>
+          <input v-model="createForm.eval_dt" type="date" class="ev-input" />
         </div>
+      </div>
+      <div class="ev-modal__foot">
+        <button class="ev-btn ev-btn--ghost" @click="showCreateModal = false">Hủy</button>
+        <button class="ev-btn ev-btn--primary" :disabled="submitting" @click="submitCreate">
+          <i class="feather icon-check"></i> Tạo bài đánh giá
+        </button>
       </div>
     </vs-popup>
   </div>
@@ -244,16 +199,25 @@
 <script>
 import axios from '@/http/axios.js'
 import multiselect from 'vue-multiselect'
+import '../_shared/eval-ui.css'
+import EvalModuleNav from '../_shared/EvalModuleNav.vue'
+import EvalTableFoot from '../_shared/EvalTableFoot.vue'
+import { initials, avatarStyle, fmtDate, todayISO } from '../_shared/helpers'
+
+const PERIODS = {
+  TT001: { name: 'Đầu kỳ', cls: 'ev-badge--info' },
+  TT002: { name: 'Giữa kỳ', cls: 'ev-badge--primary' },
+  TT003: { name: 'Cuối kỳ', cls: 'ev-badge--success' }
+}
 
 export default {
-  components: {
-    multiselect
-  },
+  components: { multiselect, EvalModuleNav, EvalTableFoot },
   data() {
     return {
       activeTab: 'completed',
       search: '',
       loading: false,
+      submitting: false,
       results: [],
       branches: [],
       classes: [],
@@ -262,20 +226,10 @@ export default {
       contracts: [],
       selectedBranch: null,
       selectedClass: null,
-      pagination: {
-        current_page: 1,
-        per_page: 20,
-        total: 0
-      },
+      counts: { completed: 0, pending: 0 },
+      pagination: { current_page: 1, per_page: 20, total: 0 },
       showCreateModal: false,
-      createForm: {
-        branch: null,
-        class: null,
-        student: null,
-        test: null,
-        teacher: null,
-        eval_dt: new Date().toISOString().substring(0, 10)
-      }
+      createForm: { branch: null, class: null, student: null, test: null, teacher: null, eval_dt: todayISO() }
     }
   },
   computed: {
@@ -289,9 +243,7 @@ export default {
     },
     modalFilteredStudents() {
       let list = this.contracts
-      if (this.createForm.class) {
-        list = list.filter(c => c.class_id === this.createForm.class.id)
-      }
+      if (this.createForm.class) list = list.filter(c => c.class_id === this.createForm.class.id)
       return list.map(c => ({
         student_id: c.student_id,
         contract_id: c.contract_id,
@@ -305,6 +257,19 @@ export default {
     this.fetchData()
   },
   methods: {
+    initials,
+    avatarStyle,
+    fmtDate,
+    periodName(cd) { return (PERIODS[cd] || {}).name || cd || '—' },
+    periodClass(cd) { return (PERIODS[cd] || {}).cls || 'ev-badge--gray' },
+    testLabel(t) { return `${t.test_nm} · ${this.periodName(t.test_cd)} · ${t.level_cd_nm || t.level_cd}` },
+    baseParams() {
+      return {
+        search: this.search,
+        branch_id: this.selectedBranch ? this.selectedBranch.id : null,
+        class_id: this.selectedClass ? this.selectedClass.id : null
+      }
+    },
     loadInitData() {
       axios.g('/api/lms/evaluations/ucrea/init-data').then(res => {
         if (res && res.data && res.data.data) {
@@ -317,15 +282,21 @@ export default {
         }
       })
     },
+    fetchCounts() {
+      ['completed', 'pending'].forEach(status => {
+        if (status === this.activeTab) return
+        axios.g('/api/lms/evaluations/ucrea/results', { ...this.baseParams(), status, per_page: 1, page: 1 }).then(res => {
+          if (res && res.data && res.data.pagination) this.counts[status] = res.data.pagination.total
+        })
+      })
+    },
     fetchData() {
       this.loading = true
       const params = {
+        ...this.baseParams(),
         status: this.activeTab,
-        search: this.search,
         page: this.pagination.current_page,
-        per_page: this.pagination.per_page,
-        branch_id: this.selectedBranch ? this.selectedBranch.id : null,
-        class_id: this.selectedClass ? this.selectedClass.id : null
+        per_page: this.pagination.per_page
       }
       axios.g('/api/lms/evaluations/ucrea/results', params).then(res => {
         this.loading = false
@@ -334,33 +305,45 @@ export default {
           if (res.data.pagination) {
             this.pagination.total = res.data.pagination.total
             this.pagination.current_page = res.data.pagination.current_page
+            this.counts[this.activeTab] = res.data.pagination.total
           }
         }
-      }).catch(() => {
-        this.loading = false
-      })
+      }).catch(() => { this.loading = false })
+      this.fetchCounts()
     },
-    changeTab(tab) {
-      this.activeTab = tab
+    onFilterChange() {
       this.pagination.current_page = 1
       this.fetchData()
+    },
+    goPage(p) {
+      this.pagination.current_page = p
+      this.fetchData()
+    },
+    setPerPage(n) {
+      this.pagination.per_page = n
+      this.onFilterChange()
+    },
+    changeTab(tab) {
+      if (this.activeTab === tab) return
+      this.activeTab = tab
+      this.onFilterChange()
     },
     resetFilters() {
       this.search = ''
       this.selectedBranch = null
       this.selectedClass = null
-      this.pagination.current_page = 1
-      this.fetchData()
+      this.onFilterChange()
     },
     openCreateModal() {
       this.createForm = {
-        branch: this.branches[0] || null,
-        class: null,
+        branch: this.selectedBranch || this.branches[0] || null,
+        class: this.selectedClass || null,
         student: null,
-        test: this.tests[0] || null,
+        test: null,
         teacher: null,
-        eval_dt: new Date().toISOString().substring(0, 10)
+        eval_dt: todayISO()
       }
+      if (this.createForm.class) this.onModalClassChange(this.createForm.class)
       this.showCreateModal = true
     },
     onModalClassChange(cls) {
@@ -370,34 +353,34 @@ export default {
       }
     },
     submitCreate() {
-      if (!this.createForm.test) {
-        this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn bài test', color: 'danger' })
-        return
-      }
       if (!this.createForm.student) {
         this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn học sinh', color: 'danger' })
         return
       }
-
+      if (!this.createForm.test) {
+        this.$vs.notify({ title: 'Thiếu thông tin', text: 'Vui lòng chọn bài kiểm tra', color: 'danger' })
+        return
+      }
       const payload = {
         test_id: this.createForm.test.id,
         student_id: this.createForm.student.student_id,
         contract_id: this.createForm.student.contract_id,
-        class_id: this.createForm.class ? this.createForm.class.id : null,
+        class_id: this.createForm.class ? this.createForm.class.id : this.createForm.student.class_id,
         branch_id: this.createForm.branch ? this.createForm.branch.id : null,
         teacher_id: this.createForm.teacher ? this.createForm.teacher.id : null,
         eval_dt: this.createForm.eval_dt
       }
-
+      this.submitting = true
       axios.p('/api/lms/evaluations/ucrea/results', payload).then(res => {
+        this.submitting = false
         if (res && res.data && res.data.status === 'success') {
-          this.$vs.notify({ title: 'Thành công', text: 'Khởi tạo bài test thành công', color: 'success' })
+          this.$vs.notify({ title: 'Thành công', text: 'Đã khởi tạo bài đánh giá – chuyển sang chấm điểm', color: 'success' })
           this.showCreateModal = false
-          this.activeTab = 'pending'
-          this.fetchData()
+          this.$router.push(`/lms/evaluations/ucrea/form/${res.data.data.id}`)
         }
       }).catch(err => {
-        this.$vs.notify({ title: 'Lỗi', text: err.message || 'Không thể tạo bài test', color: 'danger' })
+        this.submitting = false
+        this.$vs.notify({ title: 'Lỗi', text: err.message || 'Không thể tạo bài đánh giá', color: 'danger' })
       })
     },
     confirmDelete(item) {
@@ -405,12 +388,12 @@ export default {
         type: 'confirm',
         color: 'danger',
         title: 'Xác nhận xóa',
-        text: `Bạn có chắc muốn xóa bài đánh giá của học sinh ${item.stu_nm}?`,
+        text: `Xóa bài đánh giá "${item.test_nm}" của học sinh ${item.stu_nm}? Thao tác không thể hoàn tác.`,
         acceptText: 'Xóa',
         cancelText: 'Hủy',
         accept: () => {
           axios.del(`/api/lms/evaluations/ucrea/results/${item.id}`).then(() => {
-            this.$vs.notify({ title: 'Đã xóa', text: 'Xóa bài test thành công', color: 'success' })
+            this.$vs.notify({ title: 'Đã xóa', text: 'Xóa bài đánh giá thành công', color: 'success' })
             this.fetchData()
           })
         }
@@ -419,13 +402,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#ucrea-eval-list .multiselect--active {
-  z-index: 10000 !important;
-}
-#ucrea-eval-list .multiselect__content-wrapper {
-  z-index: 10000 !important;
-}
-</style>
-

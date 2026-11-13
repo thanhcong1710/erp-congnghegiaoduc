@@ -400,7 +400,7 @@ export default {
             text: 'Đã lưu điểm đánh giá cuối kỳ thành công!',
             color: 'success'
           })
-          this.$router.push('/lms/evaluations/igbh/summative')
+          this.$router.push(`/lms/evaluations/igbh/summative/report/${this.resultId}`)
         } else {
           this.$vs.notify({
             title: 'Lỗi',
@@ -419,7 +419,7 @@ export default {
       })
     },
     cancel() {
-      this.$router.push('/lms/evaluations/igbh/summative')
+      this.$router.back()
     }
   }
 }
@@ -566,7 +566,7 @@ export default {
   width: 100px;
   background: #f3f4f6;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   color: #4b5563;
@@ -614,7 +614,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   min-width: 1350px;
 }
 
@@ -665,7 +665,7 @@ export default {
 .th-sub-criterion {
   font-weight: 600;
   color: #6b7280;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.25;
   padding: 6px 2px;
   width: 70px;
@@ -674,7 +674,7 @@ export default {
 .th-lesson-col {
   font-weight: 700;
   color: #374151;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.3;
   padding: 8px 4px;
   width: 65px;
@@ -682,7 +682,7 @@ export default {
 
 .max-pts-text {
   font-weight: 400;
-  font-size: 11px;
+  font-size: 13px;
   color: #6b7280;
 }
 

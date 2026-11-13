@@ -770,7 +770,7 @@ export default {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   padding: 10px 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #475569;
   text-align: center;
@@ -790,7 +790,7 @@ export default {
 }
 
 .scale-text {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
 }

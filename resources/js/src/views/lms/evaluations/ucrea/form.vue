@@ -266,7 +266,7 @@ export default {
             text: 'Đã cập nhật điểm đánh giá UCREA thành công!',
             color: 'success'
           })
-          this.$router.push('/lms/evaluations/ucrea')
+          this.$router.push(`/lms/evaluations/ucrea/report/${id}`)
         } else {
           this.$vs.notify({
             title: 'Lỗi',
@@ -437,7 +437,7 @@ export default {
 }
 
 .info-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   color: #64748b;
@@ -527,7 +527,7 @@ export default {
   padding: 12px 16px;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #475569;
   text-transform: uppercase;
@@ -592,7 +592,7 @@ export default {
 }
 
 .detail-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #4f46e5;
   margin-top: 2px;
@@ -671,7 +671,7 @@ export default {
 }
 
 .choice-text {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
   margin-top: 5px;

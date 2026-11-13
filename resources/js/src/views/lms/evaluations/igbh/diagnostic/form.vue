@@ -588,7 +588,7 @@ export default {
 
 .field-label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   color: #64748b;
@@ -785,7 +785,7 @@ export default {
 }
 
 .summary-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   color: #6366f1;

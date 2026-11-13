@@ -1,145 +1,131 @@
 <template>
-  <div id="igbh-summative-list">
-    <vx-card no-shadow class="mt-5">
-      <div class="flex flex-wrap justify-between items-center mb-5">
-        <div>
-          <h4 class="font-bold text-xl">Đánh Giá Tổng Kết Học Sinh (IG.BH Summative)</h4>
-          <p class="text-sm text-gray-500">Danh sách kết quả đánh giá tổng kết kỳ của từng học sinh</p>
+  <div id="igbh-summative-list" class="ev-page">
+    <eval-module-nav />
+
+    <div class="ev-card">
+      <div class="ev-hero">
+        <div class="ev-hero__main">
+          <span class="ev-hero__icon is-orange"><i class="feather icon-users"></i></span>
+          <div>
+            <h4 class="ev-hero__title">Tổng kết Học sinh IG.BH (Summative)</h4>
+            <p class="ev-hero__sub">Kết quả tổng kết cuối kỳ của từng học sinh – chấm bài tự luận, xem và in báo cáo 12 tuần</p>
+          </div>
         </div>
-        <div>
-          <router-link to="/lms/evaluations/igbh/summative">
-            <vs-button color="primary" type="border" icon="arrow_back">Quản lý theo Lớp học</vs-button>
+        <div class="ev-hero__actions">
+          <router-link to="/lms/evaluations/igbh/summative" class="ev-btn ev-btn--ghost">
+            <i class="feather icon-grid"></i> Quản lý theo lớp
           </router-link>
         </div>
       </div>
 
-      <!-- Filters -->
-      <div class="vx-row mb-4 filter-row" style="position: relative; z-index: 500;">
-        <div class="vx-col sm:w-1/4 w-full mb-2">
-          <label class="vs-input--label">Lớp học</label>
-          <multiselect
-            placeholder="Chọn lớp học"
-            v-model="selectedClass"
-            :options="classes"
-            label="cls_name"
-            track-by="id"
-            :searchable="true"
-            @input="fetchData"
-          />
+      <div class="ev-filter">
+        <div>
+          <label class="ev-field__label">Lớp học</label>
+          <multiselect v-model="selectedClass" :options="classes" label="cls_name" track-by="id"
+            placeholder="Tất cả lớp" selectLabel="" deselectLabel="Bỏ chọn" @input="onFilterChange" />
         </div>
-        <div class="vx-col sm:w-1/3 w-full mb-2">
-          <label class="vs-input--label">Tìm kiếm</label>
-          <vs-input
-            class="w-full"
-            placeholder="Nhập tên học sinh, lớp, bài test..."
-            v-model="search"
-            @keyup.enter="fetchData"
-            icon="search"
-          />
+        <div>
+          <label class="ev-field__label">Trạng thái</label>
+          <multiselect v-model="selectedStatus" :options="statusOptions" label="label" track-by="value"
+            placeholder="Tất cả trạng thái" selectLabel="" deselectLabel="Bỏ chọn" :searchable="false" @input="onFilterChange" />
         </div>
-        <div class="vx-col sm:w-1/4 w-full mb-2 flex items-end">
-          <vs-button class="mr-2" @click="fetchData">Tìm kiếm</vs-button>
-          <vs-button color="dark" type="border" @click="resetFilters">Đặt lại</vs-button>
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="vs-component vs-con-table stripe vs-table-primary">
-        <div class="con-tablex vs-table--content">
-          <div class="vs-con-tbody vs-table--tbody">
-            <table class="vs-table vs-table--tbody-table">
-              <thead class="vs-table--thead">
-                <tr>
-                  <th class="text-center">STT</th>
-                  <th>Học sinh</th>
-                  <th>Lớp học</th>
-                  <th>Bài kiểm tra</th>
-                  <th>Giáo viên</th>
-                  <th class="text-center">Tổng điểm</th>
-                  <th class="text-center">Ngày đánh giá</th>
-                  <th class="text-center">Trạng thái</th>
-                  <th class="text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="loading">
-                  <td colspan="9" class="text-center py-6 text-gray-500">Đang tải dữ liệu...</td>
-                </tr>
-                <tr v-else-if="results.length === 0">
-                  <td colspan="9" class="text-center py-6 text-gray-500">Không có dữ liệu đánh giá học sinh</td>
-                </tr>
-                <tr v-for="(item, index) in results" :key="item.id" class="tr-values vs-table--tr">
-                  <td class="text-center">{{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}</td>
-                  <td>
-                    <strong>{{ item.stu_nm }}</strong>
-                    <div class="text-xs text-gray-400" v-if="item.erp_student_code">{{ item.erp_student_code }}</div>
-                  </td>
-                  <td>{{ item.erp_class_name || item.class_nm || '-' }}</td>
-                  <td>{{ item.test_nm }}</td>
-                  <td>{{ item.teacher_nm || '-' }}</td>
-                  <td class="text-center font-bold text-primary">{{ item.total_score || 0 }}</td>
-                  <td class="text-center">{{ item.eval_dt ? item.eval_dt.substring(0, 10) : '-' }}</td>
-                  <td class="text-center">
-                    <vs-chip v-if="item.status === 'completed'" color="success">Đã hoàn thành</vs-chip>
-                    <vs-chip v-else color="warning">Bản nháp</vs-chip>
-                  </td>
-                  <td class="text-center">
-                    <div class="flex justify-center items-center gap-2">
-                      <router-link
-                        :to="`/lms/evaluations/igbh/summative/form/${item.id}`"
-                        class="btn-action text-primary mr-2"
-                        title="Chấm điểm bài thi"
-                      >
-                        <i class="feather icon-edit text-lg"></i>
-                      </router-link>
-                      <router-link
-                        :to="`/lms/evaluations/igbh/summative/report/${item.id}`"
-                        class="btn-action text-success mr-2"
-                        title="Báo cáo 12 tuần & Radar chart"
-                      >
-                        <i class="feather icon-bar-chart-2 text-lg"></i>
-                      </router-link>
-                      <button
-                        @click="confirmDelete(item)"
-                        class="btn-action text-danger"
-                        title="Xóa đánh giá"
-                      >
-                        <i class="feather icon-trash-2 text-lg"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <div>
+          <label class="ev-field__label">Tìm kiếm</label>
+          <div class="ev-search">
+            <i class="feather icon-search"></i>
+            <input v-model="search" class="ev-input" placeholder="Tên/mã học sinh, lớp, bài test..." @keyup.enter="onFilterChange" />
           </div>
         </div>
+        <div class="ev-filter__actions">
+          <button class="ev-btn ev-btn--dark" @click="onFilterChange"><i class="feather icon-search"></i> Tìm</button>
+          <button class="ev-btn ev-btn--ghost" @click="resetFilters"><i class="feather icon-rotate-ccw"></i> Đặt lại</button>
+        </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex flex-wrap items-center justify-between mt-5">
-        <div class="text-sm text-gray-500">
-          Tổng số: <strong>{{ pagination.total }}</strong> kết quả
-        </div>
-        <vs-pagination
-          v-if="Math.ceil(pagination.total / pagination.per_page) > 1"
-          :total="Math.ceil(pagination.total / pagination.per_page)"
-          :max="7"
-          v-model="pagination.current_page"
-          @change="fetchData"
-        />
+      <div class="ev-table-wrap">
+        <table class="ev-table">
+          <thead>
+            <tr>
+              <th class="col-stt">#</th>
+              <th>Học sinh</th>
+              <th>Lớp học</th>
+              <th>Bài kiểm tra</th>
+              <th>Giáo viên</th>
+              <th class="is-center">Tổng điểm</th>
+              <th class="is-center">Ngày đánh giá</th>
+              <th class="is-center">Trạng thái</th>
+              <th class="is-center">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="9" class="ev-state"><div class="ev-spinner"></div>Đang tải dữ liệu...</td>
+            </tr>
+            <tr v-else-if="results.length === 0">
+              <td colspan="9" class="ev-state">
+                <i class="feather icon-inbox"></i>
+                <div class="ev-state__title">Không có kết quả tổng kết</div>
+                <div class="ev-state__sub">Học sinh được thêm tự động khi khởi tạo tổng kết cho lớp.</div>
+              </td>
+            </tr>
+            <tr v-for="(item, index) in results" v-else :key="item.id">
+              <td class="col-stt">{{ (pagination.from || 1) + index }}</td>
+              <td>
+                <div class="ev-person">
+                  <span class="ev-avatar" :style="avatarStyle(item.stu_nm)">{{ initials(item.stu_nm) }}</span>
+                  <div>
+                    <div class="ev-person__name">{{ item.stu_nm }}</div>
+                    <div class="ev-person__meta">{{ item.erp_student_code || item.stu_seq || '—' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ item.erp_class_name || item.class_nm || '—' }}</td>
+              <td>{{ item.test_nm || '—' }}</td>
+              <td>{{ item.teacher_nm || '—' }}</td>
+              <td class="is-center">
+                <span v-if="item.total_score > 0" class="ev-score is-primary">{{ item.total_score }}</span>
+                <span v-else class="ev-badge ev-badge--warning">Chưa chấm</span>
+              </td>
+              <td class="is-center">{{ fmtDate(item.eval_dt) }}</td>
+              <td class="is-center">
+                <span v-if="item.status === 'completed'" class="ev-badge ev-badge--success">Đã chốt</span>
+                <span v-else class="ev-badge ev-badge--gray">Bản nháp</span>
+              </td>
+              <td class="is-center">
+                <div class="ev-actions">
+                  <router-link :to="`/lms/evaluations/igbh/summative/report/${item.id}`" class="ev-act-text ev-act-text--success">
+                    <i class="feather icon-file-text"></i> Báo cáo
+                  </router-link>
+                  <router-link :to="`/lms/evaluations/igbh/summative/form/${item.id}`" class="ev-act ev-act--primary" title="Chấm điểm">
+                    <i class="feather icon-edit-2"></i>
+                  </router-link>
+                  <button class="ev-act ev-act--danger" title="Xóa đánh giá" @click="confirmDelete(item)">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </vx-card>
+
+      <eval-table-foot
+        :page="pagination.current_page" :per-page="pagination.per_page" :total="pagination.total" unit="học sinh"
+        @page="goPage" @per-page="setPerPage" />
+    </div>
   </div>
 </template>
 
 <script>
 import axios from '@/http/axios.js'
 import multiselect from 'vue-multiselect'
+import '../../_shared/eval-ui.css'
+import EvalModuleNav from '../../_shared/EvalModuleNav.vue'
+import EvalTableFoot from '../../_shared/EvalTableFoot.vue'
+import { initials, avatarStyle, fmtDate } from '../../_shared/helpers'
 
 export default {
-  components: {
-    multiselect
-  },
+  components: { multiselect, EvalModuleNav, EvalTableFoot },
   data() {
     return {
       search: '',
@@ -147,11 +133,12 @@ export default {
       results: [],
       classes: [],
       selectedClass: null,
-      pagination: {
-        current_page: 1,
-        per_page: 20,
-        total: 0
-      }
+      selectedStatus: null,
+      statusOptions: [
+        { value: 'completed', label: 'Đã chốt' },
+        { value: 'draft', label: 'Bản nháp' }
+      ],
+      pagination: { current_page: 1, per_page: 20, total: 0, from: 1 }
     }
   },
   created() {
@@ -159,11 +146,12 @@ export default {
     this.fetchData()
   },
   methods: {
+    initials,
+    avatarStyle,
+    fmtDate,
     loadInitData() {
       axios.g('/api/lms/evaluations/summative/classes/init-data').then(res => {
-        if (res && res.data) {
-          this.classes = res.data.classes || []
-        }
+        if (res && res.data) this.classes = res.data.classes || []
       })
     },
     fetchData() {
@@ -172,7 +160,8 @@ export default {
         search: this.search,
         page: this.pagination.current_page,
         per_page: this.pagination.per_page,
-        class_id: this.selectedClass ? this.selectedClass.id : null
+        class_id: this.selectedClass ? this.selectedClass.id : null,
+        status: this.selectedStatus ? this.selectedStatus.value : null
       }
       axios.g('/api/lms/evaluations/summative/results', params).then(res => {
         this.loading = false
@@ -180,23 +169,34 @@ export default {
           this.results = res.data.data || []
           this.pagination.total = res.data.total || 0
           this.pagination.current_page = res.data.current_page || 1
+          this.pagination.from = res.data.from || 1
         }
-      }).catch(() => {
-        this.loading = false
-      })
+      }).catch(() => { this.loading = false })
+    },
+    onFilterChange() {
+      this.pagination.current_page = 1
+      this.fetchData()
+    },
+    goPage(p) {
+      this.pagination.current_page = p
+      this.fetchData()
+    },
+    setPerPage(n) {
+      this.pagination.per_page = n
+      this.onFilterChange()
     },
     resetFilters() {
       this.search = ''
       this.selectedClass = null
-      this.pagination.current_page = 1
-      this.fetchData()
+      this.selectedStatus = null
+      this.onFilterChange()
     },
     confirmDelete(item) {
       this.$vs.dialog({
         type: 'confirm',
         color: 'danger',
         title: 'Xác nhận xóa',
-        text: `Bạn có chắc muốn xóa đánh giá tổng kết của ${item.stu_nm}?`,
+        text: `Xóa kết quả tổng kết của ${item.stu_nm}?`,
         acceptText: 'Xóa',
         cancelText: 'Hủy',
         accept: () => {
@@ -210,13 +210,3 @@ export default {
   }
 }
 </script>
-
-<style>
-#igbh-summative-list .multiselect--active {
-  z-index: 10000 !important;
-}
-#igbh-summative-list .multiselect__content-wrapper {
-  z-index: 10000 !important;
-}
-</style>
-

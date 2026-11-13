@@ -1,370 +1,217 @@
 <template>
-  <div class="ucrea-report-wrapper">
-    <!-- Action buttons (Hidden on print) -->
-    <div class="action-toolbar print-hide">
-      <div class="toolbar-info">
-        <router-link to="/lms/evaluations/ucrea" class="back-link">
-          <i class="feather icon-arrow-left"></i> Quay lại danh sách
+  <div class="ev-report ucrea-report">
+    <!-- Thanh công cụ (ẩn khi in) -->
+    <div class="ev-rtoolbar">
+      <div>
+        <router-link to="/lms/evaluations/ucrea" class="ev-rtoolbar__back">
+          <i class="feather icon-arrow-left"></i> Danh sách đánh giá UCREA
         </router-link>
-        <h2 class="toolbar-title">Báo Cáo Đánh Giá Năng Lực UCREA</h2>
-        <div class="toolbar-sub" v-if="result">
-          <span>{{ result.general.test_nm }}</span>
-          <span class="sep">|</span>
-          <span>Học sinh: <strong class="text-name">{{ result.general.stu_nm }}</strong></span>
-          <span class="sep" v-if="result.general.class_nm">|</span>
-          <span v-if="result.general.class_nm">Lớp: {{ result.general.class_nm }}</span>
-        </div>
+        <h2 class="ev-rtoolbar__title">Báo cáo năng lực UCREA<span v-if="result"> · {{ g.stu_nm }}</span></h2>
       </div>
-      <div class="toolbar-btns" v-if="result">
-        <button class="btn-print" @click="exportPdf">
-          <i class="feather icon-printer"></i> In Báo Cáo (PDF)
+      <div v-if="result" class="ev-rtoolbar__btns">
+        <div v-if="allTests.length" class="uc-compare">
+          <span class="ev-rtoolbar__hint">So sánh:</span>
+          <label v-for="t in allTests" :key="t.test_cd" class="uc-check" :class="{ 'is-disabled': !t.hasData || t.isCurrent }">
+            <input v-model="selectedTestIds" type="checkbox" :value="t.dataId" :disabled="!t.hasData || t.isCurrent" @change="initCharts" />
+            {{ t.name }}
+          </label>
+        </div>
+        <router-link :to="`/lms/evaluations/ucrea/form/${g.id}`" class="ev-btn ev-btn--ghost ev-btn--sm">
+          <i class="feather icon-edit-2"></i> Sửa điểm
+        </router-link>
+        <button class="ev-btn ev-btn--primary ev-btn--sm" @click="exportPdf">
+          <i class="feather icon-printer"></i> In / Lưu PDF
         </button>
-        <router-link :to="`/lms/evaluations/ucrea/form/${result.general.id}`" class="btn-edit">
-          <i class="feather icon-edit"></i> Sửa Điểm
-        </router-link>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-state print-hide">
-      <div class="spinner"></div>
-      <p>Đang tải dữ liệu báo cáo UCREA...</p>
-    </div>
+    <div v-if="loading" class="ev-state print-hide"><div class="ev-spinner"></div>Đang tải dữ liệu báo cáo...</div>
 
-    <!-- MAIN REPORT DOCUMENT -->
-    <div v-else-if="result" id="ucrea-report-doc" class="report-document">
-      
-      <!-- ================= PAGE 1 ================= -->
-      <div class="report-sheet" id="ucrea-sheet-1">
-        
-        <!-- Header -->
-        <div class="sheet-header">
-          <div class="header-brand-block">
-            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="brand-logo" />
-            <div class="header-titles">
-              <p class="super-title">UCREA ASSESSMENT</p>
-              <h1 class="main-title">{{ reportData.name || 'ĐÁNH GIÁ ĐẦU KỲ' }}</h1>
+    <div v-else-if="result" class="ev-doc-scroll">
+      <div class="ev-doc">
+        <!-- ================= TRANG 1 ================= -->
+        <section class="ev-sheet">
+          <header class="uc-head">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="uc-head__logo" />
+            <div class="uc-head__titles">
+              <p class="uc-head__super">UCREA ASSESSMENT REPORT</p>
+              <h1 class="uc-head__title">Báo cáo đánh giá năng lực · {{ periodName }}</h1>
             </div>
-          </div>
-          <!-- White pill student info -->
-          <div class="student-pill">
-             <span class="pill-name">{{ result.general.stu_nm }}</span>
-             <span class="pill-sep">|</span>
-             <span>{{ result.general.gender_nm || 'Nam' }}</span>
-             <span class="pill-sep">|</span>
-             <span>{{ result.general.age_nm || '3 Tuổi' }}</span>
-             <span class="pill-sep">|</span>
-             <span>{{ result.general.class_nm || '-' }}</span>
-          </div>
-        </div>
+            <div class="uc-head__level">
+              <span>Level</span>
+              <strong>{{ g.level_cd }}</strong>
+            </div>
+          </header>
 
-        <div class="sheet-body">
-          <!-- 1. Lĩnh vực đánh giá -->
-          <div class="section-title-wrap">
-            <h2 class="section-title">Lĩnh vực đánh giá</h2>
-          </div>
-          
-          <div class="two-col-layout mb-24">
-            <div class="col-7">
-              <table class="ucrea-grid-table">
-                <tbody>
-                  <tr>
-                    <td class="cell-category-label">Tư duy cơ bản</td>
-                    <td class="cell-category-desc">Đánh giá sự chú ý và tập trung, quan sát và ghi nhớ, đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
-                  </tr>
-                  <tr>
-                    <td class="cell-category-label">Tư duy toán học</td>
-                    <td class="cell-category-desc">Đánh giá năng lực về số và phép toán, không gian, đo lường, kiểu mẫu, thống kê; đó là những nhân tố cơ bản cần thiết cho sự phát triển tư duy.</td>
-                  </tr>
-                  <tr>
-                    <td class="cell-category-label">Tư duy logic</td>
-                    <td class="cell-category-desc">Đánh giá sự hiểu biết, áp dụng, phân tích và tổng hợp; đó là các thành phần của kỹ năng tư duy logic, kỹ năng cốt lõi để phát triển tư duy.</td>
-                  </tr>
-                  <tr>
-                    <td class="cell-category-label">Tư duy sáng tạo</td>
-                    <td class="cell-category-desc">Đánh giá sự lưu loát, linh hoạt, độc đáo và tinh tế, đó là những kỹ năng cần thiết cho tư duy đa dạng và sâu sắc.</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            <div class="col-5">
-              <table class="ucrea-grid-table text-center">
-                <thead>
-                  <tr class="header-row-orange">
-                    <th colspan="3" class="text-center font-bold">Tiêu chuẩn và cấp độ</th>
-                  </tr>
-                  <tr class="sub-header-row">
-                    <th style="width: 33%;">Tiêu chuẩn</th>
-                    <th style="width: 33%;">Cấp độ</th>
-                    <th style="width: 34%;">Điểm</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td class="font-medium text-slate-700">Vượt trội</td><td class="font-bold text-slate-800">S</td><td class="text-slate-500">91~100</td></tr>
-                  <tr><td class="font-medium text-slate-700">Rất tốt</td><td class="font-bold text-slate-800">A</td><td class="text-slate-500">71~90</td></tr>
-                  <tr><td class="font-medium text-slate-700">Trung bình</td><td class="font-bold text-slate-800">B</td><td class="text-slate-500">41~70</td></tr>
-                  <tr><td class="font-medium text-slate-700">Yếu</td><td class="font-bold text-slate-800">C</td><td class="text-slate-500">0~40</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 2. Kết quả đánh giá -->
-          <div class="section-title-wrap flex-between">
-            <h2 class="section-title mb-0">Kết quả đánh giá</h2>
-            
-            <!-- Checkboxes for related tests -->
-            <div class="test-period-checkboxes print-hide" v-if="allTests.length">
-              <label v-for="t in allTests" :key="t.test_cd" 
-                     class="checkbox-label"
-                     :class="{ 'disabled-label': !t.hasData || t.isCurrent }">
-                <input type="checkbox" 
-                       :value="t.dataId" 
-                       v-model="selectedTestIds" 
-                       @change="initCharts" 
-                       :disabled="!t.hasData || t.isCurrent"
-                       class="check-input">
-                <span class="check-text uppercase">{{ t.name }}</span>
-              </label>
-            </div>
-          </div>
-          
-          <!-- Section: Tư duy cơ bản -->
-          <div class="two-col-layout mb-24 align-center">
-            <div class="col-5">
-              <div class="chart-box">
-                <div ref="chart1" class="chart-canvas-el"></div>
+          <div class="ev-sheet__body">
+            <div class="ev-info-grid">
+              <div class="ev-info-cell span-2">
+                <div class="ev-info-cell__label">Họ và tên học sinh</div>
+                <div class="ev-info-cell__val is-accent">{{ g.stu_nm }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Mã học sinh</div>
+                <div class="ev-info-cell__val">{{ g.erp_student_code || '—' }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Giới tính · Tuổi</div>
+                <div class="ev-info-cell__val">{{ g.gender_nm || '—' }} · {{ g.age_nm || '—' }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Lớp học</div>
+                <div class="ev-info-cell__val">{{ g.class_nm || '—' }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Bài kiểm tra</div>
+                <div class="ev-info-cell__val">{{ g.test_nm || '—' }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Giáo viên đánh giá</div>
+                <div class="ev-info-cell__val">{{ g.memb_nm || '—' }}</div>
+              </div>
+              <div class="ev-info-cell">
+                <div class="ev-info-cell__label">Ngày kiểm tra</div>
+                <div class="ev-info-cell__val">{{ fmtDate(g.eval_dt) }}</div>
               </div>
             </div>
-            <div class="col-7">
-              <table class="ucrea-score-table">
-                <thead>
-                  <tr class="header-row-blue">
-                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
-                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
-                    <th style="width: 15%; text-align: center;">Cấp độ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Năng lực chú ý</td>
-                    <td class="cell-skill-desc">Khả năng tập trung quan sát để giải quyết vấn đề.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Năng lực chú ý') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Năng lực quan sát</td>
-                    <td class="cell-skill-desc">Khả năng quan sát tỉ mỉ một sự vật nào đó.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Năng lực quan sát') }}</td>
-                  </tr>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Năng lực ghi nhớ</td>
-                    <td class="cell-skill-desc">Khả năng ghi nhớ một thông tin mới về sự vật, sự việc.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Năng lực ghi nhớ') }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          <!-- Section: Tư duy toán học -->
-          <div class="two-col-layout mb-20 align-center">
-            <div class="col-5">
-              <div class="chart-box">
-                <div ref="chart2" class="chart-canvas-el"></div>
+            <!-- Tóm tắt 4 lĩnh vực -->
+            <div class="uc-summary ev-avoid-break">
+              <div v-for="d in domains" :key="d.key" class="uc-summary__item">
+                <div class="uc-summary__name">{{ d.name }}</div>
+                <div class="uc-summary__grade" :class="'g-' + getGrade(d.name)">{{ getGrade(d.name) }}</div>
+                <div class="uc-summary__label">{{ getGradeLabel(getGrade(d.name)) }}</div>
               </div>
             </div>
-            <div class="col-7">
-              <table class="ucrea-score-table">
-                <thead>
-                  <tr class="header-row-blue">
-                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
-                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
-                    <th style="width: 15%; text-align: center;">Cấp độ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Số và tính toán</td>
-                    <td class="cell-skill-desc">Khả năng hiểu những khái niệm về tính toán cơ bản, hiểu được ý nghĩa của toán học trong đời sống sinh hoạt hàng ngày.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Số và tính toán') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Hình học không gian</td>
-                    <td class="cell-skill-desc">Khả năng nhận biết vị trí và hướng trong không gian và hiểu biết về hình dạng.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Hình học không gian') }}</td>
-                  </tr>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Đo lường</td>
-                    <td class="cell-skill-desc">Khả năng thể hiện số lượng bằng cách sử dụng số và so sánh các đồ vật với nhau.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Đo lường') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Kiểu mẫu</td>
-                    <td class="cell-skill-desc">Khả năng nhận diện và dự đoán mối quan hệ mang tính quy luật của đồ vật.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Kiểu mẫu') }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
-        </div>
-      </div>
 
-      <!-- PAGE BREAK DIVIDER -->
-      <div class="page-break-divider"></div>
-
-      <!-- ================= PAGE 2 ================= -->
-      <div class="report-sheet sheet-page-2" id="ucrea-sheet-2">
-        <div class="sheet-body pt-24">
-          <!-- Section: Tư duy logic -->
-          <div class="two-col-layout mb-24 align-center">
-            <div class="col-5">
-              <div class="chart-box">
-                <div ref="chart3" class="chart-canvas-el"></div>
-              </div>
-            </div>
-            <div class="col-7">
-              <table class="ucrea-score-table">
-                <thead>
-                  <tr class="header-row-blue">
-                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
-                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
-                    <th style="width: 15%; text-align: center;">Cấp độ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Hiểu biết</td>
-                    <td class="cell-skill-desc">Khả năng phân tích những dự kiện liên quan và hiểu về vấn đề cần giải quyết.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Hiểu biết') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Ứng dụng</td>
-                    <td class="cell-skill-desc">Khả năng vận dụng linh hoạt những vấn đề đã học vào thực hành thực tế.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Ứng dụng') }}</td>
-                  </tr>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Phân tích</td>
-                    <td class="cell-skill-desc">Năng lực so sánh các thuộc tính và khái quát hóa vấn đề.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Phân tích') }}</td>
-                  </tr>
-                  <tr v-if="!isL1L2" class="row-odd">
-                    <td class="cell-skill-name">Tổng hợp</td>
-                    <td class="cell-skill-desc">Khả năng phân tích tình huống và giải quyết toàn diện vấn đề.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Tổng hợp') }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Section: Tư duy sáng tạo -->
-          <div class="two-col-layout mb-28 align-center">
-            <div class="col-5">
-              <div class="chart-box">
-                <div ref="chart4" class="chart-canvas-el"></div>
-              </div>
-            </div>
-            <div class="col-7">
-              <table class="ucrea-score-table">
-                <thead>
-                  <tr class="header-row-blue">
-                    <th style="width: 28%; text-align: left; padding-left: 12px;">Lĩnh vực chi tiết</th>
-                    <th style="width: 57%; text-align: left; padding-left: 12px;">Nội dung chi tiết</th>
-                    <th style="width: 15%; text-align: center;">Cấp độ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Sự trôi chảy</td>
-                    <td class="cell-skill-desc">Khả năng thể hiện nhiều ý tưởng mới lạ.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Sự trôi chảy') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Tính linh hoạt</td>
-                    <td class="cell-skill-desc">Khả năng tìm và giải quyết vấn đề và những ý tưởng đa dạng bằng cách vận dụng một đối tượng thống nhất.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Tính linh hoạt') }}</td>
-                  </tr>
-                  <tr class="row-even">
-                    <td class="cell-skill-name">Tính độc đáo</td>
-                    <td class="cell-skill-desc">Khả năng đưa ra một ý tưởng độc đáo và mới lạ hoặc hoàn toàn khác biệt.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Tính độc đáo') }}</td>
-                  </tr>
-                  <tr class="row-odd">
-                    <td class="cell-skill-name">Tính chính xác</td>
-                    <td class="cell-skill-desc">Khả năng bổ sung thêm những điểm chi tiết của ý tưởng có tính phức tạp cao.</td>
-                    <td class="cell-skill-grade">{{ getGrade('Tính chính xác') }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- 3. Đánh giá tổng quát -->
-          <div class="overall-section-wrap">
-            <div class="section-title-wrap">
-              <h2 class="section-title">Đánh giá tổng quát</h2>
-            </div>
-            <div class="two-col-layout align-center">
-              <div class="col-5">
-                <div class="chart-box chart-overall-box">
-                  <div ref="chartOverall" class="chart-canvas-el"></div>
-                </div>
-              </div>
-              <div class="col-7">
-                <table class="ucrea-summary-table">
-                  <thead>
-                    <tr class="header-row-orange">
-                      <th style="width: 22%; text-align: left; padding-left: 12px;">Lĩnh vực</th>
-                      <th style="width: 48%; text-align: left; padding-left: 12px;">Nội dung</th>
-                      <th style="width: 15%;">Trung bình</th>
-                      <th style="width: 15%;">Bình quân<br/>tất cả HS</th>
+            <h2 class="uc-sec">Lĩnh vực đánh giá</h2>
+            <div class="uc-row ev-avoid-break">
+              <div class="uc-col-7">
+                <table class="uc-table">
+                  <tbody>
+                    <tr v-for="d in domains" :key="'d' + d.key">
+                      <td class="uc-cat">{{ d.name }}</td>
+                      <td class="uc-desc">{{ d.desc }}</td>
                     </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="uc-col-5">
+                <table class="uc-table is-center">
+                  <thead>
+                    <tr class="uc-th-orange"><th colspan="3">Tiêu chuẩn và cấp độ</th></tr>
+                    <tr class="uc-th-sub"><th>Tiêu chuẩn</th><th>Cấp độ</th><th>Điểm</th></tr>
                   </thead>
                   <tbody>
-                    <tr class="row-peach">
-                      <td class="cell-skill-name">Tư duy cơ bản</td>
-                      <td class="cell-skill-desc">
-                        Tư duy cơ bản của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy cơ bản')) }}</strong>.
-                      </td>
-                      <td class="cell-skill-grade">{{ getGrade('Tư duy cơ bản') }}</td>
-                      <td class="cell-peer-avg">B</td>
-                    </tr>
-                    <tr class="row-white">
-                      <td class="cell-skill-name">Tư duy toán học</td>
-                      <td class="cell-skill-desc">
-                        Tư duy toán học của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy toán học')) }}</strong>.
-                      </td>
-                      <td class="cell-skill-grade">{{ getGrade('Tư duy toán học') }}</td>
-                      <td class="cell-peer-avg">B</td>
-                    </tr>
-                    <tr class="row-peach">
-                      <td class="cell-skill-name">Tư duy logic</td>
-                      <td class="cell-skill-desc">
-                        Tư duy logic của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy logic')) }}</strong>.
-                      </td>
-                      <td class="cell-skill-grade">{{ getGrade('Tư duy logic') }}</td>
-                      <td class="cell-peer-avg">B</td>
-                    </tr>
-                    <tr class="row-white">
-                      <td class="cell-skill-name">Tư duy sáng tạo</td>
-                      <td class="cell-skill-desc">
-                        Tư duy sáng tạo của học sinh {{ result.general.stu_nm }} ở mức độ <strong class="grade-label-red">{{ getGradeLabel(getGrade('Tư duy sáng tạo')) }}</strong>.
-                      </td>
-                      <td class="cell-skill-grade">{{ getGrade('Tư duy sáng tạo') }}</td>
-                      <td class="cell-peer-avg">B</td>
+                    <tr><td>Vượt trội</td><td class="uc-grade g-S">S</td><td>91~100</td></tr>
+                    <tr><td>Rất tốt</td><td class="uc-grade g-A">A</td><td>71~90</td></tr>
+                    <tr><td>Trung bình</td><td class="uc-grade g-B">B</td><td>41~70</td></tr>
+                    <tr><td>Yếu</td><td class="uc-grade g-C">C</td><td>0~40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <h2 class="uc-sec">Kết quả đánh giá chi tiết</h2>
+            <div v-for="sec in sections.slice(0, 2)" :key="sec.ref" class="uc-row is-middle ev-avoid-break">
+              <div class="uc-col-5"><div :ref="sec.ref" class="uc-chart"></div></div>
+              <div class="uc-col-7">
+                <table class="uc-table">
+                  <thead>
+                    <tr class="uc-th-blue"><th style="width: 30%;">Lĩnh vực chi tiết</th><th>Nội dung chi tiết</th><th style="width: 15%;" class="is-c">Cấp độ</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="s in sec.skills" :key="s.name">
+                      <td class="uc-skill">{{ s.name }}</td>
+                      <td class="uc-desc">{{ s.desc }}</td>
+                      <td class="uc-grade" :class="'g-' + getGrade(s.name)">{{ getGrade(s.name) }}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
+          <footer class="ev-sheet__foot"><span>STEMKEY · UCREA Assessment</span><span>{{ g.stu_nm }} · Trang 1/2</span></footer>
+        </section>
 
-        </div>
+        <!-- ================= TRANG 2 ================= -->
+        <section class="ev-sheet">
+          <header class="uc-head is-slim">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="uc-head__logo" />
+            <div class="uc-head__titles">
+              <h1 class="uc-head__title">{{ g.stu_nm }} · {{ g.class_nm || '' }}</h1>
+            </div>
+            <div class="uc-head__level"><span>{{ periodName }}</span><strong>{{ g.level_cd }}</strong></div>
+          </header>
+
+          <div class="ev-sheet__body">
+            <div v-for="sec in sections.slice(2)" :key="sec.ref" class="uc-row is-middle ev-avoid-break">
+              <div class="uc-col-5"><div :ref="sec.ref" class="uc-chart"></div></div>
+              <div class="uc-col-7">
+                <table class="uc-table">
+                  <thead>
+                    <tr class="uc-th-blue"><th style="width: 30%;">Lĩnh vực chi tiết</th><th>Nội dung chi tiết</th><th style="width: 15%;" class="is-c">Cấp độ</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="s in sec.skills" :key="s.name">
+                      <td class="uc-skill">{{ s.name }}</td>
+                      <td class="uc-desc">{{ s.desc }}</td>
+                      <td class="uc-grade" :class="'g-' + getGrade(s.name)">{{ getGrade(s.name) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="ev-avoid-break">
+              <h2 class="uc-sec">Đánh giá tổng quát</h2>
+              <div class="uc-row is-middle">
+                <div class="uc-col-5"><div ref="chartOverall" class="uc-chart is-tall"></div></div>
+                <div class="uc-col-7">
+                  <table class="uc-table">
+                    <thead>
+                      <tr class="uc-th-orange">
+                        <th style="width: 26%;">Lĩnh vực</th>
+                        <th>Nhận xét</th>
+                        <th style="width: 14%;" class="is-c">Cấp độ</th>
+                        <th style="width: 15%;" class="is-c">TB học sinh</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="d in domains" :key="'o' + d.key">
+                        <td class="uc-skill">{{ d.name }}</td>
+                        <td class="uc-desc">Ở mức <strong class="uc-red">{{ getGradeLabel(getGrade(d.name)) }}</strong>.</td>
+                        <td class="uc-grade" :class="'g-' + getGrade(d.name)">{{ getGrade(d.name) }}</td>
+                        <td class="is-c uc-peer">B</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="ev-signatures ev-avoid-break">
+              <div>
+                <p class="ev-sig__title">Phụ huynh</p>
+                <p class="ev-sig__note">(Ký, ghi rõ họ tên)</p>
+                <div class="ev-sig__space"></div>
+              </div>
+              <div>
+                <p class="ev-sig__title">Giáo viên đánh giá</p>
+                <p class="ev-sig__note">(Ký, ghi rõ họ tên)</p>
+                <div class="ev-sig__space"></div>
+                <p class="ev-sig__name">{{ g.memb_nm || '' }}</p>
+              </div>
+              <div>
+                <p class="ev-sig__title">Trung tâm STEMKEY</p>
+                <p class="ev-sig__note">Ngày {{ fmtDate(g.eval_dt) }}</p>
+                <div class="ev-sig__space"></div>
+              </div>
+            </div>
+          </div>
+          <footer class="ev-sheet__foot"><span>STEMKEY · UCREA Assessment</span><span>{{ g.stu_nm }} · Trang 2/2</span></footer>
+        </section>
       </div>
-
     </div>
   </div>
 </template>
@@ -372,6 +219,11 @@
 <script>
 import axios from '@/http/axios.js'
 import * as echarts from 'echarts'
+import '../_shared/eval-ui.css'
+import { fmtDate } from '../_shared/helpers'
+
+const PERIOD_COLORS = { TT001: '#94a3b8', TT002: '#1e3a8a', TT003: '#65a30d' }
+const PEER_AVG = [66, 71, 69, 61]
 
 export default {
   name: 'UcreaReportView',
@@ -379,740 +231,266 @@ export default {
     return {
       result: null,
       loading: true,
-      charts: [],
-      selectedTestIds: []
+      selectedTestIds: [],
+      domains: [
+        { key: 'co_ban', name: 'Tư duy cơ bản', desc: 'Sự chú ý và tập trung, quan sát và ghi nhớ – nhân tố cơ bản cho sự phát triển tư duy.' },
+        { key: 'toan', name: 'Tư duy toán học', desc: 'Năng lực về số và phép toán, không gian, đo lường, kiểu mẫu và thống kê.' },
+        { key: 'logic', name: 'Tư duy logic', desc: 'Sự hiểu biết, áp dụng, phân tích và tổng hợp – kỹ năng cốt lõi để phát triển tư duy.' },
+        { key: 'sang_tao', name: 'Tư duy sáng tạo', desc: 'Sự lưu loát, linh hoạt, độc đáo và tinh tế – nền tảng cho tư duy đa dạng và sâu sắc.' }
+      ]
     }
   },
   computed: {
+    g() {
+      return this.result ? this.result.general : {}
+    },
     isL1L2() {
-      return this.result && ['L1', 'L2'].includes(this.result.general.level_cd)
+      return this.result && ['L1', 'L2'].includes(this.g.level_cd)
+    },
+    periodName() {
+      return { TT001: 'Đầu kỳ', TT002: 'Giữa kỳ', TT003: 'Cuối kỳ' }[this.g.test_cd] || this.reportData.name || 'Đầu kỳ'
+    },
+    sections() {
+      const logic = [
+        { name: 'Hiểu biết', desc: 'Phân tích dữ kiện liên quan và hiểu vấn đề cần giải quyết.' },
+        { name: 'Ứng dụng', desc: 'Vận dụng linh hoạt những điều đã học vào thực hành.' },
+        { name: 'Phân tích', desc: 'So sánh các thuộc tính và khái quát hóa vấn đề.' }
+      ]
+      if (!this.isL1L2) logic.push({ name: 'Tổng hợp', desc: 'Phân tích tình huống và giải quyết toàn diện vấn đề.' })
+      return [
+        {
+          ref: 'chart1', title: 'Tư duy cơ bản', keys: ['sk11', 'sk12', 'sk13'],
+          skills: [
+            { name: 'Năng lực chú ý', desc: 'Tập trung quan sát để giải quyết vấn đề.' },
+            { name: 'Năng lực quan sát', desc: 'Quan sát tỉ mỉ một sự vật nào đó.' },
+            { name: 'Năng lực ghi nhớ', desc: 'Ghi nhớ thông tin mới về sự vật, sự việc.' }
+          ]
+        },
+        {
+          ref: 'chart2', title: 'Tư duy toán học', keys: ['kn11', 'kn12', 'kn13', 'kn14'],
+          skills: [
+            { name: 'Số và tính toán', desc: 'Hiểu khái niệm tính toán cơ bản và ý nghĩa của toán học trong đời sống.' },
+            { name: 'Hình học không gian', desc: 'Nhận biết vị trí, hướng trong không gian và hiểu biết về hình dạng.' },
+            { name: 'Đo lường', desc: 'Thể hiện số lượng bằng số và so sánh các đồ vật với nhau.' },
+            { name: 'Kiểu mẫu', desc: 'Nhận diện và dự đoán mối quan hệ mang tính quy luật.' }
+          ]
+        },
+        {
+          ref: 'chart3', title: 'Tư duy logic', keys: this.isL1L2 ? ['sk21', 'sk22', 'sk23'] : ['sk21', 'sk22', 'sk23', 'sk24'],
+          skills: logic
+        },
+        {
+          ref: 'chart4', title: 'Tư duy sáng tạo', keys: ['sk31', 'sk32', 'sk33', 'sk34'],
+          skills: [
+            { name: 'Sự trôi chảy', desc: 'Thể hiện được nhiều ý tưởng mới lạ.' },
+            { name: 'Tính linh hoạt', desc: 'Tìm ra ý tưởng đa dạng bằng cách vận dụng một đối tượng thống nhất.' },
+            { name: 'Tính độc đáo', desc: 'Đưa ra ý tưởng độc đáo, mới lạ hoặc hoàn toàn khác biệt.' },
+            { name: 'Tính chính xác', desc: 'Bổ sung chi tiết cho ý tưởng có tính phức tạp cao.' }
+          ]
+        }
+      ]
     },
     availableTests() {
       if (!this.result || !this.result.related_results) return []
       return this.result.related_results.map(r => {
         let rd = {}
-        try { rd = typeof r.report_data === 'string' ? JSON.parse(r.report_data) : r.report_data } catch(e) {}
-        return {
-          id: r.id,
-          test_cd: r.test_cd,
-          name: (rd && rd.name) ? rd.name : r.test_nm,
-          reportData: rd || {}
-        }
-      }).sort((a,b) => {
-        return (a.test_cd || '').localeCompare(b.test_cd || '')
-      })
+        try { rd = typeof r.report_data === 'string' ? JSON.parse(r.report_data) : r.report_data } catch (e) {}
+        return { id: r.id, test_cd: r.test_cd, name: (rd && rd.name) ? rd.name : r.test_nm, reportData: rd || {} }
+      }).sort((a, b) => (a.test_cd || '').localeCompare(b.test_cd || ''))
     },
     allTests() {
-      const types = [
+      return [
         { test_cd: 'TT001', name: 'Đầu kỳ' },
         { test_cd: 'TT002', name: 'Giữa kỳ' },
         { test_cd: 'TT003', name: 'Cuối kỳ' }
-      ]
-
-      return types.map(type => {
+      ].map(type => {
         const found = this.availableTests.find(t => t.test_cd === type.test_cd)
         return {
           test_cd: type.test_cd,
           name: type.name,
           hasData: !!found,
           dataId: found ? found.id : null,
-          isCurrent: found && this.result && found.id == this.result.general.id
+          isCurrent: !!(found && found.id == this.g.id)
         }
       })
     },
     reportData() {
-      if (!this.result || !this.result.general.report_data) return {}
-      try {
-        return typeof this.result.general.report_data === 'string' ? JSON.parse(this.result.general.report_data) : this.result.general.report_data
-      } catch(e) {
-        return {}
-      }
+      if (!this.result || !this.g.report_data) return {}
+      try { return typeof this.g.report_data === 'string' ? JSON.parse(this.g.report_data) : this.g.report_data } catch (e) { return {} }
     },
     parsedSkillsGrade() {
-      if (!this.result || !this.result.general.skills_grade) return []
-      try {
-        return typeof this.result.general.skills_grade === 'string' ? JSON.parse(this.result.general.skills_grade) : this.result.general.skills_grade
-      } catch(e) {
-        return []
-      }
+      if (!this.result || !this.g.skills_grade) return []
+      try { return typeof this.g.skills_grade === 'string' ? JSON.parse(this.g.skills_grade) : this.g.skills_grade } catch (e) { return [] }
     }
   },
   created() {
     this.fetchResult()
   },
   beforeDestroy() {
-    this.charts.forEach(c => {
-      if (c && !c.isDisposed()) c.dispose()
-    })
+    this.disposeCharts()
   },
   methods: {
+    fmtDate,
     fetchResult() {
       this.loading = true
-      const id = this.$route.params.id
-      axios.g(`/api/lms/evaluations/ucrea/results/${id}`).then(response => {
+      axios.g(`/api/lms/evaluations/ucrea/results/${this.$route.params.id}`).then(response => {
         this.loading = false
         if (response && response.data && response.data.status === 'success') {
           this.result = response.data.data
           this.selectedTestIds = this.availableTests.map(t => t.id)
-          this.$nextTick(() => {
-            this.initCharts()
-          })
+          this.$nextTick(() => this.initCharts())
         }
-      }).catch(err => {
-        this.loading = false
-      })
+      }).catch(() => { this.loading = false })
     },
     getGrade(skillName) {
-       const found = this.parsedSkillsGrade.find(s => s.skill === skillName)
-       if (found) {
-           return found.grade === 'L' ? 'C' : found.grade
-       }
-       return 'B'
+      const found = this.parsedSkillsGrade.find(s => s.skill === skillName)
+      if (found) return found.grade === 'L' ? 'C' : found.grade
+      return 'B'
     },
     getGradeLabel(grade) {
-      const mapping = {
-        'S': 'Vượt trội',
-        'A': 'Rất tốt',
-        'B': 'Trung bình',
-        'C': 'Yếu',
-        'L': 'Yếu'
-      }
-      return mapping[grade] || grade || 'Trung bình'
+      return { S: 'Vượt trội', A: 'Rất tốt', B: 'Trung bình', C: 'Yếu', L: 'Yếu' }[grade] || grade || 'Trung bình'
     },
     exportPdf() {
       window.print()
     },
+    refEl(name) {
+      const r = this.$refs[name]
+      return Array.isArray(r) ? r[0] : r
+    },
+    disposeCharts() {
+      ['chart1', 'chart2', 'chart3', 'chart4', 'chartOverall'].forEach(n => {
+        const el = this.refEl(n)
+        const inst = el && echarts.getInstanceByDom(el)
+        if (inst) inst.dispose()
+      })
+    },
+    getChart(name) {
+      const el = this.refEl(name)
+      if (!el) return null
+      // SVG renderer → nét khi in / lưu PDF
+      return echarts.getInstanceByDom(el) || echarts.init(el, null, { renderer: 'svg' })
+    },
+    labelOf(name) {
+      return name.replace(/^(Năng lực|Tính|Sự) /, '$1\n').replace(/^(Số và|Hình học) /, '$1\n')
+    },
     initCharts() {
-      const selectedData = this.availableTests.filter(t => this.selectedTestIds.includes(t.id))
-      if (selectedData.length === 0) return
-
-      const getColor = (test_cd) => {
-          if (test_cd === 'TT001') return '#cbd5e1' // Đầu kỳ (Xám)
-          if (test_cd === 'TT002') return '#1e3a8a' // Giữa kỳ (Xanh đậm)
-          if (test_cd === 'TT003') return '#84cc16' // Cuối kỳ (Xanh lá)
-          return '#ef4444'
+      const selected = this.availableTests.filter(t => this.selectedTestIds.includes(t.id))
+      if (!selected.length) return
+      const legend = {
+        top: 26, left: 'center', data: selected.map(t => t.name),
+        itemWidth: 14, itemHeight: 10, itemGap: 10, textStyle: { fontSize: 13, color: '#475569' }
       }
-
-      const legendData = selectedData.map(t => t.name)
-      const legendTopRight = { top: 0, right: 0, data: legendData, itemGap: 6, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 10, color: '#64748b' } }
-
-      const commonOpts = {
-        grid: { top: 32, bottom: 25, left: 28, right: 8 },
+      const base = {
+        animation: false,
+        grid: { top: 58, bottom: 44, left: 34, right: 8 },
         tooltip: { trigger: 'axis' },
-        yAxis: { type: 'value', max: 100, axisLabel: { fontSize: 10, color: '#64748b' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-        xAxis: { type: 'category', axisLabel: { interval: 0, fontSize: 9, color: '#334155' }, axisTick: { show: false } },
-        animation: false
+        yAxis: { type: 'value', max: 100, interval: 25, axisLabel: { fontSize: 13, color: '#64748b' }, splitLine: { lineStyle: { color: '#eef2f7' } } },
+        title: { left: 'center', top: 0, textStyle: { fontSize: 15, color: '#1e293b', fontWeight: 'bold' } }
       }
+      const bar = (t, data) => ({
+        name: t.name, type: 'bar', data, barMaxWidth: 16,
+        itemStyle: { color: PERIOD_COLORS[t.test_cd] || '#ef4444', barBorderRadius: [3, 3, 0, 0] },
+        label: { show: selected.length === 1, position: 'top', fontSize: 13, color: '#334155' }
+      })
 
-      // 1. Tư duy cơ bản
-      if (this.$refs.chart1) {
-        const c1 = echarts.getInstanceByDom(this.$refs.chart1) || echarts.init(this.$refs.chart1)
-        c1.setOption({
-          ...commonOpts,
-          title: { text: 'Tư duy cơ bản', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-          legend: legendTopRight,
-          xAxis: { ...commonOpts.xAxis, data: ['Năng lực\nchú ý', 'Năng lực\nquan sát', 'Năng lực\nghi nhớ'] },
-          series: selectedData.map(t => ({
-            name: t.name,
-            type: 'bar',
-            data: [t.reportData.sk11, t.reportData.sk12, t.reportData.sk13],
-            barMaxWidth: 18,
-            itemStyle: { color: getColor(t.test_cd) }
-          }))
+      this.sections.forEach(sec => {
+        const c = this.getChart(sec.ref)
+        if (!c) return
+        c.setOption({
+          ...base,
+          title: { ...base.title, text: sec.title },
+          legend,
+          xAxis: { type: 'category', data: sec.skills.map(s => this.labelOf(s.name)), axisTick: { show: false }, axisLabel: { interval: 0, fontSize: 13, color: '#334155', lineHeight: 15 } },
+          series: selected.map(t => bar(t, sec.keys.map(k => Number(t.reportData[k] || 0))))
+        }, true)
+      })
+
+      const c = this.getChart('chartOverall')
+      if (c) {
+        const avg = (rd, keys) => Math.round(keys.reduce((a, k) => a + Number(rd[k] || 0), 0) / keys.length)
+        const series = selected.map(t => bar(t, this.sections.map(sec => avg(t.reportData, sec.keys))))
+        series.push({ name: 'TB học sinh', type: 'bar', data: PEER_AVG, barMaxWidth: 16, itemStyle: { color: '#f59e0b', barBorderRadius: [3, 3, 0, 0] } })
+        c.setOption({
+          ...base,
+          title: { ...base.title, text: 'Bình quân tổng quát' },
+          legend: { ...legend, data: [...selected.map(t => t.name), 'TB học sinh'] },
+          xAxis: { type: 'category', data: this.domains.map(d => d.name.replace(' ', '\n')), axisTick: { show: false }, axisLabel: { interval: 0, fontSize: 13, color: '#334155', lineHeight: 15 } },
+          series
         }, true)
       }
-
-      // 2. Tư duy toán học
-      if (this.$refs.chart2) {
-        let mathData = ['Số và\ntính toán', 'Hình học\nkhông gian', 'Đo lường', 'Kiểu mẫu']
-        const c2 = echarts.getInstanceByDom(this.$refs.chart2) || echarts.init(this.$refs.chart2)
-        c2.setOption({
-          ...commonOpts,
-          title: { text: 'Tư duy toán học', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-          legend: legendTopRight,
-          xAxis: { ...commonOpts.xAxis, data: mathData },
-          series: selectedData.map(t => {
-            let data = [t.reportData.kn11, t.reportData.kn12, t.reportData.kn13, t.reportData.kn14]
-            return {
-              name: t.name,
-              type: 'bar',
-              data: data,
-              barMaxWidth: 18,
-              itemStyle: { color: getColor(t.test_cd) }
-            }
-          })
-        }, true)
-      }
-
-      // 3. Tư duy logic
-      if (this.$refs.chart3) {
-        let logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích', 'Tổng hợp']
-        if (this.isL1L2) {
-            logicData = ['Hiểu biết', 'Ứng dụng', 'Phân tích']
-        }
-        const c3 = echarts.getInstanceByDom(this.$refs.chart3) || echarts.init(this.$refs.chart3)
-        c3.setOption({
-          ...commonOpts,
-          title: { text: 'Tư duy logic', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-          legend: legendTopRight,
-          xAxis: { ...commonOpts.xAxis, data: logicData },
-          series: selectedData.map(t => {
-            let data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23, t.reportData.sk24]
-            if (this.isL1L2) {
-               data = [t.reportData.sk21, t.reportData.sk22, t.reportData.sk23]
-            }
-            return {
-              name: t.name,
-              type: 'bar',
-              data: data,
-              barMaxWidth: 18,
-              itemStyle: { color: getColor(t.test_cd) }
-            }
-          })
-        }, true)
-      }
-
-      // 4. Tư duy sáng tạo
-      if (this.$refs.chart4) {
-        const c4 = echarts.getInstanceByDom(this.$refs.chart4) || echarts.init(this.$refs.chart4)
-        c4.setOption({
-          ...commonOpts,
-          title: { text: 'Tư duy sáng tạo', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-          legend: legendTopRight,
-          xAxis: { ...commonOpts.xAxis, data: ['Sự\ntrôi chảy', 'Tính\nlinh hoạt', 'Tính\nđộc đáo', 'Tính\nchính xác'] },
-          series: selectedData.map(t => ({
-            name: t.name,
-            type: 'bar',
-            data: [t.reportData.sk31, t.reportData.sk32, t.reportData.sk33, t.reportData.sk34],
-            barMaxWidth: 18,
-            itemStyle: { color: getColor(t.test_cd) }
-          }))
-        }, true)
-      }
-
-      // 5. Đánh giá tổng quát
-      if (this.$refs.chartOverall) {
-        const cOverall = echarts.getInstanceByDom(this.$refs.chartOverall) || echarts.init(this.$refs.chartOverall)
-        
-        const overallSeries = selectedData.map(t => {
-          const rd = t.reportData
-          const avg1 = Math.round((Number(rd.sk11 || 0) + Number(rd.sk12 || 0) + Number(rd.sk13 || 0)) / 3)
-          const avg2 = Math.round((Number(rd.kn11 || 0) + Number(rd.kn12 || 0) + Number(rd.kn13 || 0) + Number(rd.kn14 || 0)) / 4)
-          const avg3 = this.isL1L2 ?
-              Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0)) / 3) :
-              Math.round((Number(rd.sk21 || 0) + Number(rd.sk22 || 0) + Number(rd.sk23 || 0) + Number(rd.sk24 || 0)) / 4)
-          const avg4 = Math.round((Number(rd.sk31 || 0) + Number(rd.sk32 || 0) + Number(rd.sk33 || 0) + Number(rd.sk34 || 0)) / 4)
-          return {
-            name: t.name,
-            type: 'bar',
-            data: [avg1, avg2, avg3, avg4],
-            barMaxWidth: 18,
-            itemStyle: { color: getColor(t.test_cd) }
-          }
-        })
-        
-        overallSeries.push({
-           name: 'Bình quân tất cả HS', 
-           type: 'bar', 
-           data: [66, 71, 69, 61], 
-           barMaxWidth: 18, 
-           itemStyle: { color: '#f59e0b' }
-        })
-
-        cOverall.setOption({
-          ...commonOpts,
-          title: { text: 'Bình quân tổng quát', left: 'center', textStyle: { fontSize: 13, color: '#1e293b', fontWeight: 'bold' } },
-          legend: { top: 0, right: 0, data: [...legendData, 'Bình quân tất cả HS'], itemGap: 5, itemWidth: 14, itemHeight: 9, textStyle: { fontSize: 9, color: '#64748b' } },
-          xAxis: { ...commonOpts.xAxis, data: ['Tư duy\ncơ bản', 'Tư duy\ntoán học', 'Tư duy\nlogic', 'Tư duy\nsáng tạo'] },
-          series: overallSeries
-        }, true)
-      }
-
-      this.charts = [c1, c2, c3, c4, cOverall]
     }
   }
 }
 </script>
 
 <style scoped>
-/* ============================================================
-   EXACT UCREA REPORT CSS (INDEPENDENT FROM TAILWIND & VUEXY)
-   ============================================================ */
+.uc-compare { display: inline-flex; align-items: center; gap: 10px; padding: 0 10px; border-right: 1px solid #e2e8f0; margin-right: 2px; }
+.uc-check { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 600; color: #334155; cursor: pointer; white-space: nowrap; }
+.uc-check input { width: 16px; height: 16px; accent-color: #7367f0; cursor: pointer; }
+.uc-check.is-disabled { color: #94a3b8; cursor: not-allowed; }
+.uc-check.is-disabled input { cursor: not-allowed; }
 
-.ucrea-report-wrapper {
-  background-color: #f8fafc;
-  padding: 24px 16px;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1e293b;
-}
-
-/* Toolbar */
-.action-toolbar {
-  max-width: 900px;
-  margin: 0 auto 20px auto;
+/* Header tờ báo cáo */
+.uc-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: #ffffff;
-  padding: 16px 20px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.back-link {
-  font-size: 13px;
-  color: #64748b;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 4px;
-}
-.back-link:hover { color: #2563eb; }
-
-.toolbar-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-.toolbar-sub {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 4px;
-}
-.toolbar-sub .sep { margin: 0 8px; color: #cbd5e1; }
-.toolbar-sub .text-name { color: #2563eb; }
-
-.toolbar-btns { display: flex; gap: 10px; }
-
-.btn-print {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #1e3a8a;
+  gap: 5mm;
+  background: #1b3664;
   color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 6mm 11mm;
 }
-.btn-print:hover { background: #172554; }
+.uc-head.is-slim { padding: 4mm 11mm; }
+.uc-head__logo { height: 13mm; background: rgba(255, 255, 255, 0.95); padding: 1.5mm 2.5mm; border-radius: 2mm; }
+.uc-head.is-slim .uc-head__logo { height: 9mm; }
+.uc-head__titles { flex: 1; border-left: 1px solid rgba(255, 255, 255, 0.3); padding-left: 5mm; min-width: 0; }
+.uc-head__super { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.75); margin: 0; }
+.uc-head__title { font-size: 20px; font-weight: 800; color: #f5c518; margin: 1mm 0 0; text-transform: uppercase; line-height: 1.2; }
+.uc-head.is-slim .uc-head__title { font-size: 16px; color: #ffffff; text-transform: none; margin: 0; }
+.uc-head__level { text-align: center; background: rgba(255, 255, 255, 0.12); border-radius: 2mm; padding: 1.5mm 4mm; white-space: nowrap; }
+.uc-head__level span { display: block; font-size: 13px; color: rgba(255, 255, 255, 0.75); }
+.uc-head__level strong { font-size: 20px; color: #ffffff; }
 
-.btn-edit {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-}
-.btn-edit:hover { background: #eff6ff; }
+/* Tóm tắt */
+.uc-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 6mm; }
+.uc-summary__item { border: 1px solid #e2e8f0; border-radius: 2mm; text-align: center; padding: 2.5mm 2mm; background: #f8fafc; }
+.uc-summary__name { font-size: 13.5px; font-weight: 700; color: #334155; }
+.uc-summary__grade { font-size: 28px; font-weight: 900; line-height: 1.15; margin-top: 1mm; }
+.uc-summary__label { font-size: 13px; color: #64748b; }
 
-/* Loading */
-.loading-state { text-align: center; padding: 80px 0; color: #64748b; }
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #e2e8f0;
-  border-top-color: #2563eb;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 12px auto;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Report Document */
-.report-document {
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.report-sheet {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-  margin-bottom: 24px;
-}
-
-/* Header */
-.sheet-header {
-  background-color: #1b3664;
-  color: #ffffff;
-  padding: 18px 28px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-brand-block {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand-logo {
-  height: 44px;
-  width: auto;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 2px 6px;
-  border-radius: 6px;
-  object-fit: contain;
-}
-
-.header-titles {
-  border-left: 1px solid rgba(255, 255, 255, 0.25);
-  padding-left: 14px;
-}
-
-.header-titles .super-title {
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 1px;
-  margin: 0;
-  line-height: 1;
-}
-
-.header-titles .main-title {
-  font-size: 18px;
+.uc-sec {
+  font-size: 16px;
   font-weight: 800;
-  color: #f5c518;
-  letter-spacing: 0.5px;
-  margin: 4px 0 0 0;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.student-pill {
-  background: #ffffff;
   color: #1b3664;
-  font-weight: 700;
-  font-size: 12px;
-  border-radius: 9999px;
-  padding: 7px 22px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-}
-.student-pill .pill-name { font-size: 13px; font-weight: 800; }
-.student-pill .pill-sep { color: #cbd5e1; }
-
-/* Sheet Body */
-.sheet-body {
-  padding: 24px;
-}
-
-/* Section Title */
-.section-title-wrap {
   border-bottom: 2px solid #1b3664;
-  padding-bottom: 4px;
-  margin-bottom: 16px;
-}
-.section-title-wrap.flex-between {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding-bottom: 1.5mm;
+  margin: 0 0 4mm;
 }
 
-.section-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #1b3664;
-  margin: 0;
-}
+.uc-row { display: flex; gap: 5mm; margin-bottom: 6mm; }
+.uc-row.is-middle { align-items: center; }
+.uc-col-7 { flex: 7; min-width: 0; }
+.uc-col-5 { flex: 5; min-width: 0; }
 
-/* Checkboxes */
-.test-period-checkboxes {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 11px;
-  font-weight: 700;
-}
-.checkbox-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-.checkbox-label.disabled-label {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.check-input {
-  accent-color: #2563eb;
-  width: 14px;
-  height: 14px;
-}
-.check-text {
-  color: #334155;
-}
+.uc-chart { width: 100%; height: 62mm; border: 1px solid #e2e8f0; border-radius: 2mm; background: #ffffff; }
+.uc-chart.is-tall { height: 68mm; }
 
-/* 2-Column Layout */
-.two-col-layout {
-  display: flex;
-  gap: 20px;
-}
-.two-col-layout.align-center {
-  align-items: center;
-}
-.two-col-layout.mb-24 { margin-bottom: 24px; }
-.two-col-layout.mb-20 { margin-bottom: 20px; }
-.two-col-layout.mb-28 { margin-bottom: 28px; }
-
-.col-7 {
-  flex: 7;
-  min-width: 0;
-}
-.col-5 {
-  flex: 5;
-  min-width: 0;
-}
-
-/* Tables */
-.ucrea-grid-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #cbd5e1;
-  font-size: 11px;
-}
-.ucrea-grid-table td, .ucrea-grid-table th {
-  padding: 7px 10px;
-  border: 1px solid #e2e8f0;
-}
-.cell-category-label {
-  width: 25%;
-  text-align: center;
-  font-weight: 700;
-  color: #334155;
-  background-color: #f8fafc;
-}
-.cell-category-desc {
-  color: #475569;
-  line-height: 1.45;
-}
-
-.header-row-orange th {
-  background-color: #e86036;
-  color: #ffffff;
-  padding: 8px;
-  font-size: 12px;
-}
-.sub-header-row th {
-  background-color: #f1f5f9;
-  color: #334155;
-  font-weight: 600;
-  font-size: 11px;
-}
-
-/* Chart Box */
-.chart-box {
-  width: 100%;
-  height: 240px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 6px;
-  background: #ffffff;
-  position: relative;
-}
-.chart-overall-box {
-  height: 260px;
-}
-.chart-canvas-el {
-  width: 100%;
-  height: 100%;
-}
-
-/* Score Tables */
-.ucrea-score-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #0050a0;
-  font-size: 11px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-.header-row-blue th {
-  background-color: #0050a0;
-  color: #ffffff;
-  font-weight: 700;
-  padding: 8px;
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
-}
-.header-row-blue th:last-child { border-right: none; }
-
-.ucrea-score-table td {
-  padding: 8px 10px;
-  border: 1px solid #e2e8f0;
-}
-.row-even { background-color: #ffffff; }
-.row-odd { background-color: #f4f7fa; }
-
-.cell-skill-name {
-  font-weight: 700;
-  color: #1e293b;
-  padding-left: 12px !important;
-}
-.cell-skill-desc {
-  color: #475569;
-  line-height: 1.4;
-  padding-left: 12px !important;
-}
-.cell-skill-grade {
-  text-align: center;
-  font-weight: 800;
-  color: #0f172a;
-  font-size: 13px;
-}
-
-/* Summary Table */
-.ucrea-summary-table {
-  width: 100%;
-  border-collapse: collapse;
-  border: 1px solid #e86036;
-  font-size: 11px;
-}
-.ucrea-summary-table td {
-  padding: 8px 10px;
-  border: 1px solid #e2e8f0;
-}
-.row-peach { background-color: #fef6ef; }
-.row-white { background-color: #ffffff; }
-.grade-label-red { color: #dc3545; font-weight: 700; }
-.cell-peer-avg {
-  text-align: center;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.page-break-divider {
-  height: 12px;
-}
-.sheet-page-2 {
-  margin-top: 20px;
-}
-.pt-24 { padding-top: 24px; }
-
-</style>
-
-<style>
-/* ============================================================
-   PRINT STYLES (UNSCOPED FOR FULL LAYOUT OVERRIDE)
-   ============================================================ */
-@media print {
-  header,
-  aside,
-  nav,
-  footer,
-  .v-nav-menu,
-  .v-nav-menu-swipe-area,
-  .vx-navbar-wrapper,
-  .the-navbar,
-  .the-navbar-vertical,
-  .the-navbar-horizontal,
-  .the-footer,
-  .the-customizer,
-  .vx-tour,
-  #content-overlay,
-  .content-area__header,
-  .print-hide,
-  .action-toolbar,
-  .vs-sidebar,
-  .vs-sidebar--background,
-  #btnVNavMenuMinToggler {
-    display: none !important;
-    visibility: hidden !important;
-  }
-
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  #app,
-  .layout--main,
-  #content-area,
-  .content-wrapper,
-  .router-view,
-  .router-content {
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    box-shadow: none !important;
-    border: none !important;
-    left: 0 !important;
-    top: 0 !important;
-  }
-
-  #content-area {
-    margin-left: 0 !important;
-    padding: 0 !important;
-  }
-
-  .ucrea-report-wrapper {
-    background: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  .report-document {
-    max-width: 820px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  .report-sheet {
-    box-shadow: none !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 0 !important;
-    margin: 0 auto !important;
-    padding: 24px 28px !important;
-    page-break-after: always !important;
-    break-after: page !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-  }
-
-  .sheet-page-2 {
-    page-break-before: always !important;
-    break-before: page !important;
-    margin-top: 0 !important;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-
-  @page {
-    size: A4 portrait;
-    margin: 0.6cm;
-  }
-}
+.uc-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
+.uc-table td, .uc-table th { border: 1px solid #dbe3ec; padding: 1.8mm 2.4mm; }
+.uc-table.is-center td, .uc-table.is-center th, .uc-table .is-c { text-align: center; }
+.uc-table tbody tr:nth-child(even) { background: #f6f9fc; }
+.uc-th-orange th { background: #e86036; color: #ffffff; font-weight: 700; text-align: left; }
+.uc-table.is-center .uc-th-orange th { text-align: center; }
+.uc-th-sub th { background: #f1f5f9; color: #334155; font-weight: 700; }
+.uc-th-blue th { background: #0050a0; color: #ffffff; font-weight: 700; text-align: left; }
+.uc-th-blue th.is-c { text-align: center; }
+.uc-cat { width: 27%; font-weight: 700; color: #1e293b; background: #f8fafc; white-space: nowrap; }
+.uc-skill { font-weight: 700; color: #1e293b; white-space: nowrap; }
+.uc-desc { color: #475569; }
+.uc-grade { text-align: center; font-weight: 900; font-size: 15px; }
+.uc-peer { color: #64748b; font-weight: 700; }
+.uc-red { color: #dc2626; }
+.g-S { color: #7c3aed; }
+.g-A { color: #2563eb; }
+.g-B { color: #d97706; }
+.g-C { color: #dc2626; }
 </style>
