@@ -72,7 +72,7 @@
               <tr class="tr-values vs-table--tr tr-table-state-null" v-for="(item, index) in imports" :key="index">
                 <!---->
                 <td class="td vs-table--td">{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}</td>
-                <td class="td vs-table--td"><a :href="item.file_link" target="blank">{{ item.file_name }}</a></td>
+                <td class="td vs-table--td"><a :href="fileUrl(item.file_link)" target="_blank" rel="noopener">{{ item.file_name }}</a></td>
                 <td class="td vs-table--td">{{ item.created_at }}</td>
                 <td class="td vs-table--td">{{ item.creator_name }}</td>
                 <td class="td vs-table--td text-center">{{ item.count_success }}</td>
@@ -149,6 +149,12 @@
       }
     },
     methods: {
+      // file_link lưu dạng 'static/upload/x.xlsx' (không có '/') => phải tính từ gốc domain
+      fileUrl(link) {
+        if (!link) return 'javascript:void(0)'
+        if (/^https?:\/\//.test(link)) return link
+        return window.location.origin + '/' + link.replace(/^\/+/, '')
+      },
       reset() {
         location.reload();
       },
