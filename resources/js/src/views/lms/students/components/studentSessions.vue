@@ -1,34 +1,40 @@
 <template>
   <div class="student-detail-sessions mt-3" v-if="contract_info && contract_info.id">
-    <!-- Session Stats Cards -->
-    <div class="vx-row mb-4">
-      <div class="vx-col sm:w-1/3 w-full mb-2">
-        <div class="session-stat-card border-l-primary">
-          <div class="session-stat-title">Tổng số buổi trong gói</div>
-          <div class="session-stat-number text-gray-800">
-            {{ contract_info.summary_sessions || 0 }} <span class="session-stat-unit">buổi</span>
-          </div>
+    <!-- Session Stats Cards: 3 ô cao bằng nhau, mỗi ô có dòng chân cùng chiều cao -->
+    <div class="session-stats-grid mb-4">
+      <div class="session-stat-card border-l-primary">
+        <div class="session-stat-title">Tổng số buổi trong gói</div>
+        <div class="session-stat-number text-gray-800">
+          {{ totalSessions }} <span class="session-stat-unit">buổi</span>
+        </div>
+        <div class="session-stat-foot">
+          <div class="session-progress"><div class="session-progress__bar" :style="{ width: usedPercent + '%' }"></div></div>
+          <span class="c-muted">Đã dùng {{ usedPercent }}%</span>
         </div>
       </div>
-      <div class="vx-col sm:w-1/3 w-full mb-2">
-        <div class="session-stat-card border-l-emerald">
-          <div class="session-stat-title">Số buổi đã học / ghi nhận</div>
-          <div class="session-stat-number text-emerald-600">
-            {{ contract_info.done_sessions || 0 }} <span class="session-stat-unit">buổi</span>
-          </div>
-          <div class="session-stat-breakdown">
-            <span class="c-present"><i class="fa-solid fa-circle-check"></i> Đi học {{ attendanceStats.present }}</span>
-            <span class="c-absent"><i class="fa-solid fa-circle-xmark"></i> Nghỉ học {{ attendanceStats.absent }}</span>
-            <span class="c-pending" v-if="attendanceStats.pending"><i class="fa-regular fa-circle"></i> Chưa điểm danh {{ attendanceStats.pending }}</span>
-          </div>
+
+      <div class="session-stat-card border-l-emerald">
+        <div class="session-stat-title">Số buổi đã học / ghi nhận</div>
+        <div class="session-stat-number text-emerald-600">
+          {{ doneSessions }} <span class="session-stat-unit">buổi</span>
+        </div>
+        <div class="session-stat-foot">
+          <span class="c-present"><i class="fa-solid fa-circle-check"></i> Đi học {{ attendanceStats.present }}</span>
+          <span class="c-absent"><i class="fa-solid fa-circle-xmark"></i> Nghỉ học {{ attendanceStats.absent }}</span>
+          <span class="c-pending" v-if="attendanceStats.pending"><i class="fa-regular fa-circle"></i> Chưa điểm danh {{ attendanceStats.pending }}</span>
         </div>
       </div>
-      <div class="vx-col sm:w-1/3 w-full mb-2">
-        <div class="session-stat-card border-l-amber">
-          <div class="session-stat-title">Số buổi còn lại</div>
-          <div class="session-stat-number text-amber-600">
-            {{ (contract_info.summary_sessions || 0) - (contract_info.done_sessions || 0) }} <span class="session-stat-unit">buổi</span>
-          </div>
+
+      <div class="session-stat-card border-l-amber">
+        <div class="session-stat-title">Số buổi còn lại</div>
+        <div class="session-stat-number text-amber-600">
+          {{ leftSessions }} <span class="session-stat-unit">buổi</span>
+        </div>
+        <div class="session-stat-foot">
+          <span v-if="leftSessions <= 0" class="c-absent"><i class="fa-solid fa-triangle-exclamation"></i> Đã hết buổi học</span>
+          <span v-else-if="leftSessions <= 4" class="c-warn"><i class="fa-solid fa-triangle-exclamation"></i> Sắp hết buổi – cần tái phí</span>
+          <span v-else-if="next_sessions && next_sessions.length" class="c-muted"><i class="fa-regular fa-calendar"></i> Buổi tới: {{ next_sessions[0].class_date | formatDateViewDay }}</span>
+          <span v-else class="c-muted">Còn {{ 100 - usedPercent }}% gói học</span>
         </div>
       </div>
     </div>
@@ -128,6 +134,12 @@
       }
     },
     computed: {
+      totalSessions() { return Number(this.contract_info.summary_sessions) || 0 },
+      doneSessions() { return Number(this.contract_info.done_sessions) || 0 },
+      leftSessions() { return this.totalSessions - this.doneSessions },
+      usedPercent() {
+        return this.totalSessions ? Math.min(100, Math.round(this.doneSessions * 100 / this.totalSessions)) : 0
+      },
       // Thống kê điểm danh trên các buổi đã trừ (status 0/1), bỏ qua bảo lưu / nghỉ lễ
       attendanceStats() {
         const res = { present: 0, absent: 0, pending: 0 }
@@ -238,13 +250,57 @@
   font-size: 14px;
 }
 
+.session-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+@media (max-width: 768px) {
+  .session-stats-grid { grid-template-columns: 1fr; }
+}
+
 .session-stat-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 14px 18px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
+
+.session-stat-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  min-height: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.session-stat-foot span { white-space: nowrap; }
+.session-stat-foot i { margin-right: 3px; }
+
+.session-progress {
+  flex: 1;
+  min-width: 80px;
+  height: 7px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.session-progress__bar {
+  height: 100%;
+  background: #7367f0;
+  border-radius: 99px;
+  transition: width .3s;
+}
+.c-muted { color: #64748b; }
+.c-warn { color: #d97706; }
 
 .border-l-primary { border-left: 5px solid #7367f0 !important; }
 .border-l-emerald { border-left: 5px solid #10b981 !important; }
@@ -379,16 +435,6 @@
 .pill-pending { background: #fff; color: #475569; border: 1px dashed #94a3b8; }
 .pill-paused { background: #fef9c3; color: #a16207; }
 .pill-upcoming { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
-.session-stat-breakdown {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.session-stat-breakdown span { white-space: nowrap; }
-.session-stat-breakdown i { margin-right: 3px; }
 .c-present { color: #15803d; }
 .c-absent { color: #dc2626; }
 .c-pending { color: #64748b; }
