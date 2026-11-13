@@ -73,15 +73,16 @@
 
         <!-- Ngày sinh -->
         <div class="form-group">
-          <label class="form-label">Ngày sinh <span class="text-danger font-bold">*</span></label>
-          <datepicker
-            class="w-full form-datepicker-compact"
-            v-model="student_info.date_of_birth"
-            placeholder="YYYY-MM-DD"
-            :lang="datepickerOptions.lang"
-            @change="selectDate"
-            :disabled="disabled_edit"
-          />
+          <label class="form-label">Ngày sinh / Năm sinh <span class="text-danger font-bold">*</span></label>
+          <input
+            v-if="disabled_edit"
+            class="vs-inputx vs-input--input normal w-full"
+            type="text"
+            :value="birthday_text"
+            placeholder="Chưa cập nhật"
+            disabled
+          >
+          <birthday-input v-else v-model="birthday_text" />
         </div>
 
         <!-- Trường học -->
@@ -403,6 +404,7 @@ import axios from "../../../../http/axios.js";
 import moment from "moment";
 import u from "../../../../until/helper.js";
 import datepicker from "vue2-datepicker";
+import BirthdayInput from "../../../../components/BirthdayInput.vue";
 import select from "vue-select";
 
 export default {
@@ -410,6 +412,25 @@ export default {
     "vue-select": select,
     moment,
     datepicker,
+    BirthdayInput,
+  },
+  watch: {
+    // Đồng bộ ô nhập tay khi dữ liệu học sinh được nạp/đổi
+    "student_info.date_of_birth": {
+      immediate: true,
+      handler() {
+        this.birthday_text = u.formatBirthdayInput(
+          this.student_info.date_of_birth,
+          this.student_info.birthday_year_only
+        );
+      },
+    },
+    "student_info.birthday_year_only"() {
+      this.birthday_text = u.formatBirthdayInput(
+        this.student_info.date_of_birth,
+        this.student_info.birthday_year_only
+      );
+    },
   },
   props: {
     student_info: {
@@ -437,6 +458,7 @@ export default {
         color: "",
       },
       disabled_edit: true,
+      birthday_text: "",
       html: {
         province: { item: "", list: [] },
         district: { item: "", list: [] },
@@ -594,6 +616,11 @@ export default {
         mess += " - Số điện thoại 2 không đúng định dạng<br/>";
         resp = false;
       }
+      const bd = u.parseManualBirthday(this.birthday_text);
+      if (bd === null) {
+        mess += " - Ngày sinh không đúng định dạng (yyyy hoặc dd/mm/yyyy)<br/>";
+        resp = false;
+      }
       if (!resp) {
         this.alert.color = "danger";
         this.alert.body = mess;
@@ -602,9 +629,15 @@ export default {
       }
       this.$vs.loading();
       axios
-        .p("/api/lms/students/update", this.student_info)
+        .p("/api/lms/students/update", {
+          ...this.student_info,
+          date_of_birth: bd.date || null,
+          birthday_year_only: bd.yearOnly,
+        })
         .then((response) => {
           this.$vs.loading.close();
+          this.$set(this.student_info, "date_of_birth", bd.date || null);
+          this.$set(this.student_info, "birthday_year_only", bd.yearOnly);
           this.$vs.notify({
             title: "Thành Công",
             text: response.data.message,

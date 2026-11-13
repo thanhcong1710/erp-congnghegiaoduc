@@ -171,14 +171,8 @@
           <input class="vs-inputx vs-input--input normal" type="text" v-model="student.name">
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Ngày sinh</label>
-          <datepicker
-            class=" w-full calendar"
-            v-model="student.birthday"
-            placeholder="Chọn ngày sinh nhật"
-            :lang="datepickerOptions.lang"
-            @change="selectDateStudent(index)"
-          />
+          <label>Ngày sinh / Năm sinh</label>
+          <birthday-input v-model="student.birthday" />
         </div>
         <div class="vx-col md:w-1/4 w-full mb-4">
           <label>Giới tính</label>
@@ -231,11 +225,13 @@
   import axios from '../../../http/axios.js'
   import u from '../../../until/helper.js'
   import datepicker from "vue2-datepicker";
+  import BirthdayInput from "../../../components/BirthdayInput.vue";
   import moment, { localeData } from 'moment';
 
   export default {
     components: {
       datepicker,
+      BirthdayInput,
       "vue-select": select
     },
     data() {
@@ -358,12 +354,6 @@
         if (date) {
           this.parent.birthday = moment(date).format("YYYY-MM-DD");
         }
-      },
-      selectDateStudent(index){
-        if(this.students[index].birthday){
-          this.students[index].birthday = moment(this.students[index].birthday).format("YYYY-MM-DD");
-        }
-        console.log(this.students[index].birthday);
       },
       validatePhone(){
         if(this.parent.mobile_1){
@@ -598,6 +588,14 @@
           mess += " - Nguồn không được để trống<br/>";
           resp = false;
         }
+        const students = this.students.map((st, i) => {
+          const bd = u.parseManualBirthday(st.birthday)
+          if (bd === null) {
+            mess += ` - Ngày sinh học sinh ${st.name || (i + 1)} không đúng định dạng (yyyy hoặc dd/mm/yyyy)<br/>`;
+            resp = false;
+          }
+          return { ...st, birthday: (bd && bd.date) || null, birthday_year_only: bd ? bd.yearOnly : 0 }
+        })
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
@@ -607,7 +605,7 @@
         this.$vs.loading()
         axios.p("/api/crm/parents/add",{
           'parent': this.parent,
-          'students': this.students,
+          'students': students,
         })
         .then((response) => {
           this.$vs.loading.close();;

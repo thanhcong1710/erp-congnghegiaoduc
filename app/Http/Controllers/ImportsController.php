@@ -97,7 +97,7 @@ class ImportsController extends Controller
     public function addItemDataImport($list,$import_id,$creator_id, $branch_id = 0 ) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
-            $query = "INSERT INTO crm_import_parents (import_id,`name`,email,gud_mobile1,`address`,note,created_at,creator_id,`status`,error_message,student_name_1,student_name_2,student_birthday_1,student_birthday_2,owner_hrm,gud_mobile2, checkin_at, checkin_branch_accounting_id, branch_id) VALUES ";
+            $query = "INSERT INTO crm_import_parents (import_id,`name`,email,gud_mobile1,`address`,note,created_at,creator_id,`status`,error_message,student_name_1,student_name_2,student_birthday_1,student_birthday_2,student_birthday_year_only_1,student_birthday_year_only_2,owner_hrm,gud_mobile2, checkin_at, checkin_branch_accounting_id, branch_id) VALUES ";
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
                     $item = $this->convertData($list[$i]);
@@ -110,7 +110,7 @@ class ImportsController extends Controller
                     $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
                     $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                     $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,'$item->owner_hrm','$gud_mobile2',$checkin_at,$checkin_branch_accounting_id,$branch_id),";
+                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,".(int)$item->student_birthday_year_only_1.",".(int)$item->student_birthday_year_only_2.",'$item->owner_hrm','$gud_mobile2',$checkin_at,$checkin_branch_accounting_id,$branch_id),";
                     
                 }
                 $query = substr($query, 0, -1);
@@ -128,7 +128,7 @@ class ImportsController extends Controller
                     $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
                     $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                     $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,'$item->owner_hrm','$gud_mobile2',$checkin_at,$checkin_branch_accounting_id,$branch_id),";
+                    $query.= "('$import_id','$item->name','$item->email','$gud_mobile1','$item->address','$item->note','$created_at','$creator_id',$status,'$error_message','$item->student_name_1','$item->student_name_2',$student_birthday_1,$student_birthday_2,".(int)$item->student_birthday_year_only_1.",".(int)$item->student_birthday_year_only_2.",'$item->owner_hrm','$gud_mobile2',$checkin_at,$checkin_branch_accounting_id,$branch_id),";
                 }
                 $query = substr($query, 0, -1);
                 u::query($query);
@@ -136,16 +136,11 @@ class ImportsController extends Controller
         }
     }
     public function convertData($data){
-        if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$data[8])) {
-            $student_birthday_1 = $data[8];
-        } else {
-            $student_birthday_1 = NULL;
-        }
-        if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$data[10])) {
-            $student_birthday_2 = $data[10];
-        } else {
-            $student_birthday_2 = NULL;
-        }
+        // Ngày sinh: chấp nhận năm (2019), dd/mm/yyyy, yyyy-mm-dd hoặc ô ngày Excel
+        $bd1 = u::parseBirthday($data[8]);
+        $bd2 = u::parseBirthday($data[10]);
+        $student_birthday_1 = $bd1['date'];
+        $student_birthday_2 = $bd2['date'];
         $result = (object)array(
             'name'=> str_replace(array("'","]","\\"),"",$data[0]),
             'gud_mobile1'=> u::phoneNew($data[1]),
@@ -156,8 +151,10 @@ class ImportsController extends Controller
             'owner_hrm'=>$data[6],
             'student_name_1'=>str_replace(array("'","]","\\"),"",$data[7]),
             'student_birthday_1'=>$student_birthday_1,
+            'student_birthday_year_only_1'=>$bd1['year_only'],
             'student_name_2'=>str_replace(array("'","]","\\"),"",$data[9]),
             'student_birthday_2'=>$student_birthday_2,
+            'student_birthday_year_only_2'=>$bd2['year_only'],
             'checkin_branch_accounting_id'=>$data[11] ? $data[11] :NULL,
             'checkin_at'=>$data[12] ? $data[12] :NULL
         );
@@ -285,15 +282,33 @@ class ImportsController extends Controller
         u::query("UPDATE crm_imports SET status=1 WHERE id=$import_id ");
         u::query("UPDATE crm_students AS s LEFT JOIN crm_parents AS p ON s.gud_mobile_1 =p.mobile_1 SET s.parent_id=p.id WHERE s.parent_id IS NULL ");
         u::query("UPDATE crm_students AS s LEFT JOIN branches AS b ON s.checkin_branch_accounting_id =b.accounting_id SET s.checkin_branch_id=b.id WHERE s.checkin_branch_id IS NULL  AND s.checkin_branch_accounting_id IS NOT NULL");
+        // Học sinh import cũng lên chính thức ngay (giống tạo thủ công) để có thể nhập học luôn
+        $this->promoteImportedStudents((int)$import_id);
         $data = u::first("SELECT (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status=6) AS total_success,
             (SELECT count(id) FROM crm_import_parents WHERE import_id=$import_id AND status!=6) AS total_error");
         return response()->json($data);
+    }
+    public static function promoteImportedStudents($import_id = 0)
+    {
+        set_time_limit(0);
+        $cond = $import_id > 0 ? "p.import_id = " . (int)$import_id : "p.import_id > 0";
+        $list = u::query("SELECT cs.id FROM crm_students AS cs
+                INNER JOIN crm_parents AS p ON p.id = cs.parent_id
+            WHERE $cond AND IFNULL(cs.lms_id, 0) = 0
+            ORDER BY cs.id");
+        $total = 0;
+        foreach ($list as $row) {
+            if (StudentsController::promoteToOfficialStudent($row->id)) {
+                $total++;
+            }
+        }
+        return $total;
     }
     public function addItemDataParent($list,$arr_owner,$source_id,$creator_id,$source_detail_id, $branch_id=0) {
         if ($list) {
             $created_at = date('Y-m-d H:i:s');
             $query = "INSERT INTO crm_parents (`name`,email,mobile_1,`address`,note,created_at,creator_id,`status`,source_id,source_detail_id,owner_id,mobile_2,last_assign_date, tmp_branch_id, import_id) VALUES ";
-            $query_student = "INSERT INTO crm_students (`name`,`birthday`,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
+            $query_student = "INSERT INTO crm_students (`name`,`birthday`,birthday_year_only,created_at,creator_id,gud_mobile_1, checkin_at, checkin_branch_accounting_id) VALUES ";
             $check_import_student =0;
             if (count($list) > 10000) {
                 for($i = 0; $i < 10000; $i++) {
@@ -305,14 +320,14 @@ class ImportsController extends Controller
                         $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
                         $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                         $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
+                        $query_student.= "('$item->student_name_1',$student_birthday_1,".(int)$item->student_birthday_year_only_1.",'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
                     }
                     if($item->student_name_2){
                         $check_import_student =1;
                         $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
                         $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                         $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
+                        $query_student.= "('$item->student_name_2',$student_birthday_2,".(int)$item->student_birthday_year_only_2.",'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
                     }
                 }
                 $query = substr($query, 0, -1);
@@ -332,14 +347,14 @@ class ImportsController extends Controller
                         $student_birthday_1 = $item->student_birthday_1 ? "'".$item->student_birthday_1."'" :'NULL';
                         $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                         $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_1',$student_birthday_1,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
+                        $query_student.= "('$item->student_name_1',$student_birthday_1,".(int)$item->student_birthday_year_only_1.",'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
                     }
                     if($item->student_name_2){
                         $check_import_student =1;
                         $student_birthday_2 = $item->student_birthday_2 ? "'".$item->student_birthday_2."'" :'NULL';
                         $checkin_at = $item->checkin_at ? "'".$item->checkin_at."'" :'NULL';
                         $checkin_branch_accounting_id = $item->checkin_branch_accounting_id ? "'".$item->checkin_branch_accounting_id."'" :'NULL';
-                        $query_student.= "('$item->student_name_2',$student_birthday_2,'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
+                        $query_student.= "('$item->student_name_2',$student_birthday_2,".(int)$item->student_birthday_year_only_2.",'$created_at','$creator_id','$item->gud_mobile1',$checkin_at,$checkin_branch_accounting_id),";
                     }
                 }
                 $query = substr($query, 0, -1);

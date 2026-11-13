@@ -973,7 +973,7 @@
       <button type="button" class="mobile-menu-toggle" onclick="toggleSidebar()" aria-label="Mở mục lục">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <a href="/" onclick="handleBack(event)" class="btn-back-header" title="Quay lại hệ thống ERP">
+      <a href="/" class="btn-back-header" title="Quay lại hệ thống ERP">
         <i class="fa-solid fa-arrow-left"></i>
         <span>QUAY LẠI ERP</span>
       </a>
@@ -2968,7 +2968,7 @@
   </div>
 
   <!-- FLOATING QUICK BACK BUTTON -->
-  <a href="/" onclick="handleBack(event)" class="floating-back-btn" title="Quay lại hệ thống ERP">
+  <a href="/" class="floating-back-btn" title="Quay lại hệ thống ERP">
     <i class="fa-solid fa-arrow-left"></i>
     <span>Quay lại ERP</span>
   </a>
@@ -2992,15 +2992,6 @@
         sidebar.classList.remove('active');
         backdrop.classList.remove('active');
         document.body.style.overflow = '';
-      }
-    }
-
-    function handleBack(e) {
-      if (e) e.preventDefault();
-      if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
-        window.history.back();
-      } else {
-        window.location.href = '/';
       }
     }
 

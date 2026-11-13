@@ -100,8 +100,10 @@ class ParentsController extends Controller
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
                 (SELECT m.name FROM users uo JOIN users m ON m.id = uo.manager_id WHERE uo.id = p.owner_id LIMIT 1) AS owner_leader_name,
                 (SELECT COUNT(*) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 1,1) AS hs2_name,
+                (SELECT YEAR(birthday) FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_birth_year,
+                (SELECT YEAR(birthday) FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 1,1) AS hs2_birth_year,
                 (SELECT GROUP_CONCAT(DISTINCT pr.name SEPARATOR ', ')
                  FROM crm_students AS cs
                  LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
@@ -265,8 +267,10 @@ class ParentsController extends Controller
                 (SELECT name FROM branches WHERE id=p.branch_id) AS branch_name,
                 (SELECT COUNT(ct.id) FROM crm_students cs INNER JOIN contracts ct ON (ct.student_id = cs.lms_id AND cs.parent_id = p.id) WHERE ct.status > 0) AS contract_count,
                 (SELECT u.name FROM crm_parent_logs cpl LEFT JOIN users u ON u.id=cpl.creator_id WHERE cpl.parent_id=p.id ORDER BY cpl.id ASC LIMIT 1) AS first_owner_name,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 0,1) AS hs1_name,
-                (SELECT name FROM crm_students WHERE parent_id=p.id LIMIT 1,1) AS hs2_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_name,
+                (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 1,1) AS hs2_name,
+                (SELECT YEAR(birthday) FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_birth_year,
+                (SELECT YEAR(birthday) FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 1,1) AS hs2_birth_year,
                 (SELECT GROUP_CONCAT(DISTINCT pr.name SEPARATOR ', ')
                  FROM crm_students AS cs
                  LEFT JOIN crm_student_checkin AS csc ON csc.crm_student_id = cs.id
@@ -491,11 +495,13 @@ class ParentsController extends Controller
         $parent_branch_id = data_get($parent, 'branch_id');
         foreach($students AS $student){
             if (data_get($student, 'name')){
+                $bd = u::parseBirthday(data_get($student, 'birthday'), data_get($student, 'birthday_year_only'));
                 $crm_student_id = u::insertSimpleRow(array(
                     'parent_id'=>$parent_id,
                     'name'=>data_get($student, 'name'),
                     'gender' => data_get($student, 'gender'),
-                    'birthday' => data_get($student, 'birthday'),
+                    'birthday' => $bd['date'],
+                    'birthday_year_only' => $bd['year_only'],
                     'school_level' => data_get($student, 'school_level'),
                     'school' => data_get($student, 'school'),
                     'note' => data_get($student, 'note'),

@@ -243,6 +243,7 @@
                 <th style="width: 190px;">Tên khách hàng</th>
                 <th class="th-center" style="width: 130px;">Số điện thoại</th>
                 <th style="width: 150px;">Học sinh</th>
+                <th class="th-center" style="width: 100px; white-space: nowrap;">Năm sinh</th>
                 <th style="width: 130px;">Sản phẩm</th>
                 <th style="width: 140px;">Nguồn</th>
                 <th style="width: 160px;">Người phụ trách</th>
@@ -303,6 +304,14 @@
                     <span v-if="item.hs2_name">, {{ item.hs2_name }}</span>
                   </span>
                   <span v-else class="text-gray-400 italic text-xs">Chưa có</span>
+                </td>
+
+                <!-- Năm sinh -->
+                <td class="td-center" style="font-size: 14px; white-space: nowrap;">
+                  <span v-if="item.hs1_birth_year || item.hs2_birth_year">
+                    {{ item.hs1_birth_year || '-' }}<span v-if="item.hs2_name">, {{ item.hs2_birth_year || '-' }}</span>
+                  </span>
+                  <span v-else class="text-gray-400">-</span>
                 </td>
 
                 <!-- Sản phẩm -->
@@ -376,7 +385,7 @@
 
               <!-- Trống dữ liệu -->
               <tr v-if="!parents || parents.length === 0">
-                <td colspan="13" class="text-center py-8 text-gray-400">
+                <td colspan="14" class="text-center py-8 text-gray-400">
                   <i class="feather icon-inbox text-3xl mb-2 block"></i>
                   Không tìm thấy khách hàng phù hợp với điều kiện lọc
                 </td>

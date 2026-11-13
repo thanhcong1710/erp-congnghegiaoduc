@@ -176,6 +176,48 @@ const levelOptionsParent = [
   {id:12,label:'12. KH Danh sách đen'},
 ]
 
+// Ngày sinh nhập tay: "2019" (chỉ năm), "dd/mm/yyyy", "d/m/yyyy", "dd-mm-yyyy", "dd.mm.yyyy", "yyyy-mm-dd".
+// Trả về { date: 'YYYY-MM-DD', yearOnly: 0|1 } (chỉ năm => YYYY-01-01, yearOnly = 1),
+// { date: '', yearOnly: 0 } nếu bỏ trống, null nếu sai định dạng.
+function parseManualBirthday(str) {
+  const v = (str || '').toString().trim()
+  if (v === '') return { date: '', yearOnly: 0 }
+  let d, m, y, yearOnly = 0
+  let r
+  if ((r = v.match(/^(\d{4})$/))) {
+    y = +r[1]; m = 1; d = 1; yearOnly = 1
+  } else if ((r = v.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/))) {
+    d = +r[1]; m = +r[2]; y = +r[3]
+  } else if ((r = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/))) {
+    y = +r[1]; m = +r[2]; d = +r[3]
+  } else {
+    return null
+  }
+  if (y < 1900 || y > new Date().getFullYear()) return null
+  const dt = new Date(y, m - 1, d)
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null
+  if (dt > new Date()) return null
+  return { date: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, yearOnly }
+}
+
+// Hiển thị ngày sinh: chỉ năm => "2019", đầy đủ => "15/03/2019"
+function formatBirthday(date, yearOnly) {
+  const r = (date || '').toString().match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (!r) return date || ''
+  return +yearOnly === 1 ? r[1] : `${r[3]}/${r[2]}/${r[1]}`
+}
+
+// Giá trị đưa vào ô nhập tay (giống hiển thị)
+function formatBirthdayInput(date, yearOnly) {
+  return formatBirthday(date, yearOnly)
+}
+
+// Tuổi tính theo năm (dùng cho dòng xem trước)
+function birthdayAge(date) {
+  const r = (date || '').toString().match(/^(\d{4})/)
+  return r ? new Date().getFullYear() - +r[1] : null
+}
+
 export default {
   dateToString,
   checkPermission,
@@ -186,5 +228,9 @@ export default {
   isGreaterThan,
   getDateMonth,
   levelOptionsParent,
-  statusOptionsCare
+  statusOptionsCare,
+  parseManualBirthday,
+  formatBirthday,
+  formatBirthdayInput,
+  birthdayAge
 }

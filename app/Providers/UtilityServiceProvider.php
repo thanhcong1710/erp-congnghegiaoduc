@@ -194,6 +194,44 @@ class UtilityServiceProvider extends ServiceProvider
             'gender' => data_get($data, 'gender'),
         );
     }
+    /**
+     * Chuẩn hoá ngày sinh học sinh nhập tay / từ Excel.
+     * Nhận: "2019" (chỉ năm), "15/03/2019", "15-03-2019", "15.03.2019", "2019-03-15", số serial ngày của Excel.
+     * Trả về ['date' => 'Y-m-d', 'year_only' => 0|1]; ['date' => null, 'year_only' => 0] nếu trống/không hợp lệ.
+     * Chỉ năm => lưu Y-01-01 kèm year_only = 1.
+     */
+    public static function parseBirthday($value, $year_only = null)
+    {
+        $empty = ['date' => null, 'year_only' => 0];
+        $v = trim((string)$value);
+        if ($v === '') {
+            return $empty;
+        }
+        $max_year = (int)date('Y');
+        $build = function ($y, $m, $d, $yo) use ($empty, $max_year) {
+            $y = (int)$y; $m = (int)$m; $d = (int)$d;
+            if ($y < 1900 || $y > $max_year || !checkdate($m, $d, $y)) {
+                return $empty;
+            }
+            return ['date' => sprintf('%04d-%02d-%02d', $y, $m, $d), 'year_only' => $yo ? 1 : 0];
+        };
+        if (preg_match('/^\d{4}$/', $v)) {
+            return $build($v, 1, 1, 1);
+        }
+        if (preg_match('/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/', $v, $r)) {
+            return $build($r[3], $r[2], $r[1], 0);
+        }
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})/', $v, $r)) {
+            // Ngày dạng Y-m-d (từ form/DB): nếu client không gửi cờ thì coi là ngày đầy đủ
+            return $build($r[1], $r[2], $r[3], (int)$year_only === 1 && (int)$r[2] === 1 && (int)$r[3] === 1);
+        }
+        if (is_numeric($v) && (float)$v > 3000) {
+            // Ô ngày trong Excel (đọc dạng data-only) là số serial
+            $ts = ((int)$v - 25569) * 86400;
+            return $build(gmdate('Y', $ts), gmdate('m', $ts), gmdate('d', $ts), 0);
+        }
+        return $empty;
+    }
     public static function phoneNew($number = '')
     {
         $resp = false;

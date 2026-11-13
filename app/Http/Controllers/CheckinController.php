@@ -121,6 +121,7 @@ class CheckinController extends Controller
                 'lastname' => data_get($arr_name, 'lastname'),
                 'gender' => data_get($crm_student_info, 'gender'),
                 'date_of_birth' => data_get($crm_student_info, 'birthday'),
+                'birthday_year_only' => (int)data_get($crm_student_info, 'birthday_year_only'),
                 'gud_mobile1' => data_get($crm_parent_info, 'mobile_1'),
                 'gud_name1' => data_get($crm_parent_info, 'name'),
                 'gud_email1' => data_get($crm_parent_info, 'email'),
@@ -231,11 +232,13 @@ class CheckinController extends Controller
         $students  = data_get($request, 'students', []);
         foreach($students AS $student){
             if (data_get($student, 'name')){
+                $bd = u::parseBirthday(data_get($student, 'birthday'), data_get($student, 'birthday_year_only'));
                 $crm_student_id = u::insertSimpleRow(array(
                     'parent_id'=>$parent_id,
                     'name'=>data_get($student, 'name'),
                     'gender' => data_get($student, 'gender'),
-                    'birthday' => data_get($student, 'birthday'),
+                    'birthday' => $bd['date'],
+                    'birthday_year_only' => $bd['year_only'],
                     'school_level' => data_get($student, 'school_level'),
                     'school' => data_get($student, 'school'),
                     'note' => data_get($student, 'note'),
@@ -272,7 +275,8 @@ class CheckinController extends Controller
                         'midname' => data_get($arr_name, 'midname'),
                         'lastname' => data_get($arr_name, 'lastname'),
                         'gender' => data_get($student, 'gender'),
-                        'date_of_birth' => data_get($student, 'birthday'),
+                        'date_of_birth' => $bd['date'],
+                        'birthday_year_only' => $bd['year_only'],
                         'gud_mobile1' => data_get($parent, 'mobile_1'),
                         'gud_name1' => data_get($parent, 'name'),
                         'gud_email1' => data_get($parent, 'email'),

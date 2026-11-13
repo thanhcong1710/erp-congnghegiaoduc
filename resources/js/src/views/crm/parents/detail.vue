@@ -588,7 +588,7 @@
                         <td class="text-center nowrap">
                           <div v-if="item.birthday" class="crm-birthday-cell">
                             <i class="fa fa-calendar-alt text-primary mr-1"></i>
-                            <span>{{ item.birthday }}</span>
+                            <span>{{ formatBirthday(item.birthday, item.birthday_year_only) }}</span>
                           </div>
                           <span v-else class="text-gray-400">Chưa cập nhật</span>
                         </td>
@@ -791,14 +791,8 @@
             <input class="vs-inputx vs-input--input normal" type="text" v-model="student.name">
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
-            <label>Ngày sinh</label>
-            <datepicker
-              class=" w-full calendar"
-              v-model="student.birthday"
-              placeholder="Chọn ngày sinh nhật"
-              :lang="datepickerOptions.lang"
-              @change="selectDate"
-            />
+            <label>Ngày sinh / Năm sinh</label>
+            <birthday-input v-model="student.birthday" />
           </div>
           <div class="vx-col md:w-1/2 w-full mb-4">
             <label>Giới tính</label>
@@ -914,6 +908,7 @@
   import u from '../../../until/helper.js'
   import moment from 'moment';
   import datepicker from "vue2-datepicker";
+  import BirthdayInput from "../../../components/BirthdayInput.vue";
   import select from 'vue-select'
 
   export default {
@@ -921,7 +916,8 @@
       "vue-select": select,
       Multiselect,
       moment,
-      datepicker
+      datepicker,
+      BirthdayInput
     },
     data() {
       return {
@@ -1179,6 +1175,9 @@
       this.loadStudents();
     },
     methods: {
+      formatBirthday(date, yearOnly) {
+        return u.formatBirthday(date, yearOnly)
+      },
       localeDataSourceDetail(data=null){
         if (data && typeof data === 'object') {
           const source_id = data.id
@@ -1853,7 +1852,7 @@
           this.student.name =data.name
           this.student.gender =data.gender
           this.student.school_level =data.school_level
-          this.student.birthday =data.birthday
+          this.student.birthday = u.formatBirthdayInput(data.birthday, data.birthday_year_only)
           this.student.select_school =data.school
           this.student.school = data.school
           this.student.note =data.note
@@ -1935,8 +1934,12 @@
           mess += " - Tên học sinh không được để trống<br/>";
           resp = false;
         }
-        if (this.student.birthday == "") {
+        const bd = u.parseManualBirthday(this.student.birthday);
+        if (bd && bd.date === "") {
           mess += " - Ngày sinh không được để trống<br/>";
+          resp = false;
+        } else if (bd === null) {
+          mess += " - Ngày sinh không đúng định dạng (yyyy hoặc dd/mm/yyyy)<br/>";
           resp = false;
         }
         if (this.student.gender == "") {
@@ -1950,7 +1953,7 @@
           return false;
         }
         this.$vs.loading();
-        axios.p(`/api/crm/students/add`,this.student)
+        axios.p(`/api/crm/students/add`,{ ...this.student, birthday: bd.date, birthday_year_only: bd.yearOnly })
         .then((response) => {
           this.modal_student.show = false
           this.$vs.loading.close();

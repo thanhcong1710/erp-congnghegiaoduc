@@ -62,6 +62,8 @@ Tất cả API nằm trong `Route::group(['middleware'=>'api'])`, phần cần �
 
 ## 5. Dữ liệu – bảng hay dùng
 `contracts` (gói/hợp đồng học – bảng trung tâm), `students`, `crm_parents`, `crm_students`, `crm_customer_care`, `crm_import_parents`, `crm_student_checkin`, `users`, `roles`, `role_has_user`, `branch_has_user`, `branches`, `classes`, `schedules`, `schedule_has_student`, `sessions`, `term_student_user`, `products`, `programs`, `subjects`, `tuition_fee`, `tuition_fee_relation`, `payments`, `reserves`, `class_transfer`, `tuition_transfer`, `coupons`, `discount_codes`, `sources`, `report_*` (bảng tổng hợp báo cáo: `report_renews`, `report_full_fee_active`, `report_classes`, `report_reserve`, `report_pending`, `report_users`), `log_jobs`. Riêng STEMKEY: `lms_tests`, `ucrea_*`, `igbh_*` (đánh giá học sinh).
+- Ngày sinh học sinh (`crm_students.birthday`, `students.date_of_birth`): chỉ biết năm → lưu `YYYY-01-01` + cờ `birthday_year_only=1`. Parse bằng `u::parseBirthday()` (BE) / `u.parseManualBirthday()` (FE), nhập bằng component `components/BirthdayInput.vue`, hiển thị bằng `u.formatBirthday(date, yearOnly)`.
+- Import khách hàng (`ImportsController::assign`) tự đưa học sinh lên chính thức (`promoteImportedStudents`); xử lý bù: `php artisan crm:promoteImportedStudents [--run]`.
 
 ## 6. Cron (`app/Console/Kernel.php`)
 `jobsSendEmail:command` (mỗi phút) · `scheduleHasStudent:process` 00:05 · `scheduleHasStudent:add` 01:00 · `updateEnrolmentLastDate:command` 01:00 · `processdata:command` 02:00 · `jobsProcessLockParent:command` 00:00 · `autoWithdraw:command` 03:00. Command nằm ở `app/Console/Commands/`.

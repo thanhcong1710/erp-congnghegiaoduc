@@ -14,13 +14,15 @@ class StudentsController extends Controller
 {
     public function add(Request $request)
     {
+        $bd = u::parseBirthday($request->birthday, $request->birthday_year_only);
         if ($request->id > 0) {
             $pre_student_info = u::first("SELECT * FROM crm_students WHERE id= " . (int)$request->id);
             $data_update = array(
                 'parent_id' => $request->parent_id,
                 'name' => $request->name,
                 'gender' => $request->gender,
-                'birthday' => $request->birthday,
+                'birthday' => $bd['date'],
+                'birthday_year_only' => $bd['year_only'],
                 'school_level' => $request->school_level,
                 'school' => $request->school,
                 'note' => $request->note,
@@ -42,7 +44,8 @@ class StudentsController extends Controller
                     'midname' => data_get($arr_name, 'midname'),
                     'lastname' => data_get($arr_name, 'lastname'),
                     'gender' => $request->gender,
-                    'date_of_birth' => $request->birthday,
+                    'date_of_birth' => $bd['date'],
+                    'birthday_year_only' => $bd['year_only'],
                     'note' => $request->note,
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
@@ -75,7 +78,8 @@ class StudentsController extends Controller
                     'parent_id' => $request->parent_id,
                     'name' => $request->name,
                     'gender' => $request->gender,
-                    'birthday' => $request->birthday,
+                    'birthday' => $bd['date'],
+                    'birthday_year_only' => $bd['year_only'],
                     'school_level' => $request->school_level,
                     'school' => $request->school,
                     'note' => $request->note,
@@ -157,6 +161,7 @@ class StudentsController extends Controller
                 'lastname' => data_get($arr_name, 'lastname'),
                 'gender' => data_get($crm_student_info, 'gender'),
                 'date_of_birth' => data_get($crm_student_info, 'birthday'),
+                'birthday_year_only' => (int)data_get($crm_student_info, 'birthday_year_only'),
                 'gud_mobile1' => data_get($crm_parent_info, 'mobile_1'),
                 'gud_name1' => data_get($crm_parent_info, 'name'),
                 'gud_email1' => data_get($crm_parent_info, 'email'),
@@ -335,7 +340,7 @@ class StudentsController extends Controller
         $total = u::first("SELECT count(s.id) AS total FROM students AS s 
             LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id) WHERE $cond");
 
-        $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.gud_name1, s.gud_mobile1, s.avatar_url,s.lms_id,
+        $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.birthday_year_only, s.gud_name1, s.gud_mobile1, s.avatar_url,s.lms_id,
                 (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
@@ -397,12 +402,14 @@ class StudentsController extends Controller
     {
         $pre_student_info = u::first("SELECT * FROM students WHERE id = $request->id");
         $arr_name = u::explodeName(data_get($request, 'name'));
+        $bd = u::parseBirthday($request->date_of_birth, $request->birthday_year_only);
         $data_update = array(
             'name' => $request->name,
             'firstname' => data_get($arr_name, 'firstname'),
             'midname' => data_get($arr_name, 'midname'),
             'lastname' => data_get($arr_name, 'lastname'),
-            'date_of_birth' => $request->date_of_birth,
+            'date_of_birth' => $bd['date'],
+            'birthday_year_only' => $bd['year_only'],
             'gender' => $request->gender,
             'province_id' => $request->province_id,
             'district_id' => $request->district_id,

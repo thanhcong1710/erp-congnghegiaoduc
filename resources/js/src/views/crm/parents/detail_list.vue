@@ -785,8 +785,8 @@
 
         <!-- Ngày sinh -->
         <div class="vx-col md:w-1/2 w-full mb-3">
-          <label class="font-medium text-sm">Ngày sinh <span class="text-danger">*</span></label>
-          <input class="vs-inputx vs-input--input normal" type="date" v-model="student_form.birthday">
+          <label class="font-medium text-sm">Ngày sinh / Năm sinh <span class="text-danger">*</span></label>
+          <birthday-input v-model="student_form.birthday" />
         </div>
 
         <!-- Giới tính -->
@@ -912,6 +912,7 @@
 import axios from '../../../http/axios.js'
 import Multiselect from 'vue-multiselect'
 import DatePicker from 'vue2-datepicker'
+import BirthdayInput from '../../../components/BirthdayInput.vue'
 import u from '../../../until/helper.js'
 import select from 'vue-select'
 import moment from 'moment'
@@ -921,6 +922,7 @@ export default {
   components: {
     'vue-select': select,
     DatePicker,
+    BirthdayInput,
     Multiselect,
   },
   data() {
@@ -1495,14 +1497,20 @@ export default {
         this.modal_student.alert.body = 'Tên học sinh không được để trống'
         return
       }
-      if (!this.student_form.birthday) {
+      const bd = u.parseManualBirthday(this.student_form.birthday)
+      if (bd && bd.date === '') {
         this.modal_student.alert.active = true
         this.modal_student.alert.body = 'Ngày sinh học sinh không được để trống'
         return
       }
+      if (bd === null) {
+        this.modal_student.alert.active = true
+        this.modal_student.alert.body = 'Ngày sinh không đúng định dạng (yyyy hoặc dd/mm/yyyy)'
+        return
+      }
 
       this.$vs.loading()
-      axios.p('/api/crm/students/add', this.student_form)
+      axios.p('/api/crm/students/add', { ...this.student_form, birthday: bd.date, birthday_year_only: bd.yearOnly })
         .then(res => {
           this.$vs.loading.close()
           if (res.data.status) {
@@ -1520,7 +1528,8 @@ export default {
               target.students.push({
                 name: this.student_form.name,
                 gender: this.student_form.gender,
-                birthday: this.student_form.birthday
+                birthday: bd.date,
+                birthday_year_only: bd.yearOnly
               })
               if (!target.hs1_name) {
                 target.hs1_name = this.student_form.name

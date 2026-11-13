@@ -53,7 +53,7 @@
           </span>
           <span v-if="student_info.date_of_birth" class="hero-tag">
             <i class="fa-regular fa-calendar text-primary mr-1"></i>
-            {{ student_info.date_of_birth | formatDateView }}
+            {{ formatBirthday(student_info.date_of_birth, student_info.birthday_year_only) }}
           </span>
           <span v-if="student_info.branch_name" class="hero-tag">
             <i class="fa-solid fa-building text-primary mr-1"></i>
@@ -161,6 +161,7 @@
 </template>
 
 <script>
+import u from '../../../until/helper.js'
 import Multiselect from "vue-multiselect";
 import axios from "../../../http/axios.js";
 import StudentInfo from "./components/studentInfo.vue";
@@ -195,6 +196,9 @@ export default {
     this.getData();
   },
   methods: {
+    formatBirthday(date, yearOnly) {
+      return u.formatBirthday(date, yearOnly)
+    },
     copyCode(code) {
       if (!code) return;
       navigator.clipboard.writeText(code).then(() => {

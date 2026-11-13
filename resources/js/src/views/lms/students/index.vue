@@ -171,7 +171,7 @@
           <div class="mobile-info-body py-2.5 text-sm space-y-1.5">
             <div class="flex items-center justify-between text-gray-600" v-if="item.date_of_birth">
               <span class="text-gray-500"><i class="fa-regular fa-calendar text-gray-400 mr-1.5"></i>Ngày sinh:</span>
-              <span class="font-medium text-gray-800">{{ item.date_of_birth | formatDateView }}</span>
+              <span class="font-medium text-gray-800">{{ formatBirthday(item.date_of_birth, item.birthday_year_only) }}</span>
             </div>
 
             <div class="flex items-center justify-between text-gray-600">
@@ -300,7 +300,7 @@
                   </div>
                   <div class="text-gray-500" v-if="item.date_of_birth">
                     <i class="fa-regular fa-calendar mr-1 text-gray-400"></i>
-                    {{ item.date_of_birth | formatDateView }}
+                    {{ formatBirthday(item.date_of_birth, item.birthday_year_only) }}
                   </div>
                 </td>
 
@@ -489,6 +489,9 @@ export default {
     window.removeEventListener('resize', this.handleResize);
   },
   methods: {
+    formatBirthday(date, yearOnly) {
+      return u.formatBirthday(date, yearOnly)
+    },
     handleResize() {
       this.windowWidth = window.innerWidth;
     },
