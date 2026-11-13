@@ -517,7 +517,8 @@
   display: flex;
   flex-direction: column;
 }
-.ev-sheet__body { padding: 8mm 11mm 6mm; flex: 1; }
+.ev-sheet__body { padding: 6mm 11mm 5mm; flex: 1; }
+.ev-sheet__body > *:last-child { margin-bottom: 0; }
 .ev-sheet__foot {
   padding: 3mm 11mm 5mm;
   display: flex;
@@ -586,10 +587,11 @@
   .ev-doc { width: 210mm !important; margin: 0 !important; }
   .ev-sheet {
     width: 210mm !important;
-    min-height: 296mm !important;
+    min-height: 276mm !important;
     margin: 0 !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    overflow: visible !important;
     break-after: page;
     page-break-after: always;
   }
@@ -599,5 +601,6 @@
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
-  @page { size: A4 portrait; margin: 0; }
+  /* Lề trên/dưới 10mm: tờ nào lỡ tràn trang cũng không dính mép giấy */
+  @page { size: A4 portrait; margin: 10mm 0; }
 }

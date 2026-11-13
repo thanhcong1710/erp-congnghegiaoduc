@@ -118,23 +118,6 @@
               </tfoot>
             </table>
 
-            <h2 class="sm-sec"><span>2</span> Thái độ học tập &amp; năng lực quan sát</h2>
-            <div class="sm-charts ev-avoid-break">
-              <div class="sm-chart-box">
-                <div class="sm-chart-title">Thái độ học tập trên lớp</div>
-                <div ref="chartAttitude" class="sm-chart"></div>
-                <div class="sm-chart-legend">
-                  <span v-for="a in attitudeItems" :key="a.key">{{ a.label }}: <strong>{{ d.avg_attitude[a.key] }}</strong></span>
-                </div>
-              </div>
-              <div class="sm-chart-box">
-                <div class="sm-chart-title">Năng lực quan sát &amp; tư duy</div>
-                <div ref="chartDetection" class="sm-chart"></div>
-                <div class="sm-chart-legend">
-                  <span v-for="a in detectionItems" :key="a.key">{{ a.label }}: <strong>{{ d.avg_detection[a.key] }}</strong></span>
-                </div>
-              </div>
-            </div>
           </div>
           <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Summative</span><span>{{ r.stu_nm }} · Trang 1/2</span></footer>
         </section>
@@ -150,6 +133,23 @@
           </header>
 
           <div class="ev-sheet__body">
+            <h2 class="sm-sec"><span>2</span> Thái độ học tập &amp; năng lực quan sát</h2>
+            <div class="sm-charts ev-avoid-break">
+              <div class="sm-chart-box">
+                <div class="sm-chart-title">Thái độ học tập trên lớp</div>
+                <div ref="chartAttitude" class="sm-chart"></div>
+                <div class="sm-chart-legend">
+                  <span v-for="a in attitudeItems" :key="a.key">{{ a.label }}: <strong>{{ d.avg_attitude[a.key] }}</strong> <em>{{ levelText(d.avg_attitude[a.key]) }}</em></span>
+                </div>
+              </div>
+              <div class="sm-chart-box">
+                <div class="sm-chart-title">Năng lực quan sát &amp; tư duy</div>
+                <div ref="chartDetection" class="sm-chart"></div>
+                <div class="sm-chart-legend">
+                  <span v-for="a in detectionItems" :key="a.key">{{ a.label }}: <strong>{{ d.avg_detection[a.key] }}</strong> <em>{{ levelText(d.avg_detection[a.key]) }}</em></span>
+                </div>
+              </div>
+            </div>
             <h2 class="sm-sec"><span>3</span> Kết quả bài kiểm tra tự luận cuối kỳ</h2>
             <table class="sm-table ev-avoid-break">
               <thead>
@@ -182,20 +182,7 @@
               </tfoot>
             </table>
 
-            <h2 class="sm-sec"><span>4</span> Đánh giá theo tiêu chí</h2>
-            <div class="sm-criteria ev-avoid-break">
-              <div v-for="grp in criteriaGroups" :key="grp.title" class="sm-criteria__col">
-                <div class="sm-criteria__title">{{ grp.title }}</div>
-                <div v-for="it in grp.items" :key="it.key" class="sm-crit">
-                  <span class="sm-crit__label">{{ it.label }}</span>
-                  <span class="sm-crit__bar"><span :style="{ width: (Number(grp.src[it.key]) / 5 * 100) + '%', background: grp.color }"></span></span>
-                  <span class="sm-crit__val">{{ grp.src[it.key] }}<small>/5</small></span>
-                  <span class="sm-crit__lv">{{ levelText(grp.src[it.key]) }}</span>
-                </div>
-              </div>
-            </div>
-
-            <h2 class="sm-sec"><span>5</span> Nhận xét của giáo viên</h2>
+            <h2 class="sm-sec"><span>4</span> Nhận xét của giáo viên</h2>
             <div class="sm-comment ev-avoid-break">
               {{ teacherComment || 'Học sinh có tinh thần học tập tốt, hoàn thành đầy đủ bài tập và tích cực tham gia các hoạt động tư duy trong suốt 12 tuần.' }}
             </div>
@@ -231,7 +218,7 @@
 import axios from '@/http/axios.js'
 import * as echarts from 'echarts'
 import '../../_shared/eval-ui.css'
-import { fmtDate, autoPrintIfRequested } from '../../_shared/helpers'
+import { fmtDate, autoPrintIfRequested, installPrintFit } from '../../_shared/helpers'
 
 export default {
   name: 'IgbhSummativeReport',
@@ -270,15 +257,12 @@ export default {
     weeksWithData() {
       return ((this.d && this.d.report_data) || []).filter(w => w.attitude).length
     },
-    criteriaGroups() {
-      return [
-        { title: 'Thái độ học tập', items: this.attitudeItems, src: this.d.avg_attitude || {}, color: '#ea580c' },
-        { title: 'Năng lực quan sát & tư duy', items: this.detectionItems, src: this.d.avg_detection || {}, color: '#2563eb' }
-      ]
-    }
   },
   created() {
     this.fetchData()
+  },
+  mounted() {
+    installPrintFit(this)
   },
   beforeDestroy() {
     ['chartAttitude', 'chartDetection'].forEach(n => {
@@ -405,7 +389,9 @@ export default {
 .sm-chart-box { border: 1px solid #e2e8f0; border-radius: 2mm; padding: 3mm; text-align: center; }
 .sm-chart-title { font-size: 14px; font-weight: 800; color: #1e3a8a; }
 .sm-chart { width: 100%; height: 58mm; }
-.sm-chart-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 1mm 4mm; font-size: 13px; color: #64748b; }
+.sm-chart-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 3mm; font-size: 13px; color: #64748b; text-align: left; padding: 0 2mm; }
+.sm-chart-legend em { font-style: normal; color: #94a3b8; }
+.sm-charts { margin-bottom: 6mm; }
 .sm-chart-legend strong { color: #0f172a; }
 
 .sm-criteria { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-bottom: 6mm; }

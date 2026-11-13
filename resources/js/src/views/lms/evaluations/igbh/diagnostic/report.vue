@@ -135,6 +135,27 @@
               </div>
             </div>
 
+            <div v-if="generalComment" class="ev-avoid-break">
+              <h2 class="dg-sec">Nhận xét kiến thức cơ bản</h2>
+              <div class="dg-comment" v-html="generalComment"></div>
+            </div>
+          </div>
+          <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Diagnostic</span><span>{{ general.stu_nm }} · Trang 1/3</span></footer>
+        </section>
+
+        <!-- ================= TRANG 2: TƯ DUY TOÁN HỌC ================= -->
+        <section class="ev-sheet">
+          <header class="dg-head is-slim">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="dg-head__logo" />
+            <div class="dg-head__titles">
+              <p class="dg-head__super">{{ general.stu_nm }} · {{ general.test_nm }}</p>
+              <h1 class="dg-head__title">Phân tích kiến thức &amp; tư duy toán học</h1>
+            </div>
+            <div class="dg-head__level"><span>Điểm tư duy</span><strong>{{ general.thinking_total }}/{{ thinkingMaxTotal }}</strong></div>
+          </header>
+
+          <div class="ev-sheet__body">
+            <div class="dg-part">Phần 1 · Kiến thức cơ bản (tiếp)</div>
             <div class="dg-row ev-avoid-break">
               <div class="dg-col">
                 <h2 class="dg-sec">Theo cấp độ câu hỏi</h2>
@@ -166,27 +187,8 @@
               </div>
             </div>
 
-            <div v-if="generalComment" class="ev-avoid-break">
-              <h2 class="dg-sec">Nhận xét kiến thức cơ bản</h2>
-              <div class="dg-comment" v-html="generalComment"></div>
-            </div>
-          </div>
-          <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Diagnostic</span><span>{{ general.stu_nm }} · Trang 1/2</span></footer>
-        </section>
-
-        <!-- ================= TRANG 2: TƯ DUY TOÁN HỌC ================= -->
-        <section class="ev-sheet">
-          <header class="dg-head is-slim">
-            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="dg-head__logo" />
-            <div class="dg-head__titles">
-              <p class="dg-head__super">PHẦN 2 · {{ general.stu_nm }}</p>
-              <h1 class="dg-head__title">Đánh giá năng lực tư duy toán học</h1>
-            </div>
-            <div class="dg-head__level"><span>Điểm tư duy</span><strong>{{ general.thinking_total }}/{{ thinkingMaxTotal }}</strong></div>
-          </header>
-
-          <div class="ev-sheet__body">
-            <h2 class="dg-sec">Kết quả theo từng câu hỏi</h2>
+            <div class="dg-part">Phần 2 · Năng lực tư duy toán học</div>
+            <h2 class="dg-sec">Kết quả tư duy theo từng câu hỏi</h2>
             <table class="dg-table dg-qtable ev-avoid-break">
               <thead>
                 <tr>
@@ -234,6 +236,23 @@
               </div>
             </div>
 
+          </div>
+          <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Diagnostic</span><span>{{ general.stu_nm }} · Trang 2/3</span></footer>
+        </section>
+
+        <!-- ================= TRANG 3 ================= -->
+        <section class="ev-sheet">
+          <header class="dg-head is-slim">
+            <img src="@assets/images/logo/stemkey-logo.png" alt="STEMKEY" class="dg-head__logo" />
+            <div class="dg-head__titles">
+              <p class="dg-head__super">{{ general.stu_nm }} · {{ general.test_nm }}</p>
+              <h1 class="dg-head__title">Kết luận năng lực tư duy toán học</h1>
+            </div>
+            <div class="dg-head__level"><span>Điểm tư duy</span><strong>{{ general.thinking_total }}/{{ thinkingMaxTotal }}</strong></div>
+          </header>
+
+          <div class="ev-sheet__body">
+            <h2 class="dg-sec">Biểu đồ năng lực theo lĩnh vực</h2>
             <div class="dg-row ev-avoid-break">
               <div class="dg-col dg-chartcell">
                 <canvas ref="thkRadarCanvas" data-w="340" data-h="230"></canvas>
@@ -296,7 +315,7 @@
               </div>
             </div>
           </div>
-          <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Diagnostic</span><span>{{ general.stu_nm }} · Trang 2/2</span></footer>
+          <footer class="ev-sheet__foot"><span>STEMKEY · IG.BH Diagnostic</span><span>{{ general.stu_nm }} · Trang 3/3</span></footer>
         </section>
       </div>
     </div>
@@ -306,7 +325,7 @@
 <script>
 import axios from '@/http/axios.js'
 import '../../_shared/eval-ui.css'
-import { fmtDate, hiDpiCanvas, autoPrintIfRequested } from '../../_shared/helpers'
+import { fmtDate, hiDpiCanvas, autoPrintIfRequested, installPrintFit } from '../../_shared/helpers'
 
 const EVALUATION_LEVELS = [
   { min: 48, max: 60, range: '48~60', label: 'Ưu tú', note: 'Khả năng tư duy và giải quyết vấn đề trong phạm vi đa dạng rất ưu tú và vượt trội so với các bạn cùng lứa tuổi. Nên thử thách nhiều hơn với những bài toán khó cũng như nội dung mới trước chương trình học trên trường.' },
@@ -510,6 +529,9 @@ export default {
   created() {
     this.resultId = this.$route.params.id
     this.fetchDetail()
+  },
+  mounted() {
+    installPrintFit(this)
   },
   methods: {
     fmtDate,
@@ -898,6 +920,7 @@ export default {
 .dg-kpi.is-main span, .dg-kpi.is-main small, .dg-kpi.is-main em { color: rgba(255, 255, 255, 0.8); }
 .dg-kpi.is-main strong { color: #fde047; }
 
+.dg-part { font-size: 13.5px; font-weight: 800; color: #ffffff; background: #2563eb; display: inline-block; padding: 1mm 3.5mm; border-radius: 99px; margin: 0 0 3.5mm; text-transform: uppercase; letter-spacing: 0.4px; }
 .dg-sec { font-size: 15px; font-weight: 800; color: #1e3a8a; border-left: 4px solid #2563eb; padding-left: 2.5mm; margin: 0 0 2.5mm; line-height: 1.3; }
 
 .dg-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; margin-bottom: 4.5mm; }

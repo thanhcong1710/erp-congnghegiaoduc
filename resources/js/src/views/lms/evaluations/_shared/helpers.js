@@ -45,6 +45,33 @@ export function autoPrintIfRequested(vm, delay = 800) {
   }
 }
 
+// Mỗi .ev-sheet = đúng 1 trang A4 khi in.
+// Trước khi in: đo chiều cao thật của từng tờ, tờ nào dài hơn vùng in (A4 trừ lề 10mm trên/dưới)
+// thì thu nhỏ (zoom) vừa 1 trang → không bị đẩy khối sang trang trắng, không mất header.
+const MM = 96 / 25.4
+const PRINT_H = 276 * MM
+
+export function installPrintFit(vm) {
+  const sheets = () => (vm.$el && vm.$el.querySelectorAll ? Array.from(vm.$el.querySelectorAll('.ev-sheet')) : [])
+  const before = () => {
+    sheets().forEach(el => {
+      el.style.zoom = ''
+      const prevMin = el.style.minHeight
+      el.style.minHeight = '0'
+      const h = el.scrollHeight
+      el.style.minHeight = prevMin
+      if (h > PRINT_H) el.style.zoom = Math.max(0.8, PRINT_H / h).toFixed(3)
+    })
+  }
+  const after = () => sheets().forEach(el => { el.style.zoom = '' })
+  window.addEventListener('beforeprint', before)
+  window.addEventListener('afterprint', after)
+  vm.$once('hook:beforeDestroy', () => {
+    window.removeEventListener('beforeprint', before)
+    window.removeEventListener('afterprint', after)
+  })
+}
+
 // Vẽ canvas sắc nét (HiDPI + in ấn): trả về ctx đã scale, kích thước logic giữ nguyên
 export function hiDpiCanvas(canvas, w, h, scale = 3) {
   if (!canvas) return null
