@@ -19,8 +19,8 @@
         <router-link :to="`/lms/evaluations/ucrea/form/${g.id}`" class="ev-btn ev-btn--ghost ev-btn--sm">
           <i class="feather icon-edit-2"></i> Sửa điểm
         </router-link>
-        <button class="ev-btn ev-btn--primary ev-btn--sm" @click="exportPdf">
-          <i class="feather icon-printer"></i> In / Lưu PDF
+        <button class="ev-btn ev-btn--print" title="In báo cáo hoặc lưu thành file PDF (Ctrl+P)" @click="exportPdf">
+          <i class="feather icon-printer"></i> In báo cáo / Lưu PDF
         </button>
       </div>
     </div>
@@ -220,7 +220,7 @@
 import axios from '@/http/axios.js'
 import * as echarts from 'echarts'
 import '../_shared/eval-ui.css'
-import { fmtDate } from '../_shared/helpers'
+import { fmtDate, autoPrintIfRequested } from '../_shared/helpers'
 
 const PERIOD_COLORS = { TT001: '#94a3b8', TT002: '#1e3a8a', TT003: '#65a30d' }
 const PEER_AVG = [66, 71, 69, 61]
@@ -338,7 +338,10 @@ export default {
         if (response && response.data && response.data.status === 'success') {
           this.result = response.data.data
           this.selectedTestIds = this.availableTests.map(t => t.id)
-          this.$nextTick(() => this.initCharts())
+          this.$nextTick(() => {
+            this.initCharts()
+            autoPrintIfRequested(this)
+          })
         }
       }).catch(() => { this.loading = false })
     },

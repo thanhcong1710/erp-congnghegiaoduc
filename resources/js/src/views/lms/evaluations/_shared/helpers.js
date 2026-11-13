@@ -35,6 +35,16 @@ export function todayISO() {
   return d.toISOString().substring(0, 10)
 }
 
+// Mở báo cáo với ?print=1 → tự bật hộp thoại in sau khi biểu đồ vẽ xong
+export function autoPrintIfRequested(vm, delay = 800) {
+  if (vm.$route && vm.$route.query && vm.$route.query.print) {
+    setTimeout(() => {
+      window.print()
+      vm.$router.replace({ query: {} }).catch(() => {})
+    }, delay)
+  }
+}
+
 // Vẽ canvas sắc nét (HiDPI + in ấn): trả về ctx đã scale, kích thước logic giữ nguyên
 export function hiDpiCanvas(canvas, w, h, scale = 3) {
   if (!canvas) return null

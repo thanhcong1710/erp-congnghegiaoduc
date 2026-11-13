@@ -96,6 +96,9 @@
                   <router-link :to="`/lms/evaluations/igbh/summative/report/${item.id}`" class="ev-act-text ev-act-text--success">
                     <i class="feather icon-file-text"></i> Báo cáo
                   </router-link>
+                  <router-link :to="{ path: `/lms/evaluations/igbh/summative/report/${item.id}`, query: { print: 1 } }" class="ev-act ev-act--info" title="In báo cáo / Lưu PDF">
+                    <i class="feather icon-printer"></i>
+                  </router-link>
                   <router-link :to="`/lms/evaluations/igbh/summative/form/${item.id}`" class="ev-act ev-act--primary" title="Chấm điểm">
                     <i class="feather icon-edit-2"></i>
                   </router-link>

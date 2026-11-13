@@ -4,7 +4,8 @@
    phân biệt input active/disabled, bảng có overflow-x)
    ===================================================================== */
 
-.ev-page {
+.ev-page,
+.ev-report {
   --ev-primary: #7367f0;
   --ev-primary-soft: rgba(115, 103, 240, 0.1);
   --ev-ink: #0f172a;
@@ -18,6 +19,25 @@
   --ev-info: #0284c7;
   color: var(--ev-text);
   font-size: 14px;
+}
+
+/* Nút in nổi bật trên thanh công cụ báo cáo */
+.ev-btn--print {
+  height: 40px;
+  padding: 0 18px;
+  font-size: 14.5px;
+  background: #16a34a;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+}
+.ev-btn--print:hover { background: #15803d; color: #ffffff; }
+.ev-btn--print kbd {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
 }
 
 /* ---------- Thanh điều hướng module ---------- */

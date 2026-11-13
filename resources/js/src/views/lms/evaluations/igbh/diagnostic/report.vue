@@ -11,8 +11,8 @@
         <router-link :to="`/lms/evaluations/igbh/diagnostic/form/${resultId}`" class="ev-btn ev-btn--ghost ev-btn--sm">
           <i class="feather icon-edit-2"></i> Sửa điểm
         </router-link>
-        <button class="ev-btn ev-btn--primary ev-btn--sm" @click="printReport">
-          <i class="feather icon-printer"></i> In / Lưu PDF
+        <button class="ev-btn ev-btn--print" title="In báo cáo hoặc lưu thành file PDF (Ctrl+P)" @click="printReport">
+          <i class="feather icon-printer"></i> In báo cáo / Lưu PDF
         </button>
       </div>
     </div>
@@ -306,7 +306,7 @@
 <script>
 import axios from '@/http/axios.js'
 import '../../_shared/eval-ui.css'
-import { fmtDate, hiDpiCanvas } from '../../_shared/helpers'
+import { fmtDate, hiDpiCanvas, autoPrintIfRequested } from '../../_shared/helpers'
 
 const EVALUATION_LEVELS = [
   { min: 48, max: 60, range: '48~60', label: 'Ưu tú', note: 'Khả năng tư duy và giải quyết vấn đề trong phạm vi đa dạng rất ưu tú và vượt trội so với các bạn cùng lứa tuổi. Nên thử thách nhiều hơn với những bài toán khó cũng như nội dung mới trước chương trình học trên trường.' },
@@ -602,6 +602,7 @@ export default {
             if (this.$refs.thkDiffBarCanvas) {
               this.drawBarChart(this.$refs.thkDiffBarCanvas, this.thkDiffStats)
             }
+            autoPrintIfRequested(this)
           })
         }
       }).catch(err => {

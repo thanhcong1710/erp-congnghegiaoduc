@@ -11,8 +11,8 @@
         <router-link :to="`/lms/evaluations/igbh/summative/form/${r.id}`" class="ev-btn ev-btn--ghost ev-btn--sm">
           <i class="feather icon-edit-2"></i> Chấm điểm cuối kỳ
         </router-link>
-        <button class="ev-btn ev-btn--primary ev-btn--sm" @click="printReport">
-          <i class="feather icon-printer"></i> In / Lưu PDF
+        <button class="ev-btn ev-btn--print" title="In báo cáo hoặc lưu thành file PDF (Ctrl+P)" @click="printReport">
+          <i class="feather icon-printer"></i> In báo cáo / Lưu PDF
         </button>
       </div>
     </div>
@@ -231,7 +231,7 @@
 import axios from '@/http/axios.js'
 import * as echarts from 'echarts'
 import '../../_shared/eval-ui.css'
-import { fmtDate } from '../../_shared/helpers'
+import { fmtDate, autoPrintIfRequested } from '../../_shared/helpers'
 
 export default {
   name: 'IgbhSummativeReport',
@@ -323,7 +323,10 @@ export default {
             try { sa = typeof d.result.subjective_analysis === 'string' ? JSON.parse(d.result.subjective_analysis) : d.result.subjective_analysis } catch (e) { sa = null }
           }
           this.teacherComment = (sa && sa.teacher_comment) || ''
-          this.$nextTick(() => this.initCharts())
+          this.$nextTick(() => {
+            this.initCharts()
+            autoPrintIfRequested(this)
+          })
         }
       }).catch(() => { this.loading = false })
     },

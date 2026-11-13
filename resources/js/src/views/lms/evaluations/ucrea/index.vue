@@ -136,6 +136,9 @@
                     <router-link :to="`/lms/evaluations/ucrea/report/${item.id}`" class="ev-act-text ev-act-text--success">
                       <i class="feather icon-file-text"></i> Báo cáo
                     </router-link>
+                    <router-link :to="{ path: `/lms/evaluations/ucrea/report/${item.id}`, query: { print: 1 } }" class="ev-act ev-act--info" title="In báo cáo / Lưu PDF">
+                      <i class="feather icon-printer"></i>
+                    </router-link>
                     <router-link :to="`/lms/evaluations/ucrea/form/${item.id}`" class="ev-act ev-act--primary" title="Chấm lại">
                       <i class="feather icon-edit-2"></i>
                     </router-link>

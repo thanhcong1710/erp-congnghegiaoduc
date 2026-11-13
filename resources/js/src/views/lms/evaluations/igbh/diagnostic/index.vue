@@ -106,6 +106,9 @@
                   <router-link v-else :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`" class="ev-act-text ev-act-text--primary">
                     <i class="feather icon-edit-3"></i> Chấm điểm
                   </router-link>
+                  <router-link v-if="isGraded(item)" :to="{ path: `/lms/evaluations/igbh/diagnostic/report/${item.id}`, query: { print: 1 } }" class="ev-act ev-act--info" title="In báo cáo / Lưu PDF">
+                    <i class="feather icon-printer"></i>
+                  </router-link>
                   <router-link v-if="isGraded(item)" :to="`/lms/evaluations/igbh/diagnostic/form/${item.id}`" class="ev-act ev-act--primary" title="Sửa điểm">
                     <i class="feather icon-edit-2"></i>
                   </router-link>
