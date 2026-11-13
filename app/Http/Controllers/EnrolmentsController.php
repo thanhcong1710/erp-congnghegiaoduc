@@ -9,6 +9,7 @@ use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EnrolmentsController extends Controller
 {
@@ -68,6 +69,7 @@ class EnrolmentsController extends Controller
     }
 
     public function getClassInfo(Request $request, $class_id){
+        $class_id = (int)$class_id;
         $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate,
                 COALESCE((SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id), cl.teacher_name) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
@@ -119,8 +121,9 @@ class EnrolmentsController extends Controller
     }
 
     public function getStudentsAdd(Request $request){
-        $class_info =u::first("SELECT id, branch_id, product_id,type FROM classes WHERE id=$request->class_id");
-        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $class_id = (int)data_get($request, 'class_id');
+        $class_info = u::first("SELECT id, branch_id, product_id,type FROM classes WHERE id=$class_id");
+        $keyword = trim((string)data_get($request, 'keyword', ''));
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -128,8 +131,8 @@ class EnrolmentsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
 
-        $product_id = data_get($class_info, 'product_id');
-        $branch_id = data_get($class_info, 'branch_id'); 
+        $product_id = (int)data_get($class_info, 'product_id');
+        $branch_id = (int)data_get($class_info, 'branch_id');
         // $cond = " c.status IN (3, 4, 5) AND c.type = ".(int)$class_info->type;
         $cond = " c.status IN ( 3, 4, 5) AND c.branch_id= $branch_id ";
         $saleStaffIds = Auth::user()->getSaleAllowedStaffIds();
@@ -141,7 +144,8 @@ class EnrolmentsController extends Controller
             AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE student_id =c.student_id AND product_id = $product_id AND status IN (3,4,5))";
 
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
+            $kw = DB::getPdo()->quote('%' . addcslashes($keyword, '%_\\') . '%');
+            $cond .= " AND (s.lms_code LIKE $kw OR s.name LIKE $kw OR c.code LIKE $kw) ";
         }
         
         $order_by = " ORDER BY s.id DESC ";
@@ -151,7 +155,7 @@ class EnrolmentsController extends Controller
         
         $list = u::query("SELECT c.id AS contract_id, c.code, s.name, s.lms_code, c.start_date, c.student_id AS student_id,
                 (SELECT name FROM tuition_fee WHERE id =c.tuition_fee_id) AS tuition_fee_name,
-                (SELECT CONCAT('name',' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date, c.type AS contract_type
+                (SELECT CONCAT(`name`,' - ',hrm_id) FROM users WHERE id =c.ec_id) AS ec_name, '' AS class_date, c.type AS contract_type
             FROM contracts AS c 
                 LEFT JOIN students AS s ON s.id=c.student_id
             WHERE $cond $order_by $limitation");
@@ -160,8 +164,8 @@ class EnrolmentsController extends Controller
     }
 
     public function addStudent(Request $request){
-        $contracts = $request->contracts;
-        $class_id = $request->class_id;
+        $contracts = is_array($request->contracts) ? $request->contracts : [];
+        $class_id = (int)$request->class_id;
         $class_info = u::getObject(array('id'=>$class_id), 'classes');
         $cm_id =data_get($class_info,'cm_id', null);
         $teacher_id =data_get($class_info,'teacher_id', null);
@@ -170,15 +174,18 @@ class EnrolmentsController extends Controller
                 LEFT JOIN users AS ul ON ul.id=u.manager_id
                 LEFT JOIN role_has_user AS ru ON ru.user_id= ul.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 
-            WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
+            WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".(int)data_get($class_info, 'cm_id', 0)." LIMIT 1");
         $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
         $holidays = u::getPublicHolidays(data_get($request,'branch_id'), data_get($request,'product_id'));
         $arr_day = explode(",",data_get($class_info, 'class_day'));
         
         foreach($contracts AS $contract){
-            $contract_id = data_get($contract,'contract_id');
-            $student_id = data_get($contract,'student_id');
-            $start_date = data_get($contract,'class_date', null);
+            $contract_id = (int)data_get($contract,'contract_id');
+            $student_id = (int)data_get($contract,'student_id');
+            $start_date = (string)data_get($contract,'class_date', '');
+            if (!$contract_id || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $start_date)) {
+                continue;
+            }
             $data_sessions = u::calculatorSessionsByNumberOfSessions($start_date, data_get($request,'session'), $holidays, $arr_day);
             u::updateSimpleRow(array(
                 'cm_id' => $cm_id,
@@ -214,8 +221,11 @@ class EnrolmentsController extends Controller
     }
 
     public function withdraw(Request $request){
-        $contract_id = data_get($request,'contract_id');
+        $contract_id = (int)data_get($request,'contract_id');
         $contract_info =  u::getObject(['id'=>$contract_id], 'contracts');
+        if (!$contract_info) {
+            return response()->json(['status' => 0, 'message' => 'Hợp đồng không tồn tại']);
+        }
         if($contract_info->left_sessions == 0){
             u::updateSimpleRow(array(
                 'status' => 7,
@@ -243,8 +253,8 @@ class EnrolmentsController extends Controller
     }
 
     public function getContractJoin(Request $request){
-        $student_id = data_get($request,'student_id');
-        $product_id = data_get($request,'product_id');
+        $student_id = (int)data_get($request,'student_id');
+        $product_id = (int)data_get($request,'product_id');
         $contract_join = u::first("SELECT c.* ,(SELECT name FROM tuition_fee WHERE id=c.tuition_fee_id) AS tuition_fee_name  FROM contracts AS c WHERE c.student_id = $student_id 
             AND c.status!=7 AND (c.class_id IS NULL OR c.class_id=0) AND c.left_sessions > 0 AND c.product_id=$product_id");
         if($contract_join){
@@ -263,9 +273,9 @@ class EnrolmentsController extends Controller
     }
 
     public function contractJoin(Request $request){
-        $student_id = data_get($request,'student_id');
-        $contract_id = data_get($request,'contract_id');
-        $class_id = data_get($request,'class_id');
+        $student_id = (int)data_get($request,'student_id');
+        $contract_id = (int)data_get($request,'contract_id');
+        $class_id = (int)data_get($request,'class_id');
         $contract_withdraw = u::first("SELECT c.* FROM contracts AS c WHERE c.student_id = $student_id 
             AND c.status!=7 AND (c.class_id IS NOT NULL AND c.class_id!=0) AND c.left_sessions <= 0");
         if($contract_withdraw){
@@ -286,7 +296,7 @@ class EnrolmentsController extends Controller
                     LEFT JOIN users AS ul ON ul.id=u.manager_id
                     LEFT JOIN role_has_user AS ru ON ru.user_id= ul.id 
                     LEFT JOIN roles AS r ON r.id=ru.role_id 
-                WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".data_get($class_info, 'cm_id', 0)." LIMIT 1");
+                WHERE r.code = '".SystemCode::ROLE_CM_LEADER."' AND ul.status=1 AND u.id = ".(int)data_get($class_info, 'cm_id', 0)." LIMIT 1");
             $cm_leader_id = data_get($cm_leader,'id') ? data_get($cm_leader,'id') : $cm_id;
             $holidays = u::getPublicHolidays(data_get($class_info,'branch_id'), data_get($class_info,'product_id'));
             $reserved_dates = u::getReservedDates_transfer($contract_id);
