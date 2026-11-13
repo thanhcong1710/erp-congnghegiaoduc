@@ -248,10 +248,10 @@ export default {
       loading: true,
       selectedTestIds: [],
       domains: [
-        { key: 'co_ban', name: 'Tư duy cơ bản', desc: 'Sự chú ý và tập trung, quan sát và ghi nhớ – nhân tố cơ bản cho sự phát triển tư duy.' },
-        { key: 'toan', name: 'Tư duy toán học', desc: 'Năng lực về số và phép toán, không gian, đo lường, kiểu mẫu và thống kê.' },
-        { key: 'logic', name: 'Tư duy logic', desc: 'Sự hiểu biết, áp dụng, phân tích và tổng hợp – kỹ năng cốt lõi để phát triển tư duy.' },
-        { key: 'sang_tao', name: 'Tư duy sáng tạo', desc: 'Sự lưu loát, linh hoạt, độc đáo và tinh tế – nền tảng cho tư duy đa dạng và sâu sắc.' }
+        { key: 'co_ban', name: 'Tư duy cơ bản', short: 'Cơ bản', desc: 'Sự chú ý và tập trung, quan sát và ghi nhớ – nhân tố cơ bản cho sự phát triển tư duy.' },
+        { key: 'toan', name: 'Tư duy toán học', short: 'Toán học', desc: 'Năng lực về số và phép toán, không gian, đo lường, kiểu mẫu và thống kê.' },
+        { key: 'logic', name: 'Tư duy logic', short: 'Logic', desc: 'Sự hiểu biết, áp dụng, phân tích và tổng hợp – kỹ năng cốt lõi để phát triển tư duy.' },
+        { key: 'sang_tao', name: 'Tư duy sáng tạo', short: 'Sáng tạo', desc: 'Sự lưu loát, linh hoạt, độc đáo và tinh tế – nền tảng cho tư duy đa dạng và sâu sắc.' }
       ]
     }
   },
@@ -405,8 +405,12 @@ export default {
       // SVG renderer → nét khi in / lưu PDF
       return echarts.getInstanceByDom(el) || echarts.init(el, null, { renderer: 'svg' })
     },
+    // Ngắt nhãn trục X thành 2 dòng cân đối để không đè lên nhau (vd "Hình học\nkhông gian", "Phân\ntích")
     labelOf(name) {
-      return name.replace(/^(Năng lực|Tính|Sự) /, '$1\n').replace(/^(Số và|Hình học) /, '$1\n')
+      const words = String(name).split(' ')
+      if (words.length < 2) return name
+      const k = Math.floor(words.length / 2)
+      return words.slice(0, k).join(' ') + '\n' + words.slice(k).join(' ')
     },
     initCharts() {
       const selected = this.availableTests.filter(t => this.selectedTestIds.includes(t.id))
@@ -446,7 +450,7 @@ export default {
         c.setOption({
           ...base,
           legend: { ...legend, data: [...selected.map(t => t.name), 'TB học sinh'] },
-          xAxis: { type: 'category', data: this.domains.map(d => d.name.replace(' ', '\n')), axisTick: { show: false }, axisLabel: { interval: 0, fontSize: 13, color: '#334155', lineHeight: 15 } },
+          xAxis: { type: 'category', data: this.domains.map(d => d.short), axisTick: { show: false }, axisLabel: { interval: 0, fontSize: 13, color: '#334155', lineHeight: 15 } },
           series
         }, true)
       }
