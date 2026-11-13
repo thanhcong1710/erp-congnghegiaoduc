@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tài liệu Hướng dẫn Sử dụng Hệ thống STEMKey ERP - Luồng Khách hàng Toàn trình</title>
+  <title>Hướng dẫn sử dụng STEMKey ERP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -533,6 +533,25 @@
       flex-shrink: 0;
     }
 
+    /* LINK CHÉO GIỮA CÁC CHẶNG */
+    .step-desc a, .guide-table a, .alert-box a {
+      color: var(--primary);
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px dashed currentColor;
+    }
+    .step-desc a:hover, .guide-table a:hover, .alert-box a:hover { border-bottom-style: solid; }
+    kbd {
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border: 1px solid #cbd5e1;
+      border-bottom-width: 2px;
+      border-radius: 4px;
+      background: #f8fafc;
+    }
+
     /* TABLES FOR STATUS & FIELDS */
     .guide-table {
       width: 100%;
@@ -968,7 +987,7 @@
     </div>
     <div class="search-box">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="guideSearch" placeholder="Tìm nhanh nghiệp vụ (VD: checkin, học thử, thu phí, xếp lớp, học bù...)" onkeyup="filterGuide()">
+      <input type="text" id="guideSearch" placeholder="Tìm nhanh nghiệp vụ (VD: thu phí, duyệt phí, xếp lớp, UCREA, in báo cáo, nguồn khách hàng...)" onkeyup="filterGuide()">
     </div>
   </header>
 
@@ -987,6 +1006,18 @@
             <span>Đăng nhập hệ thống</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="#chang-0-1" class="nav-link">
+            <span class="step-num">0.1</span>
+            <span>Giao diện & Bản đồ menu</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-0-2" class="nav-link">
+            <span class="step-num">0.2</span>
+            <span>Tài khoản & Đổi mật khẩu</span>
+          </a>
+        </li>
       </ul>
 
       <div class="sidebar-title">Luồng Tuyển sinh & Nhập học</div>
@@ -995,6 +1026,12 @@
           <a href="#chang-1" class="nav-link">
             <span class="step-num">1</span>
             <span>Sale lên Data & Chăm sóc KH</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-1-1" class="nav-link">
+            <span class="step-num">1.1</span>
+            <span>Import data & QL chăm sóc</span>
           </a>
         </li>
         <li class="nav-item">
@@ -1029,18 +1066,18 @@
         </li>
       </ul>
 
-      <div class="sidebar-title">Vận hành Đào tạo sau xếp lớp</div>
+      <div class="sidebar-title">Vận hành Đào tạo</div>
       <ul class="nav-list">
         <li class="nav-item">
           <a href="#chang-7-1" class="nav-link">
             <span class="step-num">7.1</span>
-            <span>Điểm danh & Đăng ký Học bù</span>
+            <span>Điểm danh chuyên cần</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-2" class="nav-link">
             <span class="step-num">7.2</span>
-            <span>Khảo sát & Đánh giá Năng lực</span>
+            <span>Nhận xét · Giáo viên & Trợ giảng</span>
           </a>
         </li>
         <li class="nav-item">
@@ -1058,13 +1095,111 @@
         <li class="nav-item">
           <a href="#chang-7-5" class="nav-link">
             <span class="step-num">7.5</span>
-            <span>Bảo lưu & Chuyển nhượng phí</span>
+            <span>Bảo lưu & Chuyển phí</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="#chang-7-6" class="nav-link">
             <span class="step-num">7.6</span>
             <span>Tái tục / Gia hạn Hợp đồng</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Test &amp; Đánh giá</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-8-0" class="nav-link">
+            <span class="step-num">8</span>
+            <span>Tổng quan & Đề kiểm tra</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-8-1" class="nav-link">
+            <span class="step-num">8.1</span>
+            <span>Đánh giá năng lực UCREA</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-8-2" class="nav-link">
+            <span class="step-num">8.2</span>
+            <span>Khảo sát đầu vào IG.BH</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-8-3" class="nav-link">
+            <span class="step-num">8.3</span>
+            <span>Đánh giá tuần IG.BH</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-8-4" class="nav-link">
+            <span class="step-num">8.4</span>
+            <span>Tổng kết lớp / học sinh IG.BH</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-8-5" class="nav-link">
+            <span class="step-num">8.5</span>
+            <span>In / Lưu PDF báo cáo</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Kế toán &amp; Báo cáo</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-9-1" class="nav-link">
+            <span class="step-num">9.1</span>
+            <span>Thu phí & Duyệt phí</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-9-2" class="nav-link">
+            <span class="step-num">9.2</span>
+            <span>Dashboard & Báo cáo</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Marketing</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-10" class="nav-link">
+            <span class="step-num">10</span>
+            <span>Chiến dịch · B2B · C2C · Voucher</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Cấu hình hệ thống</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-11-1" class="nav-link">
+            <span class="step-num">11.1</span>
+            <span>Trung tâm & Đào tạo</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-11-2" class="nav-link">
+            <span class="step-num">11.2</span>
+            <span>Gói phí · Chiết khấu · Nguồn KH</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#chang-11-3" class="nav-link">
+            <span class="step-num">11.3</span>
+            <span>Người dùng & Phân quyền</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="sidebar-title">Phụ lục</div>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#chang-faq" class="nav-link">
+            <span class="step-num">?</span>
+            <span>Câu hỏi thường gặp</span>
           </a>
         </li>
       </ul>
@@ -1076,7 +1211,7 @@
       <!-- BANNER TỔNG QUAN LUỒNG -->
       <div class="flow-banner">
         <h1>Quy trình Khách hàng Toàn trình (End-to-End Customer Journey)</h1>
-        <p>Tài liệu hướng dẫn chi tiết từng bước thao tác trên hệ thống STEMKey ERP, bám sát luồng thực tế từ khi Sale tiếp nhận Lead đến khi Học sinh Check-in, Nhập học, Đóng phí, Xếp lớp và Vận hành đào tạo.</p>
+        <p>Tài liệu hướng dẫn chi tiết từng bước thao tác trên hệ thống STEMKey ERP, bám sát luồng thực tế từ khi Sale tiếp nhận Lead đến khi Học sinh Check-in, Nhập học, Đóng phí, Xếp lớp, Vận hành đào tạo, Đánh giá năng lực – kèm phần Kế toán, Báo cáo, Marketing và Cấu hình hệ thống. <em>Cập nhật: 11/2026 (menu mới, Test &amp; Đánh giá, Nguồn khách hàng, Duyệt phí).</em></p>
         <div class="flow-steps-pill">
           <div class="flow-pill"><i class="fa-solid fa-headset"></i> 1. Sale lên Data</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
@@ -1090,7 +1225,9 @@
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
           <div class="flow-pill"><i class="fa-solid fa-chalkboard-user"></i> 6. Xếp lớp</div>
           <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
-          <div class="flow-pill"><i class="fa-solid fa-gears"></i> 7. Điểm danh, Test & Tái phí</div>
+          <div class="flow-pill"><i class="fa-solid fa-gears"></i> 7. Vận hành &amp; Tái phí</div>
+          <div class="flow-pill"><i class="fa-solid fa-arrow-right"></i></div>
+          <div class="flow-pill"><i class="fa-solid fa-star"></i> 8. Test &amp; Đánh giá</div>
         </div>
       </div>
 
@@ -1159,6 +1296,93 @@
           </div>
         </div>
       </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 0.1: GIAO DIỆN & BẢN ĐỒ MENU -->
+      <!-- ========================================================= -->
+      <section id="chang-0-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">BẮT ĐẦU 0.1</span>
+          <h2 class="section-title">Làm quen Giao diện & Bản đồ Menu chức năng</h2>
+          <span class="section-role"><i class="fa-solid fa-users"></i> Tất cả bộ phận</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Cách đọc menu bên trái</div>
+          <div class="step-desc">
+            <ul>
+              <li>Menu chia thành các <strong>khu vực</strong> (chữ xám in hoa): <code>CRM</code>, <code>LMS</code>, <code>Test &amp; Đánh giá</code>, <code>Marketing</code>, <code>Cấu hình hệ thống</code>. Bạn chỉ nhìn thấy những mục được phân quyền; khu vực không có quyền sẽ tự ẩn.</li>
+              <li>Mục có mũi tên <i class="fa-solid fa-chevron-right"></i> là <strong>nhóm</strong> – bấm để mở/đóng danh sách chức năng con.</li>
+              <li>Mục đang làm việc được <strong>tô nền tím</strong>. Khi bạn đi vào trang con (Chi tiết, Sửa, Báo cáo...) menu <strong>vẫn giữ sáng mục cha và tự mở nhóm</strong> để bạn luôn biết mình đang ở đâu.</li>
+              <li>Nút tròn cạnh logo dùng để <strong>thu gọn menu</strong> (chỉ hiện icon) giúp màn hình làm việc rộng hơn; rê chuột vào menu để mở tạm.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Bản đồ menu – chức năng nằm ở đâu?</div>
+          <div class="step-desc">
+            <table class="guide-table">
+              <thead>
+                <tr><th style="width: 22%;">Khu vực</th><th style="width: 26%;">Nhóm / Mục</th><th>Dùng để</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><strong>Dashboard</strong></td><td>—</td><td>Bức tranh tổng quan chỉ số kinh doanh & vận hành (<a href="#chang-9-2">xem 9.2</a>).</td></tr>
+                <tr><td rowspan="3"><strong>CRM</strong></td><td>Khách hàng</td><td>Lên data phụ huynh, chăm sóc, tạo học sinh, nhập học 1-chạm (<a href="#chang-1">Chặng 1–2</a>).</td></tr>
+                <tr><td>QL chăm sóc</td><td>Tra cứu toàn bộ lịch sử chăm sóc của đội Sale (<a href="#chang-1-1">1.1</a>).</td></tr>
+                <tr><td>Import</td><td>Tải data khách hàng hàng loạt từ Excel (<a href="#chang-1-1">1.1</a>).</td></tr>
+                <tr><td rowspan="5"><strong>LMS</strong></td><td>Học sinh</td><td>Hồ sơ học viên chính thức, mã STK (<a href="#chang-4">Chặng 4</a>).</td></tr>
+                <tr><td>Vận hành › Nhập học · Xếp lớp · Điểm danh · Nhận xét &amp; đánh giá · Giáo viên &amp; trợ giảng</td><td>Công việc hằng ngày của Giáo vụ (<a href="#chang-5">Chặng 5–7</a>).</td></tr>
+                <tr><td>Bảo lưu &amp; chuyển đổi › Bảo lưu · Bảo lưu cả lớp · Chuyển lớp · Chuyển trung tâm · Chuyển phí · Quy đổi</td><td>Các biến động học vụ của học viên (<a href="#chang-7-3">7.3–7.5</a>).</td></tr>
+                <tr><td>Kế toán › Đã thu phí · Chờ thu phí · Duyệt phí</td><td>Lập phiếu thu và phê duyệt học phí (<a href="#chang-9-1">9.1</a>).</td></tr>
+                <tr><td>Báo cáo</td><td>Báo cáo doanh thu, đội nhóm, nguồn, sản phẩm (<a href="#chang-9-2">9.2</a>).</td></tr>
+                <tr><td rowspan="2"><strong>Test &amp; Đánh giá</strong></td><td>UCREA › Đánh giá năng lực · Đề kiểm tra UCREA</td><td>Đánh giá tư duy theo Rubric Đầu kỳ / Giữa kỳ / Cuối kỳ (<a href="#chang-8-1">8.1</a>).</td></tr>
+                <tr><td>IG.BH › Khảo sát đầu vào · Đánh giá tuần · Tổng kết lớp · Tổng kết học sinh · Đề kiểm tra IG.BH</td><td>Kiểm tra đầu vào, đánh giá 12 tuần và tổng kết cuối kỳ (<a href="#chang-8-2">8.2–8.4</a>).</td></tr>
+                <tr><td><strong>Marketing</strong></td><td>Chiến dịch · B2B · C2C · Voucher</td><td>Chiến dịch quảng cáo, chính sách đối tác, khách giới thiệu, mã voucher (<a href="#chang-10">10</a>).</td></tr>
+                <tr><td rowspan="4"><strong>Cấu hình hệ thống</strong></td><td>Trung tâm</td><td>Danh sách cơ sở (<a href="#chang-11-1">11.1</a>).</td></tr>
+                <tr><td>Đào tạo › Khóa học · Chương trình học · Lớp học · Phòng học · Ca học · Ngày nghỉ lễ</td><td>Khai báo khung đào tạo và mở lớp (<a href="#chang-11-1">11.1</a>).</td></tr>
+                <tr><td>Học phí &amp; khách hàng › Gói phí · Mã chiết khấu · Nguồn khách hàng</td><td>Bảng giá, ưu đãi và danh mục nguồn khách hàng (<a href="#chang-11-2">11.2</a>).</td></tr>
+                <tr><td>Tài khoản &amp; phân quyền › Người dùng · Chức vụ, phân quyền · Permissions · Nhóm Permissions</td><td>Cấp tài khoản và quyền truy cập (<a href="#chang-11-3">11.3</a>).</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 0.2: TÀI KHOẢN CÁ NHÂN -->
+      <!-- ========================================================= -->
+      <section id="chang-0-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">BẮT ĐẦU 0.2</span>
+          <h2 class="section-title">Tài khoản cá nhân & Đổi mật khẩu</h2>
+          <span class="section-role"><i class="fa-solid fa-users"></i> Tất cả bộ phận</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-compass text-primary"></i> Đường dẫn:</span>
+          <span class="menu-crumb">Ảnh đại diện (góc phải trên)</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Tài khoản</span>
+          <span class="menu-url">/user/profile</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Cập nhật thông tin & đổi mật khẩu</div>
+          <div class="step-desc">
+            <ul>
+              <li>Tab <strong>Tổng Quan</strong>: bấm <strong>Upload Avatar</strong> để đổi ảnh đại diện; cập nhật số điện thoại, họ tên, email.</li>
+              <li>Tab <strong>Đổi Mật Khẩu</strong>: nhập mật khẩu cũ, mật khẩu mới, xác nhận rồi bấm <strong>Lưu</strong>. Nên đổi mật khẩu ngay lần đăng nhập đầu tiên.</li>
+              <li>Tab <strong>Thông Tin</strong>: thông tin bổ sung của nhân viên.</li>
+              <li>Đăng xuất: bấm ảnh đại diện &rarr; <strong>Đăng xuất</strong>. Sau khi quản trị viên thay đổi quyền của bạn, hãy <strong>đăng xuất và đăng nhập lại</strong> để menu cập nhật.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
 
       <!-- ========================================================= -->
       <!-- CHẶNG 1: SALE LÊN DATA & CHĂM SÓC PHỤ HUYNH -->
@@ -1257,6 +1481,60 @@
           </div>
         </div>
       </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 1.1: IMPORT DATA & QUẢN LÝ CHĂM SÓC -->
+      <!-- ========================================================= -->
+      <section id="chang-1-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 1.1</span>
+          <h2 class="section-title">Import Data hàng loạt & Theo dõi Lịch sử Chăm sóc</h2>
+          <span class="section-role"><i class="fa-solid fa-user-tie"></i> Marketing / Sale Leader / Sale (EC)</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">CRM</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Import</span>
+          <span>/</span>
+          <span class="menu-crumb">QL chăm sóc</span>
+          <span class="menu-url">/crm/imports &bull; /crm/care</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Import danh sách khách hàng từ file Excel (4 bước)</div>
+          <div class="step-desc">
+            Vào <code>CRM</code> &rarr; <code>Import</code> &rarr; bấm <strong>Import</strong> (URL: <code>/crm/imports/add</code>):
+            <ol>
+              <li><strong>Chọn tập tin:</strong> bấm <em>Tải danh sách khách hàng mẫu</em> để lấy file Excel chuẩn, điền dữ liệu rồi chọn file và <strong>Trung tâm</strong>.</li>
+              <li><strong>Kiểm tra dữ liệu:</strong> hệ thống báo số khách hàng <em>hợp lệ</em>, <em>không hợp lệ</em> (kèm cột <em>Thông tin lỗi</em>) và <em>có thể ghi đè</em> (SĐT đã tồn tại). Tích <em>Bỏ qua không nhập dữ liệu lỗi</em> nếu muốn nhập phần hợp lệ trước.</li>
+              <li><strong>Phân chia dữ liệu:</strong> chọn <strong>Người phụ trách</strong> (có thể chia đều cho nhiều Sale), <strong>Nguồn</strong> và <strong>Nguồn chi tiết</strong> (ví dụ: <em>Đi thị trường &rarr; Tờ rơi chung cư</em>).</li>
+              <li><strong>Hoàn thành:</strong> xem số khách hàng mới được tải lên / bị bỏ qua. Lịch sử mỗi lần import (tên file, người thực hiện, số thành công / lỗi) được lưu tại danh sách <code>/crm/imports</code>.</li>
+            </ol>
+          </div>
+          <div class="alert-box alert-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>Danh sách <strong>Nguồn chi tiết</strong> (trường học, tờ rơi, sự kiện...) do quản trị khai báo tại <code>Cấu hình hệ thống</code> &rarr; <code>Học phí &amp; khách hàng</code> &rarr; <code>Nguồn khách hàng</code> (<a href="#chang-11-2">xem 11.2</a>).</div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">QL chăm sóc – tra cứu lịch sử cuộc gọi của cả đội</div>
+          <div class="step-desc">
+            Màn hình <code>CRM</code> &rarr; <code>QL chăm sóc</code> (URL: <code>/crm/care</code>) tổng hợp mọi lượt chăm sóc đã ghi nhận:
+            <ul>
+              <li>Lọc theo <strong>Từ khóa</strong> (tên, SĐT khách hàng), <strong>Người phụ trách</strong>, <strong>Khoảng thời gian chăm sóc</strong> và <strong>Trạng thái cuộc gọi</strong>.</li>
+              <li>Bảng hiển thị thời gian, phương thức (gọi điện, Zalo, SMS...), nội dung, <strong>lịch hẹn tiếp theo</strong> và file đính kèm.</li>
+              <li>Bấm <strong>Xem chi tiết hồ sơ</strong> để mở ngay trang khách hàng và chăm sóc tiếp.</li>
+            </ul>
+            Sale Leader dùng màn hình này để kiểm tra chất lượng và tần suất chăm sóc của từng nhân viên.
+          </div>
+        </div>
+      </section>
+
 
       <!-- ========================================================= -->
       <!-- CHẶNG 2: TẠO HỌC SINH CHÍNH THỨC & NHẬP HỌC 1-CHẠM TỪ CRM -->
@@ -1366,12 +1644,8 @@
         </div>
 
         <div class="menu-path-bar">
-          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
-          <span class="menu-crumb">LMS</span>
-          <span>&rarr;</span>
-          <span class="menu-crumb">Học sinh</span>
-          <span>&rarr;</span>
-          <span class="menu-crumb">Checkin</span>
+          <span class="path-label"><i class="fa-solid fa-compass text-primary"></i> Truy cập trực tiếp:</span>
+          <span class="menu-crumb">Màn hình Danh sách Check-in (không nằm trên menu – gõ đường dẫn hoặc lưu Bookmark)</span>
           <span class="menu-url">/lms/checkin</span>
         </div>
 
@@ -1397,7 +1671,7 @@
               </li>
               <li>
                 <i class="fa-solid fa-magnifying-glass text-success"></i>
-                <span>Vào <code>LMS &rarr; Học sinh &rarr; Checkin</code>, gõ Tên hoặc SĐT phụ huynh vào ô <strong>Tìm kiếm</strong> để lọc học sinh đã có sẵn trong danh sách (đang ở trạng thái <span class="pill-status pill-warning">Chưa đến checkin</span>).</span>
+                <span>Vào <code>/lms/checkin</code>, gõ Tên hoặc SĐT phụ huynh vào ô <strong>Tìm kiếm</strong> để lọc học sinh đã có sẵn trong danh sách (đang ở trạng thái <span class="pill-status pill-warning">Chưa đến checkin</span>).</span>
               </li>
               <li>
                 <i class="fa-solid fa-user-check text-success"></i>
@@ -1414,7 +1688,7 @@
             <ul class="scenario-flow-steps">
               <li>
                 <i class="fa-solid fa-plus-circle text-warning"></i>
-                <span>Tại màn hình <code>LMS &rarr; Học sinh &rarr; Checkin</code>, bấm nút <strong>+ Thêm mới Checkin</strong> ở góc trên bên phải (URL: <code>/lms/checkin/add</code>).</span>
+                <span>Tại màn hình <code>/lms/checkin</code>, bấm nút <strong>+ Thêm mới Checkin</strong> ở góc trên bên phải (URL: <code>/lms/checkin/add</code>).</span>
               </li>
               <li>
                 <i class="fa-solid fa-keyboard text-warning"></i>
@@ -1434,7 +1708,7 @@
           <div class="step-title">Thao tác chi tiết Trường hợp 1: Khi Sale ĐÃ thêm mới Check-in từ Tab Học sinh</div>
           <div class="step-desc">
             <ol>
-              <li>Truy cập <code>LMS</code> &rarr; <code>Học sinh</code> &rarr; <code>Checkin</code> (URL: <code>/lms/checkin</code>).</li>
+              <li>Truy cập màn hình Danh sách Check-in (URL: <code>/lms/checkin</code>).</li>
               <li>Tại bộ lọc, gõ <strong>SĐT phụ huynh</strong> (ví dụ: <code>0986004600</code>) hoặc tên bé (<em>Phạm Hữu Khánh An</em>) rồi bấm <strong>Tìm kiếm</strong>.</li>
               <li>Kiểm tra thông tin trên dòng kết quả: Học sinh đã hiển thị sẵn kèm tên Phụ huynh, SĐT, Nguồn, EC phụ trách, Cơ sở checkin và Khóa học với trạng thái <span class="pill-status pill-warning">Chưa đến checkin</span> (hoặc <span class="pill-status pill-info">Đã checkin</span>).</li>
               <li><strong>Xác nhận học sinh đến cơ sở & Chuyển lên chính thức:</strong>
@@ -1477,7 +1751,7 @@
           <div class="step-desc">
             Chỉ áp dụng khi tra cứu SĐT phụ huynh chưa có trên hệ thống (khách vãng lai Walk-in đến trực tiếp cơ sở):
             <ol>
-              <li>Tại màn hình <code>LMS</code> &rarr; <code>Học sinh</code> &rarr; <code>Checkin</code>, bấm nút <strong>+ Thêm mới Checkin</strong> ở góc phải trên cùng (URL: <code>/lms/checkin/add</code>).</li>
+              <li>Tại màn hình Danh sách Check-in (<code>/lms/checkin</code>), bấm nút <strong>+ Thêm mới Checkin</strong> ở góc phải trên cùng (URL: <code>/lms/checkin/add</code>).</li>
               <li><strong>Phần THÔNG TIN PHỤ HUYNH:</strong> Nhập <em>Danh xưng (*)</em>, <em>Họ tên (*)</em> (ví dụ: <em>Ông — Đỗ Quang Huy</em>), <em>Điện thoại (*)</em> (<code>0936889911</code>), <em>Người phụ trách (*)</em>, <em>Nguồn (*)</em> (chọn <em>Trung tâm &rarr; Khách Walk-in tại quầy Lễ tân</em>) và <em>Trạng thái</em> (<code>9. KH Đã đến Checkin</code>).</li>
               <li><strong>Phần THÔNG TIN HỌC SINH:</strong>
                 <ul>
@@ -1517,8 +1791,6 @@
           <span class="menu-crumb">LMS</span>
           <span>&rarr;</span>
           <span class="menu-crumb">Học sinh</span>
-          <span>&rarr;</span>
-          <span class="menu-crumb">Danh sách</span>
           <span class="menu-url">/lms/students</span>
         </div>
 
@@ -1611,14 +1883,15 @@
 
         <div class="step-item">
           <div class="step-bullet">2</div>
-          <div class="step-title">Bước 2: Kế toán / Thu ngân Xác nhận Thu phí Hợp đồng</div>
+          <div class="step-title">Bước 2: Lập phiếu thu & Duyệt phí</div>
           <div class="step-desc">
             Sau khi hợp đồng chính thức được tạo, hợp đồng sẽ ở trạng thái <code>Chưa đóng phí</code> và xuất hiện trong phân hệ Kế toán:
             <ol>
               <li>Vào <code>LMS</code> &rarr; <code>Kế toán</code> &rarr; <code>Chờ thu phí</code> (URL: <code>/lms/waitcharges</code>).</li>
               <li>Tìm hợp đồng của học sinh (ví dụ: <code>C000085</code> — Số tiền còn phải đóng: <code>16,380,000đ</code>), bấm vào nút biểu tượng thanh toán ở cột <strong>Thao tác</strong> (hoặc nhấp vào mã hợp đồng).</li>
-              <li>Trong màn hình <strong>Thông tin thu phí</strong>: Nhập <strong>Số tiền thu</strong>, chọn <strong>Phương thức đóng phí</strong> (<em>Tiền mặt</em>, <em>Chuyển khoản</em>, <em>Thẻ tín dụng</em>), chọn <strong>Ngày thu phí</strong> và bấm <strong>Thêm phiếu thu</strong>.</li>
-              <li><strong>Kết quả sau khi thu phí:</strong>
+              <li>Trong màn hình <strong>Thông tin thu phí</strong>: Nhập <strong>Số tiền thu</strong>, chọn <strong>Phương thức đóng phí</strong> (<em>Tiền mặt</em>, <em>Chuyển khoản</em>, <em>Thẻ tín dụng</em>), chọn <strong>Ngày thu phí</strong> và bấm <strong>Thêm phiếu thu</strong>. Phiếu thu được tạo ở trạng thái <span class="pill-status pill-warning">Chờ duyệt</span>.</li>
+              <li><strong>Duyệt phí:</strong> Admin / Giám đốc trung tâm / Thu ngân vào <code>LMS</code> &rarr; <code>Kế toán</code> &rarr; <code>Duyệt phí</code> (URL: <code>/lms/waitcharge-approve</code>), đối chiếu tiền thực nhận và bấm <strong>Duyệt</strong> (chi tiết tại <a href="#chang-9-1">9.1</a>).</li>
+              <li><strong>Kết quả sau khi phiếu thu được duyệt:</strong>
                 <ul>
                   <li>Nếu đóng <strong>đủ 100% học phí</strong> (Công nợ = 0đ): Hợp đồng tự động chuyển sang trạng thái <span class="pill-status pill-success">Chờ xếp lớp chính thức</span>.</li>
                   <li>Nếu đóng <strong>một phần (Đặt cọc)</strong>: Hợp đồng chuyển sang trạng thái <span class="pill-status pill-warning">Đặt cọc</span> và hệ thống tự động quy đổi số buổi được phép học tương ứng với số tiền đã đóng.</li>
@@ -1631,7 +1904,7 @@
           <div class="alert-box alert-danger">
             <i class="fa-solid fa-circle-exclamation"></i>
             <div>
-              <strong>Điều kiện tiên quyết để Xếp lớp:</strong> Đối với hợp đồng Chính thức, học sinh <strong>bắt buộc phải được ghi nhận phiếu thu phí</strong> (đóng đủ hoặc đặt cọc) thì mới xuất hiện trong danh sách chờ xếp lớp của Giáo vụ. (Riêng hợp đồng <em>Học thử 0đ</em> được phép xếp lớp ngay sau khi tạo).
+              <strong>Điều kiện tiên quyết để Xếp lớp:</strong> Đối với hợp đồng Chính thức, học sinh <strong>bắt buộc phải có phiếu thu đã được duyệt</strong> (đóng đủ hoặc đặt cọc) thì mới xuất hiện trong danh sách chờ xếp lớp của Giáo vụ. (Riêng hợp đồng <em>Học thử 0đ</em> được phép xếp lớp ngay sau khi tạo).
             </div>
           </div>
 
@@ -1733,7 +2006,7 @@
       <section id="chang-7-1" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.1</span>
-          <h2 class="section-title">Vận hành: Điểm danh Chuyên cần & Đăng ký Học bù</h2>
+          <h2 class="section-title">Vận hành: Điểm danh Chuyên cần theo Tháng</h2>
           <span class="section-role"><i class="fa-solid fa-user-check"></i> Giáo vụ (CM) / Giáo viên / Trợ giảng</span>
         </div>
 
@@ -1753,26 +2026,22 @@
           <div class="step-desc">
             Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Điểm danh</code> (URL: <code>/lms/attendances</code>):
             <ol>
-              <li>Chọn <strong>Trung tâm (*)</strong>, <strong>Khóa học</strong>, <strong>Lớp học</strong> (ví dụ: <code>STM.04.U.21.Thứ 7-cn</code>) và <strong>Chọn tháng</strong> (ví dụ: <code>2026-11</code>).</li>
-              <li>Bảng điểm danh hiển thị danh sách học viên theo hàng và các buổi học trong tháng theo cột. Tại mỗi ô buổi học, chọn trạng thái tương ứng:
-                <ul>
-                  <li><code>Chưa điểm danh</code>: Buổi học chưa diễn ra hoặc chưa chấm công.</li>
-                  <li><code>Đi học</code>: Học sinh có mặt tham gia buổi học (hệ thống ghi nhận hoàn thành 1 buổi học).</li>
-                  <li><code>Học bù</code>: Khi chọn trạng thái này, cửa sổ <strong>ĐĂNG KÝ HỌC BÙ</strong> sẽ tự động bật lên để chọn <em>Lớp học bù</em> và <em>Buổi học bù</em> tương đương cho học sinh.</li>
-                  <li><code>Đã học bù</code>: Hệ thống tự động cập nhật sau khi học sinh hoàn thành buổi học bù tại bảng <strong>Đăng ký học bù</strong> bên dưới.</li>
-                </ul>
-              </li>
+              <li>Chọn <strong>Trung tâm</strong>, <strong>Khóa học</strong>, <strong>Lớp học</strong> và <strong>Tháng điểm danh</strong> (dùng nút <em>Tháng trước / Tháng sau / Tháng này</em> để chuyển nhanh).</li>
+              <li>Đầu trang hiển thị giáo viên, CM, <strong>sĩ số</strong>, số buổi trong tháng, số ô <em>chưa điểm danh</em>, <em>lượt nghỉ học</em> và <strong>tỉ lệ đi học</strong> của lớp.</li>
+              <li>Bảng điểm danh: mỗi hàng là một học sinh, mỗi cột là một buổi học. Tại mỗi ô chọn <code>Chưa điểm danh</code>, <code>Đi học</code> hoặc <code>Nghỉ học</code>. Ô xám khóa là buổi học sinh <em>không có lịch</em>.</li>
+              <li>Bấm <strong>Cả lớp đi học</strong> trên đầu cột buổi để điểm danh nhanh toàn bộ lớp, sau đó chỉ sửa các bạn nghỉ.</li>
+              <li>Ô <strong>Lọc theo tên, mã học sinh</strong> giúp tìm nhanh trong lớp đông; cột <em>Đi học / tổng</em> và <em>Nghỉ học</em> cho biết chuyên cần từng bạn.</li>
             </ol>
           </div>
 
           <div class="screenshot-container">
             <div class="screenshot-header">
-              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.1: Bảng Điểm danh theo Tháng & Quản lý Danh sách Đăng ký Học bù</span>
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.1: Bảng Điểm danh theo Tháng</span>
               <span class="file-path">/images/guide/08-attendances.png</span>
             </div>
             <div class="screenshot-body">
-              <img src="../images/guide/08-attendances.png" alt="Màn hình Điểm danh và Học bù" onclick="zoomImage(this)">
-              <p class="screenshot-caption">Giao diện điểm danh lớp STM.04.U.21.Thứ 7-cn tháng 11/2026 kèm bảng theo dõi trạng thái "Đăng ký học bù" ngay phía dưới.</p>
+              <img src="../images/guide/08-attendances.png" alt="Màn hình Điểm danh" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Giao diện điểm danh lớp STM.04.U.21.Thứ 7-cn tháng 11/2026 (ảnh minh họa – giao diện thực tế đã được làm mới với 3 trạng thái Chưa điểm danh / Đi học / Nghỉ học).</p>
             </div>
           </div>
         </div>
@@ -1784,39 +2053,43 @@
       <section id="chang-7-2" class="guide-section">
         <div class="section-header">
           <span class="section-badge">CHẶNG 7.2</span>
-          <h2 class="section-title">Vận hành: Kiểm tra Đầu vào & Đánh giá Năng lực Định kỳ</h2>
-          <span class="section-role"><i class="fa-solid fa-star"></i> Giáo viên / Chuyên môn Đào tạo / Giáo vụ</span>
+          <h2 class="section-title">Vận hành: Nhận xét & Đánh giá Học sinh · Phân công Giáo viên & Trợ giảng</h2>
+          <span class="section-role"><i class="fa-solid fa-comments"></i> Giáo vụ (CM) / Giáo viên / Quản lý đào tạo</span>
         </div>
 
         <div class="menu-path-bar">
           <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
-          <span class="menu-crumb">TEST &amp; ĐÁNH GIÁ</span>
+          <span class="menu-crumb">LMS</span>
           <span>&rarr;</span>
-          <span class="menu-crumb">QUẢN LÝ UCREA / QUẢN LÝ IG.BH</span>
-          <span class="menu-url">/lms/evaluations/igbh/diagnostic &bull; /lms/assessments</span>
+          <span class="menu-crumb">Vận hành</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Nhận xét &amp; đánh giá / Giáo viên &amp; trợ giảng</span>
+          <span class="menu-url">/lms/assessments &bull; /lms/teachers</span>
         </div>
 
         <div class="step-item">
           <div class="step-bullet">1</div>
-          <div class="step-title">Hệ thống Bài kiểm tra & Đánh giá Chuyên môn toàn diện</div>
+          <div class="step-title">Ghi nhận xét định kỳ cho học sinh</div>
           <div class="step-desc">
-            STEMKey ERP cung cấp bộ công cụ đánh giá chuẩn hóa theo từng chương trình đào tạo:
-            <ul>
-              <li><strong>Khảo sát đầu vào (Diagnostic Test — <code>/lms/evaluations/igbh/diagnostic</code>):</strong> Khởi tạo bài khảo sát năng lực chẩn đoán khi học sinh mới Check-in hoặc nhập học, chấm <em>Điểm môn học</em> + <em>Điểm tư duy</em>, tự động gán <strong>Level đề xuất</strong> (ví dụ: <code>IG.BH Level 2</code>, <code>Ucrea L1</code>) và xuất báo cáo PDF gửi phụ huynh.</li>
-              <li><strong>Đánh giá Tuần (Weekly — <code>/lms/evaluations/igbh/weekly</code>) & Đánh giá UCREA (<code>/lms/evaluations/ucrea</code>):</strong> Ghi nhận mức độ tiếp thu, kỹ năng tư duy và thái độ học tập của học viên sau từng chủ đề.</li>
-              <li><strong>Đánh giá Cuối kỳ (Summative — <code>/lms/evaluations/igbh/summative</code>) & Nhận xét chung (<code>/lms/assessments</code>):</strong> Tổng kết năng lực cuối khóa để xét duyệt lên cấp độ tiếp theo và phục vụ tư vấn tái phí.</li>
-            </ul>
+            <ol>
+              <li>Vào <code>Nhận xét &amp; đánh giá</code> &rarr; <strong>+ Thêm mới</strong>.</li>
+              <li>Chọn <strong>Trung tâm</strong> rồi tìm <strong>Học sinh</strong> – hệ thống tự hiển thị khóa học, chương trình, lớp và gói phí hiện tại.</li>
+              <li>Nhập <strong>Tiêu đề</strong> (ví dụ: <em>Nhận xét tháng 11/2026</em>) và <strong>Nội dung</strong> nhận xét rồi bấm <strong>Thêm mới</strong>.</li>
+            </ol>
+            Danh sách lọc theo trung tâm và tên/mã học sinh; bấm vào dòng để xem, sửa nhận xét. Các bài đánh giá năng lực theo đề chuẩn (UCREA, IG.BH) thực hiện tại khu vực <a href="#chang-8-0">Test &amp; Đánh giá</a>.
           </div>
+        </div>
 
-          <div class="screenshot-container">
-            <div class="screenshot-header">
-              <span><i class="fa-regular fa-image mr-1"></i> Hình 7.2: Màn hình Quản lý Khảo sát Đầu vào & Gán Level Học viên</span>
-              <span class="file-path">/images/guide/09-evaluations.png</span>
-            </div>
-            <div class="screenshot-body">
-              <img src="../images/guide/09-evaluations.png" alt="Đánh giá năng lực học sinh" onclick="zoomImage(this)">
-              <p class="screenshot-caption">Bảng tổng hợp kết quả bài kiểm tra đầu vào với Điểm môn học, Điểm tư duy, Tổng điểm, Level gán và nút Xem báo cáo PDF.</p>
-            </div>
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Giáo viên & trợ giảng theo từng buổi dạy</div>
+          <div class="step-desc">
+            Màn hình <code>Giáo viên &amp; trợ giảng</code> liệt kê từng <strong>buổi dạy</strong> (lớp, ngày, giáo viên, trợ giảng):
+            <ul>
+              <li>Lọc theo Trung tâm, từ khóa (mã/tên lớp, giáo viên, trợ giảng) và khoảng thời gian.</li>
+              <li>Khi có <strong>giáo viên dạy thay</strong> hoặc đổi trợ giảng một buổi, bấm sửa trên dòng buổi học &rarr; chọn <strong>Giáo viên</strong> / <strong>Quản lý lớp học</strong> mới &rarr; <strong>Lưu</strong>. Chỉ buổi đó thay đổi, lịch các buổi khác giữ nguyên.</li>
+              <li>Dữ liệu này dùng để đối soát số buổi dạy và tính công giáo viên.</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -1835,7 +2108,7 @@
           <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
           <span class="menu-crumb">LMS</span>
           <span>&rarr;</span>
-          <span class="menu-crumb">Vận hành</span>
+          <span class="menu-crumb">Bảo lưu &amp; chuyển đổi</span>
           <span>&rarr;</span>
           <span class="menu-crumb">Quy đổi</span>
           <span class="menu-url">/lms/exchange</span>
@@ -1847,7 +2120,7 @@
           <div class="step-desc">
             Khi phụ huynh có nhu cầu chuyển đổi chương trình học cho con (ví dụ: đang học <em>Ucrea</em> muốn chuyển số buổi còn lại sang <em>Bright I.G</em> hoặc <em>Tiếng Anh</em>):
             <ul>
-              <li>Truy cập <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Quy đổi</code> &rarr; Bấm <strong>+ Thêm mới</strong> (URL: <code>/lms/exchange/add</code>).</li>
+              <li>Truy cập <code>LMS</code> &rarr; <code>Bảo lưu &amp; chuyển đổi</code> &rarr; <code>Quy đổi</code> &rarr; Bấm <strong>+ Thêm mới</strong> (URL: <code>/lms/exchange/add</code>).</li>
               <li>Chọn Trung tâm, tìm kiếm Học sinh và chọn Gói phí đích muốn quy đổi sang. Hệ thống tự động tính toán số phí còn lại và số buổi sau quy đổi một cách minh bạch.</li>
             </ul>
           </div>
@@ -1877,7 +2150,7 @@
 
         <div class="menu-path-bar">
           <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
-          <span class="menu-crumb">LMS &rarr; Vận hành</span>
+          <span class="menu-crumb">LMS &rarr; Bảo lưu &amp; chuyển đổi</span>
           <span>&rarr;</span>
           <span class="menu-crumb">Chuyển lớp</span>
           <span>hoặc</span>
@@ -1889,7 +2162,7 @@
           <div class="step-bullet">1</div>
           <div class="step-title">Chuyển lớp nội bộ hoặc Chuyển kỳ học (`Class Transfers`)</div>
           <div class="step-desc">
-            Vào <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển lớp</code> (URL: <code>/lms/class_transfers</code>):
+            Vào <code>LMS</code> &rarr; <code>Bảo lưu &amp; chuyển đổi</code> &rarr; <code>Chuyển lớp</code> (URL: <code>/lms/class_transfers</code>):
             <ul>
               <li>Bấm <strong>+ Thêm mới</strong> khi học sinh muốn đổi lịch/ca học sang một lớp khác cùng cấp độ.</li>
               <li>Bấm <strong>+ Thêm mới chuyển kỳ</strong> khi học sinh hoàn thành cấp độ hiện tại và chuyển lên lớp ở học kỳ/cấp độ cao hơn.</li>
@@ -1915,7 +2188,7 @@
           <div class="step-desc">
             Khi gia đình học sinh chuyển nơi ở sang khu vực khác thuộc hệ thống STEMKey (ví dụ: từ <em>CS1 — Thăng Long Victory</em> sang <em>CS2 — Eurowindow River Park</em>):
             <ul>
-              <li>Vào <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển trung tâm</code> (URL: <code>/lms/branch_transfers</code>) &rarr; Nhấn <strong>+ Thêm mới</strong>.</li>
+              <li>Vào <code>LMS</code> &rarr; <code>Bảo lưu &amp; chuyển đổi</code> &rarr; <code>Chuyển trung tâm</code> (URL: <code>/lms/branch_transfers</code>) &rarr; Nhấn <strong>+ Thêm mới</strong>.</li>
               <li>Chọn học sinh, chọn <strong>Trung tâm nhận</strong> và <strong>Ngày chuyển</strong>. Sau khi được phê duyệt, toàn bộ hồ sơ, hợp đồng và số buổi còn lại của học viên sẽ được bàn giao sang cơ sở mới để xếp lớp.</li>
             </ul>
           </div>
@@ -1934,10 +2207,10 @@
 
         <div class="menu-path-bar">
           <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
-          <span class="menu-crumb">LMS &rarr; Vận hành</span>
+          <span class="menu-crumb">LMS &rarr; Bảo lưu &amp; chuyển đổi</span>
           <span>&rarr;</span>
           <span class="menu-crumb">Bảo lưu / Bảo lưu cả lớp / Chuyển phí</span>
-          <span class="menu-url">/lms/reserves &bull; /lms/tuition_transfers</span>
+          <span class="menu-url">/lms/reserves &bull; /lms/reserves-multi &bull; /lms/tuition_transfers</span>
         </div>
 
         <div class="step-item">
@@ -1946,7 +2219,7 @@
           <div class="step-desc">
             <ul>
               <li><strong>Bảo lưu cá nhân (<code>/lms/reserves</code>):</strong> Khi học sinh xin tạm nghỉ dài ngày (ốm đau, việc gia đình), Giáo vụ bấm <strong>+ Thêm mới</strong>, chọn số buổi bảo lưu, khoảng thời gian (Từ ngày &ndash; Đến ngày), loại bảo lưu (<em>Bảo lưu thường</em> / <em>Bảo lưu đặc biệt</em>) và phương thức (<em>Giữ chỗ</em> trong lớp hoặc <em>Không giữ chỗ</em>).</li>
-              <li><strong>Bảo lưu cả lớp (<code>/lms/reserves-multi</code>):</strong> Dùng khi trung tâm tạm dừng lịch học của toàn bộ một lớp trong một khoảng thời gian nhất định để tự động lùi ngày kết thúc cho tất cả học sinh trong lớp.</li>
+              <li><strong>Bảo lưu cả lớp (<code>/lms/reserves-multi</code>):</strong> Dùng khi trung tâm tạm dừng lịch học của toàn bộ một lớp (giáo viên nghỉ dài, sửa chữa phòng học...). Bấm <strong>+ Thêm mới</strong> &rarr; chọn Trung tâm, Khóa học, lọc <em>Lớp đang học / đã kết thúc</em> &rarr; chọn lớp, nhập <strong>Số buổi bảo lưu</strong>, <strong>Ngày bắt đầu – kết thúc</strong>, ghi chú &rarr; tích chọn các học sinh áp dụng (mặc định cả lớp) &rarr; <strong>Thêm mới</strong>. Hệ thống tự lùi ngày kết thúc cho từng học sinh.</li>
             </ul>
           </div>
 
@@ -1966,7 +2239,7 @@
           <div class="step-bullet">2</div>
           <div class="step-title">Chuyển nhượng Học phí giữa các Học sinh (`Tuition Transfers`)</div>
           <div class="step-desc">
-            Tại mục <code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Chuyển phí</code> (URL: <code>/lms/tuition_transfers</code>): Cho phép chuyển số dư học phí chưa sử dụng từ <strong>Học sinh chuyển</strong> sang <strong>Học sinh nhận</strong> (ví dụ: chị ruột <em>Phạm Quỳnh Mai</em> chuyển số dư phí sang cho em trai <em>Phạm Hữu An Khánh</em>), có hỗ trợ in phiếu xác nhận chuyển phí.
+            Tại mục <code>LMS</code> &rarr; <code>Bảo lưu &amp; chuyển đổi</code> &rarr; <code>Chuyển phí</code> (URL: <code>/lms/tuition_transfers</code>): Cho phép chuyển số dư học phí chưa sử dụng từ <strong>Học sinh chuyển</strong> sang <strong>Học sinh nhận</strong> (ví dụ: chị ruột <em>Phạm Quỳnh Mai</em> chuyển số dư phí sang cho em trai <em>Phạm Hữu An Khánh</em>), có hỗ trợ in phiếu xác nhận chuyển phí.
           </div>
         </div>
       </section>
@@ -2023,6 +2296,673 @@
           </div>
         </div>
       </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.0: TỔNG QUAN TEST & ĐÁNH GIÁ -->
+      <!-- ========================================================= -->
+      <section id="chang-8-0" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8</span>
+          <h2 class="section-title">Test & Đánh giá – Tổng quan, Thanh điều hướng nhanh & Đề kiểm tra</h2>
+          <span class="section-role"><i class="fa-solid fa-star"></i> Giáo viên / Chuyên môn / Giáo vụ (CM)</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Test &amp; Đánh giá</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">UCREA</span>
+          <span>/</span>
+          <span class="menu-crumb">IG.BH</span>
+          <span class="menu-url">/lms/evaluations/...</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chọn đúng loại đánh giá</div>
+          <div class="step-desc">
+            <table class="guide-table">
+              <thead><tr><th style="width: 24%;">Màn hình</th><th style="width: 22%;">Dùng khi</th><th>Kết quả</th></tr></thead>
+              <tbody>
+                <tr><td><strong>UCREA › Đánh giá năng lực</strong></td><td>Học sinh mầm non chương trình Ucrea – Đầu kỳ, Giữa kỳ, Cuối kỳ</td><td>Cấp độ S/A/B/C cho 16 kỹ năng thuộc 4 lĩnh vực tư duy, biểu đồ so sánh các kỳ, báo cáo in 3 trang.</td></tr>
+                <tr><td><strong>IG.BH › Khảo sát đầu vào</strong></td><td>Học sinh mới, trước khi xếp lớp</td><td>Điểm kiến thức (/40) + tư duy (/60), Level gán, báo cáo in 3 trang.</td></tr>
+                <tr><td><strong>IG.BH › Đánh giá tuần</strong></td><td>Sau mỗi buổi học, tuần 1 &rarr; 12</td><td>Điểm sách bài tập, thái độ, năng lực của cả lớp theo tuần.</td></tr>
+                <tr><td><strong>IG.BH › Tổng kết lớp / học sinh</strong></td><td>Cuối kỳ, <strong>sau khi đã có đánh giá tuần</strong></td><td>Bài tự luận cuối kỳ + tổng hợp 12 tuần, báo cáo in 2 trang.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Thanh điều hướng nhanh & thao tác chung trên mọi danh sách</div>
+          <div class="step-desc">
+            <ul>
+              <li>Đầu mỗi màn hình có <strong>thanh điều hướng nhanh</strong> chia 2 cụm <code>UCREA</code> | <code>IG.BH</code> – bấm để chuyển ngay giữa các màn hình đánh giá mà không cần mở menu.</li>
+              <li>Bộ lọc dùng chung: <strong>Trung tâm, Lớp học, Bài kiểm tra / Trạng thái</strong> và ô <strong>Tìm kiếm</strong> (tên, mã học sinh, giáo viên...) – nhấn <kbd>Enter</kbd> để tìm, <strong>Đặt lại</strong> để xóa lọc.</li>
+              <li>Cột <strong>Thao tác</strong> trên mỗi dòng:
+                <span class="pill-status pill-info">Chấm điểm</span> (bài chưa chấm),
+                <span class="pill-status pill-success">Báo cáo</span> (bài đã chấm),
+                <i class="fa-solid fa-print"></i> <strong>In nhanh</strong> (mở báo cáo và tự bật hộp thoại in),
+                <i class="fa-solid fa-pen"></i> sửa điểm, <i class="fa-solid fa-trash"></i> xóa.</li>
+              <li>Chân bảng cho phép chọn <strong>10 / 20 / 50 / 100 dòng mỗi trang</strong>.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">Đề kiểm tra (UCREA / IG.BH)</div>
+          <div class="step-desc">
+            <code>UCREA</code> &rarr; <code>Đề kiểm tra UCREA</code> (<code>/lms/evaluations/ucrea/tests</code>) và <code>IG.BH</code> &rarr; <code>Đề kiểm tra IG.BH</code> (<code>/lms/evaluations/igbh/tests</code>): danh mục đề thi kèm loại (Đầu kỳ / Giữa kỳ / Cuối kỳ, Đầu vào / Tổng kết), mã đề, level. Bấm <strong>Xem đề</strong> để mở file PDF hoặc <i class="fa-solid fa-download"></i> để tải về in cho học sinh làm bài.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.1: UCREA -->
+      <!-- ========================================================= -->
+      <section id="chang-8-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8.1</span>
+          <h2 class="section-title">Đánh giá Năng lực UCREA (Đầu kỳ · Giữa kỳ · Cuối kỳ)</h2>
+          <span class="section-role"><i class="fa-solid fa-star"></i> Giáo viên Ucrea / Chuyên môn</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Test &amp; Đánh giá</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">UCREA</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Đánh giá năng lực</span>
+          <span class="menu-url">/lms/evaluations/ucrea</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Khởi tạo bài đánh giá</div>
+          <div class="step-desc">
+            <ol>
+              <li>Bấm <strong>+ Khởi tạo bài đánh giá</strong>.</li>
+              <li>Chọn <strong>Trung tâm</strong> &rarr; <strong>Lớp học</strong> (danh sách học sinh tự lọc theo lớp và giáo viên của lớp được điền sẵn) &rarr; <strong>Học sinh</strong> &rarr; <strong>Bài kiểm tra</strong> (tên đề · kỳ · độ tuổi, ví dụ <em>Ucrea Lv4 PT · Đầu kỳ · 5 y/o</em>) &rarr; <strong>Ngày kiểm tra</strong>.</li>
+              <li>Bấm <strong>Tạo bài đánh giá</strong> – hệ thống chuyển thẳng sang màn hình chấm điểm.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Chấm điểm Rubric</div>
+          <div class="step-desc">
+            <ul>
+              <li>Mỗi tiêu chí (Chú ý, Quan sát, Ghi nhớ, Hiểu, Áp dụng, Phân tích, Tổng hợp, Con số, Hình học, Đo lường, Kiểu mẫu, Dữ liệu, Lưu loát, Linh hoạt, Độc đáo, Xây dựng) có 5 mức đáp án – chọn mức đúng với kết quả bài làm của bé. Level L1/L2 có ít tiêu chí hơn.</li>
+              <li>Bấm <strong>Hoàn tất &amp; Lưu Kết Quả</strong> (phải chấm đủ tất cả tiêu chí). Hệ thống tự quy đổi ra cấp độ <strong>S (91–100) · A (71–90) · B (41–70) · C (0–40)</strong> cho từng kỹ năng và 4 lĩnh vực, sau đó mở ngay <strong>báo cáo</strong> của học sinh.</li>
+              <li>Danh sách có 2 tab <strong>Đã chấm</strong> / <strong>Chờ chấm</strong> kèm số lượng; bấm thẻ thống kê ở đầu trang để chuyển tab.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">Báo cáo UCREA (3 trang A4)</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Trang 1 – Tổng quan:</strong> thông tin học sinh (họ tên, mã, giới tính · tuổi, lớp, bài test, giáo viên, ngày), cấp độ 4 lĩnh vực, biểu đồ tổng quát, giải thích lĩnh vực & thang cấp độ.</li>
+              <li><strong>Trang 2 – Chi tiết:</strong> Tư duy cơ bản, toán học, logic – mỗi lĩnh vực có biểu đồ và bảng kỹ năng.</li>
+              <li><strong>Trang 3:</strong> Tư duy sáng tạo, <strong>Nhận xét &amp; định hướng</strong> (hệ thống tự liệt kê <em>Điểm mạnh</em> – kỹ năng S/A và <em>Cần cải thiện</em> – kỹ năng B/C), dòng trống cho ý kiến giáo viên, chữ ký Phụ huynh / Giáo viên / Trung tâm.</li>
+              <li>Nếu học sinh đã có nhiều kỳ, tích <strong>So sánh: Đầu kỳ / Giữa kỳ / Cuối kỳ</strong> trên thanh công cụ để vẽ các kỳ cạnh nhau – rất hữu ích khi tư vấn tái phí.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.2: KHẢO SÁT ĐẦU VÀO IG.BH -->
+      <!-- ========================================================= -->
+      <section id="chang-8-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8.2</span>
+          <h2 class="section-title">Khảo sát Đầu vào IG.BH (Diagnostic Test)</h2>
+          <span class="section-role"><i class="fa-solid fa-bullseye"></i> Giáo viên IG.BH / Chuyên môn / Sale tư vấn</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Test &amp; Đánh giá</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">IG.BH</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Khảo sát đầu vào</span>
+          <span class="menu-url">/lms/evaluations/igbh/diagnostic</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Khởi tạo & chấm bài khảo sát</div>
+          <div class="step-desc">
+            <ol>
+              <li>Bấm <strong>+ Khởi tạo khảo sát</strong> &rarr; chọn Trung tâm, Lớp (tùy chọn), Học sinh, <strong>Bài khảo sát</strong> (ví dụ <em>PT lớp 1 Q1</em>), Người chấm, Ngày khảo sát &rarr; <strong>Tạo &amp; chấm điểm</strong>.</li>
+              <li><strong>Phần 1 – Kiến thức (20 câu):</strong> nhập đáp án học sinh chọn (1–5). Hệ thống tự so với đáp án đúng, đánh dấu ✓/✗ và cộng 2 điểm/câu đúng.</li>
+              <li><strong>Phần 2 – Tư duy (10 câu):</strong> nhập điểm từng câu (tối đa 5, 7 hoặc 11 điểm tùy câu).</li>
+              <li>Nhập <strong>Level gán</strong> (ví dụ <code>IG Lev.J</code>), bấm <strong>Lưu Điểm</strong>, sau đó bấm <strong>Xem kết quả</strong> để mở báo cáo.</li>
+            </ol>
+            Trong danh sách, bài chưa có điểm hiển thị <span class="pill-status pill-warning">Chưa chấm điểm</span> kèm nút <strong>Chấm điểm</strong>; bài đã chấm có thanh tỉ lệ tổng điểm và nút <strong>Báo cáo</strong>.
+          </div>
+
+          <div class="screenshot-container">
+            <div class="screenshot-header">
+              <span><i class="fa-regular fa-image mr-1"></i> Hình 8.2: Danh sách Khảo sát Đầu vào & Level gán</span>
+              <span class="file-path">/images/guide/09-evaluations.png</span>
+            </div>
+            <div class="screenshot-body">
+              <img src="../images/guide/09-evaluations.png" alt="Khảo sát đầu vào IG.BH" onclick="zoomImage(this)">
+              <p class="screenshot-caption">Ảnh minh họa – giao diện thực tế đã được làm mới (điểm Kiến thức /40, Tư duy /60, Tổng /100, Level gán, nút Báo cáo và In nhanh).</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Báo cáo Khảo sát đầu vào (3 trang A4)</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Trang 1 – Kiến thức cơ bản:</strong> thông tin học sinh, 3 ô tổng điểm (Kiến thức / Tư duy / Tổng + Level), kết quả từng câu, tỷ lệ đúng theo đơn vị kiến thức (A–E) kèm biểu đồ radar, nhận xét tự động theo đơn vị mạnh/yếu.</li>
+              <li><strong>Trang 2:</strong> phân tích theo cấp độ câu (Khó / Trung bình / Dễ) và dạng bài (có lời văn / không lời văn); kết quả tư duy từng câu và theo 6 lĩnh vực tư duy.</li>
+              <li><strong>Trang 3 – Kết luận:</strong> radar năng lực tư duy, tỉ lệ giải quyết vấn đề, <strong>xếp loại</strong> (Ưu tú / Xuất sắc / Khá / Trung bình / Yếu – dòng của học sinh được tô vàng) và chữ ký.</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>Sale dùng báo cáo này khi tư vấn: chỉ ra đơn vị kiến thức con còn yếu (tô đỏ trong phần nhận xét) và Level phù hợp để xếp lớp.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.3: ĐÁNH GIÁ TUẦN IG.BH -->
+      <!-- ========================================================= -->
+      <section id="chang-8-3" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8.3</span>
+          <h2 class="section-title">Đánh giá Tuần IG.BH (Tuần 1 → 12)</h2>
+          <span class="section-role"><i class="fa-solid fa-calendar-week"></i> Giáo viên IG.BH</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Test &amp; Đánh giá</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">IG.BH</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Đánh giá tuần</span>
+          <span class="menu-url">/lms/evaluations/igbh/weekly</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chấm tuần mới cho cả lớp</div>
+          <div class="step-desc">
+            <ol>
+              <li>Bấm <strong>+ Chấm tuần mới</strong> &rarr; chọn <strong>Bài kiểm tra Summative</strong> của level (ví dụ <em>IG-J summative test</em>), <strong>Lớp học</strong>, <strong>Ngày đánh giá</strong>.</li>
+              <li>Chọn tuần trên <strong>lưới 12 ô T1 &rarr; T12</strong>: ô <span class="pill-status pill-success">màu xanh</span> là tuần đã chấm (chọn lại sẽ mở bản cũ để sửa); hệ thống tự gợi ý tuần kế tiếp còn trống.</li>
+              <li>Bấm <strong>Bắt đầu chấm điểm</strong>. Bảng chấm hiện toàn bộ học sinh của lớp:
+                <ul>
+                  <li><strong>Sách bài tập</strong>: 0–20.</li>
+                  <li><strong>Thái độ</strong> (Lắng nghe, Tham gia, Thể hiện, Hợp tác) và <strong>Năng lực</strong> (Cơ bản, Lãnh đạo, Toán học, Sáng tạo): 1–5.</li>
+                </ul>
+              </li>
+              <li>Chọn trạng thái <strong>Đã hoàn thành</strong> và bấm <strong>Lưu điểm</strong>. Nếu lớp có học sinh mới chưa có trong bảng, dùng nút <strong>+ Thêm học sinh</strong>.</li>
+            </ol>
+          </div>
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>Chấm <strong>đủ 12 tuần</strong> trước khi tổng kết. Báo cáo cuối kỳ lấy điểm trung bình thái độ/năng lực và tiến trình bài tập từ các tuần này – tuần nào trống sẽ hiển thị “—”.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.4: TỔNG KẾT IG.BH -->
+      <!-- ========================================================= -->
+      <section id="chang-8-4" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8.4</span>
+          <h2 class="section-title">Đánh giá Tổng kết IG.BH (Summative) – theo Lớp & theo Học sinh</h2>
+          <span class="section-role"><i class="fa-solid fa-award"></i> Giáo viên IG.BH / Chuyên môn / Giáo vụ</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Test &amp; Đánh giá</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">IG.BH</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Tổng kết lớp / Tổng kết học sinh</span>
+          <span class="menu-url">/lms/evaluations/igbh/summative</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Khởi tạo tổng kết cho lớp</div>
+          <div class="step-desc">
+            <ol>
+              <li>Vào <strong>Tổng kết lớp</strong> &rarr; <strong>+ Khởi tạo tổng kết lớp</strong> &rarr; chọn Bài kiểm tra Summative, Lớp học, Ngày đánh giá.</li>
+              <li>Hệ thống <strong>tự kiểm tra số tuần đã chấm</strong>: hộp xanh <em>“Đánh giá tuần: 12/12”</em> là đủ dữ liệu; hộp vàng cảnh báo nếu lớp còn thiếu tuần.</li>
+              <li>Bấm <strong>Khởi tạo</strong>: toàn bộ học sinh đang học của lớp được tự thêm vào đợt tổng kết, popup <strong>Học sinh trong đợt tổng kết</strong> mở ra (sĩ số, số em đã có điểm, điểm trung bình).</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Chấm bài cuối kỳ cho từng học sinh</div>
+          <div class="step-desc">
+            Trong popup danh sách (hoặc màn <strong>Tổng kết học sinh</strong>), bấm <strong>Chấm</strong>:
+            <ul>
+              <li><strong>Câu 1–5 (tự luận):</strong> chấm 4 tiêu chí – Khái niệm hiểu biết, Chiến lược suy luận, Tính toán thực hành, Diễn đạt biểu hiện – mỗi tiêu chí 0–6.</li>
+              <li><strong>Sách bài tập 12 tuần:</strong> nhập điểm từng tuần (tối đa theo điểm chuẩn của chủ đề tuần).</li>
+              <li>Viết <strong>Nhận xét của giáo viên</strong> và bấm <strong>Lưu kết quả</strong> – hệ thống tính tổng điểm và mở báo cáo của học sinh.</li>
+            </ul>
+            Khi cả lớp đã chấm xong, trong popup bấm <strong>Chốt hoàn thành</strong> (có thể <em>Mở lại</em> để sửa).
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">Báo cáo tổng kết (2 trang A4)</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Trang 1:</strong> thông tin học sinh, 4 chỉ số (Bài tự luận, Sách bài tập 12 tuần, Số tuần có đánh giá, Thái độ · Năng lực TB) và bảng <strong>tiến trình 12 tuần</strong> (nội dung từng chủ đề, bài tập tuần, điểm sách bài tập, thái độ, năng lực).</li>
+              <li><strong>Trang 2:</strong> radar thái độ & năng lực (kèm xếp loại Xuất sắc / Tốt / Khá / Cần cố gắng), bảng chấm tự luận, nhận xét giáo viên và chữ ký.</li>
+            </ul>
+            Màn <strong>Tổng kết học sinh</strong> lọc được theo lớp và trạng thái <em>Đã chốt / Bản nháp</em>.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 8.5: IN BÁO CÁO -->
+      <!-- ========================================================= -->
+      <section id="chang-8-5" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 8.5</span>
+          <h2 class="section-title">In / Lưu PDF Báo cáo Đánh giá gửi Phụ huynh</h2>
+          <span class="section-role"><i class="fa-solid fa-print"></i> Giáo viên / Giáo vụ / Sale</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">2 cách in</div>
+          <div class="step-desc">
+            <ul>
+              <li><strong>Từ danh sách:</strong> bấm icon <i class="fa-solid fa-print"></i> trên dòng học sinh – báo cáo mở ra và hộp thoại in tự bật sau khi biểu đồ vẽ xong.</li>
+              <li><strong>Trong báo cáo:</strong> bấm nút xanh lá <strong><i class="fa-solid fa-print"></i> In báo cáo / Lưu PDF</strong> trên thanh công cụ (luôn hiện ở đầu màn hình).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Thiết lập hộp thoại in (Chrome / Edge)</div>
+          <div class="step-desc">
+            <table class="guide-table">
+              <thead><tr><th style="width: 30%;">Mục</th><th>Chọn</th></tr></thead>
+              <tbody>
+                <tr><td>Máy in đích</td><td>Máy in của cơ sở, hoặc <strong>Lưu dưới dạng PDF</strong> để gửi Zalo/Email cho phụ huynh.</td></tr>
+                <tr><td>Khổ giấy</td><td><strong>A4</strong>, hướng <strong>Dọc</strong>.</td></tr>
+                <tr><td>Lề</td><td><strong>Mặc định</strong>.</td></tr>
+                <tr><td>Tỷ lệ</td><td><strong>Mặc định (100%)</strong>.</td></tr>
+                <tr><td>Tùy chọn</td><td>Bật <strong>Đồ họa nền / In hình nền</strong> để giữ màu header, bảng và biểu đồ.</td></tr>
+              </tbody>
+            </table>
+            Mỗi tờ trên màn hình tương ứng đúng 1 trang A4 (có header, thông tin học sinh và số trang “Trang x/y” ở chân trang). Nếu nội dung dài hơn khổ giấy, hệ thống tự thu nhỏ nhẹ để vừa 1 trang – không bị đẩy khối sang trang trắng.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 9.1: KẾ TOÁN – THU PHÍ & DUYỆT PHÍ -->
+      <!-- ========================================================= -->
+      <section id="chang-9-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 9.1</span>
+          <h2 class="section-title">Kế toán: Lập phiếu thu, Duyệt phí & Tra cứu Phiếu thu</h2>
+          <span class="section-role"><i class="fa-solid fa-cash-register"></i> Thu ngân / Kế toán / Giám đốc cơ sở</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">LMS</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Kế toán</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Chờ thu phí · Duyệt phí · Đã thu phí</span>
+          <span class="menu-url">/lms/waitcharges &bull; /lms/waitcharge-approve &bull; /lms/charges</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Luồng 3 bước của một khoản thu</div>
+          <div class="step-desc">
+            <table class="guide-table">
+              <thead><tr><th style="width: 22%;">Bước</th><th style="width: 22%;">Màn hình</th><th>Việc cần làm</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1. Lập phiếu thu</strong></td><td>Chờ thu phí</td><td>Mở hợp đồng còn công nợ &rarr; nhập <em>Số tiền thu</em>, <em>Phương thức</em> (Tiền mặt / Chuyển khoản / Thẻ), <em>Ngày thu</em>, <em>Ghi chú</em> &rarr; <strong>Thêm phiếu thu</strong>. Phiếu ở trạng thái <span class="pill-status pill-warning">Chờ duyệt</span>.</td></tr>
+                <tr><td><strong>2. Duyệt phiếu</strong></td><td>Duyệt phí</td><td>Người có quyền duyệt (<strong>Admin, Giám đốc trung tâm, Thu ngân</strong>) kiểm tra tiền thực nhận &rarr; <strong>Duyệt</strong> hoặc <strong>Từ chối</strong>. Chỉ khi được duyệt, hợp đồng mới cập nhật số tiền đã đóng và trạng thái.</td></tr>
+                <tr><td><strong>3. Tra cứu / in</strong></td><td>Đã thu phí</td><td>Lịch sử mọi phiếu thu: số thu đợt này, tổng đã thu, công nợ còn, người lập. Bấm <strong>In phiếu thu</strong> để in biên nhận cho phụ huynh.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Phê duyệt phiếu thu</div>
+          <div class="step-desc">
+            Tại <code>Kế toán</code> &rarr; <code>Duyệt phí</code>:
+            <ul>
+              <li>Lọc theo Trung tâm, từ khóa (mã phiếu, mã HS, tên HS, mã HĐ), <strong>Trạng thái phiếu thu</strong> (<span class="pill-status pill-warning">Chờ duyệt</span> <span class="pill-status pill-success">Đã duyệt</span> <span class="pill-status pill-danger">Từ chối duyệt</span>) và ngày đóng phí. Có thể xem <em>Dạng thẻ</em> hoặc <em>Dạng bảng</em>.</li>
+              <li>Bấm <strong>Chi tiết</strong> để đối chiếu thông tin hợp đồng, số tiền phải đóng / đã thu / công nợ; có thể chỉnh số tiền, phương thức, ngày thu trước khi bấm <strong>Phê duyệt</strong> hoặc <strong>Từ chối</strong>.</li>
+              <li>Kết quả sau duyệt: đóng <strong>đủ 100%</strong> &rarr; hợp đồng sẵn sàng xếp lớp chính thức; đóng <strong>một phần</strong> &rarr; hợp đồng ở trạng thái <strong>Đặt cọc</strong>.</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>Phiếu thu <strong>chưa được duyệt</strong> thì học sinh chưa được tính là đã đóng phí và chưa xuất hiện trong danh sách chờ xếp lớp chính thức.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 9.2: DASHBOARD & BÁO CÁO -->
+      <!-- ========================================================= -->
+      <section id="chang-9-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 9.2</span>
+          <h2 class="section-title">Dashboard & Báo cáo Quản trị</h2>
+          <span class="section-role"><i class="fa-solid fa-chart-line"></i> Ban Giám đốc / Giám đốc cơ sở / Sale Leader / CM Leader</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Dashboard</span>
+          <span>/</span>
+          <span class="menu-crumb">LMS &rarr; Báo cáo</span>
+          <span class="menu-url">/ &bull; /lms/reports</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Dashboard – xem nhanh theo vai trò</div>
+          <div class="step-desc">
+            Trang chủ <code>Dashboard</code> chia tab theo vai trò: <strong>Ban Giám Đốc</strong> (doanh thu, học viên active, tỉ lệ tái phí, phễu chuyển đổi, xếp hạng trung tâm), <strong>GĐ Trung Tâm</strong> (doanh thu so chỉ tiêu, walk-in, lấp đầy lớp, xếp hạng KPI Sale/CM), <strong>Sale &amp; Tư vấn (EC)</strong> và <strong>Chăm sóc khách hàng (CM)</strong>. Chọn trung tâm và khoảng thời gian để lọc số liệu.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Báo cáo kinh doanh</div>
+          <div class="step-desc">
+            Vào <code>LMS</code> &rarr; <code>Báo cáo</code>, chọn báo cáo trong danh sách rồi bấm <strong>Xem báo cáo</strong>:
+            <table class="guide-table">
+              <thead><tr><th style="width: 8%;">Số</th><th style="width: 38%;">Báo cáo</th><th>Nội dung</th></tr></thead>
+              <tbody>
+                <tr><td>01</td><td>Doanh thu – Tổng quan</td><td>Theo từng nhân viên: lượng data, % hợp đồng, doanh số tạm tính, thực thu, thực thu/data, tổng nợ cần thu.</td></tr>
+                <tr><td>02</td><td>Doanh thu – Đội nhóm (Team Sale)</td><td>Theo Leader Sale: chỉ tiêu KPI, thực đạt, % hoàn thành. Nút <strong>Thiết lập KPI tháng</strong> để giao chỉ tiêu.</td></tr>
+                <tr><td>03</td><td>Kinh doanh theo Nguồn &amp; chuyển đổi data</td><td>Doanh thu theo Nguồn và <strong>Nguồn chi tiết</strong> (MKT, B2B, giới thiệu, đi thị trường...), xem theo Sale, Team, Cơ sở.</td></tr>
+                <tr><td>04</td><td>Doanh thu theo Sản phẩm</td><td>Số hợp đồng, tỷ trọng, doanh số, thực thu, công nợ từng khóa học (Ucrea, Bright I.G, Tiếng Anh, Tiền Tiểu Học...).</td></tr>
+              </tbody>
+            </table>
+            Bộ lọc: khoảng ngày (ngày tạo data / bàn giao / chăm sóc / hóa đơn), cơ sở, đội nhóm, loại hợp đồng (mới / tái phí / học thử), nguồn, kênh... Bấm <strong>Export Excel</strong> để tải số liệu. Phạm vi dữ liệu tự giới hạn theo các cơ sở bạn được phân quyền.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 10: MARKETING -->
+      <!-- ========================================================= -->
+      <section id="chang-10" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 10</span>
+          <h2 class="section-title">Marketing: Chiến dịch, Đối tác B2B, Giới thiệu C2C & Voucher</h2>
+          <span class="section-role"><i class="fa-solid fa-bullhorn"></i> Marketing / Ban Giám đốc</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Marketing</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Chiến dịch · B2B · C2C · Voucher</span>
+          <span class="menu-url">/marketing/...</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Chiến dịch Marketing</div>
+          <div class="step-desc">
+            <code>Marketing</code> &rarr; <code>Chiến dịch</code> &rarr; <strong>+ Thêm mới</strong>: nhập tên chiến dịch, thời gian, <strong>Phương thức</strong> (Google Ads, Facebook Ads, Tiktok Ads, Quà tặng, Voucher, Khác), ngân sách, trung tâm áp dụng (để trống = tất cả).
+            <ul>
+              <li>Mỗi chiến dịch <strong>tự động trở thành một Nguồn chi tiết</strong> của nguồn <em>Marketing</em> – Sale chọn được ngay khi lên data khách hàng.</li>
+              <li>Phương thức <strong>Voucher</strong>: chọn <em>Voucher random</em> (hệ thống sinh N mã ngẫu nhiên) hoặc <em>Voucher cố định</em> (1 mã dùng chung), khai báo giá trị tiền / số buổi học bổng / % giảm, số lượng tối đa và số lần áp dụng cho 1 học sinh.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">B2B – Đối tác & Chính sách đối tác</div>
+          <div class="step-desc">
+            <ul>
+              <li><code>B2B</code> &rarr; <code>Nguồn đối tác</code>: khai báo đối tác (trường học, công ty, khu đô thị...). Mỗi đối tác tự trở thành Nguồn chi tiết của nguồn <em>B2B</em>.</li>
+              <li><code>B2B</code> &rarr; <code>Chính sách B2B</code>: chọn đối tác, thời gian hiệu lực và bảng <strong>gói phí áp dụng</strong> kèm <em>số tiền khuyến mại</em> / <em>số buổi học bổng</em>. Khi làm hợp đồng cho học sinh thuộc nguồn đối tác, hệ thống tải chính sách của đối tác để áp dụng ưu đãi.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">C2C – Khách hàng giới thiệu khách hàng</div>
+          <div class="step-desc">
+            <code>Marketing</code> &rarr; <code>C2C</code> &rarr; <strong>+ Thêm mới</strong> chính sách: thời gian hiệu lực, gói phí áp dụng và ưu đãi (Giảm giá hoặc Học bổng) cho cả <strong>KH giới thiệu</strong> và <strong>KH được giới thiệu</strong>. Khi Sale lên data với nguồn <em>C2C – Khách hàng giới thiệu</em>, chọn chính sách tương ứng ở ô Nguồn chi tiết.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">4</div>
+          <div class="step-title">Voucher</div>
+          <div class="step-desc">
+            <code>Marketing</code> &rarr; <code>Voucher</code>: tra cứu toàn bộ mã voucher đã phát hành theo mã hoặc tên chiến dịch, xem giá trị, học bổng, % giảm, thời hạn và tình trạng <strong>Đã sử dụng</strong>.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 11.1: CẤU HÌNH – TRUNG TÂM & ĐÀO TẠO -->
+      <!-- ========================================================= -->
+      <section id="chang-11-1" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 11.1</span>
+          <h2 class="section-title">Cấu hình: Trung tâm & Khung Đào tạo (Khóa học → Lớp học)</h2>
+          <span class="section-role"><i class="fa-solid fa-gear"></i> Quản trị hệ thống / Quản lý đào tạo</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Cấu hình hệ thống</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Trung tâm</span>
+          <span>/</span>
+          <span class="menu-crumb">Đào tạo › Khóa học · Chương trình học · Lớp học · Phòng học · Ca học · Ngày nghỉ lễ</span>
+        </div>
+
+        <div class="alert-box alert-info">
+          <i class="fa-solid fa-list-ol"></i>
+          <div><strong>Thứ tự khai báo khi mở cơ sở / chương trình mới:</strong> Trung tâm &rarr; Khóa học &rarr; Chương trình học &rarr; Phòng học &amp; Ca học &rarr; Ngày nghỉ lễ &rarr; Gói phí (<a href="#chang-11-2">11.2</a>) &rarr; Lớp học. Lớp học cần đủ các danh mục trước đó.</div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Danh mục nền</div>
+          <div class="step-desc">
+            <table class="guide-table">
+              <thead><tr><th style="width: 22%;">Mục</th><th>Thông tin cần nhập</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Trung tâm</strong></td><td>Mã, tên trung tâm, ngày khai trương, email, hotline, trạng thái.</td></tr>
+                <tr><td><strong>Khóa học</strong></td><td>Mã, tên khóa học (Ucrea, Bright I.G, Tiếng Anh, Tiền Tiểu Học...), mô tả.</td></tr>
+                <tr><td><strong>Chương trình học</strong></td><td>Thuộc khóa học nào, mã và tên chương trình (cấp độ / level).</td></tr>
+                <tr><td><strong>Phòng học</strong></td><td>Trung tâm, tên và mã phòng. Phòng đã có buổi học thì không xóa được.</td></tr>
+                <tr><td><strong>Ca học</strong></td><td>Khung giờ học (ví dụ 19h00–20h30).</td></tr>
+                <tr><td><strong>Ngày nghỉ lễ</strong></td><td>Tên, từ ngày – đến ngày, trung tâm và sản phẩm áp dụng. Hệ thống tự bỏ qua các ngày này khi sinh lịch học và tính ngày kết thúc.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Mở lớp học mới</div>
+          <div class="step-desc">
+            <code>Đào tạo</code> &rarr; <code>Lớp học</code>: chọn Trung tâm và Khóa học, sau đó <strong>Thêm mới lớp học</strong>:
+            <ul>
+              <li>Chương trình học, <strong>Tên lớp</strong>, Giáo viên, Ca học, Phòng học, <strong>CM – Quản lý lớp</strong>, TA – Trợ giảng.</li>
+              <li><strong>Ngày học</strong> trong tuần (Thứ 2 &rarr; Chủ nhật), <strong>Ngày bắt đầu</strong>, <strong>Số buổi</strong> (ví dụ 96) – hệ thống tự tính <em>Ngày kết thúc</em> có trừ ngày nghỉ lễ.</li>
+              <li><strong>Sĩ số tối đa</strong> và <strong>Loại lớp</strong>: <em>Trải nghiệm</em> hoặc <em>Chính thức</em>.</li>
+              <li>Mục <strong>Danh sách buổi học</strong> cho phép dời riêng một buổi sang ngày khác (“Thay đổi ngày học từ … sang ngày …”).</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>Lớp phải có <strong>CM quản lý</strong> thì mới thêm học sinh được ở màn Xếp lớp (<a href="#chang-6">Chặng 6</a>).</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 11.2: CẤU HÌNH – HỌC PHÍ & KHÁCH HÀNG -->
+      <!-- ========================================================= -->
+      <section id="chang-11-2" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 11.2</span>
+          <h2 class="section-title">Cấu hình: Gói phí, Mã chiết khấu & Nguồn khách hàng</h2>
+          <span class="section-role"><i class="fa-solid fa-gear"></i> Quản trị hệ thống / Kế toán / Marketing</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Cấu hình hệ thống</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Học phí &amp; khách hàng › Gói phí · Mã chiết khấu · Nguồn khách hàng</span>
+          <span class="menu-url">/settings/tuition-fees &bull; /settings/discount-codes &bull; /settings/sources</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Gói phí</div>
+          <div class="step-desc">
+            Khai báo: khóa học, tên gói, <strong>số buổi</strong>, số tháng, <strong>giá niêm yết</strong>, ngày hiệu lực / hết hiệu lực, loại gói (<em>Học thử</em> / <em>Chính thức</em>), áp dụng cho <em>New / Renew / Tất cả</em>, trung tâm áp dụng và danh sách <strong>gói phí quy đổi</strong> được phép (dùng cho chức năng Quy đổi – <a href="#chang-7-3">7.3</a>).
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Mã chiết khấu</div>
+          <div class="step-desc">
+            Mã và tên chiết khấu, <strong>buổi học bổng</strong>, <strong>tỷ lệ %</strong> hoặc <strong>tiền chiết khấu</strong> (tự tính theo giá gốc gói phí), thời gian hiệu lực và các gói phí được áp dụng. Mã đang hiệu lực xuất hiện để chọn khi tạo hợp đồng.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">3</div>
+          <div class="step-title">Nguồn khách hàng & Nguồn chi tiết</div>
+          <div class="step-desc">
+            Màn hình chia 2 cột:
+            <ul>
+              <li><strong>Cột trái – Nguồn:</strong> Marketing, B2B, C2C, Trung tâm, Đi thị trường, Khách vãng lai, Group... kèm số nguồn chi tiết đang dùng và số khách hàng. Bấm <strong>+ Thêm nguồn</strong> để tạo nguồn mới; bấm <i class="fa-solid fa-pen"></i> để sửa / ngừng sử dụng.</li>
+              <li><strong>Cột phải – Nguồn chi tiết</strong> của nguồn đang chọn (ví dụ nguồn <em>Đi thị trường</em>: Trường MN Trạng Nguyên, Tờ rơi chung cư, LK sự kiện chung cư Eurowindow, Trường Tiểu học Đông Hội, Tờ rơi Mầm non). Lọc theo tên, trung tâm, trạng thái; xem số khách hàng / học sinh đang gắn với từng nguồn.</li>
+              <li><strong>+ Thêm nguồn chi tiết:</strong> chọn nguồn, <strong>Trung tâm áp dụng</strong> (để <em>Tất cả trung tâm</em> hoặc chỉ một cơ sở) và nhập tên – <strong>mỗi dòng một nguồn</strong> để thêm nhiều nguồn cùng lúc.</li>
+              <li>Công tắc <span class="pill-status pill-success">Đang dùng</span> / <span class="pill-status pill-gray">Ngừng</span> để ẩn nguồn khỏi form khách hàng mà không mất dữ liệu cũ.</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-warning">
+            <i class="fa-solid fa-shield-halved"></i>
+            <div>
+              <ul style="margin: 0; padding-left: 18px;">
+                <li>Nguồn / nguồn chi tiết <strong>đã gắn với khách hàng thì không xóa được</strong> – hãy chuyển sang <em>Ngừng</em>.</li>
+                <li>Nguồn chi tiết của <strong>Marketing, B2B, C2C</strong> được tạo tự động từ module Marketing (<a href="#chang-10">10</a>) nên chỉ xem tại đây.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CHẶNG 11.3: CẤU HÌNH – TÀI KHOẢN & PHÂN QUYỀN -->
+      <!-- ========================================================= -->
+      <section id="chang-11-3" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">CHẶNG 11.3</span>
+          <h2 class="section-title">Cấu hình: Người dùng, Chức vụ & Phân quyền</h2>
+          <span class="section-role"><i class="fa-solid fa-user-shield"></i> Quản trị hệ thống</span>
+        </div>
+
+        <div class="menu-path-bar">
+          <span class="path-label"><i class="fa-solid fa-bars text-primary"></i> Menu trái:</span>
+          <span class="menu-crumb">Cấu hình hệ thống</span>
+          <span>&rarr;</span>
+          <span class="menu-crumb">Tài khoản &amp; phân quyền › Người dùng · Chức vụ, phân quyền · Permissions · Nhóm Permissions</span>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">1</div>
+          <div class="step-title">Tạo tài khoản nhân viên</div>
+          <div class="step-desc">
+            <code>Người dùng</code> &rarr; <strong>+ Thêm mới</strong>: <strong>Mã nhân viên</strong> (dùng để đăng nhập, ví dụ <code>EC002</code>), họ tên, điện thoại, email, mật khẩu, <strong>Người quản lý / Trưởng nhóm</strong> (dùng cho báo cáo đội nhóm), đầu số SIP (tổng đài), <strong>Trung tâm</strong> được làm việc và <strong>Phân quyền</strong> (chức vụ: EC, EC Leader, CM, CM Leader, Giáo viên, Trợ giảng, Thu ngân, CEO...). Khi nhân viên nghỉ việc, chuyển trạng thái <em>Không hoạt động</em> thay vì xóa.
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-bullet">2</div>
+          <div class="step-title">Phân quyền theo chức vụ</div>
+          <div class="step-desc">
+            <ul>
+              <li><code>Chức vụ, phân quyền</code>: danh sách chức vụ; bấm phân quyền trên một chức vụ &rarr; <strong>Chọn phân hệ và quyền</strong> (tích các màn hình được phép) &rarr; <strong>Lưu</strong>. Mọi nhân viên thuộc chức vụ đó nhận quyền mới.</li>
+              <li><code>Permissions</code> / <code>Nhóm Permissions</code>: danh mục quyền kỹ thuật (mỗi mục menu tương ứng 1 permission) – chỉ quản trị viên cần thao tác khi bổ sung chức năng mới.</li>
+              <li>Phạm vi dữ liệu theo cơ sở được giới hạn bởi danh sách <strong>Trung tâm</strong> gán cho người dùng.</li>
+            </ul>
+          </div>
+          <div class="alert-box alert-tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>Sau khi đổi quyền, nhân viên cần <strong>đăng xuất và đăng nhập lại</strong> để menu hiển thị đúng.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- PHỤ LỤC: CÂU HỎI THƯỜNG GẶP -->
+      <!-- ========================================================= -->
+      <section id="chang-faq" class="guide-section">
+        <div class="section-header">
+          <span class="section-badge">PHỤ LỤC</span>
+          <h2 class="section-title">Câu hỏi thường gặp & Xử lý nhanh</h2>
+          <span class="section-role"><i class="fa-solid fa-circle-question"></i> Tất cả bộ phận</span>
+        </div>
+
+        <table class="guide-table">
+          <thead><tr><th style="width: 38%;">Tình huống</th><th>Cách xử lý</th></tr></thead>
+          <tbody>
+            <tr><td>Không thấy một mục trên menu</td><td>Bạn chưa được phân quyền – liên hệ quản trị. Sau khi được cấp quyền: đăng xuất, đăng nhập lại.</td></tr>
+            <tr><td>Giao diện chưa cập nhật sau khi hệ thống nâng cấp</td><td>Nhấn <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>) để tải lại trang.</td></tr>
+            <tr><td>Đã thu tiền nhưng học sinh chưa hiện ở Xếp lớp</td><td>Phiếu thu đang <strong>Chờ duyệt</strong> – vào <code>Kế toán</code> &rarr; <code>Duyệt phí</code> để phê duyệt (<a href="#chang-9-1">9.1</a>).</td></tr>
+            <tr><td>Không thêm được học sinh vào lớp</td><td>Kiểm tra lớp đã gán <strong>CM quản lý</strong> và chưa đủ sĩ số tối đa.</td></tr>
+            <tr><td>Khách hàng nói đến từ trường / sự kiện chưa có trong danh sách nguồn</td><td>Nhờ quản trị thêm tại <code>Cấu hình hệ thống</code> &rarr; <code>Học phí &amp; khách hàng</code> &rarr; <code>Nguồn khách hàng</code> (<a href="#chang-11-2">11.2</a>).</td></tr>
+            <tr><td>Báo cáo tổng kết IG.BH thiếu số liệu tuần</td><td>Lớp chưa chấm đủ 12 tuần – bổ sung tại <code>IG.BH</code> &rarr; <code>Đánh giá tuần</code> (<a href="#chang-8-3">8.3</a>).</td></tr>
+            <tr><td>In báo cáo bị mất màu</td><td>Trong hộp thoại in, bật <strong>Đồ họa nền / In hình nền</strong>; khổ A4, lề Mặc định (<a href="#chang-8-5">8.5</a>).</td></tr>
+            <tr><td>Đổi giáo viên dạy thay cho 1 buổi</td><td><code>LMS</code> &rarr; <code>Vận hành</code> &rarr; <code>Giáo viên &amp; trợ giảng</code>, sửa đúng buổi đó (<a href="#chang-7-2">7.2</a>).</td></tr>
+          </tbody>
+        </table>
+      </section>
+
 
     </main>
   </div>
