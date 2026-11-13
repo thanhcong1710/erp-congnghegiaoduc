@@ -1,209 +1,186 @@
 <template>
 
-  <div id="page-users-list">
+  <div id="page-users-list" class="crm-parent-form">
     <vx-card no-shadow class="mt-5">
-      <h5>THÔNG TIN PHỤ HUYNH</h5>
-      <div class="vx-row mt-2">
-        <div class="vx-col md:w-1/2 w-full item-first">
-          <div class="vx-row">
-            <div class="vx-col md:w-1/3 w-full mb-4">
-              <label>Danh xưng <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="parent.gender">
-                <option value="M">Ông</option>
-                <option value="F">Bà</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-2/3 w-full mb-4">
-              <label>Họ tên <span class="text-danger"> (*)</span></label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.name"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label  >Điện thoại <span class="text-danger"> (*)</span></label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.mobile_1"
-                @change="validatePhone"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label  >Điện thoại 2</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.mobile_2"
-                @change="validatePhone2"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-               <label >Email</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.email"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Ngày sinh </label>
-              <datepicker class="w-full"
-                v-model="parent.birthday"
-                placeholder="Chọn ngày sinh nhật"
-                :lang="datepickerOptions.lang"
-                @change="selectDate"
-              />
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Nghề nghiệp</label>
-              <vue-select
-                    label="title"
-                    placeholder="Chọn nghề nghiệp"
-                    :options="html.jobs.list"
-                    v-model="parent.job"
-                    :searchable="true"
-                    language="tv-VN"
-                     @input="saveJob"
-                ></vue-select>
-            </div>
-            <div class="vx-col w-full mb-4">
-              <label >Ghi chú</label>
-              <textarea class="vs-inputx vs-input--input normal" v-model="parent.note"></textarea>
-            </div>
+      <!-- ===== THÔNG TIN PHỤ HUYNH ===== -->
+      <div class="pf-section">
+        <h5 class="pf-title">Thông tin phụ huynh</h5>
+        <div class="pf-grid">
+          <div class="pf-field pf-c2">
+            <label>Danh xưng <span class="text-danger">(*)</span></label>
+            <select class="pf-control pf-select" v-model="parent.gender">
+              <option value="" disabled>Chọn</option>
+              <option value="M">Ông</option>
+              <option value="F">Bà</option>
+            </select>
           </div>
-        </div>
-        <div class="vx-col md:w-1/2 w-full item-last">
-          <div class="vx-row">
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Tỉnh Thành Phố</label>
-              <vue-select
-                label="name"
-                placeholder="Chọn Tỉnh/Thành Phố"
-                :options="html.province.list"
-                v-model="parent.province"
-                :searchable="true"
-                language="tv-VN"
-                @input="getDistrict"
-              ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Quận huyện</label>
-              <vue-select
-                    label="name"
-                    placeholder="Chọn Quận/Huyện/Thị Xã"
-                    :options="html.district.list"
-                    v-model="parent.district"
-                    :searchable="true"
-                    language="tv-VN"
-                    @input="saveDistrict"
-                ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Người phụ trách <span class="text-danger"> (*)</span></label>
-              <select class="vs-inputx vs-input--input normal" v-model="parent.owner_id">
-                <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{item.label_name}}</option>
-              </select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-               <label >Nguồn  <span class="text-danger"> (*)</span></label>
-              <vue-select
-                    label="name"
-                    placeholder="Chọn nguồn"
-                    :options="html.source.list"
-                    v-model="parent.source"
-                    :searchable="true"
-                    language="tv-VN"
-                     @input="saveSource"
-                ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <label >Nguồn chi tiết</label>
-              <vue-select
-                    label="name"
-                    placeholder="Chọn nguồn chi tiết"
-                    :options="html.source_detail.list"
-                    v-model="parent.source_detail"
-                    :searchable="true"
-                    language="tv-VN"
-                     @input="saveSourceDetail"
-                ></vue-select>
-            </div>
-            <div class="vx-col md:w-1/2 w-full mb-4" v-if="parent.source_id==3">
-              <label  >Người giới thiệu (ĐT)</label>
-              <input
-                class="vs-inputx vs-input--input normal"
-                type="text"
-                name="title"
-                v-model="parent.c2c_mobile"
-                @change="validatePhoneC2C"
-              />
-            </div>
-            <div class="vx-col w-full mb-4" v-if="parent.source_id==3">
-               <p><i>{{c2c_info}}</i></p>
-            </div>
-            
-            <div class="vx-col md:w-1/2 w-full mb-4">
-              <div class="form-group col-sm-6">
-                <label >Trạng thái khách hàng</label>
-                <select class="vs-inputx vs-input--input normal" v-model="parent.status">
-                  <option 
-                    v-for="option in levelOptionsParent" 
-                    :key="option.id" 
-                    :value="option.id">
-                    {{ option.label }}
-                  </option>
-                </select>
-              </div>
-            </div>
+          <div class="pf-field pf-c4">
+            <label>Họ tên <span class="text-danger">(*)</span></label>
+            <input class="pf-control" type="text" v-model="parent.name" placeholder="Nhập họ tên phụ huynh" />
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Điện thoại <span class="text-danger">(*)</span></label>
+            <input class="pf-control" type="text" inputmode="tel" v-model="parent.mobile_1" @change="validatePhone" placeholder="VD: 0912345678" />
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Điện thoại 2</label>
+            <input class="pf-control" type="text" inputmode="tel" v-model="parent.mobile_2" @change="validatePhone2" />
+          </div>
+
+          <div class="pf-field pf-c3">
+            <label>Email</label>
+            <input class="pf-control" type="email" v-model="parent.email" placeholder="email@example.com" />
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Ngày sinh</label>
+            <datepicker class="pf-date"
+              v-model="parent.birthday"
+              placeholder="Chọn ngày sinh"
+              :lang="datepickerOptions.lang"
+              @change="selectDate"
+            />
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Tỉnh / Thành phố</label>
+            <vue-select
+              label="name"
+              placeholder="Chọn Tỉnh/Thành phố"
+              :options="html.province.list"
+              v-model="parent.province"
+              :searchable="true"
+              language="tv-VN"
+              @input="getDistrict"
+            ></vue-select>
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Quận / Huyện</label>
+            <vue-select
+              label="name"
+              placeholder="Chọn Quận/Huyện/Thị xã"
+              :options="html.district.list"
+              v-model="parent.district"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveDistrict"
+            ></vue-select>
+          </div>
+
+          <div class="pf-field pf-c3">
+            <label>Nghề nghiệp</label>
+            <vue-select
+              label="title"
+              placeholder="Chọn nghề nghiệp"
+              :options="html.jobs.list"
+              v-model="parent.job"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveJob"
+            ></vue-select>
           </div>
         </div>
       </div>
-      <h5>THÔNG TIN HỌC SINH</h5>
-      <div class="vx-row mt-2" v-for="(student, index) in students" :key="index"> 
-        <div class="vx-col md:w-1/2 w-full mb-4">
-          <label>Họ tên học sinh</label>
-          <input class="vs-inputx vs-input--input normal" type="text" v-model="student.name">
+
+      <!-- ===== CHĂM SÓC & NGUỒN ===== -->
+      <div class="pf-section">
+        <h5 class="pf-title">Phụ trách &amp; nguồn khách hàng</h5>
+        <div class="pf-grid">
+          <div class="pf-field pf-c3">
+            <label>Người phụ trách <span class="text-danger">(*)</span></label>
+            <select class="pf-control pf-select" v-model="parent.owner_id">
+              <option value="" disabled>Chọn người phụ trách</option>
+              <option :value="item.id" v-for="(item, index) in users_manager" :key="index">{{item.label_name}}</option>
+            </select>
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Nguồn <span class="text-danger">(*)</span></label>
+            <vue-select
+              label="name"
+              placeholder="Chọn nguồn"
+              :options="html.source.list"
+              v-model="parent.source"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveSource"
+            ></vue-select>
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Nguồn chi tiết</label>
+            <vue-select
+              label="name"
+              placeholder="Chọn nguồn chi tiết"
+              :options="html.source_detail.list"
+              v-model="parent.source_detail"
+              :searchable="true"
+              language="tv-VN"
+              @input="saveSourceDetail"
+            ></vue-select>
+          </div>
+          <div class="pf-field pf-c3">
+            <label>Trạng thái khách hàng</label>
+            <select class="pf-control pf-select" v-model="parent.status">
+              <option v-for="option in levelOptionsParent" :key="option.id" :value="option.id">
+                {{ option.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="pf-field pf-c3" v-if="parent.source_id==3">
+            <label>Người giới thiệu (ĐT)</label>
+            <input class="pf-control" type="text" inputmode="tel" v-model="parent.c2c_mobile" @change="validatePhoneC2C" />
+          </div>
+          <div class="pf-field pf-c9 pf-c2c-info" v-if="parent.source_id==3 && c2c_info">
+            <i>{{c2c_info}}</i>
+          </div>
+
+          <div class="pf-field pf-c12">
+            <label>Ghi chú</label>
+            <textarea class="pf-control pf-textarea" rows="3" v-model="parent.note" placeholder="Ghi chú thêm về khách hàng..."></textarea>
+          </div>
         </div>
-        <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Ngày sinh / Năm sinh</label>
-          <birthday-input v-model="student.birthday" />
+      </div>
+
+      <!-- ===== THÔNG TIN HỌC SINH ===== -->
+      <div class="pf-section">
+        <h5 class="pf-title">Thông tin học sinh</h5>
+        <div class="pf-student" v-for="(student, index) in students" :key="index">
+          <div class="pf-student-no">{{ index + 1 }}</div>
+          <div class="pf-grid pf-student-grid">
+            <div class="pf-field pf-c4">
+              <label>Họ tên học sinh</label>
+              <input class="pf-control" type="text" v-model="student.name" placeholder="Nhập họ tên học sinh">
+            </div>
+            <div class="pf-field pf-c3">
+              <label>Ngày sinh / Năm sinh</label>
+              <birthday-input v-model="student.birthday" />
+            </div>
+            <div class="pf-field pf-c2">
+              <label>Giới tính</label>
+              <select class="pf-control pf-select" v-model="student.gender">
+                <option value="" disabled>Chọn</option>
+                <option value="M">Nam</option>
+                <option value="F">Nữ</option>
+              </select>
+            </div>
+            <div class="pf-field pf-c3">
+              <label>Trường học</label>
+              <input class="pf-control" type="text" v-model="student.school" placeholder="Tên trường">
+            </div>
+          </div>
+          <button v-if="students.length > 1" type="button" class="pf-remove" title="Xoá học sinh" @click="removeStudent(index)">
+            <feather-icon icon="Trash2Icon" svgClasses="w-5 h-5" />
+          </button>
         </div>
-        <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Giới tính</label>
-          <select class="vs-inputx vs-input--input normal" v-model="student.gender">
-            <option value="M">Nam</option>
-            <option value="F">Nữ</option>
-          </select>
-        </div>
-        <div class="vx-col md:w-1/4 w-full mb-4">
-          <label>Trường học</label>
-          <input class="vs-inputx vs-input--input normal" type="text" v-model="student.school">
-        </div>
-        <div class="vx-col md:w-1/4 w-full mb-4" >
-          <vs-button v-if="students.length > 1" color="danger" type="flat" icon-pack="feather" icon="icon-trash-2" @click="removeStudent(index)">
-            Xoá
-          </vs-button>
-          <vs-button v-if="index === students.length - 1" class="mb-4" type="border" color="primary" icon-pack="feather" icon="icon-plus" @click="addStudent">
-            Thêm học sinh
-          </vs-button>
-        </div>
-      </div>  
-      <vs-alert :active.sync="alert.active" class="mb-5" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
+        <vs-button type="border" color="primary" icon-pack="feather" icon="icon-plus" @click="addStudent">
+          Thêm học sinh
+        </vs-button>
+      </div>
+
+      <vs-alert :active.sync="alert.active" class="mb-5 mt-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
          <div v-html="alert.body"></div>
       </vs-alert>
-      <div class="vx-row mt-5">
-        <div class="vx-col w-full">
-          <router-link class="btn btn-danger" :to="`/crm/parent`">
-            <vs-button color="dark" type="border" class="mb-2 mr-3" >Hủy</vs-button>
-          </router-link>
-          <vs-button class="mb-2" color="success" @click="save">Thêm mới</vs-button>
-        </div>
+      <div class="pf-actions">
+        <vs-button color="dark" type="border" @click="$router.push(`/crm/parent`)">Hủy</vs-button>
+        <vs-button color="success" icon-pack="feather" icon="icon-check" @click="save">Thêm mới</vs-button>
       </div>
     </vx-card>
     <vs-popup :class="'modal_'+ modal.color" :title="modal.title" :active.sync="modal.show">
@@ -650,3 +627,100 @@
     },
   }
 </script>
+<style>
+/* ===== Form thêm mới khách hàng (crm/parents/add) ===== */
+.crm-parent-form .pf-section { padding-bottom: 8px; margin-bottom: 20px; border-bottom: 1px solid #eef2f7; }
+.crm-parent-form .pf-section:last-of-type { border-bottom: 0; }
+.crm-parent-form .pf-title {
+  font-size: 16px; font-weight: 700; color: #1e293b; text-transform: uppercase;
+  letter-spacing: .3px; margin-bottom: 16px;
+}
+.crm-parent-form .pf-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px 20px; margin-bottom: 16px; }
+.crm-parent-form .pf-c2 { grid-column: span 2; }
+.crm-parent-form .pf-c3 { grid-column: span 3; }
+.crm-parent-form .pf-c4 { grid-column: span 4; }
+.crm-parent-form .pf-c9 { grid-column: span 9; }
+.crm-parent-form .pf-c12 { grid-column: span 12; }
+@media (max-width: 1199px) {
+  .crm-parent-form .pf-c2, .crm-parent-form .pf-c3, .crm-parent-form .pf-c4, .crm-parent-form .pf-c9 { grid-column: span 6; }
+}
+@media (max-width: 575px) {
+  .crm-parent-form .pf-grid > .pf-field { grid-column: span 12; }
+}
+.crm-parent-form .pf-field { min-width: 0; }
+.crm-parent-form .pf-field > label {
+  display: block; font-size: 13.5px; font-weight: 600; color: #334155; margin-bottom: 6px; white-space: nowrap;
+}
+.crm-parent-form .pf-c2c-info { align-self: end; font-size: 13.5px; color: #475569; padding-bottom: 10px; }
+
+/* --- Control chung: tất cả cao 40px, cùng viền --- */
+.crm-parent-form .pf-control,
+.crm-parent-form .birthday-input .bi-field,
+.crm-parent-form .pf-date .mx-input,
+.crm-parent-form .v-select .vs__dropdown-toggle {
+  width: 100%; height: 40px; min-height: 40px; box-sizing: border-box;
+  background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 6px;
+  font-size: 14px; color: #1e293b; padding: 0 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color .15s, box-shadow .15s;
+}
+.crm-parent-form .pf-control { cursor: text; }
+.crm-parent-form .pf-control::placeholder,
+.crm-parent-form .pf-date .mx-input::placeholder { color: #94a3b8; }
+.crm-parent-form .pf-control:hover,
+.crm-parent-form .pf-date .mx-input:hover,
+.crm-parent-form .v-select .vs__dropdown-toggle:hover { border-color: #a5b4fc; }
+.crm-parent-form .pf-control:focus,
+.crm-parent-form .birthday-input .bi-field:focus,
+.crm-parent-form .pf-date .mx-input:focus,
+.crm-parent-form .v-select.vs--open .vs__dropdown-toggle {
+  outline: none; border-color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2);
+}
+
+/* native select: mũi tên rõ ràng */
+.crm-parent-form .pf-select {
+  -webkit-appearance: none; -moz-appearance: none; appearance: none; cursor: pointer; padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23334155' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.crm-parent-form .pf-textarea { height: auto; min-height: 84px; padding: 10px 12px; resize: vertical; line-height: 1.5; }
+
+/* vue-select */
+.crm-parent-form .v-select .vs__dropdown-toggle { display: flex; align-items: center; padding: 0 6px 0 8px; cursor: pointer; }
+.crm-parent-form .v-select .vs__selected-options { flex-wrap: nowrap; overflow: hidden; padding: 0; }
+.crm-parent-form .v-select .vs__selected { margin: 0; padding: 0 4px; font-size: 14px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border: 0; }
+.crm-parent-form .v-select .vs__search,
+.crm-parent-form .v-select .vs__search:focus {
+  border: none !important; background: transparent !important; box-shadow: none !important;
+  margin: 0; padding: 0 4px; font-size: 14px; height: 36px; line-height: 36px;
+}
+.crm-parent-form .v-select .vs__search::placeholder { color: #94a3b8; }
+.crm-parent-form .v-select .vs__actions { padding: 0 4px; }
+
+/* datepicker */
+.crm-parent-form .pf-date.mx-datepicker { width: 100% !important; }
+.crm-parent-form .pf-date .mx-input { cursor: pointer; }
+
+/* birthday-input: gợi ý dưới ô không làm lệch hàng */
+.crm-parent-form .birthday-input .bi-hint { font-size: 13px; }
+
+/* --- Học sinh --- */
+.crm-parent-form .pf-student {
+  position: relative; display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 16px 0; margin-bottom: 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafbfd;
+}
+.crm-parent-form .pf-student-no {
+  flex: 0 0 28px; height: 28px; margin-top: 30px; border-radius: 50%;
+  background: rgba(115, 103, 240, .12); color: #7367f0; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.crm-parent-form .pf-student-grid { flex: 1; }
+.crm-parent-form .pf-remove {
+  flex: 0 0 40px; height: 40px; margin-top: 27px; border-radius: 6px; cursor: pointer;
+  border: 1.5px solid #fecaca; background: #fff; color: #ea5455; display: flex; align-items: center; justify-content: center;
+}
+.crm-parent-form .pf-remove:hover { background: #fef2f2; border-color: #ea5455; }
+
+.crm-parent-form .pf-actions { display: flex; gap: 12px; margin-top: 8px; }
+.crm-parent-form .pf-actions .vs-button { min-width: 120px; font-size: 14px; }
+</style>

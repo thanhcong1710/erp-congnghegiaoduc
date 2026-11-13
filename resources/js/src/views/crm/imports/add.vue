@@ -39,8 +39,9 @@
           <p><a href="/static/template/import_khach_hang.xlsx" target="blank"><i class="fas fa-download"></i> Tải danh sách khách hàng mẫu</a></p>
         </div>
         <div class="vx-col sm:w-1/4 w-full mb-4">
-          <label>Chọn trung tâm</label>
-          <v-select
+          <label>Trung tâm nhận dữ liệu</label>
+          <div v-if="branch_list.length === 1" class="import-branch-fixed">{{ branch_item && branch_item.name }}</div>
+          <v-select v-else
             label="name"
             :options="branch_list"
             v-model="branch_item"
@@ -441,7 +442,12 @@
       })
       axios.g(`/api/system/branches-has-user`)
         .then(response => {
-        this.branch_list = response.data
+        this.branch_list = response.data || []
+        // User chỉ thuộc 1 trung tâm → chọn sẵn, không bắt chọn lại
+        if (this.branch_list.length === 1) {
+          this.branch_item = this.branch_list[0]
+          this.saveBranch(this.branch_item)
+        }
       })
       // axios.g(`/api/system/source_detail`)
       //   .then(response => {
@@ -451,6 +457,10 @@
   }
 </script>
 <style>
+.import-branch-fixed {
+  height: 40px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: 600;
+  color: #1e293b; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 6px; white-space: nowrap;
+}
 @media only screen and (min-width: 600px) {
   #page-roles-list .vs-table--search {
     max-width: 360px;
