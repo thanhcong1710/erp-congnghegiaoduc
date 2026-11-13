@@ -84,6 +84,7 @@
 
 <script>
 import VNavMenuItem from './VerticalNavMenuItem.vue'
+import { groupHasActive } from './navActive'
 
 export default {
   name  : 'v-nav-menu-group',
@@ -111,22 +112,7 @@ export default {
       }
     },
     isGroupActive () {
-      return (item) => {
-        const path        = this.$route.fullPath
-        let open          = false
-        const routeParent = this.$route.meta ? this.$route.meta.parent : undefined
-
-        const func = (item) => {
-          if (item.submenu) {
-            item.submenu.forEach((item) => {
-              if ((path === item.url || routeParent === item.slug) && item.url) { open = true } else if (item.submenu) { func(item) }
-            })
-          }
-        }
-
-        func(item)
-        return open
-      }
+      return (item) => groupHasActive(this.$route, item)
     }
   },
   watch: {

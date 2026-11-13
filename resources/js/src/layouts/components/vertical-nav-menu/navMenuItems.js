@@ -85,6 +85,31 @@ export default [
             permission:'lms_enrolments',
           },
           {
+            url: '/lms/attendances',
+            name: 'Điểm danh',
+            slug: 'lms-attendances',
+            permission:'lms_attendances',
+          },
+          {
+            url: '/lms/assessments',
+            name: 'Nhận xét & đánh giá',
+            slug: 'lms-assessments',
+            permission:'lms_assessments',
+          },
+          {
+            url: '/lms/teachers',
+            name: 'Giáo viên & trợ giảng',
+            slug: 'lms-teachers',
+            permission:'lms_teachers',
+          }
+        ]
+      },
+      {
+        url: null,
+        name: 'Bảo lưu & chuyển đổi',
+        icon: 'RepeatIcon',
+        submenu: [
+          {
             url: '/lms/reserves',
             name: 'Bảo lưu',
             slug: 'lms-reserves',
@@ -119,29 +144,11 @@ export default [
             name: 'Quy đổi',
             slug: 'lms-exchange',
             permission:'lms_exchange',
-          },
-          {
-            url: '/lms/attendances',
-            name: 'Điểm danh',
-            slug: 'lms-attendances',
-            permission:'lms_attendances',
-          },
-          {
-            url: '/lms/assessments',
-            name: 'Nhận xét & đánh giá',
-            slug: 'lms-attendances',
-            permission:'lms_assessments',
-          },
-          {
-            url: '/lms/teachers',
-            name: 'Giáo viên & trợ giảng',
-            slug: 'lms-teachers',
-            permission:'lms_teachers',
           }
         ]
       },
       {
-        url: '/lms/charges',
+        url: null,
         name: 'Kế toán',
         icon: 'DollarSignIcon',
         submenu: [
@@ -175,52 +182,57 @@ export default [
     ]
   },
   {
-    header: 'TEST & ĐÁNH GIÁ',
+    header: 'Test & Đánh giá',
     icon: 'CheckSquareIcon',
     items: [
       {
         url: null,
-        name: 'QUẢN LÝ UCREA',
+        name: 'UCREA',
         icon: 'StarIcon',
         slug: 'lms-evaluations-ucrea-group',
         submenu: [
           {
-            url: '/lms/evaluations/ucrea/tests',
-            name: 'Bài kiểm tra UCREA',
-            slug: 'lms-evaluations-ucrea-tests',
+            url: '/lms/evaluations/ucrea',
+            name: 'Đánh giá năng lực',
+            slug: 'lms-evaluations-ucrea',
           },
           {
-            url: '/lms/evaluations/ucrea',
-            name: 'Đánh giá UCREA',
-            slug: 'lms-evaluations-ucrea',
+            url: '/lms/evaluations/ucrea/tests',
+            name: 'Đề kiểm tra UCREA',
+            slug: 'lms-evaluations-ucrea-tests',
           }
         ]
       },
       {
         url: null,
-        name: 'QUẢN LÝ IG.BH',
+        name: 'IG.BH',
         icon: 'BarChart2Icon',
         slug: 'lms-evaluations-igbh-group',
         submenu: [
           {
-            url: '/lms/evaluations/igbh/tests',
-            name: 'Bài kiểm tra IG.BH',
-            slug: 'lms-evaluations-igbh-tests',
-          },
-          {
             url: '/lms/evaluations/igbh/diagnostic',
-            name: 'Bài kiểm tra đầu vào IG.BH',
+            name: 'Khảo sát đầu vào',
             slug: 'lms-evaluations-igbh-diagnostic',
           },
           {
             url: '/lms/evaluations/igbh/weekly',
-            name: 'ĐG Tuần IG.BH',
+            name: 'Đánh giá tuần',
             slug: 'lms-evaluations-igbh-weekly',
           },
           {
             url: '/lms/evaluations/igbh/summative',
-            name: 'ĐG Cuối kỳ IG.BH',
+            name: 'Tổng kết lớp',
             slug: 'lms-evaluations-igbh-summative-classes',
+          },
+          {
+            url: '/lms/evaluations/igbh/summative/students',
+            name: 'Tổng kết học sinh',
+            slug: 'lms-evaluations-igbh-summative-students',
+          },
+          {
+            url: '/lms/evaluations/igbh/tests',
+            name: 'Đề kiểm tra IG.BH',
+            slug: 'lms-evaluations-igbh-tests',
           }
         ]
       }
@@ -239,7 +251,7 @@ export default [
         permission:'marketing_campaigns',
       },
       {
-        url: '/marketing/b2b',
+        url: null,
         name: 'B2B',
         icon: 'CommandIcon',
         slug: 'marketing-b2b',
@@ -287,102 +299,39 @@ export default [
         permission:'settings_branches',
       },
       {
-        url: '/settings/products',
-        name: 'Khóa học',
-        icon: 'LayersIcon',
-        slug: 'settings-products',
-        permission:'settings_products',
+        url: null,
+        name: 'Đào tạo',
+        icon: 'BookOpenIcon',
+        submenu: [
+          { url: '/settings/products', name: 'Khóa học', slug: 'settings-products', permission:'settings_products' },
+          { url: '/settings/programs', name: 'Chương trình học', slug: 'settings-programs', permission:'settings_programs' },
+          { url: '/settings/classes', name: 'Lớp học', slug: 'settings-classes', permission:'settings_classes' },
+          { url: '/settings/rooms', name: 'Phòng học', slug: 'settings-rooms', permission:'settings_rooms' },
+          { url: '/settings/shifts', name: 'Ca học', slug: 'settings-shifts', permission:'settings_shifts' },
+          { url: '/settings/holidays', name: 'Ngày nghỉ lễ', slug: 'settings-holidays', permission:'settings_holidays' },
+          // { url: '/settings/subjects', name: 'Môn học', slug: 'settings-subjects', permission:'settings_subjects' },
+        ]
       },
       {
-        url: '/settings/programs',
-        name: 'Chương trình học',
-        icon: 'ServerIcon',
-        slug: 'settings-programs',
-        permission:'settings_programs',
-      },
-      // {
-      //   url: '/settings/subjects',
-      //   name: 'Môn học',
-      //   icon: 'ChromeIcon',
-      //   slug: 'settings-subjects',
-      //   permission:'settings_subjects',
-      // },
-      {
-        url: '/settings/classes',
-        name: 'Lớp học',
-        icon: 'FileIcon',
-        slug: 'settings-classes',
-        permission:'settings_classes',
+        url: null,
+        name: 'Học phí & khách hàng',
+        icon: 'CreditCardIcon',
+        submenu: [
+          { url: '/settings/tuition-fees', name: 'Gói phí', slug: 'settings-tuition-fee', permission:'settings_tuition_fees' },
+          { url: '/settings/discount-codes', name: 'Mã chiết khấu', slug: 'settings-discount-codes', permission:'settings_discount_codes' },
+          { url: '/settings/sources', name: 'Nguồn khách hàng', slug: 'settings-sources', permission:'settings_sources' },
+        ]
       },
       {
-        url: '/settings/rooms',
-        name: 'Phòng học',
-        icon: 'CastIcon',
-        slug: 'settings-rooms',
-        permission:'settings_rooms',
-      },
-      {
-        url: '/settings/shifts',
-        name: 'Ca học',
-        icon: 'WatchIcon',
-        slug: 'settings-shifts',
-        permission:'settings_shifts',
-      },
-      {
-        url: '/settings/holidays',
-        name: 'Ngày nghỉ lễ',
-        icon: 'CloudOffIcon',
-        slug: 'settings-holidays',
-        permission:'settings_holidays',
-      },
-      {
-        url: '/settings/tuition-fees',
-        name: 'Gói phí',
-        icon: 'SlackIcon',
-        slug: 'settings-tuition-fee',
-        permission:'settings_tuition_fees',
-      },
-      {
-        url: '/settings/sources',
-        name: 'Nguồn khách hàng',
-        icon: 'Share2Icon',
-        slug: 'settings-sources',
-        permission:'settings_sources',
-      },
-      {
-        url: '/settings/discount-codes',
-        name: 'Mã chiết khấu',
-        icon: 'DivideSquareIcon',
-        slug: 'settings-discount-codes',
-        permission:'settings_discount_codes',
-      },
-      {
-        url: '/settings/users',
-        name: 'Người dùng',
-        icon: 'UserIcon',
-        slug: 'settings-users',
-        permission:'settings_users',
-      },
-      {
-        url: '/settings/roles',
-        name: 'Chức vụ, phân quyền',
-        icon: 'PocketIcon',
-        slug: 'settings-roles',
-        permission:'settings_roles',
-      },
-      {
-        url: '/settings/permissions',
-        name: 'Quản lý Permissions',
-        icon: 'KeyIcon',
-        slug: 'settings-permissions',
-        permission: 'settings_permissions',
-      },
-      {
-        url: '/settings/permission-groups',
-        name: 'Quản lý Nhóm Permissions',
-        icon: 'LayersIcon',
-        slug: 'settings-permission-groups',
-        permission: 'settings_permission_groups',
+        url: null,
+        name: 'Tài khoản & phân quyền',
+        icon: 'ShieldIcon',
+        submenu: [
+          { url: '/settings/users', name: 'Người dùng', slug: 'settings-users', permission:'settings_users' },
+          { url: '/settings/roles', name: 'Chức vụ, phân quyền', slug: 'settings-roles', permission:'settings_roles' },
+          { url: '/settings/permissions', name: 'Permissions', slug: 'settings-permissions', permission: 'settings_permissions' },
+          { url: '/settings/permission-groups', name: 'Nhóm Permissions', slug: 'settings-permission-groups', permission: 'settings_permission_groups' },
+        ]
       },
     ]
   },

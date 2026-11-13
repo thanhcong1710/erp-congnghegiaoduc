@@ -24,7 +24,7 @@
       :reduce="reduce"
       v-hammer:swipe="onMenuSwipe">
 
-      <div @mouseenter="mouseEnter" @mouseleave="mouseLeave">
+      <div class="v-nav-wrap" @mouseenter="mouseEnter" @mouseleave="mouseLeave">
 
         <!-- Header -->
         <div class="header-sidebar flex items-end justify-between" slot="header">
@@ -72,7 +72,7 @@
           <template v-for="(item, index) in menuItemsUpdated">
 
             <!-- Group Header -->
-            <span v-if="item.header && !verticalNavMenuItemsMin" class="navigation-header truncate" :key="`header-${index}`">
+            <span v-if="item.header && !verticalNavMenuItemsMin && item.items && item.items.length" class="navigation-header truncate" :key="`header-${index}`">
               {{ $t(item.i18n) || item.header }}
             </span>
             <!-- /Group Header -->
@@ -126,6 +126,7 @@ import VNavMenuGroup from './VerticalNavMenuGroup.vue'
 import VNavMenuItem from './VerticalNavMenuItem.vue'
 
 import Logo from '../Logo.vue'
+import { groupHasActive } from './navActive'
 
 export default {
   name: 'v-nav-menu',
@@ -157,21 +158,7 @@ export default {
   }),
   computed: {
     isGroupActive () {
-      return (item) => {
-        const path        = this.$route.fullPath
-        const routeParent = this.$route.meta ? this.$route.meta.parent : undefined
-        let open          = false
-
-        const func = (item) => {
-          if (item.submenu) {
-            item.submenu.forEach((item) => {
-              if (item.url && (path === item.url || routeParent === item.slug)) { open = true } else if (item.submenu) { func(item) }
-            })
-          }
-        }
-        func(item)
-        return open
-      }
+      return (item) => groupHasActive(this.$route, item)
     },
     menuItemsUpdated () {
       const clone = this.navMenuItems.slice()
@@ -350,5 +337,6 @@ export default {
 
 
 <style lang="scss">
-@import "@sass/vuexy/components/verticalNavMenu.scss"
+@import "@sass/vuexy/components/verticalNavMenu.scss";
+@import "./navMenuTheme.scss";
 </style>

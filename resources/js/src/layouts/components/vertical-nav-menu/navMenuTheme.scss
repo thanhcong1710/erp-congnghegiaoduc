@@ -1,0 +1,138 @@
+/* =====================================================================
+   Sidebar STEMKEY – tinh chỉnh trên nền Vuexy
+   Quy chuẩn: chữ >= 13px, trạng thái active/hover rõ ràng, nhóm gọn
+   ===================================================================== */
+
+.v-nav-menu {
+  .vs-sidebar {
+    box-shadow: 1px 0 0 #eef0f4, 6px 0 24px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  /* Bố cục cột: header + ô tìm kiếm cố định, vùng menu tự co giãn */
+  .v-nav-wrap {
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+  .header-sidebar {
+    flex-shrink: 0;
+    padding: 12px 14px 8px 20px !important;
+    align-items: center !important;
+  }
+  .scroll-area-v-nav-menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    padding-bottom: 24px;
+  }
+
+  /* ---------- Tiêu đề nhóm ---------- */
+  .navigation-header {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.6px;
+    color: #94a3b8 !important;
+    margin: 16px 0 6px 22px !important;
+    &:first-child { margin-top: 6px !important; }
+  }
+
+  /* ---------- Mục menu ---------- */
+  .feather-icon {
+    margin-right: 12px !important;
+    color: #64748b;
+    .feather { width: 18px !important; height: 18px !important; }
+  }
+
+  .vs-sidebar--item {
+    a {
+      padding: 9px 12px !important;
+      margin: 1px 0;
+      border-radius: 8px !important;
+      color: #334155;
+      transition: background 0.15s, color 0.15s !important;
+      span { font-size: 14px !important; }
+      > * { transition: none !important; }
+    }
+    &:hover a {
+      > * { transform: none !important; }
+      &:not(.router-link-active) {
+        background: rgba(var(--vs-primary), 0.07);
+        color: rgba(var(--vs-primary), 1);
+        .feather-icon { color: rgba(var(--vs-primary), 1); }
+      }
+    }
+    .router-link-active {
+      background: linear-gradient(118deg, rgba(var(--vs-primary), 1), rgba(var(--vs-primary), 0.78)) !important;
+      box-shadow: 0 4px 12px rgba(var(--vs-primary), 0.35) !important;
+      font-weight: 600;
+    }
+  }
+
+  /* ---------- Nhóm (submenu) ---------- */
+  .vs-sidebar-group {
+    > .group-header {
+      font-size: 14px !important;
+      padding: 9px 12px !important;
+      border-radius: 8px;
+      color: #334155;
+      transition: background 0.15s, color 0.15s !important;
+      > * { transform: none !important; }
+      .feather-grp-header-arrow { top: 11px !important; right: 10px !important; color: #94a3b8; margin: 0 !important; }
+      &:hover {
+        background: rgba(var(--vs-primary), 0.07);
+        color: rgba(var(--vs-primary), 1);
+        .feather-icon { color: rgba(var(--vs-primary), 1); }
+      }
+    }
+    &.vs-sidebar-group-open > .group-header,
+    &.vs-sidebar-group-active > .group-header {
+      background: #f1f5f9 !important;
+      margin-bottom: 4px !important;
+      font-weight: 600;
+    }
+    &.vs-sidebar-group-active > .group-header {
+      color: rgba(var(--vs-primary), 1);
+      .feather-icon { color: rgba(var(--vs-primary), 1); }
+    }
+
+    /* Mục con: đường dẫn dọc + chấm tròn nhỏ */
+    .vs-sidebar-group-items {
+      position: relative;
+      margin-left: 21px;
+      padding-left: 0 !important;
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 2px;
+        bottom: 9px;
+        width: 1.5px;
+        background: #e8ecf2;
+        border-radius: 2px;
+      }
+      .vs-sidebar--item a {
+        padding: 8px 10px 8px 14px !important;
+        margin-left: 6px;
+        .feather-icon {
+          margin-right: 10px !important;
+          .feather { width: 9px !important; height: 9px !important; stroke-width: 3; }
+        }
+        span { font-size: 14px !important; }
+      }
+    }
+  }
+}
+
+/* Chế độ thu gọn (chỉ icon) */
+.v-nav-menu .vs-sidebar.vs-sidebar-reduce {
+  .vs-sidebar-group-items { margin-left: 0; &::before { display: none; } }
+}
+
+/* Dark theme */
+.theme-dark .v-nav-menu {
+  .vs-sidebar--item a { color: #c2c6dc; }
+  .vs-sidebar-group > .group-header { color: #c2c6dc; }
+  .vs-sidebar-group.vs-sidebar-group-open > .group-header,
+  .vs-sidebar-group.vs-sidebar-group-active > .group-header { background: #262c49 !important; }
+  .vs-sidebar-group-items::before { background: #414561; }
+}
