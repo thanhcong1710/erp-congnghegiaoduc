@@ -59,6 +59,9 @@
       </div>
     </div>
 
+    <!-- Wrapper cố định: vs-popup tự di chuyển DOM ra <body>, nếu khối v-if/v-else nằm sát popup
+         thì Vue sẽ insertBefore vào node đã bị chuyển đi → lỗi, bảng không render -->
+    <div class="att-body">
     <!-- ============ EMPTY ============ -->
     <div v-if="!class_info.class_id" class="att-card att-empty">
       <div class="att-empty__icon"><i class="fa-solid fa-clipboard-user"></i></div>
@@ -257,6 +260,7 @@
         </div>
       </div>
     </template>
+    </div>
 
     <!-- ============ MODAL ĐĂNG KÝ HỌC BÙ ============ -->
     <vs-popup class="att-popup" :title="modal_re_session.title" :active.sync="modal_re_session.show">
@@ -741,6 +745,7 @@
 <style>
 /* ---------- Layout ---------- */
 .att-page { font-size: 14px; color: #334155; display: flex; flex-direction: column; gap: 16px; }
+.att-body { display: flex; flex-direction: column; gap: 16px; }
 .att-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06); padding: 18px 20px; }
 .att-filter { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; }
 .att-filter .att-field { width: 240px; margin-bottom: 0; }
@@ -770,8 +775,8 @@
 .att-month { display: flex; align-items: center; gap: 6px; }
 .att-month__nav { width: 38px; height: 40px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #fff; color: #475569; cursor: pointer; flex-shrink: 0; font-size: 13px; transition: all .15s; }
 .att-month__nav:hover { border-color: #7367f0; color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2); }
-.att-month__picker.mx-datepicker { width: 130px; }
-.att-month__picker .mx-input { height: 40px; border-radius: 8px; text-align: center; font-weight: 600; cursor: pointer; }
+.att-month__picker.mx-datepicker { width: 150px !important; min-width: 150px; }
+.att-month__picker .mx-input { height: 40px; border-radius: 8px; padding: 0 30px 0 12px !important; font-weight: 600; cursor: pointer; }
 .att-month__today { border: none; background: rgba(115, 103, 240, 0.1); color: #5e50ee; font-weight: 600; font-size: 13px; padding: 0 10px; height: 40px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
 .att-month__today:hover { background: rgba(115, 103, 240, 0.18); }
 
