@@ -916,11 +916,19 @@
 
 .enrol-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 40px; cursor: text; }
 .enrol-search i { color: #94a3b8; font-size: 14px; }
-.enrol-search input { flex: 1; border: none; outline: none; background: transparent; font-size: 14px; color: #334155; min-width: 0; }
+.enrol-search input[type="text"],
+.enrol-search input[type="text"]:hover,
+.enrol-search input[type="text"]:focus,
+.enrol-search input[type="text"]:disabled {
+  flex: 1; min-width: 0; height: 100%; padding: 0 !important; margin: 0;
+  border: none !important; outline: none !important; box-shadow: none !important;
+  background: transparent !important; border-radius: 0 !important;
+  font-size: 14px; color: #334155;
+}
 .enrol-search.sm { height: 38px; width: 280px; }
 .enrol-search.grow { flex: 1; min-width: 240px; }
 .enrol-search:has(input:disabled) { background: #f1f5f9; border: 1px dashed #cbd5e1; box-shadow: none; cursor: not-allowed; }
-.enrol-search input:disabled { cursor: not-allowed; color: #94a3b8; }
+.enrol-search input[type="text"]:disabled { cursor: not-allowed; color: #94a3b8; }
 
 /* Segment buttons */
 .enrol-segment { display: flex; background: #f1f5f9; border-radius: 8px; padding: 3px; gap: 3px; }
