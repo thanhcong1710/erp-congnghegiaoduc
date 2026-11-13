@@ -90,7 +90,7 @@ class AttendancesController extends Controller
     public function save(Request $request){
         $id = (int)data_get($request, 'id');
         $attendance_status = (int)data_get($request, 'attendance_status');
-        if (!in_array($attendance_status, [0, 1, 2, 3], true)) {
+        if (!in_array($attendance_status, [0, 1, 2], true)) { // 0: Chưa điểm danh, 1: Đi học, 2: Nghỉ học
             return response()->json(['status' => 0, 'message' => 'Trạng thái điểm danh không hợp lệ']);
         }
         $schedule_has_student_info = u::getObject(array('id'=>$id), 'schedule_has_student');

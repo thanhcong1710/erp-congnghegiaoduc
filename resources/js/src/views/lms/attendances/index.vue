@@ -98,6 +98,10 @@
             <div class="att-kpi__label">Chưa điểm danh</div>
             <div class="att-kpi__value">{{ stats.pending }}</div>
           </div>
+          <div class="att-kpi" :class="{ danger: stats.absent > 0 }">
+            <div class="att-kpi__label">Lượt nghỉ học</div>
+            <div class="att-kpi__value">{{ stats.absent }}</div>
+          </div>
           <div class="att-kpi ok">
             <div class="att-kpi__label">Tỉ lệ đi học</div>
             <div class="att-kpi__value">{{ stats.rate }}<small>%</small></div>
@@ -141,7 +145,8 @@
                   <div class="att-sess__code">{{ item.code }} · B{{ item.subject_stt }}</div>
                   <div class="att-sess__date">{{ item.class_date | formatDateViewDay }}</div>
                   <div class="att-sess__count">
-                    <span title="Đi học / tổng">{{ columnStats[item.date_key].present }}/{{ columnStats[item.date_key].total }}</span>
+                    <span class="ok" title="Đi học / tổng">{{ columnStats[item.date_key].present }}/{{ columnStats[item.date_key].total }}</span>
+                    <span class="absent" v-if="columnStats[item.date_key].absent" title="Nghỉ học">· nghỉ {{ columnStats[item.date_key].absent }}</span>
                   </div>
                   <button
                     v-if="columnStats[item.date_key].pending > 0 && item.class_date <= today"
@@ -177,31 +182,22 @@
                       <select
                         class="att-status"
                         :class="'st-' + cell(item, sche).attendance_status"
-                        :disabled="cell(item, sche).attendance_status == 2 || cell(item, sche).attendance_status == 3 || cell(item, sche).saving"
+                        :disabled="cell(item, sche).saving"
                         v-model="cell(item, sche).attendance_status"
                         @focus="cell(item, sche).prev_status = cell(item, sche).attendance_status"
-                        @change="save(cell(item, sche), item)"
+                        @change="save(cell(item, sche))"
                       >
-                        <option value="0">Chưa điểm danh</option>
-                        <option value="1">Đi học</option>
-                        <option value="2">Học bù</option>
-                        <option value="3">Đã học bù</option>
+                        <option v-for="st in statusList" :key="st.value" :value="String(st.value)">{{ st.label }}</option>
                       </select>
                       <span class="att-cell__flag" v-if="cell(item, sche).saving"><i class="fa-solid fa-spinner fa-spin"></i></span>
                       <span class="att-cell__flag ok" v-else-if="cell(item, sche).saved"><i class="fa-solid fa-check"></i></span>
-                    </div>
-                    <div v-if="cell(item, sche).to_class_name" class="att-makeup">
-                      <div class="att-makeup__cls" :title="cell(item, sche).to_class_name"><i class="fa-solid fa-arrow-right-arrow-left"></i> {{ cell(item, sche).to_class_name }}</div>
-                      <div>{{ cell(item, sche).to_class_date | formatDateViewDay }}</div>
-                      <span v-if="cell(item, sche).to_class_status == 2" class="att-badge success">Đã học bù</span>
-                      <span v-else-if="cell(item, sche).to_class_status == 3" class="att-badge danger">Không đến học bù</span>
-                      <span v-else class="att-badge warning">Chờ học bù</span>
                     </div>
                   </template>
                   <span v-else class="att-na" title="Học sinh không có lịch buổi này">—</span>
                 </td>
                 <td class="c-sum">
                   <strong>{{ rowStats(item).present }}</strong><span class="att-sub">/{{ rowStats(item).total }}</span>
+                  <div v-if="rowStats(item).absent" class="att-absent-text">nghỉ {{ rowStats(item).absent }}</div>
                 </td>
               </tr>
               <tr v-if="!filteredStudents.length">
@@ -215,92 +211,9 @@
         </div>
       </div>
 
-      <!-- ============ HỌC BÙ VÀO LỚP NÀY ============ -->
-      <div class="att-card" v-if="make_up_sessions.length > 0">
-        <div class="att-toolbar">
-          <div class="att-toolbar__title">
-            <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Học sinh đăng ký học bù vào lớp
-            <span class="att-pill">{{ make_up_sessions.length }}</span>
-            <span class="att-pill warning" v-if="makeUpPending">{{ makeUpPending }} chờ xác nhận</span>
-          </div>
-        </div>
-        <div class="table-responsive att-table-border">
-          <table class="att-table">
-            <thead>
-              <tr>
-                <th class="text-center" style="width:56px">STT</th>
-                <th>Học sinh</th>
-                <th>Ngày học bù</th>
-                <th style="width:220px">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in make_up_sessions" :key="item.id">
-                <td class="text-center att-sub">{{ index + 1 }}</td>
-                <td>
-                  <div class="att-strong">{{ item.name }}</div>
-                  <div class="att-sub">{{ item.lms_code }}</div>
-                </td>
-                <td :class="{ 'att-today-text': item.to_class_date === today }">
-                  {{ item.to_class_date | formatDateViewDay }}
-                  <span v-if="item.to_class_date === today" class="att-badge primary ml-2">Hôm nay</span>
-                </td>
-                <td>
-                  <select v-if="item.status == 1" class="att-status st-mk" v-model="item.status" @change="saveMakeUpSessions(item)">
-                    <option value="1">Đăng ký học bù</option>
-                    <option value="2">Đã học bù</option>
-                    <option value="3">Không đi học bù</option>
-                  </select>
-                  <span v-else-if="item.status == 2" class="att-badge success">Đã học bù</span>
-                  <span v-else class="att-badge danger">Không đi học bù</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </template>
     </div>
 
-    <!-- ============ MODAL ĐĂNG KÝ HỌC BÙ ============ -->
-    <vs-popup class="att-popup" :title="modal_re_session.title" :active.sync="modal_re_session.show">
-      <div class="att-re-info">
-        <div><span class="att-sub">Học sinh</span><div class="att-strong">{{ modal_re_session.student_name }}</div></div>
-        <div><span class="att-sub">Buổi nghỉ</span><div class="att-strong">{{ modal_re_session.label_session }} · {{ modal_re_session.class_date | formatDateViewDay }}</div></div>
-      </div>
-      <div class="att-field">
-        <label>Lớp học bù <span class="text-danger">(*)</span></label>
-        <vue-select
-          label="cls_name"
-          placeholder="Chọn lớp học bù"
-          :options="reClassOptions"
-          v-model="html.re_classes.item"
-          :searchable="true"
-          language="tv-VN"
-          @input="saveReClass"
-        ></vue-select>
-      </div>
-      <div class="att-field">
-        <label>Buổi học bù <span class="text-danger">(*)</span></label>
-        <vue-select
-          label="session_label"
-          :placeholder="modal_re_session.to_class_id ? 'Chọn buổi học bù' : 'Chọn lớp học bù trước'"
-          :options="html.re_sessions.list"
-          v-model="html.re_sessions.item"
-          :searchable="true"
-          :disabled="!modal_re_session.to_class_id"
-          language="tv-VN"
-          @input="saveReSession"
-        ></vue-select>
-      </div>
-      <vs-alert :active.sync="alert.active" class="mb-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
-        <div v-html="alert.body"></div>
-      </vs-alert>
-      <div class="att-popup__foot">
-        <vs-button color="dark" type="border" @click="cancelReSession()">Hủy</vs-button>
-        <vs-button color="success" icon-pack="fa" icon="fa-check" @click="addReSession()">Đăng ký học bù</vs-button>
-      </div>
-    </vs-popup>
   </div>
 </template>
 
@@ -319,24 +232,6 @@
     },
     data() {
       return {
-        modal_re_session: {
-          title: "ĐĂNG KÝ HỌC BÙ",
-          show: false,
-          student_name: "",
-          label_session: "",
-          class_date: "",
-          to_class_id: "",
-          to_class_date: "",
-          to_schedule_id: "",
-          schedule_student_id: "",
-          student_id: "",
-          saved: false,
-        },
-        alert: {
-          active: false,
-          body: '',
-          color: '',
-        },
         datepickerOptions: {
           lang: {
             days: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
@@ -346,15 +241,12 @@
         statusList: [
           { value: 0, label: 'Chưa điểm danh' },
           { value: 1, label: 'Đi học' },
-          { value: 2, label: 'Học bù' },
-          { value: 3, label: 'Đã học bù' },
+          { value: 2, label: 'Nghỉ học' },
         ],
         html: {
           branches: { item: '', list: [] },
           products: { item: '', list: [] },
-          classes: { item: '', list: [] },
-          re_classes: { item: '', list: [] },
-          re_sessions: { item: '', list: [] }
+          classes: { item: '', list: [] }
         },
         att: {
           branch_id: '',
@@ -368,7 +260,6 @@
         students: [],
         class_info: {},
         shedules: [],
-        make_up_sessions: [],
       }
     },
     computed: {
@@ -387,34 +278,29 @@
       columnStats() {
         const res = {}
         this.shedules.forEach(sc => {
-          let total = 0, present = 0, pending = 0
+          let total = 0, present = 0, pending = 0, absent = 0
           this.students.forEach(st => {
             const c = st.attendances && st.attendances[sc.date_key]
             if (!c || !c.id) return
             total++
-            if (c.attendance_status == 1 || c.attendance_status == 3) present++
-            if (c.attendance_status == 0) pending++
+            if (c.attendance_status == 1) present++
+            else if (c.attendance_status == 2) absent++
+            else pending++
           })
-          res[sc.date_key] = { total, present, pending }
+          res[sc.date_key] = { total, present, pending, absent }
         })
         return res
       },
       stats() {
-        let pending = 0, present = 0, done = 0
+        let pending = 0, present = 0, absent = 0
         this.shedules.forEach(sc => {
-          if (sc.class_date > this.today) return
           const c = this.columnStats[sc.date_key]
-          pending += c.pending
           present += c.present
-          done += c.total - c.pending
+          absent += c.absent
+          if (sc.class_date <= this.today) pending += c.pending
         })
-        return { pending, rate: done ? Math.round(present * 100 / done) : 0 }
-      },
-      makeUpPending() {
-        return this.make_up_sessions.filter(m => m.status == 1).length
-      },
-      reClassOptions() {
-        return this.html.re_classes.list.filter(c => c.id != this.att.class_id)
+        const done = present + absent
+        return { pending, absent, rate: done ? Math.round(present * 100 / done) : 0 }
       },
     },
     created() {
@@ -450,14 +336,15 @@
         return student.attendances ? student.attendances[sche.date_key] : null
       },
       rowStats(student) {
-        let total = 0, present = 0
+        let total = 0, present = 0, absent = 0
         this.shedules.forEach(sc => {
           const c = this.cell(student, sc)
           if (!c || !c.id) return
           total++
-          if (c.attendance_status == 1 || c.attendance_status == 3) present++
+          if (c.attendance_status == 1) present++
+          else if (c.attendance_status == 2) absent++
         })
-        return { total, present }
+        return { total, present, absent }
       },
       readSaved() {
         try { return JSON.parse(localStorage.getItem(LS_KEY)) || {} } catch (e) { return {} }
@@ -477,7 +364,6 @@
         this.class_info = {}
         this.students = []
         this.shedules = []
-        this.make_up_sessions = []
       },
       saveBranch(data = null) {
         this.att.branch_id = data && typeof data === 'object' ? data.id : ''
@@ -506,7 +392,6 @@
             .then(response => {
               this.$vs.loading.close();
               this.html.classes.list = response.data || []
-              this.html.re_classes.list = response.data || []
               if (restoreClassId) {
                 const cls = this.html.classes.list.find(c => c.id == restoreClassId)
                 if (cls) {
@@ -519,7 +404,6 @@
             .catch(() => this.$vs.loading.close())
         } else {
           this.html.classes.list = []
-          this.html.re_classes.list = []
         }
       },
       shiftMonth(step) {
@@ -546,7 +430,9 @@
                 Object.keys(st.attendances || {}).forEach(k => {
                   const c = st.attendances[k]
                   if (c && c.id) {
-                    c.attendance_status = String(c.attendance_status == null ? 0 : c.attendance_status)
+                    // Dữ liệu cũ: 3 = "Đã học bù" → coi như Đi học
+                    const st = c.attendance_status == 3 ? 1 : (c.attendance_status == null ? 0 : c.attendance_status)
+                    c.attendance_status = String(st)
                     this.$set(c, 'saving', false)
                     this.$set(c, 'saved', false)
                     this.$set(c, 'prev_status', c.attendance_status)
@@ -556,24 +442,18 @@
               this.class_info = response.data.class_info || {}
               this.students = students
               this.shedules = response.data.shedules || []
-              this.make_up_sessions = response.data.make_up_sessions || []
             })
             .catch(() => this.$vs.loading.close())
         } else {
           this.class_info = {}
           this.students = []
           this.shedules = []
-          this.make_up_sessions = []
         }
       },
       payload(c) {
         return { id: c.id, attendance_status: c.attendance_status, note: c.note }
       },
-      save(data, student) {
-        if (data.attendance_status == 2) {
-          this.openReSession(data, student)
-          return
-        }
+      save(data) {
         data.saving = true
         data.saved = false
         axios.p(`/api/lms/attendances/save`, this.payload(data))
@@ -623,121 +503,6 @@
           }
         })
       },
-      openReSession(data, student) {
-        Object.assign(this.modal_re_session, {
-          show: true,
-          saved: false,
-          student_name: student.name + ' - ' + student.lms_code,
-          label_session: data.subject_code + ' - buổi ' + data.subject_stt,
-          class_date: data.class_date,
-          student_id: student.student_id,
-          schedule_student_id: data.id,
-          to_class_id: '',
-          to_class_date: '',
-          to_schedule_id: '',
-        })
-        this.html.re_classes.item = ''
-        this.html.re_sessions.item = ''
-        this.html.re_sessions.list = []
-        this.alert.active = false
-      },
-      saveReClass(data = null) {
-        this.html.re_sessions.item = ''
-        this.html.re_sessions.list = []
-        this.modal_re_session.to_schedule_id = ''
-        this.modal_re_session.to_class_date = ''
-        if (data && typeof data === 'object') {
-          this.modal_re_session.to_class_id = data.id
-          this.loadReSessions()
-        } else {
-          this.modal_re_session.to_class_id = ""
-        }
-      },
-      loadReSessions() {
-        this.$vs.loading();
-        axios.g(`/api/lms/attendances/loadReSessions/${this.modal_re_session.to_class_id}`)
-          .then(response => {
-            this.$vs.loading.close();
-            this.html.re_sessions.list = response.data
-          })
-          .catch(() => this.$vs.loading.close())
-      },
-      saveReSession(data = null) {
-        if (data && typeof data === 'object') {
-          this.modal_re_session.to_class_date = data.class_date
-          this.modal_re_session.to_schedule_id = data.id
-        } else {
-          this.modal_re_session.to_class_date = ""
-          this.modal_re_session.to_schedule_id = ""
-        }
-      },
-      cancelReSession() {
-        this.modal_re_session.show = false
-      },
-      addReSession() {
-        let mess = "";
-        let resp = true;
-        if (!this.modal_re_session.to_class_id) {
-          mess += " - Lớp học bù không để trống<br/>";
-          resp = false;
-        }
-        if (!this.modal_re_session.to_schedule_id) {
-          mess += " - Buổi học bù không để trống<br/>";
-          resp = false;
-        }
-        if (this.modal_re_session.to_class_id && this.modal_re_session.to_class_id == this.att.class_id) {
-          mess += " - Lớp học bù phải khác lớp đang học<br/>";
-          resp = false;
-        }
-        if (!resp) {
-          this.alert.color = 'danger'
-          this.alert.body = mess;
-          this.alert.active = true;
-          return false;
-        }
-        this.$vs.loading();
-        axios.p(`/api/lms/attendances/addReSession`, {
-          'student_id': this.modal_re_session.student_id,
-          'schedule_student_id': this.modal_re_session.schedule_student_id,
-          'to_class_id': this.modal_re_session.to_class_id,
-          'to_class_date': this.modal_re_session.to_class_date
-        })
-          .then(response => {
-            this.$vs.loading.close();
-            this.modal_re_session.saved = true
-            this.modal_re_session.show = false
-            this.$vs.notify({
-              title: 'Thành Công',
-              text: response.data.message,
-              color: 'success',
-              iconPack: 'feather',
-              icon: 'icon-check'
-            })
-          })
-          .catch(() => this.$vs.loading.close())
-      },
-      saveMakeUpSessions(data) {
-        this.$vs.loading();
-        axios.p(`/api/lms/attendances/updateReSession`, { id: data.id, status: data.status })
-          .then(response => {
-            this.$vs.loading.close();
-            this.loadStudents();
-            this.$vs.notify({
-              title: 'Thành Công',
-              text: response.data.message,
-              color: 'success',
-              iconPack: 'feather',
-              icon: 'icon-check'
-            })
-          })
-          .catch(() => this.$vs.loading.close())
-      }
-    },
-    watch: {
-      // Đóng popup học bù (Hủy / bấm ra ngoài / lưu xong) → tải lại để trả select về trạng thái đúng
-      'modal_re_session.show'(val) {
-        if (!val) this.loadStudents()
-      }
     },
   }
 </script>
@@ -755,21 +520,18 @@
 @media (max-width: 768px) { .att-filter .att-field { width: 100%; } }
 
 /* ---------- Inputs ---------- */
-.att-page .v-select .vs__dropdown-toggle,
-.att-popup .v-select .vs__dropdown-toggle {
+.att-page .v-select .vs__dropdown-toggle {
   min-height: 40px; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); transition: border-color .15s, box-shadow .15s;
 }
-.att-page .v-select .vs__dropdown-toggle:hover, .att-page .v-select.vs--open .vs__dropdown-toggle,
-.att-popup .v-select .vs__dropdown-toggle:hover, .att-popup .v-select.vs--open .vs__dropdown-toggle {
+.att-page .v-select .vs__dropdown-toggle:hover, .att-page .v-select.vs--open .vs__dropdown-toggle {
   border-color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2);
 }
-.att-page .v-select.vs--disabled .vs__dropdown-toggle,
-.att-popup .v-select.vs--disabled .vs__dropdown-toggle { background: #f1f5f9; border: 1px dashed #cbd5e1; box-shadow: none; cursor: not-allowed; }
-.att-page .v-select.vs--disabled .vs__search, .att-popup .v-select.vs--disabled .vs__search { cursor: not-allowed; }
-.att-page .v-select .vs__search, .att-popup .v-select .vs__search,
-.att-page .v-select .vs__search:focus, .att-popup .v-select .vs__search:focus { border: none !important; background: transparent !important; box-shadow: none !important; font-size: 14px; }
-.att-page .v-select .vs__selected, .att-popup .v-select .vs__selected { font-size: 14px; }
+.att-page .v-select.vs--disabled .vs__dropdown-toggle { background: #f1f5f9; border: 1px dashed #cbd5e1; box-shadow: none; cursor: not-allowed; }
+.att-page .v-select.vs--disabled .vs__search { cursor: not-allowed; }
+.att-page .v-select .vs__search,
+.att-page .v-select .vs__search:focus { border: none !important; background: transparent !important; box-shadow: none !important; font-size: 14px; }
+.att-page .v-select .vs__selected { font-size: 14px; }
 
 /* Month navigator */
 .att-month { display: flex; align-items: center; gap: 6px; }
@@ -826,8 +588,7 @@
 .att-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1.5px solid; }
 .att-legend .st-0 i { background: #fff; border-color: #cbd5e1; }
 .att-legend .st-1 i { background: #dcfce7; border-color: #22c55e; }
-.att-legend .st-2 i { background: #ffedd5; border-color: #f97316; }
-.att-legend .st-3 i { background: #e0f2fe; border-color: #0ea5e9; }
+.att-legend .st-2 i { background: #fee2e2; border-color: #ef4444; }
 
 /* ---------- Pills / badges ---------- */
 .att-pill, .att-badge { display: inline-flex !important; align-items: center; white-space: nowrap !important; font-size: 13px; font-weight: 600; border-radius: 99px; line-height: 1; }
@@ -856,7 +617,12 @@
 .att-grid tbody td.today { background: rgba(115, 103, 240, 0.04); }
 .att-sess__code { font-size: 13px; font-weight: 700; }
 .att-sess__date { font-size: 13px; font-weight: 500; margin-top: 2px; }
-.att-sess__count { font-size: 13px; font-weight: 600; color: #1f9d57; margin-top: 4px; }
+.att-sess__count { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.att-sess__count .ok { color: #1f9d57; }
+.att-sess__count .absent { color: #dc2626; margin-left: 2px; }
+.att-absent-text { font-size: 13px; color: #dc2626; font-weight: 600; }
+.att-kpi.danger { background: #fef2f2; border-color: #fecaca; }
+.att-kpi.danger .att-kpi__value { color: #dc2626; }
 .att-sess__bulk { margin-top: 6px; border: 1.5px solid #28c76f; background: #fff; color: #1f9d57; border-radius: 6px; font-size: 13px; font-weight: 600; padding: 4px 8px; cursor: pointer; white-space: nowrap; transition: all .15s; }
 .att-sess__bulk:hover { background: #28c76f; color: #fff; }
 .att-table-empty { text-align: center; color: #94a3b8; padding: 36px 12px !important; font-size: 14px; }
@@ -880,29 +646,12 @@
 }
 .att-page select.att-status.st-0:not(:disabled) { background-color: #fff !important; border: 1.5px solid #cbd5e1 !important; color: #475569 !important; }
 .att-page select.att-status.st-1:not(:disabled) { background-color: #dcfce7 !important; border: 1.5px solid #22c55e !important; color: #15803d !important; }
-.att-page select.att-status.st-mk:not(:disabled) { background-color: #fff7ed !important; border: 1.5px solid #f97316 !important; color: #c2410c !important; width: 190px; }
+.att-page select.att-status.st-2:not(:disabled) { background-color: #fee2e2 !important; border: 1.5px solid #ef4444 !important; color: #b91c1c !important; }
 .att-page select.att-status:not(:disabled):hover,
 .att-page select.att-status:not(:disabled):focus { border-color: #7367f0 !important; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2) !important; }
 .att-page select.att-status:disabled { cursor: not-allowed !important; opacity: 1; font-weight: 600; }
-.att-page select.att-status.st-2:disabled { background-color: #ffedd5 !important; border: 1px dashed #f97316 !important; color: #c2410c !important; }
-.att-page select.att-status.st-3:disabled { background-color: #e0f2fe !important; border: 1px dashed #0ea5e9 !important; color: #0369a1 !important; }
+.att-page select.att-status:disabled { background-color: #f1f5f9 !important; border: 1px dashed #cbd5e1 !important; color: #94a3b8 !important; }
 
-.att-makeup { margin-top: 6px; font-size: 13px; color: #475569; line-height: 1.5; }
-.att-makeup__cls { max-width: 160px; margin: 0 auto; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-.att-makeup__cls i { color: #f97316; margin-right: 2px; }
 
-/* ---------- Make-up table ---------- */
-.att-table-border { overflow-x: auto; border: 1px solid #eef2f7; border-radius: 10px; }
-.att-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.att-table thead th { background: #f8fafc; color: #475569; font-size: 13px; font-weight: 700; padding: 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; text-align: left; }
-.att-table thead th.text-center { text-align: center; }
-.att-table tbody td { padding: 12px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; vertical-align: middle; }
-.att-table tbody tr:last-child td { border-bottom: none; }
-.att-today-text { color: #5e50ee; font-weight: 600; }
 
-/* ---------- Popup ---------- */
-.att-popup .vs-popup { width: 560px !important; max-width: 94%; }
-.att-popup .vs-popup--content { font-size: 14px; color: #334155; }
-.att-re-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; border: 1px solid #eef2f7; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
-.att-popup__foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
 </style>
