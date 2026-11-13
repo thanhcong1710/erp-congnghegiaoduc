@@ -50,6 +50,7 @@
               <i class="fa-solid fa-magnifying-glass"></i>
               <input
                 type="text"
+                class="enrol-search__input"
                 v-model="classKeyword"
                 placeholder="Tìm nhanh tên lớp..."
                 :disabled="!classes.length"
@@ -170,7 +171,7 @@
               <div class="enrol-toolbar__actions">
                 <div class="enrol-search sm">
                   <i class="fa-solid fa-magnifying-glass"></i>
-                  <input type="text" v-model="studentKeyword" placeholder="Lọc theo tên, mã HS, mã HĐ..." />
+                  <input type="text" class="enrol-search__input" v-model="studentKeyword" placeholder="Lọc theo tên, mã HS, mã HĐ..." />
                 </div>
                 <vs-button
                   color="success"
@@ -280,7 +281,7 @@
       <div class="enrol-modal-head">
         <div class="enrol-search grow">
           <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" v-model="searchData.keyword" placeholder="Nhập tên, mã học sinh, mã hợp đồng rồi nhấn Enter" @keyup.enter="searchStudents" />
+          <input type="text" class="enrol-search__input" v-model="searchData.keyword" placeholder="Nhập tên, mã học sinh, mã hợp đồng rồi nhấn Enter" @keyup.enter="searchStudents" />
         </div>
         <vs-button type="border" icon-pack="fa" icon="fa-magnifying-glass" @click="searchStudents">Tìm kiếm</vs-button>
         <div class="enrol-modal-stats">
@@ -912,23 +913,26 @@
 .enrol-page .v-select .vs__selected { font-size: 14px; }
 
 .enrol-select { height: 38px; padding: 0 10px; font-size: 14px; color: #334155; cursor: pointer; width: 100%; }
-.enrol-select.invalid { border-color: #ea5455; background: #fff5f5; }
+.enrol-select.enrol-select.invalid:not(:disabled) { border-color: #ea5455 !important; background-color: #fff5f5 !important; }
 
 .enrol-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 40px; cursor: text; }
 .enrol-search i { color: #94a3b8; font-size: 14px; }
-.enrol-search input[type="text"],
-.enrol-search input[type="text"]:hover,
-.enrol-search input[type="text"]:focus,
-.enrol-search input[type="text"]:disabled {
+/* Specificity cao hơn rule global input[type="text"]:not(...):not(...) trong _globalFontFix.scss */
+.enrol-search.enrol-search input.enrol-search__input[type="text"],
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:not(:disabled):not([readonly]),
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:not(:disabled):not([readonly]):hover,
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:not(:disabled):not([readonly]):focus,
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:disabled,
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:disabled:hover {
   flex: 1; min-width: 0; height: 100%; padding: 0 !important; margin: 0;
   border: none !important; outline: none !important; box-shadow: none !important;
-  background: transparent !important; border-radius: 0 !important;
-  font-size: 14px; color: #334155;
+  background: transparent !important; background-color: transparent !important; border-radius: 0 !important;
+  font-size: 14px; color: #334155 !important;
 }
 .enrol-search.sm { height: 38px; width: 280px; }
 .enrol-search.grow { flex: 1; min-width: 240px; }
 .enrol-search:has(input:disabled) { background: #f1f5f9; border: 1px dashed #cbd5e1; box-shadow: none; cursor: not-allowed; }
-.enrol-search input[type="text"]:disabled { cursor: not-allowed; color: #94a3b8; }
+.enrol-search.enrol-search input.enrol-search__input[type="text"]:disabled { cursor: not-allowed !important; color: #94a3b8 !important; }
 
 /* Segment buttons */
 .enrol-segment { display: flex; background: #f1f5f9; border-radius: 8px; padding: 3px; gap: 3px; }
