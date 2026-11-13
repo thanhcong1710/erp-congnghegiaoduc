@@ -12,21 +12,27 @@ use Illuminate\Support\Facades\Auth;
 class AttendancesController extends Controller
 {
     public function loadClasses(Request $request){
-        $product_id = data_get($request, 'product_id');
-        $branch_id = data_get($request, 'branch_id');
+        $product_id = (int)data_get($request, 'product_id');
+        $branch_id = (int)data_get($request, 'branch_id');
         $data= u::query("SELECT id, cls_name FROM classes WHERE status=1 AND product_id=$product_id AND branch_id = $branch_id ");
         return response()->json($data);
     }
 
     public function loadStudents(Request $request){
-        $class_id = data_get($request, 'class_id');
-        $date_select = data_get($request, 'date_select');
+        $class_id = (int)data_get($request, 'class_id');
+        $date_select = (string)data_get($request, 'date_select');
+        if (!$class_id || !preg_match('/^\d{4}-\d{2}$/', $date_select)) {
+            return response()->json(['class_info' => (object)[], 'students' => [], 'shedules' => [], 'make_up_sessions' => []]);
+        }
         $class_info = u::first("SELECT cl.id AS class_id, cl.cls_name, cl.cls_startdate, cl.cls_enddate,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.teacher_id) AS teacher_name,
                 (SELECT CONCAT(`name`, ' - ', hrm_id) FROM users WHERE id = cl.cm_id) AS cm_name,
                 cl.max_students, cl.class_day,'' AS room_text, '' AS shift_text, '' AS class_day_text,
                 (SELECT count(id) FROM contracts WHERE class_id=cl.id AND status=6) AS num_students
             FROM classes AS cl WHERE id = $class_id");
+        if (!$class_info) {
+            return response()->json(['class_info' => (object)[], 'students' => [], 'shedules' => [], 'make_up_sessions' => []]);
+        }
         $rooms = u::query("SELECT DISTINCT r.name FROM `sessions` AS s LEFT JOIN rooms AS r ON r.id=s.room_id WHERE s.status=1 AND s.class_id =".$class_id);
         $shifts = u::query("SELECT DISTINCT sh.name FROM `sessions` AS s LEFT JOIN shifts AS sh ON sh.id=s.shift_id WHERE s.status=1 AND s.class_id =".$class_id);
 
@@ -46,15 +52,27 @@ class AttendancesController extends Controller
             WHERE DATE_FORMAT(ss.class_date, '%Y-%m')='$date_select' AND class_id=$class_id AND s.id IS NOT NULL ORDER BY s.lastname");
         $shedules = u::query("SELECT s.class_date, DATE_FORMAT(s.class_date, '%Y_%m_%d') AS date_key, sj.code, s.subject_stt
             FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id  WHERE s.class_id=$class_id AND DATE_FORMAT(s.class_date, '%Y-%m') ='$date_select' ORDER BY class_date ");
+        // Lấy toàn bộ điểm danh của lớp trong tháng bằng 1 query (thay vì 1 query cho mỗi học sinh × mỗi buổi)
+        $rows = u::query("SELECT s.student_id, s.attendance_status, s.note, s.id, s.status, sj.code AS subject_code, sj.name AS subject_name, s.subject_stt, s.class_date,
+                (SELECT cl.cls_name  FROM make_up_sessions AS m LEFT JOIN classes AS cl ON cl.id=m.to_class_id WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_name,
+                (SELECT m.to_class_date  FROM make_up_sessions AS m WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_date,
+                (SELECT m.status FROM make_up_sessions AS m WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_status
+            FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id
+            WHERE s.class_id = $class_id AND DATE_FORMAT(s.class_date, '%Y-%m') = '$date_select'
+            ORDER BY s.id");
+        $map = [];
+        foreach ($rows as $row) {
+            $key = $row->student_id . '|' . date('Y-m-d', strtotime($row->class_date));
+            if (!isset($map[$key])) {
+                unset($row->student_id);
+                $map[$key] = $row;
+            }
+        }
         foreach($students AS $k=>$stu){
             $attendances =[];
             foreach($shedules AS $sche){
-                $schedule_has_student_info = u::first("SELECT s.attendance_status, s.note, s.id, s.status, sj.code AS subject_code, sj.name AS subject_name, s.subject_stt, s.class_date,
-                        (SELECT cl.cls_name  FROM make_up_sessions AS m LEFT JOIN classes AS cl ON cl.id=m.to_class_id WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_name,
-                        (SELECT m.to_class_date  FROM make_up_sessions AS m WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_date, 
-                        (SELECT m.status FROM make_up_sessions AS m WHERE m.schedule_student_id =s.id ORDER BY m.id DESC LIMIT 1) AS to_class_status 
-                    FROM schedule_has_student AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id WHERE s.student_id=$stu->student_id AND s.class_id = $class_id AND s.class_date='$sche->class_date'");
-                $attendances[$sche->date_key] = $schedule_has_student_info;
+                $key = $stu->student_id . '|' . date('Y-m-d', strtotime($sche->class_date));
+                $attendances[$sche->date_key] = isset($map[$key]) ? $map[$key] : null;
             }
             $students[$k]->attendances = $attendances;
         }
@@ -70,15 +88,20 @@ class AttendancesController extends Controller
     }
 
     public function save(Request $request){
-        $schedule_has_student_info = u::getObject(array('id'=>data_get($request, 'id')), 'schedule_has_student');
+        $id = (int)data_get($request, 'id');
+        $attendance_status = (int)data_get($request, 'attendance_status');
+        if (!in_array($attendance_status, [0, 1, 2, 3], true)) {
+            return response()->json(['status' => 0, 'message' => 'Trạng thái điểm danh không hợp lệ']);
+        }
+        $schedule_has_student_info = u::getObject(array('id'=>$id), 'schedule_has_student');
         if($schedule_has_student_info){
             u::updateSimpleRow(array(
-                'attendance_status'=>data_get($request, 'attendance_status'),
+                'attendance_status'=>$attendance_status,
                 // 'status' => data_get($request, 'attendance_status') == 1 || data_get($request, 'attendance_status') == 3 ? 1 :0,
                 'note'=>data_get($request, 'note'),
                 'updated_at' => date('Y-m-d H:i:s'),
                 'updator_id' => Auth::user()->id,
-            ),array('id'=>data_get($request, 'id')), 'schedule_has_student');
+            ),array('id'=>$id), 'schedule_has_student');
             // u::updateDoneSessions(data_get($schedule_has_student_info, 'contract_id'));
         }
         $result = array(
@@ -89,6 +112,7 @@ class AttendancesController extends Controller
     }
 
     public function loadReSessions(Request $request, $class_id){
+        $class_id = (int)$class_id;
         $data = u::query("SELECT sj.code AS subject_code, sj.name AS subject_name , s.subject_stt, s.id, s.class_date, '' AS session_label
             FROM schedules AS s LEFT JOIN subjects AS sj ON sj.id=s.subject_id 
             WHERE s.status=1 AND s.class_id=$class_id AND s.class_date >= CURRENT_DATE ORDER BY s.class_date LIMIT 8 ");
@@ -121,14 +145,19 @@ class AttendancesController extends Controller
     }
 
     public function updateReSession(Request $request){
-        $make_up_session = u::first("SELECT schedule_student_id FROM make_up_sessions WHERE id =".data_get($request, 'id'));
+        $id = (int)data_get($request, 'id');
+        $status = (int)data_get($request, 'status');
+        if (!in_array($status, [1, 2, 3], true)) {
+            return response()->json(['status' => 0, 'message' => 'Trạng thái học bù không hợp lệ']);
+        }
+        $make_up_session = u::first("SELECT schedule_student_id FROM make_up_sessions WHERE id =".$id);
         u::updateSimpleRow(array(
-            'status'=>data_get($request, 'status'),
+            'status'=>$status,
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
-        ),array('id'=>data_get($request, 'id')), 'make_up_sessions');
+        ),array('id'=>$id), 'make_up_sessions');
         u::updateSimpleRow(array(
-            'attendance_status'=>data_get($request, 'status') == 2 ? 3 : 0,
+            'attendance_status'=>$status == 2 ? 3 : 0,
             //'status'=> data_get($request, 'status') == 2 ? 1 : 0,
             'note'=>data_get($request, 'note'),
             'updated_at' => date('Y-m-d H:i:s'),
