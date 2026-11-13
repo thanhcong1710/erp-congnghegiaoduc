@@ -48,6 +48,7 @@ Tất cả API nằm trong `Route::group(['middleware'=>'api'])`, phần cần �
 | bảo lưu / chuyển lớp / chuyển CN / chuyển phí | `ReservesController`, `ClassTransfersController`, `BranchTransfersController`, `TuitionTransfersController` | `lms/{reserves,class_transfers,branch_transfers,tuition_transfers}` | `lms.js` |
 | `lms/reports`, `lms/exports`, `export/*` | `ReportsController` (1.4k dòng), `ExportsController` (1.7k dòng) | `lms/report` | `lms.js` |
 | `settings/*` | `ClassesController`, `TuitionFeesController`, `BranchesController`, `ProductsController`, `ProgramsController`, `RoomsController`, `ShiftsController`, `HolidaysController`, `SubjectsController`, `DiscountCodesController` | `settings/<tên>` | `setting.js` |
+| `settings/sources/*` | `SourcesController` (bảng `sources` + `source_detail`; nguồn 1/2/3 do module Chiến dịch tự sinh → chỉ xem) | `settings/sources` | `setting.js` |
 | `marketing/*` | `CampaignsController`, `CouponsController`, `B2BSourcesController`, `B2BCampaignsController`, `C2CCampaignsController` | `marketing/{campaigns,coupons,b2b,c2c}` | `marketing.js` |
 | `dashboard/*` | `DashboardController` | `DashboardAnalytics.vue`, `DashboardDetailReport.vue` | – |
 | `ai/*`, `ai/admin/*` | `AI/ChatController`, `AI/AdminController` → `Services/AI/{AiAgentService,HybridAiService,GeminiService,TextToSqlService,SkillRouter,FunctionExecutor}`, `Skills/*Skill.php` | – | – |

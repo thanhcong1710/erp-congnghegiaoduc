@@ -427,6 +427,19 @@ export default {
         }
       },
       {
+        path: '/settings/sources',
+        name: 'setting-sources',
+        component: () => import('@/views/settings/sources/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nguồn khách hàng', active: true }
+          ],
+          pageTitle: 'Nguồn & nguồn chi tiết khách hàng',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/settings/discount-codes',
         name: 'setting-discount-codes',
         component: () => import('@/views/settings/discount_codes/index.vue'),

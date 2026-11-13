@@ -420,6 +420,15 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('show/{id}', 'SubjectsController@show');
                 Route::post('update', 'SubjectsController@update');
             });
+            Route::prefix('sources')->group(function () {
+                Route::get('list', 'SourcesController@listSources');
+                Route::post('save', 'SourcesController@saveSource');
+                Route::post('delete', 'SourcesController@deleteSource');
+                Route::post('details', 'SourcesController@listDetails');
+                Route::post('details/save', 'SourcesController@saveDetail');
+                Route::post('details/toggle', 'SourcesController@toggleDetail');
+                Route::post('details/delete', 'SourcesController@deleteDetail');
+            });
             Route::prefix('discount-codes')->group(function () {
                 Route::post('add', 'DiscountCodesController@add');
                 Route::post('list', 'DiscountCodesController@list');

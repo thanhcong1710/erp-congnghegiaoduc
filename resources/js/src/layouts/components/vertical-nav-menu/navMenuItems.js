@@ -343,6 +343,13 @@ export default [
         permission:'settings_tuition_fees',
       },
       {
+        url: '/settings/sources',
+        name: 'Nguồn khách hàng',
+        icon: 'Share2Icon',
+        slug: 'settings-sources',
+        permission:'settings_sources',
+      },
+      {
         url: '/settings/discount-codes',
         name: 'Mã chiết khấu',
         icon: 'DivideSquareIcon',
