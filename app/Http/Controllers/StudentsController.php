@@ -46,15 +46,21 @@ class StudentsController extends Controller
                     'gender' => $request->gender,
                     'date_of_birth' => $bd['date'],
                     'birthday_year_only' => $bd['year_only'],
+                    'school' => $request->school,
+                    'school_level' => $request->school_level,
                     'note' => $request->note,
                     'updated_at' => date('Y-m-d H:i:s'),
                     'updator_id' => Auth::user()->id,
                 );
+                $pre_lms_info = u::first("SELECT * FROM students WHERE id = " . (int)$pre_student_info->lms_id);
                 if (!empty($request->branch_id)) {
                     $lms_update['branch_id'] = (int)$request->branch_id;
                     u::updateSimpleRow(array('branch_id' => (int)$request->branch_id), array('student_id' => $pre_student_info->lms_id), 'term_student_user');
                 }
                 u::updateSimpleRow($lms_update, array('id' => $pre_student_info->lms_id), 'students');
+                if ($pre_lms_info) {
+                    LogStudents::logUpdateInfo($pre_lms_info, $lms_update, Auth::user()->id);
+                }
             } elseif ($pre_student_info) {
                 // Nếu bản ghi cũ chưa có lms_id thì tự động nâng cấp thành chính thức luôn
                 self::promoteToOfficialStudent($request->id, $request->branch_id, $request->owner_id);
@@ -447,11 +453,86 @@ class StudentsController extends Controller
             'updator_id' => Auth::user()->id,
         ], array('student_id' => $request->id), 'term_student_user');
         LogStudents::logUpdateInfo($pre_student_info, $data_update, Auth::user()->id);
+        self::syncLmsStudentToCrm((int)$request->id, $data_update);
         $result = (object) array(
             'status' => 1,
             'message' => 'Cập nhật học sinh thành công'
         );
         return response()->json($result);
+    }
+
+    /**
+     * Đồng bộ ngược hồ sơ học sinh LMS (students) → CRM:
+     *  - crm_students (bản ghi có lms_id = học sinh này)
+     *  - crm_parents (phụ huynh 1 của học sinh)
+     *  - thông tin phụ huynh/địa chỉ của các học sinh LMS khác cùng phụ huynh
+     * SĐT chính (gud_mobile1 / mobile_1) không đồng bộ vì là khoá định danh khách hàng, chỉ sửa bên CRM.
+     */
+    private static function syncLmsStudentToCrm($lms_student_id, $data)
+    {
+        $user_id = Auth::user()->id;
+        $now = date('Y-m-d H:i:s');
+        $crm_students = u::query("SELECT * FROM crm_students WHERE lms_id = " . (int)$lms_student_id);
+        $parent_ids = [];
+        foreach ($crm_students as $crm_student) {
+            $crm_update = array(
+                'name' => $data['name'],
+                'gender' => $data['gender'],
+                'birthday' => $data['date_of_birth'],
+                'birthday_year_only' => $data['birthday_year_only'],
+                'school' => $data['school'],
+                'note' => $data['note'],
+                'updated_at' => $now,
+                'updator_id' => $user_id,
+            );
+            u::updateSimpleRow($crm_update, array('id' => $crm_student->id), 'crm_students');
+            LogParents::logUpdateStudentInfo($crm_student, $crm_update, $user_id);
+            if ((int)$crm_student->parent_id > 0) {
+                $parent_ids[(int)$crm_student->parent_id] = true;
+            }
+        }
+
+        foreach (array_keys($parent_ids) as $parent_id) {
+            $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $parent_id");
+            if (!$pre_parent_info) {
+                continue;
+            }
+            $parent_update = array(
+                'email' => $data['gud_email1'],
+                'birthday' => $data['gud_birth_day1'] ?: null,
+                'job_id' => $data['gud_job1'] ?: null,
+                'address' => $data['address'],
+                'province_id' => $data['province_id'] ?: null,
+                'district_id' => $data['district_id'] ?: null,
+                'updated_at' => $now,
+                'updator_id' => $user_id,
+            );
+            if (trim((string)$data['gud_name1']) !== '') {
+                $parent_update['name'] = $data['gud_name1'];
+            }
+            u::updateSimpleRow($parent_update, array('id' => $parent_id), 'crm_parents');
+            LogParents::logUpdateInfo($pre_parent_info, $parent_update, $user_id);
+
+            // Đồng bộ thông tin phụ huynh sang các học sinh LMS khác (anh/chị/em) cùng phụ huynh
+            $siblings = u::query("SELECT DISTINCT cs.lms_id FROM crm_students AS cs
+                WHERE cs.parent_id = $parent_id AND cs.lms_id > 0 AND cs.lms_id != " . (int)$lms_student_id);
+            foreach ($siblings as $sibling) {
+                $sibling_update = array(
+                    'gud_email1' => $parent_update['email'],
+                    'gud_birth_day1' => $parent_update['birthday'],
+                    'gud_job1' => $parent_update['job_id'],
+                    'address' => $parent_update['address'],
+                    'province_id' => $parent_update['province_id'],
+                    'district_id' => $parent_update['district_id'],
+                    'updated_at' => $now,
+                    'updator_id' => $user_id,
+                );
+                if (isset($parent_update['name'])) {
+                    $sibling_update['gud_name1'] = $parent_update['name'];
+                }
+                u::updateSimpleRow($sibling_update, array('id' => (int)$sibling->lms_id), 'students');
+            }
+        }
     }
 
     public function searchContract(Request $request)

@@ -390,6 +390,40 @@
                   </div>
                 </div>
 
+                <!-- Thông tin học sinh (cho phép cập nhật ngay tại tab Thông tin) -->
+                <div class="vx-col w-full mb-3">
+                  <div class="crm-form-section">
+                    <h6 class="crm-section-title justify-between">
+                      <span><i class="fa fa-child text-primary mr-1.5"></i> Thông tin học sinh ({{ students.length }})</span>
+                      <vs-button size="small" color="success" :disabled="disabled_action" @click="showModalStudent(0)">
+                        <i class="fa fa-plus mr-1"></i> Thêm học sinh
+                      </vs-button>
+                    </h6>
+                    <div v-if="!students || students.length === 0" class="crm-info-student-empty">
+                      Chưa có học sinh nào gắn với phụ huynh này.
+                    </div>
+                    <div v-else class="crm-info-student-list">
+                      <div v-for="(item, index) in students" :key="'info-st-' + index" class="crm-info-student-item">
+                        <div class="crm-info-student-main">
+                          <span class="crm-info-student-name">{{ item.name }}</span>
+                          <span class="badge-student-gender" :class="item.gender === 'F' ? 'gender-f' : (item.gender === 'M' ? 'gender-m' : 'gender-other')">
+                            {{ item.gender === 'F' ? 'Nữ' : (item.gender === 'M' ? 'Nam' : 'Khác') }}
+                          </span>
+                          <span v-if="item.lms_code" class="crm-info-student-code">{{ item.lms_code }}</span>
+                        </div>
+                        <div class="crm-info-student-meta">
+                          <span><i class="fa fa-birthday-cake mr-1"></i>{{ item.birthday ? formatBirthday(item.birthday, item.birthday_year_only) : 'Chưa có ngày sinh' }}</span>
+                          <span v-if="item.school"><i class="fa fa-school mr-1"></i>{{ item.school }}</span>
+                          <span v-if="item.checkin_branch_name"><i class="fa fa-building mr-1"></i>{{ item.checkin_branch_name }}</span>
+                        </div>
+                        <button type="button" class="crm-info-student-edit" :disabled="disabled_action" @click="showModalStudent(item)" title="Cập nhật thông tin học sinh">
+                          <i class="fa fa-edit mr-1"></i> Cập nhật
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Thanh nút thao tác -->
                 <div class="vx-col w-full mt-2">
                   <vs-alert :active.sync="alert.active" class="mb-4" :color="alert.color" closable icon-pack="feather" close-icon="icon-x">
@@ -2436,6 +2470,73 @@
   padding: 1.25rem;
 }
 
+.crm-info-student-empty {
+  font-size: 14px;
+  color: #64748b;
+  padding: 8px 0;
+}
+.crm-info-student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.crm-info-student-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.crm-info-student-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 220px;
+}
+.crm-info-student-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+.crm-info-student-code {
+  font-size: 13px;
+  font-weight: 600;
+  color: #7367f0;
+  white-space: nowrap;
+}
+.crm-info-student-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+  color: #475569;
+  flex: 1;
+}
+.crm-info-student-edit {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1.5px solid #7367f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #7367f0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.crm-info-student-edit:hover:not(:disabled) {
+  background: #7367f0;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(115, 103, 240, 0.35);
+}
+.crm-info-student-edit:disabled {
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
 .crm-section-title {
   font-size: 15px;
   font-weight: 700;

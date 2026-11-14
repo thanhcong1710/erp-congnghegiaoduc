@@ -8,6 +8,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx as x;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\LogParents;
+use App\Models\LogStudents;
 
 class ParentsController extends Controller
 {
@@ -542,7 +543,8 @@ class ParentsController extends Controller
 
     public function update(Request $request)
     {
-        $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $request->id");
+        $parent_id = (int)$request->id;
+        $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $parent_id");
         $data_update = array(
             'name'=>$request->name,
             'email'=>$request->email,
@@ -561,18 +563,26 @@ class ParentsController extends Controller
             'updator_id' => Auth::user()->id,
             'c2c_mobile'=>$request->c2c_mobile,
         );
-        $data = u::updateSimpleRow($data_update, array('id' => $request->id), 'crm_parents');
+        $data = u::updateSimpleRow($data_update, array('id' => $parent_id), 'crm_parents');
         LogParents::logUpdateInfo($pre_parent_info,$data_update,Auth::user()->id);
-        $students = u::query("SELECT s.id FROM students AS s LEFT JOIN crm_students AS cs ON cs.lms_id=s.id WHERE cs.parent_id=$request->id");
+        // Đồng bộ thông tin phụ huynh sang hồ sơ học sinh LMS (students) của phụ huynh này
+        $students = u::query("SELECT DISTINCT s.* FROM students AS s INNER JOIN crm_students AS cs ON cs.lms_id=s.id WHERE cs.parent_id=$parent_id");
         foreach($students AS $student){
-            u::updateSimpleRow(array(
+            $student_update = array(
                 'gud_mobile1' => data_get($request, 'mobile_1'),
                 'gud_name1' => data_get($request, 'name'),
                 'gud_email1' => data_get($request, 'email'),
                 'gud_birth_day1' => data_get($request, 'birthday'),
                 'gud_gender1' => data_get($request, 'gender'),
                 'gud_job1' => data_get($request, 'job_id'),
-            ), array('id'=>data_get($student,'id')),'students');
+                'address' => data_get($request, 'address'),
+                'province_id' => data_get($request, 'province_id'),
+                'district_id' => data_get($request, 'district_id'),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updator_id' => Auth::user()->id,
+            );
+            u::updateSimpleRow($student_update, array('id'=>data_get($student,'id')),'students');
+            LogStudents::logUpdateInfo($student, $student_update, Auth::user()->id);
         }
         $result =(object)array(
             'status'=>1,

@@ -128,6 +128,28 @@
             </multiselect>
           </div>
 
+          <!-- 5b. Kênh nguồn ngách -->
+          <div class="vx-col sm:w-1/2 md:w-1/3 lg:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-git-branch text-primary mr-1"></i> Kênh nguồn ngách
+            </label>
+            <multiselect
+              name="search_source_detail"
+              placeholder="Chọn kênh nguồn ngách"
+              v-model="searchData.arr_source_detail"
+              :options="sourceDetailOptions"
+              label="name"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              track-by="id"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
+
           <!-- 6. Sản phẩm -->
           <div class="vx-col sm:w-1/2 md:w-1/3 lg:w-1/4 w-full mb-4">
             <label class="custom-filter-label">
@@ -1066,6 +1088,12 @@ export default {
     }
   },
   computed: {
+    sourceDetailOptions() {
+      // Nếu đã chọn Nguồn → chỉ hiện kênh nguồn ngách thuộc các nguồn đó
+      const srcIds = (this.searchData.arr_source || []).map(s => Number(s.id))
+      if (!srcIds.length) return this.source_detail_list
+      return this.source_detail_list.filter(d => srcIds.includes(Number(d.source_id)))
+    },
     activeFilterCount() {
       let count = 0
       if (this.searchData.keyword && this.searchData.keyword.trim()) count++
@@ -1073,6 +1101,7 @@ export default {
       if (this.searchData.arr_status && this.searchData.arr_status.length) count++
       if (this.searchData.arr_owner && this.searchData.arr_owner.length) count++
       if (this.searchData.arr_source && this.searchData.arr_source.length) count++
+      if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) count++
       if (this.searchData.arr_product && this.searchData.arr_product.length) count++
       return count
     },
@@ -1090,6 +1119,14 @@ export default {
         }
         this.checked_list = selected
       }
+    }
+  },
+  watch: {
+    'searchData.arr_source'(val) {
+      // Bỏ các kênh nguồn ngách không còn thuộc nguồn đã chọn
+      const srcIds = (val || []).map(s => Number(s.id))
+      if (!srcIds.length || !this.searchData.arr_source_detail || !this.searchData.arr_source_detail.length) return
+      this.searchData.arr_source_detail = this.searchData.arr_source_detail.filter(d => srcIds.includes(Number(d.source_id)))
     }
   },
   methods: {
