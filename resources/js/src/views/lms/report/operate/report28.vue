@@ -92,6 +92,7 @@
               <th style="min-width:100px" class="text-center">Lần chuyển khoản</th>
               <th style="min-width:150px">Ảnh Bill</th>
               <th style="min-width:120px" class="text-right">Trạng thái duyệt</th>
+              <th style="min-width:250px">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
@@ -114,9 +115,10 @@
                   {{ row.status == 1 ? 'Đã duyệt' : (row.status == 2 ? 'Từ chối' : 'Chờ duyệt') }}
                 </span>
               </td>
+              <td class="text-wrap-cell">{{ row.note || '—' }}</td>
             </tr>
             <tr v-if="datas.length === 0">
-              <td colspan="14" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
+              <td colspan="15" class="text-center py-8">Không có dữ liệu · Nhấn Tìm kiếm để tải</td>
             </tr>
           </tbody>
         </table>

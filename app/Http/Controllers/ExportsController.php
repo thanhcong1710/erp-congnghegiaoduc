@@ -4229,6 +4229,10 @@ class ExportsController extends Controller
                 tp.charge_date,
                 tp.status,
                 tp.attachments,
+                a.note AS agreement_note,
+                a.group_type,
+                a.discount_note,
+                tp.note AS payment_note,
                 (
                     SELECT COUNT(tp2.id)
                     FROM tmp_payments tp2
@@ -4249,10 +4253,14 @@ class ExportsController extends Controller
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-        $lastColStr = self::applyStandardTemplate($sheet, 'BÁO CÁO 28', array ( 0 => 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN',), array ());
+        $lastColStr = self::applyStandardTemplate($sheet, 'BÁO CÁO CHI TIẾT PHỤC VỤ XUẤT HÓA ĐƠN', [
+            'STT', 'Ngày tạo phiếu', 'Trạng thái đăng ký', 'Khoá học đăng kí', 'Họ và tên', 'Sđt',
+            'Team kinh doanh', 'Địa chỉ nhận sách', 'Giá khoá học', 'Học phí', 'Ngày chuyển khoản',
+            'Lần chuyển khoản', 'Ảnh Bill', 'Trạng thái duyệt', 'Ghi chú',
+        ]);
 
         for ($i = 0; $i < count($list); $i++) {
-            $x = $i + 4;
+            $x = $i + 3;
             $item = $list[$i];
 
             $status_str = "";
@@ -4288,6 +4296,8 @@ class ExportsController extends Controller
             $sheet->setCellValue("L" . $x, $item->transfer_count);
             $sheet->setCellValue("M" . $x, implode("\n", $bills_links));
             $sheet->setCellValue("N" . $x, $status_str);
+            $sheet->setCellValue("O" . $x, ReportsController::buildInvoiceNote($item));
+            $sheet->getStyle("O" . $x)->getAlignment()->setWrapText(true);
 
         $sheet->getStyle('A' . $x . ':' . $lastColStr . $x)->applyFromArray(['borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']]]]);
             $sheet->getRowDimension($x)->setRowHeight(23);
@@ -4296,6 +4306,7 @@ class ExportsController extends Controller
         foreach (range("A", "N") as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
+        $sheet->getColumnDimension("O")->setWidth(50);
 
         $writer = new Xlsx($spreadsheet);
         try {

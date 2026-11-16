@@ -2197,6 +2197,10 @@ class ReportsController extends Controller
                 tp.charge_date,
                 tp.attachments AS img_bill_raw,
                 tp.status,
+                a.note AS agreement_note,
+                a.group_type,
+                a.discount_note,
+                tp.note AS payment_note,
                 (
                     SELECT COUNT(tp2.id)
                     FROM tmp_payments tp2
@@ -2230,6 +2234,7 @@ class ReportsController extends Controller
                 }
             }
             $row->img_bill = implode('<br>', $bills);
+            $row->note = self::buildInvoiceNote($row);
             $finalList[] = $row;
         }
 
@@ -2244,6 +2249,34 @@ class ReportsController extends Controller
         ]);
     }
 
+
+    /**
+     * Ghép ghi chú cho báo cáo xuất hóa đơn (report28): nhóm đăng ký, ghi chú sale, ưu đãi, phiếu thu
+     */
+    public static function buildInvoiceNote($row)
+    {
+        $parts = [];
+        if ((int) ($row->group_type ?? 0) > 0) {
+            $parts[] = 'Nhóm ' . (int) $row->group_type;
+        }
+        // Sale hay nhập trùng nội dung ở nhiều ô -> chỉ giữ lần xuất hiện đầu tiên
+        $seen = [];
+        $sources = [
+            '' => $row->agreement_note ?? '',
+            'Ưu đãi: ' => $row->discount_note ?? '',
+            'Phiếu thu: ' => $row->payment_note ?? '',
+        ];
+        foreach ($sources as $prefix => $text) {
+            $text = trim((string) $text);
+            $key = mb_strtolower($text);
+            if ($text === '' || isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $parts[] = $prefix . $text;
+        }
+        return implode(' | ', $parts);
+    }
 
     public function report25(Request $request)
     {
