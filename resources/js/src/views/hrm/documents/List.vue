@@ -30,8 +30,8 @@
 
     <vx-card no-shadow>
       <div class="hrm-toolbar">
-        <div class="hrm-toolbar-group text-sm text-gray-600">
-          Đang hiển thị <strong class="mx-1">{{ filteredDocuments.length }}</strong> hồ sơ
+        <div class="hrm-toolbar-group">
+          <span class="text-sm text-gray-600">Đang hiển thị <strong>{{ filteredDocuments.length }}</strong> hồ sơ</span>
         </div>
         <div class="hrm-toolbar-group">
           <div class="hrm-search">

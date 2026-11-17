@@ -15,8 +15,8 @@
     <vx-card no-shadow>
       <!-- Toolbar tìm kiếm -->
       <div class="hrm-toolbar">
-        <div class="hrm-toolbar-group text-sm text-gray-600">
-          Tổng số <strong class="mx-1">{{ contracts.total || 0 }}</strong> hợp đồng
+        <div class="hrm-toolbar-group">
+          <span class="text-sm text-gray-600">Tổng số <strong>{{ contracts.total || 0 }}</strong> hợp đồng</span>
         </div>
         <div class="hrm-toolbar-group">
           <div class="hrm-search">
@@ -50,22 +50,29 @@
             <tbody>
               <tr v-for="(tr, index) in contracts.data" :key="tr.id || index" class="tr-values vs-table--tr">
                 <td class="td vs-table--td text-center text-gray-500">{{ rowNumber(index) }}</td>
-                <td class="td vs-table--td">
-                  <div class="font-bold text-primary">{{ tr.contract_number }}</div>
-                  <span class="hrm-badge mt-1" :class="isMega(tr) ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'">
+                <td class="td vs-table--td whitespace-nowrap">
+                  <span class="font-bold text-primary mr-2">{{ tr.contract_number }}</span>
+                  <span class="hrm-badge is-sm" :class="isMega(tr) ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'">
                     {{ isMega(tr) ? 'MEGA' : 'CHAM' }}
                   </span>
                 </td>
                 <td class="td vs-table--td">
-                  <div class="font-semibold text-gray-900">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'N/A') }}</div>
-                  <div v-if="tr.employee && tr.employee.employee_code" class="text-xs text-gray-500">Mã NS: {{ tr.employee.employee_code }}</div>
+                  <div class="hrm-person">
+                    <div class="hrm-person-name">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'N/A') }}</div>
+                    <div v-if="tr.employee && tr.employee.employee_code" class="hrm-person-code">{{ tr.employee.employee_code }}</div>
+                  </div>
                 </td>
-                <td class="td vs-table--td">{{ tr.contract_type }}</td>
+                <td class="td vs-table--td whitespace-nowrap">
+                  <span class="hrm-badge" :class="contractTypeClass(tr.contract_type)">{{ tr.contract_type || '---' }}</span>
+                </td>
                 <td class="td vs-table--td whitespace-nowrap">
                   <div>{{ fmtDate(tr.start_date) }} → {{ fmtDate(tr.end_date, 'Không thời hạn') }}</div>
                   <div v-if="expiryHint(tr)" class="text-xs font-semibold" :class="expiryHint(tr).cls">{{ expiryHint(tr).text }}</div>
                 </td>
-                <td class="td vs-table--td text-right font-semibold text-gray-800 whitespace-nowrap">{{ formatCurrency(tr.basic_salary) }}</td>
+                <td class="td vs-table--td text-right whitespace-nowrap">
+                  <span v-if="Number(tr.basic_salary) > 0" class="font-semibold text-gray-800">{{ formatCurrency(tr.basic_salary) }}</span>
+                  <span v-else class="text-gray-400" title="Chưa nhập lương">—</span>
+                </td>
                 <td class="td vs-table--td text-center">
                   <span class="hrm-badge" :class="tr.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
                     {{ tr.status === 1 ? 'Hiệu lực' : 'Hết hạn' }}
@@ -218,6 +225,14 @@ export default {
     },
     formatCurrency(val) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(val) || 0);
+    },
+    // Màu badge theo loại hợp đồng
+    contractTypeClass(type) {
+      const t = String(type || '').toLowerCase();
+      if (t.includes('ctv') || t.includes('cộng tác')) return 'bg-amber-100 text-amber-800';
+      if (t.includes('thử việc')) return 'bg-orange-100 text-orange-700';
+      if (t.includes('fulltime') || t.includes('không xác định')) return 'bg-green-100 text-green-700';
+      return 'bg-blue-100 text-blue-700';
     },
     isMega(tr) {
       return (tr.contract_number && tr.contract_number.startsWith('MEGA')) || (tr.company && tr.company.code === 'MEGA');

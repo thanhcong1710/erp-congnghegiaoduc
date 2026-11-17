@@ -145,11 +145,11 @@
           <vs-th style="width: 50px;">STT</vs-th>
           <vs-th style="min-width: 280px;">Tên phòng ban / Cơ cấu tổ chức</vs-th>
           <vs-th style="width: 100px;">Công ty</vs-th>
-          <vs-th style="width: 120px;">Cấp bậc</vs-th>
-          <vs-th style="width: 160px; text-align: center;">Số lượng nhân viên</vs-th>
+          <vs-th style="min-width: 120px;">Cấp bậc</vs-th>
+          <vs-th style="min-width: 150px;">Nhân sự</vs-th>
           <vs-th style="min-width: 180px;">Mô tả chức năng</vs-th>
-          <vs-th style="width: 110px;">Trạng thái</vs-th>
-          <vs-th style="width: 160px; text-align: center;">Thao tác</vs-th>
+          <vs-th style="min-width: 110px;">Trạng thái</vs-th>
+          <vs-th style="width: 130px;">Thao tác</vs-th>
         </template>
 
         <template slot-scope="{data}">
@@ -208,27 +208,23 @@
 
             <!-- Cấp bậc -->
             <vs-td>
-              <vs-chip v-if="tr.level === 0" color="primary">Khối (Cấp 1)</vs-chip>
-              <vs-chip v-else-if="tr.level === 1" color="warning">Phòng (Cấp 2)</vs-chip>
-              <vs-chip v-else color="dark">Team (Cấp {{ tr.level + 1 }})</vs-chip>
+              <span v-if="tr.level === 0" class="hrm-badge bg-indigo-100 text-indigo-700">Khối · Cấp 1</span>
+              <span v-else-if="tr.level === 1" class="hrm-badge bg-amber-100 text-amber-800">Phòng · Cấp 2</span>
+              <span v-else class="hrm-badge bg-gray-100 text-gray-700">Team · Cấp {{ tr.level + 1 }}</span>
             </vs-td>
 
-            <!-- Số lượng nhân viên -->
-            <vs-td class="text-center">
-              <div class="flex flex-col items-center justify-center">
-                <span 
-                  :class="(tr.employees_count || 0) > 0 ? 'bg-primary-light text-primary font-bold px-3 py-1 rounded-full text-sm inline-flex items-center' : 'text-gray-400 text-sm'"
-                >
-                  <feather-icon icon="UsersIcon" class="w-3.5 h-3.5 mr-1" v-if="(tr.employees_count || 0) > 0" />
-                  {{ tr.employees_count || 0 }} nhân viên
+            <!-- Số lượng nhân viên (trực tiếp + tổng cả khối) -->
+            <vs-td>
+              <div class="whitespace-nowrap">
+                <span v-if="(tr.employees_count || 0) > 0" class="hrm-badge bg-primary-light text-primary">
+                  <i class="fa-solid fa-users"></i> {{ tr.employees_count }}
                 </span>
-                <span 
-                  v-if="tr.children_count > 0 && tr.total_tree_employees > tr.employees_count" 
-                  class="text-xs text-primary font-semibold mt-1"
+                <span v-else class="text-gray-400 text-sm">0</span>
+                <span
+                  v-if="tr.children_count > 0 && tr.total_tree_employees > tr.employees_count"
+                  class="hrm-muted-small ml-1"
                   :title="'Bao gồm cả các bộ phận con: ' + tr.total_tree_employees + ' nhân viên'"
-                >
-                  (Tổng cả khối: {{ tr.total_tree_employees }})
-                </span>
+                >/ tổng khối {{ tr.total_tree_employees }}</span>
               </div>
             </vs-td>
 
@@ -242,51 +238,22 @@
 
             <!-- Trạng thái -->
             <vs-td>
-              <vs-chip :color="tr.status == 1 ? 'success' : 'danger'">
+              <span class="hrm-badge" :class="tr.status == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
                 {{ tr.status == 1 ? 'Hoạt động' : 'Tạm dừng' }}
-              </vs-chip>
+              </span>
             </vs-td>
 
             <!-- Thao tác: Thêm cấp con, Sửa, Xóa bản ghi thừa -->
             <vs-td>
-              <div class="flex items-center justify-center space-x-1">
-                <!-- Thêm cấp con trực thuộc -->
+              <div class="hrm-actions">
                 <vx-tooltip text="Thêm bộ phận trực thuộc">
-                  <vs-button 
-                    size="small" 
-                    color="primary" 
-                    type="border" 
-                    class="p-2 mr-1"
-                    @click="openAddChild(tr)"
-                  >
-                    <i class="fa fa-plus-circle"></i>
-                  </vs-button>
+                  <button type="button" class="hrm-icon-btn is-primary" @click="openAddChild(tr)"><i class="fa-solid fa-plus"></i></button>
                 </vx-tooltip>
-
-                <!-- Chỉnh sửa -->
-                <vx-tooltip text="Chỉnh sửa thông tin">
-                  <vs-button 
-                    size="small" 
-                    color="success" 
-                    type="border" 
-                    class="p-2 mr-1"
-                    @click="openPopup(tr)"
-                  >
-                    <i class="fa fa-edit"></i>
-                  </vs-button>
+                <vx-tooltip text="Chỉnh sửa">
+                  <button type="button" class="hrm-icon-btn is-success" @click="openPopup(tr)"><i class="fa-solid fa-pen"></i></button>
                 </vx-tooltip>
-
-                <!-- Xóa bản ghi thừa -->
-                <vx-tooltip text="Xóa bản ghi thừa">
-                  <vs-button 
-                    size="small" 
-                    color="danger" 
-                    type="border" 
-                    class="p-2"
-                    @click="confirmDelete(tr)"
-                  >
-                    <i class="fa fa-trash"></i>
-                  </vs-button>
+                <vx-tooltip text="Xóa">
+                  <button type="button" class="hrm-icon-btn is-danger" @click="confirmDelete(tr)"><i class="fa-solid fa-trash-can"></i></button>
                 </vx-tooltip>
               </div>
             </vs-td>

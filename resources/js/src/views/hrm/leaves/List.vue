@@ -2,18 +2,16 @@
   <div id="page-hrm-leaves">
     <!-- Header -->
     <div class="hrm-page-header">
-      <div class="mb-2 md:mb-0">
-        <h3 class="font-bold text-gray-800 flex items-center">
-          <feather-icon icon="CalendarIcon" class="mr-2 text-primary" /> Quản Lý Nghỉ Phép & Quỹ Phép Toàn Bộ Nhân Sự
-        </h3>
-        <p class="text-sm text-gray-500 mt-1">Theo dõi quỹ phép năm của toàn thể cán bộ nhân viên, phê duyệt đơn nghỉ và đối soát công lương</p>
+      <div>
+        <h3><feather-icon icon="CalendarIcon" class="mr-2 text-primary" /> Nghỉ Phép & Quỹ Phép</h3>
+        <p>Theo dõi quỹ phép năm, phê duyệt đơn nghỉ và đối soát công lương</p>
       </div>
-      <div class="flex flex-wrap items-center">
-        <vs-button class="p-3 mr-2" color="warning" type="filled" @click="openImportPopup">
-          <i class="fa-solid fa-file-import mr-2"></i> Import Bảng Nghỉ Phép
+      <div class="hrm-page-actions">
+        <vs-button color="warning" type="border" @click="openImportPopup">
+          <i class="fa-solid fa-file-import mr-1"></i> Import Excel
         </vs-button>
-        <vs-button class="p-3" color="success" type="border" @click="openPopup">
-          <i class="fa-solid fa-plus mr-2"></i> Tạo Đơn Xin Phép
+        <vs-button color="primary" @click="openPopup">
+          <i class="fa-solid fa-plus mr-1"></i> Tạo đơn xin phép
         </vs-button>
       </div>
     </div>
@@ -277,136 +275,125 @@
       <vs-tab label="Danh sách đơn xin nghỉ" icon-pack="feather" icon="icon-file-text">
         <vx-card no-shadow class="mt-4">
           <!-- Bộ lọc và tìm kiếm -->
-          <div class="flex flex-wrap items-center justify-between mb-4">
-            <div class="flex items-center mb-2 md:mb-0">
-              <span class="text-sm font-medium mr-2 text-gray-700">Trạng thái:</span>
-              <select v-model="filterStatus" @change="fetchLeaves" class="filter-select" style="min-width: 170px;">
-                <option value="all">-- Tất cả trạng thái --</option>
-                <option value="0">Chờ duyệt</option>
-                <option value="1">Đã phê duyệt</option>
-                <option value="2">Bị từ chối</option>
-              </select>
-            </div>
-
-            <div class="mb-2 md:mb-0">
-              <input 
-                type="text" 
-                class="filter-input" 
-                style="min-width: 250px;" 
-                placeholder="Tìm theo tên nhân viên..." 
-                v-model="searchKeyword" 
-                @input="fetchLeaves"
+          <div class="hrm-toolbar">
+            <div class="hrm-toolbar-group">
+              <vs-button
+                v-for="tab in leaveStatusTabs"
+                :key="tab.value"
+                size="small"
+                :color="tab.color"
+                :type="filterStatus === tab.value ? 'filled' : 'border'"
+                @click="setLeaveStatus(tab.value)"
               >
+                {{ tab.label }}
+              </vs-button>
+            </div>
+            <div class="hrm-toolbar-group">
+              <div class="hrm-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  v-model="searchKeyword"
+                  type="text"
+                  class="vs-inputx vs-input--input normal hrm-input"
+                  placeholder="Tìm theo tên nhân viên..."
+                  @input="onSearchLeavesInput"
+                >
+              </div>
             </div>
           </div>
 
-          <!-- Table danh sách đơn -->
-          <div class="vs-component vs-con-table stripe vs-table-primary overflow-x-auto">
+          <!-- Bảng danh sách đơn -->
+          <div class="vs-component vs-con-table stripe vs-table-primary">
             <div class="con-tablex vs-table--content">
-              <div class="vs-con-tbody vs-table--tbody">
-                <table class="vs-table vs-table--tbody-table w-full">
-                  <thead class="vs-table--thead">
-                    <tr>
-                      <th width="3%" class="text-center">STT</th>
-                      <th width="8%">Mã NS</th>
-                      <th width="12%">Người làm đơn</th>
-                      <th width="9%">Loại yêu cầu</th>
-                      <th width="13%">Thời gian xin phép</th>
-                      <th width="5%" class="text-center">Số ngày</th>
-                      <th width="10%" class="text-center">Thời gian tạo</th>
-                      <th width="8%" class="text-center">Trạng thái</th>
-                      <th width="11%">Chế độ duyệt</th>
-                      <th width="11%" class="text-center">Thời gian duyệt</th>
-                      <th class="text-center" style="min-width: 150px; width: 150px; white-space: nowrap;">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr class="tr-values vs-table--tr" v-for="(tr, index) in leaves.data" :key="index">
-                      <td class="td vs-table--td text-center">{{ index + 1 + ((leaves.current_page || 1) - 1) * (leaves.per_page || 20) }}</td>
-                      <td class="td vs-table--td font-bold text-primary">{{ tr.employee ? tr.employee.employee_code : (tr.user ? (tr.user.hrm_id || '---') : '') }}</td>
-                      <td class="td vs-table--td font-semibold text-gray-900">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'Unknown') }}</td>
-                      <td class="td vs-table--td">
-                        <vs-chip :color="getRequestCategoryColor(tr.request_category)">
-                          {{ getRequestCategoryText(tr.request_category) }}
-                        </vs-chip>
-                      </td>
-                      <td class="td vs-table--td text-sm">
-                        <div>{{ tr.start_date | formatDateView }} <i class="fa fa-arrow-right text-xs text-gray-400"></i> {{ tr.end_date | formatDateView }}</div>
-                        <div class="text-xs text-gray-500 truncate" :title="tr.reason">Lý do: {{ tr.reason }}</div>
-                      </td>
-                      <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
+              <table class="vs-table vs-table--tbody-table leave-request-table">
+                <thead class="vs-table--thead">
+                  <tr>
+                    <th class="text-center" style="width: 48px;">STT</th>
+                    <th>Nhân sự</th>
+                    <th>Loại</th>
+                    <th>Thời gian xin nghỉ</th>
+                    <th class="text-center">Số ngày</th>
+                    <th>Trạng thái</th>
+                    <th>Duyệt</th>
+                    <th class="text-center">Ngày tạo</th>
+                    <th class="text-center" style="width: 90px;">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(tr, index) in leaves.data" :key="tr.id || index" class="tr-values vs-table--tr">
+                    <td class="td vs-table--td text-center text-gray-500">{{ index + 1 + ((leaves.current_page || 1) - 1) * (leaves.per_page || 20) }}</td>
 
-                      <!-- Thời gian tạo -->
-                      <td class="td vs-table--td text-center text-xs whitespace-no-wrap">
-                        <div class="font-semibold text-gray-800">{{ formatDateTime(tr.created_at) }}</div>
-                      </td>
+                    <!-- Nhân sự: tên + mã -->
+                    <td class="td vs-table--td">
+                      <div class="hrm-person">
+                        <div class="hrm-person-name">{{ tr.employee ? tr.employee.full_name : (tr.user ? tr.user.name : 'Unknown') }}</div>
+                        <div class="hrm-person-code">{{ tr.employee ? tr.employee.employee_code : (tr.user ? (tr.user.hrm_id || '---') : '') }}</div>
+                      </div>
+                    </td>
 
-                      <td class="td vs-table--td text-center">
-                        <vs-chip :color="tr.status === 1 ? 'success' : (tr.status === 2 ? 'danger' : 'warning')">
-                          {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
-                        </vs-chip>
-                      </td>
-                      <td class="td vs-table--td">
-                        <span v-if="tr.status === 1" class="font-semibold text-xs" :class="getApprovalTypeClass(tr.approval_type)">
-                          {{ getApprovalTypeText(tr.approval_type) }}
-                        </span>
-                        <div v-else-if="tr.status === 2" class="text-danger text-xs">
-                          <div class="font-semibold flex items-center">
-                            <i class="fa-solid fa-circle-xmark mr-1"></i> Từ chối
-                          </div>
-                          <div v-if="tr.rejection_reason" class="text-gray-500 italic mt-0.5 truncate max-w-xs" :title="tr.rejection_reason">
-                            Ghi chú: {{ tr.rejection_reason }}
-                          </div>
-                        </div>
-                        <span v-else class="text-gray-400 text-xs italic">Chờ duyệt</span>
-                      </td>
+                    <td class="td vs-table--td">
+                      <span class="hrm-badge" :class="categoryBadgeClass(tr.request_category)">
+                        {{ getRequestCategoryText(tr.request_category) }}
+                      </span>
+                    </td>
 
-                      <!-- Thời gian duyệt -->
-                      <td class="td vs-table--td text-center text-xs whitespace-no-wrap">
-                        <div v-if="tr.status !== 0">
-                          <div class="font-semibold text-gray-800">{{ formatDateTime(tr.approved_at || tr.updated_at) }}</div>
-                          <div v-if="tr.manager_approver || tr.hr_approver" class="text-gray-500 text-xs mt-0.5 truncate max-w-xs" :title="'Người duyệt: ' + ((tr.manager_approver ? tr.manager_approver.name : '') || (tr.hr_approver ? tr.hr_approver.name : ''))">
-                            Bởi: {{ (tr.manager_approver ? tr.manager_approver.name : '') || (tr.hr_approver ? tr.hr_approver.name : '') }}
-                          </div>
-                        </div>
-                        <span v-else class="text-gray-400 text-xs italic">---</span>
-                      </td>
+                    <td class="td vs-table--td" style="min-width: 200px;">
+                      <div class="whitespace-nowrap font-medium text-gray-800">
+                        {{ tr.start_date | formatDateView }}
+                        <template v-if="tr.end_date && tr.end_date !== tr.start_date">
+                          <i class="fa-solid fa-arrow-right text-xs text-gray-400 mx-1"></i>{{ tr.end_date | formatDateView }}
+                        </template>
+                      </div>
+                      <div v-if="tr.reason" class="hrm-muted-small leave-reason" :title="tr.reason">{{ tr.reason }}</div>
+                      <div v-else class="hrm-muted-small italic">Không ghi lý do</div>
+                    </td>
 
-                      <td class="td vs-table--td text-center list-action" style="min-width: 150px; width: 150px; white-space: nowrap;">
-                        <div class="flex items-center justify-center space-x-2" v-if="canApprove && tr.status === 0" style="white-space: nowrap;">
-                          <vs-button 
-                            size="small" 
-                            color="success" 
-                            type="filled"
-                            class="px-3 py-1.5 whitespace-nowrap text-xs font-semibold inline-flex items-center"
-                            style="white-space: nowrap;"
-                            @click="openApprovePopup(tr)"
-                            title="Phê duyệt đơn"
-                          >
-                            <i class="fa-solid fa-check mr-1"></i> Duyệt
-                          </vs-button>
-                          <vs-button 
-                            size="small" 
-                            color="danger" 
-                            type="border"
-                            class="px-3 py-1.5 whitespace-nowrap text-xs font-semibold inline-flex items-center"
-                            style="white-space: nowrap;"
-                            @click="openRejectPopup(tr)"
-                            title="Từ chối đơn"
-                          >
-                            <i class="fa-solid fa-ban mr-1"></i> Từ chối
-                          </vs-button>
-                        </div>
-                        <span v-else class="text-xs text-gray-400">---</span>
-                      </td>
-                    </tr>
-                    <tr v-if="!leaves.data || !leaves.data.length">
-                      <td colspan="11" class="text-center p-4 text-gray-500">Không có dữ liệu đơn nghỉ phép</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                    <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
+
+                    <td class="td vs-table--td">
+                      <span class="hrm-badge" :class="leaveStatusBadgeClass(tr.status)">
+                        {{ tr.status === 1 ? 'Đã duyệt' : (tr.status === 2 ? 'Từ chối' : 'Chờ duyệt') }}
+                      </span>
+                    </td>
+
+                    <!-- Kết quả duyệt: chế độ + người duyệt + thời gian -->
+                    <td class="td vs-table--td" style="min-width: 170px;">
+                      <template v-if="tr.status === 1">
+                        <div class="text-xs font-semibold whitespace-nowrap" :class="getApprovalTypeClass(tr.approval_type)">{{ getApprovalTypeText(tr.approval_type) }}</div>
+                      </template>
+                      <template v-else-if="tr.status === 2">
+                        <div v-if="tr.rejection_reason" class="text-xs text-danger leave-reason" :title="tr.rejection_reason">{{ tr.rejection_reason }}</div>
+                        <div v-else class="text-xs text-danger">Không ghi lý do</div>
+                      </template>
+                      <span v-else class="hrm-muted-small italic">Đang chờ xử lý</span>
+                      <div v-if="tr.status !== 0" class="hrm-muted-small whitespace-nowrap">
+                        {{ approverName(tr) ? approverName(tr) + ' · ' : '' }}{{ formatDateTime(tr.approved_at || tr.updated_at) }}
+                      </div>
+                    </td>
+
+                    <td class="td vs-table--td text-center text-xs whitespace-nowrap text-gray-600">{{ formatDateTime(tr.created_at) }}</td>
+
+                    <td class="td vs-table--td text-center">
+                      <div v-if="canApprove && tr.status === 0" class="hrm-actions">
+                        <vx-tooltip text="Phê duyệt">
+                          <button type="button" class="hrm-icon-btn is-success" @click="openApprovePopup(tr)"><i class="fa-solid fa-check"></i></button>
+                        </vx-tooltip>
+                        <vx-tooltip text="Từ chối">
+                          <button type="button" class="hrm-icon-btn is-danger" @click="openRejectPopup(tr)"><i class="fa-solid fa-xmark"></i></button>
+                        </vx-tooltip>
+                      </div>
+                      <span v-else class="text-gray-400">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
+          </div>
+
+          <div v-if="!leaves.data || !leaves.data.length" class="hrm-empty">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            <div class="hrm-empty-title">Không có đơn nghỉ phép</div>
+            <span class="text-sm">Thử đổi bộ lọc hoặc từ khóa tìm kiếm</span>
           </div>
 
           <!-- Phân trang đơn nghỉ -->
@@ -1073,6 +1060,13 @@ export default {
       // Tab 2: Danh sách đơn nghỉ phép
       filterStatus: 'all',
       searchKeyword: '',
+      leaveSearchTimer: null,
+      leaveStatusTabs: [
+        { value: 'all', label: 'Tất cả', color: 'primary' },
+        { value: '0', label: 'Chờ duyệt', color: 'warning' },
+        { value: '1', label: 'Đã duyệt', color: 'success' },
+        { value: '2', label: 'Từ chối', color: 'danger' }
+      ],
       leaves: { data: [], total: 0, per_page: 20, current_page: 1 },
       leaveTypes: [],
       canApprove: false,
@@ -1507,6 +1501,35 @@ export default {
       }).catch(err => console.error(err));
     },
 
+    setLeaveStatus(value) {
+      this.filterStatus = value;
+      this.leaves.current_page = 1;
+      this.fetchLeaves();
+    },
+    // Debounce tìm kiếm đơn: chỉ gọi API khi ngừng gõ 400ms
+    onSearchLeavesInput() {
+      clearTimeout(this.leaveSearchTimer);
+      this.leaveSearchTimer = setTimeout(() => {
+        this.leaves.current_page = 1;
+        this.fetchLeaves();
+      }, 400);
+    },
+    categoryBadgeClass(cat) {
+      const map = {
+        leave: 'bg-blue-100 text-blue-700',
+        shift_change: 'bg-amber-100 text-amber-800',
+        off_to_onl: 'bg-purple-100 text-purple-700'
+      };
+      return map[cat] || 'bg-gray-100 text-gray-700';
+    },
+    leaveStatusBadgeClass(status) {
+      if (status === 1) return 'bg-green-100 text-green-700';
+      if (status === 2) return 'bg-red-100 text-red-700';
+      return 'bg-amber-100 text-amber-800';
+    },
+    approverName(tr) {
+      return (tr.manager_approver ? tr.manager_approver.name : '') || (tr.hr_approver ? tr.hr_approver.name : '');
+    },
     changePage(p) {
       this.leaves.current_page = p;
       this.fetchLeaves();
@@ -1672,6 +1695,15 @@ export default {
 </script>
 
 <style scoped>
+/* Lý do nghỉ / lý do từ chối: tối đa 2 dòng */
+.leave-reason {
+  max-width: 260px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.leave-request-table { min-width: 1000px; }
 /* Controls lọc */
 .filter-select, .filter-input {
   height: 38px;

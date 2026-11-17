@@ -166,6 +166,7 @@ $hrm-heading: #1f2937;
       color: #9ca3af;
       font-size: 13px;
       pointer-events: none;
+      z-index: 2; // input của Vuesax có position nên đè icon
     }
     input { padding-left: 34px !important; width: 100%; }
   }
@@ -202,6 +203,47 @@ $hrm-heading: #1f2937;
     .hrm-empty-title { font-weight: 600; color: #4b5563; }
   }
 
+  // Chip Vuesax không được xuống dòng trong bảng
+  .con-vs-chip { white-space: nowrap; max-width: none; }
+
+  // Nút hành động dạng icon vuông trong bảng (main.css ép .list-action .vs-button.small = 28px)
+  .hrm-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .hrm-icon-btn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &.is-success { color: rgba(var(--vs-success), 1); }
+    &.is-danger { color: rgba(var(--vs-danger), 1); }
+    &.is-primary { color: rgba(var(--vs-primary), 1); }
+    &.is-warning { color: rgba(var(--vs-warning), 1); }
+    &.is-success:hover { background: rgba(var(--vs-success), 1); color: #fff; }
+    &.is-danger:hover { background: rgba(var(--vs-danger), 1); color: #fff; }
+    &.is-primary:hover { background: rgba(var(--vs-primary), 1); color: #fff; }
+    &.is-warning:hover { background: rgba(var(--vs-warning), 1); color: #fff; }
+  }
+
+  // Ô "người": tên + mã nhân sự 2 dòng
+  .hrm-person {
+    min-width: 150px;
+    .hrm-person-name { font-weight: 600; color: #111827; line-height: 1.3; }
+    .hrm-person-code { font-size: 12px; font-weight: 600; color: rgba(var(--vs-primary), 1); }
+  }
+  .hrm-muted-small { font-size: 12px; color: #6b7280; }
+
   // Badge trạng thái gọn
   .hrm-badge {
     display: inline-flex;
@@ -213,6 +255,8 @@ $hrm-heading: #1f2937;
     font-weight: 600;
     line-height: 1.6;
     white-space: nowrap;
+
+    &.is-sm { padding: 0 8px; font-size: 11px; }
   }
 
   // Footer phân trang

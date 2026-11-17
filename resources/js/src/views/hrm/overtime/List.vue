@@ -31,8 +31,8 @@
 
     <vx-card no-shadow>
       <div class="hrm-toolbar">
-        <div class="hrm-toolbar-group text-sm text-gray-600">
-          Đang hiển thị <strong class="mx-1">{{ filteredRequests.length }}</strong> đơn
+        <div class="hrm-toolbar-group">
+          <span class="text-sm text-gray-600">Đang hiển thị <strong>{{ filteredRequests.length }}</strong> đơn</span>
         </div>
         <div class="hrm-toolbar-group">
           <div class="hrm-search">
