@@ -779,7 +779,9 @@ class UtilityServiceProvider extends ServiceProvider
                 $text = "Đang học chính thức";
             } elseif ($status == 7) {
                 $text = "Hết phí";
-            } elseif (in_array($status, [3, 4, 5])) {
+            } elseif ($status == 4) {
+                $text = "Bảo lưu";
+            } elseif (in_array($status, [3, 5])) {
                 $text = "Chờ xếp lớp";
             } elseif ($status == 2) {
                 $text = "Đặt cọc";

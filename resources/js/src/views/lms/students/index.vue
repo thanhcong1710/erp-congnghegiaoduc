@@ -87,6 +87,23 @@
           <i class="fas fa-undo-alt mr-1.5"></i> Đặt lại
         </button>
       </div>
+
+      <!-- Thống kê nhanh theo trạng thái (bấm để lọc) -->
+      <div class="status-summary-bar" v-if="statusSummaryList.length">
+        <span class="status-summary-title"><i class="fa-solid fa-chart-simple mr-1"></i>Theo trạng thái:</span>
+        <button
+          v-for="st in statusSummaryList"
+          :key="'sum-' + st.id"
+          type="button"
+          class="status-chip"
+          :class="[statusMeta(st.id).cls, { 'is-active': isStatusSelected(st.id) }]"
+          @click="toggleStatusFilter(st.id)"
+          :title="isStatusSelected(st.id) ? 'Bỏ lọc trạng thái này' : 'Lọc theo trạng thái này'"
+        >
+          <i :class="statusMeta(st.id).icon" class="mr-1"></i>{{ st.label }}
+          <span class="status-chip-count">{{ st.total }}</span>
+        </button>
+      </div>
     </vx-card>
 
     <!-- Table / Content Card -->
@@ -161,9 +178,10 @@
               <span class="text-xs text-gray-400 font-semibold">
                 #{{ index + 1 + (pagination.cpage - 1) * pagination.limit }}
               </span>
-              <span :class="getStatusBadgeClass(item.label_status)" class="text-xs">
-                {{ item.label_status || 'Chưa có' }}
+              <span :class="getStatusBadgeClass(item)">
+                <i :class="statusMeta(item.student_status).icon" class="mr-1"></i>{{ item.label_status || 'Chưa có hợp đồng' }}
               </span>
+              <span v-if="getStatusDetail(item)" class="status-detail text-right">{{ getStatusDetail(item) }}</span>
             </div>
           </div>
 
@@ -330,9 +348,15 @@
                     <span class="class-pill"><i class="fa-solid fa-chalkboard-user mr-1"></i>{{ item.class_name }}</span>
                   </div>
                   <div class="mt-1">
-                    <span :class="getStatusBadgeClass(item.label_status)">
-                      {{ item.label_status || 'Chưa có' }}
+                    <span :class="getStatusBadgeClass(item)">
+                      <i :class="statusMeta(item.student_status).icon" class="mr-1"></i>{{ item.label_status || 'Chưa có hợp đồng' }}
                     </span>
+                    <div v-if="item.product_name" class="status-detail">
+                      <i class="fa-solid fa-box-open mr-1"></i>{{ item.product_name }}
+                    </div>
+                    <div v-if="getStatusDetail(item)" class="status-detail">
+                      <i class="fa-regular fa-clock mr-1"></i>{{ getStatusDetail(item) }}
+                    </div>
                   </div>
                   <div class="text-gray-500 mt-1 flex items-center gap-2" v-if="item.ec_name || item.cm_name">
                     <span v-if="item.ec_name" title="EC phụ trách"><i class="fa-solid fa-user-tag mr-0.5"></i>EC: {{ item.ec_name }}</span>
@@ -432,15 +456,17 @@ export default {
       statusOptions: [
         { id: 1, label: "Chờ xếp lớp học thử" },
         { id: 2, label: "Đang học thử" },
-        { id: 3, label: "Chờ xếp lớp chính thức" },
-        { id: 4, label: "Đang học chính thức" },
-        { id: 5, label: "Bảo lưu" },
-        { id: 6, label: "Đình chỉ" },
-        { id: 7, label: "Bỏ học" },
-        { id: 8, label: "Hết phí" },
-        { id: 9, label: "Rút phí" },
-        { id: 10, label: "Tốt nghiệp" },
+        { id: 3, label: "Kết thúc học thử" },
+        { id: 4, label: "Chưa đóng phí" },
+        { id: 5, label: "Đặt cọc" },
+        { id: 6, label: "Chờ xếp lớp chính thức" },
+        { id: 7, label: "Đang học chính thức" },
+        { id: 8, label: "Bảo lưu" },
+        { id: 9, label: "Hết phí" },
+        { id: 10, label: "Đã nghỉ học" },
+        { id: 0, label: "Chưa có hợp đồng" },
       ],
+      statusSummary: {},
       viewMode: 'card',
       windowWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
       searchData: {
@@ -471,6 +497,11 @@ export default {
   computed: {
     isDesktop() {
       return this.windowWidth >= 768;
+    },
+    statusSummaryList() {
+      return this.statusOptions
+        .map(o => ({ ...o, total: Number(this.statusSummary[o.id] || 0) }))
+        .filter(o => o.total > 0);
     },
     paginationMaxButtons() {
       return this.windowWidth < 640 ? 4 : 7;
@@ -508,15 +539,74 @@ export default {
         });
       });
     },
-    getStatusBadgeClass(status) {
-      if (!status) return 'status-badge status-default';
-      const s = status.toLowerCase();
-      if (s.includes('chính thức')) return 'status-badge status-official';
-      if (s.includes('học thử')) return 'status-badge status-trial';
-      if (s.includes('chờ xếp')) return 'status-badge status-waiting';
-      if (s.includes('bảo lưu')) return 'status-badge status-paused';
-      if (s.includes('bỏ học') || s.includes('đình chỉ') || s.includes('hết phí')) return 'status-badge status-inactive';
-      return 'status-badge status-default';
+    statusMeta(code) {
+      const map = {
+        0: { cls: 'status-default', icon: 'fa-regular fa-file' },
+        1: { cls: 'status-waiting', icon: 'fa-solid fa-hourglass-half' },
+        2: { cls: 'status-trial', icon: 'fa-solid fa-flask' },
+        3: { cls: 'status-default', icon: 'fa-solid fa-flag-checkered' },
+        4: { cls: 'status-unpaid', icon: 'fa-solid fa-file-invoice-dollar' },
+        5: { cls: 'status-deposit', icon: 'fa-solid fa-hand-holding-dollar' },
+        6: { cls: 'status-waiting', icon: 'fa-solid fa-hourglass-half' },
+        7: { cls: 'status-official', icon: 'fa-solid fa-circle-check' },
+        8: { cls: 'status-paused', icon: 'fa-solid fa-pause' },
+        9: { cls: 'status-inactive', icon: 'fa-solid fa-battery-empty' },
+        10: { cls: 'status-inactive', icon: 'fa-solid fa-user-slash' },
+      };
+      return map[Number(code)] || map[0];
+    },
+    getStatusBadgeClass(item) {
+      return 'status-badge ' + this.statusMeta(item ? item.student_status : 0).cls;
+    },
+    fmtDate(d) {
+      if (!d || String(d).startsWith('0000')) return '';
+      const [y, m, day] = String(d).substring(0, 10).split('-');
+      return `${day}/${m}/${y}`;
+    },
+    fmtMoney(n) {
+      return Number(n || 0).toLocaleString('vi-VN') + 'đ';
+    },
+    getStatusDetail(item) {
+      const code = Number(item.student_status);
+      const left = Math.max(0, Number(item.summary_sessions || 0) - Number(item.done_sessions || 0));
+      switch (code) {
+        case 0:
+          return 'Chưa tạo gói học';
+        case 2:
+        case 7:
+          if (item.reserve_start_date) return `Sắp bảo lưu từ ${this.fmtDate(item.reserve_start_date)}`;
+          return item.summary_sessions > 0 ? `Còn ${left} buổi` : '';
+        case 3:
+        case 9:
+        case 10:
+          return item.enrolment_last_date ? `Buổi cuối: ${this.fmtDate(item.enrolment_last_date)}` : '';
+        case 4:
+        case 5:
+          if (Number(item.must_charge) > 0) {
+            return `Đã đóng ${this.fmtMoney(item.total_charged)} / ${this.fmtMoney(item.must_charge)}`;
+          }
+          return '';
+        case 6:
+          return item.summary_sessions > 0 ? `${item.summary_sessions} buổi – chưa có lớp` : 'Chưa có lớp';
+        case 8:
+          if (item.reserve_end_date) return `Bảo lưu ${this.fmtDate(item.reserve_start_date)} – ${this.fmtDate(item.reserve_end_date)}`;
+          return 'Đang bảo lưu, chưa xếp lớp';
+        default:
+          return '';
+      }
+    },
+    isStatusSelected(id) {
+      return this.searchData.arr_status.some(s => s.id === id);
+    },
+    toggleStatusFilter(id) {
+      if (this.isStatusSelected(id)) {
+        this.searchData.arr_status = this.searchData.arr_status.filter(s => s.id !== id);
+      } else {
+        const opt = this.statusOptions.find(o => o.id === id);
+        if (opt) this.searchData.arr_status = [...this.searchData.arr_status, opt];
+      }
+      this.pagination.cpage = 1;
+      this.getData();
     },
     reset() {
       this.searchData.keyword = "";
@@ -547,6 +637,7 @@ export default {
         .then((response) => {
           this.$vs.loading.close();
           this.students = response.data.list || [];
+          this.statusSummary = response.data.status_summary || {};
           if (response.data.paging) {
             this.pagination = response.data.paging;
             this.pagination.url = '/api/lms/students/list';
@@ -891,6 +982,56 @@ export default {
 .status-paused { background: #ffedd5; color: #c2410c; }
 .status-inactive { background: #fee2e2; color: #b91c1c; }
 .status-default { background: #f1f5f9; color: #475569; }
+.status-unpaid { background: #fce7f3; color: #be185d; }
+.status-deposit { background: #ede9fe; color: #6d28d9; }
+
+.status-detail {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.status-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #e2e8f0;
+}
+.status-summary-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 6px 5px 12px;
+  border-radius: 9999px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  white-space: nowrap !important;
+  transition: box-shadow .15s, border-color .15s;
+}
+.status-chip:hover { box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2); }
+.status-chip.is-active { border-color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2); }
+.status-chip-count {
+  margin-left: 8px;
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1e293b;
+  font-weight: 700;
+  text-align: center;
+}
 
 .progress-bar-container {
   width: 100%;

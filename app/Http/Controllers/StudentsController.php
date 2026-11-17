@@ -288,14 +288,53 @@ class StudentsController extends Controller
     }
 
     //LMS
+    /**
+     * Mã trạng thái học sinh (dùng chung cho filter + nhãn hiển thị ở danh sách học sinh).
+     * Tính từ hợp đồng "hiện tại" của học sinh (alias c) + bảo lưu đang hiệu lực (bảng reserves).
+     */
+    const STUDENT_STATUS_LABELS = [
+        0 => 'Chưa có hợp đồng',
+        1 => 'Chờ xếp lớp học thử',
+        2 => 'Đang học thử',
+        3 => 'Kết thúc học thử',
+        4 => 'Chưa đóng phí',
+        5 => 'Đặt cọc',
+        6 => 'Chờ xếp lớp chính thức',
+        7 => 'Đang học chính thức',
+        8 => 'Bảo lưu',
+        9 => 'Hết phí',
+        10 => 'Đã nghỉ học',
+    ];
+
+    private static function studentStatusExpr()
+    {
+        $activeReserve = "EXISTS (SELECT 1 FROM reserves AS r WHERE r.contract_id = c.id AND r.status = 4
+            AND r.start_date <= CURRENT_DATE AND r.end_date >= CURRENT_DATE)";
+        return "(CASE
+            WHEN c.id IS NULL THEN 0
+            WHEN c.type = 0 AND c.status = 6 THEN 2
+            WHEN c.type = 0 AND c.status = 7 THEN 3
+            WHEN c.type = 0 THEN 1
+            WHEN c.status = 7 AND c.type_withdraw = 1 THEN 9
+            WHEN c.status = 7 THEN 10
+            WHEN c.status = 4 OR $activeReserve THEN 8
+            WHEN c.status = 1 THEN 4
+            WHEN c.status = 2 THEN 5
+            WHEN c.status IN (3, 5) THEN 6
+            WHEN c.status = 6 THEN 7
+            ELSE 0 END)";
+    }
+
     public function list(Request $request)
     {
         $branch_id = isset($request->branch_id) ? $request->branch_id : (isset($request->arr_branch) ? $request->arr_branch : []);
         $status = isset($request->status) ? $request->status : (isset($request->arr_status) ? $request->arr_status : []);
-        $keyword = isset($request->keyword) ? $request->keyword : '';
+        $keyword = isset($request->keyword) ? trim((string)$request->keyword) : '';
+        $branch_id = array_values(array_filter(array_map('intval', (array)$branch_id)));
+        $status = array_values(array_unique(array_map('intval', (array)$status)));
 
         $pagination = (object) $request->pagination;
-        $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
+        $page = isset($pagination->cpage) ? max(1, (int) $pagination->cpage) : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
@@ -308,64 +347,57 @@ class StudentsController extends Controller
                 OR EXISTS (SELECT 1 FROM crm_students cs JOIN crm_parents cp ON cp.id = cs.parent_id WHERE cs.lms_id = s.id AND cp.owner_id IN ($saleStaffIds))
                 OR s.creator_id IN ($saleStaffIds)) ";
         }
-
-        if (!empty($status)) {
-            $cond_status = "";
-            foreach ($status as $s) {
-                if ($s == 1) {
-                    $qu = " (c.type=0 AND c.status NOT IN(6,7)) ";
-                } elseif ($s == 2) {
-                    $qu = " (c.type=0 AND c.status =6) ";
-                } elseif ($s == 3) {
-                    $qu = " (c.type=0 AND c.status =7) ";
-                } elseif ($s == 4) {
-                    $qu = " (c.type=1 AND c.status =1) ";
-                } elseif ($s == 5) {
-                    $qu = " (c.type=1 AND c.status =2) ";
-                } elseif ($s == 6) {
-                    $qu = " (c.type=1 AND c.status IN (3,4,5)) ";
-                } elseif ($s == 7) {
-                    $qu = " (c.type=1 AND c.status =6) ";
-                } elseif ($s == 8) {
-                    $qu = " (c.type=1 AND c.status =8) ";
-                }
-                $cond_status .= $cond_status ? " OR " . $qu : $qu;
-            }
-            $cond .= " AND ($cond_status)";
-        }
         if (!empty($branch_id)) {
             $cond .= " AND s.branch_id IN (" . implode(",", $branch_id) . ")";
         }
-
         if ($keyword !== '') {
-            $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.lms_id LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR s.gud_name1 LIKE '%$keyword%' OR s.gud_mobile1 LIKE '%$keyword%' OR s.gud_mobile2 LIKE '%$keyword%') ";
+            $kw = addslashes($keyword);
+            $cond .= " AND (s.lms_code LIKE '%$kw%' OR s.lms_id LIKE '%$kw%' OR s.name LIKE '%$kw%' OR s.gud_name1 LIKE '%$kw%' OR s.gud_mobile1 LIKE '%$kw%' OR s.gud_mobile2 LIKE '%$kw%') ";
         }
 
-        $order_by = " ORDER BY s.id DESC ";
+        $statusExpr = self::studentStatusExpr();
+        // Hợp đồng hiện tại: hợp đồng chưa kết thúc sớm nhất, nếu không còn thì hợp đồng gần nhất
+        $from = " FROM students AS s
+            LEFT JOIN contracts AS c ON c.student_id = s.id AND c.status != 0 AND c.count_recharge =
+                IF((SELECT count(id) FROM contracts WHERE student_id = s.id AND status NOT IN (0, 7)) > 0,
+                    (SELECT min(count_recharge) FROM contracts WHERE student_id = s.id AND status NOT IN (0, 7)),
+                    (SELECT max(count_recharge) FROM contracts WHERE student_id = s.id AND status != 0)) ";
 
-        $total = u::first("SELECT count(s.id) AS total FROM students AS s 
-            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.count_recharge = (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id) WHERE $cond");
+        // Thống kê số học sinh theo trạng thái (theo trung tâm/từ khóa, chưa áp filter trạng thái)
+        $summaryRows = u::query("SELECT st, count(DISTINCT id) AS total FROM (SELECT s.id, $statusExpr AS st $from WHERE $cond) AS x GROUP BY st");
+        $status_summary = [];
+        foreach ($summaryRows as $r) {
+            $status_summary[(int)$r->st] = (int)$r->total;
+        }
+
+        if (!empty($status)) {
+            $cond .= " AND $statusExpr IN (" . implode(",", $status) . ")";
+        }
+
+        $total = u::first("SELECT count(DISTINCT s.id) AS total $from WHERE $cond");
 
         $list = u::query("SELECT s.name, s.id, s.lms_code, s.gender, s.date_of_birth, s.birthday_year_only, s.gud_name1, s.gud_mobile1, s.avatar_url,s.lms_id,
                 (SELECT name FROM sources WHERE id =s.source_id) AS source_name,
                 (SELECT cls_name FROM classes WHERE id = c.class_id) AS class_name,
+                (SELECT name FROM products WHERE id = c.product_id) AS product_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.ec_id) AS ec_name,
                 (SELECT CONCAT(name, ' - ', hrm_id) FROM users WHERE id =c.cm_id) AS cm_name,
-                (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.type, c.status, '' AS label_status
-            FROM students AS s
-            LEFT JOIN contracts AS c ON c.student_id=s.id AND c.status!=0
-            WHERE (c.count_recharge = 
-                    IF((SELECT count(id) FROM contracts WHERe student_id=s.id AND status!=7)>0,
-                        (SELECT min(count_recharge) FROM contracts WHERE status !=7 AND student_id =s.id),
-                        (SELECT max(count_recharge) FROM contracts WHERE student_id =s.id)) 
-                OR c.id IS NULL) 
-                AND $cond $order_by $limitation");
+                (SELECT name FROM branches WHERE id =s.branch_id) AS branch_name, c.done_sessions, c.summary_sessions, c.left_sessions,
+                c.type, c.status, c.type_withdraw, c.must_charge, c.total_charged, c.debt_amount,
+                c.enrolment_start_date, c.enrolment_last_date, c.start_date AS contract_start_date, c.end_date AS contract_end_date,
+                (SELECT r.start_date FROM reserves AS r WHERE r.contract_id = c.id AND r.status = 4 AND r.end_date >= CURRENT_DATE ORDER BY r.start_date LIMIT 1) AS reserve_start_date,
+                (SELECT r.end_date FROM reserves AS r WHERE r.contract_id = c.id AND r.status = 4 AND r.end_date >= CURRENT_DATE ORDER BY r.start_date LIMIT 1) AS reserve_end_date,
+                $statusExpr AS student_status, '' AS label_status
+            $from
+            WHERE $cond ORDER BY s.id DESC $limitation");
         foreach ($list as $k => $row) {
-            $list[$k]->label_status = u::genStatusStudent($row->status, $row->type);
+            $list[$k]->student_status = (int)$row->student_status;
+            $list[$k]->label_status = self::STUDENT_STATUS_LABELS[$list[$k]->student_status] ?? '';
         }
         $total_count = $total ? (int)$total->total : 0;
         $data = u::makingPagination($list, $total_count, $page, $limit);
         $data->total = $total_count;
+        $data->status_summary = (object)$status_summary;
         return response()->json($data);
     }
 
