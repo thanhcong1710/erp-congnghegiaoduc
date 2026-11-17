@@ -291,7 +291,7 @@
             <thead>
               <tr>
                 <!-- Checkbox -->
-                <th class="th-center" style="width: 48px;">
+                <th class="th-center col-check" style="width: 48px;">
                   <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
                     <input type="checkbox" v-model="selectAll" class="vs-checkbox--input" >
                     <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
@@ -344,7 +344,7 @@
                 :class="{ 'row-selected': checked_list.includes(item.id) }"
               >
                 <!-- Checkbox -->
-                <td class="td-center">
+                <td class="td-center col-check">
                   <div v-if="item.in_scope != 0" class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
                     <input type="checkbox" v-model="checked_list" :value="item.id" class="vs-checkbox--input" >
                     <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
@@ -2191,6 +2191,21 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.2) !important;
   box-sizing: border-box !important;
   background: #fff !important;
+}
+
+/* CỘT CHECKBOX: bỏ padding ngang để checkbox không bị bóp (table-layout: fixed) */
+.col-check {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: center !important;
+}
+.col-check .con-vs-checkbox {
+  display: inline-flex;
+  justify-content: center;
+  margin: 0 auto;
+}
+.col-check .vs-checkbox {
+  flex-shrink: 0;
 }
 </style>
 
