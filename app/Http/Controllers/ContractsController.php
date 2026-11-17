@@ -364,10 +364,20 @@ class ContractsController extends Controller
         }
         $amount = $this->otherDiscountAmount($request);
         $note = trim((string) data_get($request, 'other_discount_note', ''));
-        return [
+        $fields = [
             'other_discount_amount' => $amount,
             'other_discount_note' => $amount > 0 ? mb_substr($note, 0, 500) : null,
         ];
+
+        // Cách tính ưu đãi STEMKey: cascade = Giảm dần (mặc định), base = Theo giá gốc
+        static $hasDiscountMode = null;
+        if ($hasDiscountMode === null) {
+            $hasDiscountMode = Schema::hasColumn('contracts', 'discount_mode');
+        }
+        if ($hasDiscountMode) {
+            $fields['discount_mode'] = data_get($request, 'discount_mode') === 'base' ? 'base' : 'cascade';
+        }
+        return $fields;
     }
 
     public function isManagerOrAccountant()

@@ -314,6 +314,19 @@
             <div class="vx-col w-full mb-4" v-if="contract.tuition_fee_id">
               <vx-card no-shadow style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px;">
                 <h5 class="mb-3 font-semibold text-primary">Chính sách ưu đãi STEMKey 2026</h5>
+
+                <!-- CÁCH TÍNH ƯU ĐÃI -->
+                <div class="discount-mode-box">
+                  <span class="discount-mode-title">Cách tính ưu đãi:</span>
+                  <label class="discount-mode-option">
+                    <input type="radio" value="cascade" v-model="contract.discount_mode" :disabled="!contract.can_edit_all" @change="caculatorSession">
+                    <span><b>Giảm dần</b> – ưu đãi sau tính trên số tiền còn lại</span>
+                  </label>
+                  <label class="discount-mode-option">
+                    <input type="radio" value="base" v-model="contract.discount_mode" :disabled="!contract.can_edit_all" @change="caculatorSession">
+                    <span><b>Theo giá gốc</b> – mọi ưu đãi tính trên giá gốc rồi cộng dồn</span>
+                  </label>
+                </div>
                 
                 <div class="vx-row">
                   <div class="vx-col md:w-1/2 w-full mb-3">
@@ -722,6 +735,7 @@
           is_resident: false,
           resident_percent: 0,
           resident_amount: 0,
+          discount_mode: 'cascade',
           other_discount_amount: 0,
           other_discount_note: '',
           gift_note: '',
@@ -829,6 +843,7 @@
           this.contract.resident_percent = response.data.resident_percent || 0;
           this.contract.is_resident = (response.data.resident_percent > 0);
           this.contract.gift_note = response.data.gift_note || '';
+          this.contract.discount_mode = response.data.discount_mode === 'base' ? 'base' : 'cascade';
           this.$set(this.contract, 'other_discount_amount', Number(response.data.other_discount_amount) || 0);
           this.$set(this.contract, 'other_discount_note', response.data.other_discount_note || '');
           this.contract.can_edit_all = (response.data.can_edit_all !== undefined) ? response.data.can_edit_all : true;
@@ -1138,17 +1153,26 @@
       caculatorSession(){
         const basePrice = Number(this.contract.tuition_fee_amount) || 0;
         
+        // Cách tính ưu đãi STEMKey: 'cascade' = Giảm dần (mỗi ưu đãi tính trên số còn lại sau ưu đãi trước)
+        //                          'base'    = Theo giá gốc (mọi ưu đãi đều tính trên giá gốc rồi cộng dồn)
+        const isBaseMode = this.contract.discount_mode === 'base';
+        let currentTuition = basePrice;
+        const calcDiscount = (percent) => {
+          const discountBase = isBaseMode ? basePrice : currentTuition;
+          return Math.round(discountBase * percent / 100);
+        };
+
         // 1. Học bổng kỳ hạn
         const scholarshipPercent = Number(this.contract.scholarship_percent) || 0;
-        const scholarshipAmount = Math.round(basePrice * scholarshipPercent / 100);
+        const scholarshipAmount = calcDiscount(scholarshipPercent);
         this.contract.scholarship_amount = scholarshipAmount;
-        let currentTuition = basePrice - scholarshipAmount;
+        currentTuition = Math.max(0, currentTuition - scholarshipAmount);
 
         // 2. Ưu đãi tháng 11 (Tặng thêm 10% nếu gói >= 6 tháng)
         let promoExtraAmount = 0;
         if (this.contract.is_promo_extra && Number(this.contract.number_of_months) >= 6) {
           this.contract.promo_extra_percent = 10;
-          promoExtraAmount = Math.round(basePrice * 10 / 100);
+          promoExtraAmount = calcDiscount(10);
         } else {
           this.contract.promo_extra_percent = 0;
         }
@@ -1158,7 +1182,7 @@
         // 3. Đăng ký nhóm 3 / Check-in
         let checkinAmount = 0;
         if (this.contract.is_checkin_group && Number(this.contract.checkin_group_percent) > 0) {
-          checkinAmount = Math.round(currentTuition * Number(this.contract.checkin_group_percent) / 100);
+          checkinAmount = calcDiscount(Number(this.contract.checkin_group_percent));
         }
         this.contract.checkin_group_amount = checkinAmount;
         currentTuition = Math.max(0, currentTuition - checkinAmount);
@@ -1167,7 +1191,7 @@
         let residentAmount = 0;
         if (this.contract.is_resident) {
           this.contract.resident_percent = 5;
-          residentAmount = Math.round(currentTuition * 5 / 100);
+          residentAmount = calcDiscount(5);
         } else {
           this.contract.resident_percent = 0;
         }
@@ -1271,6 +1295,36 @@
   }
 </script>
 <style>
+  .discount-mode-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .discount-mode-title {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .discount-mode-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .discount-mode-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .discount-mode-option input[type="radio"]:disabled {
+    cursor: not-allowed;
+  }
   .other-discount-row {
     margin-top: 8px;
     padding-top: 12px;
