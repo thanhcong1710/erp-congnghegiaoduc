@@ -12,6 +12,31 @@ use App\Models\LogStudents;
 
 class ParentsController extends Controller
 {
+    /** Số ngày (tính từ last_assign_date) data chưa đăng ký học sẽ tự động về kho / được phép ghi đè */
+    const WAREHOUSE_DAYS = 10;
+
+    /** Điều kiện data "đủ điều kiện về kho": quá WAREHOUSE_DAYS ngày kể từ lần nhận data, chưa có hợp đồng, không phải danh sách đen */
+    public static function warehouseEligibleCond($a = 'p')
+    {
+        $days = (int) self::WAREHOUSE_DAYS;
+        return " DATEDIFF(CURRENT_DATE, COALESCE($a.last_assign_date, $a.created_at)) > $days
+            AND IFNULL($a.status, 0) <> 12
+            AND NOT EXISTS (SELECT 1 FROM crm_students AS wcs INNER JOIN contracts AS wct ON wct.student_id = wcs.lms_id
+                WHERE wcs.parent_id = $a.id AND wct.type > 0) ";
+    }
+
+    /** Data đang nằm trong kho (đã được cron mở khoá) */
+    public static function warehouseCond($a = 'p')
+    {
+        return " $a.is_lock = 0 AND ".self::warehouseEligibleCond($a);
+    }
+
+    /** Chuẩn hoá SĐT: bỏ ký tự không phải số */
+    private static function normalizePhone($phone)
+    {
+        return preg_replace('/[^0-9]/', '', (string) $phone);
+    }
+
     public function list(Request $request)
     {
         $status = isset($request->status) ? $request->status : [];
@@ -25,6 +50,7 @@ class ParentsController extends Controller
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_search = isset($request->type_search) ? $request->type_search : 0;
         $branch_id = isset($request->branch_id) ? $request->branch_id : 0;
+        $birth_year = isset($request->birth_year) ? (array) $request->birth_year : [];
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -32,11 +58,11 @@ class ParentsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page-1);
         $limitation =  $limit > 0 ? " LIMIT $offset, $limit": "";
         $cond = " 1 ";
-        
-        if(!Auth::user()->checkPermission('canViewAllParents')){
-            $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
-        }
-        
+        $can_view_all = Auth::user()->checkPermission('canViewAllParents');
+        $staff_ids = $can_view_all ? '' : Auth::user()->getStaffHasUser();
+        $scope_cond = $can_view_all ? "" : " AND p.owner_id IN ($staff_ids)";
+        $scope_cond_not = $can_view_all ? "" : " AND (p.owner_id IS NULL OR p.owner_id NOT IN ($staff_ids))";
+
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
         }
@@ -61,8 +87,15 @@ class ParentsController extends Controller
             )";
         }
         
+        $birth_year = array_values(array_filter(array_map('intval', $birth_year)));
+        if (!empty($birth_year)) {
+            $cond .= " AND EXISTS (SELECT 1 FROM crm_students AS bcs WHERE bcs.parent_id = p.id AND YEAR(bcs.birthday) IN (".implode(",", $birth_year)."))";
+        }
+
+        $keyword = trim((string) $keyword);
         if ($keyword !== '') {
-            $cond .= " AND (p.name LIKE '%$keyword%' OR p.mobile_1 LIKE '%$keyword%' OR p.mobile_2 LIKE '%$keyword%') ";
+            $kw = addslashes($keyword);
+            $cond .= " AND (p.name LIKE '%$kw%' OR p.mobile_1 LIKE '%$kw%' OR p.mobile_2 LIKE '%$kw%') ";
         }
         if ($end_date !== '') {
             $cond .= " AND p.next_care_date < '$end_date 23:59:59' AND p.next_care_date IS NOT NULL";
@@ -77,6 +110,8 @@ class ParentsController extends Controller
         $cond_3 = " AND next_care_date < '".date('Y-m-d')."' 
             AND (p.care_date < p.next_care_date OR p.care_date IS NULL) ";
         $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5)>0 ";
+        // type_search=5: Data kho – toàn trung tâm, không giới hạn theo người quản lý
+        $cond_5 = " AND ".self::warehouseCond('p');
 
         $order_by = " ORDER BY p.id DESC ";
         $tmp_cond="";
@@ -91,7 +126,13 @@ class ParentsController extends Controller
         }elseif($type_search==4){
             $tmp_cond = $cond_4;
             $order_by = " ORDER BY p.last_ticket_date DESC ";
+        }elseif($type_search==5){
+            $tmp_cond = $cond_5;
+            $order_by = " ORDER BY COALESCE(p.last_assign_date, p.created_at) ASC ";
         }
+        // Tab kho bỏ giới hạn người quản lý; các tab khác giữ phạm vi
+        $base_cond = $cond;
+        $cond = $type_search == 5 ? $base_cond : $base_cond.$scope_cond;
 
         $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
         $list = u::query("SELECT p.name,p.id,p.mobile_1,p.status,p.next_care_date, (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
@@ -101,6 +142,8 @@ class ParentsController extends Controller
                 (SELECT name FROM users WHERE id=p.owner_id) AS owner_name ,
                 (SELECT m.name FROM users uo JOIN users m ON m.id = uo.manager_id WHERE uo.id = p.owner_id LIMIT 1) AS owner_leader_name,
                 (SELECT COUNT(*) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
+                IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse,
+                ".($can_view_all ? "1" : "IF(p.owner_id IN ($staff_ids), 1, 0)")." AS in_scope,
                 (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_name,
                 (SELECT name FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 1,1) AS hs2_name,
                 (SELECT YEAR(birthday) FROM crm_students WHERE parent_id=p.id ORDER BY id LIMIT 0,1) AS hs1_birth_year,
@@ -132,13 +175,35 @@ class ParentsController extends Controller
         $total_2 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
         $total_3 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
         $total_4 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
+        $total_5 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $base_cond $cond_5 ");
         $data->detail_total = (object)array(
             'total_0' => $total_0->total,
             'total_1' => $total_1->total,
             'total_2' => $total_2->total,
             'total_3' => $total_3->total,
             'total_4' => $total_4->total,
+            'total_5' => $total_5->total,
         );
+
+        // Tìm theo SĐT: báo data thuộc quyền quản lý của ai nếu nằm ngoài phạm vi của user
+        $data->foreign_matches = [];
+        $phone = self::normalizePhone($keyword);
+        if (!$can_view_all && strlen($phone) >= 9 && $phone === preg_replace('/[\s.\-]/', '', $keyword)) {
+            $data->foreign_matches = u::query("SELECT p.id, p.name, p.mobile_1, p.mobile_2,
+                    u.name AS owner_name, u.branch_name AS owner_branch_name,
+                    m.name AS leader_name,
+                    (SELECT COUNT(*) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
+                    IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse
+                FROM crm_parents AS p
+                    LEFT JOIN users AS u ON u.id = p.owner_id
+                    LEFT JOIN users AS m ON m.id = u.manager_id
+                WHERE (p.mobile_1 = '$phone' OR p.mobile_2 = '$phone') $scope_cond_not
+                LIMIT 5");
+            foreach ($data->foreign_matches as $row) {
+                $leader = $row->leader_name ?: ($row->is_owner_leader ? $row->owner_name : '');
+                $row->owner_team_name = $leader ? 'Team '.$leader : '';
+            }
+        }
         return response()->json($data);
     }
 
@@ -389,7 +454,10 @@ class ParentsController extends Controller
                 $result->dup_parent_id = $duplicate_info->parent_id;
             }
         }else{
-            $duplicate_info = u::first("SELECT p.is_lock,u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,p.owner_id, p.last_assign_date, p.care_date
+            $phone = addslashes($phone);
+            $duplicate_info = u::first("SELECT u.name,u.hrm_id, u.branch_name,p.status,p.id AS parent_id,p.owner_id, p.last_assign_date, p.created_at, p.care_date,
+                    IF(".self::warehouseCond('p').", 0, 1) AS is_lock,
+                    EXISTS (SELECT 1 FROM crm_students AS cs INNER JOIN contracts AS ct ON ct.student_id = cs.lms_id WHERE cs.parent_id = p.id AND ct.type > 0) AS has_contract
                 FROM crm_parents AS p 
                     LEFT JOIN users AS u ON u.id=p.owner_id 
                 WHERE (p.mobile_1='$phone' OR p.mobile_2='$phone')");
@@ -398,12 +466,14 @@ class ParentsController extends Controller
                     $result->status = 0;
                     $result->dup_parent_id = $duplicate_info->parent_id;
                     $text = "";
-                    if($duplicate_info->care_date && (15 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24)))>0){
-                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->care_date))/(3600*24));
-                        $text.="<br> Thời gian chăm sóc gần nhất: $duplicate_info->care_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
-                    }else{
-                        $thoi_gian_con = 15 - floor((time() - strtotime($duplicate_info->last_assign_date))/(3600*24));
-                        $text.="<br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    $assign_date = $duplicate_info->last_assign_date ?: $duplicate_info->created_at;
+                    $thoi_gian_con = self::WAREHOUSE_DAYS + 1 - floor((strtotime(date('Y-m-d')) - strtotime(date('Y-m-d', strtotime($assign_date))))/(3600*24));
+                    if ($duplicate_info->has_contract) {
+                        $text.="<br> Khách hàng đã đăng ký học, không thể ghi đè";
+                    } elseif ($thoi_gian_con > 0) {
+                        $text.="<br> Ngày nhận data: $assign_date <br> Thời gian còn lại sẽ được ghi đè sau $thoi_gian_con ngày";
+                    } else {
+                        $text.="<br> Data sẽ được đưa về kho trong lần xử lý tiếp theo";
                     }
                     $result->message = "Khách hàng có SĐT: $phone đang thuộc quyền quản lý của nhân viên $duplicate_info->name - $duplicate_info->hrm_id $duplicate_info->branch_name .".$text;
                 }else{
@@ -416,29 +486,46 @@ class ParentsController extends Controller
         return response()->json($result);
     }
 
+    /**
+     * Nhận data về chăm sóc (ghi đè quyền quản lý). Chỉ cho phép khi data đang nằm trong kho.
+     * Nhận theo parent_id (tab Data kho / banner tìm kiếm) hoặc phone (màn Checkin).
+     */
     public function overwrite(Request $request){
-        $phone = isset($request->phone) ? $request->phone : '';
-        $parent_info = u::first("SELECT * FROM crm_parents WHERE mobile_1='$phone' OR mobile_2='$phone'");
-        if($parent_info){
-            u::updateSimpleRow(array(
-                'updated_at' => date('Y-m-d H:i:s'),
-                'updator_id' => Auth::user()->id,
-                'owner_id' => Auth::user()->id,
-                'last_assign_date' => date('Y-m-d H:i:s'),
-                'is_lock' => 1,
-            ), array('id' => $parent_info->id), 'crm_parents');
-            u::insertSimpleRow(array(
-                'parent_id'=>$parent_info->id,
-                'last_owner_id'=>$parent_info->owner_id,
-                'owner_id'=>Auth::user()->id,
-                'created_at'=>date('Y-m-d H:i:s'),
-                'creator_id'=>Auth::user()->id,
-            ), 'crm_parent_overwrite');
-            LogParents::logAssign($parent_info->id,$parent_info->owner_id,Auth::user()->id,Auth::user()->id, true);
+        $parent_id = (int) data_get($request, 'parent_id', 0);
+        $phone = addslashes((string) data_get($request, 'phone', ''));
+        if ($parent_id) {
+            $where = "p.id = $parent_id";
+        } elseif ($phone !== '') {
+            $where = "(p.mobile_1 = '$phone' OR p.mobile_2 = '$phone')";
+        } else {
+            return response()->json((object)['status' => 0, 'message' => 'Thiếu thông tin khách hàng']);
         }
+        $parent_info = u::first("SELECT p.id, p.owner_id, IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse
+            FROM crm_parents AS p WHERE $where LIMIT 1");
+        if (!$parent_info) {
+            return response()->json((object)['status' => 0, 'message' => 'Không tìm thấy khách hàng']);
+        }
+        if (!(int) $parent_info->in_warehouse) {
+            return response()->json((object)['status' => 0, 'message' => 'Khách hàng chưa về kho, không thể nhận về chăm sóc']);
+        }
+        u::updateSimpleRow(array(
+            'updated_at' => date('Y-m-d H:i:s'),
+            'updator_id' => Auth::user()->id,
+            'owner_id' => Auth::user()->id,
+            'last_assign_date' => date('Y-m-d H:i:s'),
+            'is_lock' => 1,
+        ), array('id' => $parent_info->id), 'crm_parents');
+        u::insertSimpleRow(array(
+            'parent_id'=>$parent_info->id,
+            'last_owner_id'=>$parent_info->owner_id,
+            'owner_id'=>Auth::user()->id,
+            'created_at'=>date('Y-m-d H:i:s'),
+            'creator_id'=>Auth::user()->id,
+        ), 'crm_parent_overwrite');
+        LogParents::logAssign($parent_info->id,$parent_info->owner_id,Auth::user()->id,Auth::user()->id, true);
         $result =(object)array(
             'status'=>1,
-            'message'=>'Ghi đè quyền chăm sóc thành công'
+            'message'=>'Nhận khách hàng về chăm sóc thành công'
         );
         return response()->json($result);
     }
@@ -795,24 +882,18 @@ class ParentsController extends Controller
     public function processParentLock(){
         u::query("UPDATE crm_parents SET is_lock = 1");
         u::query("UPDATE crm_parents AS p SET p.care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1)");
-        u::query("UPDATE crm_parents SET is_lock = 0 
-            WHERE
-                (care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
-                (care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, care_date )> 15) ");
+        // Về kho: quá WAREHOUSE_DAYS ngày kể từ lần nhận data (last_assign_date), chưa đăng ký học
+        u::query("UPDATE crm_parents AS p SET p.is_lock = 0 WHERE ".self::warehouseEligibleCond('p'));
         return "ok";
     }
 
     public static function processParentLockById($parent_id){
+        $parent_id = (int) $parent_id;
         u::query("UPDATE crm_parents AS p SET 
                 p.care_date=(SELECT care_date FROM crm_customer_care WHERE parent_id=p.id AND creator_id=p.owner_id AND `status`=1 ORDER BY id DESC LIMIT 1),
                 p.is_lock = 1
             WHERE p.id=$parent_id ");
-        u::query("UPDATE crm_parents SET is_lock = 0 
-            WHERE
-                id=$parent_id AND (
-                    (care_date IS NULL AND DATEDIFF( CURRENT_DATE, last_assign_date )> 15) OR
-                    (care_date IS NOT NULL AND DATEDIFF( CURRENT_DATE, care_date )> 15) 
-                ) ");
+        u::query("UPDATE crm_parents AS p SET p.is_lock = 0 WHERE p.id=$parent_id AND ".self::warehouseEligibleCond('p'));
         return true;
     }
 

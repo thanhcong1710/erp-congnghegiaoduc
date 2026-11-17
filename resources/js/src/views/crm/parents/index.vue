@@ -171,6 +171,26 @@
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>
           </div>
+
+          <!-- 7. Năm sinh học sinh -->
+          <div class="vx-col sm:w-1/2 md:w-1/3 lg:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-calendar text-primary mr-1"></i> Năm sinh
+            </label>
+            <multiselect
+              name="search_birth_year"
+              placeholder="Chọn năm sinh"
+              v-model="searchData.arr_birth_year"
+              :options="birthYearOptions"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
         </div>
 
         <!-- ACTION BUTTONS VÀ CHUYỂN CHẾ ĐỘ XEM -->
@@ -234,6 +254,22 @@
         </div>
       </div>
 
+      <!-- BÁO DATA THUỘC QUYỀN QUẢN LÝ CỦA NGƯỜI KHÁC (tìm theo SĐT) -->
+      <div v-for="fm in foreign_matches" :key="'fm-' + fm.id" class="foreign-owner-banner mt-3">
+        <i class="feather icon-alert-triangle mr-2"></i>
+        <span>
+          SĐT <b>{{ fm.mobile_1 }}</b><span v-if="fm.mobile_2"> / {{ fm.mobile_2 }}</span> – KH <b>{{ fm.name }}</b>
+          <template v-if="fm.in_warehouse == 1"> đang nằm trong <b>Data kho</b> (trước đây do {{ fm.owner_name || 'chưa có người' }} quản lý)</template>
+          <template v-else> đang thuộc quyền quản lý của <b>{{ fm.owner_name || 'chưa có người phụ trách' }}</b>
+            <span v-if="fm.owner_team_name"> ({{ fm.owner_team_name }}<span v-if="fm.owner_branch_name"> – {{ fm.owner_branch_name }}</span>)</span>
+            <span v-else-if="fm.owner_branch_name"> ({{ fm.owner_branch_name }})</span>
+          </template>
+        </span>
+        <vs-button v-if="fm.in_warehouse == 1" size="small" color="success" class="ml-3 btn-nowrap" @click="claimParent(fm)">
+          <i class="feather icon-download mr-1"></i> Nhận về chăm sóc
+        </vs-button>
+      </div>
+
       <!-- TABS PHÂN LOẠI VỚI BADGE ĐẾM MÀU SẮC -->
       <div class="custom-crm-tabs mt-4">
         <vs-tabs v-model="activeItem">
@@ -242,7 +278,13 @@
           <vs-tab :label="'Lịch hôm nay (' + total.total_2 + ')'" @click.prevent="setActive(2)"></vs-tab>
           <vs-tab :label="'Quá hạn xử lý (' + total.total_3 + ')'" @click.prevent="setActive(3)"></vs-tab>
           <vs-tab :label="'Ticket tồn (' + total.total_4 + ')'" @click.prevent="setActive(4)"></vs-tab>
+          <vs-tab :label="'Data kho (' + (total.total_5 || 0) + ')'" @click.prevent="setActive(5)"></vs-tab>
         </vs-tabs>
+      </div>
+
+      <div v-if="activeItem === 5" class="warehouse-hint mt-3">
+        <i class="feather icon-info mr-2"></i>
+        Data chưa đăng ký học, quá 10 ngày kể từ ngày nhận data sẽ tự động về kho. Bấm <b>"Nhận về chăm sóc"</b> để chuyển data về CRM của bạn.
       </div>
 
       <!-- BẢNG DANH SÁCH KHÁCH HÀNG TỔNG QUAN NÂNG CẤP CHUẨN ERP -->
@@ -284,7 +326,7 @@
               >
                 <!-- Checkbox -->
                 <td class="td-center">
-                  <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
+                  <div v-if="item.in_scope != 0" class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
                     <input type="checkbox" v-model="checked_list" :value="item.id" class="vs-checkbox--input" >
                     <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
                       <span class="vs-checkbox--check">
@@ -301,14 +343,18 @@
 
                 <!-- Tên KH -->
                 <td>
-                  <router-link :to="`/crm/parent/${item.id}/detail`" class="font-semibold text-blue-600 hover:underline">
+                  <router-link v-if="item.in_scope != 0" :to="`/crm/parent/${item.id}/detail`" class="font-semibold text-blue-600 hover:underline">
                     {{ item.name }}
                   </router-link>
+                  <span v-else class="font-semibold text-gray-800">{{ item.name }}</span>
+                  <span v-if="item.in_warehouse == 1" class="badge-warehouse ml-1">Kho</span>
                 </td>
 
                 <!-- Số điện thoại -->
                 <td class="td-center">
+                  <span v-if="item.in_scope == 0" class="font-medium">{{ item.mobile_1 }}</span>
                   <a 
+                    v-else
                     href="javascript:void(0)" 
                     class="font-medium text-blue-600 hover:underline inline-flex items-center"
                     @click="openQuickCare(item)"
@@ -390,7 +436,10 @@
 
                 <!-- Thao tác -->
                 <td class="td-center">
-                  <div class="flex items-center justify-center gap-1">
+                  <vs-button v-if="item.in_warehouse == 1 && item.in_scope == 0" size="small" color="success" class="btn-nowrap" @click="claimParent(item)">
+                    <i class="feather icon-download mr-1"></i> Nhận về
+                  </vs-button>
+                  <div v-else class="flex items-center justify-center gap-1">
                     <!-- Nút xem chi tiết -->
                     <router-link :to="`/crm/parent/${item.id}/detail`" title="Xem chi tiết hồ sơ">
                       <button class="btn-action-icon btn-action-view">
@@ -558,9 +607,18 @@ export default {
         total_2: 0,
         total_3: 0,
         total_4: 0,
+        total_5: 0,
       },
+      foreign_matches: [],
+      birthYearOptions: (() => {
+        const y = new Date().getFullYear()
+        const arr = []
+        for (let i = y - 2; i >= y - 18; i--) arr.push(i)
+        return arr
+      })(),
       searchData: {
         keyword: '',
+        arr_birth_year: [],
         arr_status: '',
         arr_product: '',
         arr_level: '',
@@ -654,6 +712,7 @@ export default {
       if (this.searchData.arr_source && this.searchData.arr_source.length) count++
       if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) count++
       if (this.searchData.arr_product && this.searchData.arr_product.length) count++
+      if (this.searchData.arr_birth_year && this.searchData.arr_birth_year.length) count++
       return count
     },
     selectAll: {
@@ -696,6 +755,7 @@ export default {
       this.searchData.keyword = ''
       this.searchData.arr_status = ''
       this.searchData.arr_product = ''
+      this.searchData.arr_birth_year = []
       this.searchData.arr_level = ''
       this.searchData.arr_owner = ''
       this.searchData.arr_source = ''
@@ -774,6 +834,7 @@ export default {
         level: this.searchData.ids_level,
         start_date: startDate,
         end_date: endDate,
+        birth_year: this.searchData.arr_birth_year || [],
         pagination: this.pagination,
         type_search: this.searchData.type_search
       }
@@ -785,6 +846,7 @@ export default {
           this.$vs.loading.close()
           this.parents = response.data.list
           this.total = response.data.detail_total
+          this.foreign_matches = response.data.foreign_matches || []
           this.pagination = response.data.paging
           setTimeout(() => {
             this.pagination.init = 1
@@ -808,7 +870,37 @@ export default {
     setActive(menuItem) {
       this.searchData.type_search = menuItem
       this.activeItem = menuItem
+      this.checked_list = []
       this.getData()
+    },
+    // Nhận data trong kho về chăm sóc
+    claimParent(item) {
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'success',
+        title: 'Nhận về chăm sóc',
+        text: `Bạn muốn nhận khách hàng ${item.name} (${item.mobile_1}) về CRM của mình?`,
+        acceptText: 'Đồng ý',
+        cancelText: 'Hủy',
+        accept: () => {
+          this.$vs.loading()
+          axios.p('/api/crm/parents/overwrite', { parent_id: item.id })
+            .then(res => {
+              this.$vs.loading.close()
+              this.$vs.notify({
+                title: res.data.status == 1 ? 'Thành Công' : 'Thông báo',
+                text: res.data.message,
+                color: res.data.status == 1 ? 'success' : 'danger',
+                iconPack: 'feather',
+                icon: res.data.status == 1 ? 'icon-check' : 'icon-alert-circle'
+              })
+              this.getData()
+            })
+            .catch(() => {
+              this.$vs.loading.close()
+            })
+        }
+      })
     },
     assignCustomer() {
       if (this.owners.length) {
@@ -1212,6 +1304,40 @@ export default {
 .btn-action-care:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+/* DATA KHO & BÁO CHỦ SỞ HỮU */
+.foreign-owner-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 14px;
+}
+.warehouse-hint {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 14px;
+}
+.badge-warehouse {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap !important;
+}
+.btn-nowrap {
+  white-space: nowrap !important;
 }
 
 /* POPUP */

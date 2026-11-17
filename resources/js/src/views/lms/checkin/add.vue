@@ -543,14 +543,17 @@
         this.modal_overwrite.show = false;
         axios.p(`/api/crm/parents/overwrite`,data).then(response => {
           this.$vs.loading.close();
+          const ok = response.data.status == 1
           this.$vs.notify({
-            title: 'Thành Công',
+            title: ok ? 'Thành Công' : 'Thông báo',
             text: response.data.message,
-            color: 'success',
+            color: ok ? 'success' : 'danger',
             iconPack: 'feather',
-            icon: 'icon-check'
+            icon: ok ? 'icon-check' : 'icon-alert-circle'
           })
-          this.$router.push('/crm/parent')
+          if (ok) this.$router.push('/crm/parent')
+        }).catch(() => {
+          this.$vs.loading.close();
         })
       },
       async save() {
