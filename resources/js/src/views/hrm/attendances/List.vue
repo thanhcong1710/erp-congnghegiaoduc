@@ -1517,7 +1517,7 @@ export default {
   color: #334155;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   border: 1px solid #e2e8f0;
 }
@@ -1628,7 +1628,7 @@ export default {
   min-width: 0;
 }
 .kpi-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
   color: #64748b;
@@ -1645,7 +1645,7 @@ export default {
   margin-top: 2px;
 }
 .kpi-hint {
-  font-size: 10px;
+  font-size: 13px;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -1676,7 +1676,7 @@ export default {
   background: #f1f5f9;
   color: #334155;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   padding: 12px 14px;
@@ -1741,7 +1741,7 @@ export default {
 }
 .att-weekend-badge {
   display: block;
-  font-size: 10px;
+  font-size: 13px;
   color: #94a3b8;
   font-weight: normal;
   margin-top: 1px;
@@ -1752,7 +1752,7 @@ export default {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   background: #f8fafc;
   color: #475569;
@@ -1770,7 +1770,7 @@ export default {
   align-items: center;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -1828,7 +1828,7 @@ export default {
 }
 .att-time-dash {
   font-family: monospace;
-  font-size: 12px;
+  font-size: 13px;
   color: #cbd5e1;
 }
 
@@ -1837,7 +1837,7 @@ export default {
   display: inline-block;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 .work-positive {
@@ -1852,7 +1852,7 @@ export default {
 
 .att-note-cell {
   color: #64748b;
-  font-size: 12px;
+  font-size: 13px;
   max-width: 180px;
   white-space: nowrap;
   overflow: hidden;

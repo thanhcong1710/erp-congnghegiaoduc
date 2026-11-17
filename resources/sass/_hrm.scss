@@ -92,7 +92,7 @@ $hrm-heading: #1f2937;
     margin-bottom: 1rem;
 
     h3 { font-weight: 700; color: $hrm-heading; display: flex; align-items: center; }
-    p { font-size: 0.875rem; color: $hrm-muted; margin-top: 0.25rem; }
+    p { font-size: 14px; color: $hrm-muted; margin-top: 0.25rem; }
   }
   .hrm-page-actions {
     display: flex;
@@ -122,7 +122,7 @@ $hrm-heading: #1f2937;
     &.is-clickable:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); }
     &.is-active { border-color: rgba(var(--vs-primary), 1); box-shadow: 0 0 0 1px rgba(var(--vs-primary), 1); }
 
-    .hrm-stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: $hrm-muted; }
+    .hrm-stat-label { font-size: 13px; font-weight: 600; text-transform: uppercase; color: $hrm-muted; }
     .hrm-stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; margin-top: 4px; }
     .hrm-stat-icon {
       width: 42px;
@@ -240,9 +240,9 @@ $hrm-heading: #1f2937;
   .hrm-person {
     min-width: 150px;
     .hrm-person-name { font-weight: 600; color: #111827; line-height: 1.3; }
-    .hrm-person-code { font-size: 12px; font-weight: 600; color: rgba(var(--vs-primary), 1); }
+    .hrm-person-code { font-size: 13px; font-weight: 600; color: rgba(var(--vs-primary), 1); }
   }
-  .hrm-muted-small { font-size: 12px; color: #6b7280; }
+  .hrm-muted-small { font-size: 13px; color: #6b7280; }
 
   // Badge trạng thái gọn
   .hrm-badge {
@@ -251,12 +251,12 @@ $hrm-heading: #1f2937;
     gap: 4px;
     padding: 2px 10px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.6;
     white-space: nowrap;
 
-    &.is-sm { padding: 0 8px; font-size: 11px; }
+    &.is-sm { padding: 0 8px; font-size: 13px; }
   }
 
   // Footer phân trang
@@ -290,6 +290,66 @@ $hrm-heading: #1f2937;
 }
 
 // ---------------------------------------------------------------------------
+// 3b. Cỡ chữ tối thiểu 13px cho toàn bộ HRM (trang + popup)
+//  html gốc = 14px nên text-xs = 10.5px, text-sm = 12.25px, nút small ≈ 9.8px
+//  → quá nhỏ, khó đọc. Ép sàn 13px; dùng selector có id/class cha để thắng !important của Tailwind.
+// ---------------------------------------------------------------------------
+$hrm-font-min: 13px;
+
+@mixin hrm-font-floor {
+  font-size: 14px;
+
+  .text-xs,
+  .text-sm,
+  small,
+  .small { font-size: $hrm-font-min !important; }
+
+  // Nút Vuesax (mặc định .7em ~ 9.8px)
+  .vs-button,
+  .vs-button.small,
+  .vs-button .vs-button--text { font-size: $hrm-font-min !important; }
+  .vs-button:not(.small) { font-size: 14px !important; }
+
+  // Chip, header bảng, phân trang
+  .con-vs-chip,
+  .vs-chip--text { font-size: $hrm-font-min !important; }
+  .vs-table--thead th,
+  thead th { font-size: $hrm-font-min !important; }
+  .vs-table--tbody-table,
+  .vs-table--td,
+  td { font-size: 14px; }
+  .vs-pagination--li,
+  .item-pagination { font-size: $hrm-font-min !important; }
+
+  // Form controls
+  .vs-input--label,
+  .vs-select--label,
+  .hrm-form-label { font-size: $hrm-font-min !important; }
+  .vs-input--input,
+  select,
+  textarea,
+  .vs-textarea,
+  .vs__selected,
+  .vs__search,
+  .vs-select--input { font-size: 14px !important; }
+
+  // Tab, dropdown
+  .vs-tabs--li button { font-size: 14px; }
+  .vs-dropdown--item,
+  .vs-dropdown--item-link { font-size: 14px; }
+}
+
+[id^='page-hrm'] { @include hrm-font-floor; }
+.con-vs-popup.hrm-popup {
+  @include hrm-font-floor;
+  .vs-popup--content { font-size: 14px; }
+}
+// Dropdown của vs-select/vs-dropdown và tooltip được gắn vào <body>
+.vs-select--options .vs-select--item,
+.vs-dropdown--menu .vs-dropdown--item { font-size: 14px; }
+.vs-tooltip { font-size: $hrm-font-min; }
+
+// ---------------------------------------------------------------------------
 // 4. Popup HRM (vs-popup được gắn vào <body> nên không nằm trong #page-hrm-*)
 // ---------------------------------------------------------------------------
 .con-vs-popup.hrm-popup {
@@ -311,7 +371,7 @@ $hrm-heading: #1f2937;
     border-radius: 6px;
     width: 100%;
   }
-  .hrm-form-hint { font-size: 12px; color: $hrm-muted; margin-top: 4px; display: block; }
+  .hrm-form-hint { font-size: 13px; color: $hrm-muted; margin-top: 4px; display: block; }
   .hrm-popup-footer {
     display: flex;
     justify-content: flex-end;

@@ -1766,7 +1766,7 @@ export default {
   background-color: #f3f2fe;
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.3px;
 }
 
@@ -1777,7 +1777,7 @@ export default {
   justify-content: center !important;
   white-space: nowrap !important;
   padding: 6px 14px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
   color: #7367f0 !important;
   background-color: #f5f4ff !important;
@@ -1797,7 +1797,7 @@ export default {
 .status-tag {
   display: inline-block;
   padding: 3px 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   border-radius: 20px;
   white-space: nowrap;
@@ -1839,7 +1839,7 @@ export default {
   display: inline-flex !important;
   align-items: center !important;
   white-space: nowrap !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
 }
 
 /* POPUP CHI TIẾT LỊCH SỬ NGHỈ */
@@ -1872,7 +1872,7 @@ export default {
   justify-content: center;
 }
 .summary-label {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
@@ -1924,7 +1924,7 @@ export default {
 .history-table th {
   background-color: #f8fafc;
   color: #475569;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   padding: 10px 12px;
@@ -1946,7 +1946,7 @@ export default {
 .day-badge {
   display: inline-block;
   padding: 3px 10px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #4338ca;
   background-color: #e0e7ff;
@@ -1957,7 +1957,7 @@ export default {
   display: inline-flex;
   align-items: center;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   border-radius: 4px;
   white-space: nowrap;
@@ -2012,7 +2012,7 @@ export default {
   justify-content: center !important;
   white-space: nowrap !important;
   padding: 6px 12px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 600 !important;
   color: #2563eb !important;
   background-color: #eff6ff !important;
@@ -2034,7 +2034,7 @@ export default {
 /* Phím tắt chọn nhanh định mức phép */
 .quick-preset-btn {
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #1e40af;
   background-color: #ffffff;
