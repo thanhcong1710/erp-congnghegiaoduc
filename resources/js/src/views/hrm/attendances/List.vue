@@ -1,7 +1,7 @@
 <template>
   <div id="page-hrm-attendances">
     <!-- Header & Tra cứu nhanh -->
-    <div class="flex flex-wrap items-center justify-between mb-4">
+    <div class="hrm-page-header">
       <div class="mb-2 md:mb-0">
         <h3 class="font-bold text-gray-800 flex items-center">
           <feather-icon icon="ClockIcon" class="mr-2 text-primary" /> Bảng Chấm
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Modal kết quả tra cứu nhanh -->
-    <vs-popup
+    <vs-popup class="hrm-popup"
       title="KẾT QUẢ TRA CỨU CÔNG NHÂN SỰ"
       :active.sync="quickSearchModalActive"
     >
@@ -122,7 +122,7 @@
     <vs-popup
       :title="detailPopupTitle"
       :active.sync="employeeDetailModalActive"
-      class="modal-attendance-month-detail"
+      class="hrm-popup modal-attendance-month-detail"
     >
       <div v-if="employeeDetailLoading" class="att-modal-loading">
         <i class="fa-solid fa-spinner fa-spin att-loading-spinner"></i>
@@ -720,9 +720,7 @@
                   class="vs-inputx vs-input--input normal"
                   style="padding: 8px 12px; font-size: 13px"
                 >
-                  <option :value="2025">2025</option>
-                  <option :value="2026">2026</option>
-                  <option :value="2027">2027</option>
+                  <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
                 </select>
               </div>
               <div class="mr-3 mb-2 flex items-center">
@@ -999,6 +997,11 @@ export default {
     }
   },
   computed: {
+    // Năm hiện tại +1 và lùi 3 năm (không hard-code)
+    yearOptions() {
+      const now = new Date().getFullYear();
+      return [now + 1, now, now - 1, now - 2, now - 3];
+    },
     filteredDailyRecords() {
       if (!this.dailySearchKeyword) return this.dailyRecords;
       const kw = this.dailySearchKeyword.toLowerCase().trim();
@@ -1646,12 +1649,13 @@ export default {
   color: #94a3b8;
   font-weight: 500;
 }
-.text-success { color: #10b981 !important; }
-.text-purple { color: #8b5cf6 !important; }
-.text-warning { color: #f59e0b !important; }
-.text-blue { color: #0284c7 !important; }
-.text-danger { color: #ef4444 !important; }
-.text-slate { color: #475569 !important; }
+/* Chỉ áp dụng trong popup chi tiết – tránh ghi đè màu theme toàn hệ thống */
+.modal-attendance-month-detail .text-success { color: #10b981 !important; }
+.modal-attendance-month-detail .text-purple { color: #8b5cf6 !important; }
+.modal-attendance-month-detail .text-warning { color: #f59e0b !important; }
+.modal-attendance-month-detail .text-blue { color: #0284c7 !important; }
+.modal-attendance-month-detail .text-danger { color: #ef4444 !important; }
+.modal-attendance-month-detail .text-slate { color: #475569 !important; }
 
 /* Table Container */
 .att-table-box {

@@ -1,7 +1,7 @@
 <template>
-  <div id="hrm-online-registrations">
+  <div id="page-hrm-online-registrations">
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between mb-4">
+    <div class="hrm-page-header">
       <div>
         <h3 class="font-bold text-gray-800">QUẢN LÝ ĐĂNG KÝ LÀM ONLINE</h3>
         <p class="text-xs text-gray-500 mt-1">
@@ -46,7 +46,7 @@
               class="vs-inputx vs-input--input normal"
               style="padding: 8px 12px; font-size: 13px; width: 100px"
             >
-              <option :value="y" v-for="y in [2024, 2025, 2026, 2027]" :key="y">{{ y }}</option>
+              <option :value="y" v-for="y in yearOptions" :key="y">{{ y }}</option>
             </select>
           </div>
 
@@ -269,7 +269,7 @@
     </vx-card>
 
     <!-- Modal Đăng Ký Làm Online -->
-    <vs-popup title="ĐĂNG KÝ LÀM ONLINE" :active.sync="createModalActive">
+    <vs-popup class="hrm-popup" title="ĐĂNG KÝ LÀM ONLINE" :active.sync="createModalActive">
       <div class="p-4">
         <!-- Chú ý quy tắc -->
         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded text-xs text-blue-800 leading-relaxed">
@@ -397,7 +397,7 @@
     </vs-popup>
 
     <!-- Modal Từ Chối Đơn -->
-    <vs-popup title="TỪ CHỐI ĐƠN ĐĂNG KÝ LÀM ONLINE" :active.sync="rejectModalActive">
+    <vs-popup class="hrm-popup" title="TỪ CHỐI ĐƠN ĐĂNG KÝ LÀM ONLINE" :active.sync="rejectModalActive">
       <div class="p-4" v-if="targetRegistration">
         <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800">
           Từ chối đơn đăng ký online ngày <strong>{{ targetRegistration.date | formatDateView }}</strong> của nhân viên <strong>{{ targetRegistration.employee_name }}</strong>.
@@ -486,6 +486,11 @@ export default {
     };
   },
   computed: {
+    // Năm hiện tại +1 và lùi 3 năm (không hard-code)
+    yearOptions() {
+      const now = new Date().getFullYear();
+      return [now + 1, now, now - 1, now - 2, now - 3];
+    },
     filteredList() {
       let list = this.registrations;
       if (this.searchKeyword) {

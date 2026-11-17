@@ -1,11 +1,20 @@
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-4">
+  <div id="page-hrm-employee-edit">
+    <div class="hrm-page-header">
       <div class="flex items-center">
-        <vs-button color="dark" type="border" @click="$router.push('/hrm/employees')" class="p-3 mr-4">
-          <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại
+        <vs-button color="dark" type="border" @click="$router.push('/hrm/employees')" class="mr-3" title="Quay lại danh sách">
+          <i class="fa-solid fa-arrow-left"></i>
         </vs-button>
-        <h3 class="font-bold text-gray-800">{{ isEdit ? 'Cập Nhật Hồ Sơ Nhân Viên' : 'Thêm Mới Hồ Sơ Nhân Viên' }}</h3>
+        <div>
+          <h3>{{ isEdit ? 'Cập Nhật Hồ Sơ Nhân Viên' : 'Thêm Mới Hồ Sơ Nhân Viên' }}</h3>
+          <p v-if="isEdit && form.employee_code">Mã NS: <strong>{{ form.employee_code }}</strong></p>
+        </div>
+      </div>
+      <!-- Nút lưu luôn hiển thị ở đầu trang, không cần cuộn xuống cuối form -->
+      <div class="hrm-page-actions">
+        <vs-button color="primary" @click="saveData()">
+          <i class="fa-solid fa-floppy-disk mr-1"></i> {{ isEdit ? 'Lưu thay đổi' : 'Tạo mới nhân sự' }}
+        </vs-button>
       </div>
     </div>
 
@@ -19,18 +28,18 @@
             </h5>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Họ và tên nhân sự (*)</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.user_name" placeholder="Nguyễn Văn A" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Email đăng nhập / liên hệ</label>
                 <input type="email" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.email" placeholder="Không bắt buộc (để trống tự sinh theo mã NV)" />
               </div>
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Công ty (*)</label>
                 <select 
                   class="vs-inputx vs-input--input normal w-full font-medium" 
@@ -44,7 +53,7 @@
                   </option>
                 </select>
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">
                   Mã nhân viên (Để trống tự sinh {{ selectedCompanyPrefix }}xx)
                 </label>
@@ -60,11 +69,11 @@
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày vào làm việc chính thức</label>
                 <flat-pickr v-model="form.start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Giới tính</label>
                 <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.gender">
                   <option :value="1">Nam</option>
@@ -75,22 +84,22 @@
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày tháng năm sinh</label>
                 <flat-pickr v-model="form.dob" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">CCCD / CMND / Passport</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.id_card_number" placeholder="Số CCCD/CMND..." />
               </div>
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày cấp CCCD / CMND</label>
                 <flat-pickr v-model="form.id_card_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Số điện thoại</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.phone" placeholder="0987xxxxxx" />
               </div>
@@ -108,7 +117,7 @@
             </h5>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Phân loại nhân sự (*)</label>
                 <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.employee_type">
                   <option value="fulltime">Nhân sự Fulltime</option>
@@ -116,7 +125,7 @@
                   <option value="probation">Thử việc</option>
                 </select>
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Trạng thái hoạt động</label>
                 <select class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.work_status">
                   <option value="working">Đang làm việc</option>
@@ -127,11 +136,11 @@
 
             <!-- Nếu là nhân sự thử việc -->
             <div class="vx-row mb-4 p-3 bg-gray-50 border border-gray-200 rounded" v-if="form.employee_type === 'probation'">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày bắt đầu thử việc (*)</label>
                 <flat-pickr v-model="form.probation_start_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày kết thúc thử việc (*)</label>
                 <flat-pickr v-model="form.probation_end_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
@@ -139,35 +148,35 @@
 
             <!-- Nếu đã nghỉ việc -->
             <div class="vx-row mb-4 p-3 bg-red-50 border border-red-200 rounded" v-if="form.work_status === 'resigned'">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngày nghỉ việc</label>
                 <flat-pickr v-model="form.resigned_date" :config="flatpickrDateConfig" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" placeholder="dd/mm/yyyy" />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Lý do nghỉ việc</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.resigned_reason" placeholder="Lý do nghỉ việc..." />
               </div>
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">
                   Phòng ban / Team <span v-if="!isHrmAdmin" class="text-xs text-primary font-normal">(Phòng ban bạn quản lý)</span>
                 </label>
                 <v-select class="w-full" v-model="form.department_id" :options="departments" :reduce="item => item.id" label="displayName" placeholder="Chọn phòng ban / team..." />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Chức danh</label>
                 <v-select class="w-full" v-model="form.job_title_id" :options="jobTitles" :reduce="item => item.id" label="name" placeholder="Chọn chức danh..." />
               </div>
             </div>
 
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Cấp bậc năng lực</label>
                 <v-select class="w-full" v-model="form.job_level_id" :options="jobLevels" :reduce="item => item.id" label="name" placeholder="Chọn cấp bậc..." />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Lương cơ bản (VNĐ)</label>
                 <input type="number" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.base_salary" placeholder="0" />
               </div>
@@ -177,11 +186,11 @@
               <feather-icon icon="CreditCardIcon" class="w-4 h-4 mr-2 text-primary" /> Thông tin tài khoản ngân hàng
             </h5>
             <div class="vx-row mb-4">
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Số tài khoản ngân hàng</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.bank_account" placeholder="Số tài khoản..." />
               </div>
-              <div class="vx-col w-1/2">
+              <div class="vx-col w-full md:w-1/2">
                 <label class="text-sm font-semibold text-gray-700 block mb-1">Ngân hàng (Chi nhánh)</label>
                 <input type="text" class="vs-inputx vs-input--input normal w-full" style="padding: 10px 14px; font-size: 13px;" v-model="form.bank_name" placeholder="Ví dụ: Vietcombank, Techcombank..." />
               </div>
@@ -242,7 +251,7 @@
                         <td class="td vs-table--td font-bold text-primary">{{ tr.contract_number }}</td>
                         <td class="td vs-table--td">{{ tr.contract_type }}</td>
                         <td class="td vs-table--td">{{ tr.start_date | formatDateView }}</td>
-                        <td class="td vs-table--td">{{ tr.end_date ? (tr.end_date | formatDateView) : 'Không thời hạn' }}</td>
+                        <td class="td vs-table--td">{{ fmtDate(tr.end_date, 'Không thời hạn') }}</td>
                         <td class="td vs-table--td font-semibold">{{ tr.basic_salary | formatCurrency }}</td>
                       </tr>
                       <tr v-if="!contracts.length">
@@ -309,7 +318,7 @@
                       <tr class="tr-values vs-table--tr" v-for="(tr, index) in documents" :key="index">
                         <td class="td vs-table--td font-semibold">{{ tr.title }}</td>
                         <td class="td vs-table--td">{{ tr.document_type }}</td>
-                        <td class="td vs-table--td">{{ tr.expiry_date || 'Không thời hạn' }}</td>
+                        <td class="td vs-table--td">{{ fmtDate(tr.expiry_date, 'Không thời hạn') }}</td>
                         <td class="td vs-table--td text-center">
                           <vs-button v-if="tr.file_path" size="small" :href="tr.file_path" target="_blank" color="primary" type="border"><i class="fa-solid fa-download mr-1"></i> Tải về</vs-button>
                           <span v-else class="text-gray-400 text-xs">Chưa có file</span>
@@ -329,7 +338,7 @@
     </vx-card>
 
     <!-- Modal Hợp đồng -->
-    <vs-popup title="Thêm Hợp đồng mới" :active.sync="showContractModal">
+    <vs-popup class="hrm-popup" title="Thêm Hợp đồng mới" :active.sync="showContractModal">
       <div class="mb-4">
         <vs-input class="w-full mb-4" label="Số hợp đồng" v-model="contractForm.contract_number" />
         <vs-input class="w-full mb-4" label="Loại hợp đồng (Ví dụ: Thử việc, 1 năm)" v-model="contractForm.contract_type" />
@@ -349,7 +358,7 @@
     </vs-popup>
 
     <!-- Modal Tài liệu -->
-    <vs-popup title="Tải lên Tài liệu" :active.sync="showDocumentModal">
+    <vs-popup class="hrm-popup" title="Tải lên Tài liệu" :active.sync="showDocumentModal">
       <div class="mb-4">
         <vs-input class="w-full mb-4" label="Tên tài liệu" v-model="documentForm.title" />
         <vs-input class="w-full mb-4" label="Loại tài liệu (Ví dụ: CCCD, Hợp đồng, Bằng cấp)" v-model="documentForm.document_type" />
@@ -389,6 +398,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 import vSelect from 'vue-select';
 
 export default {
@@ -489,6 +499,10 @@ export default {
     }
   },
   methods: {
+    // Định dạng ngày dd/mm/yyyy, trả về fallback nếu rỗng
+    fmtDate(value, fallback = '') {
+      return value ? moment(value).format('DD/MM/YYYY') : fallback;
+    },
     fetchOptions() {
       axios.g('/api/hrm/companies/all').then(res => {
         if (res.data && res.data.data) {

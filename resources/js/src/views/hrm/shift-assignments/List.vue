@@ -210,7 +210,7 @@
     </vx-card>
 
     <!-- Modal cấu hình Xếp Ca (áp dụng đến khi thay đổi) -->
-    <vs-popup :title="popupTitle" :active.sync="popupActive">
+    <vs-popup class="hrm-popup" :title="popupTitle" :active.sync="popupActive">
       <div class="p-4">
         <!-- Thông tin đối tượng được xếp ca -->
         <div class="p-3 mb-4 rounded bg-primary-light border border-primary text-gray-800 text-sm">

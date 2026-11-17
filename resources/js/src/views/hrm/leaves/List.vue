@@ -1,7 +1,7 @@
 <template>
   <div id="page-hrm-leaves">
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between mb-4">
+    <div class="hrm-page-header">
       <div class="mb-2 md:mb-0">
         <h3 class="font-bold text-gray-800 flex items-center">
           <feather-icon icon="CalendarIcon" class="mr-2 text-primary" /> Quản Lý Nghỉ Phép & Quỹ Phép Toàn Bộ Nhân Sự
@@ -94,9 +94,7 @@
               <div class="flex items-center">
                 <span class="text-sm font-semibold mr-2 text-gray-700 whitespace-no-wrap">Năm:</span>
                 <select v-model="filterYear" @change="fetchAllBalances" class="filter-select" style="width: 100px;">
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
+                  <option v-for="y in yearOptions" :key="y" :value="String(y)">{{ y }}</option>
                 </select>
               </div>
 
@@ -429,7 +427,7 @@
     <vs-popup 
       :title="popupHistoryTitle" 
       :active.sync="popupHistoryActive" 
-      class="popup-leave-history modal-custom-leave"
+      class="hrm-popup popup-leave-history modal-custom-leave"
     >
       <div class="popup-history-container" v-if="selectedStaffHistory">
         <!-- Thông tin nhân sự -->
@@ -466,7 +464,7 @@
         </div>
 
         <!-- 5 Card Tóm tắt số ngày phép & đăng ký làm Online của nhân viên -->
-        <div class="grid grid-cols-5 gap-3 mb-5">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
           <div class="summary-card card-blue">
             <span class="summary-label">Quỹ phép {{ selectedStaffHistory.summary.year }}</span>
             <span class="summary-value text-primary">
@@ -607,7 +605,7 @@
     <!-- ========================================== -->
     <!-- POPUP 2: IMPORT BẢNG NGHỈ PHÉP TỰ ĐỘNG -->
     <!-- ========================================== -->
-    <vs-popup title="IMPORT BẢNG KẾ HOẠCH NGHỈ PHÉP TỪ EXCEL" :active.sync="popupImportActive" class="modal-custom-leave">
+    <vs-popup title="IMPORT BẢNG KẾ HOẠCH NGHỈ PHÉP TỪ EXCEL" :active.sync="popupImportActive" class="hrm-popup modal-custom-leave">
       <div class="p-3">
         <p class="text-sm text-gray-600 mb-2">
           Dán các dòng copy trực tiếp từ Excel / Google Sheet vào khung dưới đây theo thứ tự cột:
@@ -679,7 +677,7 @@
     <!-- ========================================== -->
     <!-- POPUP 3: TẠO ĐƠN XIN NGHỈ (HIỆN CÓ) -->
     <!-- ========================================== -->
-    <vs-popup title="TẠO ĐƠN XIN NGHỈ / ĐỔI CA" :active.sync="popupActive">
+    <vs-popup class="hrm-popup" title="TẠO ĐƠN XIN NGHỈ / ĐỔI CA" :active.sync="popupActive">
       <div class="p-4">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
@@ -747,7 +745,7 @@
     <!-- ========================================== -->
     <!-- POPUP 4: PHÊ DUYỆT ĐƠN NGHỈ PHÉP (HIỆN CÓ) -->
     <!-- ========================================== -->
-    <vs-popup title="PHÊ DUYỆT ĐƠN NGHỈ PHÉP" :active.sync="approvePopupActive">
+    <vs-popup class="hrm-popup" title="PHÊ DUYỆT ĐƠN NGHỈ PHÉP" :active.sync="approvePopupActive">
       <div class="p-4" v-if="selectedLeave">
         <div class="mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">
           <div>Phê duyệt đơn của nhân sự: <strong class="text-primary">{{ selectedLeave.employee ? selectedLeave.employee.full_name : (selectedLeave.user ? selectedLeave.user.name : '') }}</strong> 
@@ -821,7 +819,7 @@
     <!-- ========================================== -->
     <!-- POPUP TỪ CHỐI ĐƠN NGHỈ PHÉP TRỰC TIẾP -->
     <!-- ========================================== -->
-    <vs-popup title="TỪ CHỐI ĐƠN NGHỈ PHÉP" :active.sync="rejectPopupActive">
+    <vs-popup class="hrm-popup" title="TỪ CHỐI ĐƠN NGHỈ PHÉP" :active.sync="rejectPopupActive">
       <div class="p-4" v-if="targetRejectLeave">
         <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800">
           Từ chối đơn của nhân sự: <strong>{{ targetRejectLeave.employee ? targetRejectLeave.employee.full_name : (targetRejectLeave.user ? targetRejectLeave.user.name : '') }}</strong>
@@ -853,7 +851,7 @@
     <!-- POPUP ĐIỀU CHỈNH QUỸ PHÉP NĂM NHÂN SỰ -->
     <!-- ========================================== -->
     <vs-popup 
-      class="modal-custom-leave modal-adjust-balance" 
+      class="hrm-popup modal-custom-leave modal-adjust-balance" 
       :title="adjustPopupTitle" 
       :active.sync="adjustPopupActive"
     >
@@ -1055,7 +1053,7 @@ export default {
         allowInput: true
       },
       // Tab 1: Quản lý Quỹ phép Toàn Nhân Sự
-      filterYear: '2026',
+      filterYear: String(new Date().getFullYear()),
       filterDepartment: 'all',
       searchStaffKeyword: '',
       searchDebounce: null,
@@ -1085,7 +1083,7 @@ export default {
       isSavingBalance: false,
       adjustForm: {
         employee_id: null,
-        year: 2026,
+        year: new Date().getFullYear(),
         total_days: 12.0,
         used_days: 0.0,
         enable_custom_used: false,
@@ -1130,6 +1128,11 @@ export default {
     };
   },
   computed: {
+    // Năm hiện tại +1 và lùi 3 năm (không hard-code)
+    yearOptions() {
+      const now = new Date().getFullYear();
+      return [now + 1, now, now - 1, now - 2, now - 3];
+    },
     popupHistoryTitle() {
       if (!this.selectedStaffHistory) return 'LỊCH SỬ NGHỈ PHÉP NHÂN SỰ';
       return `LỊCH SỬ NGHỈ PHÉP - ${this.selectedStaffHistory.employee.full_name} (${this.selectedStaffHistory.employee.employee_code})`;
@@ -1237,7 +1240,7 @@ export default {
       this.adjustingEmployee = emp;
       this.adjustForm = {
         employee_id: emp.id,
-        year: parseInt(this.filterYear) || 2026,
+        year: parseInt(this.filterYear) || new Date().getFullYear(),
         total_days: emp.total_days !== undefined ? emp.total_days : (emp.is_fulltime ? 12 : 0),
         used_days: emp.used_days !== undefined ? emp.used_days : 0,
         enable_custom_used: false,
@@ -1269,7 +1272,7 @@ export default {
         return;
       }
 
-      const filterYear = parseInt(this.filterYear) || 2026;
+      const filterYear = parseInt(this.filterYear) || new Date().getFullYear();
       const startYear = startDate.getFullYear();
       const startMonth = startDate.getMonth() + 1; // 1 - 12
       const startDay = startDate.getDate();
@@ -1317,7 +1320,7 @@ export default {
       if (!startDateStr) return '';
       const startDate = new Date(startDateStr);
       if (isNaN(startDate.getTime())) return '';
-      const filterYear = parseInt(this.filterYear) || 2026;
+      const filterYear = parseInt(this.filterYear) || new Date().getFullYear();
       const startYear = startDate.getFullYear();
       const startMonth = startDate.getMonth() + 1;
 

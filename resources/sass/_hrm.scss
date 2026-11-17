@@ -1,0 +1,295 @@
+/*=========================================================================================
+  File Name: _hrm.scss
+  Description: Style dùng chung cho module HRM (Nhân sự).
+  - Bổ sung các utility class mà Tailwind 1.x của dự án KHÔNG sinh ra
+    (bảng màu gray/blue/green..., spacing x.5, shadow-sm, whitespace-nowrap...)
+    → trước đây các class này bị "mất" khiến badge không màu, chữ không phân cấp.
+  - Các thành phần layout chung: header trang, toolbar lọc, thẻ thống kê,
+    bảng cuộn ngang, popup responsive.
+==========================================================================================*/
+
+// ---------------------------------------------------------------------------
+// 1. Bảng màu utility (tương đương palette mặc định Tailwind 2)
+// ---------------------------------------------------------------------------
+$hrm-palette: (
+  'gray': (50: #f9fafb, 100: #f3f4f6, 200: #e5e7eb, 300: #d1d5db, 400: #9ca3af, 500: #6b7280, 600: #4b5563, 700: #374151, 800: #1f2937, 900: #111827),
+  'red': (50: #fef2f2, 100: #fee2e2, 200: #fecaca, 300: #fca5a5, 400: #f87171, 500: #ef4444, 600: #dc2626, 700: #b91c1c, 800: #991b1b, 900: #7f1d1d),
+  'orange': (50: #fff7ed, 100: #ffedd5, 200: #fed7aa, 300: #fdba74, 400: #fb923c, 500: #f97316, 600: #ea580c, 700: #c2410c, 800: #9a3412, 900: #7c2d12),
+  'amber': (50: #fffbeb, 100: #fef3c7, 200: #fde68a, 300: #fcd34d, 400: #fbbf24, 500: #f59e0b, 600: #d97706, 700: #b45309, 800: #92400e, 900: #78350f),
+  'yellow': (50: #fefce8, 100: #fef9c3, 200: #fef08a, 300: #fde047, 400: #facc15, 500: #eab308, 600: #ca8a04, 700: #a16207, 800: #854d0e, 900: #713f12),
+  'green': (50: #f0fdf4, 100: #dcfce7, 200: #bbf7d0, 300: #86efac, 400: #4ade80, 500: #22c55e, 600: #16a34a, 700: #15803d, 800: #166534, 900: #14532d),
+  'teal': (50: #f0fdfa, 100: #ccfbf1, 200: #99f6e4, 300: #5eead4, 400: #2dd4bf, 500: #14b8a6, 600: #0d9488, 700: #0f766e, 800: #115e59, 900: #134e4a),
+  'blue': (50: #eff6ff, 100: #dbeafe, 200: #bfdbfe, 300: #93c5fd, 400: #60a5fa, 500: #3b82f6, 600: #2563eb, 700: #1d4ed8, 800: #1e40af, 900: #1e3a8a),
+  'indigo': (50: #eef2ff, 100: #e0e7ff, 200: #c7d2fe, 300: #a5b4fc, 400: #818cf8, 500: #6366f1, 600: #4f46e5, 700: #4338ca, 800: #3730a3, 900: #312e81),
+  'purple': (50: #faf5ff, 100: #f3e8ff, 200: #e9d5ff, 300: #d8b4fe, 400: #c084fc, 500: #a855f7, 600: #9333ea, 700: #7e22ce, 800: #6b21a8, 900: #581c87),
+);
+
+@each $name, $shades in $hrm-palette {
+  @each $shade, $color in $shades {
+    .text-#{$name}-#{$shade} { color: $color !important; }
+    .bg-#{$name}-#{$shade} { background-color: $color !important; }
+    .border-#{$name}-#{$shade} { border-color: $color !important; }
+    .hover\:text-#{$name}-#{$shade}:hover { color: $color !important; }
+    .hover\:bg-#{$name}-#{$shade}:hover { background-color: $color !important; }
+  }
+}
+
+// Màu theo theme Vuesax
+@each $name in (primary, success, danger, warning, info, dark) {
+  .bg-#{$name}-light { background-color: rgba(var(--vs-#{$name}), 0.12) !important; }
+  .border-#{$name} { border-color: rgba(var(--vs-#{$name}), 1) !important; }
+}
+.text-info { color: rgba(var(--vs-info), 1) !important; }
+.hover\:text-primary-dark:hover { color: rgba(var(--vs-primary), 0.8) !important; }
+.hover\:text-danger-dark:hover { color: rgba(var(--vs-danger), 0.8) !important; }
+
+// ---------------------------------------------------------------------------
+// 2. Spacing nửa bước (x.5) & utility còn thiếu
+// ---------------------------------------------------------------------------
+$hrm-half-steps: ('0\\.5': 0.125rem, '1\\.5': 0.375rem, '2\\.5': 0.625rem, '3\\.5': 0.875rem);
+@each $key, $val in $hrm-half-steps {
+  .p-#{$key} { padding: $val !important; }
+  .px-#{$key} { padding-left: $val !important; padding-right: $val !important; }
+  .py-#{$key} { padding-top: $val !important; padding-bottom: $val !important; }
+  .m-#{$key} { margin: $val !important; }
+  .mt-#{$key} { margin-top: $val !important; }
+  .mb-#{$key} { margin-bottom: $val !important; }
+  .ml-#{$key} { margin-left: $val !important; }
+  .mr-#{$key} { margin-right: $val !important; }
+  .w-#{$key} { width: $val !important; }
+  .h-#{$key} { height: $val !important; }
+}
+.top-1 { top: 0.25rem !important; }
+.right-1 { right: 0.25rem !important; }
+.w-max { width: max-content !important; }
+.shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; }
+.whitespace-nowrap { white-space: nowrap !important; }
+.font-mono { font-family: Menlo, Monaco, Consolas, 'Courier New', monospace !important; }
+.leading-relaxed { line-height: 1.625 !important; }
+.list-disc { list-style-type: disc !important; }
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ---------------------------------------------------------------------------
+// 3. Layout trang HRM (áp dụng cho mọi trang có id "page-hrm-*")
+// ---------------------------------------------------------------------------
+$hrm-border: #e5e7eb;
+$hrm-muted: #6b7280;
+$hrm-heading: #1f2937;
+
+[id^='page-hrm'] {
+  // Header trang: tiêu đề + mô tả + nút hành động
+  .hrm-page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 1rem;
+
+    h3 { font-weight: 700; color: $hrm-heading; display: flex; align-items: center; }
+    p { font-size: 0.875rem; color: $hrm-muted; margin-top: 0.25rem; }
+  }
+  .hrm-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // Thẻ thống kê nhanh (có thể click để lọc)
+  .hrm-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 1rem;
+  }
+  .hrm-stat-card {
+    background: #fff;
+    border: 1px solid $hrm-border;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+    &.is-clickable { cursor: pointer; }
+    &.is-clickable:hover { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06); }
+    &.is-active { border-color: rgba(var(--vs-primary), 1); box-shadow: 0 0 0 1px rgba(var(--vs-primary), 1); }
+
+    .hrm-stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: $hrm-muted; }
+    .hrm-stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; margin-top: 4px; }
+    .hrm-stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+  }
+
+  // Toolbar lọc / tìm kiếm
+  .hrm-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid $hrm-border;
+  }
+  .hrm-toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .hrm-search {
+    position: relative;
+    min-width: 240px;
+
+    i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    input { padding-left: 34px !important; width: 100%; }
+  }
+
+  // Ô nhập / select chuẩn (thay cho style inline lặp lại)
+  .hrm-input {
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px;
+    max-width: 100%;
+  }
+
+  // Bảng: cuộn ngang thay vì bóp méo cột, bỏ hiệu ứng "nhảy" dòng khi hover
+  .vs-table--content,
+  .con-tablex { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .vs-table--tbody-table { min-width: 760px; }
+  .vs-table--thead th { white-space: nowrap; }
+  .vs-table--tbody-table .tr-values:not(.activeEdit):not(.tr-expandedx):not(.hoverFlat):hover {
+    transform: none;
+    background: #f9fafb;
+  }
+  .list-action { white-space: nowrap; }
+  .list-action .vs-button + .vs-button,
+  .list-action a + .vs-button,
+  .list-action .vs-button + a { margin-left: 4px; }
+
+  // Trạng thái rỗng
+  .hrm-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: $hrm-muted;
+
+    i { font-size: 34px; color: #d1d5db; display: block; margin-bottom: 8px; }
+    .hrm-empty-title { font-weight: 600; color: #4b5563; }
+  }
+
+  // Badge trạng thái gọn
+  .hrm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  // Footer phân trang
+  .hrm-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 1.25rem;
+  }
+
+  // ---- Responsive: màn hình nhỏ ----
+  @media (max-width: 767px) {
+    .hrm-page-header h3 { font-size: 1.25rem; }
+    .hrm-page-actions,
+    .hrm-toolbar,
+    .hrm-toolbar-group { width: 100%; }
+    // Ô lọc/tìm kiếm chiếm hết chiều ngang; nút tab giữ kích thước tự nhiên
+    .hrm-toolbar-group > div,
+    .hrm-search { flex: 1 1 100%; min-width: 0 !important; }
+    // Ô input/select có min-width cố định (style inline) → co về 100%
+    .vs-input--input,
+    select.vs-inputx { min-width: 0 !important; max-width: 100%; }
+    .hrm-toolbar .vs-input--input,
+    .hrm-toolbar select { width: 100% !important; }
+    .vs-pagination--ul { flex-wrap: wrap; }
+    // Form 2 cột (w-full md:w-1/2) xếp dọc → thêm khoảng cách giữa các ô
+    .vx-row > .vx-col[class*='md:w-1/2'] + .vx-col { margin-top: 1rem; }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 4. Popup HRM (vs-popup được gắn vào <body> nên không nằm trong #page-hrm-*)
+// ---------------------------------------------------------------------------
+.con-vs-popup.hrm-popup {
+  .vs-popup { width: 640px; max-width: calc(100vw - 24px) !important; border-radius: 10px; }
+  &.hrm-popup--lg .vs-popup { width: 860px; }
+  .vs-popup--header { border-bottom: 1px solid $hrm-border; }
+  .vs-popup--content { padding: 16px 18px; }
+
+  .hrm-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+  }
+  .hrm-input {
+    padding: 9px 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px;
+    width: 100%;
+  }
+  .hrm-form-hint { font-size: 12px; color: $hrm-muted; margin-top: 4px; display: block; }
+  .hrm-popup-footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid $hrm-border;
+  }
+  .hrm-info-box {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid $hrm-border;
+    margin-bottom: 1rem;
+  }
+
+  // Màn hình nhỏ: các cột form 1/2, 1/3 xếp dọc
+  @media (max-width: 575px) {
+    .vx-row > .vx-col[class*='w-1/2'],
+    .vx-row > .vx-col[class*='w-1/3'],
+    .vx-row > .vx-col[class*='w-2/3'] { width: 100% !important; margin-bottom: 12px; }
+    .grid-cols-2 { grid-template-columns: minmax(0, 1fr) !important; }
+  }
+}

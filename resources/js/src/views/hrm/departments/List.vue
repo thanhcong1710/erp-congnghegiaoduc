@@ -1,7 +1,7 @@
 <template>
   <div id="page-hrm-departments">
     <!-- Header Section -->
-    <div class="flex flex-wrap items-center justify-between mb-4">
+    <div class="hrm-page-header">
       <div class="mb-2 md:mb-0">
         <h3 class="font-bold text-gray-800 flex items-center">
           <feather-icon icon="LayersIcon" class="mr-2 text-primary" /> Cơ Cấu Tổ Chức & Phòng Ban
@@ -303,7 +303,7 @@
     </vx-card>
 
     <!-- Popup Thêm / Cập nhật phòng ban -->
-    <vs-popup :title="isEdit ? 'Cập Nhật Phòng Ban' : 'Thêm Phòng Ban Mới'" :active.sync="popupActive">
+    <vs-popup class="hrm-popup" :title="isEdit ? 'Cập Nhật Phòng Ban' : 'Thêm Phòng Ban Mới'" :active.sync="popupActive">
       <div class="p-3">
         <div class="vx-row mb-4">
           <div class="vx-col w-full">

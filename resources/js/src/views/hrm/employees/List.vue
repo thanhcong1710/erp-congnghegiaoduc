@@ -1,27 +1,24 @@
 <template>
   <div id="page-hrm-employees-list">
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between mb-4">
-      <div class="mb-2 md:mb-0">
-        <h3 class="font-bold text-gray-800 flex items-center">
-          <feather-icon icon="UsersIcon" class="mr-2 text-primary" /> Quản Lý Danh Sách Nhân Sự
-        </h3>
-        <p class="text-sm text-gray-500 mt-1">Phân loại Fulltime, CTV, Thử việc & theo dõi trạng thái hoạt động</p>
+    <div class="hrm-page-header">
+      <div>
+        <h3><feather-icon icon="UsersIcon" class="mr-2 text-primary" /> Danh Sách Nhân Sự</h3>
+        <p>Phân loại Fulltime, CTV, Thử việc & theo dõi trạng thái hoạt động</p>
       </div>
-      <div v-if="canAdd">
-        <router-link :to="'/hrm/employees/add'">
-          <vs-button class="p-3" color="success" type="border">
-            <i class="fa-solid fa-user-plus mr-2"></i> Thêm Nhân Sự Mới
-          </vs-button>
+      <div class="hrm-page-actions">
+        <vs-button color="dark" type="border" @click="fetchEmployees"><i class="fa-solid fa-rotate-right mr-1"></i> Tải lại</vs-button>
+        <router-link v-if="canAdd" :to="'/hrm/employees/add'">
+          <vs-button color="primary"><i class="fa-solid fa-user-plus mr-1"></i> Thêm nhân sự</vs-button>
         </router-link>
       </div>
     </div>
 
     <vx-card no-shadow>
       <!-- Toolbar lọc & tìm kiếm -->
-      <div class="flex flex-wrap items-center justify-between mb-4 pb-3 border-b border-gray-200">
+      <div class="hrm-toolbar">
         <!-- Bộ lọc phân loại Tab -->
-        <div class="flex flex-wrap items-center space-x-2 mb-2 md:mb-0">
+        <div class="hrm-toolbar-group">
           <vs-button 
             :type="filterType === 'all' ? 'filled' : 'border'" 
             color="primary" 
@@ -61,10 +58,10 @@
         </div>
 
         <!-- Bộ lọc trạng thái & ô tìm kiếm -->
-        <div class="flex flex-wrap items-center">
-          <!-- Bộ lọc Công ty -->
-          <div class="mr-3 mb-2 md:mb-0">
-            <select v-model="filterCompany" @change="fetchEmployees" class="vs-inputx vs-input--input normal font-medium" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
+        <div class="hrm-toolbar-group">
+          <!-- Bộ lọc Công ty (watcher filterCompany tự gọi fetchEmployees) -->
+          <div>
+            <select v-model="filterCompany" class="vs-inputx vs-input--input normal hrm-input font-medium" style="min-width: 170px;">
               <option value="all">🏢 Tất cả công ty</option>
               <option v-for="comp in companies" :key="comp.id" :value="comp.id">
                 🏢 {{ comp.code }} - {{ comp.name }}
@@ -72,22 +69,22 @@
             </select>
           </div>
 
-          <div class="mr-3 mb-2 md:mb-0">
-            <select v-model="filterWorkStatus" @change="fetchEmployees" class="vs-inputx vs-input--input normal" style="padding: 10px 14px; font-size: 13px; min-width: 170px;">
+          <div>
+            <select v-model="filterWorkStatus" @change="fetchEmployees" class="vs-inputx vs-input--input normal hrm-input" style="min-width: 170px;">
               <option value="all">-- Tất cả trạng thái --</option>
               <option value="working">Đang làm việc</option>
               <option value="resigned">Đã nghỉ việc</option>
             </select>
           </div>
 
-          <div class="mb-2 md:mb-0">
+          <div class="hrm-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
             <input 
               type="text" 
-              class="vs-inputx vs-input--input normal" 
-              style="padding: 10px 14px; font-size: 13px; min-width: 280px;" 
+              class="vs-inputx vs-input--input normal hrm-input" 
               placeholder="Mã NS, mã đăng nhập, họ tên, SĐT..." 
               v-model="searchKeyword" 
-              @input="fetchEmployees"
+              @input="onSearchInput"
             >
           </div>
         </div>
@@ -187,8 +184,8 @@
                   </td>
                   <td class="td vs-table--td text-xs">
                     <div v-if="tr.employee_type === 'probation'">
-                      <div>Từ: <strong>{{ tr.probation_start_date ? (tr.probation_start_date | formatDateView) : '---' }}</strong></div>
-                      <div>Đến: <strong>{{ tr.probation_end_date ? (tr.probation_end_date | formatDateView) : '---' }}</strong></div>
+                      <div>Từ: <strong>{{ fmtDate(tr.probation_start_date, '---') }}</strong></div>
+                      <div>Đến: <strong>{{ fmtDate(tr.probation_end_date, '---') }}</strong></div>
                       <vs-button 
                         v-if="isHrmAdmin"
                         size="small" 
@@ -298,7 +295,7 @@
     </vx-card>
 
     <!-- Modal Cập nhật trạng thái hoạt động (Đang làm / Đã nghỉ) -->
-    <vs-popup title="CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG" :active.sync="statusModalActive">
+    <vs-popup class="hrm-popup" title="CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG" :active.sync="statusModalActive">
       <div class="p-4" v-if="selectedEmployee">
         <p class="mb-4 text-sm text-gray-700">
           Nhân sự: <strong class="text-primary">{{ selectedEmployee.full_name || (selectedEmployee.user ? selectedEmployee.user.name : '') }}</strong> (Mã NS: {{ selectedEmployee.employee_code }})
@@ -345,7 +342,7 @@
     </vs-popup>
 
     <!-- Modal Liên kết tài khoản User (Quan hệ 1 - 1) -->
-    <vs-popup title="LIÊN KẾT TÀI KHOẢN ĐĂNG NHẬP (QUAN HỆ 1 - 1)" :active.sync="linkUserModalActive">
+    <vs-popup class="hrm-popup" title="LIÊN KẾT TÀI KHOẢN ĐĂNG NHẬP (QUAN HỆ 1 - 1)" :active.sync="linkUserModalActive">
       <div class="p-3" v-if="selectedEmployeeForLink">
         <div class="bg-gray-100 p-3 rounded mb-4 border border-gray-200">
           <div class="text-sm text-gray-800">
@@ -416,7 +413,7 @@
     </vs-popup>
 
     <!-- Modal Xem Chi Tiết Nhân Sự (Dạng bảng chuẩn, cỡ chữ rõ ràng) -->
-    <vs-popup title="THÔNG TIN HỒ SƠ NHÂN SỰ" :active.sync="viewModalActive" class="modal-employee-view-detail">
+    <vs-popup title="THÔNG TIN HỒ SƠ NHÂN SỰ" :active.sync="viewModalActive" class="hrm-popup modal-employee-view-detail">
       <div v-if="viewingEmployee" class="p-2">
         <table class="table-employee-detail w-full border-collapse">
           <tbody>
@@ -565,6 +562,7 @@ export default {
       filterType: 'all',
       filterWorkStatus: 'all',
       searchKeyword: '',
+      searchTimer: null,
       statusModalActive: false,
       selectedEmployee: null,
       canDeleteServer: null,
@@ -654,11 +652,18 @@ export default {
         roleStr.includes('hrm_manager');
     }
   },
+  beforeDestroy() {
+    clearTimeout(this.searchTimer);
+  },
   created() {
     this.fetchCompanies();
     this.fetchEmployees();
   },
   methods: {
+    // Định dạng ngày dd/mm/yyyy, trả về fallback nếu rỗng
+    fmtDate(value, fallback = '') {
+      return value ? moment(value).format('DD/MM/YYYY') : fallback;
+    },
     fetchCompanies() {
       axios.g('/api/hrm/companies/all').then(res => {
         if (res.data && res.data.data) {
@@ -686,6 +691,11 @@ export default {
     },
     setFilterType(type) {
       this.filterType = type;
+    },
+    // Debounce tìm kiếm: chỉ gọi API khi người dùng ngừng gõ 400ms
+    onSearchInput() {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = setTimeout(() => this.fetchEmployees(), 400);
     },
     fetchEmployees() {
       this.$vs.loading();
