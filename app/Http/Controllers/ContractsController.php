@@ -8,6 +8,7 @@ use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 
 class ContractsController extends Controller
 {
@@ -125,7 +126,7 @@ class ContractsController extends Controller
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount + $this->otherDiscountAmount($request);
         $total_discount = $total_discount < data_get($request, 'tuition_fee_receivable') ? $total_discount : data_get($request, 'tuition_fee_receivable');
         $last_contract = u::first("SELECT count_recharge FROM contracts WHERE student_id=".data_get($request, 'student_id')." AND status > 0 ORDER BY count_recharge DESC LIMIT 1");
         $count_recharge = data_get($request, 'type') ==0 ? -1 : ($last_contract ? $last_contract->count_recharge + 1 : 0);
@@ -175,11 +176,11 @@ class ContractsController extends Controller
            'tuition_receivable' => data_get($request, 'tuition_receivable', data_get($request, 'total_amount')),
            'book_receivable' => data_get($request, 'book_receivable', 0),
            'scholarship_percent' => data_get($request, 'scholarship_percent', 0),
-           'promo_extra_percent' => data_get($request, 'promo_extra_percent', 0),
-           'checkin_group_percent' => data_get($request, 'checkin_group_percent', 0),
-           'resident_percent' => data_get($request, 'resident_percent', 0),
+           'promo_extra_percent' => data_get($request, 'is_promo_extra') ? data_get($request, 'promo_extra_percent', 0) : 0,
+           'checkin_group_percent' => data_get($request, 'is_checkin_group') ? data_get($request, 'checkin_group_percent', 0) : 0,
+           'resident_percent' => data_get($request, 'is_resident') ? data_get($request, 'resident_percent', 0) : 0,
            'gift_note' => data_get($request, 'gift_note', ''),
-        ), 'contracts');
+        ) + $this->otherDiscountFields($request), 'contracts');
 
         $materials = data_get($request, 'materials', []);
         if (!empty($materials) && is_array($materials)) {
@@ -339,6 +340,36 @@ class ContractsController extends Controller
         return response()->json($result);
     } 
 
+    /**
+     * Giảm trừ khác (nhập tay để khớp số tiền thu thực tế).
+     */
+    private function otherDiscountAmount($request)
+    {
+        return max(0, (int) data_get($request, 'other_discount_amount', 0));
+    }
+
+    /**
+     * Trường giảm trừ khác để ghi vào bảng contracts.
+     * Chỉ ghi khi DB đã có cột (migration 2026_11_17_000001 chưa chạy thì bỏ qua, không lỗi).
+     */
+    private function otherDiscountFields($request)
+    {
+        static $hasColumns = null;
+        if ($hasColumns === null) {
+            $hasColumns = Schema::hasColumn('contracts', 'other_discount_amount')
+                && Schema::hasColumn('contracts', 'other_discount_note');
+        }
+        if (!$hasColumns) {
+            return [];
+        }
+        $amount = $this->otherDiscountAmount($request);
+        $note = trim((string) data_get($request, 'other_discount_note', ''));
+        return [
+            'other_discount_amount' => $amount,
+            'other_discount_note' => $amount > 0 ? mb_substr($note, 0, 500) : null,
+        ];
+    }
+
     public function isManagerOrAccountant()
     {
         $user = Auth::user();
@@ -470,7 +501,7 @@ class ContractsController extends Controller
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id', data_get($pre_update_contract_info, 'student_id')), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
-        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount;
+        $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount + $this->otherDiscountAmount($request);
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
         $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
         $total_amount = data_get($payment, 'total', 0);
@@ -523,8 +554,12 @@ class ContractsController extends Controller
            'sibling_discount' => $sibling_discount,
            'tuition_receivable' => data_get($request, 'tuition_receivable', data_get($request, 'total_amount')),
            'book_receivable' => $book_receivable,
+           'scholarship_percent' => data_get($request, 'scholarship_percent', 0),
+           'promo_extra_percent' => data_get($request, 'is_promo_extra') ? data_get($request, 'promo_extra_percent', 0) : 0,
+           'checkin_group_percent' => data_get($request, 'is_checkin_group') ? data_get($request, 'checkin_group_percent', 0) : 0,
+           'resident_percent' => data_get($request, 'is_resident') ? data_get($request, 'resident_percent', 0) : 0,
            'gift_note' => data_get($request, 'gift_note', ''),
-        ), ['id'=>$contract_id],'contracts');
+        ) + $this->otherDiscountFields($request), ['id'=>$contract_id],'contracts');
 
         if(data_get($pre_update_contract_info, 'coupon_code') && (data_get($request,'coupon_code_check') != 1 || data_get($pre_update_contract_info, 'coupon_code') != data_get($request, 'coupon_code'))){
             $pre_coupon = u::getObject(['code'=>data_get($pre_update_contract_info, 'coupon_code')], 'coupons');

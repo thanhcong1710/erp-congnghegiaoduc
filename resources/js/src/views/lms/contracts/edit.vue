@@ -350,6 +350,38 @@
                     <span v-if="contract.is_resident" class="text-xs text-success block">Đã giảm nội khu: -{{ contract.resident_amount | formatNumber }} đ</span>
                   </div>
                 </div>
+
+                <!-- GIẢM TRỪ KHÁC (nhập tay để khớp số tiền thu thực tế) -->
+                <div class="vx-row other-discount-row">
+                  <div class="vx-col md:w-1/3 w-full mb-3">
+                    <label class="other-discount-label">Giảm trừ khác (đ)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      class="vs-inputx vs-input--input normal other-discount-input"
+                      v-model.number="contract.other_discount_amount"
+                      :disabled="!contract.can_edit_all"
+                      placeholder="0"
+                      @input="caculatorSession"
+                    />
+                    <span v-if="Number(contract.other_discount_amount) > 0" class="other-discount-hint">
+                      Đã giảm khác: -{{ contract.other_discount_amount | formatNumber }} đ
+                    </span>
+                  </div>
+                  <div class="vx-col md:w-2/3 w-full mb-3">
+                    <label class="other-discount-label">
+                      Lý do giảm trừ khác <span v-if="Number(contract.other_discount_amount) > 0" class="text-danger">(*)</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="vs-inputx vs-input--input normal other-discount-input"
+                      v-model="contract.other_discount_note"
+                      :disabled="!contract.can_edit_all"
+                      placeholder="VD: Chính sách riêng được BGĐ duyệt, làm tròn số tiền thu..."
+                    />
+                  </div>
+                </div>
               </vx-card>
             </div>
 
@@ -690,6 +722,8 @@
           is_resident: false,
           resident_percent: 0,
           resident_amount: 0,
+          other_discount_amount: 0,
+          other_discount_note: '',
           gift_note: '',
           materials: [],
           discount_code_id:'',
@@ -773,7 +807,8 @@
         axios.g(`/api/lms/contracts/show/${this.$route.params.id}`)
           .then(response => {
           this.$vs.loading.close();
-          this.contract = response.data
+          // Gộp với giá trị mặc định để các key như is_promo_extra / is_resident / other_discount_* vẫn reactive
+          this.contract = Object.assign({}, this.contract, response.data)
           this.contract.total_amount = response.data.must_charge
           this.contract.total_session = response.data.total_sessions
           this.contract.tuition_fee_amount = response.data.init_tuition_fee_amount
@@ -794,6 +829,8 @@
           this.contract.resident_percent = response.data.resident_percent || 0;
           this.contract.is_resident = (response.data.resident_percent > 0);
           this.contract.gift_note = response.data.gift_note || '';
+          this.$set(this.contract, 'other_discount_amount', Number(response.data.other_discount_amount) || 0);
+          this.$set(this.contract, 'other_discount_note', response.data.other_discount_note || '');
           this.contract.can_edit_all = (response.data.can_edit_all !== undefined) ? response.data.can_edit_all : true;
           this.contract.receipts = response.data.receipts || [];
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
@@ -912,6 +949,20 @@
           this.contract.gift_note = ''
         }
       },
+      // Khi mở màn sửa: gán bằng code không kích hoạt @input của vue-select → tự nạp lại số tháng gói
+      // và % chính sách, nhưng GIỮ % học bổng / trạng thái checkbox đã lưu trong hợp đồng.
+      restorePolicyFromTuitionFee(fee) {
+        if (!fee) return;
+        const savedScholarship = Number(this.contract.scholarship_percent) || 0;
+        const savedCheckin = Number(this.contract.checkin_group_percent) || 0;
+        const savedGift = this.contract.gift_note;
+        this.$set(this.contract, 'number_of_months', fee.number_of_months || 0);
+        this.applyStemkeyPolicy(fee.number_of_months, this.contract.product_id);
+        this.contract.scholarship_percent = savedScholarship;
+        if (savedCheckin > 0) this.contract.checkin_group_percent = savedCheckin;
+        if (savedGift) this.contract.gift_note = savedGift;
+        this.caculatorSession();
+      },
       applyStemkeyPolicy(months, productId) {
         let scholarship = 0;
         let checkin = 0;
@@ -1016,6 +1067,7 @@
             this.html.tuition_fee.list = response.data
             if(this.tmp_tuition_fee_id){
               this.html.tuition_fee.item = this.html.tuition_fee.list.filter(item => item.id == this.tmp_tuition_fee_id)[0]
+              this.restorePolicyFromTuitionFee(this.html.tuition_fee.item)
               this.loadDiscountCode()
             }
           }).catch(e => console.log(e))
@@ -1142,6 +1194,14 @@
         // 8. Mã chiết khấu thủ công
         currentTuition = Math.max(0, currentTuition - Number(this.contract.discount_code_amount || 0));
 
+        // 9. Giảm trừ khác (nhập tay, không vượt quá học phí còn lại)
+        let otherDiscount = Math.max(0, Math.round(Number(this.contract.other_discount_amount) || 0));
+        if (otherDiscount > currentTuition) {
+          otherDiscount = currentTuition;
+          this.contract.other_discount_amount = otherDiscount;
+        }
+        currentTuition = currentTuition - otherDiscount;
+
         this.contract.tuition_receivable = currentTuition;
 
         // 9. Tiền sách & Học liệu mua kèm
@@ -1179,6 +1239,10 @@
           mess += " - Ngày dự kiến học không được để trống<br/>";
           resp = false;
         }
+        if (this.contract.can_edit_all && Number(this.contract.other_discount_amount) > 0 && !String(this.contract.other_discount_note || '').trim()) {
+          mess += " - Vui lòng nhập lý do giảm trừ khác<br/>";
+          resp = false;
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
@@ -1207,6 +1271,39 @@
   }
 </script>
 <style>
+  .other-discount-row {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed #cbd5e1;
+  }
+  .other-discount-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .other-discount-input {
+    width: 100%;
+    font-size: 14px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+  .other-discount-input:focus {
+    border-color: #7367f0 !important;
+    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15);
+  }
+  .other-discount-input:disabled {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1 !important;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+  .other-discount-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: #16a34a;
+  }
   th{
     text-align: center;
   }

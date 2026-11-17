@@ -357,6 +357,36 @@
                     <span v-if="contract.is_resident" class="text-xs text-success block">Đã giảm nội khu: -{{ contract.resident_amount | formatNumber }} đ</span>
                   </div>
                 </div>
+
+                <!-- GIẢM TRỪ KHÁC (nhập tay để khớp số tiền thu thực tế) -->
+                <div class="vx-row other-discount-row">
+                  <div class="vx-col md:w-1/3 w-full mb-3">
+                    <label class="other-discount-label">Giảm trừ khác (đ)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1000"
+                      class="vs-inputx vs-input--input normal other-discount-input"
+                      v-model.number="contract.other_discount_amount"
+                      placeholder="0"
+                      @input="caculatorSession"
+                    />
+                    <span v-if="Number(contract.other_discount_amount) > 0" class="other-discount-hint">
+                      Đã giảm khác: -{{ contract.other_discount_amount | formatNumber }} đ
+                    </span>
+                  </div>
+                  <div class="vx-col md:w-2/3 w-full mb-3">
+                    <label class="other-discount-label">
+                      Lý do giảm trừ khác <span v-if="Number(contract.other_discount_amount) > 0" class="text-danger">(*)</span>
+                    </label>
+                    <input
+                      type="text"
+                      class="vs-inputx vs-input--input normal other-discount-input"
+                      v-model="contract.other_discount_note"
+                      placeholder="VD: Chính sách riêng được BGĐ duyệt, làm tròn số tiền thu..."
+                    />
+                  </div>
+                </div>
               </vx-card>
             </div>
 
@@ -639,6 +669,8 @@
           is_resident: false,
           resident_percent: 0,
           resident_amount: 0,
+          other_discount_amount: 0,
+          other_discount_note: '',
           gift_note: '',
           materials: [],
           discount_code_id:'',
@@ -1092,6 +1124,14 @@
         // 8. Mã chiết khấu thủ công
         currentTuition = Math.max(0, currentTuition - Number(this.contract.discount_code_amount || 0));
 
+        // 9. Giảm trừ khác (nhập tay, không vượt quá học phí còn lại)
+        let otherDiscount = Math.max(0, Math.round(Number(this.contract.other_discount_amount) || 0));
+        if (otherDiscount > currentTuition) {
+          otherDiscount = currentTuition;
+          this.contract.other_discount_amount = otherDiscount;
+        }
+        currentTuition = currentTuition - otherDiscount;
+
         this.contract.tuition_receivable = currentTuition;
 
         // 9. Tiền sách & Học liệu mua kèm
@@ -1102,7 +1142,14 @@
         this.contract.book_receivable = bookReceivable;
 
         // Tổng tiền thanh toán (Học phí + Sách)
+        const prevTotal = Number(this.contract.total_amount) || 0;
         this.contract.total_amount = this.contract.tuition_receivable + this.contract.book_receivable;
+
+        // Số tiền thu lần 1: nếu đang = tổng cũ (chưa sửa tay) hoặc vượt tổng mới → đồng bộ theo tổng mới
+        const initPay = Number(this.contract.initial_payment_amount) || 0;
+        if (initPay > 0 && (initPay === prevTotal || initPay > this.contract.total_amount)) {
+          this.contract.initial_payment_amount = this.contract.total_amount;
+        }
 
         // Tổng số buổi học
         this.contract.total_session = Number(this.contract.tuition_fee_session || 0) + 
@@ -1150,6 +1197,10 @@
           mess += " - Số tiền thu lần 1 không được vượt quá tổng thanh toán<br/>";
           resp = false;
         }
+        if (Number(this.contract.other_discount_amount) > 0 && !String(this.contract.other_discount_note || '').trim()) {
+          mess += " - Vui lòng nhập lý do giảm trừ khác<br/>";
+          resp = false;
+        }
         if (!resp) {
           this.alert.color = 'danger'
           this.alert.body = mess;
@@ -1180,3 +1231,39 @@
     },
   }
 </script>
+
+<style scoped>
+  .other-discount-row {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px dashed #cbd5e1;
+  }
+  .other-discount-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .other-discount-input {
+    width: 100%;
+    font-size: 14px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+  .other-discount-input:focus {
+    border-color: #7367f0 !important;
+    box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.15);
+  }
+  .other-discount-input:disabled {
+    background: #f1f5f9;
+    border: 1px dashed #cbd5e1 !important;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+  .other-discount-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: #16a34a;
+  }
+</style>
