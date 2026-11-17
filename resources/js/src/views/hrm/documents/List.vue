@@ -168,6 +168,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 
 export default {
   data() {
@@ -247,7 +248,7 @@ export default {
     openEditModal(item) {
       this.selectedItem = item;
       this.editForm = {
-        profile_received_date: item.profile_received_date || new Date().toISOString().split('T')[0],
+        profile_received_date: item.profile_received_date || moment().format('YYYY-MM-DD'),
         profile_note: item.profile_note || ''
       };
       

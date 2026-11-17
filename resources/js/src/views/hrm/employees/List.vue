@@ -800,7 +800,7 @@ export default {
       this.selectedEmployee = emp;
       this.statusForm = {
         work_status: emp.work_status || 'working',
-        resigned_date: emp.resigned_date || new Date().toISOString().split('T')[0],
+        resigned_date: emp.resigned_date || moment().format('YYYY-MM-DD'),
         resigned_reason: emp.resigned_reason || ''
       };
       this.statusModalActive = true;

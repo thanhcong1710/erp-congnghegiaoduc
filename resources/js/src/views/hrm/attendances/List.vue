@@ -940,6 +940,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 
 export default {
   data() {
@@ -950,7 +951,7 @@ export default {
         altFormat: 'd/m/Y',
         allowInput: true
       },
-      selectedDate: new Date().toISOString().split('T')[0],
+      selectedDate: moment().format('YYYY-MM-DD'),
       selectedDepartment: '',
       selectedShift: '',
       shifts: [],

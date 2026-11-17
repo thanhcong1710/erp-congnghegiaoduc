@@ -715,6 +715,11 @@
             <input type="number" step="0.5" class="filter-input w-full" v-model="form.duration_days" />
           </div>
         </div>
+        <!-- Hiển thị rõ ngày nghỉ để tránh nhầm với ngày gửi đơn -->
+        <div class="mb-4 text-sm" v-if="leaveDateHint">
+          <div class="text-gray-700">Ngày nghỉ: <strong>{{ leaveDateHint.label }}</strong></div>
+          <div v-for="(w, wIdx) in leaveDateHint.warnings" :key="wIdx" class="text-warning font-semibold mt-1">⚠ {{ w }}</div>
+        </div>
 
         <div class="vx-row mb-4" v-if="form.request_category === 'shift_change'">
           <div class="vx-col w-full">
@@ -1133,6 +1138,17 @@ export default {
       if (!this.adjustingEmployee) return 'ĐIỀU CHỈNH QUỸ PHÉP NĂM';
       return `ĐIỀU CHỈNH QUỸ PHÉP NĂM - ${this.adjustingEmployee.full_name} (${this.adjustingEmployee.employee_code})`;
     },
+    leaveDateHint() {
+      const { start_date: start, end_date: end } = this.form;
+      if (!start || !end) return null;
+      const dayLabel = d => `${['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'][moment(d).day()]}, ${moment(d).format('DD/MM/YYYY')}`;
+      const label = start === end ? dayLabel(start) : `${dayLabel(start)} → ${dayLabel(end)}`;
+      // Cảnh báo ngày nghỉ rơi vào cuối tuần hoặc đã qua
+      const warnings = [];
+      if ([start, end].some(d => [0, 6].includes(moment(d).day()))) warnings.push('Ngày nghỉ rơi vào Thứ 7 / Chủ nhật, vui lòng kiểm tra lại.');
+      if (moment(start).isBefore(moment(), 'day')) warnings.push('Ngày nghỉ đã qua (trước hôm nay).');
+      return { label, warnings };
+    },
     previewRemainingDays() {
       const total = parseFloat(this.adjustForm.total_days) || 0;
       const used = parseFloat(this.adjustForm.used_days) || 0;
@@ -1498,8 +1514,8 @@ export default {
         user_id: null,
         request_category: 'leave',
         leave_type_id: this.leaveTypes.length > 0 ? this.leaveTypes[0].id : null,
-        start_date: new Date().toISOString().substr(0, 10),
-        end_date: new Date().toISOString().substr(0, 10),
+        start_date: moment().format('YYYY-MM-DD'),
+        end_date: moment().format('YYYY-MM-DD'),
         duration_days: 1.0,
         target_shift_info: '',
         reason: ''

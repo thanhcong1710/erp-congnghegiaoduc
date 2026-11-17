@@ -159,6 +159,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 
 export default {
   data() {
@@ -231,7 +232,7 @@ export default {
         user_id: firstEmp && firstEmp.user_id ? firstEmp.user_id : null,
         contract_number: '',
         contract_type: 'Hợp đồng 1 năm',
-        start_date: new Date().toISOString().split('T')[0],
+        start_date: moment().format('YYYY-MM-DD'),
         end_date: '',
         basic_salary: 0
       };

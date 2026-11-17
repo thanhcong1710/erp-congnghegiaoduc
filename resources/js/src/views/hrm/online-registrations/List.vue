@@ -431,6 +431,7 @@
 
 <script>
 import axios from '../../../http/axios.js';
+import moment from 'moment';
 import vSelect from 'vue-select';
 
 export default {
@@ -441,7 +442,7 @@ export default {
     // Tính ngày mai để chặn quá khứ và hiện tại
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = moment(tomorrow).format('YYYY-MM-DD');
 
     return {
       filterMonth: new Date().getMonth() + 1,
