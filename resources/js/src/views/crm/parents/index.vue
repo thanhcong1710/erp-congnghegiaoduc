@@ -290,7 +290,7 @@
       <!-- BẢNG DANH SÁCH KHÁCH HÀNG TỔNG QUAN NÂNG CẤP CHUẨN ERP -->
       <div class="overview-table-wrapper mt-3">
         <div class="overview-table-scroll">
-          <table class="overview-custom-table" style="min-width: 1750px">
+          <table class="overview-custom-table" style="width: 1956px; min-width: 1956px">
             <thead>
               <tr>
                 <th class="th-center" style="width: 46px;">
@@ -399,7 +399,7 @@
                 </td>
 
                 <!-- Người phụ trách -->
-                <td class="font-medium text-gray-800 text-sm" style="min-width: 180px;">
+                <td class="font-medium text-gray-800 text-sm">
                   <div v-if="item.owner_name">
                     <span class="font-semibold text-gray-800">{{ item.owner_name }}</span>
                     <span v-if="item.owner_team_name" class="text-primary font-medium"> / {{ item.owner_team_name }}</span>
@@ -1172,7 +1172,7 @@ export default {
   max-width: 100%;
 }
 .overview-custom-table {
-  width: 100%;
+  table-layout: fixed; /* cột luôn đúng width khai báo ở <th> */
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;

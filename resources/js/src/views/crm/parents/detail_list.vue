@@ -171,6 +171,26 @@
               <span slot="noResult">Không tìm thấy dữ liệu</span>
             </multiselect>
           </div>
+
+          <!-- Năm sinh học sinh -->
+          <div class="vx-col sm:w-1/2 md:w-1/3 lg:w-1/4 w-full mb-4">
+            <label class="custom-filter-label">
+              <i class="feather icon-calendar text-primary mr-1"></i> Năm sinh
+            </label>
+            <multiselect
+              name="search_birth_year"
+              placeholder="Chọn năm sinh"
+              v-model="searchData.arr_birth_year"
+              :options="birthYearOptions"
+              :close-on-select="false"
+              :hide-selected="true"
+              :multiple="true"
+              :searchable="true"
+              selectedLabel="" selectLabel="" deselectLabel=""
+            >
+              <span slot="noResult">Không tìm thấy dữ liệu</span>
+            </multiselect>
+          </div>
         </div>
 
         <!-- ACTION TOOLBAR VÀ NÚT CHUYỂN CHẾ ĐỘ XEM -->
@@ -234,6 +254,22 @@
         </div>
       </div>
 
+      <!-- BÁO DATA THUỘC QUYỀN QUẢN LÝ CỦA NGƯỜI KHÁC (tìm theo SĐT) -->
+      <div v-for="fm in foreign_matches" :key="'fm-' + fm.id" class="foreign-owner-banner mt-3 mb-2">
+        <i class="feather icon-alert-triangle mr-2"></i>
+        <span>
+          SĐT <b>{{ fm.mobile_1 }}</b><span v-if="fm.mobile_2"> / {{ fm.mobile_2 }}</span> – KH <b>{{ fm.name }}</b>
+          <template v-if="fm.in_warehouse == 1"> đang nằm trong <b>Data kho</b> (trước đây do {{ fm.owner_name || 'chưa có người' }} quản lý)</template>
+          <template v-else> đang thuộc quyền quản lý của <b>{{ fm.owner_name || 'chưa có người phụ trách' }}</b>
+            <span v-if="fm.owner_team_name"> ({{ fm.owner_team_name }}<span v-if="fm.owner_branch_name"> – {{ fm.owner_branch_name }}</span>)</span>
+            <span v-else-if="fm.owner_branch_name"> ({{ fm.owner_branch_name }})</span>
+          </template>
+        </span>
+        <vs-button v-if="fm.in_warehouse == 1" size="small" color="success" class="ml-3 btn-nowrap" @click="claimParent(fm)">
+          <i class="feather icon-download mr-1"></i> Nhận về chăm sóc
+        </vs-button>
+      </div>
+
       <!-- TABS PHÂN LOẠI -->
       <vs-tabs v-model="activeItem">
         <vs-tab :label="'Tất cả ('+ total.total_0 +')'" @click.prevent="setActive(0)"></vs-tab>
@@ -241,12 +277,17 @@
         <vs-tab :label="'Lịch chăm sóc trong ngày ('+ total.total_2 +')'" @click.prevent="setActive(2)"></vs-tab>
         <vs-tab :label="'KH quá hạn xử lý ('+ total.total_3+')'" @click.prevent="setActive(3)"></vs-tab>
         <vs-tab :label="'Ticket chưa xử lý ('+ total.total_4 +')'" @click.prevent="setActive(4)"></vs-tab>
+        <vs-tab :label="'Data kho ('+ (total.total_5 || 0) +')'" @click.prevent="setActive(5)"></vs-tab>
       </vs-tabs>
+      <div v-if="activeItem === 5" class="warehouse-hint mt-2 mb-2">
+        <i class="feather icon-info mr-2"></i>
+        Data chưa đăng ký học, quá 10 ngày kể từ ngày nhận data sẽ tự động về kho. Bấm <b>"Nhận về chăm sóc"</b> để chuyển data về CRM của bạn.
+      </div>
 
       <!-- BẢNG CHI TIẾT 16 CỘT -->
       <div class="detail-table-wrapper mt-3">
         <div class="detail-table-scroll-container">
-          <table class="detail-custom-table" style="min-width: 2050px;">
+          <table class="detail-custom-table" style="width: 3008px; min-width: 3008px;">
             <thead>
               <tr>
                 <!-- Checkbox -->
@@ -304,7 +345,7 @@
               >
                 <!-- Checkbox -->
                 <td class="td-center">
-                  <div class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
+                  <div v-if="item.in_scope != 0" class="vs-component con-vs-checkbox vs-checkbox-primary vs-checkbox-default">
                     <input type="checkbox" v-model="checked_list" :value="item.id" class="vs-checkbox--input" >
                     <span class="checkbox_x vs-checkbox" style="border: 2px solid rgb(180, 180, 180);">
                       <span class="vs-checkbox--check">
@@ -316,7 +357,10 @@
 
                 <!-- Cột 1: CÔNG CỤ -->
                 <td class="td-center sticky-col">
-                  <div class="action-btn-group">
+                  <vs-button v-if="item.in_scope == 0" size="small" color="success" class="btn-nowrap" @click="claimParent(item)">
+                    <i class="feather icon-download mr-1"></i> Nhận về
+                  </vs-button>
+                  <div v-else class="action-btn-group">
                     <!-- Nút tím: Thêm chăm sóc -->
                     <button 
                       class="btn-tool btn-tool-purple" 
@@ -374,7 +418,9 @@
 
                 <!-- Cột 3: Điện thoại -->
                 <td class="td-center">
+                  <span v-if="item.in_scope == 0" class="font-semibold">{{ item.mobile_1 }}</span>
                   <a 
+                    v-else
                     href="javascript:void(0)" 
                     class="font-semibold text-blue-600 hover:underline"
                     @click="openAddCare(item)"
@@ -389,9 +435,11 @@
 
                 <!-- Cột 4: Họ và tên -->
                 <td>
-                  <router-link :to="`/crm/parent/${item.id}/detail`" class="font-semibold text-blue-600 hover:underline">
+                  <router-link v-if="item.in_scope != 0" :to="`/crm/parent/${item.id}/detail`" class="font-semibold text-blue-600 hover:underline">
                     {{ item.name }}
                   </router-link>
+                  <span v-else class="font-semibold text-gray-800">{{ item.name }}</span>
+                  <span v-if="item.in_warehouse == 1" class="badge-warehouse ml-1">Kho</span>
                   <div v-if="item.students && item.students.length" class="text-xs text-gray-500 mt-1">
                     <span class="inline-block bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-2xs">
                       HS: {{ item.students.map(s => s.name).join(', ') }}
@@ -401,7 +449,7 @@
 
                 <!-- Cột 5: Lịch sử chăm sóc -->
                 <td>
-                  <div class="care-history-box" v-if="item.care_history && item.care_history.length">
+                  <div class="care-history-box cell-scroll-box" v-if="item.care_history && item.care_history.length">
                     <div 
                       class="care-log-row" 
                       v-for="(care, cIdx) in item.care_history" 
@@ -428,7 +476,7 @@
 
                 <!-- Cột 8: Ghi chú -->
                 <td>
-                  <div class="notes-bullet-box">
+                  <div class="notes-bullet-box cell-scroll-box">
                     <div class="note-bullet-line" v-if="item.address">
                       <span class="bullet-dot">•</span> 
                       <strong class="text-dark">address:</strong> {{ item.address }}
@@ -446,7 +494,7 @@
                 </td>
 
                 <!-- Cột 7: Người quản lý -->
-                <td class="font-medium text-dark text-sm" style="min-width: 180px;">
+                <td class="font-medium text-dark text-sm">
                   <div v-if="item.owner_name">
                     <span class="font-semibold text-dark">{{ item.owner_name }}</span>
                     <span v-if="item.owner_team_name" class="text-primary font-medium"> / {{ item.owner_team_name }}</span>
@@ -958,9 +1006,18 @@ export default {
         total_2: 0,
         total_3: 0,
         total_4: 0,
+        total_5: 0,
       },
+      foreign_matches: [],
+      birthYearOptions: (() => {
+        const y = new Date().getFullYear()
+        const arr = []
+        for (let i = y - 2; i >= y - 18; i--) arr.push(i)
+        return arr
+      })(),
       searchData: {
         keyword: '',
+        arr_birth_year: [],
         arr_status: '',
         arr_product: '',
         arr_level: '',
@@ -1103,6 +1160,7 @@ export default {
       if (this.searchData.arr_source && this.searchData.arr_source.length) count++
       if (this.searchData.arr_source_detail && this.searchData.arr_source_detail.length) count++
       if (this.searchData.arr_product && this.searchData.arr_product.length) count++
+      if (this.searchData.arr_birth_year && this.searchData.arr_birth_year.length) count++
       return count
     },
     selectAll: {
@@ -1184,6 +1242,7 @@ export default {
         level: this.searchData.ids_level,
         start_date: startDate,
         end_date: endDate,
+        birth_year: this.searchData.arr_birth_year || [],
         pagination: this.pagination,
         type_search: this.searchData.type_search
       }
@@ -1196,6 +1255,7 @@ export default {
           this.$vs.loading.close()
           this.parents = response.data.list || []
           this.total = response.data.detail_total || this.total
+          this.foreign_matches = response.data.foreign_matches || []
           this.pagination = response.data.paging || this.pagination
           setTimeout(() => {
             this.pagination.init = 1
@@ -1218,6 +1278,7 @@ export default {
       this.searchData.keyword = ''
       this.searchData.arr_status = ''
       this.searchData.arr_product = ''
+      this.searchData.arr_birth_year = []
       this.searchData.arr_level = ''
       this.searchData.arr_owner = ''
       this.searchData.arr_source = ''
@@ -1250,7 +1311,39 @@ export default {
     setActive(menuItem) {
       this.searchData.type_search = menuItem
       this.activeItem = menuItem
+      this.checked_list = []
       this.getData()
+    },
+
+    // Nhận data trong kho về chăm sóc
+    claimParent(item) {
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'success',
+        title: 'Nhận về chăm sóc',
+        text: `Bạn muốn nhận khách hàng ${item.name} (${item.mobile_1}) về CRM của mình?`,
+        acceptText: 'Đồng ý',
+        cancelText: 'Hủy',
+        accept: () => {
+          this.$vs.loading()
+          axios.p('/api/crm/parents/overwrite', { parent_id: item.id })
+            .then(res => {
+              this.$vs.loading.close()
+              const ok = res.data.status == 1
+              this.$vs.notify({
+                title: ok ? 'Thành Công' : 'Thông báo',
+                text: res.data.message,
+                color: ok ? 'success' : 'danger',
+                iconPack: 'feather',
+                icon: ok ? 'icon-check' : 'icon-alert-circle'
+              })
+              this.getData()
+            })
+            .catch(() => {
+              this.$vs.loading.close()
+            })
+        }
+      })
     },
 
     // Bàn giao nhiều khách hàng
@@ -1784,7 +1877,7 @@ export default {
   max-width: 100%;
 }
 .detail-custom-table {
-  width: 100%;
+  table-layout: fixed; /* cột luôn đúng width khai báo ở <th> */
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
@@ -1797,7 +1890,7 @@ export default {
 }
 .detail-custom-table th {
   padding: 12px 14px;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: none;
   border-right: 1px solid rgba(255, 255, 255, 0.12);
@@ -1832,6 +1925,7 @@ export default {
   border-bottom: 1px solid #e2e8f0;
   vertical-align: top;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 .detail-custom-table td:last-child {
   border-right: none;
@@ -1896,11 +1990,26 @@ export default {
 
 /* CARE HISTORY BOX */
 .care-history-box {
-  max-height: 120px;
-  overflow-y: auto;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
-  padding-right: 4px;
+}
+/* Ô nội dung dài (Lịch sử chăm sóc, Ghi chú): giới hạn chiều cao + thanh cuộn luôn hiển thị */
+.cell-scroll-box {
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+.cell-scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+.cell-scroll-box::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.cell-scroll-box::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 .care-log-row {
   margin-bottom: 6px;
@@ -1913,20 +2022,20 @@ export default {
   border-bottom: none;
 }
 .care-method-badge {
-  font-size: 10.5px;
+  font-size: 13px;
   color: #7367f0;
   font-weight: 600;
   margin-right: 2px;
 }
 .care-status-badge {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   margin-right: 2px;
 }
 
 /* NOTES BULLET BOX */
 .notes-bullet-box {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
 }
 .note-bullet-line {
@@ -1996,6 +2105,40 @@ export default {
   font-size: 11.5px;
   color: #334155;
   font-weight: 500;
+}
+
+/* DATA KHO & BÁO CHỦ SỞ HỮU */
+.foreign-owner-banner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 14px;
+}
+.warehouse-hint {
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-size: 14px;
+}
+.badge-warehouse {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap !important;
+}
+.btn-nowrap {
+  white-space: nowrap !important;
 }
 
 /* DROPDOWN MENU */

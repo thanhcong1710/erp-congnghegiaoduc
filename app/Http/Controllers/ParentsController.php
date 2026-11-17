@@ -31,6 +31,35 @@ class ParentsController extends Controller
         return " $a.is_lock = 0 AND ".self::warehouseEligibleCond($a);
     }
 
+    /**
+     * Tìm theo SĐT: trả về KH khớp chính xác SĐT nhưng nằm ngoài phạm vi quản lý của user,
+     * để báo "data đang thuộc quyền quản lý của ai". Chỉ áp dụng khi keyword là SĐT (>= 9 số).
+     */
+    private static function findForeignOwners($keyword, $can_view_all, $staff_ids)
+    {
+        $keyword = trim((string) $keyword);
+        $phone = self::normalizePhone($keyword);
+        if ($can_view_all || strlen($phone) < 9 || $phone !== preg_replace('/[\s.\-]/', '', $keyword)) {
+            return [];
+        }
+        $rows = u::query("SELECT p.id, p.name, p.mobile_1, p.mobile_2,
+                u.name AS owner_name, u.branch_name AS owner_branch_name,
+                m.name AS leader_name,
+                (SELECT COUNT(*) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
+                IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse
+            FROM crm_parents AS p
+                LEFT JOIN users AS u ON u.id = p.owner_id
+                LEFT JOIN users AS m ON m.id = u.manager_id
+            WHERE (p.mobile_1 = '$phone' OR p.mobile_2 = '$phone')
+                AND (p.owner_id IS NULL OR p.owner_id NOT IN ($staff_ids))
+            LIMIT 5");
+        foreach ($rows as $row) {
+            $leader = $row->leader_name ?: ($row->is_owner_leader ? $row->owner_name : '');
+            $row->owner_team_name = $leader ? 'Team '.$leader : '';
+        }
+        return $rows;
+    }
+
     /** Chuẩn hoá SĐT: bỏ ký tự không phải số */
     private static function normalizePhone($phone)
     {
@@ -61,7 +90,6 @@ class ParentsController extends Controller
         $can_view_all = Auth::user()->checkPermission('canViewAllParents');
         $staff_ids = $can_view_all ? '' : Auth::user()->getStaffHasUser();
         $scope_cond = $can_view_all ? "" : " AND p.owner_id IN ($staff_ids)";
-        $scope_cond_not = $can_view_all ? "" : " AND (p.owner_id IS NULL OR p.owner_id NOT IN ($staff_ids))";
 
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
@@ -185,25 +213,7 @@ class ParentsController extends Controller
             'total_5' => $total_5->total,
         );
 
-        // Tìm theo SĐT: báo data thuộc quyền quản lý của ai nếu nằm ngoài phạm vi của user
-        $data->foreign_matches = [];
-        $phone = self::normalizePhone($keyword);
-        if (!$can_view_all && strlen($phone) >= 9 && $phone === preg_replace('/[\s.\-]/', '', $keyword)) {
-            $data->foreign_matches = u::query("SELECT p.id, p.name, p.mobile_1, p.mobile_2,
-                    u.name AS owner_name, u.branch_name AS owner_branch_name,
-                    m.name AS leader_name,
-                    (SELECT COUNT(*) FROM role_has_user WHERE user_id = p.owner_id AND role_id = 69) AS is_owner_leader,
-                    IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse
-                FROM crm_parents AS p
-                    LEFT JOIN users AS u ON u.id = p.owner_id
-                    LEFT JOIN users AS m ON m.id = u.manager_id
-                WHERE (p.mobile_1 = '$phone' OR p.mobile_2 = '$phone') $scope_cond_not
-                LIMIT 5");
-            foreach ($data->foreign_matches as $row) {
-                $leader = $row->leader_name ?: ($row->is_owner_leader ? $row->owner_name : '');
-                $row->owner_team_name = $leader ? 'Team '.$leader : '';
-            }
-        }
+        $data->foreign_matches = self::findForeignOwners($keyword, $can_view_all, $staff_ids);
         return response()->json($data);
     }
 
@@ -220,6 +230,7 @@ class ParentsController extends Controller
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_search = isset($request->type_search) ? (int)$request->type_search : 0;
         $branch_id = isset($request->branch_id) ? (int)$request->branch_id : 0;
+        $birth_year = isset($request->birth_year) ? (array) $request->birth_year : [];
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -227,10 +238,9 @@ class ParentsController extends Controller
         $offset = $page == 1 ? 0 : $limit * ($page - 1);
         $limitation = $limit > 0 ? " LIMIT $offset, $limit" : "";
         $cond = " 1 ";
-        
-        if (!Auth::user()->checkPermission('canViewAllParents')) {
-            $cond .= " AND p.owner_id IN (" . Auth::user()->getStaffHasUser() . ")";
-        }
+        $can_view_all = Auth::user()->checkPermission('canViewAllParents');
+        $staff_ids = $can_view_all ? '' : Auth::user()->getStaffHasUser();
+        $scope_cond = $can_view_all ? "" : " AND p.owner_id IN ($staff_ids)";
         
         if (!empty($status)) {
             $status_ids = is_array($status) ? implode(",", array_map('intval', $status)) : (int)$status;
@@ -260,6 +270,10 @@ class ParentsController extends Controller
             )";
         }
         
+        $birth_year = array_values(array_filter(array_map('intval', $birth_year)));
+        if (!empty($birth_year)) {
+            $cond .= " AND EXISTS (SELECT 1 FROM crm_students AS bcs WHERE bcs.parent_id = p.id AND YEAR(bcs.birthday) IN (".implode(",", $birth_year)."))";
+        }
         if ($keyword !== '') {
             $kw = addslashes($keyword);
             $cond .= " AND (p.name LIKE '%$kw%' OR p.mobile_1 LIKE '%$kw%' OR p.mobile_2 LIKE '%$kw%') ";
@@ -278,6 +292,8 @@ class ParentsController extends Controller
         $cond_3 = " AND next_care_date < '" . date('Y-m-d') . "' 
             AND (p.care_date < p.next_care_date OR p.care_date IS NULL) ";
         $cond_4 = " AND (SELECT count(id) FROM crm_tickets WHERE parent_id = p.id AND status !=4 AND status!=5) > 0 ";
+        // type_search=5: Data kho – toàn trung tâm
+        $cond_5 = " AND ".self::warehouseCond('p');
 
         $order_by = " ORDER BY p.id DESC ";
         $tmp_cond = "";
@@ -292,7 +308,12 @@ class ParentsController extends Controller
         } elseif ($type_search == 4) {
             $tmp_cond = $cond_4;
             $order_by = " ORDER BY p.last_ticket_date DESC ";
+        } elseif ($type_search == 5) {
+            $tmp_cond = $cond_5;
+            $order_by = " ORDER BY COALESCE(p.last_assign_date, p.created_at) ASC ";
         }
+        $base_cond = $cond;
+        $cond = $type_search == 5 ? $base_cond : $base_cond.$scope_cond;
 
         $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
         
@@ -321,6 +342,8 @@ class ParentsController extends Controller
                 p.last_assign_date,
                 p.next_care_date,
                 p.care_date AS last_time_care,
+                IF(".self::warehouseCond('p').", 1, 0) AS in_warehouse,
+                ".($can_view_all ? "1" : "IF(p.owner_id IN ($staff_ids), 1, 0)")." AS in_scope,
                 (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
                 (SELECT name FROM source_detail WHERE id=p.source_detail_id) AS source_detail_name,
                 (SELECT note FROM crm_customer_care WHERE parent_id=p.id AND status=1 ORDER BY care_date DESC LIMIT 1) AS last_care,
@@ -425,13 +448,16 @@ class ParentsController extends Controller
         $total_2 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_2 ");
         $total_3 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_3 ");
         $total_4 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $cond_4 ");
+        $total_5 = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $base_cond $cond_5 ");
         $data->detail_total = (object)array(
             'total_0' => $total_0->total,
             'total_1' => $total_1->total,
             'total_2' => $total_2->total,
             'total_3' => $total_3->total,
             'total_4' => $total_4->total,
+            'total_5' => $total_5->total,
         );
+        $data->foreign_matches = self::findForeignOwners($keyword, $can_view_all, $staff_ids);
         return response()->json($data);
     }
 
