@@ -522,6 +522,10 @@ class ContractsController extends Controller
                 return response()->json(['status' => 0, 'message' => "$label không tồn tại."], 422);
             }
         }
+        if ($new_ec_leader_id && $new_ec_leader_id !== (int)data_get($pre_update_contract_info, 'ec_leader_id')
+            && !DB::selectOne("SELECT 1 FROM role_has_user AS ru JOIN roles AS r ON r.id = ru.role_id WHERE ru.user_id = ? AND r.code = ?", [$new_ec_leader_id, \App\Enums\SystemCode::ROLE_EC_LEADER])) {
+            return response()->json(['status' => 0, 'message' => 'EC Leader phải là trưởng nhóm kinh doanh.'], 422);
+        }
         $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
         $total_amount = data_get($payment, 'total', 0);
         $availableSession = (int) data_get($request, 'tuition_fee_session') && (int)data_get($request, 'total_amount') ? 

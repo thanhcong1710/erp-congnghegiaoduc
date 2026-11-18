@@ -113,7 +113,7 @@
                 v-if="contract.can_edit_all"
                 label="label"
                 placeholder="Chọn EC Leader"
-                :options="html.ecs.list"
+                :options="ecLeaderOptions"
                 v-model="html.ecs.leader"
                 :searchable="true"
                 :clearable="false"
@@ -830,6 +830,10 @@
       this.loadDetail();
     },
     computed: {
+      // EC Leader chỉ lấy trưởng nhóm kinh doanh (role ec_leader); giữ leader hiện tại để không mất dữ liệu cũ
+      ecLeaderOptions() {
+        return this.html.ecs.list.filter(i => Number(i.is_leader) === 1 || Number(i.id) === this.origin_ec_leader_id)
+      },
       ecChanged() {
         return Number(this.contract.ec_id || 0) !== this.origin_ec_id || Number(this.contract.ec_leader_id || 0) !== this.origin_ec_leader_id
       }
@@ -910,7 +914,7 @@
           const list = Array.isArray(res.data) ? res.data : []
           // EC/EC leader hiện tại có thể đã nghỉ hoặc khác chi nhánh → vẫn hiển thị để không mất dữ liệu
           ;[[info.ec_id, info.ec_name], [info.ec_leader_id, info.ec_leader_name]].forEach(([id, name]) => {
-            if (Number(id) && !list.some(i => Number(i.id) === Number(id))) list.push({ id: Number(id), label: name || `#${id}`, manager_id: 0 })
+            if (Number(id) && !list.some(i => Number(i.id) === Number(id))) list.push({ id: Number(id), label: name || `#${id}`, manager_id: 0, is_leader: 0 })
           })
           this.html.ecs.list = list
           this.html.ecs.ec = list.find(i => Number(i.id) === Number(info.ec_id)) || null
@@ -920,7 +924,9 @@
       selectEc(item) {
         this.contract.ec_id = item ? item.id : this.origin_ec_id
         // Tự gợi ý EC leader = quản lý trực tiếp của EC mới (vẫn sửa tay được)
-        const leader = item && Number(item.manager_id) ? this.html.ecs.list.find(i => Number(i.id) === Number(item.manager_id)) : null
+        // EC mới là trưởng nhóm → leader là chính họ; ngược lại lấy quản lý trực tiếp (nếu là trưởng nhóm)
+        const leaderId = item ? (Number(item.is_leader) === 1 ? Number(item.id) : Number(item.manager_id)) : 0
+        const leader = leaderId ? this.ecLeaderOptions.find(i => Number(i.id) === leaderId) : null
         if (leader) this.html.ecs.leader = leader
         this.contract.ec_leader_id = this.html.ecs.leader ? this.html.ecs.leader.id : this.origin_ec_leader_id
       },
