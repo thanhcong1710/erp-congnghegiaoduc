@@ -733,6 +733,8 @@ class LessonReportsController extends Controller
                 (SELECT count(DISTINCT ss.student_id) FROM schedule_has_student AS ss WHERE ss.class_id = s.class_id AND ss.class_date = s.class_date) AS total_students,
                 (SELECT count(DISTINCT ss.student_id) FROM schedule_has_student AS ss WHERE ss.class_id = s.class_id AND ss.class_date = s.class_date AND ss.attendance_status IN (1, 3)) AS present,
                 (SELECT count(DISTINCT ss.student_id) FROM schedule_has_student AS ss WHERE ss.class_id = s.class_id AND ss.class_date = s.class_date AND ss.attendance_status = 0) AS pending_attendance,
+                (SELECT count(DISTINCT c.student_id) FROM contracts AS c WHERE c.class_id = s.class_id AND c.type = 1 AND c.status = 6
+                    AND (c.enrolment_start_date IS NULL OR c.enrolment_start_date <= s.class_date) AND (c.enrolment_last_date IS NULL OR c.enrolment_last_date >= s.class_date)) AS expected_students,
                 (SELECT s2.id FROM schedules AS s2 WHERE s2.class_id = s.class_id AND s2.status = 1 AND YEARWEEK(s2.class_date, 3) = YEARWEEK(s.class_date, 3)
                     ORDER BY s2.class_date DESC, s2.id DESC LIMIT 1) AS report_schedule_id
             FROM schedules AS s JOIN classes AS cl ON cl.id = s.class_id
@@ -780,6 +782,9 @@ class LessonReportsController extends Controller
                 'total_students' => (int)$r->total_students,
                 'present' => (int)$r->present,
                 'pending_attendance' => (int)$r->pending_attendance,
+                // Chưa sinh danh sách điểm danh (schedule_has_student) → hiển thị sĩ số dự kiến theo hợp đồng đang học
+                'expected_students' => (int)$r->expected_students,
+                'roster_missing' => (int)$r->total_students === 0 && (int)$r->expected_students > 0 ? 1 : 0,
                 'report_status' => $st === null ? 'none' : ($st === self::STATUS_SENT ? 'sent' : ($st === self::STATUS_DONE ? 'done' : 'draft')),
             ];
         }

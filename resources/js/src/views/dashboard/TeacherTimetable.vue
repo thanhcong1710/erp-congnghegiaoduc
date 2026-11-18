@@ -62,7 +62,10 @@
               <div class="tt-item__meta"><i class="fa-solid fa-building"></i><span class="nowrap">{{ it.branch_name }}</span></div>
               <div class="tt-item__meta" v-if="it.type === 'replaced' || it.type === 'ta'"><i class="fa-solid fa-user"></i>GV: {{ it.teacher_name || '—' }}</div>
               <div class="tt-item__foot">
-                <span class="tt-att" :class="{ warn: it.pending_attendance > 0 && it.class_date <= today }">
+                <span v-if="it.roster_missing" class="tt-att muted" :title="it.class_date <= today ? 'Chưa sinh danh sách điểm danh cho buổi này' : 'Danh sách điểm danh được tạo vào ngày học'">
+                  <i class="fa-solid fa-users"></i>Sĩ số {{ it.expected_students }}<template v-if="it.class_date <= today"> · chưa có DS điểm danh</template>
+                </span>
+                <span v-else class="tt-att" :class="{ warn: it.pending_attendance > 0 && it.class_date <= today }">
                   <i class="fa-solid fa-clipboard-user"></i>
                   <template v-if="it.pending_attendance > 0 && it.class_date <= today">Chưa điểm danh {{ it.pending_attendance }}</template>
                   <template v-else>{{ it.present }}/{{ it.total_students }} HS</template>
@@ -107,10 +110,10 @@ export default {
         { key: 'main', label: 'Dạy chính' },
         { key: 'substitute', label: 'Dạy thay' },
         { key: 'ta', label: 'Trợ giảng' },
-        { key: 'replaced', label: 'Có GV dạy thay' },
+        { key: 'replaced', label: 'GV khác phụ trách' },
         { key: 'holiday', label: 'Nghỉ lễ / Tết' }
       ],
-      typeLabel: { main: 'Dạy chính', substitute: 'Dạy thay', ta: 'Trợ giảng', replaced: 'GV khác dạy thay', holiday: 'Nghỉ lễ' },
+      typeLabel: { main: 'Dạy chính', substitute: 'Dạy thay', ta: 'Trợ giảng', replaced: 'GV khác phụ trách', holiday: 'Nghỉ lễ' },
       reportLabel: { none: 'Chưa nhận xét', draft: 'Đang nhận xét', done: 'Đã nhận xét', sent: 'Đã gửi PH' }
     }
   },
@@ -244,14 +247,15 @@ export default {
 .tt-item.clickable { cursor: pointer; }
 .tt-item.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1); border-color: var(--ty); }
 .tt-item.ty-replaced { opacity: .8; }
-.tt-item__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
-.tt-item__cls { font-size: 14px; font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tt-type { flex-shrink: 0; white-space: nowrap !important; font-size: 13px; font-weight: 700; color: var(--ty); }
+.tt-item__top { display: flex; flex-direction: column-reverse; gap: 2px; }
+.tt-item__cls { font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1.35; word-break: break-word; }
+.tt-type { white-space: nowrap !important; font-size: 13px; font-weight: 700; color: var(--ty); }
 .tt-item__meta { font-size: 13px; color: #64748b; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tt-item__meta i { width: 14px; color: var(--ty); margin-right: 6px; }
 .tt-item__foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
 .tt-att { font-size: 13px; color: #16a34a; font-weight: 600; white-space: nowrap; }
 .tt-att.warn { color: #ea580c; }
+.tt-att.muted { color: #64748b; white-space: normal; }
 .tt-att i { margin-right: 5px; }
 .tt-rp { white-space: nowrap !important; font-size: 13px; font-weight: 600; border-radius: 99px; padding: 1px 8px; }
 .tt-rp.none { background: #fee2e2; color: #b91c1c; }
