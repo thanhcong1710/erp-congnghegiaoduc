@@ -88,7 +88,18 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC</label>
+              <vue-select
+                v-if="contract.can_edit_all"
+                label="label"
+                placeholder="Chọn EC"
+                :options="html.ecs.list"
+                v-model="html.ecs.ec"
+                :searchable="true"
+                :clearable="false"
+                @input="selectEc"
+              ></vue-select>
               <input
+                v-else
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
@@ -98,13 +109,34 @@
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>EC Leader</label>
+              <vue-select
+                v-if="contract.can_edit_all"
+                label="label"
+                placeholder="Chọn EC Leader"
+                :options="html.ecs.list"
+                v-model="html.ecs.leader"
+                :searchable="true"
+                :clearable="false"
+                @input="selectEcLeader"
+              ></vue-select>
               <input
+                v-else
                 class="vs-inputx vs-input--input normal"
                 type="text"
                 name="title"
                 v-model="contract.ec_leader_name"
                 disabled="true"
               />
+            </div>
+            <div class="vx-col w-full mb-4" v-if="contract.can_edit_all && ecChanged">
+              <div class="ec-transfer-note">
+                <i class="fa-solid fa-right-left mr-1"></i>
+                Đổi EC: hợp đồng, doanh thu đã thu (phiếu thu đã duyệt) và các báo cáo tổng hợp của hợp đồng này sẽ chuyển sang EC mới.
+              </div>
+              <label class="ec-transfer-check">
+                <input type="checkbox" v-model="contract.transfer_student_owner" />
+                Chuyển luôn quyền quản lý học sinh sang EC mới
+              </label>
             </div>
             <div class="vx-col md:w-1/2 w-full mb-4">
               <label>Giám đốc trung tâm</label>
@@ -678,6 +710,8 @@
           }
         },
         calling:false,
+        origin_ec_id: 0,
+        origin_ec_leader_id: 0,
         filter: {
           search: {
               link: 0,
@@ -687,6 +721,11 @@
           }
         },
         html:{
+          ecs: {
+            list: [],
+            ec: null,
+            leader: null
+          },
           branches: {
             item: '',
             list: []
@@ -790,6 +829,11 @@
       })
       this.loadDetail();
     },
+    computed: {
+      ecChanged() {
+        return Number(this.contract.ec_id || 0) !== this.origin_ec_id || Number(this.contract.ec_leader_id || 0) !== this.origin_ec_leader_id
+      }
+    },
     methods: {
       saveDiscountB2B(data = null){
         console.log(data);
@@ -848,6 +892,10 @@
           this.$set(this.contract, 'other_discount_note', response.data.other_discount_note || '');
           this.contract.can_edit_all = (response.data.can_edit_all !== undefined) ? response.data.can_edit_all : true;
           this.contract.receipts = response.data.receipts || [];
+          this.$set(this.contract, 'transfer_student_owner', false);
+          this.origin_ec_id = Number(response.data.ec_id) || 0;
+          this.origin_ec_leader_id = Number(response.data.ec_leader_id) || 0;
+          if (this.contract.can_edit_all) this.loadEcs(response.data);
           this.tmp_tuition_fee_id = response.data.tuition_fee_id
           this.tmp_discount_code_id = response.data.discount_code_id
           this.html.products.item = this.html.products.list.filter(item => item.id == response.data.product_id)[0]
@@ -856,6 +904,28 @@
           this.loadB2BCampaign();
           this.caculatorSession();
         })
+      },
+      loadEcs(info) {
+        axios.g(`/api/system/ecs/${Number(info.branch_id) || 0}`).then(res => {
+          const list = Array.isArray(res.data) ? res.data : []
+          // EC/EC leader hiện tại có thể đã nghỉ hoặc khác chi nhánh → vẫn hiển thị để không mất dữ liệu
+          ;[[info.ec_id, info.ec_name], [info.ec_leader_id, info.ec_leader_name]].forEach(([id, name]) => {
+            if (Number(id) && !list.some(i => Number(i.id) === Number(id))) list.push({ id: Number(id), label: name || `#${id}`, manager_id: 0 })
+          })
+          this.html.ecs.list = list
+          this.html.ecs.ec = list.find(i => Number(i.id) === Number(info.ec_id)) || null
+          this.html.ecs.leader = list.find(i => Number(i.id) === Number(info.ec_leader_id)) || null
+        }).catch(e => console.log(e))
+      },
+      selectEc(item) {
+        this.contract.ec_id = item ? item.id : this.origin_ec_id
+        // Tự gợi ý EC leader = quản lý trực tiếp của EC mới (vẫn sửa tay được)
+        const leader = item && Number(item.manager_id) ? this.html.ecs.list.find(i => Number(i.id) === Number(item.manager_id)) : null
+        if (leader) this.html.ecs.leader = leader
+        this.contract.ec_leader_id = this.html.ecs.leader ? this.html.ecs.leader.id : this.origin_ec_leader_id
+      },
+      selectEcLeader(item) {
+        this.contract.ec_leader_id = item ? item.id : this.origin_ec_leader_id
       },
       openReceiptModal() {
         this.receiptModal = {
@@ -1295,6 +1365,19 @@
   }
 </script>
 <style>
+  .ec-transfer-note {
+    font-size: 13px;
+    color: #9a6700;
+    background: #fff8e6;
+    border: 1px solid #f5d48a;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .ec-transfer-check {
+    font-size: 14px;
+    cursor: pointer;
+  }
   .discount-mode-box {
     display: flex;
     flex-wrap: wrap;

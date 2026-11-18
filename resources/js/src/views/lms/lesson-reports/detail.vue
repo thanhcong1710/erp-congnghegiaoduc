@@ -2,10 +2,10 @@
   <div id="page-lesson-report-detail" class="lrd-page mt-5">
     <!-- ============ THANH ĐIỀU HƯỚNG ============ -->
     <div class="lrd-topbar">
-      <button type="button" class="lrd-btn ghost" @click="$router.push('/lms/lesson-reports')"><i class="fa-solid fa-arrow-left"></i>Danh sách buổi</button>
+      <button type="button" class="lrd-btn ghost" @click="$router.push('/lms/lesson-reports')"><i class="fa-solid fa-arrow-left"></i>Lịch nhận xét</button>
       <div class="lrd-topbar__nav">
-        <button type="button" class="lrd-btn ghost" :disabled="!prevId" @click="go(prevId)"><i class="fa-solid fa-chevron-left"></i>Buổi trước</button>
-        <button type="button" class="lrd-btn ghost" :disabled="!nextId" @click="go(nextId)">Buổi sau<i class="fa-solid fa-chevron-right ml-2"></i></button>
+        <button type="button" class="lrd-btn ghost" :disabled="!prevId" @click="go(prevId)"><i class="fa-solid fa-chevron-left"></i>Tuần trước</button>
+        <button type="button" class="lrd-btn ghost" :disabled="!nextId" @click="go(nextId)">Tuần sau<i class="fa-solid fa-chevron-right ml-2"></i></button>
       </div>
       <div class="lrd-savestate" :class="saveState.cls">
         <i :class="saveState.icon"></i>{{ saveState.text }}
@@ -27,7 +27,8 @@
             </div>
             <div class="lrd-hero__meta">
               <span><i class="fa-regular fa-calendar"></i>{{ dateText }}</span>
-              <span><i class="fa-solid fa-book-open"></i>Buổi {{ session.subject_stt || '?' }}<template v-if="session.total_sessions">/{{ session.total_sessions }}</template></span>
+              <span><i class="fa-solid fa-book-open"></i>Tuần {{ session.week_no || '?' }}<template v-if="session.total_weeks">/{{ session.total_weeks }}</template></span>
+              <span><i class="fa-solid fa-list-check"></i>{{ weekSessions.length }} buổi: {{ sessionsText }}</span>
               <span v-if="session.branch_name"><i class="fa-solid fa-building"></i><span class="nowrap">{{ session.branch_name }}</span></span>
             </div>
             <div class="lrd-hero__meta">
@@ -38,8 +39,8 @@
           </div>
           <div class="lrd-kpis">
             <div class="lrd-kpi"><div class="lrd-kpi__k">Sĩ số</div><div class="lrd-kpi__v">{{ students.length }}</div></div>
-            <div class="lrd-kpi ok"><div class="lrd-kpi__k">Có mặt</div><div class="lrd-kpi__v">{{ stats.present }}</div></div>
-            <div class="lrd-kpi" :class="{ danger: stats.absent }"><div class="lrd-kpi__k">Vắng</div><div class="lrd-kpi__v">{{ stats.absent }}</div></div>
+            <div class="lrd-kpi ok"><div class="lrd-kpi__k">Lượt có mặt</div><div class="lrd-kpi__v">{{ stats.present }}</div></div>
+            <div class="lrd-kpi" :class="{ danger: stats.absent }"><div class="lrd-kpi__k">Lượt vắng</div><div class="lrd-kpi__v">{{ stats.absent }}</div></div>
             <div class="lrd-kpi" :class="{ warn: stats.pending }"><div class="lrd-kpi__k">Chưa điểm danh</div><div class="lrd-kpi__v">{{ stats.pending }}</div></div>
             <div class="lrd-kpi brand"><div class="lrd-kpi__k">Làm BTVN</div><div class="lrd-kpi__v">{{ stats.homework }}</div></div>
           </div>
@@ -48,13 +49,18 @@
         <div v-if="report.status === 2" class="lrd-note">
           <i class="fa-solid fa-circle-info"></i>Báo cáo đã gửi phụ huynh. Mọi chỉnh sửa sẽ cập nhật ngay trên link đã gửi.
         </div>
+        <div v-if="prefillPending" class="lrd-note">
+          <i class="fa-solid fa-route"></i>Nội dung bài học được lấy từ <b>lộ trình tuần {{ session.week_no }}</b>. Bạn có thể bổ sung, nội dung sẽ lưu khi bạn chỉnh sửa hoặc nhận xét học viên.
+        </div>
 
         <!-- ============ NỘI DUNG BUỔI HỌC ============ -->
         <div class="lrd-card">
-          <div class="lrd-card__title"><span><i class="fa-solid fa-comment-dots"></i>Nhận xét chung của buổi học</span>
+          <div class="lrd-card__title"><span><i class="fa-solid fa-comment-dots"></i>Nội dung bài học tuần {{ session.week_no || '' }}</span>
             <div class="lrd-card__actions">
+              <button v-if="plan" type="button" class="lrd-btn soft" @click="applyPlan(true)"><i class="fa-solid fa-route"></i>Lấy theo lộ trình</button>
+              <button v-if="canEditPlan" type="button" class="lrd-btn ghost" @click="saveToPlan"><i class="fa-solid fa-floppy-disk"></i>Lưu vào lộ trình tuần {{ session.week_no }}</button>
               <button type="button" class="lrd-btn soft" @click="insertTemplate"><i class="fa-solid fa-wand-magic-sparkles"></i>Chèn khung mẫu</button>
-              <button type="button" class="lrd-btn soft" @click="openCopy"><i class="fa-regular fa-copy"></i>Sao chép từ lớp/buổi khác</button>
+              <button type="button" class="lrd-btn soft" @click="openCopy"><i class="fa-regular fa-copy"></i>Sao chép từ lớp khác</button>
             </div>
           </div>
           <div class="lrd-grid">
@@ -99,14 +105,14 @@
                 <tr>
                   <th class="c-stt">#</th>
                   <th class="c-name">Học viên</th>
-                  <th class="c-att">Điểm danh</th>
+                  <th v-for="w in weekSessions" :key="'h' + w.schedule_id" class="c-att">Điểm danh {{ shortDate(w.class_date) }}</th>
                   <th class="c-hw">BTVN</th>
                   <th class="c-score">Điểm BTVN</th>
                   <th>Nhận xét</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(st, idx) in students" :key="st.student_id" :class="{ absent: st.attendance_status == 2 }">
+                <tr v-for="(st, idx) in students" :key="st.student_id" :class="{ absent: weekAbsent(st) }">
                   <td class="c-stt">{{ idx + 1 }}</td>
                   <td class="c-name">
                     <div class="lrd-student">
@@ -118,14 +124,17 @@
                       </div>
                     </div>
                   </td>
-                  <td class="c-att">
-                    <div v-if="!st.is_makeup" class="lrd-seg" :class="{ busy: st._attSaving }">
-                      <button type="button" :class="{ on: st.attendance_status == 1, ok: true }" @click="setAttendance(st, 1)"><i class="fa-solid fa-check"></i>Có mặt</button>
-                      <button type="button" :class="{ on: st.attendance_status == 2, no: true }" @click="setAttendance(st, 2)"><i class="fa-solid fa-xmark"></i>Vắng</button>
-                    </div>
-                    <span v-else class="lrd-badge" :class="st.attendance_status == 1 ? 'done' : 'draft'" title="Xác nhận học bù tại màn Điểm danh/Học bù">
-                      {{ st.attendance_status == 1 ? 'Đã học bù' : 'Chờ xác nhận' }}
-                    </span>
+                  <td v-for="w in weekSessions" :key="'a' + w.schedule_id" class="c-att">
+                    <template v-if="att(st, w)">
+                      <div v-if="!att(st, w).is_makeup" class="lrd-seg" :class="{ busy: att(st, w)._saving }">
+                        <button type="button" :class="{ on: att(st, w).status == 1, ok: true }" @click="setAttendance(st, w, 1)"><i class="fa-solid fa-check"></i>Có mặt</button>
+                        <button type="button" :class="{ on: att(st, w).status == 2, no: true }" @click="setAttendance(st, w, 2)"><i class="fa-solid fa-xmark"></i>Vắng</button>
+                      </div>
+                      <span v-else class="lrd-badge" :class="att(st, w).status == 1 ? 'done' : 'draft'" title="Xác nhận học bù tại màn Điểm danh/Học bù">
+                        {{ att(st, w).status == 1 ? 'Đã học bù' : 'Chờ xác nhận' }}
+                      </span>
+                    </template>
+                    <span v-else class="lrd-sub" title="Học viên không có lịch buổi này">—</span>
                   </td>
                   <td class="c-hw">
                     <div class="lrd-seg sm">
@@ -157,7 +166,7 @@
                   </td>
                 </tr>
                 <tr v-if="!students.length">
-                  <td colspan="6" class="lrd-empty-row">Buổi học chưa có học viên nào.</td>
+                  <td :colspan="5 + weekSessions.length" class="lrd-empty-row">Tuần học chưa có học viên nào.</td>
                 </tr>
               </tbody>
             </table>
@@ -180,43 +189,55 @@
     </div>
 
     <!-- ============ POPUP: XEM TRƯỚC ============ -->
-    <vs-popup class="lrd-popup lrd-popup--preview" title="Báo cáo buổi học gửi phụ huynh" :active.sync="preview.open" fullscreen>
+    <vs-popup class="lrd-popup lrd-popup--preview" title="Báo cáo tuần gửi phụ huynh" :active.sync="preview.open" fullscreen>
       <div v-if="preview.open" class="lrd-preview">
         <div class="lrd-preview__bar">
           <div class="lrd-preview__info">
-            <template v-if="shareUrl">
-              <i class="fa-solid fa-link"></i><span class="lrd-preview__url">{{ shareUrl }}</span>
-            </template>
-            <template v-else>
-              <i class="fa-solid fa-circle-info"></i>Đánh dấu hoàn thành để tạo link gửi phụ huynh.
+            <span class="nowrap">Xem trước:</span>
+            <select class="lrd-select" v-model="preview.studentId">
+              <option :value="0">Bản đầy đủ (nội bộ)</option>
+              <option v-for="st in students" :key="st.student_id" :value="st.student_id">{{ st.name }}</option>
+            </select>
+            <template v-if="!(report.status >= 1)">
+              <i class="fa-solid fa-circle-info"></i>Đánh dấu hoàn thành để tạo link riêng cho từng phụ huynh.
             </template>
           </div>
           <div class="lrd-preview__btns">
             <button type="button" class="lrd-btn ghost" @click="printReport"><i class="fa-solid fa-print"></i>In / Lưu PDF</button>
             <template v-if="report.status >= 1">
-              <button type="button" class="lrd-btn soft" @click="copyMessage"><i class="fa-regular fa-copy"></i>Sao chép tin nhắn Zalo</button>
-              <a class="lrd-btn ghost" :href="shareUrl" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Mở link</a>
+              <button type="button" class="lrd-btn soft" @click="copyAllLinks"><i class="fa-regular fa-copy"></i>Sao chép link cả lớp</button>
               <button v-if="report.status !== 2" type="button" class="lrd-btn primary" @click="markSent"><i class="fa-solid fa-paper-plane"></i>Đánh dấu đã gửi</button>
               <span v-else class="lrd-badge sent"><i class="fa-solid fa-paper-plane mr-1"></i>Đã gửi {{ sentText }}</span>
             </template>
             <button v-else type="button" class="lrd-btn success" @click="setStatus(1)"><i class="fa-solid fa-circle-check"></i>Hoàn thành &amp; tạo link</button>
           </div>
         </div>
+        <div v-if="report.status >= 1" class="lrd-links">
+          <div class="lrd-links__head"><i class="fa-solid fa-link"></i>Link riêng từng học viên – mỗi phụ huynh chỉ xem được nhận xét của con mình</div>
+          <div v-for="st in students" :key="'l' + st.student_id" class="lrd-links__row">
+            <span class="lrd-strong nowrap">{{ st.name }}</span>
+            <span class="lrd-preview__url">{{ studentUrl(st) || 'Đang tạo link...' }}</span>
+            <span class="lrd-links__btns">
+              <button type="button" class="lrd-btn soft sm" :disabled="!studentUrl(st)" @click="copyMessage(st)"><i class="fa-regular fa-copy"></i>Tin nhắn Zalo</button>
+              <a v-if="studentUrl(st)" class="lrd-btn ghost sm" :href="studentUrl(st)" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Mở</a>
+            </span>
+          </div>
+        </div>
         <div class="lrd-preview__sheet" id="lesson-report-print">
-          <report-sheet :session="previewSession" :report="report" :students="previewStudents" />
+          <report-sheet :session="previewSession" :report="report" :students="previewStudents" :view="preview.studentId ? 'student' : ''" />
         </div>
       </div>
     </vs-popup>
 
     <!-- ============ POPUP: SAO CHÉP ============ -->
-    <vs-popup class="lrd-popup" title="Sao chép nhận xét chung" :active.sync="copy.open">
+    <vs-popup class="lrd-popup" title="Sao chép nội dung bài học" :active.sync="copy.open">
       <div class="lrd-copy">
-        <div v-if="!copy.list.length" class="lrd-empty-row">Chưa có báo cáo nào cùng khóa học để sao chép.</div>
+        <div v-if="!copy.list.length" class="lrd-empty-row">Chưa có phiếu nào cùng khóa học để sao chép.</div>
         <div v-for="c in copy.list" :key="c.schedule_id" class="lrd-copy__item" @click="applyCopy(c)">
           <div class="lrd-copy__head">
             <b>{{ c.cls_name }}</b>
-            <span class="lrd-sub">Buổi {{ c.subject_stt }} · {{ fmtDate(c.class_date) }}</span>
-            <span v-if="c.subject_stt == session.subject_stt" class="lrd-badge done">Cùng buổi</span>
+            <span class="lrd-sub">Tuần {{ c.week_no || "?" }} · {{ fmtDate(c.class_date) }}</span>
+            <span v-if="c.week_no && c.week_no == session.week_no" class="lrd-badge done">Cùng tuần</span>
             <span v-if="c.same_class == 1" class="lrd-badge sent">Lớp này</span>
           </div>
           <div class="lrd-copy__title" v-if="c.lesson_title">{{ c.lesson_title }}</div>
@@ -248,7 +269,7 @@ import 'quill/dist/quill.snow.css'
 import axios from '../../../http/axios.js'
 import ReportSheet from './ReportSheet.vue'
 
-const WEEKDAYS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
+const DOW_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 const GENERAL_TEMPLATE = '<p><strong><u>NỘI DUNG BÀI HỌC:</u></strong></p><p><strong>Unit ...: ...</strong></p><p><strong>Lesson ...: ...</strong></p><p>- Từ vựng: ...</p><p>- Chữ cái / Mẫu câu: ...</p><p>- Kỹ năng: ...</p><p><br></p><p><strong><u>BÀI TẬP VỀ NHÀ:</u></strong></p><p>- Hoàn thành ...</p>'
 
 export default {
@@ -262,6 +283,9 @@ export default {
       students: [],
       prevId: null,
       nextId: null,
+      plan: null,
+      canEditPlan: false,
+      prefillPending: false,
       pendingReport: null,
       pendingStudents: {},
       inflight: 0,
@@ -279,16 +303,20 @@ export default {
           ]
         }
       },
-      preview: { open: false },
+      preview: { open: false, studentId: 0 },
       copy: { open: false, list: [] },
       tpl: { open: false, text: '', onlyEmpty: true }
     }
   },
   computed: {
     scheduleId() { return parseInt(this.$route.params.schedule_id) },
+    weekSessions() { return this.session.sessions || [] },
     dateText() {
-      const m = moment(this.session.class_date)
-      return m.isValid() ? `${WEEKDAYS[m.day()]}, ${m.format('DD/MM/YYYY')}` : ''
+      const a = moment(this.session.week_start), b = moment(this.session.week_end)
+      return a.isValid() && b.isValid() ? `${a.format('DD/MM')} – ${b.format('DD/MM/YYYY')}` : ''
+    },
+    sessionsText() {
+      return this.weekSessions.map(w => this.shortDate(w.class_date)).join(', ')
     },
     statusKey() {
       if (this.report.status === 2) return 'sent'
@@ -300,11 +328,17 @@ export default {
       return { none: 'Chưa nhận xét', draft: 'Đang làm', done: 'Hoàn thành', sent: 'Đã gửi PH' }[this.statusKey]
     },
     stats() {
+      // Đếm theo lượt (học viên × buổi); "chưa điểm danh" chỉ tính các buổi đã diễn ra
+      const today = moment().format('YYYY-MM-DD')
       let present = 0, absent = 0, pending = 0, homework = 0, commented = 0
       this.students.forEach(s => {
-        if (s.attendance_status == 1) present++
-        else if (s.attendance_status == 2) absent++
-        else pending++
+        this.weekSessions.forEach(w => {
+          const a = this.att(s, w)
+          if (!a) return
+          if (a.status == 1) present++
+          else if (a.status == 2) absent++
+          else if (w.class_date <= today) pending++
+        })
         if (s.homework_done === 1) homework++
         if ((s.comment || '').trim()) commented++
       })
@@ -317,18 +351,17 @@ export default {
       if (this.lastSavedAt) return { cls: 'ok', icon: 'fa-solid fa-cloud', text: 'Đã lưu lúc ' + this.lastSavedAt }
       return { cls: '', icon: 'fa-regular fa-cloud', text: 'Tự động lưu' }
     },
-    shareUrl() {
-      return this.report.share_token && this.report.status >= 1 ? `${window.location.origin}/pages/lesson-report/${this.report.share_token}` : ''
-    },
     sentText() { return this.report.sent_at ? moment(this.report.sent_at).format('HH:mm DD/MM') : '' },
     previewSession() {
+      const present = this.students.filter(s => this.weekSessions.some(w => { const a = this.att(s, w); return a && a.status == 1 })).length
       return Object.assign({}, this.session, {
-        total_students: this.students.length, present: this.stats.present, homework_done: this.stats.homework
+        total_students: this.students.length, present, homework_done: this.stats.homework
       })
     },
     previewStudents() {
-      return this.students.map(s => ({
-        student_id: s.student_id, name: s.name, is_makeup: s.is_makeup, attendance_status: s.attendance_status,
+      const list = this.preview.studentId ? this.students.filter(s => s.student_id === this.preview.studentId) : this.students
+      return list.map(s => ({
+        student_id: s.student_id, name: s.name, is_makeup: s.is_makeup, attendance: s.attendance,
         homework_done: s.homework_done, homework_score: this.parseScore(s.homework_score_text).value, comment: s.comment
       }))
     }
@@ -355,6 +388,13 @@ export default {
       }
     },
     fmtDate(v) { const m = moment(v); return m.isValid() ? m.format('DD/MM/YYYY') : '' },
+    shortDate(v) { const m = moment(v); return m.isValid() ? `${DOW_SHORT[m.day()]} ${m.format('DD/MM')}` : '' },
+    att(st, w) { const a = st.attendance || {}; return a[w.schedule_id] || null },
+    weekAbsent(st) {
+      const list = this.weekSessions.map(w => this.att(st, w)).filter(Boolean)
+      return list.length > 0 && list.every(a => a.status == 2)
+    },
+    studentUrl(st) { return st.share_token && this.report.status >= 1 ? `${window.location.origin}/pages/lesson-report/${st.share_token}` : '' },
     initials(name) { const p = (name || '').trim().split(/\s+/); return p.length ? p[p.length - 1].charAt(0).toUpperCase() : '?' },
     givenName(name) { const p = (name || '').trim().split(/\s+/); return p[p.length - 1] || 'học viên' },
     stripHtml(html) { return (html || '').replace(/<\/p>/g, ' ').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().slice(0, 260) },
@@ -369,15 +409,27 @@ export default {
         const d = res.data || {}
         if (d.status !== 1) { this.error = d.message || 'Không tải được dữ liệu'; this.loaded = true; return }
         const data = d.data
+        if (data.redirect_schedule_id) {
+          // Buổi đầu tuần → mở phiếu tuần (gắn buổi cuối tuần)
+          this.$router.replace(`/lms/lesson-reports/${data.redirect_schedule_id}`)
+          return
+        }
         this.session = data.session
         this.report = Object.assign({ general_comment: '' }, data.report, { general_comment: data.report.general_comment || '' })
         this.students = (data.students || []).map(s => Object.assign(s, {
+          attendance: this.normalizeAttendance(s.attendance),
           comment: s.comment || '',
           homework_score_text: s.homework_score === null || s.homework_score === undefined ? '' : String(s.homework_score).replace('.', ','),
-          _saving: false, _saved: false, _error: false, _scoreErr: false, _attSaving: false
+          _saving: false, _saved: false, _error: false, _scoreErr: false
         }))
         this.prevId = data.prev_schedule_id
         this.nextId = data.next_schedule_id
+        this.plan = data.plan || null
+        this.canEditPlan = !!data.can_edit_plan
+        this.prefillPending = false
+        this.preview.studentId = 0
+        // Phiếu còn trống → tự điền nội dung theo lộ trình (chưa lưu cho tới khi GV thao tác)
+        if (this.plan && !this.report.lesson_title && !this.stripHtml(this.report.general_comment)) this.applyPlan(false)
         this.lastSavedAt = null
         this.hasError = false
         this.loaded = true
@@ -394,6 +446,7 @@ export default {
     },
     queueReport() {
       if (!this.loaded) return
+      this.prefillPending = false
       clearTimeout(this._reportTimer)
       this.pendingReport = true
       this._reportTimer = setTimeout(() => this.saveReport(), 900)
@@ -415,7 +468,13 @@ export default {
       clearTimeout(this._studentTimer)
       this._studentTimer = setTimeout(() => this.saveStudents(), 800)
     },
+    takePrefill() {
+      // Lần lưu đầu tiên sau khi tự điền lộ trình → lưu kèm nội dung bài học
+      if (this.prefillPending) { this.prefillPending = false; this.pendingReport = true }
+    },
     saveStudents() {
+      this.takePrefill()
+      if (this.pendingReport) this.saveReport()
       clearTimeout(this._studentTimer)
       const ids = Object.keys(this.pendingStudents)
       if (!ids.length) return Promise.resolve()
@@ -451,6 +510,7 @@ export default {
         .catch(() => { this.inflight--; this.hasError = true; return false })
     },
     flush() {
+      this.takePrefill()
       return Promise.all([this.saveReport(), this.saveStudents()])
     },
     parseScore(text) {
@@ -472,35 +532,76 @@ export default {
     },
 
     /* ---------- Điểm danh (ghi thẳng schedule_has_student) ---------- */
-    setAttendance(st, val) {
-      if (st.is_makeup || !st.shs_id || st._attSaving) return
-      const prev = st.attendance_status
+    normalizeAttendance(att) {
+      const out = {}
+      Object.keys(att || {}).forEach(k => { out[k] = Object.assign({ _saving: false }, att[k]) })
+      return out
+    },
+    setAttendance(st, w, val) {
+      const a = this.att(st, w)
+      if (!a || a.is_makeup || !a.shs_id || a._saving) return Promise.resolve(false)
+      const prev = a.status
       const next = prev == val ? 0 : val
-      st.attendance_status = next
-      st._attSaving = true
-      return axios.p('/api/lms/attendances/save', { id: st.shs_id, attendance_status: next, note: st.note })
+      a.status = next
+      a._saving = true
+      return axios.p('/api/lms/attendances/save', { id: a.shs_id, attendance_status: next, note: a.note })
         .then(res => {
-          st._attSaving = false
-          if (!res.data || res.data.status !== 1) { st.attendance_status = prev; this.notify((res.data && res.data.message) || 'Không lưu được điểm danh', 'danger'); return false }
+          a._saving = false
+          if (!res.data || res.data.status !== 1) { a.status = prev; this.notify((res.data && res.data.message) || 'Không lưu được điểm danh', 'danger'); return false }
           return true
         })
-        .catch(() => { st._attSaving = false; st.attendance_status = prev; return false })
+        .catch(() => { a._saving = false; a.status = prev; return false })
     },
     bulkPresent() {
-      const list = this.students.filter(s => !s.is_makeup && s.attendance_status == 0)
+      // Điểm danh có mặt cho các lượt chưa điểm danh của những buổi đã diễn ra
+      const today = moment().format('YYYY-MM-DD')
+      const list = []
+      this.students.forEach(s => this.weekSessions.forEach(w => {
+        const a = this.att(s, w)
+        if (a && !a.is_makeup && a.status == 0 && w.class_date <= today) list.push([s, w])
+      }))
       if (!list.length) return
       this.$vs.loading()
-      Promise.all(list.map(s => this.setAttendance(s, 1))).then(r => {
+      Promise.all(list.map(([s, w]) => this.setAttendance(s, w, 1))).then(r => {
         this.$vs.loading.close()
         const fail = r.filter(x => !x).length
-        this.notify(fail ? `Lỗi ${fail} học viên` : `Đã điểm danh có mặt ${r.length} học viên`, fail ? 'warning' : 'success')
+        this.notify(fail ? `Lỗi ${fail} lượt điểm danh` : `Đã điểm danh có mặt ${r.length} lượt`, fail ? 'warning' : 'success')
       })
     },
     bulkHomework() {
       this.students.forEach(s => {
-        if (s.attendance_status != 2 && s.homework_done !== 1) { s.homework_done = 1; this.$set(this.pendingStudents, s.student_id, true) }
+        if (!this.weekAbsent(s) && s.homework_done !== 1) { s.homework_done = 1; this.$set(this.pendingStudents, s.student_id, true) }
       })
       this.saveStudents()
+    },
+
+    /* ---------- Lộ trình ---------- */
+    applyPlan(confirm) {
+      const p = this.plan
+      if (!p) return
+      const apply = () => {
+        this.report.lesson_title = p.lesson_title || this.report.lesson_title || ''
+        this.report.general_comment = p.content || ''
+        if (p.homework_deadline && !this.report.homework_deadline) this.report.homework_deadline = p.homework_deadline
+        if (confirm) { this.queueReport(); this.notify('Đã lấy nội dung theo lộ trình') } else this.prefillPending = true
+      }
+      if (!confirm || !this.stripHtml(this.report.general_comment)) return apply()
+      this.$vs.dialog({ type: 'confirm', color: 'warning', title: 'Lấy nội dung theo lộ trình', text: 'Nội dung bài học hiện tại sẽ bị thay thế. Tiếp tục?', acceptText: 'Thay thế', cancelText: 'Hủy', accept: apply })
+    },
+    saveToPlan() {
+      if (!this.session.product_id) return this.notify('Lớp chưa gắn khóa học, không lưu được lộ trình', 'danger')
+      if (!this.report.lesson_title && !this.stripHtml(this.report.general_comment)) return this.notify('Chưa có nội dung bài học để lưu', 'danger')
+      const doSave = () => axios.p('/api/lms/lesson-reports/plans/save', {
+        product_id: this.session.product_id, week_no: this.session.week_no,
+        lesson_title: this.report.lesson_title || '', content: this.report.general_comment || '', homework_deadline: this.report.homework_deadline || ''
+      }).then(res => {
+        const d = res.data || {}
+        if (d.status !== 1) return this.notify(d.message || 'Không lưu được', 'danger')
+        this.plan = { lesson_title: this.report.lesson_title, content: this.report.general_comment, homework_deadline: this.report.homework_deadline }
+        this.notify(d.message)
+      })
+      if (!this.plan) return doSave()
+      this.$vs.dialog({ type: 'confirm', color: 'warning', title: 'Lưu vào lộ trình', text: `Tuần ${this.session.week_no} của khóa học đã có nội dung lộ trình. Ghi đè bằng nội dung hiện tại?`, acceptText: 'Ghi đè', cancelText: 'Hủy', accept: doSave })
     },
 
     /* ---------- Mẫu / sao chép ---------- */
@@ -567,6 +668,8 @@ export default {
           if (d.status !== 1) { this.notify(d.message, 'danger'); return false }
           this.report.status = d.data.status
           this.report.share_token = d.data.share_token
+          const tokens = d.data.student_tokens || {}
+          this.students.forEach(s => { if (tokens[s.student_id]) this.$set(s, 'share_token', tokens[s.student_id]) })
           if (!this.report.id) this.report.id = true
           if (status === 2) this.report.sent_at = moment().format('YYYY-MM-DD HH:mm:ss')
           this.notify(d.message)
@@ -575,26 +678,33 @@ export default {
     },
     openPreview() {
       this.flush()
-      if (this.stats.pending && moment(this.session.class_date).isSameOrBefore(moment(), 'day')) {
-        this.notify(`Còn ${this.stats.pending} học viên chưa điểm danh`, 'warning')
-      }
+      if (this.stats.pending) this.notify(`Còn ${this.stats.pending} lượt chưa điểm danh`, 'warning')
       this.preview.open = true
     },
     markSent() { this.setStatus(2) },
-    zaloMessage() {
+    zaloMessage(st) {
       const lines = [
-        `📚 BÁO CÁO BUỔI HỌC – LỚP ${this.session.cls_name}`,
-        `🗓 ${this.dateText}${this.report.start_time ? ' · ' + this.report.start_time + (this.report.end_time ? ' - ' + this.report.end_time : '') : ''}`,
-        `📖 Buổi ${this.session.subject_stt || ''}${this.report.lesson_title ? ': ' + this.report.lesson_title : ''}`,
-        `✅ Có mặt ${this.stats.present}/${this.students.length} · Làm BTVN ${this.stats.homework}`,
+        `📚 BÁO CÁO HỌC TẬP TUẦN ${this.session.week_no || ''} – LỚP ${this.session.cls_name}`,
+        `👦 Học viên: ${st.name}`,
+        `🗓 ${this.dateText} (${this.sessionsText})`,
+        this.report.lesson_title ? `📖 ${this.report.lesson_title}` : '',
         this.report.homework_deadline ? `⏰ Hạn nộp bài: ${this.report.homework_deadline}` : '',
-        `👉 Quý phụ huynh xem nhận xét chi tiết tại: ${this.shareUrl}`
+        `👉 Quý phụ huynh xem nhận xét của con tại: ${this.studentUrl(st)}`
       ]
       return lines.filter(Boolean).join('\n')
     },
-    copyMessage() {
-      const text = this.zaloMessage()
-      const done = () => this.notify('Đã sao chép – dán vào nhóm Zalo phụ huynh')
+    copyAllLinks() {
+      const rows = this.students.filter(s => this.studentUrl(s)).map(s => `${s.name}: ${this.studentUrl(s)}`)
+      if (!rows.length) return this.notify('Chưa có link, vui lòng đánh dấu hoàn thành lại', 'danger')
+      const text = `Báo cáo tuần ${this.session.week_no || ''} – lớp ${this.session.cls_name} (${this.dateText})\n` + rows.join('\n')
+      const done = () => this.notify(`Đã sao chép ${rows.length} link – gửi riêng cho từng phụ huynh`)
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(done).catch(() => this.fallbackCopy(text, done))
+      } else this.fallbackCopy(text, done)
+    },
+    copyMessage(st) {
+      const text = this.zaloMessage(st)
+      const done = () => this.notify(`Đã sao chép – gửi riêng cho phụ huynh ${st.name}`)
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(done).catch(() => this.fallbackCopy(text, done))
       } else this.fallbackCopy(text, done)
@@ -614,7 +724,7 @@ export default {
       const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map(n => n.outerHTML).join('')
       const w = window.open('', '_blank')
       if (!w) return this.notify('Trình duyệt chặn cửa sổ in, vui lòng cho phép pop-up', 'danger')
-      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Báo cáo ${this.session.cls_name} ${this.fmtDate(this.session.class_date)}</title><base href="${window.location.origin}/">${styles}<style>body{background:#fff;margin:0;padding:12px}</style></head><body>${el.innerHTML}</body></html>`)
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Báo cáo tuần ${this.session.week_no || ''} ${this.session.cls_name}</title><base href="${window.location.origin}/">${styles}<style>body{background:#fff;margin:0;padding:12px}</style></head><body>${el.innerHTML}</body></html>`)
       w.document.close()
       w.onload = () => setTimeout(() => { w.focus(); w.print() }, 300)
     }
@@ -775,5 +885,14 @@ export default {
 .lrd-tpl { display: flex; flex-direction: column; gap: 12px; }
 .lrd-tpl code { font-size: 13px; background: #f1f5f9; padding: 0 4px; border-radius: 4px; color: #be185d; }
 .lrd-tpl__btns { display: flex; justify-content: flex-end; gap: 8px; }
+.lrd-select { height: 36px; min-width: 200px; max-width: 280px; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 0 8px; font-size: 14px; color: #1e293b; cursor: pointer; }
+.lrd-select:hover, .lrd-select:focus { border-color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2); outline: none; }
+.lrd-btn.sm { height: 32px; padding: 0 10px; font-size: 13px; }
+.lrd-links { background: #fff; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06); max-height: 240px; overflow-y: auto; }
+.lrd-links__head { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+.lrd-links__head i { color: #f05a28; margin-right: 8px; }
+.lrd-links__row { display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px dashed #e2e8f0; font-size: 14px; }
+.lrd-links__btns { display: flex; gap: 6px; }
+@media (max-width: 768px) { .lrd-links__row { grid-template-columns: 1fr; } }
 .lrd-check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
 </style>

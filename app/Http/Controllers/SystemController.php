@@ -98,7 +98,7 @@ class SystemController extends Controller
     public function getECs($branch_id){
         $b_id = (is_numeric($branch_id) && (int)$branch_id > 0) ? (int)$branch_id : 0;
         $cond = $b_id ? " AND b.branch_id=$b_id " : "";
-        $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label 
+        $data = u::query("SELECT DISTINCT u.id, CONCAT(u.name, ' - ', u.hrm_id) AS label, u.manager_id 
             FROM role_has_user AS ru 
                 LEFT JOIN users AS u ON ru.user_id=u.id 
                 LEFT JOIN roles AS r ON r.id=ru.role_id 

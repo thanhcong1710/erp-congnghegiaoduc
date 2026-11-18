@@ -12,16 +12,17 @@
 
     <div class="lrs-title-wrap">
       <div class="lrs-title">Thông tin lớp học {{ session.cls_name }}</div>
-      <div class="lrs-subtitle">Báo cáo buổi học gửi Quý phụ huynh</div>
+      <div class="lrs-subtitle">{{ isSingle ? 'Nhận xét học tập của ' + students[0].name : 'Báo cáo học tập tuần gửi Quý phụ huynh' }}</div>
     </div>
 
     <!-- Thông tin buổi -->
     <div class="lrs-info">
       <div class="lrs-info__col">
         <div class="lrs-info__row"><i class="fa-regular fa-calendar"></i><span>{{ dateText }}</span></div>
+        <div class="lrs-info__row" v-if="sessionsText"><i class="fa-solid fa-list-check"></i><span>{{ sessionsText }}</span></div>
         <div class="lrs-info__row" v-if="timeText"><i class="fa-regular fa-clock"></i><span>{{ timeText }}</span></div>
         <div class="lrs-info__row"><i class="fa-solid fa-book-open"></i>
-          <span><b>Buổi {{ session.subject_stt || '' }}<template v-if="report.lesson_title">:</template></b> {{ report.lesson_title }}</span>
+          <span><b>Tuần {{ session.week_no || '' }}<template v-if="report.lesson_title">:</template></b> {{ report.lesson_title }}</span>
         </div>
       </div>
       <div class="lrs-info__col">
@@ -29,7 +30,7 @@
         <div class="lrs-info__row" v-if="session.ta_name"><span class="lrs-k">Trợ giảng:</span><span class="lrs-link">{{ session.ta_name }}</span></div>
         <div class="lrs-info__row" v-if="session.cm_name"><span class="lrs-k">CSKH/QLLH:</span><span class="lrs-link">{{ session.cm_name }}</span></div>
       </div>
-      <div class="lrs-info__col lrs-stats">
+      <div class="lrs-info__col lrs-stats" v-if="showStats">
         <div class="lrs-stat"><div class="lrs-stat__v">{{ session.total_students }}</div><div class="lrs-stat__k">Sĩ số</div></div>
         <div class="lrs-stat ok"><div class="lrs-stat__v">{{ session.present }}</div><div class="lrs-stat__k">Có điểm danh</div></div>
         <div class="lrs-stat hw"><div class="lrs-stat__v">{{ session.homework_done }}</div><div class="lrs-stat__k">Làm bài tập</div></div>
@@ -38,22 +39,22 @@
 
     <!-- Nhận xét chung -->
     <div class="lrs-section">
-      <div class="lrs-section__title"><i class="fa-solid fa-comment-dots"></i>Nhận xét chung</div>
+      <div class="lrs-section__title"><i class="fa-solid fa-comment-dots"></i>Nội dung bài học trong tuần</div>
       <div v-if="hasGeneral" class="lrs-rich ql-editor" v-html="report.general_comment"></div>
-      <div v-else class="lrs-muted">Chưa có nhận xét chung.</div>
+      <div v-else class="lrs-muted">Chưa có nội dung bài học.</div>
       <div class="lrs-deadline" v-if="report.homework_deadline">
         <i class="fa-solid fa-hourglass-half"></i><b>Thời gian nộp bài:</b> {{ report.homework_deadline }}
       </div>
     </div>
 
     <!-- Bảng học viên -->
-    <div class="lrs-section">
-      <div class="lrs-section__title"><i class="fa-solid fa-user-graduate"></i>Nhận xét từng học viên</div>
+    <div class="lrs-section" v-if="!classOnly">
+      <div class="lrs-section__title"><i class="fa-solid fa-user-graduate"></i>{{ isSingle ? 'Nhận xét của giáo viên' : 'Nhận xét từng học viên' }}</div>
       <table class="lrs-table">
         <thead>
           <tr>
             <th class="c-name">Học viên</th>
-            <th class="c-mid">Điểm danh</th>
+            <th v-for="w in weekSessions" :key="'h' + w.schedule_id" class="c-mid">{{ shortDate(w.class_date) }}</th>
             <th class="c-mid">BTVN</th>
             <th class="c-mid">Điểm BTVN</th>
             <th>Nhận xét</th>
@@ -65,10 +66,14 @@
               <div class="lrs-stname">{{ st.name }}</div>
               <span v-if="st.is_makeup" class="lrs-tag">Học bù</span>
             </td>
-            <td class="c-mid" data-k="Điểm danh">
-              <span v-if="st.attendance_status == 1" class="lrs-ic ok" title="Có mặt"><i class="fa-solid fa-check"></i></span>
-              <span v-else-if="st.attendance_status == 2" class="lrs-badge absent">Vắng</span>
-              <span v-else class="lrs-dash">–</span>
+            <td v-for="w in weekSessions" :key="'a' + w.schedule_id" class="c-mid" :data-k="'Điểm danh ' + shortDate(w.class_date)">
+              <template v-if="att(st, w)">
+                <span v-if="att(st, w).status == 1" class="lrs-ic ok" title="Có mặt"><i class="fa-solid fa-check"></i></span>
+                <span v-else-if="att(st, w).status == 2" class="lrs-badge absent">Vắng</span>
+                <span v-else class="lrs-dash">–</span>
+                <span v-if="att(st, w).is_makeup" class="lrs-tag">Học bù</span>
+              </template>
+              <span v-else class="lrs-dash" title="Không có lịch học buổi này">·</span>
             </td>
             <td class="c-mid" data-k="BTVN">
               <span v-if="st.homework_done === 1" class="lrs-ic ok" title="Đã làm"><i class="fa-solid fa-check"></i></span>
@@ -81,7 +86,7 @@
             <td class="c-note" data-k="Nhận xét">{{ st.comment }}</td>
           </tr>
           <tr v-if="!students.length">
-            <td colspan="5" class="lrs-muted c-mid">Buổi học chưa có học viên.</td>
+            <td :colspan="4 + weekSessions.length" class="lrs-muted c-mid">Tuần học chưa có học viên.</td>
           </tr>
         </tbody>
       </table>
@@ -99,18 +104,33 @@ import moment from 'moment'
 import 'quill/dist/quill.core.css'
 
 const WEEKDAYS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
+const DOW_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
 export default {
   name: 'LessonReportSheet',
   props: {
     session: { type: Object, required: true },
     report: { type: Object, required: true },
-    students: { type: Array, default: () => [] }
+    students: { type: Array, default: () => [] },
+    // 'class' = link chung của lớp (chỉ nội dung bài), 'student' = link riêng 1 học sinh, '' = nội bộ
+    view: { type: String, default: '' }
   },
   computed: {
+    classOnly() { return this.view === 'class' },
+    isSingle() { return this.view === 'student' && this.students.length === 1 },
+    showStats() { return !this.view && this.session.total_students !== undefined },
+    weekSessions() { return this.session.sessions && this.session.sessions.length ? this.session.sessions : [{ schedule_id: this.session.schedule_id, class_date: this.session.class_date }] },
     dateText() {
+      const a = moment(this.session.week_start), b = moment(this.session.week_end)
+      if (a.isValid() && b.isValid()) return `Tuần ${this.session.week_no || ''} · ${a.format('DD/MM')} – ${b.format('DD/MM/YYYY')}`
       const m = moment(this.session.class_date)
       return m.isValid() ? `${WEEKDAYS[m.day()]}, ${m.format('DD-MM-YYYY')}` : ''
+    },
+    sessionsText() {
+      return (this.session.sessions || []).map(w => {
+        const m = moment(w.class_date)
+        return `${WEEKDAYS[m.day()]} ${m.format('DD/MM')}`
+      }).join(', ')
     },
     timeText() {
       const { start_time: s, end_time: e } = this.report
@@ -123,6 +143,11 @@ export default {
     }
   },
   methods: {
+    shortDate(d) { const m = moment(d); return m.isValid() ? `${DOW_SHORT[m.day()]} ${m.format('DD/MM')}` : '' },
+    att(st, w) {
+      const a = st.attendance || {}
+      return a[w.schedule_id] || a[String(w.schedule_id)] || null
+    },
     fmtScore(v) {
       const n = Number(v)
       return isNaN(n) ? v : (Math.round(n * 10) / 10).toString().replace('.', ',')

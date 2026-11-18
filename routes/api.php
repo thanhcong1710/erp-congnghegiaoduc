@@ -300,6 +300,11 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('save', 'LessonReportsController@save');
                 Route::post('status', 'LessonReportsController@updateStatus');
                 Route::get('copy-sources/{schedule_id}', 'LessonReportsController@copySources');
+                Route::post('teacher-timetable', 'LessonReportsController@teacherTimetable');
+                Route::get('plans/products', 'LessonReportsController@planProducts');
+                Route::post('plans/list', 'LessonReportsController@planList');
+                Route::post('plans/save', 'LessonReportsController@planSave');
+                Route::post('plans/delete', 'LessonReportsController@planDelete');
             });
             Route::prefix('assessments')->group(function () {
                 Route::post('add', 'AssessmentsController@add');

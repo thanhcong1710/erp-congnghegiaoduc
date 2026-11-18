@@ -6,7 +6,7 @@
       <div>{{ error }}</div>
     </div>
     <template v-else>
-      <report-sheet :session="data.session" :report="data.report" :students="data.students" />
+      <report-sheet :session="data.session" :report="data.report" :students="data.students" :view="data.view || 'class'" />
       <div class="lrp-actions">
         <button type="button" class="lrp-btn" @click="print"><i class="fa-solid fa-print"></i> In / Lưu PDF</button>
       </div>
@@ -31,7 +31,8 @@ export default {
         if (d.status !== 1) { this.error = d.message || 'Không tìm thấy báo cáo'; return }
         this.data = d.data
         const s = d.data.session
-        document.title = `Báo cáo buổi học ${s.cls_name} - ${moment(s.class_date).format('DD/MM/YYYY')}`
+        const who = d.data.view === 'student' && d.data.students.length ? ` - ${d.data.students[0].name}` : ''
+        document.title = `Báo cáo tuần ${s.week_no || ''} lớp ${s.cls_name}${who} (${moment(s.week_start || s.class_date).format('DD/MM')} - ${moment(s.week_end || s.class_date).format('DD/MM/YYYY')})`
       })
       .catch(() => { this.error = 'Không tải được báo cáo, vui lòng thử lại sau.' })
       .then(() => { this.loading = false })

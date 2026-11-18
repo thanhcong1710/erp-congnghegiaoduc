@@ -8,6 +8,7 @@ use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class ContractsController extends Controller
@@ -513,6 +514,14 @@ class ContractsController extends Controller
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
         $total_discount = (int)$coupon_amount + (int)data_get($request, 'discount_code_amount') + (int)data_get($request,'b2b_amount') + (int)$sibling_discount + $this->otherDiscountAmount($request);
         $total_discount = $total_discount < data_get($request, 'tuition_fee_amount') ? $total_discount : data_get($request, 'tuition_fee_amount');
+        // Admin/Kế toán chọn lại EC / EC leader → ưu tiên giá trị trên form, mặc định giữ như cũ
+        $new_ec_id = (int)data_get($request, 'ec_id', 0) ?: (int)data_get($student_info, 'ec_id', data_get($pre_update_contract_info, 'ec_id'));
+        $new_ec_leader_id = (int)data_get($request, 'ec_leader_id', 0) ?: (int)data_get($student_info, 'ec_leader_id', data_get($pre_update_contract_info, 'ec_leader_id'));
+        foreach (['EC' => $new_ec_id, 'EC leader' => $new_ec_leader_id] as $label => $uid) {
+            if ($uid && !DB::selectOne("SELECT id FROM users WHERE id = ?", [$uid])) {
+                return response()->json(['status' => 0, 'message' => "$label không tồn tại."], 422);
+            }
+        }
         $payment = u::first("SELECT SUM(amount) AS total FROM payments WHERE contract_id=$contract_id");
         $total_amount = data_get($payment, 'total', 0);
         $availableSession = (int) data_get($request, 'tuition_fee_session') && (int)data_get($request, 'total_amount') ? 
@@ -524,8 +533,8 @@ class ContractsController extends Controller
            'student_id' => data_get($request, 'student_id', data_get($pre_update_contract_info, 'student_id')), 
            'branch_id' => data_get($student_info, 'branch_id', data_get($pre_update_contract_info, 'branch_id')),
            'ceo_branch_id' => data_get($student_info, 'ceo_branch_id', data_get($pre_update_contract_info, 'ceo_branch_id')),
-           'ec_id' => data_get($student_info, 'ec_id', data_get($pre_update_contract_info, 'ec_id')),
-           'ec_leader_id' => data_get($student_info, 'ec_leader_id', data_get($pre_update_contract_info, 'ec_leader_id')),
+           'ec_id' => $new_ec_id,
+           'ec_leader_id' => $new_ec_leader_id,
            'cm_id' => data_get($student_info, 'cm_id', data_get($pre_update_contract_info, 'cm_id')),
            'cm_leader_id' => data_get($student_info, 'cm_leader_id', data_get($pre_update_contract_info, 'cm_leader_id')),
            'product_id' => data_get($request, 'product_id'),
@@ -602,14 +611,53 @@ class ContractsController extends Controller
         $contract_code = str_pad((string)$contract_id, 6, '0', STR_PAD_LEFT);
         $contract_code = config('app.prefix_contract_code').$contract_code;
         u::updateSimpleRow(array('code'=>$contract_code), array('id'=>$contract_id), 'contracts');
+        $this->syncContractEc($pre_update_contract_info, $new_ec_id, $new_ec_leader_id, (bool)data_get($request, 'transfer_student_owner', false));
         u::addLogContracts($contract_id);
         $text_mess = data_get($pre_update_contract_info, 'count_recharge') > 0 ? 'tái phí' : 'nhập học';
-        
+
         $result = array(
             'status' => 1,
             'message' => 'Cập nhật thông tin '.$text_mess.' thành công'
         );
         return response()->json($result);
+    }
+
+    /**
+     * Chuyển giao hợp đồng + doanh thu sang EC mới (chỉ gọi ở nhánh Admin/Kế toán):
+     * payments (doanh thu thực thu), report_* (bảng tổng hợp) theo contract_id;
+     * tuỳ chọn chuyển luôn quyền quản lý học sinh (term_student_user).
+     */
+    private function syncContractEc($pre, $newEcId, $newEcLeaderId, $transferStudentOwner)
+    {
+        $contractId = (int)data_get($pre, 'id');
+        $oldEcId = (int)data_get($pre, 'ec_id');
+        $oldEcLeaderId = (int)data_get($pre, 'ec_leader_id');
+        if (!$contractId || ($oldEcId === $newEcId && $oldEcLeaderId === $newEcLeaderId && !$transferStudentOwner)) {
+            return;
+        }
+        if ($oldEcId !== $newEcId) {
+            DB::update("UPDATE payments SET ec_id = ? WHERE contract_id = ?", [$newEcId, $contractId]);
+            DB::update("UPDATE report_pending SET ec_id = ? WHERE contract_id = ?", [$newEcId, $contractId]);
+            DB::update("UPDATE report_reserve SET ec_id = ? WHERE contract_id = ?", [$newEcId, $contractId]);
+        }
+        DB::update("UPDATE report_renews SET ec_id = ?, ec_leader_id = ? WHERE contract_id = ?", [$newEcId, $newEcLeaderId, $contractId]);
+
+        $studentId = (int)data_get($pre, 'student_id');
+        if ($transferStudentOwner && $studentId) {
+            DB::update("UPDATE term_student_user SET ec_id = ?, ec_leader_id = ?, updated_at = ?, updator_id = ? WHERE student_id = ? AND status = 1",
+                [$newEcId, $newEcLeaderId, date("Y-m-d H:i:s"), (int)Auth::user()->id, $studentId]);
+        }
+
+        $names = [];
+        foreach (DB::select("SELECT id, name FROM users WHERE id IN (?, ?, ?, ?)", [$oldEcId, $newEcId, $oldEcLeaderId, $newEcLeaderId]) as $usr) {
+            $names[(int)$usr->id] = $usr->name;
+        }
+        $n = function ($id) use ($names) { return $names[$id] ?? '-'; };
+        LogStudents::logAdd($studentId,
+            'Chuyển giao hợp đồng ' . data_get($pre, 'code') . ': EC ' . $n($oldEcId) . ' → ' . $n($newEcId)
+            . ', EC leader ' . $n($oldEcLeaderId) . ' → ' . $n($newEcLeaderId)
+            . ($transferStudentOwner ? ' (chuyển cả quyền quản lý học sinh)' : ''),
+            Auth::user()->id);
     }
 
     public function addReceipt(Request $request)

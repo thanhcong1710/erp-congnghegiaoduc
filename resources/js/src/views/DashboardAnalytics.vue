@@ -506,7 +506,12 @@
         </div>
       </vs-tab>
 
-
+      <!-- ============================================== -->
+      <!-- GIÁO VIÊN: THỜI KHOÁ BIỂU -->
+      <!-- ============================================== -->
+      <vs-tab label="Giáo viên" icon="school">
+        <teacher-timetable v-if="teacherTabLoaded" />
+      </vs-tab>
     </vs-tabs>
   </div>
 </template>
@@ -517,16 +522,21 @@ import StatisticsCardLine from '@/components/statistics-cards/StatisticsCardLine
 import axios from '../http/axios.js'
 import VueApexCharts from 'vue-apexcharts'
 import u from '../until/helper.js';
+import TeacherTimetable from './dashboard/TeacherTimetable.vue'
+
+const TEACHER_TAB = 4
 
 export default {
   components: {
     StatisticsCardLine,
     VueApexCharts,
     Multiselect,
+    TeacherTimetable,
   },
   data () {
     return {
       activeTab: 0,
+      teacherTabLoaded: false,
       checkoutTracker: [],
       branch_id: [],
       branches: [
@@ -862,6 +872,9 @@ export default {
   mounted() {
     if (this.$route.query.tab !== undefined) {
       this.activeTab = parseInt(this.$route.query.tab) || 0;
+    } else if (this.isTeacherOnly()) {
+      // Giáo viên / trợ giảng vào dashboard → mở thẳng thời khoá biểu
+      this.activeTab = TEACHER_TAB;
     }
     if (this.$route.query.scroll) {
       setTimeout(() => {
@@ -869,7 +882,20 @@ export default {
       }, 500);
     }
   },
+  watch: {
+    activeTab: {
+      immediate: true,
+      handler(v) { if (v === TEACHER_TAB) this.teacherTabLoaded = true }
+    }
+  },
   methods: {
+    isTeacherOnly() {
+      try {
+        const info = JSON.parse(localStorage.getItem('userInfo')) || {}
+        const roles = (info.permissions || []).filter(p => /^role_/.test(p))
+        return roles.length > 0 && roles.every(r => ['role_36', 'role_54'].includes(r))
+      } catch (e) { return false }
+    },
     handleChartClick(event, chartContext, config, chartTitle) {
       let label = 'chart-clicked';
       let value = '';

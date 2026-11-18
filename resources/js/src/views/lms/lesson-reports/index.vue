@@ -2,7 +2,7 @@
   <div id="page-lesson-reports" class="lr-page mt-5">
     <div v-if="loaded && !ready" class="lr-alert">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      Chưa khởi tạo bảng dữ liệu nhận xét buổi học. Vui lòng liên hệ quản trị để chạy migration <b>2026_11_18_000001_create_lesson_reports_tables</b>.
+      Chưa khởi tạo bảng dữ liệu nhận xét. Vui lòng liên hệ quản trị để chạy migration <b>2026_11_18_000001_create_lesson_reports_tables</b> và <b>2026_11_18_000002_lesson_reports_weekly_and_plans</b>.
     </div>
 
     <!-- ============ BỘ LỌC ============ -->
@@ -16,6 +16,7 @@
         <button type="button" class="lr-nav" title="Tuần sau" @click="shiftWeek(1)"><i class="fa-solid fa-chevron-right"></i></button>
         <button type="button" class="lr-today" v-if="!isCurrentWeek" @click="goToday">Hôm nay</button>
       </div>
+      <button type="button" class="lr-today" @click="$router.push('/lms/lesson-plans')"><i class="fa-solid fa-route mr-1"></i>Lộ trình bài học</button>
 
       <div class="lr-filter__fields">
         <div class="lr-field" v-if="branches.length > 1">
@@ -52,15 +53,20 @@
         <div class="lr-day__body">
           <div
             v-for="s in sessionsByDay[day.date]" :key="s.schedule_id"
-            class="lr-session" :class="'st-' + s.ui_status"
+            class="lr-session" :class="s.is_report_session ? 'st-' + s.ui_status : 'st-merged'"
             @click="open(s)"
           >
             <div class="lr-session__top">
               <div class="lr-session__cls" :title="s.cls_name">{{ s.cls_name }}</div>
-              <span class="lr-badge" :class="s.ui_status">{{ statusLabel[s.ui_status] }}</span>
+              <span v-if="s.is_report_session" class="lr-badge" :class="s.ui_status">{{ statusLabel[s.ui_status] }}</span>
+              <span v-else class="lr-badge merged">Chỉ điểm danh</span>
             </div>
             <div class="lr-session__meta">
               <span><i class="fa-solid fa-book-open"></i>Buổi {{ s.subject_stt || '?' }}<template v-if="s.lesson_title"> · {{ s.lesson_title }}</template></span>
+            </div>
+            <div class="lr-session__meta" v-if="s.week_session_count > 1">
+              <span v-if="s.is_report_session"><i class="fa-solid fa-layer-group"></i>Phiếu tuần · gộp {{ s.week_session_count }} buổi</span>
+              <span v-else><i class="fa-solid fa-share"></i>Nhận xét gộp vào buổi {{ fmtShort(s.report_date) }}</span>
             </div>
             <div class="lr-session__meta" v-if="s.start_time || !teacherOnly">
               <span v-if="s.start_time"><i class="fa-regular fa-clock"></i>{{ s.start_time }}<template v-if="s.end_time"> – {{ s.end_time }}</template></span>
@@ -71,12 +77,18 @@
               <template v-if="s.pending_attendance > 0 && s.class_date <= today">Chưa điểm danh {{ s.pending_attendance }} HS</template>
               <template v-else>Điểm danh {{ s.present }}/{{ s.total_students }}</template>
             </div>
-            <div class="lr-progress" :title="'Đã nhận xét ' + s.commented + '/' + s.total_students">
-              <div class="lr-progress__bar" :style="{ width: pct(s) + '%' }"></div>
-            </div>
-            <div class="lr-session__foot">
-              <span>Nhận xét {{ s.commented }}/{{ s.total_students }}</span>
-              <span class="lr-session__go">{{ s.ui_status === 'none' ? 'Bắt đầu' : 'Mở' }} <i class="fa-solid fa-arrow-right"></i></span>
+            <template v-if="s.is_report_session">
+              <div class="lr-progress" :title="'Đã nhận xét ' + s.commented + '/' + s.total_students">
+                <div class="lr-progress__bar" :style="{ width: pct(s) + '%' }"></div>
+              </div>
+              <div class="lr-session__foot">
+                <span>Nhận xét {{ s.commented }}/{{ s.total_students }}</span>
+                <span class="lr-session__go">{{ s.ui_status === 'none' ? 'Bắt đầu' : 'Mở' }} <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </template>
+            <div v-else class="lr-session__foot">
+              <span></span>
+              <span class="lr-session__go">Điểm danh <i class="fa-solid fa-arrow-right"></i></span>
             </div>
           </div>
           <div v-if="!sessionsByDay[day.date] || !sessionsByDay[day.date].length" class="lr-day__empty">Không có buổi</div>
@@ -132,9 +144,10 @@ export default {
       const b = this.filter.branch
       return b ? this.classes.filter(c => c.branch_id == b.id) : this.classes
     },
+    reportSessions() { return this.sessions.filter(s => s.is_report_session) },
     counts() {
       const c = { all: this.sessions.length, todo: 0, draft: 0, done: 0, sent: 0 }
-      this.sessions.forEach(s => {
+      this.reportSessions.forEach(s => {
         if (s.ui_status === 'none' && s.class_date <= this.today) c.todo++
         if (s.ui_status === 'draft') { c.draft++; if (s.class_date <= this.today) c.todo++ }
         if (s.ui_status === 'done') c.done++
@@ -145,8 +158,8 @@ export default {
     filteredSessions() {
       const st = this.filter.status
       if (st === 'all') return this.sessions
-      if (st === 'todo') return this.sessions.filter(s => ['none', 'draft'].includes(s.ui_status) && s.class_date <= this.today)
-      return this.sessions.filter(s => s.ui_status === st)
+      if (st === 'todo') return this.reportSessions.filter(s => ['none', 'draft'].includes(s.ui_status) && s.class_date <= this.today)
+      return this.reportSessions.filter(s => s.ui_status === st)
     },
     sessionsByDay() {
       const map = {}
@@ -196,6 +209,7 @@ export default {
     setStatus(v) { this.filter.status = v; this.persist() },
     shiftWeek(step) { this.weekStart = this.weekStart.clone().add(step, 'weeks'); this.persistAndLoad() },
     goToday() { this.weekStart = moment().startOf('isoWeek'); this.persistAndLoad() },
+    fmtShort(d) { const m = moment(d); return m.isValid() ? `${DOW[m.day()]} ${m.format('DD/MM')}` : '' },
     pct(s) { return s.total_students ? Math.min(100, Math.round(s.commented * 100 / s.total_students)) : 0 },
     load() {
       this.$vs.loading()
@@ -218,7 +232,8 @@ export default {
       }).catch(() => this.$vs.loading.close())
     },
     open(s) {
-      this.$router.push(`/lms/lesson-reports/${s.schedule_id}`)
+      // Mọi buổi trong tuần đều mở phiếu tuần (gắn buổi cuối tuần) – điểm danh từng buổi nằm trong phiếu
+      this.$router.push(`/lms/lesson-reports/${s.report_schedule_id || s.schedule_id}`)
     }
   }
 }
@@ -276,6 +291,8 @@ export default {
 .lr-session.st-draft { border-left-color: #f59e0b; }
 .lr-session.st-done { border-left-color: #22c55e; }
 .lr-session.st-sent { border-left-color: #7367f0; }
+.lr-session.st-merged { border-left-color: #cbd5e1; border-left-style: dashed; background: #fcfcfd; }
+.lr-session.st-merged .lr-session__cls { color: #475569; }
 .lr-session__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
 .lr-session__cls { font-size: 15px; font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lr-session__meta { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13px; color: #64748b; margin-top: 4px; }
@@ -293,4 +310,5 @@ export default {
 .lr-badge.draft { background: #fef3c7; color: #b45309; }
 .lr-badge.done { background: #dcfce7; color: #15803d; }
 .lr-badge.sent { background: rgba(115, 103, 240, 0.12); color: #5e50ee; }
+.lr-badge.merged { background: #f1f5f9; color: #64748b; }
 </style>

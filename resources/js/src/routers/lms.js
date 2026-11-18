@@ -490,6 +490,20 @@ export default {
         }
       },
       {
+        path: '/lms/lesson-plans',
+        name: 'lms-lesson-plans',
+        component: () => import('@/views/lms/lesson-reports/plans.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhận xét & đánh giá', url: '/lms/lesson-reports' },
+            { title: 'Lộ trình bài học', active: true }
+          ],
+          pageTitle: 'Lộ trình bài học theo tuần',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/lesson-reports/:schedule_id',
         name: 'lms-lesson-reports-detail',
         component: () => import('@/views/lms/lesson-reports/detail.vue'),
