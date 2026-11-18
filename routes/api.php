@@ -26,6 +26,8 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('import/{import_id}', 'ExportsController@import');
     });
     Route::get('test-auto/{student_id}', 'JobsController@testAuto');
+    // Báo cáo buổi học gửi phụ huynh (public, truy cập bằng token)
+    Route::get('public/lesson-report/{token}', 'LessonReportsController@publicReport');
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
         Route::get('menu', 'MenuController@index');
@@ -290,6 +292,14 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::get('loadReSessions/{class_id}', 'AttendancesController@loadReSessions');
                 Route::post('addReSession', 'AttendancesController@addReSession');
                 Route::post('updateReSession', 'AttendancesController@updateReSession');
+            });
+            Route::prefix('lesson-reports')->group(function () {
+                Route::get('filters', 'LessonReportsController@filters');
+                Route::post('sessions', 'LessonReportsController@sessions');
+                Route::get('show/{schedule_id}', 'LessonReportsController@show');
+                Route::post('save', 'LessonReportsController@save');
+                Route::post('status', 'LessonReportsController@updateStatus');
+                Route::get('copy-sources/{schedule_id}', 'LessonReportsController@copySources');
             });
             Route::prefix('assessments')->group(function () {
                 Route::post('add', 'AssessmentsController@add');

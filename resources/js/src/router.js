@@ -100,6 +100,14 @@ const router = new Router({
       component: () => import('@/layouts/full-page/FullPage.vue'),
       children: [
         {
+          path: '/pages/lesson-report/:token',
+          name: 'lesson-report-public',
+          component: () => import('@/views/pages/LessonReportPublic.vue'),
+          meta: {
+            rule: 'editor'
+          }
+        },
+        {
           path: '/pages/print/receipt/:id',
           name: 'print-receipt',
           component: () => import('@/views/pages/print/receipt.vue'),

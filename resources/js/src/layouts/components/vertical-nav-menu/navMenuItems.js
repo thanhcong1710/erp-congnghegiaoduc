@@ -91,9 +91,9 @@ export default [
             permission:'lms_attendances',
           },
           {
-            url: '/lms/assessments',
+            url: '/lms/lesson-reports',
             name: 'Nhận xét & đánh giá',
-            slug: 'lms-assessments',
+            slug: 'lms-lesson-reports',
             permission:'lms_assessments',
           },
           {

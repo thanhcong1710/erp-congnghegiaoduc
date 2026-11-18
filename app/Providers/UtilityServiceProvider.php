@@ -678,6 +678,21 @@ class UtilityServiceProvider extends ServiceProvider
         return $resp;
     }
 
+    /**
+     * Trạng thái hợp đồng khi đã thu một phần học phí (chưa đủ):
+     * - thu < deposit_min_rate (30%) must_charge  => 2 (Đặt cọc)
+     * - thu >= deposit_min_rate must_charge        => 3 (Chờ xếp lớp chính thức – được xếp lớp)
+     * Không bao giờ hạ trạng thái hiện tại.
+     */
+    public static function contractStatusByCharged($must_charge, $total_charged, $current_status = 0)
+    {
+        $rate = (float)config('app.deposit_min_rate', 0.3);
+        $must_charge = (int)$must_charge;
+        $total_charged = (int)$total_charged;
+        $status = $total_charged <= 0 ? 1 : (($must_charge <= 0 || $total_charged >= $must_charge * $rate) ? 3 : 2);
+        return max((int)$current_status, $status);
+    }
+
     public static function getClassDayText($class_day)
     {
         $arr_day = explode(',', $class_day);

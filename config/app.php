@@ -236,4 +236,6 @@ return [
     'prefix_student_code' => env('APP_PREFIX_STUDENT_CODE', 'STK'),
     'prefix_contract_code' => env('APP_PREFIX_CONTRACT_CODE', 'C'),
     'num_session_of_reservable' => env('APP_NUM_SESSION_OF_RESERVABLE', '24'),
+    // Thu học phí (trên must_charge) từ ngưỡng này trở lên => "Chờ xếp lớp chính thức" (contracts.status=3), dưới => "Đặt cọc" (status=2)
+    'deposit_min_rate' => env('APP_DEPOSIT_MIN_RATE', 0.3),
 ];

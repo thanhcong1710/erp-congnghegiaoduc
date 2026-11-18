@@ -477,6 +477,33 @@ export default {
         }
       },
       {
+        path: '/lms/lesson-reports',
+        name: 'lms-lesson-reports',
+        component: () => import('@/views/lms/lesson-reports/index.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhận xét buổi học', active: true }
+          ],
+          pageTitle: 'Nhận xét & đánh giá buổi học',
+          rule: 'editor'
+        }
+      },
+      {
+        path: '/lms/lesson-reports/:schedule_id',
+        name: 'lms-lesson-reports-detail',
+        component: () => import('@/views/lms/lesson-reports/detail.vue'),
+        meta: {
+          breadcrumb: [
+            { title: 'Home', url: '/' },
+            { title: 'Nhận xét buổi học', url: '/lms/lesson-reports' },
+            { title: 'Chấm buổi học', active: true }
+          ],
+          pageTitle: 'Nhận xét buổi học',
+          rule: 'editor'
+        }
+      },
+      {
         path: '/lms/attendances',
         name: 'lms-attendances',
         component: () => import('@/views/lms/attendances/index.vue'),
