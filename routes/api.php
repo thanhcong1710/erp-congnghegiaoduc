@@ -488,6 +488,8 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         Route::post('dashboard', 'DashboardController@index');
         Route::prefix('dashboard')->group(function () {
+            Route::get('role/init', 'RoleDashboardController@init');
+            Route::post('role/data', 'RoleDashboardController@data');
             Route::post('01', 'DashboardController@dashboard01');
             Route::post('02', 'DashboardController@dashboard02');
             Route::post('03', 'DashboardController@dashboard03');

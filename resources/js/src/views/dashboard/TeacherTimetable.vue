@@ -14,7 +14,7 @@
 
       <div class="tt-teacher">
         <div class="tt-teacher__avatar"><i class="fa-solid fa-chalkboard-user"></i></div>
-        <div v-if="teacherOnly || !teachers.length" class="tt-teacher__name">{{ teacher ? teacher.name : '—' }}</div>
+        <div v-if="teacherId || teacherOnly || !teachers.length" class="tt-teacher__name">{{ teacher ? teacher.name : '—' }}</div>
         <div v-else class="tt-teacher__select">
           <vue-select label="name" placeholder="Chọn giáo viên" :options="teachers" v-model="selectedTeacher" :clearable="false" @input="onTeacher"></vue-select>
         </div>
@@ -91,6 +91,8 @@ const LS_KEY = 'dashboard_teacher_timetable'
 export default {
   name: 'TeacherTimetable',
   components: { 'vue-select': select },
+  // teacherId: dashboard cha đã chọn tài khoản GV → dùng luôn, ẩn ô chọn riêng
+  props: { teacherId: { type: Number, default: null } },
   data() {
     return {
       weekStart: moment().startOf('isoWeek'),
@@ -132,7 +134,11 @@ export default {
       return map
     }
   },
+  watch: {
+    teacherId() { this.load() }
+  },
   created() {
+    if (this.teacherId) return this.load()
     try {
       const saved = JSON.parse(localStorage.getItem(LS_KEY)) || {}
       if (saved.teacher_id) this.selectedTeacher = { id: saved.teacher_id }
@@ -151,7 +157,7 @@ export default {
       axios.p('/api/lms/lesson-reports/teacher-timetable', {
         from_date: this.weekStart.format('YYYY-MM-DD'),
         to_date: this.weekEnd.format('YYYY-MM-DD'),
-        teacher_id: this.selectedTeacher ? this.selectedTeacher.id : ''
+        teacher_id: this.teacherId || (this.selectedTeacher ? this.selectedTeacher.id : '')
       }).then(res => {
         this.$vs.loading.close()
         const d = res.data || {}
@@ -179,7 +185,7 @@ export default {
 </script>
 
 <style>
-.tt-page { font-size: 14px; color: #334155; display: flex; flex-direction: column; gap: 14px; padding-top: 18px; }
+.tt-page { font-size: 14px; color: #334155; display: flex; flex-direction: column; gap: 14px; }
 .tt-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06); padding: 14px 18px; }
 .nowrap { white-space: nowrap !important; }
 
