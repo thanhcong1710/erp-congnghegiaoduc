@@ -47,7 +47,7 @@
     </div>
 
     <template v-if="currentTab">
-      <div v-if="currentTab.key !== 'system' && !currentTab.accounts.length && !['ceo', 'accountant'].includes(currentTab.key)" class="db-card db-empty">
+      <div v-if="currentTab.key !== 'system' && !currentTab.accounts.length && !['ceo', 'accountant', 'marketing'].includes(currentTab.key)" class="db-card db-empty">
         Chưa có tài khoản nào thuộc vai trò này.
       </div>
       <teacher-timetable v-else-if="currentTab.key === 'teacher'" :teacher-id="accountId" />
@@ -57,6 +57,7 @@
         <overview-dashboard v-else-if="['system', 'ceo'].includes(currentTab.key)" :d="data" />
         <sale-dashboard v-else-if="currentTab.key === 'sale'" :d="data" />
         <cm-dashboard v-else-if="currentTab.key === 'cm'" :d="data" />
+        <marketing-dashboard v-else-if="currentTab.key === 'marketing'" :d="data" />
         <accountant-dashboard v-else-if="currentTab.key === 'accountant'" :d="data" />
       </template>
     </template>
@@ -70,12 +71,13 @@ import OverviewDashboard from './dashboard/OverviewDashboard.vue'
 import SaleDashboard from './dashboard/SaleDashboard.vue'
 import CmDashboard from './dashboard/CmDashboard.vue'
 import AccountantDashboard from './dashboard/AccountantDashboard.vue'
+import MarketingDashboard from './dashboard/MarketingDashboard.vue'
 import TeacherTimetable from './dashboard/TeacherTimetable.vue'
 
 const LS_KEY = 'dashboard_role_state'
 
 export default {
-  components: { OverviewDashboard, SaleDashboard, CmDashboard, AccountantDashboard, TeacherTimetable },
+  components: { OverviewDashboard, SaleDashboard, CmDashboard, AccountantDashboard, MarketingDashboard, TeacherTimetable },
   data() {
     return {
       tabs: [],

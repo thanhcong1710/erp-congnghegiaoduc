@@ -26,6 +26,7 @@ class RoleDashboardController extends Controller
         'system' => ['label' => 'Toàn hệ thống', 'icon' => 'public', 'roles' => [999999], 'leaders' => []],
         'ceo' => ['label' => 'Giám đốc trung tâm', 'icon' => 'store', 'roles' => [686868], 'leaders' => []],
         'sale' => ['label' => 'Sale', 'icon' => 'shopping_cart', 'roles' => [68, 69], 'leaders' => [69]],
+        'marketing' => ['label' => 'Marketing', 'icon' => 'campaign', 'roles' => [70], 'leaders' => []],
         'cm' => ['label' => 'Chăm sóc khách hàng', 'icon' => 'favorite', 'roles' => [55, 56], 'leaders' => [56]],
         'teacher' => ['label' => 'Giáo viên', 'icon' => 'school', 'roles' => [36, 37, 54], 'leaders' => [37]],
         'accountant' => ['label' => 'Kế toán', 'icon' => 'account_balance_wallet', 'roles' => [1000002], 'leaders' => []],
@@ -300,7 +301,7 @@ class RoleDashboardController extends Controller
         }
         $userId = (int)$request->input('user_id') ?: (int)$tab['default_id'];
         // Admin xem tab Kế toán / GĐ trung tâm khi chưa có tài khoản thuộc role đó → theo cơ sở admin quản lý
-        $noAccount = !$tab['accounts'] && $this->isAdmin() && in_array($tabKey, ['accountant', 'ceo'], true);
+        $noAccount = !$tab['accounts'] && $this->isAdmin() && in_array($tabKey, ['accountant', 'ceo', 'marketing'], true);
         if ($tabKey !== 'system' && !$tab['accounts'] && !$noAccount) {
             return response()->json((object)['status' => 0, 'message' => 'Chưa có tài khoản nào thuộc vai trò này', 'data' => null]);
         }
@@ -326,6 +327,9 @@ class RoleDashboardController extends Controller
                 break;
             case 'cm':
                 $data = $this->cm($userId, $range);
+                break;
+            case 'marketing':
+                $data = $this->marketing($noAccount ? $this->myBranchIds() : $this->branchIdsOf($userId), $range);
                 break;
             case 'accountant':
                 $data = $this->accountant($noAccount ? $this->myBranchIds() : $this->branchIdsOf($userId), $range);
@@ -570,6 +574,79 @@ class RoleDashboardController extends Controller
             'birthdays' => $this->birthdays($cCond),
             'debts' => $this->debtContracts($cCond),
             'classes' => $classList,
+        ];
+    }
+
+    /* ======================= Marketing ======================= */
+
+    private function marketing($branchIds, $range)
+    {
+        list($start, $end, $pStart, $pEnd) = $range;
+        $inMonth = " p.branch_id IN ($branchIds) AND p.created_at BETWEEN '$start 00:00:00' AND '$end 23:59:59' ";
+        $cur = u::first("SELECT COUNT(*) AS n, SUM(p.status IN (8, 9, 10)) AS booked, SUM(p.status IN (9, 10)) AS checkin, SUM(p.status = 10) AS bought,
+                SUM(p.status IN (3, 4, 6, 12)) AS bad, SUM(IFNULL(p.source_id, 0) = 0) AS no_source
+            FROM crm_parents AS p WHERE $inMonth");
+        $prev = u::first("SELECT COUNT(*) AS n FROM crm_parents AS p WHERE p.branch_id IN ($branchIds) AND p.created_at BETWEEN '$pStart 00:00:00' AND '$pEnd 23:59:59'");
+        // Doanh số HĐ mới tháng có gắn nguồn khách hàng
+        $srcExpr = "COALESCE(NULLIF(cp.source_id, 0), NULLIF(s.source_id, 0), 0)";
+        $contractJoin = "FROM contracts AS c LEFT JOIN students AS s ON s.id = c.student_id
+            LEFT JOIN crm_students AS cs ON cs.lms_id = c.student_id LEFT JOIN crm_parents AS cp ON cp.id = cs.parent_id
+            WHERE c.type = 1 AND c.status > 0 AND c.branch_id IN ($branchIds) AND c.created_at BETWEEN '$start 00:00:00' AND '$end 23:59:59'";
+        $rev = u::first("SELECT COUNT(DISTINCT c.id) AS n, SUM(c.must_charge) AS total FROM (SELECT DISTINCT c.id, c.must_charge $contractJoin) AS c");
+
+        $bySource = u::query("SELECT COALESCE(src.name, 'Chưa có nguồn') AS name, COUNT(*) AS leads,
+                SUM(p.status IN (8, 9, 10)) AS booked, SUM(p.status IN (9, 10)) AS checkin, SUM(p.status = 10) AS bought
+            FROM crm_parents AS p LEFT JOIN sources AS src ON src.id = p.source_id WHERE $inMonth GROUP BY src.name ORDER BY leads DESC");
+        $revBySource = [];
+        foreach (u::query("SELECT x.src, SUM(x.must_charge) AS total, COUNT(*) AS n FROM (SELECT DISTINCT c.id, c.must_charge, $srcExpr AS src $contractJoin) AS x GROUP BY x.src") as $r) {
+            $revBySource[(int)$r->src] = $r;
+        }
+        $srcIds = [];
+        foreach (u::query("SELECT id, name FROM sources") as $x) $srcIds[$x->name] = (int)$x->id;
+        foreach ($bySource as $r) {
+            $r->leads = (int)$r->leads; $r->booked = (int)$r->booked; $r->checkin = (int)$r->checkin; $r->bought = (int)$r->bought;
+            $r->conversion = $this->pct($r->bought, $r->leads);
+            $sid = $srcIds[$r->name] ?? 0;
+            $r->revenue = isset($revBySource[$sid]) ? $this->num($revBySource[$sid]->total) : 0;
+            $r->contracts = isset($revBySource[$sid]) ? (int)$revBySource[$sid]->n : 0;
+        }
+        $byDetail = u::query("SELECT COALESCE(src.name, '—') AS source_name, COALESCE(sd.name, 'Chưa có kênh ngách') AS name, COUNT(*) AS leads,
+                SUM(p.status IN (9, 10)) AS checkin, SUM(p.status = 10) AS bought
+            FROM crm_parents AS p LEFT JOIN sources AS src ON src.id = p.source_id LEFT JOIN source_detail AS sd ON sd.id = p.source_detail_id
+            WHERE $inMonth GROUP BY src.name, sd.name ORDER BY leads DESC LIMIT 15");
+        foreach ($byDetail as $r) $r->conversion = $this->pct((int)$r->bought, (int)$r->leads);
+
+        // Lead 6 tháng
+        $from = date('Y-m-01', strtotime($end . ' -5 months'));
+        $map = [];
+        foreach (u::query("SELECT DATE_FORMAT(p.created_at, '%Y-%m') AS m, COUNT(*) AS n FROM crm_parents AS p
+                WHERE p.branch_id IN ($branchIds) AND p.created_at BETWEEN '$from 00:00:00' AND '$end 23:59:59' GROUP BY m") as $r) $map[$r->m] = (int)$r->n;
+        $trend = ['labels' => [], 'values' => []];
+        for ($i = 5; $i >= 0; $i--) {
+            $m = date('Y-m', strtotime($end . ' -' . $i . ' months'));
+            $trend['labels'][] = date('m/Y', strtotime($m . '-01'));
+            $trend['values'][] = $map[$m] ?? 0;
+        }
+        $byBranch = u::query("SELECT b.name, COUNT(p.id) AS leads, SUM(p.status = 10) AS bought
+            FROM crm_parents AS p JOIN branches AS b ON b.id = p.branch_id WHERE $inMonth GROUP BY b.name ORDER BY leads DESC");
+        $campaigns = u::query("SELECT id, title, type, start_date, end_date, branch_id FROM campaigns
+            WHERE status = 1 AND (start_date IS NULL OR start_date <= '$end') AND (end_date IS NULL OR end_date >= '$start') ORDER BY start_date DESC LIMIT 15");
+
+        return [
+            'kpis' => [
+                'leads' => (int)$cur->n, 'leads_prev' => (int)$prev->n, 'booked' => (int)$cur->booked, 'checkin' => (int)$cur->checkin,
+                'bought' => (int)$cur->bought, 'conversion' => $this->pct((int)$cur->bought, (int)$cur->n),
+                'checkin_rate' => $this->pct((int)$cur->checkin, (int)$cur->n),
+                'bad' => (int)$cur->bad, 'bad_rate' => $this->pct((int)$cur->bad, (int)$cur->n), 'no_source' => (int)$cur->no_source,
+                'new_contracts' => (int)$rev->n, 'new_contract_amount' => $this->num($rev->total),
+                'campaigns' => count($campaigns),
+            ],
+            'lead_trend' => $trend,
+            'funnel' => $this->funnel($inMonth),
+            'by_source' => $bySource,
+            'by_detail' => $byDetail,
+            'by_branch' => ['labels' => array_column($byBranch, 'name'), 'values' => array_map('intval', array_column($byBranch, 'leads'))],
+            'campaigns' => $campaigns,
         ];
     }
 
