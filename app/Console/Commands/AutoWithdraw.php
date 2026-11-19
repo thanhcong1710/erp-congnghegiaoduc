@@ -38,7 +38,7 @@ class AutoWithdraw extends Command
      */
     public function handle()
     {
-        $date = date('Y-m-d', strtotime('-7 days'));
+        $date = date('Y-m-d', strtotime('-1 days'));
         $listContracts = u::query("SELECT c.* , cl.cls_name, cl.cls_enddate
                 FROM contracts AS c 
 				    LEFT JOIN classes AS cl On cl.id=c.class_id
