@@ -253,7 +253,10 @@ export default {
 .tt-item.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1); border-color: var(--ty); }
 .tt-item.ty-replaced { opacity: .8; }
 /* Buổi chưa tới ngày: nền xám, giữ vạch màu loại buổi, không bấm được */
-.tt-item.future { background: #f1f5f9; border-style: dashed; border-left-style: solid; cursor: not-allowed; }
+/* Ghi đè màu loại buổi → toàn bộ thẻ xám giống màn Nhận xét & đánh giá */
+.tt-item.future { --ty: #cbd5e1; --ty-bg: #f1f5f9; background: #f1f5f9; border: 1px dashed #cbd5e1; border-left: 4px solid #cbd5e1; cursor: not-allowed; }
+.tt-item.future .tt-type { color: #94a3b8; }
+.tt-item.future .tt-item__meta i { color: #94a3b8; }
 .tt-item.future .tt-item__cls { color: #64748b; }
 .tt-item.future .tt-item__meta { color: #94a3b8; }
 .tt-item.future .tt-st.future { background: #e2e8f0; border: none; color: #64748b; }
