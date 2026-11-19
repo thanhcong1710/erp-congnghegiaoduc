@@ -45,7 +45,7 @@
         <div class="tt-day__body">
           <div
             v-for="it in itemsByDay[day.date]" :key="it.type + '-' + (it.schedule_id || it.class_id)"
-            class="tt-item" :class="['ty-' + it.type, isFuture(it) ? 'future' : '', { clickable: it.type !== 'holiday' && !isFuture(it) }]"
+            class="tt-item" :class="['ty-' + it.type, it.type === 'holiday' ? '' : (isFuture(it) ? 'future' : 'done-day st-' + itemState(it).cls), { clickable: it.type !== 'holiday' && !isFuture(it) }]"
             :title="isFuture(it) ? 'Buổi học chưa diễn ra – chưa thể điểm danh / nhận xét' : ''"
             @click="open(it)"
           >
@@ -174,7 +174,7 @@ export default {
     itemState(it) {
       const n = it.total_students || it.expected_students || 0
       if (it.class_date > this.today) return { cls: 'future', icon: 'fa-solid fa-lock', text: `Chưa đến ngày học · ${n} HS` }
-      if (it.roster_missing) return { cls: 'muted', icon: 'fa-solid fa-users', text: `${n} HS · chưa có DS điểm danh` }
+      if (it.roster_missing) return { cls: 'warn', icon: 'fa-solid fa-users', text: `${n} HS · chưa có DS điểm danh` }
       const att = `${it.present}/${it.total_students} có mặt`
       if (it.type === 'replaced') return { cls: 'muted', icon: 'fa-solid fa-user', text: att }
       if (it.pending_attendance > 0) return { cls: 'warn', icon: 'fa-solid fa-clipboard-user', text: `Cần điểm danh ${it.pending_attendance} HS` }
@@ -252,6 +252,14 @@ export default {
 .tt-item.clickable { cursor: pointer; }
 .tt-item.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1); border-color: var(--ty); }
 .tt-item.ty-replaced { opacity: .8; }
+/* Buổi đã/đang diễn ra: nền trắng + vạch trái theo trạng thái (giống màn Nhận xét & đánh giá) để cảnh báo GV */
+.tt-item.done-day { background: #fff; opacity: 1; }
+.tt-item.st-danger { border-left-color: #ef4444; }
+.tt-item.st-warn { border-left-color: #f97316; }
+.tt-item.st-draft { border-left-color: #f59e0b; }
+.tt-item.st-ok { border-left-color: #22c55e; }
+.tt-item.st-sent { border-left-color: #7367f0; }
+.tt-item.st-muted { border-left-color: #cbd5e1; }
 /* Buổi chưa tới ngày: nền xám, giữ vạch màu loại buổi, không bấm được */
 /* Ghi đè màu loại buổi → toàn bộ thẻ xám giống màn Nhận xét & đánh giá */
 .tt-item.future { --ty: #cbd5e1; --ty-bg: #f1f5f9; background: #f1f5f9; border: 1px dashed #cbd5e1; border-left: 4px solid #cbd5e1; cursor: not-allowed; }
