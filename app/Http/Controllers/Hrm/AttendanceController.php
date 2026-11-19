@@ -251,6 +251,7 @@ class AttendanceController extends Controller
                 'leave_reason' => $leaveReason,
                 'leave_approval_type' => $leaveApprovalType,
                 'leave_duration_days' => $leaveDurationDays,
+                'leave_day_part' => $leaveReq ? ($leaveReq->day_part ?: 'full') : 'full',
                 'override_edit' => $overrideEdit,
                 // not_checked, online, present, leave_approved, leave_approved_half, unexcused_absent, unexcused_absent_half, late_fined, late_submitted
                 'attendance_status' => $attendanceStatus,

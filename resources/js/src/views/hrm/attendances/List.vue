@@ -474,7 +474,7 @@
                           <div class="flex items-center">
                             <span class="inline-flex items-center px-3 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700 border border-blue-300 w-max">
                               <i class="fa-solid fa-calendar-check mr-1.5"></i>
-                              Nghỉ phép {{ Number(tr.leave_duration_days) === 0.5 ? '0.5 ngày' : '1 ngày' }} (Đã duyệt)
+                              Nghỉ phép {{ tr.leave_day_part === 'morning' ? 'buổi Sáng' : (tr.leave_day_part === 'afternoon' ? 'buổi Chiều' : (Number(tr.leave_duration_days) === 0.5 ? '0.5 ngày' : '1 ngày')) }} (Đã duyệt)
                             </span>
                             <button
                               v-if="isHrmAdmin"

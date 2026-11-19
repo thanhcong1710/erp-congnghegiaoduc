@@ -19,6 +19,7 @@ class HrmLeaveRequest extends Model
         'request_category',
         'approval_type',
         'duration_days',
+        'day_part',
         'target_shift_info',
         'status',
         'approved_by',

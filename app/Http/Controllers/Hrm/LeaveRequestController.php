@@ -79,7 +79,22 @@ class LeaveRequestController extends Controller
 
             $startDate = Carbon::parse($request->start_date);
             $endDate = Carbon::parse($request->end_date);
-            $durationDays = $request->duration_days ?: (max(1, $startDate->diffInDays($endDate) + 1));
+            if ($endDate->lt($startDate)) {
+                return response()->json(['status' => 0, 'message' => 'Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!']);
+            }
+
+            // Buổi nghỉ: full (cả ngày) / morning (nghỉ sáng) / afternoon (nghỉ chiều)
+            $isShiftChange = $request->request_category === 'shift_change';
+            $dayPart = (!$isShiftChange && in_array($request->day_part, ['morning', 'afternoon'], true))
+                ? $request->day_part
+                : 'full';
+            if ($dayPart !== 'full' && !$startDate->isSameDay($endDate)) {
+                return response()->json(['status' => 0, 'message' => 'Nghỉ buổi Sáng/Chiều chỉ áp dụng cho 1 ngày!']);
+            }
+            // Nửa ngày: server tự đặt 0.5, không tin số FE gửi lên
+            $durationDays = $dayPart !== 'full'
+                ? 0.5
+                : ($request->duration_days ?: ($startDate->diffInDays($endDate) + 1));
 
             $leave = new HrmLeaveRequest();
             $leave->user_id = $userId;
@@ -91,6 +106,7 @@ class LeaveRequestController extends Controller
             $leave->start_date = $request->start_date;
             $leave->end_date = $request->end_date;
             $leave->duration_days = $durationDays;
+            $leave->day_part = $dayPart;
             $leave->target_shift_info = $request->target_shift_info ?: null;
             $leave->reason = $request->reason;
             $leave->status = 0; // Chờ duyệt
@@ -267,6 +283,8 @@ class LeaveRequestController extends Controller
                     $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
                     $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
 
+                    $dayPartLabels = ['morning' => ' (Nghỉ sáng)', 'afternoon' => ' (Nghỉ chiều)'];
+                    $dayPartSuffix = $dayPartLabels[$leave->day_part] ?? '';
                     $currentDay = Carbon::parse($leave->start_date);
                     $endDay = Carbon::parse($leave->end_date);
                     while ($currentDay->lte($endDay)) {
@@ -275,7 +293,7 @@ class LeaveRequestController extends Controller
                             $attStatus = ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1)
                                 ? 'online_half'
                                 : 'online';
-                            $attNote = 'Theo đơn làm Online #' . $leave->id;
+                            $attNote = 'Theo đơn làm Online #' . $leave->id . $dayPartSuffix;
                         } else {
                             $attStatus = 'leave_approved';
                             if ($approvalType === 'late_unpaid') {
@@ -283,7 +301,7 @@ class LeaveRequestController extends Controller
                             } elseif ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1) {
                                 $attStatus = 'leave_approved_half';
                             }
-                            $attNote = 'Theo đơn xin phép #' . $leave->id;
+                            $attNote = 'Theo đơn xin phép #' . $leave->id . $dayPartSuffix;
                         }
 
                         $condition = ['date' => $dateStr];

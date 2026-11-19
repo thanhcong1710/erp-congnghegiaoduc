@@ -348,7 +348,10 @@
                       <div v-else class="hrm-muted-small italic">Không ghi lý do</div>
                     </td>
 
-                    <td class="td vs-table--td text-center font-bold text-gray-800">{{ tr.duration_days }}</td>
+                    <td class="td vs-table--td text-center font-bold text-gray-800">
+                      {{ tr.duration_days }}
+                      <div v-if="dayPartText(tr.day_part)" class="text-xs font-semibold text-primary whitespace-nowrap">{{ dayPartText(tr.day_part) }}</div>
+                    </td>
 
                     <td class="td vs-table--td">
                       <span class="hrm-badge" :class="leaveStatusBadgeClass(tr.status)">
@@ -539,6 +542,7 @@
                 </td>
                 <td class="text-center">
                   <span class="day-badge">{{ lv.duration_days }}</span>
+                  <div v-if="dayPartText(lv.day_part)" class="text-xs font-semibold text-primary whitespace-nowrap mt-1">{{ dayPartText(lv.day_part) }}</div>
                 </td>
                 <td class="text-sm text-gray-700">
                   {{ lv.reason || '---' }}
@@ -693,12 +697,31 @@
           </div>
           <div class="vx-col w-1/3">
             <label class="text-sm font-semibold text-gray-700 block mb-1">Đến ngày (*)</label>
-            <flat-pickr v-model="form.end_date" :config="flatpickrDateConfig" @on-change="calculateDays" class="filter-input w-full" placeholder="dd/mm/yyyy" />
+            <flat-pickr v-model="form.end_date" :config="flatpickrDateConfig" @on-change="calculateDays" class="filter-input w-full" :class="{ 'is-locked': isHalfDayForm }" placeholder="dd/mm/yyyy" />
           </div>
           <div class="vx-col w-1/3">
-            <label class="text-sm font-semibold text-gray-700 block mb-1">Số ngày (*)</label>
-            <input type="number" step="0.5" class="filter-input w-full" v-model="form.duration_days" />
+            <label class="text-sm font-semibold text-gray-700 block mb-1">Số ngày</label>
+            <input type="text" class="filter-input w-full is-locked" :value="form.duration_days + ' ngày'" readonly />
           </div>
+        </div>
+
+        <!-- Chọn buổi nghỉ: Cả ngày / Sáng / Chiều (Sáng/Chiều chỉ áp dụng khi nghỉ 1 ngày) -->
+        <div class="mb-4" v-if="form.request_category !== 'shift_change'">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">Thời gian nghỉ (*)</label>
+          <div class="day-part-group">
+            <button
+              v-for="opt in dayPartOptions"
+              :key="opt.value"
+              type="button"
+              class="day-part-btn"
+              :class="{ active: form.day_part === opt.value }"
+              :disabled="opt.value !== 'full' && !isSingleDayForm"
+              @click="selectDayPart(opt.value)"
+            >
+              <i :class="opt.icon" class="mr-1"></i> {{ opt.label }}
+            </button>
+          </div>
+          <div v-if="!isSingleDayForm" class="text-xs text-gray-500 mt-1">Nghỉ buổi Sáng/Chiều chỉ áp dụng khi Từ ngày = Đến ngày.</div>
         </div>
         <!-- Hiển thị rõ ngày nghỉ để tránh nhầm với ngày gửi đơn -->
         <div class="mb-4 text-sm" v-if="leaveDateHint">
@@ -736,7 +759,7 @@
       <div class="p-4" v-if="selectedLeave">
         <div class="mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded border border-gray-200">
           <div>Phê duyệt đơn của nhân sự: <strong class="text-primary">{{ selectedLeave.employee ? selectedLeave.employee.full_name : (selectedLeave.user ? selectedLeave.user.name : '') }}</strong> 
-          ({{ selectedLeave.duration_days }} ngày: {{ selectedLeave.start_date }} đến {{ selectedLeave.end_date }})</div>
+          ({{ formatDuration(selectedLeave) }}: {{ selectedLeave.start_date }} đến {{ selectedLeave.end_date }})</div>
           <div class="text-xs text-gray-500 mt-1">Thời gian tạo đơn: <strong class="text-gray-700">{{ formatDateTime(selectedLeave.created_at) }}</strong></div>
         </div>
 
@@ -810,7 +833,7 @@
       <div class="p-4" v-if="targetRejectLeave">
         <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800">
           Từ chối đơn của nhân sự: <strong>{{ targetRejectLeave.employee ? targetRejectLeave.employee.full_name : (targetRejectLeave.user ? targetRejectLeave.user.name : '') }}</strong>
-          ({{ targetRejectLeave.duration_days }} ngày: {{ targetRejectLeave.start_date }} đến {{ targetRejectLeave.end_date }}).
+          ({{ formatDuration(targetRejectLeave) }}: {{ targetRejectLeave.start_date }} đến {{ targetRejectLeave.end_date }}).
         </div>
         <div class="vx-row mb-4">
           <div class="vx-col w-full">
@@ -1103,9 +1126,15 @@ export default {
         start_date: '',
         end_date: '',
         duration_days: 1.0,
+        day_part: 'full',
         target_shift_info: '',
         reason: ''
       },
+      dayPartOptions: [
+        { value: 'full', label: 'Cả ngày', icon: 'fa-solid fa-calendar-day' },
+        { value: 'morning', label: 'Nghỉ Sáng', icon: 'fa-solid fa-sun' },
+        { value: 'afternoon', label: 'Nghỉ Chiều', icon: 'fa-solid fa-cloud-sun' }
+      ],
 
       // Popup Phê duyệt
       approvePopupActive: false,
@@ -1145,6 +1174,12 @@ export default {
       if ([start, end].some(d => [0, 6].includes(moment(d).day()))) warnings.push('Ngày nghỉ rơi vào Thứ 7 / Chủ nhật, vui lòng kiểm tra lại.');
       if (moment(start).isBefore(moment(), 'day')) warnings.push('Ngày nghỉ đã qua (trước hôm nay).');
       return { label, warnings };
+    },
+    isSingleDayForm() {
+      return !!this.form.start_date && this.form.start_date === this.form.end_date;
+    },
+    isHalfDayForm() {
+      return this.form.day_part === 'morning' || this.form.day_part === 'afternoon';
     },
     previewRemainingDays() {
       const total = parseFloat(this.adjustForm.total_days) || 0;
@@ -1543,13 +1578,28 @@ export default {
         start_date: moment().format('YYYY-MM-DD'),
         end_date: moment().format('YYYY-MM-DD'),
         duration_days: 1.0,
+        day_part: 'full',
         target_shift_info: '',
         reason: ''
       };
       this.popupActive = true;
     },
 
+    selectDayPart(value) {
+      if (value !== 'full' && !this.isSingleDayForm) return;
+      this.form.day_part = value;
+      this.calculateDays();
+    },
+
     calculateDays() {
+      // Đổi ca không có khái niệm buổi nghỉ
+      if (this.form.request_category === 'shift_change') this.form.day_part = 'full';
+      // Nghỉ nửa ngày: khóa "Đến ngày" bằng "Từ ngày", số ngày = 0.5
+      if (this.isHalfDayForm) {
+        this.form.end_date = this.form.start_date;
+        this.form.duration_days = 0.5;
+        return;
+      }
       if (this.form.start_date && this.form.end_date) {
         let start = new Date(this.form.start_date);
         let end = new Date(this.form.end_date);
@@ -1564,6 +1614,7 @@ export default {
         this.$vs.notify({ title: 'Cảnh báo', text: 'Vui lòng chọn ngày bắt đầu và kết thúc', color: 'warning' });
         return;
       }
+      this.calculateDays();
       axios.p('/api/hrm/leaves/add', this.form).then(res => {
         if (res.data.status === 1) {
           this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
@@ -1651,6 +1702,16 @@ export default {
       }).catch(err => {
         this.$vs.notify({ title: 'Lỗi', text: err.message, color: 'danger' });
       });
+    },
+
+    dayPartText(part) {
+      return { morning: 'Nghỉ Sáng', afternoon: 'Nghỉ Chiều' }[part] || '';
+    },
+
+    // Hiển thị số ngày kèm buổi nghỉ, VD: "0.5 ngày - Nghỉ Sáng"
+    formatDuration(lv) {
+      const part = this.dayPartText(lv.day_part);
+      return `${lv.duration_days} ngày${part ? ' - ' + part : ''}`;
     },
 
     getRequestCategoryText(cat) {
@@ -1943,6 +2004,34 @@ export default {
   background-color: #fbfcfe;
 }
 
+.day-part-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.day-part-btn {
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.day-part-btn.active {
+  border-color: rgba(var(--vs-primary), 1);
+  background: rgba(var(--vs-primary), 0.1);
+  color: rgba(var(--vs-primary), 1);
+}
+.day-part-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.is-locked {
+  pointer-events: none;
+  background: #f3f4f6 !important;
+}
 .day-badge {
   display: inline-block;
   padding: 3px 10px;
