@@ -94,6 +94,10 @@ class AttendancesController extends Controller
             return response()->json(['status' => 0, 'message' => 'Trạng thái điểm danh không hợp lệ']);
         }
         $schedule_has_student_info = u::getObject(array('id'=>$id), 'schedule_has_student');
+        // Buổi chưa diễn ra thì không được điểm danh (cho phép đưa về "chưa điểm danh")
+        if ($schedule_has_student_info && $attendance_status !== 0 && data_get($schedule_has_student_info, 'class_date') > date('Y-m-d')) {
+            return response()->json(['status' => 0, 'message' => 'Buổi học chưa diễn ra, chưa thể điểm danh']);
+        }
         if($schedule_has_student_info){
             u::updateSimpleRow(array(
                 'attendance_status'=>$attendance_status,

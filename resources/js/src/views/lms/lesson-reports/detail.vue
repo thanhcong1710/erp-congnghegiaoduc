@@ -90,12 +90,15 @@
         <div class="lrd-card">
           <div class="lrd-card__title">
             <span><i class="fa-solid fa-user-graduate"></i>Nhận xét từng học viên <span class="lrd-pill">{{ stats.commented }}/{{ students.length }} đã nhận xét</span></span>
-            <div class="lrd-card__actions">
+            <div class="lrd-card__actions" v-if="weekStarted">
               <button type="button" class="lrd-btn success" v-if="stats.pending" @click="bulkPresent"><i class="fa-solid fa-check-double"></i>Cả lớp có mặt</button>
               <button type="button" class="lrd-btn soft" @click="bulkHomework"><i class="fa-solid fa-book"></i>Cả lớp đã làm BTVN</button>
               <button type="button" class="lrd-btn soft" @click="tpl.open = true"><i class="fa-solid fa-paste"></i>Áp mẫu nhận xét</button>
             </div>
           </div>
+
+          <div v-if="!weekStarted" class="lrd-note lock"><i class="fa-solid fa-lock"></i>Tuần học chưa diễn ra buổi nào ({{ sessionsText }}). Điểm danh và nhận xét học viên sẽ mở khi tới ngày học.</div>
+          <div v-else-if="futureSessions.length" class="lrd-note lock"><i class="fa-solid fa-lock"></i>Buổi {{ futureSessions.map(w => shortDate(w.class_date)).join(', ') }} chưa diễn ra – chỉ điểm danh được khi tới ngày học.</div>
 
           <div class="lrd-hint"><i class="fa-regular fa-keyboard"></i>Nhận xét tự lưu. Nhấn <kbd>Ctrl</kbd> + <kbd>Enter</kbd> để chuyển sang học viên tiếp theo.</div>
 
@@ -105,7 +108,7 @@
                 <tr>
                   <th class="c-stt">#</th>
                   <th class="c-name">Học viên</th>
-                  <th v-for="w in weekSessions" :key="'h' + w.schedule_id" class="c-att">Điểm danh {{ shortDate(w.class_date) }}</th>
+                  <th class="c-att">Điểm danh <span class="lrd-th-sub">(bấm để đổi)</span></th>
                   <th class="c-hw">BTVN</th>
                   <th class="c-score">Điểm BTVN</th>
                   <th>Nhận xét</th>
@@ -124,28 +127,37 @@
                       </div>
                     </div>
                   </td>
-                  <td v-for="w in weekSessions" :key="'a' + w.schedule_id" class="c-att">
-                    <template v-if="att(st, w)">
-                      <div v-if="!att(st, w).is_makeup" class="lrd-seg" :class="{ busy: att(st, w)._saving }">
-                        <button type="button" :class="{ on: att(st, w).status == 1, ok: true }" @click="setAttendance(st, w, 1)"><i class="fa-solid fa-check"></i>Có mặt</button>
-                        <button type="button" :class="{ on: att(st, w).status == 2, no: true }" @click="setAttendance(st, w, 2)"><i class="fa-solid fa-xmark"></i>Vắng</button>
-                      </div>
-                      <span v-else class="lrd-badge" :class="att(st, w).status == 1 ? 'done' : 'draft'" title="Xác nhận học bù tại màn Điểm danh/Học bù">
-                        {{ att(st, w).status == 1 ? 'Đã học bù' : 'Chờ xác nhận' }}
-                      </span>
-                    </template>
-                    <span v-else class="lrd-sub" title="Học viên không có lịch buổi này">—</span>
+                  <td class="c-att">
+                    <!-- 1 ô duy nhất: mỗi buổi trong tuần là 1 chip, bấm để đổi Chưa → Có mặt → Vắng -->
+                    <div class="lrd-days">
+                      <template v-for="w in weekSessions">
+                        <span v-if="!att(st, w)" :key="'a' + w.schedule_id" class="lrd-day none" title="Học viên không có lịch buổi này">
+                          <span class="lrd-day__d">{{ shortDate(w.class_date) }}</span><span class="lrd-day__s">—</span>
+                        </span>
+                        <span v-else-if="att(st, w).is_makeup" :key="'a' + w.schedule_id" class="lrd-day" :class="att(st, w).status == 1 ? 'present' : 'pending'" title="Học bù – xác nhận tại màn Điểm danh/Học bù">
+                          <span class="lrd-day__d">{{ shortDate(w.class_date) }}</span><span class="lrd-day__s">{{ att(st, w).status == 1 ? 'Đã học bù' : 'Chờ học bù' }}</span>
+                        </span>
+                        <span v-else-if="isFuture(w)" :key="'a' + w.schedule_id" class="lrd-day future" title="Buổi học chưa diễn ra, chưa thể điểm danh">
+                          <span class="lrd-day__d">{{ shortDate(w.class_date) }}</span><span class="lrd-day__s"><i class="fa-solid fa-lock"></i>Chưa học</span>
+                        </span>
+                        <button v-else :key="'a' + w.schedule_id" type="button" class="lrd-day clickable" :class="[attKey(att(st, w)), { busy: att(st, w)._saving }]"
+                          :title="'Bấm để đổi trạng thái điểm danh ' + shortDate(w.class_date)" @click="cycleAttendance(st, w)">
+                          <span class="lrd-day__d">{{ shortDate(w.class_date) }}</span>
+                          <span class="lrd-day__s"><i :class="attIcon(att(st, w))"></i>{{ attText(att(st, w)) }}</span>
+                        </button>
+                      </template>
+                    </div>
                   </td>
                   <td class="c-hw">
-                    <div class="lrd-seg sm">
-                      <button type="button" :class="{ on: st.homework_done === 1, ok: true }" title="Đã làm BTVN" @click="setHomework(st, 1)"><i class="fa-solid fa-check"></i></button>
-                      <button type="button" :class="{ on: st.homework_done === 0, no: true }" title="Chưa làm BTVN" @click="setHomework(st, 0)"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="lrd-seg sm" :class="{ locked: !weekStarted }">
+                      <button type="button" :disabled="!weekStarted" :class="{ on: st.homework_done === 1, ok: true }" title="Đã làm BTVN" @click="setHomework(st, 1)"><i class="fa-solid fa-check"></i></button>
+                      <button type="button" :disabled="!weekStarted" :class="{ on: st.homework_done === 0, no: true }" title="Chưa làm BTVN" @click="setHomework(st, 0)"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                   </td>
                   <td class="c-score">
                     <input
                       type="text" inputmode="decimal" class="lrd-input lrd-score" :class="{ invalid: st._scoreErr }"
-                      v-model="st.homework_score_text" placeholder="0–10" maxlength="4"
+                      v-model="st.homework_score_text" placeholder="0–10" maxlength="4" :disabled="!weekStarted"
                       @input="onScore(st)"
                     />
                     <div v-if="st._scoreErr" class="lrd-err">0 – 10</div>
@@ -154,7 +166,8 @@
                     <div class="lrd-note-cell">
                       <textarea
                         :ref="'note_' + idx" class="lrd-textarea" rows="3" v-model="st.comment"
-                        :placeholder="'Nhận xét cho ' + givenName(st.name) + '...'"
+                        :disabled="!weekStarted"
+                        :placeholder="weekStarted ? 'Nhận xét cho ' + givenName(st.name) + '...' : 'Chưa đến buổi học – chưa thể nhận xét'"
                         @input="autoGrow($event); queueStudent(st)"
                         @keydown.ctrl.enter.prevent="focusNext(idx)"
                         @keydown.meta.enter.prevent="focusNext(idx)"
@@ -166,7 +179,7 @@
                   </td>
                 </tr>
                 <tr v-if="!students.length">
-                  <td :colspan="5 + weekSessions.length" class="lrd-empty-row">Tuần học chưa có học viên nào.</td>
+                  <td colspan="6" class="lrd-empty-row">Tuần học chưa có học viên nào.</td>
                 </tr>
               </tbody>
             </table>
@@ -181,7 +194,7 @@
           </div>
           <div class="lrd-actionbar__btns">
             <button v-if="report.status >= 1" type="button" class="lrd-btn ghost" @click="setStatus(0)"><i class="fa-solid fa-rotate-left"></i>Chuyển về nháp</button>
-            <button v-if="!(report.status >= 1)" type="button" class="lrd-btn success" @click="setStatus(1)"><i class="fa-solid fa-circle-check"></i>Đánh dấu hoàn thành</button>
+            <button v-if="!(report.status >= 1)" type="button" class="lrd-btn success" :disabled="!weekEnded" :title="weekEnded ? '' : 'Chưa học hết các buổi trong tuần'" @click="setStatus(1)"><i class="fa-solid fa-circle-check"></i>Đánh dấu hoàn thành</button>
             <button type="button" class="lrd-btn primary" @click="openPreview"><i class="fa-solid fa-eye"></i>Xem trước &amp; gửi phụ huynh</button>
           </div>
         </div>
@@ -209,7 +222,7 @@
               <button v-if="report.status !== 2" type="button" class="lrd-btn primary" @click="markSent"><i class="fa-solid fa-paper-plane"></i>Đánh dấu đã gửi</button>
               <span v-else class="lrd-badge sent"><i class="fa-solid fa-paper-plane mr-1"></i>Đã gửi {{ sentText }}</span>
             </template>
-            <button v-else type="button" class="lrd-btn success" @click="setStatus(1)"><i class="fa-solid fa-circle-check"></i>Hoàn thành &amp; tạo link</button>
+            <button v-else type="button" class="lrd-btn success" :disabled="!weekEnded" :title="weekEnded ? '' : 'Chưa học hết các buổi trong tuần'" @click="setStatus(1)"><i class="fa-solid fa-circle-check"></i>Hoàn thành &amp; tạo link</button>
           </div>
         </div>
         <div v-if="report.status >= 1" class="lrd-links">
@@ -311,6 +324,11 @@ export default {
   computed: {
     scheduleId() { return parseInt(this.$route.params.schedule_id) },
     weekSessions() { return this.session.sessions || [] },
+    today() { return moment().format('YYYY-MM-DD') },
+    futureSessions() { return this.weekSessions.filter(w => this.isFuture(w)) },
+    // Có ít nhất 1 buổi đã diễn ra → mới được nhận xét; học hết các buổi → mới được hoàn thành phiếu
+    weekStarted() { return this.weekSessions.some(w => !this.isFuture(w)) },
+    weekEnded() { return this.weekSessions.length > 0 && !this.futureSessions.length },
     dateText() {
       const a = moment(this.session.week_start), b = moment(this.session.week_end)
       return a.isValid() && b.isValid() ? `${a.format('DD/MM')} – ${b.format('DD/MM/YYYY')}` : ''
@@ -390,6 +408,16 @@ export default {
     fmtDate(v) { const m = moment(v); return m.isValid() ? m.format('DD/MM/YYYY') : '' },
     shortDate(v) { const m = moment(v); return m.isValid() ? `${DOW_SHORT[m.day()]} ${m.format('DD/MM')}` : '' },
     att(st, w) { const a = st.attendance || {}; return a[w.schedule_id] || null },
+    isFuture(w) { return w.class_date > this.today },
+    attKey(a) { return a.status == 1 ? 'present' : (a.status == 2 ? 'absent' : 'pending') },
+    attText(a) { return a.status == 1 ? 'Có mặt' : (a.status == 2 ? 'Vắng' : 'Chưa ĐD') },
+    attIcon(a) { return a.status == 1 ? 'fa-solid fa-check' : (a.status == 2 ? 'fa-solid fa-xmark' : 'fa-regular fa-circle') },
+    cycleAttendance(st, w) {
+      // Chưa điểm danh → Có mặt → Vắng → Chưa điểm danh
+      const a = this.att(st, w)
+      if (!a) return
+      this.setAttendance(st, w, a.status == 1 ? 2 : (a.status == 2 ? 0 : 1))
+    },
     weekAbsent(st) {
       const list = this.weekSessions.map(w => this.att(st, w)).filter(Boolean)
       return list.length > 0 && list.every(a => a.status == 2)
@@ -527,6 +555,7 @@ export default {
       this.queueStudent(st)
     },
     setHomework(st, val) {
+      if (!this.weekStarted) return
       st.homework_done = st.homework_done === val ? null : val
       this.queueStudent(st)
     },
@@ -539,7 +568,7 @@ export default {
     },
     setAttendance(st, w, val) {
       const a = this.att(st, w)
-      if (!a || a.is_makeup || !a.shs_id || a._saving) return Promise.resolve(false)
+      if (!a || a.is_makeup || !a.shs_id || a._saving || this.isFuture(w)) return Promise.resolve(false)
       const prev = a.status
       const next = prev == val ? 0 : val
       a.status = next
@@ -569,6 +598,7 @@ export default {
       })
     },
     bulkHomework() {
+      if (!this.weekStarted) return
       this.students.forEach(s => {
         if (!this.weekAbsent(s) && s.homework_done !== 1) { s.homework_done = 1; this.$set(this.pendingStudents, s.student_id, true) }
       })
@@ -778,6 +808,7 @@ export default {
 .lrd-kpi.danger .lrd-kpi__v { color: #dc2626; }
 .lrd-note { background: rgba(115, 103, 240, 0.08); color: #4c3fd6; border-radius: 10px; padding: 10px 14px; font-size: 14px; }
 .lrd-note i { margin-right: 8px; }
+.lrd-note.lock { background: #f1f5f9; color: #475569; margin-bottom: 10px; }
 
 /* Card title */
 .lrd-card__title { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
@@ -827,7 +858,24 @@ export default {
 .lrd-table tr.absent .lrd-strong { color: #94a3b8; }
 .lrd-table .c-stt { width: 44px; text-align: center; color: #64748b; padding-top: 18px; }
 .lrd-table .c-name { min-width: 220px; width: 240px; }
-.lrd-table .c-att { width: 190px; text-align: center; white-space: nowrap; padding-top: 14px; }
+.lrd-table .c-att { width: 1%; text-align: left; padding-top: 12px; }
+.lrd-th-sub { font-weight: 500; color: #94a3b8; }
+
+/* Điểm danh: 1 ô / học viên, mỗi buổi 1 chip */
+.lrd-days { display: flex; gap: 6px; flex-wrap: nowrap; }
+.lrd-day { display: inline-flex; flex-direction: column; align-items: flex-start; min-width: 92px; padding: 5px 10px; border-radius: 8px; border: 1.5px solid #cbd5e1; background: #fff; font-size: 13px; line-height: 1.35; text-align: left; white-space: nowrap !important; transition: border-color .12s, box-shadow .12s, background .12s; }
+.lrd-day__d { font-weight: 700; color: #475569; }
+.lrd-day__s { font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.lrd-day.clickable { cursor: pointer; }
+.lrd-day.clickable:hover { border-color: #7367f0; box-shadow: 0 0 0 3px rgba(115, 103, 240, 0.2); }
+.lrd-day.busy { opacity: .6; pointer-events: none; }
+.lrd-day.pending .lrd-day__s { color: #ea580c; }
+.lrd-day.present { background: #f0fdf4; border-color: #86efac; }
+.lrd-day.present .lrd-day__s { color: #15803d; }
+.lrd-day.absent { background: #fef2f2; border-color: #fca5a5; }
+.lrd-day.absent .lrd-day__s { color: #b91c1c; }
+.lrd-day.future, .lrd-day.none { background: #f1f5f9; border: 1px dashed #cbd5e1; cursor: not-allowed; }
+.lrd-day.future .lrd-day__d, .lrd-day.future .lrd-day__s, .lrd-day.none .lrd-day__d, .lrd-day.none .lrd-day__s { color: #94a3b8; }
 .lrd-table .c-hw { width: 100px; text-align: center; padding-top: 14px; }
 .lrd-table .c-score { width: 96px; text-align: center; padding-top: 12px; }
 .lrd-table .c-note { min-width: 360px; }
@@ -847,6 +895,9 @@ export default {
 .lrd-seg button.ok.on { background: #dcfce7; color: #15803d; }
 .lrd-seg button.no.on { background: #fee2e2; color: #b91c1c; }
 .lrd-seg.sm button { padding: 7px 12px; }
+.lrd-seg.locked { background: #f1f5f9; border: 1px dashed #cbd5e1; }
+.lrd-seg.locked button { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+.lrd-page input.lrd-input:disabled, .lrd-page textarea.lrd-textarea:disabled { background: #f1f5f9 !important; border: 1px dashed #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; box-shadow: none !important; }
 .lrd-score { text-align: center; font-weight: 700; }
 .lrd-page input.lrd-score { padding: 0 6px !important; width: 72px; }
 .lrd-err { color: #dc2626; font-size: 13px; margin-top: 2px; }

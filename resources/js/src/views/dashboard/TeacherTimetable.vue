@@ -61,17 +61,9 @@
               <div class="tt-item__meta"><i class="fa-solid fa-book-open"></i>Buổi {{ it.subject_stt || '?' }}<template v-if="it.product_name"> · {{ it.product_name }}</template></div>
               <div class="tt-item__meta"><i class="fa-solid fa-building"></i><span class="nowrap">{{ it.branch_name }}</span></div>
               <div class="tt-item__meta" v-if="it.type === 'replaced' || it.type === 'ta'"><i class="fa-solid fa-user"></i>GV: {{ it.teacher_name || '—' }}</div>
-              <div class="tt-item__foot">
-                <span v-if="it.roster_missing" class="tt-att muted" :title="it.class_date <= today ? 'Chưa sinh danh sách điểm danh cho buổi này' : 'Danh sách điểm danh được tạo vào ngày học'">
-                  <i class="fa-solid fa-users"></i>Sĩ số {{ it.expected_students }}<template v-if="it.class_date <= today"> · chưa có DS điểm danh</template>
-                </span>
-                <span v-else class="tt-att" :class="{ warn: it.pending_attendance > 0 && it.class_date <= today }">
-                  <i class="fa-solid fa-clipboard-user"></i>
-                  <template v-if="it.pending_attendance > 0 && it.class_date <= today">Chưa điểm danh {{ it.pending_attendance }}</template>
-                  <template v-else>{{ it.present }}/{{ it.total_students }} HS</template>
-                </span>
-                <span v-if="it.is_report_session" class="tt-rp" :class="it.report_status">{{ reportLabel[it.report_status] }}</span>
-                <span v-else class="tt-rp merged">Chỉ điểm danh</span>
+              <!-- 1 dòng trạng thái gộp điểm danh + nhận xét -->
+              <div class="tt-st" :class="itemState(it).cls">
+                <i :class="itemState(it).icon"></i><span>{{ itemState(it).text }}</span>
               </div>
             </template>
           </div>
@@ -79,7 +71,7 @@
         </div>
       </div>
     </div>
-    <div class="tt-hint"><i class="fa-solid fa-circle-info"></i>Bấm vào lớp để mở phiếu tuần: điểm danh từng buổi và nhận xét học viên.</div>
+    <div class="tt-hint"><i class="fa-solid fa-circle-info"></i>Bấm vào lớp để mở phiếu tuần: điểm danh từng buổi và nhận xét học viên. Buổi chưa diễn ra chỉ xem, chưa điểm danh/nhận xét được.</div>
   </div>
 </template>
 
@@ -114,7 +106,6 @@ export default {
         { key: 'holiday', label: 'Nghỉ lễ / Tết' }
       ],
       typeLabel: { main: 'Dạy chính', substitute: 'Dạy thay', ta: 'Trợ giảng', replaced: 'GV khác phụ trách', holiday: 'Nghỉ lễ' },
-      reportLabel: { none: 'Chưa nhận xét', draft: 'Đang nhận xét', done: 'Đã nhận xét', sent: 'Đã gửi PH' }
     }
   },
   computed: {
@@ -178,6 +169,18 @@ export default {
           this.selectedTeacher = this.teachers.find(t => t.id === data.teacher.id) || { id: data.teacher.id, name: data.teacher.name }
         }
       }).catch(() => this.$vs.loading.close())
+    },
+    itemState(it) {
+      const n = it.total_students || it.expected_students || 0
+      if (it.class_date > this.today) return { cls: 'future', icon: 'fa-solid fa-lock', text: `Chưa đến buổi học · ${n} HS` }
+      if (it.roster_missing) return { cls: 'muted', icon: 'fa-solid fa-users', text: `${n} HS · chưa có DS điểm danh` }
+      const att = `${it.present}/${it.total_students} có mặt`
+      if (it.type === 'replaced') return { cls: 'muted', icon: 'fa-solid fa-user', text: att }
+      if (it.pending_attendance > 0) return { cls: 'warn', icon: 'fa-solid fa-clipboard-user', text: `Cần điểm danh ${it.pending_attendance} HS` }
+      if (!it.is_report_session) return { cls: 'ok', icon: 'fa-solid fa-check', text: `${att} · nhận xét cuối tuần` }
+      const rp = { none: ['danger', 'fa-solid fa-pen', 'cần nhận xét'], draft: ['draft', 'fa-solid fa-pen', 'đang nhận xét'],
+        done: ['ok', 'fa-solid fa-circle-check', 'đã nhận xét'], sent: ['sent', 'fa-solid fa-paper-plane', 'đã gửi PH'] }[it.report_status] || ['muted', 'fa-solid fa-pen', '']
+      return { cls: rp[0], icon: rp[1], text: `${att} · ${rp[2]}` }
     },
     open(it) {
       if (it.type === 'holiday') return
@@ -252,17 +255,15 @@ export default {
 .tt-type { white-space: nowrap !important; font-size: 13px; font-weight: 700; color: var(--ty); }
 .tt-item__meta { font-size: 13px; color: #64748b; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tt-item__meta i { width: 14px; color: var(--ty); margin-right: 6px; }
-.tt-item__foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
-.tt-att { font-size: 13px; color: #16a34a; font-weight: 600; white-space: nowrap; }
-.tt-att.warn { color: #ea580c; }
-.tt-att.muted { color: #64748b; white-space: normal; }
-.tt-att i { margin-right: 5px; }
-.tt-rp { white-space: nowrap !important; font-size: 13px; font-weight: 600; border-radius: 99px; padding: 1px 8px; }
-.tt-rp.none { background: #fee2e2; color: #b91c1c; }
-.tt-rp.draft { background: #fef3c7; color: #b45309; }
-.tt-rp.done { background: #dcfce7; color: #15803d; }
-.tt-rp.sent { background: rgba(115, 103, 240, 0.12); color: #5e50ee; }
-.tt-rp.merged { background: #f1f5f9; color: #64748b; }
+.tt-st { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding: 4px 9px; border-radius: 7px; font-size: 13px; font-weight: 600; line-height: 1.4; }
+.tt-st i { flex-shrink: 0; }
+.tt-st.ok { background: #dcfce7; color: #15803d; }
+.tt-st.warn { background: #ffedd5; color: #c2410c; }
+.tt-st.danger { background: #fee2e2; color: #b91c1c; }
+.tt-st.draft { background: #fef3c7; color: #b45309; }
+.tt-st.sent { background: rgba(115, 103, 240, 0.12); color: #5e50ee; }
+.tt-st.muted { background: #f1f5f9; color: #64748b; }
+.tt-st.future { background: #f1f5f9; color: #94a3b8; border: 1px dashed #cbd5e1; }
 .tt-hint { font-size: 13px; color: #64748b; }
 .tt-hint i { color: #7367f0; margin-right: 6px; }
 </style>

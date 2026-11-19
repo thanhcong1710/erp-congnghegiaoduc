@@ -280,35 +280,35 @@ export default {
       this.hideScrollToTop = val
     },
     updateMenu(){
-      const new_list = []
-      this.navMenuItems.map(item => {
-        if ( typeof item.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item.permission)) {
-          const new_list_1 = []
-          if(typeof item.items != 'undefined'){
-            item.items.map(item_1 =>{
-              if ( typeof item_1.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, item_1.permission)) {
-                let check_active_item_1 = 1
-                if(typeof item_1.submenu != 'undefined'){
-                  const new_submenu_2 = []
-                  check_active_item_1 = 0
-                  item_1.submenu.map(submenu_2 =>{
-                    if ( typeof submenu_2.permission == 'undefined' || helper.checkPermission(this.$store.state.AppActiveUser, submenu_2.permission)) {
-                      new_submenu_2.push(submenu_2)
-                      check_active_item_1 = 1
-                    }
-                  })
-                  item_1.submenu = new_submenu_2
-                }
-                if(check_active_item_1){
-                  new_list_1.push(item_1)
-                }
-              }
-            })
-          }
-          item.items = new_list_1;
-          new_list.push(item)
-        }
+      // Lọc theo quyền (không sửa trực tiếp navMenuItems.js để đổi tài khoản không bị mất menu)
+      const user = this.$store.state.AppActiveUser
+      const can = it => typeof it.permission == 'undefined' || helper.checkPermission(user, it.permission)
+      let new_list = []
+      navMenuItems.forEach(item => {
+        if (!can(item)) return
+        if (!item.items) return new_list.push(item)
+        const items = []
+        item.items.forEach(item_1 => {
+          if (!can(item_1)) return
+          if (!item_1.submenu) return items.push(item_1)
+          const submenu = item_1.submenu.filter(can)
+          if (submenu.length) items.push(Object.assign({}, item_1, { submenu }))
+        })
+        if (items.length) new_list.push(Object.assign({}, item, { items }))
       })
+
+      // Tài khoản ít menu (VD giáo viên): bỏ cấp nhóm nhỏ (≤ 3 mục) → menu phẳng, bấm 1 lần là tới
+      const leaves = new_list.reduce((n, it) => n + (it.items || [it]).reduce((m, i) => m + (i.submenu ? i.submenu.length : 1), 0), 0)
+      if (leaves <= 12) {
+        new_list = new_list.map(item => !item.items ? item : Object.assign({}, item, {
+          items: item.items.reduce((arr, i) => {
+            if (i.submenu && i.submenu.length <= 3) {
+              i.submenu.forEach(s => arr.push(Object.assign({ icon: i.icon }, s)))
+            } else arr.push(i)
+            return arr
+          }, [])
+        }))
+      }
       this.navMenuItems = new_list
     }
   },

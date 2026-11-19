@@ -25,7 +25,7 @@ export default [
     name: 'Dashboard',
     icon: 'HomeIcon',
     slug: 'dashboard',
-    permission:'Dashboard',
+    // Mọi vai trò đều có dashboard riêng (RoleDashboardController) → luôn hiện
   },
   {
     header: 'CRM',
@@ -87,12 +87,14 @@ export default [
           {
             url: '/lms/attendances',
             name: 'Điểm danh',
+            icon: 'CheckSquareIcon',
             slug: 'lms-attendances',
             permission:'lms_attendances',
           },
           {
             url: '/lms/lesson-reports',
             name: 'Nhận xét & đánh giá',
+            icon: 'MessageSquareIcon',
             slug: 'lms-lesson-reports',
             permission:'lms_assessments',
           },
@@ -194,11 +196,13 @@ export default [
           {
             url: '/lms/evaluations/ucrea',
             name: 'Đánh giá năng lực',
+            icon: 'StarIcon',
             slug: 'lms-evaluations-ucrea',
           },
           {
             url: '/lms/evaluations/ucrea/tests',
             name: 'Đề kiểm tra UCREA',
+            icon: 'FileTextIcon',
             slug: 'lms-evaluations-ucrea-tests',
           }
         ]

@@ -107,6 +107,13 @@ class LessonReportsController extends Controller
             WHERE class_id = ? AND status = 1 AND class_date BETWEEN ? AND ? ORDER BY class_date, id", [(int)$classId, $from, $to]);
     }
 
+    /** Tuần đã có ít nhất 1 buổi diễn ra (≤ hôm nay) → mới được nhận xét học viên */
+    private function weekStarted($sch)
+    {
+        $week = $this->weekSessions($sch->class_id, $sch->class_date);
+        return $week && $week[0]->class_date <= date('Y-m-d');
+    }
+
     /** Tuần thứ mấy của lớp (đếm số tuần có lịch học tính đến tuần này) */
     private function weekNo($classId, $date)
     {
@@ -484,6 +491,9 @@ class LessonReportsController extends Controller
         $studentsIn = $request->input('students');
         $rowsToSave = [];
         if (is_array($studentsIn) && count($studentsIn)) {
+            if (!$this->weekStarted($sch)) {
+                return response()->json((object)['status' => 0, 'message' => 'Tuần học chưa diễn ra buổi nào, chưa thể nhận xét học viên', 'data' => null]);
+            }
             $valid = $this->validWeekStudents($sch);
             foreach ($studentsIn as $st) {
                 $sid = (int)data_get($st, 'student_id');
@@ -578,6 +588,9 @@ class LessonReportsController extends Controller
         $status = (int)$request->input('status');
         if (!in_array($status, [self::STATUS_DRAFT, self::STATUS_DONE, self::STATUS_SENT], true)) {
             return response()->json((object)['status' => 0, 'message' => 'Trạng thái không hợp lệ', 'data' => null]);
+        }
+        if ($status >= self::STATUS_DONE && $sch->class_date > date('Y-m-d')) {
+            return response()->json((object)['status' => 0, 'message' => 'Chưa học hết các buổi trong tuần, chưa thể hoàn thành phiếu nhận xét', 'data' => null]);
         }
         $report = $this->ensureReport($sch);
         $full = DB::selectOne("SELECT * FROM lesson_reports WHERE id = ?", [$report->id]);
