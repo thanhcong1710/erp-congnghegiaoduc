@@ -12,14 +12,17 @@
           <div>
             <h4 class="directory-title">DANH SÁCH BÁO CÁO</h4>
             <p class="directory-subtitle">
-              <span v-if="filterMeta.scope === 'self'">
-                Phạm vi dữ liệu: <strong>Cá nhân Sale ({{ filterMeta.current_user.full_name }})</strong>
-              </span>
-              <span v-else-if="filterMeta.scope === 'team'">
-                Phạm vi dữ liệu: <strong>Đội nhóm ({{ 'Team ' + filterMeta.current_user.full_name }})</strong>
+              <span v-if="catalogMeta.is_admin">
+                Quyền xem: <strong>Admin – tất cả báo cáo, toàn hệ thống</strong>
               </span>
               <span v-else>
-                Phạm vi dữ liệu: <strong>Toàn hệ thống / Các cơ sở được phân quyền</strong>
+                Vai trò: <strong>{{ catalogMeta.roles.join(', ') || '—' }}</strong>
+                <template v-if="hasSaleReports">
+                  <span class="mx-1">•</span>
+                  <span v-if="filterMeta.scope === 'self'">Báo cáo Sale: <strong>Cá nhân</strong></span>
+                  <span v-else-if="filterMeta.scope === 'team'">Báo cáo Sale: <strong>Đội nhóm</strong></span>
+                  <span v-else>Báo cáo Sale: <strong>Các cơ sở được phân quyền</strong></span>
+                </template>
               </span>
             </p>
           </div>
@@ -27,7 +30,7 @@
 
         <div class="directory-header-right">
           <button
-            v-if="filterMeta.can_manage_kpi"
+            v-if="canManageKpi"
             type="button"
             class="btn-action btn-kpi"
             @click="openKpiModal"
@@ -39,30 +42,57 @@
 
       <hr class="directory-divider" />
 
-      <!-- Danh sách các báo cáo đánh số thứ tự 01, 02, 03, 04... -->
-      <div class="report-directory-list">
-        <div
-          v-for="rep in reportCatalog"
-          :key="rep.code"
-          class="report-list-item"
-          @click="openReport(rep.code)"
-        >
-          <div class="report-item-left">
-            <span class="report-item-number">{{ rep.number }}</span>
-            <div class="report-item-info">
-              <div class="report-item-title">{{ rep.number }}. {{ rep.title }}</div>
-              <div class="report-item-desc">{{ rep.description }}</div>
+      <div v-if="catalogLoading" class="td-empty">
+        <i class="fa fa-spinner fa-spin mr-2"></i> Đang tải danh sách báo cáo...
+      </div>
+      <div v-else-if="!catalogGroups.length" class="td-empty">
+        Tài khoản của bạn chưa được phân quyền xem báo cáo nào.
+      </div>
+
+      <!-- Danh sách báo cáo chia theo nhóm vai trò -->
+      <div v-for="grp in catalogGroups" :key="grp.key" class="report-group">
+        <div class="report-group-header">
+          <i :class="grp.icon" class="report-group-icon"></i>
+          <span class="report-group-title">{{ grp.label }}</span>
+          <span class="report-group-count">{{ grp.reports.length }} báo cáo</span>
+        </div>
+        <div class="report-directory-list">
+          <div
+            v-for="rep in grp.reports"
+            :key="rep.code"
+            class="report-list-item"
+            @click="openReport(rep.code)"
+          >
+            <div class="report-item-left">
+              <span class="report-item-number">{{ rep.number }}</span>
+              <div class="report-item-info">
+                <div class="report-item-title">{{ rep.number }}. {{ rep.title }}</div>
+                <div class="report-item-desc">{{ rep.description }}</div>
+                <div v-if="catalogMeta.is_admin" class="report-item-roles">
+                  Dành cho: <span v-for="r in rep.role_names" :key="r" class="report-role-chip">{{ r }}</span>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="report-item-right">
-            <span class="report-item-tag" :class="rep.tagClass">{{ rep.tag }}</span>
-            <span class="report-item-arrow">
-              Xem báo cáo <i class="fa fa-arrow-right ml-1"></i>
-            </span>
+            <div class="report-item-right">
+              <span class="report-item-tag" :class="rep.tagClass">{{ rep.tag }}</span>
+              <span class="report-item-arrow">
+                Xem báo cáo <i class="fa fa-arrow-right ml-1"></i>
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </vx-card>
+
+    <!-- ======================================================================= -->
+    <!-- BÁO CÁO THEO VAI TRÒ (05+): Marketing / CSKH / Giáo viên / Kế toán      -->
+    <!-- ======================================================================= -->
+    <role-report
+      v-else-if="!isSaleReport && activeReportInfo"
+      :report="activeReportInfo"
+      :meta="catalogMeta"
+      @back="backToDirectory"
+    />
 
     <!-- ======================================================================= -->
     <!-- MÀN HÌNH 2: CHI TIẾT TỪNG BÁO CÁO (CÓ NÚT QUAY LẠI & PHÂN TRANG CŨ)      -->
@@ -93,7 +123,7 @@
 
           <div class="report-header-actions">
             <button
-              v-if="filterMeta.can_manage_kpi"
+              v-if="canManageKpi"
               type="button"
               class="btn-action btn-kpi"
               @click="openKpiModal"
@@ -880,11 +910,15 @@
 import DatePicker from 'vue2-datepicker'
 import axios from '../../../http/axios.js'
 import u from '../../../until/helper.js'
+import RoleReport from './RoleReport.vue'
+
+const SALE_REPORT_CODES = ['overview', 'team', 'business_source', 'business_product']
 
 export default {
   name: 'LmsUnifiedReports',
   components: {
-    DatePicker
+    DatePicker,
+    RoleReport
   },
   data() {
     const now = new Date()
@@ -914,45 +948,18 @@ export default {
         }
       },
 
-      // Danh mục báo cáo hiển thị theo danh sách đánh số 01, 02, 03, 04
-      reportCatalog: [
-        {
-          number: '01',
-          code: 'overview',
-          title: 'BÁO CÁO DOANH THU - TỔNG QUAN',
-          description:
-            'Thống kê tổng quan theo từng nhân viên: Lượng data, Hợp đồng (%), Doanh số tạm tính, Doanh số thực thu, Thực thu/data và Tổng nợ cần thu.',
-          tag: 'Doanh thu',
-          tagClass: 'tag-blue'
-        },
-        {
-          number: '02',
-          code: 'team',
-          title: 'BÁO CÁO DOANH THU - ĐỘI NHÓM (TEAM SALE)',
-          description:
-            'Thống kê kết quả kinh doanh theo Đội nhóm (Leader Sale), theo dõi Chỉ tiêu KPI, Thực đạt và Phần trăm hoàn thành của từng thành viên trong nhóm.',
-          tag: 'Đội nhóm & KPI',
-          tagClass: 'tag-emerald'
-        },
-        {
-          number: '03',
-          code: 'business_source',
-          title: 'BÁO CÁO KINH DOANH THEO NGUỒN KHÁCH HÀNG & CHUYỂN ĐỔI DATA',
-          description:
-            'Phân tích doanh thu theo từng Nguồn khách hàng (MKT, B2B, KH giới thiệu...) & Kênh nguồn ngách; xem theo Cá nhân Sale, Team, Cơ sở hoặc Tổng Trung tâm.',
-          tag: 'Kinh doanh',
-          tagClass: 'tag-purple'
-        },
-        {
-          number: '04',
-          code: 'business_product',
-          title: 'BÁO CÁO DOANH THU CHI TIẾT THEO TỪNG SẢN PHẨM (KHÓA HỌC)',
-          description:
-            'Thống kê số lượng hợp đồng, tỷ trọng, doanh thu theo nguồn, doanh số tạm tính, thực thu và công nợ của từng sản phẩm (Ucrea, Bright I.G, Tiếng Anh, Tiền Tiểu Học...).',
-          tag: 'Sản phẩm',
-          tagClass: 'tag-amber'
-        }
-      ],
+      // Danh mục báo cáo theo nhóm vai trò – lấy từ API (phân quyền tại App\Services\ReportAccess)
+      catalogLoading: true,
+      catalogGroups: [],
+      catalogMeta: {
+        is_admin: false,
+        roles: [],
+        branches: [],
+        sources: [],
+        products: [],
+        methods: [],
+        staff_by_report: {}
+      },
 
       // Cấu hình phân trang giống hệt các báo cáo cũ
       limitSource: [20, 50, 100, 500],
@@ -1070,6 +1077,21 @@ export default {
     }
   },
   computed: {
+    reportCatalog() {
+      return this.catalogGroups.reduce((acc, g) => acc.concat(g.reports), [])
+    },
+    activeReportInfo() {
+      return this.reportCatalog.find(r => r.code === this.activeReport) || null
+    },
+    isSaleReport() {
+      return SALE_REPORT_CODES.indexOf(this.activeReport) !== -1
+    },
+    hasSaleReports() {
+      return this.reportCatalog.some(r => r.code === 'overview' || r.code === 'team')
+    },
+    canManageKpi() {
+      return !!this.filterMeta.can_manage_kpi && this.hasSaleReports
+    },
     currentReportTitle() {
       const found = this.reportCatalog.find(r => r.code === this.activeReport)
       return found ? `${found.number}. ${found.title}` : 'BÁO CÁO'
@@ -1114,12 +1136,28 @@ export default {
     }
   },
   async created() {
-    await this.loadInitFilters()
+    await Promise.all([this.loadCatalog(), this.loadInitFilters()])
     if (this.$route && this.$route.query && this.$route.query.type) {
       this.openReport(this.$route.query.type)
     }
   },
   methods: {
+    async loadCatalog() {
+      this.catalogLoading = true
+      try {
+        const res = await axios.g('/api/lms/reports/catalog')
+        if (res && res.data && res.data.status === 1) {
+          const d = res.data.data
+          this.catalogGroups = d.catalog || []
+          this.catalogMeta = { ...this.catalogMeta, ...d }
+        }
+      } catch (e) {
+        console.error('Lỗi tải danh mục báo cáo:', e)
+      } finally {
+        this.catalogLoading = false
+      }
+    },
+
     async loadInitFilters() {
       try {
         const res = await axios.g('/api/lms/reports/init-filters')
@@ -1139,7 +1177,9 @@ export default {
     },
 
     openReport(reportCode) {
+      if (!this.reportCatalog.some(r => r.code === reportCode)) return
       this.activeReport = reportCode
+      if (SALE_REPORT_CODES.indexOf(reportCode) === -1) return
       this.pagination.cpage = 1
       if (reportCode === 'overview') {
         if (this.filterMeta.scope === 'all') {
@@ -1567,6 +1607,72 @@ export default {
   margin: 16px 0;
 }
 
+.report-group {
+  margin-bottom: 22px;
+}
+
+.report-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.report-group-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.report-group-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.report-group-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.report-item-roles {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.report-role-chip {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
 .report-directory-list {
   display: flex;
   flex-direction: column;
@@ -1667,6 +1773,30 @@ export default {
 .tag-amber {
   background: #fffbeb;
   color: #b45309;
+}
+.tag-pink {
+  background: #fdf2f8;
+  color: #be185d;
+}
+.tag-rose {
+  background: #fff1f2;
+  color: #be123c;
+}
+.tag-teal {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+.tag-indigo {
+  background: #eef2ff;
+  color: #4338ca;
+}
+.tag-green {
+  background: #f0fdf4;
+  color: #15803d;
+}
+.tag-red {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 .report-item-arrow {

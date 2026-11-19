@@ -325,6 +325,9 @@ Route::group(['middleware' => 'api'], function ($router) {
                 Route::post('overview', 'ReportsController@overviewReport');
                 Route::post('business', 'ReportsController@businessReport');
                 Route::post('save-targets', 'ReportsController@saveTargets');
+                // Báo cáo theo vai trò (05+) – phân quyền tại App\Services\ReportAccess
+                Route::get('catalog', 'RoleReportsController@init');
+                Route::post('role-data', 'RoleReportsController@data');
 
                 Route::post('01', 'ReportsController@report01');
                 Route::post('02a', 'ReportsController@report02a');

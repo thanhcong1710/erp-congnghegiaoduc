@@ -6,6 +6,7 @@ use App\User;
 use App\Http\Controllers\Controller;
 use App\Models\LogStudents;
 use App\Providers\UtilityServiceProvider as u;
+use App\Services\ReportAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -1499,6 +1500,9 @@ class ReportsController extends Controller
     public function overviewReport(Request $request)
     {
         $user = Auth::user();
+        if (!ReportAccess::canAny((int)$user->id, ['overview', 'team'])) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền xem báo cáo này.'], 403);
+        }
         $scope = $user->getReportScope();
         $branchIdsStr = $user->getBranchesHasUser();
 
@@ -1883,6 +1887,9 @@ class ReportsController extends Controller
     public function businessReport(Request $request)
     {
         $user = Auth::user();
+        if (!ReportAccess::canAny((int)$user->id, ['business_source', 'business_product'])) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền xem báo cáo này.'], 403);
+        }
         $scope = $user->getReportScope();
         $branchIdsStr = $user->getBranchesHasUser();
 
@@ -2331,6 +2338,9 @@ class ReportsController extends Controller
     public function saveTargets(Request $request)
     {
         $user = Auth::user();
+        if (!ReportAccess::canAny((int)$user->id, ['overview', 'team'])) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền xem báo cáo này.'], 403);
+        }
         $scope = $user->getReportScope();
         if (!in_array($scope, ['all', 'team'])) {
             return response()->json([
