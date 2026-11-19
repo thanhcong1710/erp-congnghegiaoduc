@@ -126,8 +126,12 @@ class StudentsController extends Controller
         // Nếu có filter theo status, thêm điều kiện dựa trên logic ưu tiên
         if (!empty($status_filter)) {
             $status_conditions = [];
+            // Có contract status = 6 mà lớp đã khai giảng (hoặc không xác định được ngày khai giảng)
+            $learning_sql = "EXISTS (SELECT 1 FROM contracts AS c6 LEFT JOIN classes AS cl6 ON cl6.id = c6.class_id
+                WHERE c6.student_id = s.id AND c6.status = 6 AND (cl6.cls_startdate IS NULL OR cl6.cls_startdate <= CURDATE()))";
 
             foreach ($status_filter as $sf) {
+                $sf = (int) $sf;
                 if ($sf == 1) { // Chưa đóng phí
                     $status_conditions[] = "
                         (NOT EXISTS (SELECT 1 FROM contracts WHERE student_id = s.id AND status = 6 AND status NOT IN (0, 8))
@@ -135,9 +139,13 @@ class StudentsController extends Controller
                         AND NOT EXISTS (SELECT 1 FROM contracts WHERE student_id = s.id AND status = 2 AND status NOT IN (0, 8))
                         AND EXISTS (SELECT 1 FROM contracts WHERE student_id = s.id AND status = 1 AND status NOT IN (0, 8)))
                     ";
-                } elseif ($sf == 2) { // Đang học (status = 6)
+                } elseif ($sf == 2) { // Đang học (status = 6, lớp đã khai giảng)
+                    $status_conditions[] = $learning_sql;
+                } elseif ($sf == 6) { // Sắp học (status = 6, lớp chưa khai giảng)
                     $status_conditions[] = "
-                        EXISTS (SELECT 1 FROM contracts WHERE student_id = s.id AND status = 6 AND status NOT IN (0, 8))
+                        (NOT $learning_sql
+                        AND EXISTS (SELECT 1 FROM contracts AS c6 INNER JOIN classes AS cl6 ON cl6.id = c6.class_id
+                            WHERE c6.student_id = s.id AND c6.status = 6 AND cl6.cls_startdate > CURDATE()))
                     ";
                 } elseif ($sf == 3) { // Hết phí (status = 7)
                     $status_conditions[] = "

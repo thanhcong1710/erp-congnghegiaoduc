@@ -1005,7 +1005,8 @@ class UtilityServiceProvider extends ServiceProvider
      * @return mixed - Trả về label text hoặc status code hoặc object chứa cả hai
      * 
      * Logic ưu tiên:
-     * 1. Nếu có bất kỳ contract nào đang học (status = 6) => "Đang học"
+     * 1. Nếu có contract status = 6 và lớp đã khai giảng (cls_startdate <= hôm nay) => "Đang học"
+     * 1b. Nếu chỉ có contract status = 6 mà lớp chưa khai giảng (cls_startdate > hôm nay) => "Sắp học"
      * 2. Nếu có contract chờ xếp lớp (status = 3,4,5) => "Chờ xếp lớp"
      * 3. Nếu có contract đặt cọc (status = 2) => "Đặt cọc"
      * 4. Nếu có contract chưa đóng phí (status = 1) => "Chưa đóng phí"
@@ -1014,13 +1015,15 @@ class UtilityServiceProvider extends ServiceProvider
      */
     public static function genLearningStatusByContracts($student_id, $return_label = true, $agreement_id = null)
     {
-        $cond = $agreement_id ? " AND agreement_id=$agreement_id" : "";
-        // Lấy tất cả contracts của học sinh (loại trừ status = 0 và 8)
-        $contracts = self::query("SELECT id, status, type, class_id 
-            FROM contracts 
-            WHERE student_id = $student_id 
-            AND status NOT IN (0, 8) $cond
-            ORDER BY status DESC, id DESC");
+        $student_id = (int) $student_id;
+        $cond = $agreement_id ? " AND c.agreement_id=" . (int) $agreement_id : "";
+        // Lấy tất cả contracts của học sinh (loại trừ status = 0 và 8), kèm ngày khai giảng của lớp
+        $contracts = self::query("SELECT c.id, c.status, c.type, c.class_id, cl.cls_startdate
+            FROM contracts AS c
+                LEFT JOIN classes AS cl ON cl.id = c.class_id
+            WHERE c.student_id = $student_id 
+            AND c.status NOT IN (0, 8) $cond
+            ORDER BY c.status DESC, c.id DESC");
 
         if (!$contracts || count($contracts) == 0) {
             // Không có contract hợp lệ
@@ -1028,7 +1031,8 @@ class UtilityServiceProvider extends ServiceProvider
         }
 
         // Khởi tạo biến để theo dõi các trạng thái
-        $has_learning = false;          // status = 6
+        $has_learning = false;          // status = 6, lớp đã khai giảng
+        $has_upcoming = false;          // status = 6, lớp chưa khai giảng
         $has_waiting_class = false;     // status = 3,4,5
         $has_deposit = false;           // status = 2
         $has_not_paid = false;          // status = 1
@@ -1040,7 +1044,12 @@ class UtilityServiceProvider extends ServiceProvider
 
             switch ($status) {
                 case 6:
-                    $has_learning = true;
+                    // Lớp có ngày khai giảng sau hôm nay => Sắp học
+                    if (!empty($contract->cls_startdate) && $contract->cls_startdate > date('Y-m-d')) {
+                        $has_upcoming = true;
+                    } else {
+                        $has_learning = true;
+                    }
                     break;
                 case 3:
                 case 4:
@@ -1066,6 +1075,9 @@ class UtilityServiceProvider extends ServiceProvider
         if ($has_learning) {
             $final_status = 6;
             $final_label = "Đang học";
+        } elseif ($has_upcoming) {
+            $final_status = 61; // 61 = Sắp học (contract status 6, lớp chưa khai giảng)
+            $final_label = "Sắp học";
         } elseif ($has_waiting_class) {
             $final_status = 5;  // Sử dụng 5 để đại diện cho nhóm 3,4,5
             $final_label = "Chờ xếp lớp";

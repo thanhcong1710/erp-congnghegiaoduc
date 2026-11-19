@@ -188,6 +188,7 @@
         statusOptions:[
           {id:1,label:'Chưa đóng phí'},
           {id:2,label:'Đang học'},
+          {id:6,label:'Sắp học'},
           {id:3,label:'Hết phí'},
           {id:4,label:'Đặt cọc'},
           {id:5,label:'Chờ xếp lớp'},
