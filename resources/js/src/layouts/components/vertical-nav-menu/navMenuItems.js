@@ -45,6 +45,7 @@ export default [
         icon: 'PhoneCallIcon',
         slug: 'crm-care',
         permission:'crm_parent',
+        hidePermission: 'crm_parent_own_created', // Marketing chỉ xem KH mình tạo, không chăm sóc
       },
       {
         url: '/crm/imports',

@@ -282,7 +282,8 @@ export default {
     updateMenu(){
       // Lọc theo quyền (không sửa trực tiếp navMenuItems.js để đổi tài khoản không bị mất menu)
       const user = this.$store.state.AppActiveUser
-      const can = it => typeof it.permission == 'undefined' || helper.checkPermission(user, it.permission)
+      const can = it => (typeof it.permission == 'undefined' || helper.checkPermission(user, it.permission))
+        && !(it.hidePermission && helper.checkPermission(user, it.hidePermission))
       let new_list = []
       navMenuItems.forEach(item => {
         if (!can(item)) return

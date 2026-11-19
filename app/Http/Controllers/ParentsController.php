@@ -7,6 +7,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx as x;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\LogParents;
 use App\Models\LogStudents;
 
@@ -66,6 +67,22 @@ class ParentsController extends Controller
         return preg_replace('/[^0-9]/', '', (string) $phone);
     }
 
+    /** Quyền "chỉ xem khách hàng do mình tạo" (role Marketing): giới hạn theo crm_parents.creator_id */
+    const PERM_OWN_CREATED = 'crm_parent_own_created';
+
+    private function ownCreatedOnly()
+    {
+        return Auth::user()->checkPermission(self::PERM_OWN_CREATED);
+    }
+
+    /** Chặn thao tác trên khách hàng không do mình tạo (chỉ áp dụng khi có quyền PERM_OWN_CREATED) */
+    private function denyNotOwnCreated($parent_id)
+    {
+        if (!$this->ownCreatedOnly()) return null;
+        $ok = DB::selectOne("SELECT id FROM crm_parents WHERE id = ? AND creator_id = ?", [(int)$parent_id, (int)Auth::user()->id]);
+        return $ok ? null : response()->json((object)['status' => 0, 'message' => 'Bạn chỉ được thao tác khách hàng do mình tạo', 'data' => null]);
+    }
+
     public function list(Request $request)
     {
         $status = isset($request->status) ? $request->status : [];
@@ -90,6 +107,8 @@ class ParentsController extends Controller
         $can_view_all = Auth::user()->checkPermission('canViewAllParents');
         $staff_ids = $can_view_all ? '' : Auth::user()->getStaffHasUser();
         $scope_cond = $can_view_all ? "" : " AND p.owner_id IN ($staff_ids)";
+        $own_only = $this->ownCreatedOnly();
+        if ($own_only) $scope_cond = " AND p.creator_id = ".(int)Auth::user()->id;
 
         if (!empty($status)) {
             $cond .= " AND p.status IN (".implode(",",$status).")";
@@ -160,7 +179,7 @@ class ParentsController extends Controller
         }
         // Tab kho bỏ giới hạn người quản lý; các tab khác giữ phạm vi
         $base_cond = $cond;
-        $cond = $type_search == 5 ? $base_cond : $base_cond.$scope_cond;
+        $cond = ($type_search == 5 && !$own_only) ? $base_cond : $base_cond.$scope_cond;
 
         $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
         $list = u::query("SELECT p.name,p.id,p.mobile_1,p.status,p.next_care_date, (SELECT name FROM sources WHERE id=p.source_id) AS source_name,
@@ -241,6 +260,8 @@ class ParentsController extends Controller
         $can_view_all = Auth::user()->checkPermission('canViewAllParents');
         $staff_ids = $can_view_all ? '' : Auth::user()->getStaffHasUser();
         $scope_cond = $can_view_all ? "" : " AND p.owner_id IN ($staff_ids)";
+        $own_only = $this->ownCreatedOnly();
+        if ($own_only) $scope_cond = " AND p.creator_id = ".(int)Auth::user()->id;
         
         if (!empty($status)) {
             $status_ids = is_array($status) ? implode(",", array_map('intval', $status)) : (int)$status;
@@ -313,7 +334,7 @@ class ParentsController extends Controller
             $order_by = " ORDER BY COALESCE(p.last_assign_date, p.created_at) ASC ";
         }
         $base_cond = $cond;
-        $cond = $type_search == 5 ? $base_cond : $base_cond.$scope_cond;
+        $cond = ($type_search == 5 && !$own_only) ? $base_cond : $base_cond.$scope_cond;
 
         $total = u::first("SELECT count(p.id) AS total FROM crm_parents AS p WHERE $cond $tmp_cond");
         
@@ -517,6 +538,7 @@ class ParentsController extends Controller
      * Nhận theo parent_id (tab Data kho / banner tìm kiếm) hoặc phone (màn Checkin).
      */
     public function overwrite(Request $request){
+        if ($this->ownCreatedOnly()) return response()->json((object)['status' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này', 'data' => null]);
         $parent_id = (int) data_get($request, 'parent_id', 0);
         $phone = addslashes((string) data_get($request, 'phone', ''));
         if ($parent_id) {
@@ -641,6 +663,10 @@ class ParentsController extends Controller
         if(!Auth::user()->checkPermission('canViewAllParents')){
             $cond .= " AND p.owner_id IN (".Auth::user()->getStaffHasUser().")";
         }
+        if ($this->ownCreatedOnly()) {
+            $cond = " AND p.creator_id = ".(int)Auth::user()->id;
+        }
+        $parent_id = (int)$parent_id;
         
         $data = u::first("SELECT p.*,(SELECT name FROM users WHERE id=p.creator_id) AS creator_name,
                 (SELECT name FROM districts WHERE id=p.district_id) AS district_name,
@@ -656,6 +682,7 @@ class ParentsController extends Controller
 
     public function update(Request $request)
     {
+        if ($deny = $this->denyNotOwnCreated((int)$request->id)) return $deny;
         $parent_id = (int)$request->id;
         $pre_parent_info = u::first("SELECT * FROM crm_parents WHERE id = $parent_id");
         $data_update = array(
@@ -706,6 +733,7 @@ class ParentsController extends Controller
 
     public function changeStatus(Request $request)
     {
+        if ($deny = $this->denyNotOwnCreated($request->parent_id)) return $deny;
         $pre_parent_info = u::first("SELECT status FROM crm_parents WHERE id=$request->parent_id");
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
@@ -722,6 +750,7 @@ class ParentsController extends Controller
 
     public function changeLevel(Request $request)
     {
+        if ($deny = $this->denyNotOwnCreated($request->parent_id)) return $deny;
         $pre_parent_info = u::first("SELECT level FROM crm_parents WHERE id=$request->parent_id");
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
@@ -739,6 +768,7 @@ class ParentsController extends Controller
 
     public function assign(Request $request)
     {
+        if ($deny = $this->denyNotOwnCreated($request->parent_id)) return $deny;
         $pre_parent_info = u::first("SELECT owner_id,last_assign_date FROM crm_parents WHERE id=$request->parent_id");
         $data = u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
@@ -757,6 +787,7 @@ class ParentsController extends Controller
 
     public function assignList(Request $request)
     {
+        if ($this->ownCreatedOnly()) return response()->json((object)['status' => 0, 'message' => 'Bạn không có quyền thực hiện thao tác này', 'data' => null]);
         $cond = implode(",",$request->parents);
         $arr_owner = $request->owners;
         $list_parent_info = u::query("SELECT p.id AS parent_id,p.owner_id,(SELECT CONCAT(name,' (',hrm_id,')') FROM users WHERE id= p.owner_id) AS pre_owner,p.last_assign_date FROM crm_parents AS p WHERE p.id IN ($cond)");
@@ -780,6 +811,7 @@ class ParentsController extends Controller
     }
 
     public function updateNextCareDate(Request $request){
+        if ($deny = $this->denyNotOwnCreated($request->parent_id)) return $deny;
         $data=u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => $request->user()->id,
@@ -794,6 +826,7 @@ class ParentsController extends Controller
     }
 
     public function getLogs(Request $request, $parent_id){
+        if ($deny = $this->denyNotOwnCreated($parent_id)) return $deny;
         $data = u::query("SELECT l.*,(SELECT name FROM users WHERE id=l.creator_id) AS creator_name
             FROM crm_parent_logs AS l WHERE l.parent_id=$parent_id AND l.status=1 
             ORDER BY l.id DESC");
@@ -801,6 +834,7 @@ class ParentsController extends Controller
     }
 
     public function sendSms(Request $request){
+        if ($deny = $this->denyNotOwnCreated($request->parent_id)) return $deny;
         $parent_info = u::first("SELECT id,mobile_1,mobile_2 FROM crm_parents WHERE id='$request->parent_id'");
         $phone = $request->phone ? $request->phone :$parent_info->mobile_1;
         if($parent_info){
@@ -823,6 +857,7 @@ class ParentsController extends Controller
     }
 
     public function getAllDataTicketByParent(Request $request, $parent_id){
+        if ($deny = $this->denyNotOwnCreated($parent_id)) return $deny;
         $list = u::query("SELECT t.*
             FROM crm_tickets AS t WHERE parent_id=$parent_id ORDER BY t.id DESC");
         $total = u::first("SELECT count(t.id) AS total
@@ -835,6 +870,7 @@ class ParentsController extends Controller
 
     public function addTicket(Request $request)
     {
+        if ($deny = $this->denyNotOwnCreated(data_get($request, 'parent_id'))) return $deny;
         $id = u::insertSimpleRow(array(
             'parent_id'=>data_get($request, 'parent_id'),
             'type'=>data_get($request, 'type'),
@@ -868,6 +904,7 @@ class ParentsController extends Controller
     }
 
     public function uploadAvatar(Request $request){
+        if ($deny = $this->denyNotOwnCreated(isset($_POST['parent_id']) ? $_POST['parent_id'] : 0)) return $deny;
         $parent_id = isset($_POST['parent_id']) ? $_POST['parent_id'] : '';
         $total = count($_FILES['files']['name']);
         if ($total > 0){
@@ -898,6 +935,7 @@ class ParentsController extends Controller
     }
 
     public function getVouchers(Request $request, $parent_id){
+        if ($deny = $this->denyNotOwnCreated($parent_id)) return $deny;
         $parent_info = u::first("SELECT mobile_1 FROM crm_parents WHERE id=$parent_id");
         $data = u::query("SELECT c.*
             FROM coupons AS c WHERE c.c2c_mobile = '".data_get($parent_info,'mobile_1')."' 
