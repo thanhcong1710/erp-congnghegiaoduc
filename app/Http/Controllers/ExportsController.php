@@ -35,7 +35,12 @@ class ExportsController extends Controller
         $sheet->setCellValue('L1', 'Trạng thái');
         $sheet->setCellValue('M1', 'Thông tin lỗi');
 
-        $parents = u::query("SELECT * FROM crm_import_parents WHERE import_id=$import_id");
+        $import_id = (int)$import_id;
+        $own = u::first("SELECT id FROM crm_imports WHERE id = $import_id AND creator_id = " . (int)Auth::user()->id);
+        if (!$own) {
+            abort(403, 'Bạn không có quyền tải kết quả import này');
+        }
+        $parents = u::query("SELECT * FROM crm_import_parents WHERE import_id=$import_id ORDER BY id");
         $arr_status = [
             '0'=>'Chưa xử lý',
             '1'=>'Đã kiểm tra dữ liệu đầu vào',
@@ -44,6 +49,7 @@ class ExportsController extends Controller
             '4'=>'Trùng lặp dữ liệu khách hàng đang chăm sóc',
             '6'=> 'Đã import thành công'
         ];
+        $sheet->getStyle('A1:M1')->getFont()->setBold(true);
         $sheet->getColumnDimension("A")->setWidth(30);
         $sheet->getColumnDimension("B")->setWidth(30);
         $sheet->getColumnDimension("C")->setWidth(30);
@@ -70,7 +76,7 @@ class ExportsController extends Controller
             $sheet->setCellValue('I' . $x, $parents[$i]->student_birthday_1? "'".$parents[$i]->student_birthday_1 : $parents[$i]->student_birthday_1);
             $sheet->setCellValue('J' . $x, $parents[$i]->student_name_2);
             $sheet->setCellValue('K' . $x, $parents[$i]->student_birthday_2 ? "'".$parents[$i]->student_birthday_2 : $parents[$i]->student_birthday_2);
-            $sheet->setCellValue('L' . $x, $arr_status[$parents[$i]->status]);
+            $sheet->setCellValue('L' . $x, $arr_status[$parents[$i]->status] ?? '');
             $sheet->setCellValue('M' . $x, $parents[$i]->error_message);
 
         }

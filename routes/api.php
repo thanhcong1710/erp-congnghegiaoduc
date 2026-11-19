@@ -22,14 +22,13 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('forgot-password', 'AuthController@forgotPassword');
         Route::post('reset-password', 'AuthController@resetPassword');
     });
-    Route::prefix('export')->group(function () {
-        Route::get('import/{import_id}', 'ExportsController@import');
-    });
     Route::get('test-auto/{student_id}', 'JobsController@testAuto');
     // Báo cáo buổi học gửi phụ huynh (public, truy cập bằng token)
     Route::get('public/lesson-report/{token}', 'LessonReportsController@publicReport');
     Route::group(['middleware' => 'jwt.auth'], function ($router) {
         Route::post('revoke-token', 'AuthController@revokeToken');
+        // Tải kết quả import (mở tab mới kèm ?token=, chỉ người tạo được tải)
+        Route::get('export/import/{import_id}', 'ExportsController@import');
         Route::get('menu', 'MenuController@index');
         Route::post('auth/logout', 'AuthController@logout');
         Route::prefix('system')->group(function () {
@@ -97,6 +96,7 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('imports/list', 'ImportsController@list');
             Route::post('imports/upload', 'ImportsController@upload');
             Route::post('imports/assign', 'ImportsController@assign');
+            Route::post('imports/detail', 'ImportsController@detail');
             Route::post('parents/list', 'ParentsController@list');
             Route::post('parents/detail-list', 'ParentsController@detailList');
             Route::post('parents/validate_phone', 'ParentsController@validatePhone');
