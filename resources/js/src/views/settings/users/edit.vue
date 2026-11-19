@@ -125,7 +125,7 @@
           hrm_id:'',
           sip_id:'',
           manager_hrm_id:'',
-          re_password: '12345678@',
+          re_password: '@12345678',
           message: '',
           status:1,
         }

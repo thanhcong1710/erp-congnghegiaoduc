@@ -124,7 +124,7 @@
           hrm_id:'',
           sip_id:'',
           manager_hrm_id:'',
-          password: '12345678@',
+          password: '@12345678',
           message: '',
           status:1,
         }
