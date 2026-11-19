@@ -45,7 +45,8 @@
         <div class="tt-day__body">
           <div
             v-for="it in itemsByDay[day.date]" :key="it.type + '-' + (it.schedule_id || it.class_id)"
-            class="tt-item" :class="['ty-' + it.type, { clickable: it.type !== 'holiday' }]"
+            class="tt-item" :class="['ty-' + it.type, isFuture(it) ? 'future' : '', { clickable: it.type !== 'holiday' && !isFuture(it) }]"
+            :title="isFuture(it) ? 'Buổi học chưa diễn ra – chưa thể điểm danh / nhận xét' : ''"
             @click="open(it)"
           >
             <div class="tt-item__top">
@@ -172,7 +173,7 @@ export default {
     },
     itemState(it) {
       const n = it.total_students || it.expected_students || 0
-      if (it.class_date > this.today) return { cls: 'future', icon: 'fa-solid fa-lock', text: `Chưa đến buổi học · ${n} HS` }
+      if (it.class_date > this.today) return { cls: 'future', icon: 'fa-solid fa-lock', text: `Chưa đến ngày học · ${n} HS` }
       if (it.roster_missing) return { cls: 'muted', icon: 'fa-solid fa-users', text: `${n} HS · chưa có DS điểm danh` }
       const att = `${it.present}/${it.total_students} có mặt`
       if (it.type === 'replaced') return { cls: 'muted', icon: 'fa-solid fa-user', text: att }
@@ -182,8 +183,9 @@ export default {
         done: ['ok', 'fa-solid fa-circle-check', 'đã nhận xét'], sent: ['sent', 'fa-solid fa-paper-plane', 'đã gửi PH'] }[it.report_status] || ['muted', 'fa-solid fa-pen', '']
       return { cls: rp[0], icon: rp[1], text: `${att} · ${rp[2]}` }
     },
+    isFuture(it) { return it.type !== 'holiday' && it.class_date > this.today },
     open(it) {
-      if (it.type === 'holiday') return
+      if (it.type === 'holiday' || this.isFuture(it)) return
       this.$router.push(`/lms/lesson-reports/${it.report_schedule_id || it.schedule_id}`)
     }
   }
@@ -250,6 +252,11 @@ export default {
 .tt-item.clickable { cursor: pointer; }
 .tt-item.clickable:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1); border-color: var(--ty); }
 .tt-item.ty-replaced { opacity: .8; }
+/* Buổi chưa tới ngày: nền xám, giữ vạch màu loại buổi, không bấm được */
+.tt-item.future { background: #f1f5f9; border-style: dashed; border-left-style: solid; cursor: not-allowed; }
+.tt-item.future .tt-item__cls { color: #64748b; }
+.tt-item.future .tt-item__meta { color: #94a3b8; }
+.tt-item.future .tt-st.future { background: #e2e8f0; border: none; color: #64748b; }
 .tt-item__top { display: flex; flex-direction: column-reverse; gap: 2px; }
 .tt-item__cls { font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1.35; word-break: break-word; }
 .tt-type { white-space: nowrap !important; font-size: 13px; font-weight: 700; color: var(--ty); }

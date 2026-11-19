@@ -297,12 +297,12 @@ export default {
         if (items.length) new_list.push(Object.assign({}, item, { items }))
       })
 
-      // Tài khoản ít menu (VD giáo viên): bỏ cấp nhóm nhỏ (≤ 3 mục) → menu phẳng, bấm 1 lần là tới
+      // Tài khoản ít menu (VD giáo viên): bỏ cấp nhóm nhỏ (≤ 3 mục) → menu phẳng, bấm 1 lần là tới (trừ nhóm đánh dấu keepGroup)
       const leaves = new_list.reduce((n, it) => n + (it.items || [it]).reduce((m, i) => m + (i.submenu ? i.submenu.length : 1), 0), 0)
       if (leaves <= 12) {
         new_list = new_list.map(item => !item.items ? item : Object.assign({}, item, {
           items: item.items.reduce((arr, i) => {
-            if (i.submenu && i.submenu.length <= 3) {
+            if (i.submenu && !i.keepGroup && i.submenu.length <= 3) {
               i.submenu.forEach(s => arr.push(Object.assign({ icon: i.icon }, s)))
             } else arr.push(i)
             return arr

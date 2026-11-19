@@ -53,12 +53,14 @@
         <div class="lr-day__body">
           <div
             v-for="s in sessionsByDay[day.date]" :key="s.schedule_id"
-            class="lr-session" :class="s.is_report_session ? 'st-' + s.ui_status : 'st-merged'"
+            class="lr-session" :class="isFuture(s) ? 'future' : (s.is_report_session ? 'st-' + s.ui_status : 'st-merged')"
+            :title="isFuture(s) ? 'Buổi học chưa diễn ra – chưa thể điểm danh / nhận xét' : ''"
             @click="open(s)"
           >
             <div class="lr-session__top">
               <div class="lr-session__cls" :title="s.cls_name">{{ s.cls_name }}</div>
-              <span v-if="s.is_report_session" class="lr-badge" :class="s.ui_status">{{ statusLabel[s.ui_status] }}</span>
+              <span v-if="isFuture(s)" class="lr-badge future"><i class="fa-solid fa-lock mr-1"></i>Chưa học</span>
+              <span v-else-if="s.is_report_session" class="lr-badge" :class="s.ui_status">{{ statusLabel[s.ui_status] }}</span>
               <span v-else class="lr-badge merged">Chỉ điểm danh</span>
             </div>
             <div class="lr-session__meta">
@@ -72,24 +74,31 @@
               <span v-if="s.start_time"><i class="fa-regular fa-clock"></i>{{ s.start_time }}<template v-if="s.end_time"> – {{ s.end_time }}</template></span>
               <span v-if="!teacherOnly"><i class="fa-solid fa-chalkboard-user"></i>{{ s.teacher_name || '—' }}</span>
             </div>
-            <div class="lr-session__att" :class="{ warn: s.pending_attendance > 0 && s.class_date <= today }">
-              <i class="fa-solid fa-clipboard-user"></i>
-              <template v-if="s.pending_attendance > 0 && s.class_date <= today">Chưa điểm danh {{ s.pending_attendance }} HS</template>
-              <template v-else>Điểm danh {{ s.present }}/{{ s.total_students }}</template>
+            <!-- Buổi chưa tới ngày: chỉ hiển thị, không mở được -->
+            <div v-if="isFuture(s)" class="lr-session__foot">
+              <span><i class="fa-solid fa-users mr-1"></i>{{ s.total_students }} HS</span>
+              <span class="lr-session__lock">Chưa đến ngày học</span>
             </div>
-            <template v-if="s.is_report_session">
-              <div class="lr-progress" :title="'Đã nhận xét ' + s.commented + '/' + s.total_students">
-                <div class="lr-progress__bar" :style="{ width: pct(s) + '%' }"></div>
+            <template v-else>
+              <div class="lr-session__att" :class="{ warn: s.pending_attendance > 0 }">
+                <i class="fa-solid fa-clipboard-user"></i>
+                <template v-if="s.pending_attendance > 0">Chưa điểm danh {{ s.pending_attendance }} HS</template>
+                <template v-else>Điểm danh {{ s.present }}/{{ s.total_students }}</template>
               </div>
-              <div class="lr-session__foot">
-                <span>Nhận xét {{ s.commented }}/{{ s.total_students }}</span>
-                <span class="lr-session__go">{{ s.ui_status === 'none' ? 'Bắt đầu' : 'Mở' }} <i class="fa-solid fa-arrow-right"></i></span>
+              <template v-if="s.is_report_session">
+                <div class="lr-progress" :title="'Đã nhận xét ' + s.commented + '/' + s.total_students">
+                  <div class="lr-progress__bar" :style="{ width: pct(s) + '%' }"></div>
+                </div>
+                <div class="lr-session__foot">
+                  <span>Nhận xét {{ s.commented }}/{{ s.total_students }}</span>
+                  <span class="lr-session__go">{{ s.ui_status === 'none' ? 'Bắt đầu' : 'Mở' }} <i class="fa-solid fa-arrow-right"></i></span>
+                </div>
+              </template>
+              <div v-else class="lr-session__foot">
+                <span></span>
+                <span class="lr-session__go">Điểm danh <i class="fa-solid fa-arrow-right"></i></span>
               </div>
             </template>
-            <div v-else class="lr-session__foot">
-              <span></span>
-              <span class="lr-session__go">Điểm danh <i class="fa-solid fa-arrow-right"></i></span>
-            </div>
           </div>
           <div v-if="!sessionsByDay[day.date] || !sessionsByDay[day.date].length" class="lr-day__empty">Không có buổi</div>
         </div>
@@ -231,7 +240,9 @@ export default {
         this.sessions = d.data || []
       }).catch(() => this.$vs.loading.close())
     },
+    isFuture(s) { return s.class_date > this.today },
     open(s) {
+      if (this.isFuture(s)) return
       // Mọi buổi trong tuần đều mở phiếu tuần (gắn buổi cuối tuần) – điểm danh từng buổi nằm trong phiếu
       this.$router.push(`/lms/lesson-reports/${s.report_schedule_id || s.schedule_id}`)
     }
@@ -293,6 +304,12 @@ export default {
 .lr-session.st-sent { border-left-color: #7367f0; }
 .lr-session.st-merged { border-left-color: #cbd5e1; border-left-style: dashed; background: #fcfcfd; }
 .lr-session.st-merged .lr-session__cls { color: #475569; }
+/* Buổi chưa tới ngày: nền xám, không bấm được */
+.lr-session.future { background: #f1f5f9; border: 1px dashed #cbd5e1; border-left: 4px solid #cbd5e1; cursor: not-allowed; }
+.lr-session.future:hover { transform: none; box-shadow: none; border-color: #cbd5e1; }
+.lr-session.future .lr-session__cls { color: #64748b; }
+.lr-session.future .lr-session__meta, .lr-session.future .lr-session__foot { color: #94a3b8; }
+.lr-session__lock { color: #94a3b8; font-weight: 600; white-space: nowrap; }
 .lr-session__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
 .lr-session__cls { font-size: 15px; font-weight: 700; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lr-session__meta { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13px; color: #64748b; margin-top: 4px; }
@@ -311,4 +328,5 @@ export default {
 .lr-badge.done { background: #dcfce7; color: #15803d; }
 .lr-badge.sent { background: rgba(115, 103, 240, 0.12); color: #5e50ee; }
 .lr-badge.merged { background: #f1f5f9; color: #64748b; }
+.lr-badge.future { background: #e2e8f0; color: #64748b; }
 </style>

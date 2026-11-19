@@ -191,18 +191,17 @@ export default [
         url: null,
         name: 'UCREA',
         icon: 'StarIcon',
+        keepGroup: true,
         slug: 'lms-evaluations-ucrea-group',
         submenu: [
           {
             url: '/lms/evaluations/ucrea',
             name: 'Đánh giá năng lực',
-            icon: 'StarIcon',
             slug: 'lms-evaluations-ucrea',
           },
           {
             url: '/lms/evaluations/ucrea/tests',
             name: 'Đề kiểm tra UCREA',
-            icon: 'FileTextIcon',
             slug: 'lms-evaluations-ucrea-tests',
           }
         ]
@@ -211,6 +210,7 @@ export default [
         url: null,
         name: 'IG.BH',
         icon: 'BarChart2Icon',
+        keepGroup: true,
         slug: 'lms-evaluations-igbh-group',
         submenu: [
           {
