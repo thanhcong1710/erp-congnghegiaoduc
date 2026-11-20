@@ -316,7 +316,7 @@
                     <th>Trạng thái</th>
                     <th>Duyệt</th>
                     <th class="text-center">Ngày tạo</th>
-                    <th class="text-center" style="width: 90px;">Thao tác</th>
+                    <th class="text-center" style="width: 120px;">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -377,12 +377,17 @@
                     <td class="td vs-table--td text-center text-xs whitespace-nowrap text-gray-600">{{ formatDateTime(tr.created_at) }}</td>
 
                     <td class="td vs-table--td text-center">
-                      <div v-if="canApprove && tr.status === 0" class="hrm-actions">
-                        <vx-tooltip text="Phê duyệt">
-                          <button type="button" class="hrm-icon-btn is-success" @click="openApprovePopup(tr)"><i class="fa-solid fa-check"></i></button>
-                        </vx-tooltip>
-                        <vx-tooltip text="Từ chối">
-                          <button type="button" class="hrm-icon-btn is-danger" @click="openRejectPopup(tr)"><i class="fa-solid fa-xmark"></i></button>
+                      <div v-if="canApprove" class="hrm-actions">
+                        <template v-if="tr.status === 0">
+                          <vx-tooltip text="Phê duyệt">
+                            <button type="button" class="hrm-icon-btn is-success" @click="openApprovePopup(tr)"><i class="fa-solid fa-check"></i></button>
+                          </vx-tooltip>
+                          <vx-tooltip text="Từ chối">
+                            <button type="button" class="hrm-icon-btn is-danger" @click="openRejectPopup(tr)"><i class="fa-solid fa-xmark"></i></button>
+                          </vx-tooltip>
+                        </template>
+                        <vx-tooltip text="Xóa đơn">
+                          <button type="button" class="hrm-icon-btn is-danger" @click="confirmDeleteLeave(tr)"><i class="fa-solid fa-trash"></i></button>
                         </vx-tooltip>
                       </div>
                       <span v-else class="text-gray-400">—</span>
@@ -554,6 +559,9 @@
                   <span v-if="lv.approval_type === 'approved'" class="mode-badge mode-approved">
                     <i class="fa-solid fa-circle-check mr-1"></i> Hưởng 100% lương
                   </span>
+                  <span v-else-if="lv.approval_type === 'unpaid_leave'" class="mode-badge mode-late">
+                    <i class="fa-solid fa-money-bill-transfer mr-1"></i> Nghỉ không lương
+                  </span>
                   <span v-else-if="lv.approval_type === 'late_unpaid'" class="mode-badge mode-late">
                     <i class="fa-solid fa-triangle-exclamation mr-1"></i> Gửi muộn (trừ lương)
                   </span>
@@ -675,7 +683,7 @@
             <label class="text-sm font-semibold text-gray-700 block mb-1">Loại yêu cầu (*)</label>
             <select class="filter-select w-full" v-model="form.request_category">
               <option value="leave">Xin nghỉ phép thường</option>
-              <option value="shift_change">Xin đổi ca làm việc</option>
+              <option value="shift_change">Xin đổi ca làm việc (Đổi ca chỉ áp dụng với các Sale)</option>
               <option value="off_to_onl">Xin chuyển làm Off sang Onl (Hưởng 50% lương)</option>
             </select>
           </div>
@@ -706,8 +714,8 @@
         </div>
 
         <!-- Chọn buổi nghỉ: Cả ngày / Sáng / Chiều (Sáng/Chiều chỉ áp dụng khi nghỉ 1 ngày) -->
-        <div class="mb-4" v-if="form.request_category !== 'shift_change'">
-          <label class="text-sm font-semibold text-gray-700 block mb-1">Thời gian nghỉ (*)</label>
+        <div class="mb-4">
+          <label class="text-sm font-semibold text-gray-700 block mb-1">{{ form.request_category === 'shift_change' ? 'Thời gian đổi ca (*)' : 'Thời gian nghỉ (*)' }}</label>
           <div class="day-part-group">
             <button
               v-for="opt in dayPartOptions"
@@ -721,7 +729,7 @@
               <i :class="opt.icon" class="mr-1"></i> {{ opt.label }}
             </button>
           </div>
-          <div v-if="!isSingleDayForm" class="text-xs text-gray-500 mt-1">Nghỉ buổi Sáng/Chiều chỉ áp dụng khi Từ ngày = Đến ngày.</div>
+          <div v-if="!isSingleDayForm" class="text-xs text-gray-500 mt-1">Buổi Sáng/Chiều (0,5 ngày) chỉ áp dụng khi Từ ngày = Đến ngày.</div>
         </div>
         <!-- Hiển thị rõ ngày nghỉ để tránh nhầm với ngày gửi đơn -->
         <div class="mb-4 text-sm" v-if="leaveDateHint">
@@ -772,6 +780,14 @@
                 <div>
                   <span class="font-bold text-success block">Đã duyệt</span>
                   <span class="text-xs text-gray-500">Hưởng 100% lương / Tự động trừ vào số ngày phép năm</span>
+                </div>
+              </label>
+
+              <label v-if="isLeaveRequest(selectedLeave)" class="flex items-center p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50" :class="{'border-primary bg-blue-50': approveForm.approval_type === 'unpaid_leave'}">
+                <input type="radio" value="unpaid_leave" v-model="approveForm.approval_type" class="mr-3" />
+                <div>
+                  <span class="font-bold text-primary block">Đã duyệt (Không lương)</span>
+                  <span class="text-xs text-gray-500">Nghỉ không lương / nhân sự chưa có phép năm – không trừ vào số ngày phép năm</span>
                 </div>
               </label>
 
@@ -1132,8 +1148,8 @@ export default {
       },
       dayPartOptions: [
         { value: 'full', label: 'Cả ngày', icon: 'fa-solid fa-calendar-day' },
-        { value: 'morning', label: 'Nghỉ Sáng', icon: 'fa-solid fa-sun' },
-        { value: 'afternoon', label: 'Nghỉ Chiều', icon: 'fa-solid fa-cloud-sun' }
+        { value: 'morning', label: 'Sáng (0,5 ngày)', icon: 'fa-solid fa-sun' },
+        { value: 'afternoon', label: 'Chiều (0,5 ngày)', icon: 'fa-solid fa-cloud-sun' }
       ],
 
       // Popup Phê duyệt
@@ -1592,8 +1608,6 @@ export default {
     },
 
     calculateDays() {
-      // Đổi ca không có khái niệm buổi nghỉ
-      if (this.form.request_category === 'shift_change') this.form.day_part = 'full';
       // Nghỉ nửa ngày: khóa "Đến ngày" bằng "Từ ngày", số ngày = 0.5
       if (this.isHalfDayForm) {
         this.form.end_date = this.form.start_date;
@@ -1640,7 +1654,7 @@ export default {
       }
       this.selectedLeave = leave;
       this.approveForm = {
-        approval_type: leave.request_category === 'off_to_onl' ? 'half_salary' : 'approved',
+        approval_type: this.defaultApprovalType(leave),
         rejection_reason: ''
       };
       this.approvePopupActive = true;
@@ -1693,6 +1707,9 @@ export default {
       axios.p(`/api/hrm/leaves/approve/${this.selectedLeave.id}`, this.approveForm).then(res => {
         if (res.data.status === 1) {
           this.$vs.notify({ title: 'Thành công', text: res.data.message, color: 'success' });
+          if (res.data.warning) {
+            this.$vs.notify({ title: 'Lưu ý', text: res.data.warning, color: 'warning', time: 10000 });
+          }
           this.approvePopupActive = false;
           this.fetchLeaves();
           this.fetchAllBalances();
@@ -1706,6 +1723,49 @@ export default {
 
     dayPartText(part) {
       return { morning: 'Nghỉ Sáng', afternoon: 'Nghỉ Chiều' }[part] || '';
+    },
+
+    isLeaveRequest(leave) {
+      return !!leave && !['shift_change', 'off_to_onl'].includes(leave.request_category);
+    },
+
+    // Mặc định kiểu duyệt: Off sang Onl -> 50% lương; đơn chọn loại "Nghỉ không lương" -> Không lương
+    defaultApprovalType(leave) {
+      if (leave.request_category === 'off_to_onl') return 'half_salary';
+      const type = leave.leave_type || this.leaveTypes.find(t => t.id === leave.leave_type_id);
+      if (this.isLeaveRequest(leave) && type && Number(type.is_paid) === 0) return 'unpaid_leave';
+      return 'approved';
+    },
+
+    confirmDeleteLeave(leave) {
+      const name = leave.employee ? leave.employee.full_name : (leave.user ? leave.user.name : '');
+      const extra = leave.status === 1 ? ' Đơn đã duyệt: số ngày phép đã trừ sẽ được hoàn lại và bảng chấm công các ngày này trở về "Chưa điểm danh".' : '';
+      this.$vs.dialog({
+        type: 'confirm',
+        color: 'danger',
+        title: 'Xác nhận xóa đơn',
+        text: `Xóa đơn #${leave.id} của ${name} (${leave.start_date} → ${leave.end_date})?${extra}`,
+        acceptText: 'Xóa',
+        cancelText: 'Hủy',
+        accept: () => this.deleteLeave(leave)
+      });
+    },
+
+    deleteLeave(leave) {
+      this.$vs.loading();
+      axios.p(`/api/hrm/leaves/delete/${leave.id}`, {}).then(res => {
+        this.$vs.loading.close();
+        const ok = res.data.status === 1;
+        this.$vs.notify({ title: ok ? 'Thành công' : 'Lỗi', text: res.data.message, color: ok ? 'success' : 'danger' });
+        if (ok) {
+          this.fetchLeaves();
+          this.fetchAllBalances();
+        }
+      }).catch(err => {
+        this.$vs.loading.close();
+        const msg = err.response && err.response.data && err.response.data.message ? err.response.data.message : err.message;
+        this.$vs.notify({ title: 'Lỗi', text: msg, color: 'danger' });
+      });
     },
 
     // Hiển thị số ngày kèm buổi nghỉ, VD: "0.5 ngày - Nghỉ Sáng"
@@ -1735,6 +1795,7 @@ export default {
     getApprovalTypeText(type) {
       const map = {
         approved: 'Hưởng 100% lương',
+        unpaid_leave: 'Nghỉ không lương',
         half_salary: 'Hưởng 50% lương',
         late_unpaid: 'Gửi muộn (không lương)',
         rejected: 'Từ chối'
@@ -1745,6 +1806,7 @@ export default {
     getApprovalTypeClass(type) {
       const map = {
         approved: 'text-success',
+        unpaid_leave: 'text-primary',
         half_salary: 'text-warning',
         late_unpaid: 'text-gray-600',
         rejected: 'text-danger'

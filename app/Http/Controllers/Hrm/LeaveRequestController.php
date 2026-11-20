@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\DB;
 
 class LeaveRequestController extends Controller
 {
+    // Các kiểu duyệt KHÔNG trừ vào quỹ phép năm (50% lương làm online, nghỉ không lương)
+    const NON_DEDUCT_APPROVAL_TYPES = ['half_salary', 'unpaid_leave'];
+
     /**
      * Danh sách đơn nghỉ phép
      */
@@ -84,8 +87,7 @@ class LeaveRequestController extends Controller
             }
 
             // Buổi nghỉ: full (cả ngày) / morning (nghỉ sáng) / afternoon (nghỉ chiều)
-            $isShiftChange = $request->request_category === 'shift_change';
-            $dayPart = (!$isShiftChange && in_array($request->day_part, ['morning', 'afternoon'], true))
+            $dayPart = in_array($request->day_part, ['morning', 'afternoon'], true)
                 ? $request->day_part
                 : 'full';
             if ($dayPart !== 'full' && !$startDate->isSameDay($endDate)) {
@@ -94,7 +96,10 @@ class LeaveRequestController extends Controller
             // Nửa ngày: server tự đặt 0.5, không tin số FE gửi lên
             $durationDays = $dayPart !== 'full'
                 ? 0.5
-                : ($request->duration_days ?: ($startDate->diffInDays($endDate) + 1));
+                : (float)($request->duration_days ?: ($startDate->diffInDays($endDate) + 1));
+            if ($durationDays <= 0) {
+                $durationDays = $startDate->diffInDays($endDate) + 1;
+            }
 
             $leave = new HrmLeaveRequest();
             $leave->user_id = $userId;
@@ -127,6 +132,7 @@ class LeaveRequestController extends Controller
     /**
      * HR Phê duyệt đơn xin phép:
      * - approved: Đã duyệt (hưởng nguyên lương / trừ phép năm)
+     * - unpaid_leave: Đã duyệt nghỉ không lương (không trừ phép năm)
      * - half_salary: 50% lương (off sang onl)
      * - late_unpaid: Gửi đơn muộn (không lương)
      * - rejected: Từ chối
@@ -177,7 +183,11 @@ class LeaveRequestController extends Controller
                 }
             }
 
-            $approvalType = $request->approval_type ?: 'approved'; // approved, half_salary, late_unpaid, rejected
+            $approvalType = $request->approval_type ?: 'approved'; // approved, unpaid_leave, half_salary, late_unpaid, rejected
+            if (!in_array($approvalType, ['approved', 'unpaid_leave', 'half_salary', 'late_unpaid', 'rejected'], true)) {
+                return response()->json(['status' => 0, 'message' => 'Kiểu phê duyệt không hợp lệ!'], 422);
+            }
+            $warning = null;
 
             if ($approvalType === 'rejected') {
                 $wasApproved = ($leave->status == 1);
@@ -260,7 +270,7 @@ class LeaveRequestController extends Controller
                         })
                         ->where(function ($q) {
                             $q->whereNull('approval_type')
-                              ->orWhere('approval_type', '!=', 'half_salary');
+                              ->orWhereNotIn('approval_type', self::NON_DEDUCT_APPROVAL_TYPES);
                         })
                         ->sum('duration_days');
 
@@ -282,6 +292,14 @@ class LeaveRequestController extends Controller
                 if (!$isShiftChangeRequest) {
                     $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
                     $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
+                    if ($empId && !$leave->employee_id) {
+                        $leave->employee_id = $empId;
+                    }
+                    if (!$empId) {
+                        // Tài khoản chưa liên kết hồ sơ nhân sự -> bảng chấm công (theo hồ sơ) sẽ không thấy đơn này
+                        $warning = 'Tài khoản người gửi đơn chưa được liên kết với hồ sơ nhân sự nào nên bảng chấm công chưa nhận đơn này. '
+                            . 'Vui lòng vào Hồ sơ nhân viên để gán tài khoản đăng nhập.';
+                    }
 
                     $dayPartLabels = ['morning' => ' (Nghỉ sáng)', 'afternoon' => ' (Nghỉ chiều)'];
                     $dayPartSuffix = $dayPartLabels[$leave->day_part] ?? '';
@@ -301,7 +319,8 @@ class LeaveRequestController extends Controller
                             } elseif ((float)$leave->duration_days > 0 && (float)$leave->duration_days < 1) {
                                 $attStatus = 'leave_approved_half';
                             }
-                            $attNote = 'Theo đơn xin phép #' . $leave->id . $dayPartSuffix;
+                            $attNote = ($approvalType === 'unpaid_leave' ? 'Theo đơn nghỉ không lương #' : 'Theo đơn xin phép #')
+                                . $leave->id . $dayPartSuffix;
                         }
 
                         $condition = ['date' => $dateStr];
@@ -332,7 +351,8 @@ class LeaveRequestController extends Controller
 
             return response()->json([
                 'status' => 1,
-                'message' => ($approvalType === 'rejected') ? 'Đã từ chối đơn thành công!' : 'Phê duyệt đơn thành công!'
+                'message' => ($approvalType === 'rejected') ? 'Đã từ chối đơn thành công!' : 'Phê duyệt đơn thành công!',
+                'warning' => $warning,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -349,6 +369,84 @@ class LeaveRequestController extends Controller
     {
         $request->merge(['approval_type' => 'rejected']);
         return $this->approve($request, $id);
+    }
+
+    /**
+     * Xóa đơn (dùng khi duyệt nhầm): hoàn lại phép năm đã trừ và trả bảng chấm công về "Chưa điểm danh"
+     */
+    public function delete($id)
+    {
+        try {
+            $currentUser = Auth::user();
+            $leave = HrmLeaveRequest::findOrFail($id);
+            $denied = $this->checkManagePermission($currentUser, $leave);
+            if ($denied) {
+                return $denied;
+            }
+
+            DB::transaction(function () use ($leave) {
+                if ((int)$leave->status === 1) {
+                    $this->revertApprovedLeave($leave);
+                }
+                $leave->delete();
+            });
+
+            return response()->json(['status' => 1, 'message' => 'Đã xóa đơn #' . $id . ' thành công!']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 0, 'message' => 'Lỗi: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Kiểm tra quyền xử lý đơn: Admin HRM, hoặc người có quyền duyệt và nhân sự thuộc team/phòng ban quản lý
+     */
+    private function checkManagePermission($currentUser, HrmLeaveRequest $leave)
+    {
+        if (!$currentUser || !$currentUser->canApproveHrmLeave()) {
+            return response()->json(['status' => 0, 'message' => 'Bạn không có quyền xử lý đơn này!'], 403);
+        }
+        if (HrmScopeService::isHrmAdmin($currentUser)) {
+            return null;
+        }
+        $subordinateIds = HrmScopeService::getSubordinateUserIds($currentUser);
+        $accessibleDeptIds = HrmScopeService::getAccessibleDepartmentIds($currentUser);
+        $empDeptId = $leave->employee ? $leave->employee->department_id : null;
+        $allowed = in_array((int)$leave->user_id, $subordinateIds, true)
+            || ($empDeptId && in_array((int)$empDeptId, $accessibleDeptIds, true));
+
+        return $allowed ? null : response()->json([
+            'status' => 0,
+            'message' => 'Bạn chỉ có quyền xử lý đơn của nhân viên thuộc team hoặc phòng ban mình quản lý!'
+        ], 403);
+    }
+
+    /**
+     * Hoàn tác tác động của 1 đơn đã duyệt: trả lại phép năm (nếu đã trừ) và reset điểm danh các ngày theo đơn
+     */
+    private function revertApprovedLeave(HrmLeaveRequest $leave)
+    {
+        $empProfile = HrmEmployeeProfile::where('user_id', $leave->user_id)->first();
+        $empId = $leave->employee_id ?: ($empProfile ? $empProfile->id : null);
+
+        $isLeaveCategory = !in_array($leave->request_category, ['shift_change', 'off_to_onl'], true)
+            && !in_array($leave->type, ['shift_change', 'off_to_onl'], true);
+        if ($isLeaveCategory && $leave->approval_type === 'approved') {
+            $balance = HrmLeaveBalance::where('year', Carbon::parse($leave->start_date)->year)
+                ->where(function ($q) use ($empId, $leave) {
+                    $q->where('employee_id', $empId ?: -1)->orWhere('user_id', $leave->user_id ?: -1);
+                })->first();
+            if ($balance) {
+                $balance->used_days = max(0, (float)$balance->used_days - (float)$leave->duration_days);
+                $balance->save();
+            }
+        }
+
+        HrmAttendance::where(function ($q) use ($empId, $leave) {
+            $q->where('employee_id', $empId ?: -1)->orWhere('user_id', $leave->user_id ?: -1);
+        })
+            ->whereBetween('date', [$leave->start_date, $leave->end_date])
+            ->whereIn('attendance_status', ['leave_approved', 'leave_approved_half', 'online', 'online_half', 'late_submitted'])
+            ->update(['attendance_status' => 'not_checked', 'note' => null]);
     }
 
     /**
@@ -486,7 +584,7 @@ class LeaveRequestController extends Controller
               })
               ->where(function ($q) {
                   $q->whereNull('approval_type')
-                    ->orWhere('approval_type', '!=', 'half_salary');
+                    ->orWhereNotIn('approval_type', self::NON_DEDUCT_APPROVAL_TYPES);
               })
               ->sum('duration_days');
 
@@ -626,7 +724,7 @@ class LeaveRequestController extends Controller
                 $empLeaveRequests = $empRequests->filter(function ($lr) {
                     $isOnline = ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
                     $isShiftChange = ($lr->request_category === 'shift_change' || $lr->type === 'shift_change');
-                    return !$isOnline && !$isShiftChange;
+                    return !$isOnline && !$isShiftChange && $lr->approval_type !== 'unpaid_leave';
                 });
 
                 $empOnlineRequests = $empRequests->filter(function ($lr) {
@@ -672,7 +770,7 @@ class LeaveRequestController extends Controller
                 $empLeaveRequests = $empRequests->filter(function ($lr) {
                     $isOnline = ($lr->request_category === 'off_to_onl' || $lr->type === 'off_to_onl' || $lr->approval_type === 'half_salary');
                     $isShiftChange = ($lr->request_category === 'shift_change' || $lr->type === 'shift_change');
-                    return !$isOnline && !$isShiftChange;
+                    return !$isOnline && !$isShiftChange && $lr->approval_type !== 'unpaid_leave';
                 });
 
                 $empOnlineRequests = $empRequests->filter(function ($lr) {
@@ -795,7 +893,7 @@ class LeaveRequestController extends Controller
                 if ((int)$lv->status !== 1) return false;
                 $isOnline = ($lv->request_category === 'off_to_onl' || $lv->type === 'off_to_onl' || $lv->approval_type === 'half_salary');
                 $isShiftChange = ($lv->request_category === 'shift_change' || $lv->type === 'shift_change');
-                return !$isOnline && !$isShiftChange;
+                return !$isOnline && !$isShiftChange && $lv->approval_type !== 'unpaid_leave';
             });
 
             $approvedOnlineOnly = $leaves->filter(function ($lv) {
