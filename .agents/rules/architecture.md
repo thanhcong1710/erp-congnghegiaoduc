@@ -29,6 +29,7 @@ alwaysApply: true
   - Gọi HTTP ngoài: `use App\Providers\CurlServiceProvider as curl;` (`curl::get|post|put|patch|delete`).
 - **Response chuẩn:** `return response()->json((object)['status' => 1|0, 'message' => '...', 'data' => ...]);` (message tiếng Việt).
 - User hiện tại: `Auth::user()->id`; role so sánh với `App\Enums\SystemCode::ROLE_*` (`ROLE_ADMIN=99999999`, `ROLE_CEO_BRANCH=686868`, `ROLE_EC=68`, `ROLE_EC_LEADER=69`, `ROLE_CM=55`, `ROLE_CM_LEADER=56`, `ROLE_TEACHER=36`, `ROLE_TEACHER_LEADER=37`, `ROLE_TA=54`, `ROLE_MARKETING=70`; tài khoản demo đăng nhập nhanh: S001 GĐTT, S002 Sale, S003 CSKH, S006 Giáo viên, S007 Marketing – mật khẩu `@12345678`). Phân quyền chi nhánh qua bảng `branch_has_user`, `role_has_user`.
+- Phân quyền Sale (EC 68/EC leader 69): chỉ thấy bản ghi của mình + cấp dưới theo cây `users.manager_id` (`User::getSaleAllowedStaffIds()`). API theo ID phải chặn bằng `Auth::user()->canAccessContract($id)` / `canAccessStudent($id)` → `return $this->denyRecordAccess();` (403).
 - Log thay đổi: `App\Models\LogStudents`, `LogParents` (gọi khi cập nhật học sinh/phụ huynh).
 - **Code mới:** vẫn dùng helper `u::` cho đồng nhất, nhưng **KHÔNG nội suy trực tiếp input user vào SQL** (code cũ đang dính SQL injection kiểu `WHERE id= $request->id`) → ép kiểu `(int)`, hoặc dùng `DB::select($sql, $bindings)` / `addslashes` cho chuỗi.
 - Thay đổi schema: tạo migration mới trong `database/migrations/` (chỉ có vài migration gần đây; schema gốc không nằm trong migration) – không tự chạy (xem mục 0).

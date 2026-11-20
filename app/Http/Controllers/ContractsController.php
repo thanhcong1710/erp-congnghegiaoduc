@@ -124,6 +124,9 @@ class ContractsController extends Controller
 
     public function add(Request $request)
     {
+        if (!Auth::user()->canAccessStudent(data_get($request, 'student_id'))) {
+            return $this->denyRecordAccess();
+        }
         $student_info = u::getObject(['student_id'=>data_get($request, 'student_id'), 'status' => 1], 'term_student_user');
         $coupon_amount = data_get($request,'coupon_code_check') == 1 ? data_get($request, 'coupon_amount') : 0;
         $sibling_discount = data_get($request, 'sibling_discount') ? data_get($request, 'sibling_discount') : 0;
@@ -266,6 +269,7 @@ class ContractsController extends Controller
         $start_date = isset($request->start_date) ? $request->start_date : '';
         $type_contract = isset($request->type_contract) ? $request->type_contract : 0;
         $debt_status = isset($request->debt_status) ? $request->debt_status : '';
+        $ec_ids = array_filter(array_map('intval', (array) data_get($request, 'ec_id', [])));
 
         $pagination = (object)$request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
@@ -284,6 +288,10 @@ class ContractsController extends Controller
             $cond .= " AND c.branch_id IN (".implode(",",$branch_id).")";
         }
         
+        if (!empty($ec_ids)) {
+            $cond .= " AND c.ec_id IN (" . implode(',', $ec_ids) . ")";
+        }
+
         if ($keyword !== '') {
             $cond .= " AND (s.lms_code LIKE '%$keyword%' OR s.lms_id LIKE '%$keyword%' OR s.name LIKE '%$keyword%' OR c.code LIKE '%$keyword%') ";
         }
@@ -330,8 +338,12 @@ class ContractsController extends Controller
     }
 
     public function delete(Request $request){
-        $contract_info = u::first("SELECT student_id, code FROM contracts WHERE id=$request->contract_id");
-        u::query("DELETE FROM contracts WHERE id =".$request->contract_id);
+        $contract_id = (int) data_get($request, 'contract_id');
+        if (!Auth::user()->canAccessContract($contract_id)) {
+            return $this->denyRecordAccess();
+        }
+        $contract_info = u::first("SELECT student_id, code FROM contracts WHERE id=$contract_id");
+        u::query("DELETE FROM contracts WHERE id =".$contract_id);
 
         LogStudents::logAdd(data_get($contract_info, 'student_id'), 'Hủy hợp đồng nhập học - '.data_get($contract_info, 'code'), Auth::user()->id);
         $result = array(
@@ -452,7 +464,10 @@ class ContractsController extends Controller
 
     public function update(Request $request)
     {
-        $contract_id = data_get($request, 'id');
+        $contract_id = (int) data_get($request, 'id');
+        if (!Auth::user()->canAccessContract($contract_id)) {
+            return $this->denyRecordAccess();
+        }
         $pre_update_contract_info = u::getObject(['id'=>$contract_id], 'contracts');
         if (!$pre_update_contract_info) {
             return response()->json(['status' => 0, 'message' => 'Hợp đồng không tồn tại.'], 404);
@@ -679,6 +694,9 @@ class ContractsController extends Controller
             return response()->json(['status' => 0, 'message' => 'Số tiền thu phải lớn hơn 0.'], 422);
         }
 
+        if (!Auth::user()->canAccessContract($contract_id)) {
+            return $this->denyRecordAccess();
+        }
         $contract = u::getObject(['id' => $contract_id], 'contracts');
         if (!$contract) {
             return response()->json(['status' => 0, 'message' => 'Không tìm thấy hợp đồng.'], 404);
@@ -725,6 +743,10 @@ class ContractsController extends Controller
 
     public function getReceipts(Request $request, $contract_id)
     {
+        $contract_id = (int) $contract_id;
+        if (!Auth::user()->canAccessContract($contract_id)) {
+            return $this->denyRecordAccess();
+        }
         $receipts = u::query("SELECT tp.id, tp.code, tp.charge_amount, tp.charge_date, tp.method, tp.note, tp.status, tp.created_at, tp.approved_at,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.creator_id) AS creator_name,
             (SELECT CONCAT(name,'-',hrm_id) FROM users WHERE id=tp.approver_id) AS approver_name
@@ -736,6 +758,10 @@ class ContractsController extends Controller
 
     public function print(Request $request,$contract_id)
     {
+        $contract_id = (int) $contract_id;
+        if (!Auth::user()->canAccessContract($contract_id)) {
+            return $this->denyRecordAccess();
+        }
         $contract_info = u::first("SELECT s.name AS student_name, s.date_of_birth, s.gender, s.address, s.school,
             s.gud_name1, s.gud_mobile1, s.gud_email1, c.note,c.total_charged, c.debt_amount, c.must_charge, c.start_date,
             (SELECT name FROM users WHERE id=c.ec_id) AS ec_name,

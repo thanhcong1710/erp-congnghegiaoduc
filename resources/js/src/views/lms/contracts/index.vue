@@ -28,7 +28,7 @@
     <vx-card no-shadow class="mb-4 shadow-sm border border-solid border-grey-light rounded-lg">
       <div class="vx-row">
         <!-- Trung tâm -->
-        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+        <div class="vx-col lg:w-1/5 md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-location-dot text-primary mr-1"></i> Trung tâm</label>
           <multiselect
             class="custom-multiselect"
@@ -48,8 +48,29 @@
           </multiselect>
         </div>
 
+        <!-- Người quản lý (EC) -->
+        <div class="vx-col lg:w-1/5 md:w-1/3 sm:w-1/2 w-full mb-3">
+          <label class="filter-label"><i class="fa-solid fa-user-tie text-primary mr-1"></i> Người quản lý</label>
+          <multiselect
+            class="custom-multiselect"
+            name="search_ec"
+            placeholder="Tất cả nhân sự"
+            v-model="searchData.arr_ec"
+            :options="ec_list"
+            label="label_name"
+            :close-on-select="false"
+            :hide-selected="true"
+            :multiple="true"
+            :searchable="true"
+            track-by="id"
+            selectedLabel="" selectLabel="" deselectLabel=""
+          >
+            <span slot="noResult">Không tìm thấy</span>
+          </multiselect>
+        </div>
+
         <!-- Từ khóa -->
-        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+        <div class="vx-col lg:w-1/5 md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-magnifying-glass text-primary mr-1"></i> Tìm kiếm</label>
           <div class="filter-search-wrapper">
             <i class="fa-solid fa-search filter-search-icon"></i>
@@ -64,7 +85,7 @@
         </div>
 
         <!-- Khoảng thời gian tạo -->
-        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+        <div class="vx-col lg:w-1/5 md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-regular fa-calendar-days text-primary mr-1"></i> Thời gian tạo</label>
           <date-picker
             name="item-date"
@@ -80,7 +101,7 @@
         </div>
 
         <!-- Trạng thái công nợ -->
-        <div class="vx-col md:w-1/4 sm:w-1/2 w-full mb-3">
+        <div class="vx-col lg:w-1/5 md:w-1/3 sm:w-1/2 w-full mb-3">
           <label class="filter-label"><i class="fa-solid fa-scale-balanced text-primary mr-1"></i> Công nợ</label>
           <select class="custom-select-box" v-model="searchData.debt_status" @change="getData">
             <option value="">-- Tất cả công nợ --</option>
@@ -552,8 +573,10 @@ export default {
       windowWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
       viewMode: 'table',
       branch_list: [],
+      ec_list: [],
       searchData: {
         arr_branch: '',
+        arr_ec: '',
         branch_id: '',
         keyword: '',
         dateRange: '',
@@ -607,6 +630,9 @@ export default {
   created() {
     axios.g('/api/system/branches-has-user').then((response) => {
       this.branch_list = response.data;
+    });
+    axios.g('/api/users/get-data/users-manager').then((response) => {
+      this.ec_list = response.data || [];
     });
     this.getData();
   },
@@ -719,6 +745,7 @@ export default {
     reset() {
       this.searchData.keyword = '';
       this.searchData.arr_branch = '';
+      this.searchData.arr_ec = '';
       this.searchData.branch_id = '';
       this.searchData.debt_status = '';
       this.searchData.pagination = this.pagination;
@@ -752,6 +779,7 @@ export default {
         start_date: startDate,
         end_date: endDate,
         debt_status: this.searchData.debt_status,
+        ec_id: (this.searchData.arr_ec || []).map((item) => item.id),
         pagination: this.pagination,
         type_contract: 1
       };

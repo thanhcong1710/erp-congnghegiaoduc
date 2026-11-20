@@ -149,6 +149,51 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Sale (EC/EC leader) chỉ được thao tác hợp đồng của mình hoặc nhân viên dưới quyền.
+     * Cùng điều kiện với ContractsController::list. Role không bị giới hạn → luôn true.
+     */
+    public function canAccessContract($contract_id)
+    {
+        $staffIds = $this->getSaleAllowedStaffIds();
+        if (empty($staffIds)) {
+            return true;
+        }
+        $contract_id = (int) $contract_id;
+        if ($contract_id <= 0) {
+            return false;
+        }
+        $row = u::first("SELECT c.id FROM contracts AS c
+            WHERE c.id = $contract_id
+                AND c.branch_id IN (" . $this->getBranchesHasUser() . ")
+                AND (c.ec_id IN ($staffIds) OR c.ec_leader_id IN ($staffIds) OR c.creator_id IN ($staffIds)
+                    OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = c.student_id AND (tsu.ec_id IN ($staffIds) OR tsu.ec_leader_id IN ($staffIds))))");
+        return !empty($row);
+    }
+
+    /**
+     * Sale (EC/EC leader) chỉ được thao tác học sinh của mình hoặc nhân viên dưới quyền.
+     * Cùng điều kiện với StudentsController::list/show. Role không bị giới hạn → luôn true.
+     */
+    public function canAccessStudent($student_id)
+    {
+        $staffIds = $this->getSaleAllowedStaffIds();
+        if (empty($staffIds)) {
+            return true;
+        }
+        $student_id = (int) $student_id;
+        if ($student_id <= 0) {
+            return false;
+        }
+        $row = u::first("SELECT s.id FROM students AS s
+            WHERE s.id = $student_id
+                AND (s.creator_id IN ($staffIds)
+                    OR EXISTS (SELECT 1 FROM term_student_user tsu WHERE tsu.student_id = s.id AND (tsu.ec_id IN ($staffIds) OR tsu.ec_leader_id IN ($staffIds)))
+                    OR EXISTS (SELECT 1 FROM contracts ct WHERE ct.student_id = s.id AND (ct.ec_id IN ($staffIds) OR ct.ec_leader_id IN ($staffIds) OR ct.creator_id IN ($staffIds)))
+                    OR EXISTS (SELECT 1 FROM crm_students cs JOIN crm_parents cp ON cp.id = cs.parent_id WHERE cs.lms_id = s.id AND cp.owner_id IN ($staffIds)))");
+        return !empty($row);
+    }
+
+    /**
      * Xác định phạm vi xem Báo cáo của user hiện tại:
      * - 'all': Admin, CEO, Kế toán hoặc có canViewAllSale
      * - 'team': Trưởng nhóm Kinh doanh (role 69) hoặc có nhân viên cấp dưới

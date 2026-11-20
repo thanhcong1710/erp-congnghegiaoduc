@@ -438,6 +438,10 @@ class StudentsController extends Controller
 
     public function update(Request $request)
     {
+        $request->merge(['id' => (int) $request->id]);
+        if (!Auth::user()->canAccessStudent($request->id)) {
+            return $this->denyRecordAccess();
+        }
         $pre_student_info = u::first("SELECT * FROM students WHERE id = $request->id");
         $arr_name = u::explodeName(data_get($request, 'name'));
         $bd = u::parseBirthday($request->date_of_birth, $request->birthday_year_only);
@@ -612,7 +616,10 @@ class StudentsController extends Controller
 
     public function logs(Request $request)
     {
-        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $student_id = (int) data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -634,7 +641,10 @@ class StudentsController extends Controller
 
     public function contracts(Request $request)
     {
-        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $student_id = (int) data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $list = u::query("SELECT c.created_at, c.code, c.total_sessions, c.bonus_sessions, c.debt_amount, c.id AS contract_id, 
                 c.must_charge, c.init_tuition_fee_amount, '' AS label_status, c.status, c.type, c.total_charged, c.summary_sessions,
                 (SELECT name FROM products WHERE id=c.product_id) AS product_name,
@@ -657,6 +667,9 @@ class StudentsController extends Controller
     public function sessions(Request $request)
     {
         $student_id = (int)data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $contract_active = u::first("SELECT c.id, c.class_id, c.status, c.done_sessions, c.summary_sessions
             FROM contracts AS c 
             WHERE c.count_recharge = 
@@ -683,7 +696,10 @@ class StudentsController extends Controller
 
     public function assessments(Request $request)
     {
-        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $student_id = (int) data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $pagination = (object) $request->pagination;
         $page = isset($pagination->cpage) ? (int) $pagination->cpage : 1;
         $limit = isset($pagination->limit) ? (int) $pagination->limit : 20;
@@ -708,7 +724,10 @@ class StudentsController extends Controller
 
     public function operating(Request $request)
     {
-        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $student_id = (int) data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $class_transfer = u::query("SELECT s.lms_code , s.name, c.transfer_date ,
                 (SELECT cls_name FROM classes WHERE id=c.from_class_id) AS from_class_name,
                 (SELECT cls_name FROM classes WHERE id=c.to_class_id) AS to_class_name,
@@ -737,7 +756,10 @@ class StudentsController extends Controller
 
     public function uploadAvatar(Request $request)
     {
-        $student_id = isset($_POST['student_id']) ? $_POST['student_id'] : ($request->student_id ? $request->student_id : '');
+        $student_id = (int) (isset($_POST['student_id']) ? $_POST['student_id'] : ($request->student_id ? $request->student_id : 0));
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $files = isset($_FILES['files']) ? $_FILES['files'] : (isset($_FILES['file']) ? $_FILES['file'] : null);
         if ($files && isset($files['name'])) {
             $names = is_array($files['name']) ? $files['name'] : [$files['name']];
@@ -769,7 +791,10 @@ class StudentsController extends Controller
     }
     public function getFile(Request $request)
     {
-        $student_id = isset($request->student_id) ? $request->student_id : 0;
+        $student_id = (int) data_get($request, 'student_id', 0);
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $data = u::query("SELECT *
             FROM file_has_student
             WHERE status=1 AND student_id = $student_id ORDER BY id DESC");
@@ -784,7 +809,10 @@ class StudentsController extends Controller
         // ]);
 
         $file = $request->file('file');
-        $student_id = $request->input('student_id');
+        $student_id = (int) $request->input('student_id');
+        if (!Auth::user()->canAccessStudent($student_id)) {
+            return $this->denyRecordAccess();
+        }
         $note = $request->input('note');
 
         // Tạo thư mục lưu file
@@ -818,7 +846,14 @@ class StudentsController extends Controller
     }
     public function deleteFile(Request $request)
     {
-        $file_id = $request->id ? $request->id : $request->file_id;
+        $file_id = (int) ($request->id ? $request->id : $request->file_id);
+        $file_row = u::first("SELECT student_id FROM file_has_student WHERE id = $file_id");
+        if (!$file_row) {
+            return response()->json((object)['status' => 0, 'message' => 'File không tồn tại.'], 404);
+        }
+        if (!Auth::user()->canAccessStudent($file_row->student_id)) {
+            return $this->denyRecordAccess();
+        }
         u::updateSimpleRow(array(
             'updated_at' => date('Y-m-d H:i:s'),
             'updator_id' => Auth::user()->id,
