@@ -349,8 +349,9 @@
                     </td>
 
                     <td class="td vs-table--td text-center font-bold text-gray-800">
-                      {{ tr.duration_days }}
-                      <div v-if="dayPartText(tr.day_part)" class="text-xs font-semibold text-primary whitespace-nowrap">{{ dayPartText(tr.day_part) }}</div>
+                      <!-- Đơn nửa ngày chỉ hiển thị Nghỉ Sáng/Chiều, không hiện số ngày -->
+                      <span v-if="dayPartText(tr.day_part)" class="text-primary whitespace-nowrap">{{ dayPartText(tr.day_part) }}</span>
+                      <template v-else>{{ tr.duration_days }}</template>
                     </td>
 
                     <td class="td vs-table--td">
@@ -546,8 +547,8 @@
                   <div class="text-xs text-gray-400" v-if="lv.start_date !== lv.end_date">đến {{ lv.end_date }}</div>
                 </td>
                 <td class="text-center">
-                  <span class="day-badge">{{ lv.duration_days }}</span>
-                  <div v-if="dayPartText(lv.day_part)" class="text-xs font-semibold text-primary whitespace-nowrap mt-1">{{ dayPartText(lv.day_part) }}</div>
+                  <span v-if="dayPartText(lv.day_part)" class="day-badge whitespace-nowrap">{{ dayPartText(lv.day_part) }}</span>
+                  <span v-else class="day-badge">{{ lv.duration_days }}</span>
                 </td>
                 <td class="text-sm text-gray-700">
                   {{ lv.reason || '---' }}
@@ -1768,10 +1769,10 @@ export default {
       });
     },
 
-    // Hiển thị số ngày kèm buổi nghỉ, VD: "0.5 ngày - Nghỉ Sáng"
+    // Đơn nửa ngày chỉ hiển thị buổi (VD: "Nghỉ Sáng"), đơn cả ngày hiển thị số ngày
     formatDuration(lv) {
       const part = this.dayPartText(lv.day_part);
-      return `${lv.duration_days} ngày${part ? ' - ' + part : ''}`;
+      return part || `${lv.duration_days} ngày`;
     },
 
     getRequestCategoryText(cat) {
