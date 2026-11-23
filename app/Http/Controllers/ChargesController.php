@@ -437,13 +437,7 @@ class ChargesController extends Controller
                 $availableSession = (int) data_get($row, 'contract_data.init_tuition_fee_session') && (int) data_get($row, 'contract_data.must_charge') ?
                     round(((int) data_get($row, 'total_charged') + (int) data_get($row, 'discount_amount')) / ((int) data_get($row, 'contract_data.must_charge') / (int) data_get($row, 'contract_data.init_tuition_fee_session'))) : 0;
                 
-                if (data_get($row, 'contract_data.status') ==7) {
-                    $status = 7;
-                }elseif (data_get($row, 'contract_data.class_id')) {
-                    $status = 6;
-                } else {
-                    $status = data_get($row, 'is_fully_paid') ? (data_get($row, 'status') > 3 ? data_get($row, 'status') : 3) : 2;
-                }
+                $status = self::resolveContractStatus($row);
                 u::updateSimpleRow([
                     'status' => $status,
                     'real_sessions' => $availableSession,
@@ -462,6 +456,26 @@ class ChargesController extends Controller
 
         return true;
     }
+    /**
+     * Xác định trạng thái contract sau khi phân bổ tiền (1 phần tử packages của splitChargedAndDiscountAmount)
+     * - Hết phí (7) giữ nguyên; đã xếp lớp => 6
+     * - Đủ tiền => 3 (giữ 4,5 nếu đang ở đó); chưa đủ => 2
+     */
+    public static function resolveContractStatus($row)
+    {
+        $currentStatus = (int) data_get($row, 'contract_data.status');
+        if ($currentStatus == 7) {
+            return 7;
+        }
+        if (data_get($row, 'contract_data.class_id')) {
+            return 6;
+        }
+        if (!data_get($row, 'is_fully_paid')) {
+            return 2;
+        }
+        return in_array($currentStatus, [4, 5]) ? $currentStatus : 3;
+    }
+
     public static function splitChargedAndDiscountAmount(float $totalCharged, float $totalDiscount, array $packages, bool $isFullyPaidAgreement = false): array
     {
         // Kiểm tra điều kiện ưu tiên đặc biệt: tồn tại cả 28 & 29, trong đó 28 chưa xếp lớp và 29 đã xếp lớp

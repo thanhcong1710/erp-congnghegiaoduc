@@ -97,6 +97,8 @@ class UpdateContractsDiscountAndCharges extends Command
                     }
 
                     $updateData = [
+                        // Cập nhật trạng thái theo kết quả phân bổ tiền (tránh contract hết nợ mà vẫn "Đặt cọc")
+                        'status' => ChargesController::resolveContractStatus($row),
                         'real_sessions' => $availableSession,
                         'summary_sessions' => $availableSession,
                         'total_charged' => $totalChargedAllocated,
