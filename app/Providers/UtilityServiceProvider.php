@@ -713,12 +713,18 @@ class UtilityServiceProvider extends ServiceProvider
             $class_info = self::first("SELECT class_day FROM classes WHERE id=$contract_info->class_id");
             $arr_day = explode(",", data_get($class_info, 'class_day'));
             $left_sessions = $contract_info->summary_sessions - $done_sessions->total + $contract_info->last_done_sessions;
-            $data_sessions = self::calculatorSessionsByNumberOfSessions(data_get($contract_info, 'enrolment_start_date'), $left_sessions, $holidays, $arr_day);
-            self::updateSimpleRow(array(
-                'enrolment_last_date' => data_get($data_sessions, 'end_date'),
+            // Số buổi còn lại tính từ hôm nay (done_sessions chỉ đếm buổi đã qua), không phải từ ngày bắt đầu học
+            $from_date = max(date('Y-m-d'), (string) data_get($contract_info, 'enrolment_start_date'));
+            $data_sessions = self::calculatorSessionsByNumberOfSessions($from_date, $left_sessions, $holidays, $arr_day);
+            $update_data = array(
                 'done_sessions' => $done_sessions->total - $contract_info->last_done_sessions,
                 'left_sessions' => $left_sessions
-            ), array('id' => $contract_id), 'contracts');
+            );
+            // Hết buổi hoặc không tính được thì giữ nguyên ngày học cuối, tránh ghi đè NULL
+            if (data_get($data_sessions, 'end_date')) {
+                $update_data['enrolment_last_date'] = data_get($data_sessions, 'end_date');
+            }
+            self::updateSimpleRow($update_data, array('id' => $contract_id), 'contracts');
         } else {
             $left_sessions = $contract_info->summary_sessions - $done_sessions->total + $contract_info->last_done_sessions;
             self::updateSimpleRow(array(
