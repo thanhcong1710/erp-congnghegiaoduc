@@ -1265,6 +1265,15 @@ class ContractsController extends Controller
                     'message' => 'Bạn không có quyền thay đổi Giảm trừ'
                 ]);
             }
+            // Chặn chọn EC Leader không phải role EC Leader (kiểm tra trước mọi thao tác ghi dữ liệu)
+            $req_ec_leader_id = (int) data_get($request, 'ec_leader_id');
+            if ($req_ec_leader_id > 0 && $req_ec_leader_id != (int) $agreementInfo->ec_leader_id
+                && !$this->isValidEcLeader($req_ec_leader_id)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'EC Leader không hợp lệ: người được chọn không có vai trò EC Leader'
+                ]);
+            }
             if ($request->has('point_toeic')) {
                 u::updateSimpleRow(
                     ['point_toeic' => $request->point_toeic],
@@ -1719,5 +1728,16 @@ class ContractsController extends Controller
             'message' => 'Cập nhật thông tin nhập học thành công'
         );
         return response()->json($result);
+    }
+
+    /**
+     * Kiểm tra user có role EC Leader (69) và đang hoạt động
+     */
+    private function isValidEcLeader(int $userId): bool
+    {
+        $row = u::first("SELECT 1 AS ok FROM role_has_user AS ru
+            INNER JOIN users AS u ON u.id = ru.user_id
+            WHERE u.status = 1 AND ru.user_id = $userId AND ru.role_id = " . SystemCode::ROLE_EC_LEADER . " LIMIT 1");
+        return !empty($row);
     }
 }

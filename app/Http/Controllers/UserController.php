@@ -267,7 +267,9 @@ class UserController extends Controller
         } else {
             $cond = " AND (SELECT count(id) FROM role_has_user WHERE user_id=u.id AND role_id IN ( " . SystemCode::ROLE_EC . "," . SystemCode::ROLE_EC_LEADER . "))";
         }
-        $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value` 
+        // is_leader: user có role EC Leader → dùng để lọc ô "EC Leader" ở FE
+        $data = u::query("SELECT u.id, CONCAT(u.hrm_id,' - ',u.name) AS label_name, u.id AS `value`,
+                IF(EXISTS(SELECT 1 FROM role_has_user WHERE user_id = u.id AND role_id = " . SystemCode::ROLE_EC_LEADER . "), 1, 0) AS is_leader
             FROM users AS u WHERE status=1 $cond");
         return response()->json($data);
     }

@@ -1167,12 +1167,20 @@
         axios.g(`/api/users/get-data/users-manager`)
           .then(response => {
             this.html.ec.list = response.data.map(item => ({...item, label: item.label_name}))
-            this.html.ec_leader.list = response.data.map(item => ({...item, label: item.label_name}))
+            // Ô EC Leader chỉ cho chọn user có role EC Leader (69)
+            this.html.ec_leader.list = response.data
+              .filter(item => parseInt(item.is_leader) === 1)
+              .map(item => ({...item, label: item.label_name}))
             if (this.agreement.ec_id) {
               this.html.ec.item = this.html.ec.list.find(e => e.id === this.agreement.ec_id);
             }
             if (this.agreement.ec_leader_id) {
               this.html.ec_leader.item = this.html.ec_leader.list.find(e => e.id === this.agreement.ec_leader_id);
+              // Leader đang lưu không phải EC Leader (dữ liệu sai) → bỏ, buộc chọn lại
+              if (!this.html.ec_leader.item) {
+                this.agreement.ec_leader_id = '';
+                this.agreement.ec_leader_name = '';
+              }
             }
           })
       },
