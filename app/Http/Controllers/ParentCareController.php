@@ -160,7 +160,17 @@ class ParentCareController extends Controller
         if ($nextCareDate) {
             $parentUpdate['next_care_date'] = $nextCareDate;
         }
-        u::updateSimpleRow($parentUpdate, array('id' => $request->parent_id), 'crm_parents');
+        // Sale phụ trách thêm chăm sóc mới → tiếp tục chăm sóc: tính lại mốc về kho từ hôm nay
+        $parentId = (int) $request->parent_id;
+        $parentOwner = u::first("SELECT owner_id FROM crm_parents WHERE id = $parentId");
+        $continueCare = $parentOwner && (int) $parentOwner->owner_id === (int) Auth::user()->id;
+        if ($continueCare) {
+            $parentUpdate['last_assign_date'] = date('Y-m-d H:i:s');
+        }
+        u::updateSimpleRow($parentUpdate, array('id' => $parentId), 'crm_parents');
+        if ($continueCare) {
+            ParentsController::processParentLockById($parentId);
+        }
         if ($nextCareDate) {
             LogParents::logAdd($request->parent_id, 'Cập nhật lịch chăm sóc tiếp theo: ' . $nextCareDate, Auth::user()->id);
         }
