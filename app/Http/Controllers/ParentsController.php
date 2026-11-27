@@ -611,7 +611,7 @@ class ParentsController extends Controller
             'birthday' => data_get($parent, 'birthday'),
             'job_id' => data_get($parent, 'job_id'),
             'source_id' => data_get($parent, 'source_id'),
-            'source_detail_id' => data_get($parent, 'emsource_detail_idail'),
+            'source_detail_id' => data_get($parent, 'source_detail_id') ?: null,
             'note' => data_get($parent, 'note'),
             'created_at' => date('Y-m-d H:i:s'),
             'creator_id' => Auth::user()->id,

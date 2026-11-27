@@ -734,6 +734,10 @@ class ImportAnKhanhCommand extends Command
                     continue;
                 }
 
+                // Thời gian tạo của HS/PH/HĐ import = ngày bắt đầu học (không lấy thời điểm import)
+                $rowStartDate = $row['start_date'] ?: (!empty($row['class_name']) && isset($classMap[$row['class_name']]['start_date']) ? $classMap[$row['class_name']]['start_date'] : date('Y-m-d'));
+                $rowCreatedAt = $rowStartDate . ' ' . date('H:i:s');
+
                 // A. CRM Parent
                 $crmParentId = null;
                 if (!empty($row['parent_mobile'])) {
@@ -759,7 +763,7 @@ class ImportAnKhanhCommand extends Command
                             'creator_id' => 1,
                             'owner_id' => 1,
                             'note' => "[Import: " . self::BATCH_CODE . "]",
-                            'created_at' => date('Y-m-d H:i:s'),
+                            'created_at' => $rowCreatedAt,
                         ]);
                         $batchData['parent_ids'][] = $crmParentId;
                     }
@@ -782,7 +786,7 @@ class ImportAnKhanhCommand extends Command
                             'birthday' => $row['dob'],
                             'status' => 3,
                             'creator_id' => 1,
-                            'created_at' => date('Y-m-d H:i:s'),
+                            'created_at' => $rowCreatedAt,
                         ]);
                         $batchData['crm_student_ids'][] = $crmStudentId;
                     }
@@ -809,7 +813,7 @@ class ImportAnKhanhCommand extends Command
                     'avatar_url' => '/images/common/avatar-boy.svg',
                     'note' => "[Import: " . self::BATCH_CODE . "] Mã cũ: {$row['code']}",
                     'creator_id' => 1,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_at' => $rowCreatedAt,
                 ]);
 
                 $lastLmsCode = str_pad((string)$studentId, 6, '0', STR_PAD_LEFT);
@@ -824,7 +828,7 @@ class ImportAnKhanhCommand extends Command
                     'student_id' => $studentId,
                     'branch_id' => self::BRANCH_ID,
                     'status' => 1,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_at' => $rowCreatedAt,
                 ]);
 
                 // Update LMS ID in CRM
@@ -885,7 +889,7 @@ class ImportAnKhanhCommand extends Command
                     'count_recharge' => 0,
                     'note' => "[Import: " . self::BATCH_CODE . "]",
                     'creator_id' => 1,
-                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_at' => $rowCreatedAt,
                 ]);
 
                 $lastContractCode = str_pad((string)$contractId, 6, '0', STR_PAD_LEFT);

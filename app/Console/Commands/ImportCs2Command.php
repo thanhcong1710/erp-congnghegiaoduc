@@ -345,7 +345,7 @@ class ImportCs2Command extends Command
 
             $firstDate = $sessions ? array_keys($sessions)[0] : null;
             $start = $firstDate ?: ($f1['start'] ?? null) ?: $today;
-            $chargeDate = ($f1['reg_date'] ?? null) ?: $start;
+            $chargeDate = $start; // thời gian thu phí lấy theo ngày bắt đầu học, không theo ngày import
 
             $plan['contracts'][] = [
                 'cfg' => $cfg, 'student_key' => $key, 'gift' => $gift,
@@ -498,7 +498,9 @@ class ImportCs2Command extends Command
             foreach ($plan['students'] as $key => $s) {
                 $needed = array_filter($plan['contracts'], function ($c) use ($key) { return $c['student_key'] === $key && (empty($c['cfg']['pending']) || !$this->option('skip-pending')); });
                 if (!$needed) continue;
-                $studentIds[$key] = $this->ensureStudent($s, $now);
+                // Học sinh/phụ huynh tạo mới: thời gian tạo = ngày bắt đầu học sớm nhất của các HĐ
+                $firstStart = min(array_map(function ($c) { return $c['start']; }, $needed));
+                $studentIds[$key] = $this->ensureStudent($s, $this->atDate($firstStart, $now));
             }
 
             // 4. Hợp đồng + điểm danh + phiếu thu
@@ -663,7 +665,7 @@ class ImportCs2Command extends Command
             $data['updator_id'] = self::SYSTEM_USER;
             $this->update('contracts', $contractId, $data);
         } else {
-            $contractId = $this->insert('contracts', $data + ['code' => '', 'note' => $note, 'creator_id' => self::SYSTEM_USER, 'created_at' => $now]);
+            $contractId = $this->insert('contracts', $data + ['code' => '', 'note' => $note, 'creator_id' => self::SYSTEM_USER, 'created_at' => $this->atDate($c['start'], $now)]);
             DB::table('contracts')->where('id', $contractId)->update(['code' => config('app.prefix_contract_code', 'C') . str_pad((string)$contractId, 6, '0', STR_PAD_LEFT)]);
         }
 
@@ -704,7 +706,7 @@ class ImportCs2Command extends Command
             $tmpId = $this->insert('tmp_payments', [
                 'contract_id' => $contractId, 'charge_amount' => (int)$c['paid'], 'debt_amount' => $debt, 'total_charged' => (int)$c['paid'],
                 'charge_date' => $c['charge_date'], 'method' => self::METHOD_CARD, 'note' => self::TAG . ' Thu phí theo sổ trung tâm',
-                'created_at' => $now, 'creator_id' => self::SYSTEM_USER, 'status' => 1, 'approved_at' => $now, 'approver_id' => self::SYSTEM_USER,
+                'created_at' => $this->atDate($c['start'], $now), 'creator_id' => self::SYSTEM_USER, 'status' => 1, 'approved_at' => $this->atDate($c['start'], $now), 'approver_id' => self::SYSTEM_USER,
             ]);
             $code = 'PT' . str_pad((string)$tmpId, 6, '0', STR_PAD_LEFT);
             DB::table('tmp_payments')->where('id', $tmpId)->update(['code' => $code]);
@@ -712,7 +714,7 @@ class ImportCs2Command extends Command
                 'code' => $code, 'contract_id' => $contractId, 'student_id' => $studentId, 'branch_id' => self::BRANCH_ID,
                 'ec_id' => self::EC_ID, 'method' => self::METHOD_CARD, 'must_charge' => $must, 'amount' => (int)$c['paid'],
                 'total' => (int)$c['paid'], 'debt' => $debt, 'charge_date' => $c['charge_date'], 'count' => 0,
-                'note' => self::TAG . ' Thu phí theo sổ trung tâm', 'created_at' => $now, 'creator_id' => self::SYSTEM_USER,
+                'note' => self::TAG . ' Thu phí theo sổ trung tâm', 'created_at' => $this->atDate($c['start'], $now), 'creator_id' => self::SYSTEM_USER,
             ]);
         }
 
@@ -786,6 +788,12 @@ class ImportCs2Command extends Command
     }
 
     /* ============================ TIỆN ÍCH ============================ */
+
+    /** Ngày $date (Y-m-d) + giờ của $now */
+    private function atDate($date, $now)
+    {
+        return $date ? substr($date, 0, 10) . ' ' . substr($now, 11, 8) : $now;
+    }
 
     private function insert($table, array $data)
     {
